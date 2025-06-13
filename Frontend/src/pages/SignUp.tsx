@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,13 +11,10 @@ import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Ch
 import { 
   signInWithPopup, 
   GoogleAuthProvider, 
-  OAuthProvider,
   GithubAuthProvider,
-  FacebookAuthProvider,
   sendEmailVerification,
-  Auth 
 } from "firebase/auth";
-import { auth } from "../lib/firebase"; 
+import { auth, handleGithubAuth, handleGoogleAuth } from "../lib/firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, addDoc, getFirestore, collection, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase"; // Make sure db is exported from your firebase config
@@ -98,17 +94,6 @@ const SignUp = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-   const loginWithGoogle = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const userCred = await signInWithPopup(auth, provider);
-      console.log("Google sign-up successful:", userCred.user);
-      navigate("/profile");
-    } catch (err: any) {
-      console.error("Google sign-up error:", err.message);
-      alert("Google login failed: " + err.message);
-    }
-  };
   const handleContinue = async () => {
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
@@ -141,25 +126,24 @@ const SignUp = () => {
   };
 
   const signUpWithEmailAndPassword = async () => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      const user = userCredential.user;
+    const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+    const idToken = await userCredential.user.getIdToken();
 
-      // Add user data to Firestore
-      await setDoc(doc(db, "users", user.uid), {
+    await fetch('http://localhost:3000/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+        body: JSON.stringify({
         firstName: formData.firstName,
         lastName: formData.lastName,
-        email: formData.email,
         phone: formData.phone,
         userType: formData.userType,
-      });
-
-      console.log("User signed up successfully:", user);
-    } catch (error: any) {
-      console.error("Error signing up:", error.message);
-      alert("Error signing up: " + error.message);
-    }
+      }),
+    });
   };
+
 
   const handleNextStep = () => {
     if (currentStep === 1) {
@@ -167,17 +151,6 @@ const SignUp = () => {
       setCurrentStep(2);
     } else if (currentStep === 2) {
       setCurrentStep(3);
-    }
-  };
-  const loginwithgithub = async () => {
-    try {
-      const provider = new GithubAuthProvider();
-      const userCred = await signInWithPopup(auth, provider);
-      console.log("Github sign-up successful:", userCred.user);
-      navigate("/profile");
-    } catch (err: any) {
-      console.error("Github sign-up error:", err.message);
-      alert("Github login failed: " + err.message);
     }
   };
   const handleCreateAccount = () => {
@@ -236,6 +209,7 @@ const SignUp = () => {
               <Star className="w-3 h-3 mr-1" />
               Free to get started
             </Badge>
+
             <Badge
               variant="outline"
               className="border-green-500 text-green-700 hover:scale-105 transition-transform"
@@ -273,6 +247,7 @@ const SignUp = () => {
             ))}
           </div>
         </div>
+
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Benefits sidebar */}
@@ -605,7 +580,7 @@ const SignUp = () => {
                       <Button
                         variant="outline"
                         className="w-full hover:scale-105 transition-all duration-300 hover:shadow-md"
-                        onClick={loginWithGoogle}
+                        onClick={() => handleGoogleAuth(navigate)}
                       >
                         <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                           <path
@@ -635,7 +610,7 @@ const SignUp = () => {
                       formData.userType === "professor") && (
                       
                         <Button
-                        onClick={loginwithgithub}
+                        onClick={() => handleGithubAuth(navigate)}
                           variant="outline"
                           className="w-full hover:scale-105 transition-all duration-300 hover:shadow-md"
                         >
