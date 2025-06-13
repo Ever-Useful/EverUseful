@@ -8,18 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Github, Linkedin, Shield, Smartphone, Mail } from "lucide-react";
-import { 
-  getAuth, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  signInWithEmailAndPassword, 
-  OAuthProvider,
-  GithubAuthProvider,
-  FacebookAuthProvider,
-  sendEmailVerification,
-  Auth 
-} from "firebase/auth";
+import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Github, Shield, Smartphone, Mail } from "lucide-react";
+import { handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "../lib/firebase";
 import { useNavigate } from "react-router-dom";
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -30,9 +20,8 @@ const SignIn = () => {
   const [mfaCode, setMfaCode] = useState("");
   const [mfaMethod, setMfaMethod] = useState("authenticator");
   const navigate = useNavigate();
-  const gProvider = new GoogleAuthProvider();
-  const gitProvider = new GithubAuthProvider();
-  const auth = getAuth();
+  const [token, setToken] = useState(sessionStorage.getItem('token') || '');
+
   const userTypes = [
     { 
       id: "student", 
@@ -73,39 +62,23 @@ const SignIn = () => {
 
   const handleSignIn = async () => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log("User signed in:", userCredential.user);
-      localStorage.setItem("isLoggedIn", "true");
-      window.dispatchEvent(new Event("storage"));
-      navigate("/profile");
-    } catch (error: any) {
-      console.error("Error signing in:", error.message);
-      alert("Invalid email or password");
+      const idToken = await loginWithEmailPassword(email, password);
+      const response = await fetch('http://localhost:3000/token', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      navigate(data.redirectUrl);
+    } catch (error) {
+      console.error("Login failed", error);
     }
   };
-  const handleGithubSignIn = async () => {
-    try {
-      const userCredential = await signInWithPopup(auth, gitProvider);
-      console.log("User signed in with Google:", userCredential.user);
-      navigate("/profile");
-    } catch (error: any) {
-      console.error("Error signing in with Google:", error.message);
-      alert("Error signing in with Google");
-    }
-  };
-  const handleGoogleSignIn = async () => {
-    try {
-      const userCredential = await signInWithPopup(auth, gProvider);
-      console.log("User signed in with Google:", userCredential.user);
-      localStorage.setItem("isLoggedIn", "true");
-      window.dispatchEvent(new Event("storage"));
-      navigate("/profile");
-    } catch (error: any) {
-      console.error("Error signing in with Google:", error.message);
-      alert("Error signing in with Google");
-    }
-  };
-
+ 
   const handleMFAVerify = () => {
     console.log("MFA verified:", mfaCode);
     // Handle successful sign in
@@ -358,7 +331,7 @@ const SignIn = () => {
 
                   
                     <Button 
-                    onClick={handleGoogleSignIn}
+                    onClick={() => handleGoogleAuth(navigate)}
                     variant="outline" className="w-full hover:scale-105 transition-all duration-300 hover:shadow-md" >
                       <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -375,7 +348,7 @@ const SignIn = () => {
                   {(userType === "student" || userType === "professor") && (
                     
                       <Button 
-                      onClick={handleGithubSignIn}
+                      onClick={() => handleGithubAuth(navigate)}
                       variant="outline" className="w-full hover:scale-105 transition-all duration-300 hover:shadow-md">
                         <Github className="w-4 h-4 mr-2" />
                         GitHub
