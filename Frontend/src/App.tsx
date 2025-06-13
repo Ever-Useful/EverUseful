@@ -10,6 +10,7 @@ import SignUp from "./pages/SignUp";
 import Marketplace from "./pages/Marketplace";
 import Freelancing from "./pages/Freelancing";
 
+import EditProfile from "./pages/EditProfile";
 import Community from "./pages/Community";
 import Admin from "./pages/Admin";
 import Checkout from "./pages/Checkout";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/cart" element={<Cart />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/editProfile" element={<EditProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
