@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Camera } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
+// comment
 import BackgroundUpload from "@/components/BackgroundUpload";
 import RecentProjects from "@/components/RecentProjects";
 import QuickActions from "@/components/QuickActions";
