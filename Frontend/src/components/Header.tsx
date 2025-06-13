@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Menu, X, Sparkles, ShoppingCart, User, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { logout } from "../lib/firebase";
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -23,11 +23,17 @@ export const Header = () => {
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    setIsLoggedIn(false);
-    navigate("/signin");
+  const handleLogout = async () => {
+    try {
+      await logout(); // this signs the user out from Firebase
+      localStorage.removeItem("isLoggedIn");
+      setIsLoggedIn(false);
+      navigate("/signin");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-purple-200/50 bg-white/95 backdrop-blur-md shadow-sm">
