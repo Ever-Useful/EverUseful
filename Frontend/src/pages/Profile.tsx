@@ -7,7 +7,7 @@ import RecentProjects from "@/components/RecentProjects";
 import QuickActions from "@/components/QuickActions";
 import RecentActivity from "@/components/RecentActivity";
 import SkillsSection from '@/components/Skillssection';
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useProfileStore } from "@/hooks/useProfileStore";
 import { Link } from "react-router-dom";
 import {
@@ -96,6 +96,7 @@ const Profile = () => {
         },
       };
 
+
   const handleBackgroundChange = (newImageUrl: string) => {
     setBackgroundImage(newImageUrl);
   };
@@ -119,7 +120,7 @@ const Profile = () => {
               <div className="relative">
                 <img src={profileData.avatar} alt={profileData.name} className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover justify-center flex items-center " />
                 <button className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-slate-100 transition-colors">
-                  <Camera className="w-4 h-4 text-slate-600" />
+                  <Camera className="w-4 h-4 text-slate-600"></Camera>
                 </button>
               </div>
               

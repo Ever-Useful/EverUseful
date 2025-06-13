@@ -135,7 +135,7 @@ const ProfessorForm = ({ onComplete }: ProfessorFormProps) => {
           </div>
 
           <div className="flex justify-end pt-6">
-            <Button type="submit" size="lg">
+            <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white text-base" type="submit" size="lg">
               Continue to Papers
             </Button>
           </div>
