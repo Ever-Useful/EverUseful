@@ -75,7 +75,7 @@ export const FeaturedProducts: React.FC = () => {
       author: "AgTech Innovators",
       rating: 4.7,
       users: "3.2K",
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fe992",
+      image: "https://plus.unsplash.com/premium_photo-1678344170545-c3edef92a16e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       tags: ["Robotics", "Agriculture", "AI"],
       gradient: "from-yellow-500 to-orange-600",
     }
