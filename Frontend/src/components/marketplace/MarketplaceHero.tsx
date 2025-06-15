@@ -9,7 +9,7 @@ import {
   RocketLaunchIcon,
   StarIcon,
 } from "@heroicons/react/24/solid";
-import marketplaceBackdrop from "@/assets/images/marketplace.jpg";
+import marketplaceBackdrop from "@/assets/images/community.jpg";
 
 
 export const MarketplaceHero = () => {
@@ -79,7 +79,7 @@ export const MarketplaceHero = () => {
           Empowering Innovation, Globally
         </h1>
         <p className="text-base sm:text-lg md:text-xl mb-8 max-w-2xl mx-auto text-slate-700 font-medium">
-          Join the world’s brightest minds—explore, collaborate, and create in the next-generation global marketplace.
+          Join the world's brightest minds—explore, collaborate, and create in the next-generation global marketplace.
         </p>
         {/* Search Bar */}
         <form className="w-full max-w-lg mx-auto">
