@@ -193,7 +193,7 @@ const SignIn = () => {
               {!showMFA ? (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
+                    <Label htmlFor="email" className="text-gray-700 font-medium">Email/Phone no.</Label>
                     <Input
                       id="email"
                       type="email"

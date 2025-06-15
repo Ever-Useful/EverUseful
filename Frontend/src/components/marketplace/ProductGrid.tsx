@@ -42,7 +42,7 @@ const projects = [
     tags: ["AI", "Climate", "Prediction", "Sustainability"],
     skills: ["Machine Learning", "Python", "Climate Science"],
     views: 1540,
-    likes: 284,
+    
   },
   {
     id: 2,
@@ -66,7 +66,7 @@ const projects = [
     tags: ["Blockchain", "Supply Chain", "Transparency"],
     skills: ["Blockchain", "Solidity", "React"],
     views: 2100,
-    likes: 456,
+    
   },
   {
     id: 3,
@@ -90,7 +90,7 @@ const projects = [
     tags: ["IoT", "Healthcare", "Wearable"],
     skills: ["IoT", "Hardware", "Mobile App"],
     views: 980,
-    likes: 187,
+    
   },
   {
     id: 4,
@@ -114,7 +114,7 @@ const projects = [
     tags: ["Energy", "Grid", "Sustainability"],
     skills: ["Energy Systems", "Python", "Data Analytics"],
     views: 1765,
-    likes: 389,
+    
   },
   {
     id: 5,
@@ -137,7 +137,7 @@ const projects = [
     tags: ["VR", "Education", "3D"],
     skills: ["VR Development", "Unity", "3D Modeling"],
     views: 1320,
-    likes: 245,
+    
   },
   {
     id: 6,
@@ -160,7 +160,7 @@ const projects = [
     tags: ["FinTech", "Payments", "Security"],
     skills: ["React Native", "Cybersecurity", "API Development"],
     views: 2240,
-    likes: 478,
+    
   },
   {
     id: 7,
@@ -183,7 +183,7 @@ const projects = [
     tags: ["Finance", "Analytics", "Dashboard"],
     skills: ["Finance", "React", "Data Visualization"],
     views: 890,
-    likes: 132,
+    
   },
   {
     id: 8,
@@ -206,7 +206,7 @@ const projects = [
     tags: ["Health", "Remote", "Monitoring"],
     skills: ["Mobile App", "Healthcare", "Security"],
     views: 1450,
-    likes: 210,
+    
   },
   {
     id: 9,
@@ -229,7 +229,7 @@ const projects = [
     tags: ["IoT", "Home", "Automation"],
     skills: ["IoT", "Home Automation", "Security"],
     views: 1680,
-    likes: 233,
+    
   },
   {
     id: 10,
@@ -252,7 +252,7 @@ const projects = [
     tags: ["Farming", "Urban", "Sustainability"],
     skills: ["Agriculture", "Data Science", "Community"],
     views: 780,
-    likes: 98,
+    
   },
 ];
 
@@ -362,10 +362,6 @@ export const ProductGrid = () => {
                       <Clock className="w-3 h-3" />
                       <span>{project.duration}</span>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-1 text-pink-500">
-                    <Heart className="w-3 h-3" />
-                    <span className="text-xs">{project.likes}</span>
                   </div>
                 </div>
               </CardContent>
