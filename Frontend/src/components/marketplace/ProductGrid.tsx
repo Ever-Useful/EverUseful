@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, Clock, DollarSign, Users, Heart, Eye, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const ProductGrid = () => {
   const projects = [
@@ -192,10 +193,12 @@ export const ProductGrid = () => {
                 </div>
               </div>
               
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300">
-                View Details
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
+              <Link to="/product/:id">
+                <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300">
+                  View Details
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         ))}

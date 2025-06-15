@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 import FreelancerProfile from "./pages/FreelancerProfile";
+import ProductDisplay from "./pages/ProductDisplay";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/freelancing" element={<Freelancing />} />
-
+          <Route path="/product/:id" element={<ProductDisplay />} />
           <Route path="/community" element={<Community />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/checkout" element={<Checkout />} />
