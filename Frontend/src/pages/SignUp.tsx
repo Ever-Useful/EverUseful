@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,11 @@ import { auth, handleGoogleAuth, handleGithubAuth } from "../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, addDoc, getFirestore, collection, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase"; // Make sure db is exported from your firebase config
+
 const SignUp = () => {
+  const [selectedCode, setSelectedCode] = useState("+91");
+  const [user, setUser] = useState(null);
+  const [otpValue, setOtpValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -86,6 +90,16 @@ const SignUp = () => {
   ];
 
   const currentUserType = userTypes.find(type => type.id === formData.userType);
+  useEffect(() => {
+    if (window.location.hostname === "localhost") {
+      auth.settings.appVerificationDisabledForTesting = true;
+    }
+  }, []);
+
+
+  // Add this inside your component before return
+  const countryCodes = ["+91", "+1", "+44", "+61", "+81"]; // Extend as needed
+  // window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha', {});
 
   const mfaMethods = [
     { id: "authenticator", label: "Authenticator App", icon: Smartphone, description: "Most secure option" },
@@ -121,8 +135,59 @@ const SignUp = () => {
       console.error("Error creating account:", error);
     }
   };
+  // In your component
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
-    const sendVerificationCode = async () => {
+  const sendOTP = async () => {
+    try {
+      console.log(selectedCode+formData.phone);
+      // Only create reCAPTCHA verifier if not in development
+      if (!recaptchaVerifierRef.current && !auth.settings.appVerificationDisabledForTesting) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(
+          auth, 
+          "recaptcha",
+          { 
+            size: "normal", // Changed from "invisible"
+            callback: () => {},
+            'expired-callback': () => {
+              recaptchaVerifierRef.current?.clear();
+            }
+          }
+        );
+      }
+
+      const confirmation = await signInWithPhoneNumber(
+        auth,
+        selectedCode + formData.phone,
+        recaptchaVerifierRef.current || undefined
+      );
+
+      setConfirmationResult(confirmation);
+      setOtpValue("");
+    } catch (err) {
+      console.error("OTP Error:", err);
+      recaptchaVerifierRef.current?.clear();
+    }
+  };
+
+
+  const verifyOTP = async () => {
+    if (!confirmationResult) {
+      console.error("No confirmation result");
+      return;
+    }
+
+    try {
+      const result = await confirmationResult.confirm(otpValue);
+      console.log("Authentication successful:", result);
+      // Handle successful authentication
+    } catch (error) {
+      console.error("Verification Error:", error);
+    }
+  };
+
+  const sendVerificationCode = async () => {
     try {
       const user = auth.currentUser;
       if (user) {
@@ -255,7 +320,6 @@ const SignUp = () => {
             ))}
           </div>
         </div>
-
         {/* User Type Selection - Mobile optimized */}
         {currentStep === 1 && (
           <div className="animate-scale-in delay-400 mb-6 lg:mb-8">
@@ -467,7 +531,6 @@ const SignUp = () => {
                     Continue
                     <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
-
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t border-gray-200" />
