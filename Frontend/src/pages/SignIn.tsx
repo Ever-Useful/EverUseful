@@ -5,11 +5,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Header } from "@/components/Header";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link, useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Github, Linkedin, Shield, Smartphone, Mail, Check, Phone } from "lucide-react";
+import { auth,handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "@/lib/firebase";
+import { sendEmailVerification,  RecaptchaVerifier, signInWithPhoneNumber, } from "firebase/auth";
+
+// Extend the Window interface to include confirmationResult
+declare global {
+  interface Window {
+    confirmationResult: any; // You can specify a more precise type if needed
+    recaptchaVerifier: RecaptchaVerifier | null;
+  }
+}
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -90,40 +101,80 @@ const SignIn = () => {
 
   const handleSignIn = async () => {
     try {
-      console.log("User signed in:", email);
-      localStorage.setItem("isLoggedIn", "true");
-      window.dispatchEvent(new Event("storage"));
-      navigate("/");
-    } catch (error: any) {
-      console.error("Error signing in:", error.message);
-      alert("Invalid email or password");
+      const idToken = await loginWithEmailPassword(email, password);
+      const response = await fetch('http://localhost:3000/token', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      navigate(data.redirectUrl);
+    } catch (error) {
+      console.error("Login failed", error);
+    }
+  };
+  
+  let recaptchaVerifier: RecaptchaVerifier | null = null;
+  const sendOtp = () => {
+    
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear(); // or .reset() if available
+      window.recaptchaVerifier = null;
+    }
+    recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      'size': 'invisible',
+      'callback': (response) => {
+        // reCAPTCHA solved
+      },
+      'expired-callback': () => {
+        // reCAPTCHA expired
+      }
+    });
+    window.recaptchaVerifier = recaptchaVerifier;
+    recaptchaVerifier.render().then(() => {
+      signInWithPhoneNumber(auth, countryCode + mobileNumber, recaptchaVerifier)
+        .then((confirmationResult) => {
+          window.confirmationResult = confirmationResult;
+          console.log("OTP sent to phone");
+        }).catch((error) => {
+          console.error("Error sending OTP:", error);
+        });
+    });
+  };
+
+  const verifyOtp = async () => {
+    const confirmationResult = window.confirmationResult;
+    try {
+      await confirmationResult.confirm(mobileOTP);
+      console.log("OTP verified successfully");
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
     }
   };
 
-  const handleGithubSignIn = async () => {
+  const sendVerificationCode = async () => {
     try {
-      console.log("User signed in with Github");
-      navigate("/");
+      const user = auth.currentUser;
+      if (user && !user.emailVerified) {
+        await sendEmailVerification(user);
+        console.log("Verification code sent to user's email");
+      } else if (!user) {
+        console.error("No user found");
+      } else {
+        console.log("User already verified. No email sent.");
+      }
     } catch (error: any) {
-      console.error("Error signing in with Github:", error.message);
-      alert("Error signing in with Github");
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      console.log("User signed in with Google");
-      localStorage.setItem("isLoggedIn", "true");
-      window.dispatchEvent(new Event("storage"));
-      navigate("/");
-    } catch (error: any) {
-      console.error("Error signing in with Google:", error.message);
-      alert("Error signing in with Google");
+      console.error("Error sending verification code:", error.message);
     }
   };
 
   const handleMobileSignIn = () => {
     console.log("Sending OTP to:", countryCode + mobileNumber);
+    sendOtp();
     setShowMobileOTP(true);
   };
 
@@ -422,7 +473,7 @@ const SignIn = () => {
                         </div>
 
                         <Button 
-                          onClick={handleForgotPasswordSubmit}
+                          onClick={sendVerificationCode}
                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg"
                           disabled={!forgotPasswordEmail}
                         >
@@ -608,7 +659,7 @@ const SignIn = () => {
 
                     <div className="flex justify-center gap-3 lg:gap-4">
                       <Button 
-                        onClick={handleGoogleSignIn}
+                        onClick={() => handleGoogleAuth(navigate)}
                         variant="outline" 
                         className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center"
                       >
@@ -620,14 +671,11 @@ const SignIn = () => {
                         </svg>
                       </Button>
                       <Button 
-                        onClick={handleGithubSignIn}
+                        onClick={() => handleGithubAuth(navigate)}
                         variant="outline" 
                         className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center"
                       >
                         <Github className="w-4 h-4 lg:w-5 lg:h-5" />
-                      </Button>
-                      <Button variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center">
-                        <Linkedin className="w-4 h-4 lg:w-5 lg:h-5" />
                       </Button>
                     </div>
 
