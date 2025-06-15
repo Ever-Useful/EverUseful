@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,11 +17,15 @@ import {
   sendEmailVerification,
   Auth 
 } from "firebase/auth";
-import { auth } from "../lib/firebase"; 
+import { auth, handleGoogleAuth, handleGithubAuth } from "../lib/firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, addDoc, getFirestore, collection, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase"; // Make sure db is exported from your firebase config
+
 const SignUp = () => {
+  const [selectedCode, setSelectedCode] = useState("+91");
+  const [user, setUser] = useState(null);
+  const [otpValue, setOtpValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -86,6 +90,16 @@ const SignUp = () => {
   ];
 
   const currentUserType = userTypes.find(type => type.id === formData.userType);
+  useEffect(() => {
+    if (window.location.hostname === "localhost") {
+      auth.settings.appVerificationDisabledForTesting = true;
+    }
+  }, []);
+
+
+  // Add this inside your component before return
+  const countryCodes = ["+91", "+1", "+44", "+61", "+81"]; // Extend as needed
+  // window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha', {});
 
   const mfaMethods = [
     { id: "authenticator", label: "Authenticator App", icon: Smartphone, description: "Most secure option" },
@@ -114,19 +128,66 @@ const SignUp = () => {
       alert("Passwords do not match");
       return;
     }
-
     try {
       await signUpWithEmailAndPassword();
-      // Send verification code to user's email
-      sendVerificationCode();
-      // Proceed to next step
-      setCurrentStep(2);
+      // Proceed to OTP verification
     } catch (error) {
       console.error("Error creating account:", error);
     }
   };
+  // In your component
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
-    const sendVerificationCode = async () => {
+  const sendOTP = async () => {
+    try {
+      console.log(selectedCode+formData.phone);
+      // Only create reCAPTCHA verifier if not in development
+      if (!recaptchaVerifierRef.current && !auth.settings.appVerificationDisabledForTesting) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(
+          auth, 
+          "recaptcha",
+          { 
+            size: "normal", // Changed from "invisible"
+            callback: () => {},
+            'expired-callback': () => {
+              recaptchaVerifierRef.current?.clear();
+            }
+          }
+        );
+      }
+
+      const confirmation = await signInWithPhoneNumber(
+        auth,
+        selectedCode + formData.phone,
+        recaptchaVerifierRef.current || undefined
+      );
+
+      setConfirmationResult(confirmation);
+      setOtpValue("");
+    } catch (err) {
+      console.error("OTP Error:", err);
+      recaptchaVerifierRef.current?.clear();
+    }
+  };
+
+
+  const verifyOTP = async () => {
+    if (!confirmationResult) {
+      console.error("No confirmation result");
+      return;
+    }
+
+    try {
+      const result = await confirmationResult.confirm(otpValue);
+      console.log("Authentication successful:", result);
+      // Handle successful authentication
+    } catch (error) {
+      console.error("Verification Error:", error);
+    }
+  };
+
+  const sendVerificationCode = async () => {
     try {
       const user = auth.currentUser;
       if (user) {
@@ -143,21 +204,28 @@ const SignUp = () => {
   const signUpWithEmailAndPassword = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      const user = userCredential.user;
+      const idToken = await userCredential.user.getIdToken();
 
-      // Add user data to Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        userType: formData.userType,
+      await fetch('http://localhost:3000/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          userType: formData.userType,
+        }),
       });
-
-      console.log("User signed up successfully:", user);
+      navigate('/signin');
     } catch (error: any) {
-      console.error("Error signing up:", error.message);
-      alert("Error signing up: " + error.message);
+      if (error.code === 'auth/email-already-in-use') {
+        console.log("User already exists. Logging that instead of throwing.");
+      } else {
+        console.error("Error creating account:", error.message || error);
+      }
     }
   };
 
@@ -169,19 +237,6 @@ const SignUp = () => {
       setCurrentStep(3);
     }
   };
-
-  // This function is for GitHub authentication via Firebase
-  // const loginwithgithub = async () => {
-  //   try {
-  //     const provider = new GithubAuthProvider();
-  //     const userCred = await signInWithPopup(auth, provider);
-  //     console.log("Github sign-up successful:", userCred.user);
-  //     navigate("/profile");
-  //   } catch (err: any) {
-  //     console.error("Github sign-up error:", err.message);
-  //     alert("Github login failed: " + err.message);
-  //   }
-  // };
   const handleCreateAccount = () => {
     console.log("Account created:", formData);
   };
@@ -265,7 +320,6 @@ const SignUp = () => {
             ))}
           </div>
         </div>
-
         {/* User Type Selection - Mobile optimized */}
         {currentStep === 1 && (
           <div className="animate-scale-in delay-400 mb-6 lg:mb-8">
@@ -470,14 +524,13 @@ const SignUp = () => {
                   </div>
 
                   <Button 
-                    onClick={handleNextStep}
+                    onClick={handleContinue}
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl"
                     disabled={!formData.agreeToTerms}
                   >
                     Continue
                     <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
-
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t border-gray-200" />
@@ -488,7 +541,9 @@ const SignUp = () => {
                   </div>
 
                   <div className="flex justify-center gap-3 lg:gap-4">
-                    <Button variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
+                    <Button 
+                    onClick={() => handleGoogleAuth(navigate)}
+                    variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
                       <svg className="w-4 h-4 lg:w-5 lg:h-5" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -496,11 +551,10 @@ const SignUp = () => {
                         <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                       </svg>
                     </Button>
-                    <Button variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
+                    <Button 
+                    onClick={() => handleGithubAuth(navigate)}
+                    variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
                       <Github className="w-4 h-4 lg:w-5 lg:h-5" />
-                    </Button>
-                    <Button variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
-                      <Linkedin className="w-4 h-4 lg:w-5 lg:h-5" />
                     </Button>
                   </div>
 

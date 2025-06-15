@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,58 +5,72 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Filter, Star, DollarSign, Clock, Users } from "lucide-react";
 
+
+const categories = [
+  { name: "AI & ML", count: 245 },
+  { name: "Sustainable", count: 189 },
+  { name: "FinTech", count: 156 },
+  { name: "HealthTech", count: 134 },
+  { name: "EdTech", count: 98 },
+  { name: "IoT", count: 87 },
+  { name: "Blockchain", count: 76 },
+  { name: "Mobile", count: 234 }
+];
+
+
+const skills = [
+  "React", "Python", "JavaScript", "ML", "UI/UX",
+  "DataSci", "Blockchain", "Cloud"
+];
+
+
+const durations = [
+  "1-2w", "1m", "2-3m", "3-6m", "6+m"
+];
+
+
 export const FilterSidebar = () => {
-  const categories = [
-    { name: "AI & Machine Learning", count: 245 },
-    { name: "Sustainable Tech", count: 189 },
-    { name: "FinTech", count: 156 },
-    { name: "HealthTech", count: 134 },
-    { name: "EdTech", count: 98 },
-    { name: "IoT & Hardware", count: 87 },
-    { name: "Blockchain", count: 76 },
-    { name: "Mobile Apps", count: 234 }
-  ];
-
-  const skills = [
-    "React", "Python", "JavaScript", "Machine Learning", "UI/UX Design", 
-    "Data Science", "Blockchain", "Cloud Computing"
-  ];
-
   return (
-    <div className="w-80 space-y-6">
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <Filter className="w-5 h-5 mr-2" />
+    <aside className="w-full max-w-xs lg:w-72 sticky top-8 z-20 font-sans">
+      <Card
+        className="bg-[#2f343d] border border-[#444b59] shadow-md rounded-lg overflow-hidden"
+        style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}
+      >
+        <CardHeader className="py-4 px-5 border-b border-[#444b59] bg-[#2f343d]">
+          <CardTitle className="flex items-center gap-2 text-gray-300 text-lg font-semibold tracking-tight">
+            <Filter className="w-5 h-5 text-gray-400" />
             Filters
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="py-5 px-5 space-y-6">
           {/* Categories */}
-          <div>
-            <h3 className="text-white font-semibold mb-3">Categories</h3>
-            <div className="space-y-2">
-              {categories.map((category, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id={`category-${index}`} />
-                    <label htmlFor={`category-${index}`} className="text-gray-300 text-sm cursor-pointer">
-                      {category.name}
-                    </label>
-                  </div>
-                  <Badge variant="outline" className="text-gray-400 border-gray-600">
+          <section>
+            <h3 className="flex items-center gap-2 font-semibold text-gray-400 text-sm mb-3">
+              <Users className="w-4 h-4 text-gray-400" />
+              Categories
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category, idx) => (
+                <label
+                  key={idx}
+                  className="flex items-center gap-1 bg-[#3a3f4d] px-2 py-1 rounded text-xs text-gray-200 cursor-pointer hover:bg-[#464c5b] transition"
+                >
+                  <Checkbox id={`cat-${idx}`} className="scale-90 border-gray-500 checked:bg-gray-300" />
+                  <span>{category.name}</span>
+                  <Badge variant="outline" className="border-gray-500 text-gray-400 bg-transparent px-1 font-medium">
                     {category.count}
                   </Badge>
-                </div>
+                </label>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* Price Range */}
-          <div>
-            <h3 className="text-white font-semibold mb-3 flex items-center">
-              <DollarSign className="w-4 h-4 mr-1" />
-              Budget Range
+
+          {/* Budget Range */}
+          <section>
+            <h3 className="flex items-center gap-2 font-semibold text-gray-400 text-sm mb-3">
+              <DollarSign className="w-4 h-4 text-gray-400" />
+              Budget
             </h3>
             <Slider
               defaultValue={[500, 5000]}
@@ -66,72 +79,82 @@ export const FilterSidebar = () => {
               step={100}
               className="w-full"
             />
-            <div className="flex justify-between text-sm text-gray-400 mt-2">
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>$0</span>
-              <span>$10,000+</span>
+              <span>$10k+</span>
             </div>
-          </div>
+          </section>
+
 
           {/* Duration */}
-          <div>
-            <h3 className="text-white font-semibold mb-3 flex items-center">
-              <Clock className="w-4 h-4 mr-1" />
-              Project Duration
+          <section>
+            <h3 className="flex items-center gap-2 font-semibold text-gray-400 text-sm mb-3">
+              <Clock className="w-4 h-4 text-gray-400" />
+              Duration
             </h3>
-            <div className="space-y-2">
-              {["1-2 weeks", "1 month", "2-3 months", "3-6 months", "6+ months"].map((duration, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <Checkbox id={`duration-${index}`} />
-                  <label htmlFor={`duration-${index}`} className="text-gray-300 text-sm cursor-pointer">
-                    {duration}
-                  </label>
-                </div>
+            <div className="flex flex-wrap gap-2">
+              {durations.map((duration, idx) => (
+                <label
+                  key={idx}
+                  className="flex items-center gap-1 bg-[#3a3f4d] px-2 py-1 rounded text-xs text-gray-200 cursor-pointer hover:bg-[#464c5b] transition"
+                >
+                  <Checkbox id={`duration-${idx}`} className="scale-90 border-gray-500 checked:bg-gray-300" />
+                  <span>{duration}</span>
+                </label>
               ))}
             </div>
-          </div>
+          </section>
+
 
           {/* Skills */}
-          <div>
-            <h3 className="text-white font-semibold mb-3">Required Skills</h3>
+          <section>
+            <h3 className="font-semibold text-gray-400 text-sm mb-3">Required Skills</h3>
             <div className="flex flex-wrap gap-2">
-              {skills.map((skill, index) => (
-                <Badge 
-                  key={index}
-                  variant="outline" 
-                  className="cursor-pointer hover:bg-blue-600 hover:border-blue-600 text-gray-300 border-gray-600 transition-colors"
+              {skills.map((skill, idx) => (
+                <Badge
+                  key={idx}
+                  variant="outline"
+                  className="cursor-pointer hover:bg-gray-400 hover:border-gray-400 text-gray-300 border-gray-500 bg-transparent transition-colors font-medium px-2 py-1 text-xs"
                 >
                   {skill}
                 </Badge>
               ))}
             </div>
-          </div>
+          </section>
+
 
           {/* Rating */}
-          <div>
-            <h3 className="text-white font-semibold mb-3 flex items-center">
-              <Star className="w-4 h-4 mr-1" />
+          <section>
+            <h3 className="flex items-center gap-2 font-semibold text-gray-400 text-sm mb-3">
+              <Star className="w-4 h-4 text-gray-400" />
               Minimum Rating
             </h3>
-            <div className="space-y-2">
+            <div className="flex gap-2 flex-wrap">
               {[5, 4, 3, 2, 1].map((rating) => (
-                <div key={rating} className="flex items-center space-x-2">
-                  <Checkbox id={`rating-${rating}`} />
-                  <label htmlFor={`rating-${rating}`} className="text-gray-300 text-sm cursor-pointer flex items-center">
+                <label
+                  key={rating}
+                  className="flex items-center gap-1 bg-[#3a3f4d] px-2 py-1 rounded text-xs text-gray-200 cursor-pointer hover:bg-[#464c5b] transition"
+                >
+                  <Checkbox id={`rating-${rating}`} className="scale-90 border-gray-500 checked:bg-gray-300" />
+                  <span className="flex items-center">
                     {Array.from({ length: rating }).map((_, i) => (
-                      <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-1" />
+                      <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-0.5" />
                     ))}
-                    & up
-                  </label>
-                </div>
+                  </span>
+                  <span>&up</span>
+                </label>
               ))}
             </div>
-          </div>
+          </section>
 
-          <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+
+          <Button className="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold shadow-sm mt-2 text-sm py-2 rounded-xl transition">
             Apply Filters
           </Button>
         </CardContent>
       </Card>
-    </div>
+    </aside>
   );
 };
+
+
