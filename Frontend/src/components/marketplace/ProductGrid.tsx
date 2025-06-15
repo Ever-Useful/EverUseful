@@ -255,8 +255,6 @@ const projects = [
     
   },
 ];
-
-
 export const ProductGrid = () => {
   const [selected, setSelected] = useState(null);
   const navigate = useNavigate();
