@@ -59,7 +59,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Project | null>(null);
-  const [sor
+  const [sortBy, setSortBy] = useState<string>('recent');
   const navigate = useNavigate();
   const { user, token, isLoading: authLoading } = useAuthState();
 
