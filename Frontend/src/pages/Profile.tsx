@@ -2,6 +2,7 @@ import { Camera } from 'lucide-react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 // import SocialLinks from "@/components/SocialLinks";
+import { Header } from '@/components/Header';
 import BackgroundUpload from "@/components/BackgroundUpload";
 import RecentProjects from "@/components/RecentProjects";
 import QuickActions from "@/components/QuickActions";
@@ -155,7 +156,9 @@ const Profile = () => {
   // }]);
  
   return (
+  
   <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <Header/>
    {/* Hidden Inputs for File Upload & Camera */}
       <input
         type="file"

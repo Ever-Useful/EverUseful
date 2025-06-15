@@ -1,4 +1,3 @@
-import Freelancing from "@/pages/Freelancing";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Menu, X, Sparkles, ShoppingCart, User, LogOut } from "lucide-react";
