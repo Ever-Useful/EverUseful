@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,35 +16,44 @@ import Profile from "./pages/Profile";
 import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 import FreelancerProfile from "./pages/FreelancerProfile";
+import NewProject from '@/pages/NewProject';
+import Collaborators from '@/pages/Collaborators';
+import ScheduleMeeting from '@/pages/ScheduleMeeting';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/freelancing" element={<Freelancing />} />
+  <AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/freelancing" element={<Freelancing />} />
 
-          <Route path="/community" element={<Community />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/editProfile" element={<EditProfile />} />
-          <Route path="/freelancer/:id" element={<FreelancerProfile />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+            <Route path="/community" element={<Community />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/editProfile" element={<EditProfile />} />
+            <Route path="/freelancer/:id" element={<FreelancerProfile />} />
+            <Route path="/projects/new" element={<NewProject />} />
+            <Route path="/collaborators" element={<Collaborators />} />
+            <Route path="/meetings/schedule" element={<ScheduleMeeting />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </AuthProvider>
 );
 
 export default App;
