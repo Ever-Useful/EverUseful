@@ -16,10 +16,12 @@ import Profile from "./pages/Profile";
 import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 import FreelancerProfile from "./pages/FreelancerProfile";
+import ProductDisplay from "./pages/ProductDisplay";
 import NewProject from '@/pages/NewProject';
 import Collaborators from '@/pages/Collaborators';
 import ScheduleMeeting from '@/pages/ScheduleMeeting';
 import { AuthProvider } from '@/contexts/AuthContext';
+
 
 const queryClient = new QueryClient();
 
@@ -29,12 +31,12 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/freelancing" element={<Freelancing />} />
-
+            <Route path="/product/:id" element={<ProductDisplay />} />
             <Route path="/community" element={<Community />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/checkout" element={<Checkout />} />
