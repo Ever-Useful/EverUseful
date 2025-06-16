@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 import { RelatedProducts } from "@/components/RelatedProducts";
+import { ReviewSection } from "@/components/ReviewSection";
 import { 
   Star, 
   Heart, 
@@ -13,20 +12,23 @@ import {
   Download, 
   Eye, 
   Clock, 
-  DollarSign,
   Users,
   CheckCircle,
   Shield,
   Award,
   Code,
-  Database,
-  Cpu
+  ShoppingCart
 } from "lucide-react";
+import { Footer } from "@/components/Footer";
+import { useNavigate } from "react-router-dom";
 
 const ProductDisplay = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
-
+  const [isExpanded, setIsExpanded] = useState(false);
+  const navigate = useNavigate();
+  const MAX_LENGTH = 200;
+  
   const project = {
     id: 1,
     title: "AI-Powered Climate Change Prediction Model",
@@ -75,8 +77,17 @@ const ProductDisplay = () => {
     ]
   };
 
+  const showReceipt = () => {
+    navigate("/paymentSuccess")
+  }
+
+  const shouldTruncate = project.description.length > MAX_LENGTH
+  const displayedText = isExpanded
+  ? project.description
+  : project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "")
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-100">
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-6 py-8">
@@ -179,8 +190,12 @@ const ProductDisplay = () => {
                 </div>
                 
                 <div className="flex space-x-3">
-                  <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
+                  <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={showReceipt}>
                     Purchase Now
+                  </Button>
+                  <Button className="flex-1 items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600">
+                    <ShoppingCart className="w-5 h-5" />
+                    Add to Cart
                   </Button>
                   <Button 
                     variant="outline" 
@@ -219,8 +234,13 @@ const ProductDisplay = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-700 leading-relaxed">
-                      {project.description}
+                      {displayedText}
                     </p>
+                    {shouldTruncate && (
+                      <button className="mt-2 text-blue-600 hover:underline text-sm" onClick={() => setIsExpanded(!isExpanded)}>
+                        {isExpanded ? "Read Less" : "Read More"}
+                      </button>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -277,6 +297,14 @@ const ProductDisplay = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+              
+              <TabsContent value="reviews" className="mt-6">
+                <ReviewSection 
+                  projectId={project.id}
+                  averageRating={project.rating}
+                  totalReviews={project.reviews}
+                />
               </TabsContent>
             </Tabs>
           </div>
@@ -342,7 +370,17 @@ const ProductDisplay = () => {
         <div className="mt-12">
           <RelatedProducts />
         </div>
+
+        {/* Reviews Section */}
+        <div className="mt-12">
+          <ReviewSection 
+            projectId={project.id}
+            averageRating={project.rating}
+            totalReviews={project.reviews}
+          />
+        </div>
       </div>
+      <Footer/>
     </div>
   );
 };
