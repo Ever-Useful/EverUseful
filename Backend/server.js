@@ -2,10 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const authorize = require('./authorize');
 const admin = require('firebase-admin');
+const marketplaceRoutes = require('./routes/marketplace');
 
 const app = express();
 
 // Initialize Firestore
+//this is server
 const db = admin.firestore();
 
 app.use(cors({
@@ -15,6 +17,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Marketplace routes
+app.use('/api/marketplace', marketplaceRoutes);
 
 app.get('/token', authorize, async (req, res) => {
   const { uid, name, email, picture, firebase } = req.user;
@@ -45,7 +50,6 @@ app.get('/token', authorize, async (req, res) => {
     return res.status(500).json({ error: 'Failed to save user info' });
   }
 });
-
 
 const port = 3000;
 app.listen(port, (error) => {

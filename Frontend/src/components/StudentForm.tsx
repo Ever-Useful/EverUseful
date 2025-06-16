@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useProfileStore, StudentProfile } from '@/hooks/useProfileStore';
+import { auth, db } from "@/lib/firebase";
+import { doc, updateDoc } from "firebase/firestore";
+import toast from "react-hot-toast";
 
 interface StudentFormProps {
   onComplete: () => void;
@@ -47,21 +50,39 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const studentProfile: StudentProfile = {
-      ...formData,
-      projects: profile?.userType === 'student' ? profile.projects : []
-    };
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("No user logged in");
+      }
 
-    if (profile) {
-      updateProfile(studentProfile);
-    } else {
-      setProfile(studentProfile);
+      const studentProfile: StudentProfile = {
+        ...formData,
+        projects: profile?.userType === 'student' ? profile.projects : []
+      };
+
+      // Update Firestore
+      await updateDoc(doc(db, "users", user.uid), {
+        ...formData,
+        updatedAt: new Date().toISOString()
+      });
+
+      // Update local state
+      if (profile) {
+        updateProfile(studentProfile);
+      } else {
+        setProfile(studentProfile);
+      }
+
+      toast.success("Profile updated successfully");
+      onComplete();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
     }
-    
-    onComplete();
   };
 
   return (
@@ -107,16 +128,16 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
 
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="college">College/University Name *</Label>
+              <Label htmlFor="college">College/University *</Label>
               <Input
                 id="college"
                 value={formData.college}
                 onChange={(e) => handleInputChange('college', e.target.value)}
                 required
-                placeholder="Enter your institution name"
+                placeholder="Enter your college/university name"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="degree">Degree *</Label>
               <Input
@@ -124,31 +145,31 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
                 value={formData.degree}
                 onChange={(e) => handleInputChange('degree', e.target.value)}
                 required
-                placeholder="e.g., Bachelor of Science"
+                placeholder="e.g., Bachelor's, Master's, PhD"
               />
             </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="course">Course *</Label>
+              <Label htmlFor="course">Course/Major *</Label>
               <Input
                 id="course"
                 value={formData.course}
                 onChange={(e) => handleInputChange('course', e.target.value)}
                 required
-                placeholder="e.g., Computer Science"
+                placeholder="Enter your course or major"
               />
             </div>
-            
+
             <div>
-              <Label htmlFor="year">Year of Studying *</Label>
+              <Label htmlFor="year">Year of Study *</Label>
               <Input
                 id="year"
                 value={formData.year}
                 onChange={(e) => handleInputChange('year', e.target.value)}
                 required
-                placeholder="e.g., 3rd Year"
+                placeholder="e.g., 1st Year, 2nd Year"
               />
             </div>
           </div>
@@ -160,24 +181,24 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
                 id="location"
                 value={formData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
-                placeholder="City, Country"
+                placeholder="Enter your location"
               />
             </div>
-            
+
             <div>
-              <Label htmlFor="website">Website URL</Label>
+              <Label htmlFor="website">Personal Website</Label>
               <Input
                 id="website"
                 value={formData.website}
                 onChange={(e) => handleInputChange('website', e.target.value)}
-                placeholder="https://yourwebsite.com"
+                placeholder="https://your-website.com"
               />
             </div>
           </div>
 
-          <div className="flex justify-end pt-6">
-            <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white text-base" type="submit" size="lg">
-              Continue to Projects
+          <div className="flex justify-end space-x-4">
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+              Save Changes
             </Button>
           </div>
         </form>
