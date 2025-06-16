@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 import { PopupMenu } from "@/components/PopupMenu";
 import {
   Star,
@@ -189,7 +190,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   if (projects.length === 0) {
     return <div className="text-center py-8">No projects found</div>;
   }
-
   return (
     <div className="flex-1 font-sans flex" style={{ minHeight: "100vh" }}>
       {/* Product Grid */}
@@ -244,7 +244,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                   </div>
                 </div>
               </div>
-
               <CardContent className="p-4 flex flex-col flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <img
@@ -259,11 +258,9 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                     <span className="text-gray-400 text-[10px]">({project.reviews})</span>
                   </div>
                 </div>
-
                 <h3 className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
                   {project.title}
                 </h3>
-
                 <div className="flex flex-wrap gap-1 mb-3">
                   {project.skills.map((skill, index) => (
                     <Badge
@@ -275,7 +272,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                     </Badge>
                   ))}
                 </div>
-
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2 text-sm font-sm font-semibold text-gray-500">
                     <div className="flex items-center space-x-1">
@@ -289,7 +285,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                   </div>
                 </div>
               </CardContent>
-
               {/* Fixed Buttons at Card Bottom */}
               <div className="px-4 pb-4 mt-auto flex gap-2">
                 <Button
@@ -324,7 +319,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
           </Button>
         </div>
       </div>
-
       {/* Detail Panel */}
       {selected && (
         <aside
@@ -368,7 +362,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
               alt={selected.title}
               className="w-full h-40 object-cover rounded-lg mb-4"
             />
-
             <div className="flex items-center mb-4">
               <img
                 src={selected.authorImage}
@@ -384,7 +377,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                 </div>
               </div>
             </div>
-
             <div className="mb-3">
               <div className="text-xs text-gray-500 mb-1">Author Bio</div>
               <div className="text-gray-700 text-xs mb-2">{selected.authorBio}</div>
@@ -393,11 +385,9 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                 Team Size: <span className="font-semibold text-gray-700">{selected.teamSize}</span>
               </div>
             </div>
-
             <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow mb-4">
               {selected.category}
             </Badge>
-
             <h3 className="text-lg font-bold text-gray-900 mb-2">{selected.title}</h3>
             <div className="flex flex-wrap gap-1 mb-3">
               {selected.skills.map((skill, idx) => (
@@ -432,7 +422,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
               </div>
             </div>
             <p className="text-gray-700 text-sm mb-4">{selected.description}</p>
-
             <div className="flex gap-2 mb-6">
               <Button size="sm" variant="outline" className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100">
                 <Share2 className="w-4 h-4" /> Share
@@ -441,14 +430,12 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                 <Download className="w-4 h-4" /> Download Brochure
               </Button>
             </div>
-
             <Button 
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition-all duration-300 mb-6"
               onClick={() => handleViewDetails(selected.id)}
             >
               Let's Connect
             </Button>
-
             {/* Related Projects */}
             <div>
               <div className="text-xs text-gray-500 mb-2 font-semibold">Related Projects</div>

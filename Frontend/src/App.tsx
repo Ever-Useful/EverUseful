@@ -17,35 +17,45 @@ import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 import FreelancerProfile from "./pages/FreelancerProfile";
 import ProductDisplay from "./pages/ProductDisplay";
+import NewProject from '@/pages/NewProject';
+import Collaborators from '@/pages/Collaborators';
+import ScheduleMeeting from '@/pages/ScheduleMeeting';
+import { AuthProvider } from '@/contexts/AuthContext';
+
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/freelancing" element={<Freelancing />} />
-          <Route path="/product/:id" element={<ProductDisplay />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/editProfile" element={<EditProfile />} />
-          <Route path="/freelancer/:id" element={<FreelancerProfile />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/freelancing" element={<Freelancing />} />
+            <Route path="/product/:id" element={<ProductDisplay />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/editProfile" element={<EditProfile />} />
+            <Route path="/freelancer/:id" element={<FreelancerProfile />} />
+            <Route path="/projects/new" element={<NewProject />} />
+            <Route path="/collaborators" element={<Collaborators />} />
+            <Route path="/meetings/schedule" element={<ScheduleMeeting />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </AuthProvider>
 );
 
 export default App;
