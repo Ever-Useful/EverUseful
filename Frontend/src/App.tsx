@@ -18,6 +18,7 @@ import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 import FreelancerProfile from "./pages/FreelancerProfile";
 import ProductDisplay from "./pages/ProductDisplay";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/signup" element={<SignUp />} />
           <Route path="/editProfile" element={<EditProfile />} />
           <Route path="/freelancer/:id" element={<FreelancerProfile />} />
+          <Route path="/paymentSuccess" element={<PaymentSuccess />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
