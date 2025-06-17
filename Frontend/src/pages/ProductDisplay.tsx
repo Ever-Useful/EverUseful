@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RelatedProducts } from "@/components/RelatedProducts";
 import { ReviewSection } from "@/components/ReviewSection";
+import { Header } from "@/components/Header";
 import { 
   Star, 
   Heart, 
@@ -20,74 +21,107 @@ import {
   ShoppingCart
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
+interface Project {
+  id: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  image: string;
+  images?: string[];
+  category: string;
+  price: number;
+  originalPrice?: number;
+  rating: number;
+  reviews: number;
+  views: number;
+  downloads: number;
+  duration: string;
+  skills: string[];
+  author: {
+    name: string;
+    image: string;
+    verified: boolean;
+    rating: number;
+    projects: number;
+    bio: string;
+  };
+  features: string[];
+  techStack: string[];
+  deliverables: string[];
+}
 
 const ProductDisplay = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { id } = useParams();
   const MAX_LENGTH = 200;
-  
-  const project = {
-    id: 1,
-    title: "AI-Powered Climate Change Prediction Model",
-    subtitle: "Advanced machine learning system for environmental forecasting",
-    description: "Revolutionary machine learning system for predicting climate patterns and environmental changes with 95% accuracy. This comprehensive solution combines satellite data, weather patterns, and historical climate information to provide actionable insights for governments, researchers, and environmental organizations.",
-    category: "AI & Sustainability",
-    price: "$2,500",
-    originalPrice: "$3,200",
-    duration: "2 months",
-    rating: 4.9,
-    reviews: 127,
-    downloads: 1540,
-    likes: 284,
-    views: 8920,
-    author: {
-      name: "Dr. Sarah Chen",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-      verified: true,
-      rating: 4.9,
-      projects: 24,
-      bio: "Climate scientist and AI researcher with 10+ years experience in environmental modeling."
-    },
-    images: [
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1569163139394-de44aa8c3cc0?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=600&fit=crop"
-    ],
-    skills: ["Machine Learning", "Python", "Climate Science", "TensorFlow", "Data Analytics"],
-    features: [
-      "95% prediction accuracy",
-      "Real-time data processing",
-      "Global climate modeling",
-      "Historical data analysis",
-      "API integration ready",
-      "Custom alerts system"
-    ],
-    techStack: ["Python", "TensorFlow", "Pandas", "NumPy", "Matplotlib", "Jupyter"],
-    deliverables: [
-      "Complete source code",
-      "Documentation",
-      "Training dataset",
-      "API endpoints",
-      "Deployment guide",
-      "30-day support"
-    ]
-  };
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:3000/api/marketplace/projects/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch project');
+        }
+        const data = await response.json();
+        setProject(data.project);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProject();
+    }
+  }, [id]);
 
   const showReceipt = () => {
-    navigate("/paymentSuccess")
+    navigate("/paymentSuccess");
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading project details...</p>
+        </div>
+      </div>
+    );
   }
 
-  const shouldTruncate = project.description.length > MAX_LENGTH
+  if (error || !project) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error || 'Project not found'}</p>
+          <Button onClick={() => navigate('/marketplace')}>Back to Marketplace</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const shouldTruncate = project.description.length > MAX_LENGTH;
   const displayedText = isExpanded
-  ? project.description
-  : project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "")
+    ? project.description
+    : project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "");
+
+  // Get the main image URL
+  const mainImageUrl = project.images?.[selectedImage] || project.image;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-100">
+      <Header/>
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-6 py-8">
@@ -96,28 +130,30 @@ const ProductDisplay = () => {
             <div>
               <div className="mb-4">
                 <img 
-                  src={project.images[selectedImage]} 
+                  src={mainImageUrl}
                   alt={project.title}
                   className="w-full h-96 object-cover rounded-lg shadow-lg"
                 />
               </div>
-              <div className="grid grid-cols-4 gap-2">
-                {project.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`relative overflow-hidden rounded border-2 transition-all ${
-                      selectedImage === index ? 'border-blue-500' : 'border-gray-200'
-                    }`}
-                  >
-                    <img 
-                      src={image} 
-                      alt={`${project.title} ${index + 1}`}
-                      className="w-full h-20 object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
+              {project.images && project.images.length > 1 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {project.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`relative overflow-hidden rounded border-2 transition-all ${
+                        selectedImage === index ? 'border-blue-500' : 'border-gray-200'
+                      }`}
+                    >
+                      <img 
+                        src={image} 
+                        alt={`${project.title} ${index + 1}`}
+                        className="w-full h-20 object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Product Info */}
@@ -178,8 +214,10 @@ const ProductDisplay = () => {
               <div className="bg-gray-50 rounded-lg p-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <span className="text-3xl font-bold text-gray-900">{project.price}</span>
-                    <span className="text-lg text-gray-500 line-through ml-2">{project.originalPrice}</span>
+                    <span className="text-3xl font-bold text-gray-900">${project.price.toLocaleString()}</span>
+                    {project.originalPrice && (
+                      <span className="text-lg text-gray-500 line-through ml-2">${project.originalPrice.toLocaleString()}</span>
+                    )}
                   </div>
                   <div className="text-right">
                     <div className="flex items-center space-x-1 text-gray-600">
@@ -297,14 +335,6 @@ const ProductDisplay = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
-              
-              <TabsContent value="reviews" className="mt-6">
-                <ReviewSection 
-                  projectId={project.id}
-                  averageRating={project.rating}
-                  totalReviews={project.reviews}
-                />
               </TabsContent>
             </Tabs>
           </div>
