@@ -21,7 +21,7 @@ const writeMarketplaceData = async (data) => {
 // Get all projects with optional search and filters
 router.get('/projects', async (req, res) => {
   try {
-    const { search, category, minPrice, maxPrice, minRating, skills, duration, sort } = req.query;
+    const { search, category, minPrice, maxPrice, minRating, skills, duration, sort, page = 1, limit = 6 } = req.query;
     const data = await readMarketplaceData();
     let projects = [...data.projects];
 
@@ -91,7 +91,25 @@ router.get('/projects', async (req, res) => {
       projects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
     }
 
-    res.json({ projects });
+    // Calculate pagination
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const totalProjects = projects.length;
+    const totalPages = Math.ceil(totalProjects / limitNum);
+    const startIndex = (pageNum - 1) * limitNum;
+    const endIndex = startIndex + limitNum;
+    const paginatedProjects = projects.slice(startIndex, endIndex);
+
+    res.json({ 
+      projects: paginatedProjects,
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalProjects,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1
+      }
+    });
   } catch (error) {
     console.error('Error fetching projects:', error);
     res.status(500).json({ error: 'Internal server error' });
