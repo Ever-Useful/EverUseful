@@ -1,6 +1,8 @@
-import { Camera } from 'lucide-react';
+import { Camera, Edit2, Save } from 'lucide-react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 // import SocialLinks from "@/components/SocialLinks";
 import { Header } from '@/components/Header';
 import BackgroundUpload from "@/components/BackgroundUpload";
@@ -32,6 +34,12 @@ const Profile = () => {
     bio: "",
     avatar: "",
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedData, setEditedData] = useState({
+    name: "",
+    title: "",
+    bio: "",
+  });
   const [stats, setStats] = useState({
     followers: 0,
     following: 0,
@@ -58,11 +66,17 @@ const Profile = () => {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setProfileData({
+            const newProfileData = {
               name: userData.name || user.displayName || "Anonymous",
               title: userData.title || "Member",
               bio: userData.bio || "No bio available",
               avatar: userData.photo || user.photoURL || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
+            };
+            setProfileData(newProfileData);
+            setEditedData({
+              name: newProfileData.name,
+              title: newProfileData.title,
+              bio: newProfileData.bio,
             });
 
             // Initialize or fetch stats
@@ -173,6 +187,45 @@ const Profile = () => {
   const handleBackgroundChange = (newImageUrl) => {
     setBackgroundImage(newImageUrl);
   };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("No user logged in");
+      }
+
+      // Update Firestore
+      await updateDoc(doc(db, "users", user.uid), {
+        ...editedData,
+        updatedAt: new Date().toISOString()
+      });
+
+      // Update local state
+      setProfileData(prev => ({
+        ...prev,
+        ...editedData
+      }));
+
+      setIsEditing(false);
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setEditedData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   // const [socialLinks] = useState([{
   //   platform: 'instagram',
   //   username: '@alexrivera',
@@ -331,15 +384,51 @@ const Profile = () => {
               
               {/* Profile Text */}
               <div className="flex-1 text-white">
-                <h1 className="text-4xl font-bold mb-2 drop-shadow-lg flex items-center mb-1.5 ">{profileData.name}</h1>
-                <p className="text-xl text-slate-200 drop-shadow-md">{profileData.title}</p>
-                <div className="mt-4">
-                <Link to="/EditProfile">
-                  <Button variant="secondary" size="sm">
-                    Edit Profile
-                  </Button>
-                </Link>
-              </div>
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <Input
+                      value={editedData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      className="text-2xl font-bold bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      placeholder="Your name"
+                    />
+                    <Input
+                      value={editedData.title}
+                      onChange={(e) => handleInputChange('title', e.target.value)}
+                      className="text-lg bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      placeholder="Your title"
+                    />
+                    <Textarea
+                      value={editedData.bio}
+                      onChange={(e) => handleInputChange('bio', e.target.value)}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      placeholder="Your bio"
+                    />
+                    <div className="flex gap-2">
+                      <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Changes
+                      </Button>
+                      <Button onClick={() => setIsEditing(false)} variant="outline" className="border-white text-white hover:bg-white/10">
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h1 className="text-4xl font-bold mb-2 drop-shadow-lg flex items-center gap-2">
+                      {profileData.name}
+                      <button
+                        onClick={handleEdit}
+                        className="p-1 hover:bg-white/10 rounded-full transition-colors"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                    </h1>
+                    <p className="text-xl text-slate-200 drop-shadow-md">{profileData.title}</p>
+                    <p className="mt-2 text-slate-200 drop-shadow-md">{profileData.bio}</p>
+                  </>
+                )}
               </div>
             </div>
           </div>

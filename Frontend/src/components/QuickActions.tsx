@@ -28,6 +28,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import SuccessAnimation from './SuccessAnimation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { addActivity } from '@/lib/activities';
+import { api } from '@/lib/api';
 
 interface User {
   id: string;
@@ -55,6 +56,8 @@ const QuickActions = () => {
   const [date, setDate] = useState<Date>();
 
   // Project form state
+  const [showProjectDialog, setShowProjectDialog] = useState(false);
+  const [showProjectSuccess, setShowProjectSuccess] = useState(false);
   const [projectData, setProjectData] = useState({
     title: '',
     description: '',
@@ -77,7 +80,6 @@ const QuickActions = () => {
     meetingLink: '',
   });
 
-  const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [showMeetingDialog, setShowMeetingDialog] = useState(false);
   const [showMeetingSuccess, setShowMeetingSuccess] = useState(false);
 
@@ -102,15 +104,11 @@ const QuickActions = () => {
 
   const handleStartProject = async () => {
     if (!user) {
-      console.log('No user found, cannot create project');
       toast.error('Please sign in to start a project');
       return;
     }
 
-    console.log('Current user:', user.uid);
-
     if (!projectData.title || !projectData.description || !projectData.category) {
-      console.log('Missing required fields:', projectData);
       toast.error('Please fill in all required fields');
       return;
     }
@@ -120,36 +118,20 @@ const QuickActions = () => {
       const projectDataToSave = {
         title: projectData.title,
         description: projectData.description,
+        status: 'in_progress',
         category: projectData.category,
         tags: projectData.tags.split(',').map(tag => tag.trim()),
-        createdBy: user.uid,
-        createdAt: new Date().toISOString(),
-        status: 'Planning',
-        progress: 0,
-        collaborators: 0,
         githubLink: projectData.githubLink || '',
         projectLink: projectData.projectLink || '',
         imageUrl: projectData.imageUrl || '',
       };
 
-      console.log('Saving project data:', projectDataToSave);
-
-      // Create project in Firestore
-      const projectRef = await addDoc(collection(db, 'projects'), projectDataToSave);
-      console.log('Project created with ID:', projectRef.id);
-      
-      // Update user's project count
-      await updateDoc(doc(db, 'users', user.uid), {
-        'stats.projects': increment(1)
+      const token = await user.getIdToken();
+      const result = await api.post('/api/profile/projects', projectDataToSave, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
-      console.log('Updated user project count');
-      
-      // Add activity
-      await addActivity(
-        user.uid,
-        'project',
-        `Created new project: ${projectData.title}`
-      );
       
       // Reset form data
       setProjectData({
@@ -162,21 +144,15 @@ const QuickActions = () => {
         imageUrl: '',
       });
       
-      // Close dialog and show success message
+      // Close dialog and show success animation
       setShowProjectDialog(false);
-      toast.success('Project created successfully!');
+      setShowProjectSuccess(true);
       
-      // Show success animation
-      setShowMeetingSuccess(true);
-
-      // Force a refresh of the projects list
-      const projectsQuery = query(
-        collection(db, 'projects'),
-        where('createdBy', '==', user.uid),
-        orderBy('createdAt', 'desc')
-      );
-      const snapshot = await getDocs(projectsQuery);
-      console.log('Refreshed projects list:', snapshot.docs.length, 'projects');
+      // After animation, refresh the page
+      setTimeout(() => {
+        setShowProjectSuccess(false);
+        window.location.reload();
+      }, 2000);
     } catch (error) {
       console.error('Error creating project:', error);
       toast.error('Failed to create project');
@@ -324,7 +300,7 @@ const QuickActions = () => {
               <ArrowRight className="w-5 h-5" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>Start a New Project</DialogTitle>
               <DialogDescription>
@@ -362,7 +338,6 @@ const QuickActions = () => {
                   <SelectContent>
                     <SelectItem value="Web Development">Web Development</SelectItem>
                     <SelectItem value="Mobile App">Mobile App</SelectItem>
-                    <SelectItem value="AI/ML">AI/ML</SelectItem>
                     <SelectItem value="Data Science">Data Science</SelectItem>
                     <SelectItem value="IoT">IoT</SelectItem>
                     <SelectItem value="Other">Other</SelectItem>
@@ -395,20 +370,6 @@ const QuickActions = () => {
                   onChange={(e) => setProjectData({ ...projectData, githubLink: e.target.value })}
                   placeholder="https://github.com/username/repo"
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label>Project Image (optional)</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploadingImage}
-                  />
-                  {uploadingImage && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
-                  )}
-                </div>
               </div>
             </div>
             <DialogFooter>
@@ -627,26 +588,22 @@ const QuickActions = () => {
   ];
 
   return (
-    <>
-      <Card className="p-6 shadow-lg border-0 bg-white/70 backdrop-blur-sm">
-        <h2 className="text-2xl font-bold text-slate-800 mb-6">Quick Actions</h2>
-        
-        <div className="space-y-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {actions.map((action, index) => (
             <div key={index}>
               {action.dialog}
             </div>
           ))}
-        </div>
-      </Card>
       
-      {showMeetingSuccess && (
+      {showProjectSuccess && (
         <SuccessAnimation
-          isVisible={showMeetingSuccess}
-          onClose={() => setShowMeetingSuccess(false)}
+          isVisible={showProjectSuccess}
+          onClose={() => setShowProjectSuccess(false)}
+          title="Project Created!"
+          message="Your project has been successfully created."
         />
       )}
-    </>
+    </div>
   );
 };
 

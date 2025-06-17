@@ -8,7 +8,6 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Marketplace from "./pages/Marketplace";
 import Freelancing from "./pages/Freelancing";
-import EditProfile from "./pages/EditProfile";
 import Community from "./pages/Community";
 import Admin from "./pages/Admin";
 import Checkout from "./pages/Checkout";
@@ -22,7 +21,10 @@ import NewProject from '@/pages/NewProject';
 import Collaborators from '@/pages/Collaborators';
 import ScheduleMeeting from '@/pages/ScheduleMeeting';
 import { AuthProvider } from '@/contexts/AuthContext';
+<<<<<<< HEAD
 import About from '@/pages/AboutUs';
+=======
+>>>>>>> ba84081 (Commit pending changes: update FilterSidebar, add useAuth hook, and add api lib)
 
 const queryClient = new QueryClient();
 
@@ -45,7 +47,6 @@ const App = () => (
             <Route path="/cart" element={<Cart />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/editProfile" element={<EditProfile />} />
             <Route path="/freelancer/:id" element={<FreelancerProfile />} />
             <Route path="/projects/new" element={<NewProject />} />
             <Route path="/collaborators" element={<Collaborators />} />

@@ -5,9 +5,16 @@ import { CheckCircle2 } from 'lucide-react';
 interface SuccessAnimationProps {
   isVisible: boolean;
   onClose: () => void;
+  title?: string;
+  message?: string;
 }
 
-const SuccessAnimation = ({ isVisible, onClose }: SuccessAnimationProps) => {
+const SuccessAnimation = ({ 
+  isVisible, 
+  onClose, 
+  title = "Success!", 
+  message = "Operation completed successfully." 
+}: SuccessAnimationProps) => {
   return (
     <AnimatePresence>
       {isVisible && (
@@ -72,10 +79,10 @@ const SuccessAnimation = ({ isVisible, onClose }: SuccessAnimationProps) => {
               className="text-center"
             >
               <h3 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
-                Meeting Scheduled!
+                {title}
               </h3>
               <p className="text-gray-600 mb-6">
-                Your meeting has been successfully scheduled.
+                {message}
               </p>
             </motion.div>
 

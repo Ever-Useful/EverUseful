@@ -29,17 +29,14 @@ const categories = [
   { name: "Mobile", count: 234 }
 ];
 
-
 const skills = [
   "React", "Python", "JavaScript", "ML", "UI/UX",
   "DataSci", "Blockchain", "Cloud"
 ];
 
-
 const durations = [
   "1-2w", "1m", "2-3m", "3-6m", "6+m"
 ];
-
 
 export const FilterSidebar = ({ onFiltersChange }: FilterSidebarProps) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -107,6 +104,7 @@ export const FilterSidebar = ({ onFiltersChange }: FilterSidebarProps) => {
     debouncedPriceChange(value);
   }, [debouncedPriceChange]);
 
+<<<<<<< HEAD
 const categories = [
   { name: "AI & ML", count: 245 },
   { name: "Sustainable", count: 189 },
@@ -129,6 +127,8 @@ const durations = [
   "1-2w", "1m", "2-3m", "3-6m", "6+m"
 ];
 
+=======
+>>>>>>> ba84081 (Commit pending changes: update FilterSidebar, add useAuth hook, and add api lib)
   return (
     <aside className="w-full max-w-xs lg:w-72 sticky top-8 z-20 font-sans">
       <Card
@@ -223,6 +223,7 @@ const durations = [
               ))}
             </div>
           </section>
+
           {/* Skills */}
           <section>
             <h3 className="font-semibold text-gray-400 text-sm mb-3">Required Skills</h3>
@@ -248,10 +249,10 @@ const durations = [
           <section>
             <h3 className="flex items-center gap-2 font-semibold text-gray-400 text-sm mb-3">
               <Star className="w-4 h-4 text-gray-400" />
-              Minimum Rating
+              Rating
             </h3>
-            <div className="flex gap-2 flex-wrap">
-              {[5, 4, 3, 2, 1].map((rating) => (
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3, 4, 5].map((rating) => (
                 <label
                   key={rating}
                   className={`flex items-center gap-1 px-2 py-1 rounded text-xs text-gray-200 cursor-pointer transition ${
@@ -267,18 +268,14 @@ const durations = [
                     checked={selectedRatings.includes(rating)}
                     onCheckedChange={() => handleRatingChange(rating)}
                   />
-                  <span className="flex items-center">
-                    {Array.from({ length: rating }).map((_, i) => (
-                      <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-0.5" />
-                    ))}
-                  </span>
-                  <span>&up</span>
+                  <span>{rating}+</span>
                 </label>
               ))}
             </div>
           </section>
+
           <Button
-            className="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold shadow-sm mt-2 text-sm py-2 rounded-xl transition"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             onClick={handleApplyFilters}
           >
             Apply Filters

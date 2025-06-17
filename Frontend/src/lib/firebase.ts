@@ -27,51 +27,72 @@ export const auth =  getAuth(app);
 export { db }; 
 export const storage = getStorage(app);
 
+const API_BASE_URL = 'http://localhost:3001';
+
 export const handleGoogleAuth = async (navigate: (url: string) => void) => {
   try {
-    
     const provider = new GoogleAuthProvider();
     const userCredential = await signInWithPopup(auth, provider);
     const token = await userCredential.user.getIdToken();
 
-    const response = await fetch("http://localhost:3000/token", {
-      method: "GET",
+    // Create or update user profile
+    const response = await fetch(`${API_BASE_URL}/api/profile`, {
+      method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify({
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName,
+        photoURL: userCredential.user.photoURL,
+      }),
     });
 
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-    const data = await response.json();
-    navigate(data.redirectUrl);
+    // Navigate to profile page after successful authentication
+    navigate('/profile');
   } catch (error) {
     console.error("Error during Google auth:", error);
+    throw error;
   }
 };
 
 export const handleGithubAuth = async (navigate: (url: string) => void) => {
   try {
-    
     const provider = new GithubAuthProvider();
     const userCredential = await signInWithPopup(auth, provider);
     const token = await userCredential.user.getIdToken();
 
-    const response = await fetch("http://localhost:3000/token", {
-      method: "GET",
+    // Create or update user profile
+    const response = await fetch(`${API_BASE_URL}/api/profile`, {
+      method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify({
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName,
+        photoURL: userCredential.user.photoURL,
+      }),
     });
 
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-    const data = await response.json();
-    navigate(data.redirectUrl);
+    // Navigate to profile page after successful authentication
+    navigate('/profile');
   } catch (error) {
     console.error("Error during Github auth:", error);
+    throw error;
   }
 };
+
 export const loginWithEmailPassword = async (email: string, password: string): Promise<string> => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
