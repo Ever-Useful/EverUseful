@@ -5,14 +5,25 @@
       "title": "AI-Powered Climate Change Prediction Model",
       "description": "Advanced machine learning system for predicting climate patterns and environmental changes with 95% accuracy.",
       "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=800&q=80"
+      ],
       "category": "AI & ML",
       "price": 2500,
       "duration": "2 months",
       "rating": 4,
       "reviews": 127,
-      "author": "Dr. Sarah Chen",
-      "authorImage": "https://randomuser.me/api/portraits/women/44.jpg",
-      "authorBio": "PhD in Environmental Science, 10+ years in AI research. Passionate about climate solutions.",
+      "author": {
+        "name": "Dr. Sarah Chen",
+        "image": "https://randomuser.me/api/portraits/women/44.jpg",
+        "verified": true,
+        "rating": 4.8,
+        "projects": 12,
+        "bio": "PhD in Environmental Science, 10+ years in AI research. Passionate about climate solutions."
+      },
       "status": "Active",
       "posted": "2025-06-01",
       "teamSize": 6,
@@ -27,183 +38,971 @@
         "Python",
         "Climate Science"
       ],
+      "features": [
+        "Real-time climate pattern analysis",
+        "95% prediction accuracy",
+        "Customizable reporting",
+        "API integration"
+      ],
+      "techStack": [
+        "TensorFlow",
+        "Python",
+        "AWS",
+        "Docker"
+      ],
+      "deliverables": [
+        "Source code",
+        "Documentation",
+        "API access",
+        "1 month support"
+      ],
       "views": 1553,
       "favoritedBy": []
     },
     {
       "id": 2,
       "title": "Blockchain-Based Supply Chain Tracker",
-      "description": "Transparent supply chain management system using blockchain technology for ethical sourcing verification.",
+      "description": "Transparent supply chain management platform leveraging blockchain for real-time tracking, supplier verification, and audit trails.",
       "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+      ],
       "category": "Blockchain",
       "price": 3200,
       "duration": "3 months",
-      "rating": 2,
+      "rating": 4.2,
       "reviews": 89,
-      "author": "Michael Rodriguez",
-      "authorImage": "https://randomuser.me/api/portraits/men/32.jpg",
-      "authorBio": "Blockchain enthusiast and full-stack developer. Loves building transparent systems.",
-      "status": "New",
+      "author": {
+        "name": "Michael Rodriguez",
+        "image": "https://randomuser.me/api/portraits/men/32.jpg",
+        "verified": true,
+        "rating": 4.5,
+        "projects": 8,
+        "bio": "Blockchain enthusiast and full-stack developer. Loves building transparent systems."
+      },
+      "status": "Active",
       "posted": "2025-06-06",
-      "teamSize": 4,
+      "teamSize": 5,
       "tags": [
         "Blockchain",
         "Supply Chain",
-        "Transparency"
+        "Transparency",
+        "Logistics"
       ],
       "skills": [
         "Blockchain",
         "Solidity",
         "React"
       ],
-      "views": 2102,
+      "features": [
+        "Immutable audit trail",
+        "Supplier verification",
+        "Smart contract automation",
+        "Real-time shipment tracking"
+      ],
+      "techStack": [
+        "Ethereum",
+        "Solidity",
+        "React",
+        "Node.js"
+      ],
+      "deliverables": [
+        "Smart contracts",
+        "Frontend application",
+        "API documentation",
+        "Deployment guide"
+      ],
+      "views": 2103,
       "favoritedBy": []
     },
     {
       "id": 3,
       "title": "Smart Health Monitoring IoT Device",
-      "description": "Wearable device that monitors vital signs and provides real-time health analytics using advanced sensors.",
+      "description": "Wearable IoT device for continuous health monitoring, providing real-time analytics and personalized health insights.",
       "image": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80"
+      ],
       "category": "HealthTech",
       "price": 1800,
       "duration": "6 weeks",
-      "rating": 3,
+      "rating": 4.3,
       "reviews": 156,
-      "author": "Lisa Johnson",
-      "authorImage": "https://randomuser.me/api/portraits/women/65.jpg",
-      "authorBio": "Hardware and IoT specialist. Building smart devices for better health.",
+      "author": {
+        "name": "Lisa Johnson",
+        "image": "https://randomuser.me/api/portraits/women/65.jpg",
+        "verified": false,
+        "rating": 4.1,
+        "projects": 6,
+        "bio": "Hardware and IoT specialist. Building smart devices for better health."
+      },
       "status": "Completed",
       "posted": "2025-05-20",
       "teamSize": 5,
       "tags": [
         "IoT",
         "Healthcare",
-        "Wearable"
+        "Wearable",
+        "Analytics"
       ],
       "skills": [
-        "IoT",
-        "Hardware",
-        "Mobile App"
+        "Embedded Systems",
+        "Python",
+        "Sensor Integration"
       ],
-      "views": 980,
+      "features": [
+        "Continuous vital sign monitoring",
+        "Personalized health analytics",
+        "Mobile app integration",
+        "Cloud-based data storage"
+      ],
+      "techStack": [
+        "Arduino",
+        "Python",
+        "AWS IoT",
+        "React Native"
+      ],
+      "deliverables": [
+        "Device firmware",
+        "Mobile application",
+        "User manual",
+        "1 month support"
+      ],
+      "views": 981,
       "favoritedBy": [
         "q4aDCAlHqecS9D9scZy5a25Livm1"
       ]
     },
     {
       "id": 4,
-      "title": "Augmented Reality Art Gallery",
-      "description": "An interactive AR mobile app that brings famous artworks to life, offering immersive educational experiences.",
-      "image": "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80",
-      "category": "AR/VR",
-      "price": 2100,
-      "duration": "7 weeks",
-      "rating": 1,
-      "reviews": 73,
-      "author": "Priya Singh",
-      "authorImage": "https://randomuser.me/api/portraits/women/23.jpg",
-      "authorBio": "AR/VR developer and digital artist. Bridging technology and creativity.",
+      "title": "E-Learning Platform with Adaptive Content",
+      "description": "A personalized e-learning platform that adapts content and quizzes to individual learning styles and progress.",
+      "image": "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "EdTech",
+      "price": 2000,
+      "duration": "2.5 months",
+      "rating": 4.6,
+      "reviews": 142,
+      "author": {
+        "name": "Anjali Mehra",
+        "image": "https://randomuser.me/api/portraits/women/68.jpg",
+        "verified": true,
+        "rating": 4.7,
+        "projects": 10,
+        "bio": "EdTech innovator and curriculum designer with a passion for adaptive learning."
+      },
       "status": "Active",
       "posted": "2025-06-10",
-      "teamSize": 3,
+      "teamSize": 7,
       "tags": [
-        "AR",
-        "Art",
-        "Education"
+        "E-Learning",
+        "Adaptive",
+        "Personalized",
+        "Quizzes"
       ],
       "skills": [
-        "Unity",
-        "C#",
-        "3D Modeling"
+        "React",
+        "Node.js",
+        "Instructional Design"
       ],
-      "views": 1344,
+      "features": [
+        "Adaptive quizzes",
+        "Personalized content delivery",
+        "Progress analytics dashboard",
+        "Gamification elements"
+      ],
+      "techStack": [
+        "React",
+        "Node.js",
+        "MongoDB",
+        "AWS"
+      ],
+      "deliverables": [
+        "Web application",
+        "Admin dashboard",
+        "User documentation",
+        "3 months support"
+      ],
+      "views": 1345,
       "favoritedBy": []
     },
     {
       "id": 5,
-      "title": "Eco-Friendly Smart Home Automation",
-      "description": "IoT-based home automation system focused on energy efficiency and reducing carbon footprint.",
-      "image": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
-      "category": "Smart Home",
-      "price": 2300,
-      "duration": "2 months",
-      "rating": 5,
-      "reviews": 112,
-      "author": "David Kim",
-      "authorImage": "https://randomuser.me/api/portraits/men/41.jpg",
-      "authorBio": "IoT engineer with a passion for sustainability and smart living.",
+      "title": "Automated Financial Portfolio Advisor",
+      "description": "AI-driven platform for automated investment portfolio management and personalized financial advice.",
+      "image": "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1556742031-c6961e8560b0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "FinTech",
+      "price": 3000,
+      "duration": "3 months",
+      "rating": 4.4,
+      "reviews": 95,
+      "author": {
+        "name": "Rahul Singh",
+        "image": "https://randomuser.me/api/portraits/men/55.jpg",
+        "verified": true,
+        "rating": 4.6,
+        "projects": 14,
+        "bio": "FinTech specialist with a decade of experience in financial modeling and AI."
+      },
       "status": "Active",
       "posted": "2025-06-12",
-      "teamSize": 4,
+      "teamSize": 6,
       "tags": [
-        "IoT",
-        "Smart Home",
-        "Sustainability"
+        "Finance",
+        "AI",
+        "Portfolio",
+        "Advisor"
       ],
       "skills": [
-        "Embedded Systems",
         "Python",
-        "Home Automation"
+        "Machine Learning",
+        "Finance"
       ],
-      "views": 1215,
+      "features": [
+        "Automated portfolio balancing",
+        "Personalized investment advice",
+        "Risk assessment tools",
+        "Performance tracking"
+      ],
+      "techStack": [
+        "Python",
+        "Django",
+        "PostgreSQL",
+        "AWS"
+      ],
+      "deliverables": [
+        "Web platform",
+        "API access",
+        "User guide",
+        "2 months support"
+      ],
+      "views": 1102,
       "favoritedBy": []
     },
     {
       "id": 6,
-      "title": "Personal Finance Management App",
-      "description": "A cross-platform app that helps users track expenses, set budgets, and achieve financial goals using AI-driven insights.",
-      "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80",
-      "category": "FinTech",
-      "price": 1950,
-      "duration": "5 weeks",
+      "title": "Real-Time Language Translation App",
+      "description": "Mobile app for real-time speech and text translation supporting over 50 languages.",
+      "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "Mobile App",
+      "price": 2200,
+      "duration": "2 months",
       "rating": 4.5,
-      "reviews": 68,
-      "author": "Emily Carter",
-      "authorImage": "https://randomuser.me/api/portraits/women/55.jpg",
-      "authorBio": "FinTech product manager and UI/UX designer. Making finance simple and accessible.",
-      "status": "New",
-      "posted": "2025-06-13",
-      "teamSize": 3,
+      "reviews": 120,
+      "author": {
+        "name": "Yuki Tanaka",
+        "image": "https://randomuser.me/api/portraits/men/41.jpg",
+        "verified": true,
+        "rating": 4.7,
+        "projects": 11,
+        "bio": "Mobile developer with a focus on language and communication technologies."
+      },
+      "status": "Active",
+      "posted": "2025-06-15",
+      "teamSize": 4,
       "tags": [
-        "Finance",
-        "AI",
-        "Mobile App"
+        "Translation",
+        "Mobile",
+        "Speech",
+        "Text"
       ],
       "skills": [
-        "Flutter",
-        "Python",
-        "UI/UX"
+        "React Native",
+        "NLP",
+        "API Integration"
       ],
-      "views": 990,
+      "features": [
+        "Real-time speech translation",
+        "Text translation",
+        "Offline language packs",
+        "Conversation mode"
+      ],
+      "techStack": [
+        "React Native",
+        "Google Cloud Translation API",
+        "AWS",
+        "Node.js"
+      ],
+      "deliverables": [
+        "Mobile app",
+        "API documentation",
+        "User manual",
+        "1 month support"
+      ],
+      "views": 987,
       "favoritedBy": []
     },
     {
       "id": 7,
-      "title": "Automated Legal Document Analyzer",
-      "description": "NLP-powered web tool that reviews and summarizes legal documents, highlighting key clauses and potential risks.",
-      "image": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=400&q=80",
-      "category": "LegalTech",
-      "price": 2750,
+      "title": "Smart Home Automation System",
+      "description": "Comprehensive IoT-based home automation system for lighting, security, and appliance control.",
+      "image": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "IoT",
+      "price": 2400,
       "duration": "2.5 months",
-      "rating": 4.7,
-      "reviews": 54,
-      "author": "Amit Patel",
-      "authorImage": "https://randomuser.me/api/portraits/men/36.jpg",
-      "authorBio": "LegalTech entrepreneur and NLP specialist. Making law accessible with technology.",
+      "rating": 4.3,
+      "reviews": 112,
+      "author": {
+        "name": "Priya Patel",
+        "image": "https://randomuser.me/api/portraits/women/50.jpg",
+        "verified": true,
+        "rating": 4.6,
+        "projects": 7,
+        "bio": "IoT engineer passionate about smart living and automation."
+      },
       "status": "Active",
-      "posted": "2025-06-14",
+      "posted": "2025-06-18",
+      "teamSize": 6,
+      "tags": [
+        "IoT",
+        "Home Automation",
+        "Smart Devices",
+        "Security"
+      ],
+      "skills": [
+        "Embedded Systems",
+        "Python",
+        "Home Assistant"
+      ],
+      "features": [
+        "Remote lighting control",
+        "Smart security integration",
+        "Energy monitoring",
+        "Voice assistant compatibility"
+      ],
+      "techStack": [
+        "Raspberry Pi",
+        "Python",
+        "MQTT",
+        "Home Assistant"
+      ],
+      "deliverables": [
+        "Firmware",
+        "Mobile app",
+        "User guide",
+        "2 months support"
+      ],
+      "views": 1045,
+      "favoritedBy": []
+    },
+    {
+      "id": 8,
+      "title": "Augmented Reality Interior Design Tool",
+      "description": "AR-based mobile app for visualizing and customizing interior design in real-time.",
+      "image": "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "AR/VR",
+      "price": 2800,
+      "duration": "3 months",
+      "rating": 4.4,
+      "reviews": 108,
+      "author": {
+        "name": "Lucas Brown",
+        "image": "https://randomuser.me/api/portraits/men/67.jpg",
+        "verified": true,
+        "rating": 4.7,
+        "projects": 9,
+        "bio": "AR/VR developer with a background in interactive design and visualization."
+      },
+      "status": "Active",
+      "posted": "2025-06-20",
       "teamSize": 5,
       "tags": [
-        "NLP",
-        "Legal",
+        "AR",
+        "Interior Design",
+        "Visualization",
+        "Customization"
+      ],
+      "skills": [
+        "Unity",
+        "ARKit",
+        "3D Modeling"
+      ],
+      "features": [
+        "Real-time AR visualization",
+        "Custom furniture placement",
+        "Material and color selection",
+        "Room measurement tools"
+      ],
+      "techStack": [
+        "Unity",
+        "ARKit",
+        "Blender",
+        "Firebase"
+      ],
+      "deliverables": [
+        "Mobile app",
+        "3D asset library",
+        "User guide",
+        "1 month support"
+      ],
+      "views": 1180,
+      "favoritedBy": []
+    },
+    {
+      "id": 9,
+      "title": "AI-Based Resume Screening Tool",
+      "description": "Automated recruitment tool using AI to screen and rank resumes for HR professionals.",
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "HR Tech",
+      "price": 2100,
+      "duration": "2 months",
+      "rating": 4.3,
+      "reviews": 88,
+      "author": {
+        "name": "Samantha Lee",
+        "image": "https://randomuser.me/api/portraits/women/23.jpg",
+        "verified": true,
+        "rating": 4.6,
+        "projects": 8,
+        "bio": "AI/ML engineer with a focus on HR automation and analytics."
+      },
+      "status": "Active",
+      "posted": "2025-06-22",
+      "teamSize": 5,
+      "tags": [
+        "AI",
+        "Recruitment",
+        "Resume",
         "Automation"
       ],
       "skills": [
         "Python",
         "NLP",
-        "Web Development"
+        "HR Analytics"
       ],
-      "views": 847,
+      "features": [
+        "Automated resume parsing",
+        "Candidate ranking",
+        "Bias detection",
+        "Integration with HR systems"
+      ],
+      "techStack": [
+        "Python",
+        "spaCy",
+        "Flask",
+        "AWS"
+      ],
+      "deliverables": [
+        "Web application",
+        "API access",
+        "User documentation",
+        "2 months support"
+      ],
+      "views": 990,
+      "favoritedBy": []
+    },
+    {
+      "id": 10,
+      "title": "Smart Agriculture Monitoring System",
+      "description": "IoT-powered system for real-time monitoring of soil, weather, and crop health in agriculture.",
+      "image": "https://images.unsplash.com/photo-1556742031-c6961e8560b0?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1556742031-c6961e8560b0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "AgriTech",
+      "price": 2300,
+      "duration": "2 months",
+      "rating": 4.5,
+      "reviews": 77,
+      "author": {
+        "name": "Vikram Rao",
+        "image": "https://randomuser.me/api/portraits/men/88.jpg",
+        "verified": true,
+        "rating": 4.7,
+        "projects": 13,
+        "bio": "AgriTech innovator specializing in IoT and smart farming solutions."
+      },
+      "status": "Active",
+      "posted": "2025-06-25",
+      "teamSize": 6,
+      "tags": [
+        "IoT",
+        "Agriculture",
+        "Monitoring",
+        "Crop Health"
+      ],
+      "skills": [
+        "Embedded Systems",
+        "Python",
+        "Sensor Networks"
+      ],
+      "features": [
+        "Soil moisture monitoring",
+        "Weather data integration",
+        "Crop health analytics",
+        "Automated irrigation alerts"
+      ],
+      "techStack": [
+        "Arduino",
+        "Python",
+        "AWS IoT",
+        "React"
+      ],
+      "deliverables": [
+        "Device firmware",
+        "Web dashboard",
+        "User manual",
+        "2 months support"
+      ],
+      "views": 1210,
+      "favoritedBy": []
+    },
+    {
+      "id": 11,
+      "title": "Virtual Fitness Coach Platform",
+      "description": "AI-powered virtual fitness coach providing personalized workout plans and real-time feedback.",
+      "image": "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "HealthTech",
+      "price": 2100,
+      "duration": "2 months",
+      "rating": 4.2,
+      "reviews": 99,
+      "author": {
+        "name": "Julia Müller",
+        "image": "https://randomuser.me/api/portraits/women/31.jpg",
+        "verified": true,
+        "rating": 4.5,
+        "projects": 7,
+        "bio": "Fitness enthusiast and AI developer, passionate about digital health."
+      },
+      "status": "Active",
+      "posted": "2025-06-28",
+      "teamSize": 5,
+      "tags": [
+        "AI",
+        "Fitness",
+        "Coach",
+        "Personalized"
+      ],
+      "skills": [
+        "Python",
+        "Machine Learning",
+        "Mobile Development"
+      ],
+      "features": [
+        "Personalized workout plans",
+        "Real-time feedback",
+        "Progress tracking",
+        "Diet recommendations"
+      ],
+      "techStack": [
+        "Python",
+        "TensorFlow",
+        "React Native",
+        "Firebase"
+      ],
+      "deliverables": [
+        "Mobile app",
+        "AI models",
+        "User guide",
+        "1 month support"
+      ],
+      "views": 1130,
+      "favoritedBy": []
+    },
+    {
+      "id": 12,
+      "title": "Crowdsourced Traffic Management System",
+      "description": "Real-time traffic management platform leveraging crowdsourced data for optimal route planning.",
+      "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "Smart City",
+      "price": 2600,
+      "duration": "2.5 months",
+      "rating": 4.4,
+      "reviews": 104,
+      "author": {
+        "name": "Ahmed El-Sayed",
+        "image": "https://randomuser.me/api/portraits/men/25.jpg",
+        "verified": true,
+        "rating": 4.7,
+        "projects": 11,
+        "bio": "Smart city solutions architect with a focus on urban mobility."
+      },
+      "status": "Active",
+      "posted": "2025-07-01",
+      "teamSize": 6,
+      "tags": [
+        "Traffic",
+        "Crowdsourcing",
+        "Smart City",
+        "Route Planning"
+      ],
+      "skills": [
+        "React",
+        "Node.js",
+        "GIS"
+      ],
+      "features": [
+        "Real-time traffic data",
+        "Crowdsourced incident reporting",
+        "Optimal route suggestions",
+        "Integration with navigation apps"
+      ],
+      "techStack": [
+        "React",
+        "Node.js",
+        "MongoDB",
+        "Mapbox"
+      ],
+      "deliverables": [
+        "Web platform",
+        "Mobile app",
+        "API documentation",
+        "2 months support"
+      ],
+      "views": 1204,
+      "favoritedBy": []
+    },
+    {
+      "id": 13,
+      "title": "Personal Finance Tracker with AI Insights",
+      "description": "A personal finance app that uses AI to provide spending insights, budgeting, and savings recommendations.",
+      "image": "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "FinTech",
+      "price": 1700,
+      "duration": "6 weeks",
+      "rating": 4.1,
+      "reviews": 82,
+      "author": {
+        "name": "Emily Carter",
+        "image": "https://randomuser.me/api/portraits/women/19.jpg",
+        "verified": true,
+        "rating": 4.5,
+        "projects": 8,
+        "bio": "Finance app developer with a passion for AI-driven insights."
+      },
+      "status": "Active",
+      "posted": "2025-07-04",
+      "teamSize": 4,
+      "tags": [
+        "Finance",
+        "AI",
+        "Budgeting",
+        "Personal"
+      ],
+      "skills": [
+        "React Native",
+        "Python",
+        "Data Analytics"
+      ],
+      "features": [
+        "Expense tracking",
+        "AI-powered insights",
+        "Budget planning",
+        "Savings recommendations"
+      ],
+      "techStack": [
+        "React Native",
+        "Python",
+        "Firebase",
+        "AWS"
+      ],
+      "deliverables": [
+        "Mobile app",
+        "User manual",
+        "API documentation",
+        "1 month support"
+      ],
+      "views": 926,
+      "favoritedBy": []
+    },
+    {
+      "id": 14,
+      "title": "Remote Patient Monitoring Dashboard",
+      "description": "A secure dashboard for healthcare providers to monitor patients remotely using IoT and analytics.",
+      "image": "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "HealthTech",
+      "price": 2600,
+      "duration": "2.5 months",
+      "rating": 4.4,
+      "reviews": 112,
+      "author": {
+        "name": "Dr. Omar Khalid",
+        "image": "https://randomuser.me/api/portraits/men/21.jpg",
+        "verified": true,
+        "rating": 4.8,
+        "projects": 13,
+        "bio": "Digital health expert with a focus on remote care and IoT."
+      },
+      "status": "Active",
+      "posted": "2025-07-07",
+      "teamSize": 6,
+      "tags": [
+        "Healthcare",
+        "IoT",
+        "Monitoring",
+        "Remote"
+      ],
+      "skills": [
+        "React",
+        "Python",
+        "Data Analytics"
+      ],
+      "features": [
+        "Real-time patient data",
+        "Secure data transmission",
+        "Alerts and notifications",
+        "Analytics dashboard"
+      ],
+      "techStack": [
+        "React",
+        "Python",
+        "AWS IoT",
+        "MongoDB"
+      ],
+      "deliverables": [
+        "Web dashboard",
+        "API documentation",
+        "User manual",
+        "2 months support"
+      ],
+      "views": 1157,
+      "favoritedBy": []
+    },
+    {
+      "id": 15,
+      "title": "AI-Powered Chatbot for Customer Support",
+      "description": "A smart chatbot that automates customer support with natural language understanding and instant responses.",
+      "image": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "AI & ML",
+      "price": 1900,
+      "duration": "1.5 months",
+      "rating": 4.2,
+      "reviews": 76,
+      "author": {
+        "name": "Carlos Silva",
+        "image": "https://randomuser.me/api/portraits/men/42.jpg",
+        "verified": true,
+        "rating": 4.6,
+        "projects": 8,
+        "bio": "Conversational AI developer with a focus on customer experience."
+      },
+      "status": "Active",
+      "posted": "2025-07-10",
+      "teamSize": 5,
+      "tags": [
+        "AI",
+        "Chatbot",
+        "Customer Support",
+        "NLP"
+      ],
+      "skills": [
+        "Python",
+        "NLP",
+        "Dialogflow"
+      ],
+      "features": [
+        "24/7 automated support",
+        "Natural language understanding",
+        "Multi-channel integration",
+        "Analytics dashboard"
+      ],
+      "techStack": [
+        "Python",
+        "Dialogflow",
+        "React",
+        "Firebase"
+      ],
+      "deliverables": [
+        "Chatbot scripts",
+        "Integration guide",
+        "User manual",
+        "1 month support"
+      ],
+      "views": 890,
+      "favoritedBy": []
+    },
+    {
+      "id": 16,
+      "title": "Online Mental Health Counseling Platform",
+      "description": "A secure online platform connecting users with certified mental health professionals for video and chat counseling.",
+      "image": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "HealthTech",
+      "price": 2700,
+      "duration": "3 months",
+      "rating": 4.5,
+      "reviews": 134,
+      "author": {
+        "name": "Maria Gomez",
+        "image": "https://randomuser.me/api/portraits/women/10.jpg",
+        "verified": true,
+        "rating": 4.8,
+        "projects": 12,
+        "bio": "Mental health advocate and digital health entrepreneur."
+      },
+      "status": "Active",
+      "posted": "2025-07-13",
+      "teamSize": 7,
+      "tags": [
+        "Mental Health",
+        "Counseling",
+        "Online",
+        "Secure"
+      ],
+      "skills": [
+        "React",
+        "Node.js",
+        "Video Streaming"
+      ],
+      "features": [
+        "Video and chat counseling",
+        "Secure messaging",
+        "Appointment scheduling",
+        "Resource library"
+      ],
+      "techStack": [
+        "React",
+        "Node.js",
+        "WebRTC",
+        "MongoDB"
+      ],
+      "deliverables": [
+        "Web platform",
+        "Admin dashboard",
+        "User manual",
+        "3 months support"
+      ],
+      "views": 1303,
+      "favoritedBy": []
+    },
+    {
+      "id": 17,
+      "title": "AI-Based Fraud Detection System",
+      "description": "A robust AI solution for detecting and preventing fraudulent transactions in real-time.",
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
+      ],
+      "category": "FinTech",
+      "price": 3100,
+      "duration": "3 months",
+      "rating": 4.6,
+      "reviews": 121,
+      "author": {
+        "name": "David Kim",
+        "image": "https://randomuser.me/api/portraits/men/53.jpg",
+        "verified": true,
+        "rating": 4.9,
+        "projects": 15,
+        "bio": "FinTech and AI security expert with a decade of experience."
+      },
+      "status": "Active",
+      "posted": "2025-07-15",
+      "teamSize": 8,
+      "tags": [
+        "AI",
+        "Fraud Detection",
+        "Security",
+        "Finance"
+      ],
+      "skills": [
+        "Python",
+        "Machine Learning",
+        "Data Analytics"
+      ],
+      "features": [
+        "Real-time fraud detection",
+        "Automated alerts",
+        "Pattern recognition",
+        "Reporting dashboard"
+      ],
+      "techStack": [
+        "Python",
+        "TensorFlow",
+        "AWS",
+        "React"
+      ],
+      "deliverables": [
+        "Source code",
+        "API documentation",
+        "User manual",
+        "2 months support"
+      ],
+      "views": 1408,
       "favoritedBy": []
     }
   ]
