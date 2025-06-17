@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Calendar, Clock, Users } from 'lucide-react';
+import { Copy, Calendar, Clock, Users, Trash2 } from 'lucide-react';
 import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,18 @@ const YourMeetings = () => {
   const { user } = useAuth();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleDeleteMeeting = async (meetingId: string) => {
+    if (!user) return;
+    
+    try {
+      await deleteDoc(doc(db, 'meetings', meetingId));
+      toast.success('Meeting deleted successfully');
+    } catch (error) {
+      console.error('Error deleting meeting:', error);
+      toast.error('Failed to delete meeting');
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -97,10 +109,20 @@ const YourMeetings = () => {
                     {meeting.participants?.length || 0} participants
                   </div>
                 </div>
-                <Badge variant="outline" className="capitalize">
-                  {meeting.status}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="capitalize">
+                    {meeting.status}
+                  </Badge>
+                  <button
+                    onClick={() => handleDeleteMeeting(meeting.id)}
+                    className="p-2 text-gray-600 hover:text-red-600 transition-colors"
+                    title="Delete meeting"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
+              
               <div className="mt-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">Meeting ID:</span>

@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { db } from '@/lib/firebase';
-import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, getDocs, addDoc, updateDoc, increment, orderBy } from 'firebase/firestore';
 import { incrementFollowing, incrementProjects } from '@/lib/stats';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -26,6 +26,8 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import SuccessAnimation from './SuccessAnimation';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { addActivity } from '@/lib/activities';
 
 interface User {
   id: string;
@@ -75,6 +77,7 @@ const QuickActions = () => {
     meetingLink: '',
   });
 
+  const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [showMeetingDialog, setShowMeetingDialog] = useState(false);
   const [showMeetingSuccess, setShowMeetingSuccess] = useState(false);
 
@@ -99,26 +102,56 @@ const QuickActions = () => {
 
   const handleStartProject = async () => {
     if (!user) {
+      console.log('No user found, cannot create project');
       toast.error('Please sign in to start a project');
+      return;
+    }
+
+    console.log('Current user:', user.uid);
+
+    if (!projectData.title || !projectData.description || !projectData.category) {
+      console.log('Missing required fields:', projectData);
+      toast.error('Please fill in all required fields');
       return;
     }
 
     setLoading(true);
     try {
       const projectDataToSave = {
-        ...projectData,
+        title: projectData.title,
+        description: projectData.description,
+        category: projectData.category,
         tags: projectData.tags.split(',').map(tag => tag.trim()),
         createdBy: user.uid,
         createdAt: new Date().toISOString(),
         status: 'Planning',
         progress: 0,
         collaborators: 0,
+        githubLink: projectData.githubLink || '',
+        projectLink: projectData.projectLink || '',
+        imageUrl: projectData.imageUrl || '',
       };
 
-      const projectRef = doc(db, 'projects', Date.now().toString());
-      await setDoc(projectRef, projectDataToSave);
-      await incrementProjects(user.uid);
+      console.log('Saving project data:', projectDataToSave);
+
+      // Create project in Firestore
+      const projectRef = await addDoc(collection(db, 'projects'), projectDataToSave);
+      console.log('Project created with ID:', projectRef.id);
       
+      // Update user's project count
+      await updateDoc(doc(db, 'users', user.uid), {
+        'stats.projects': increment(1)
+      });
+      console.log('Updated user project count');
+      
+      // Add activity
+      await addActivity(
+        user.uid,
+        'project',
+        `Created new project: ${projectData.title}`
+      );
+      
+      // Reset form data
       setProjectData({
         title: '',
         description: '',
@@ -129,9 +162,21 @@ const QuickActions = () => {
         imageUrl: '',
       });
       
-      // Close the dialog and show success animation
-      setShowMeetingDialog(false);
+      // Close dialog and show success message
+      setShowProjectDialog(false);
+      toast.success('Project created successfully!');
+      
+      // Show success animation
       setShowMeetingSuccess(true);
+
+      // Force a refresh of the projects list
+      const projectsQuery = query(
+        collection(db, 'projects'),
+        where('createdBy', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+      const snapshot = await getDocs(projectsQuery);
+      console.log('Refreshed projects list:', snapshot.docs.length, 'projects');
     } catch (error) {
       console.error('Error creating project:', error);
       toast.error('Failed to create project');
@@ -217,11 +262,14 @@ const QuickActions = () => {
       const meetingRef = doc(db, 'meetings', Date.now().toString());
       await setDoc(meetingRef, meetingDataToSave);
       
-      // Close the dialog and show success animation
-      setShowMeetingDialog(false);
-      setShowMeetingSuccess(true);
+      // Add activity
+      await addActivity(
+        user.uid,
+        'meeting',
+        `Scheduled new meeting: ${meetingData.title}`
+      );
       
-      // Reset the form data
+      // Reset form data
       setMeetingData({
         title: '',
         date: '',
@@ -230,6 +278,13 @@ const QuickActions = () => {
         meetingId: '',
         meetingLink: '',
       });
+      
+      // Close dialog and show success message
+      setShowMeetingDialog(false);
+      toast.success('Meeting scheduled successfully!');
+      
+      // Show success animation
+      setShowMeetingSuccess(true);
     } catch (error) {
       console.error('Error scheduling meeting:', error);
       toast.error('Failed to schedule meeting');
@@ -249,140 +304,132 @@ const QuickActions = () => {
   const actions = [
     {
       icon: Plus,
-      label: 'Start New Project',
+      label: 'Start Project',
       description: 'Create a new project',
       primary: true,
       dialog: (
-        <Dialog open={showMeetingDialog} onOpenChange={setShowMeetingDialog}>
+        <Dialog open={showProjectDialog} onOpenChange={setShowProjectDialog}>
           <DialogTrigger asChild>
             <Button
-              variant="default"
+              id="start-project-trigger"
               className="w-full justify-between p-4 h-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
             >
               <div className="flex items-center">
                 <Plus className="w-5 h-5 mr-3" />
                 <div className="text-left">
-                  <div className="font-semibold">Start New Project</div>
+                  <div className="font-semibold">Start Project</div>
                   <div className="text-sm opacity-80">Create a new project</div>
                 </div>
               </div>
               <ArrowRight className="w-5 h-5" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Create New Project</DialogTitle>
+              <DialogTitle>Start a New Project</DialogTitle>
+              <DialogDescription>
+                Fill in the details to create your project.
+              </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Project Title</Label>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="project-title">Project Title</Label>
                 <Input
-                  id="title"
+                  id="project-title"
                   value={projectData.title}
-                  onChange={(e) => setProjectData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) => setProjectData({ ...projectData, title: e.target.value })}
                   placeholder="Enter project title"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+              <div className="grid gap-2">
+                <Label htmlFor="project-description">Description</Label>
                 <Textarea
-                  id="description"
+                  id="project-description"
                   value={projectData.description}
-                  onChange={(e) => setProjectData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) => setProjectData({ ...projectData, description: e.target.value })}
                   placeholder="Describe your project"
-                  className="min-h-[100px]"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
-                    value={projectData.category}
-                    onChange={(e) => setProjectData(prev => ({ ...prev, category: e.target.value }))}
-                    placeholder="e.g., Web Development, AI, Design"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tags">Tags (comma-separated)</Label>
-                  <Input
-                    id="tags"
-                    value={projectData.tags}
-                    onChange={(e) => setProjectData(prev => ({ ...prev, tags: e.target.value }))}
-                    placeholder="e.g., react, typescript, ui-design"
-                  />
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="project-category">Category</Label>
+                <Select
+                  value={projectData.category}
+                  onValueChange={(value) => setProjectData({ ...projectData, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Web Development">Web Development</SelectItem>
+                    <SelectItem value="Mobile App">Mobile App</SelectItem>
+                    <SelectItem value="AI/ML">AI/ML</SelectItem>
+                    <SelectItem value="Data Science">Data Science</SelectItem>
+                    <SelectItem value="IoT">IoT</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="projectLink">Project Link</Label>
-                  <div className="flex">
-                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-                      <LinkIcon className="h-4 w-4" />
-                    </span>
-                    <Input
-                      id="projectLink"
-                      value={projectData.projectLink}
-                      onChange={(e) => setProjectData(prev => ({ ...prev, projectLink: e.target.value }))}
-                      placeholder="https://your-project.com"
-                      className="rounded-l-none"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="githubLink">GitHub Repository</Label>
-                  <div className="flex">
-                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-                      <Github className="h-4 w-4" />
-                    </span>
-                    <Input
-                      id="githubLink"
-                      value={projectData.githubLink}
-                      onChange={(e) => setProjectData(prev => ({ ...prev, githubLink: e.target.value }))}
-                      placeholder="https://github.com/username/repo"
-                      className="rounded-l-none"
-                    />
-                  </div>
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="project-tags">Tags (comma-separated)</Label>
+                <Input
+                  id="project-tags"
+                  value={projectData.tags}
+                  onChange={(e) => setProjectData({ ...projectData, tags: e.target.value })}
+                  placeholder="e.g., React, Node.js, MongoDB"
+                />
               </div>
-              <div className="space-y-2">
-                <Label>Project Image</Label>
-                <div className="flex items-center gap-4">
-                  {projectData.imageUrl && (
-                    <img
-                      src={projectData.imageUrl}
-                      alt="Project preview"
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
+              <div className="grid gap-2">
+                <Label htmlFor="project-link">Project Link (optional)</Label>
+                <Input
+                  id="project-link"
+                  value={projectData.projectLink}
+                  onChange={(e) => setProjectData({ ...projectData, projectLink: e.target.value })}
+                  placeholder="https://your-project.com"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="github-link">GitHub Link (optional)</Label>
+                <Input
+                  id="github-link"
+                  value={projectData.githubLink}
+                  onChange={(e) => setProjectData({ ...projectData, githubLink: e.target.value })}
+                  placeholder="https://github.com/username/repo"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Project Image (optional)</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                  />
+                  {uploadingImage && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
                   )}
-                  <div className="flex-1">
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="w-8 h-8 mb-2 text-gray-500" />
-                        <p className="mb-2 text-sm text-gray-500">
-                          <span className="font-semibold">Click to upload</span> or drag and drop
-                        </p>
-                        <p className="text-xs text-gray-500">PNG, JPG or GIF (MAX. 2MB)</p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={uploadingImage}
-                      />
-                    </label>
-                  </div>
                 </div>
               </div>
-              <Button
-                onClick={handleStartProject}
-                disabled={loading || uploadingImage}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setProjectData({
+                  title: '',
+                  description: '',
+                  category: '',
+                  tags: '',
+                  projectLink: '',
+                  githubLink: '',
+                  imageUrl: '',
+                });
+                setShowProjectDialog(false);
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleStartProject} disabled={loading}>
                 {loading ? 'Creating...' : 'Create Project'}
               </Button>
-            </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       ),
@@ -476,7 +523,7 @@ const QuickActions = () => {
       description: 'Book a time slot',
       primary: false,
       dialog: (
-        <Dialog>
+        <Dialog open={showMeetingDialog} onOpenChange={setShowMeetingDialog}>
           <DialogTrigger asChild>
             <Button
               variant="outline"
@@ -528,6 +575,24 @@ const QuickActions = () => {
                 />
               </div>
               <div className="grid gap-2">
+                <Label htmlFor="meeting-id">Meeting ID</Label>
+                <Input
+                  id="meeting-id"
+                  value={meetingData.meetingId}
+                  onChange={(e) => setMeetingData({ ...meetingData, meetingId: e.target.value })}
+                  placeholder="Enter meeting ID"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="meeting-link">Meeting Link</Label>
+                <Input
+                  id="meeting-link"
+                  value={meetingData.meetingLink}
+                  onChange={(e) => setMeetingData({ ...meetingData, meetingLink: e.target.value })}
+                  placeholder="Enter meeting link"
+                />
+              </div>
+              <div className="grid gap-2">
                 <Label htmlFor="meeting-participants">Participants (Email addresses, comma-separated)</Label>
                 <Input
                   id="meeting-participants"
@@ -538,7 +603,17 @@ const QuickActions = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowMeetingDialog(false)}>
+              <Button variant="outline" onClick={() => {
+                setMeetingData({
+                  title: '',
+                  date: '',
+                  time: '',
+                  participants: '',
+                  meetingId: '',
+                  meetingLink: '',
+                });
+                setShowMeetingDialog(false);
+              }}>
                 Cancel
               </Button>
               <Button onClick={handleScheduleMeeting} disabled={loading}>
