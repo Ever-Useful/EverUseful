@@ -70,6 +70,9 @@ export const Header = () => {
           <Link to="/community" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium hover:scale-105 transform duration-200">
             Connect
           </Link>
+          <Link to="/aboutus" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium hover:scale-105 transform duration-200">
+            About Us
+          </Link>
         </nav>
 
         {/* Right-aligned Buttons */}

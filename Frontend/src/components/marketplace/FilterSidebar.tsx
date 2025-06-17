@@ -129,6 +129,7 @@ const durations = [
   "1-2w", "1m", "2-3m", "3-6m", "6+m"
 ];
 
+
   return (
     <aside className="w-full max-w-xs lg:w-72 sticky top-8 z-20 font-sans">
       <Card
