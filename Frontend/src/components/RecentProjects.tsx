@@ -30,11 +30,14 @@ const RecentProjects = () => {
 
   useEffect(() => {
     if (!user) {
+      console.log('No user found in RecentProjects, cannot fetch projects');
       setLoading(false);
       return;
     }
 
-    // Query projects created by the current user
+    console.log('Setting up projects listener for user:', user.uid);
+
+    // Query projects created by the current user with server-side sorting
     const q = query(
       collection(db, 'projects'),
       where('createdBy', '==', user.uid),
@@ -44,23 +47,45 @@ const RecentProjects = () => {
     // Set up real-time listener
     const unsubscribe = onSnapshot(q, 
       (snapshot) => {
-        const projectsData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Project[];
+        console.log('Received projects update. Changes:', snapshot.docChanges().length);
+        console.log('Total projects found:', snapshot.docs.length);
+        
+        snapshot.docChanges().forEach(change => {
+          console.log('Change type:', change.type);
+          console.log('Document ID:', change.doc.id);
+          console.log('Document data:', change.doc.data());
+        });
+
+        const projectsData = snapshot.docs.map(doc => {
+          const data = doc.data();
+          console.log('Processing project:', data);
+          return {
+            id: doc.id,
+            ...data
+          };
+        }) as Project[];
+        
+        console.log('Final processed projects data:', projectsData);
         setProjects(projectsData);
         setLoading(false);
       },
       (error) => {
-        console.error('Error fetching projects:', error);
-        toast.error('Failed to load projects');
+        console.error('Error in projects listener:', error);
+        if (error.code === 'failed-precondition') {
+          toast.error('Projects are being indexed. Please try again in a few minutes.');
+        } else {
+          toast.error('Failed to load projects');
+        }
         setLoading(false);
       }
     );
 
     // Cleanup subscription
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      console.log('Cleaning up projects listener');
+      unsubscribe();
+    };
+  }, [user]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -95,21 +120,7 @@ const RecentProjects = () => {
           <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Recent Projects
           </h2>
-          <Button
-            variant="outline"
-            className="text-blue-600 hover:text-blue-700"
-            onClick={() => {
-              const trigger = document.getElementById('start-project-trigger');
-              if (trigger) {
-                (trigger as HTMLButtonElement).click();
-              }
-            }}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            New Project
-          </Button>
         </div>
-
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
@@ -249,27 +260,9 @@ const RecentProjects = () => {
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {format(new Date(project.createdAt), 'MMM d, yyyy')}
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 rounded-full bg-blue-600 mr-2"></div>
-                        <span className="text-sm font-medium text-gray-700">{project.status}</span>
-                      </div>
-                      <div className="h-4 w-px bg-gray-200"></div>
-                      <div className="flex items-center">
-                        <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-blue-600 to-purple-600"
-                            style={{ width: `${project.progress}%` }}
-                          ></div>
-                        </div>
-                        <span className="ml-2 text-sm font-medium text-gray-700">{project.progress}%</span>
-                      </div>
-                    </div>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    {format(new Date(project.createdAt), 'MMM d, yyyy')}
                   </div>
                 </div>
               </div>

@@ -22,6 +22,7 @@ import NewProject from '@/pages/NewProject';
 import Collaborators from '@/pages/Collaborators';
 import ScheduleMeeting from '@/pages/ScheduleMeeting';
 import { AuthProvider } from '@/contexts/AuthContext';
+import About from '@/pages/AboutUs';
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/collaborators" element={<Collaborators />} />
             <Route path="/meetings/schedule" element={<ScheduleMeeting />} />
             <Route path="/paymentSuccess" element={<PaymentSuccess />} />
+            <Route path="/aboutus" element={<About />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
