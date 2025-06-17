@@ -7,6 +7,7 @@ const marketplaceRoutes = require('./routes/marketplace');
 const app = express();
 
 // Initialize Firestore
+//this is server
 const db = admin.firestore();
 
 app.use(cors({

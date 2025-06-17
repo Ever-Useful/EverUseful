@@ -6,6 +6,7 @@ import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
 import { ProductGrid } from "@/components/marketplace/ProductGrid";
 import { FilterSidebar } from "@/components/marketplace/FilterSidebar";
 
+
 const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
@@ -28,6 +29,7 @@ const Marketplace = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50">
       <Header />
+
       <MarketplaceHero 
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -43,5 +45,6 @@ const Marketplace = () => {
     </div>
   );
 };
+
 
 export default Marketplace;

@@ -72,10 +72,6 @@ export const RelatedProducts = () => {
     <div className="bg-white px-6 py-8 rounded-lg shadow-md">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-bold text-gray-900">Related Products</h2>
-        <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
-          View All Products
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

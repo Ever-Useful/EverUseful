@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,6 +13,9 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpen, Building2, Star, Sparkles } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import toast from "react-hot-toast";
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -20,9 +23,44 @@ const EditProfile = () => {
   const [selectedUserType, setSelectedUserType] = useState<UserType>(profile?.userType || 'student');
   const [currentStep, setCurrentStep] = useState<'type' | 'profile' | 'content'>('type');
 
-  const handleUserTypeSelect = (userType: UserType) => {
-    setSelectedUserType(userType);
-    setCurrentStep('profile');
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setProfile({
+              ...userData,
+              userType: userData.userType || 'student'
+            });
+            setSelectedUserType(userData.userType || 'student');
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast.error("Failed to load profile data");
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleUserTypeSelect = async (userType: UserType) => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        await updateDoc(doc(db, "users", user.uid), {
+          userType: userType
+        });
+        setSelectedUserType(userType);
+        setCurrentStep('profile');
+      }
+    } catch (error) {
+      console.error("Error updating user type:", error);
+      toast.error("Failed to update user type");
+    }
   };
 
   const handleProfileComplete = () => {

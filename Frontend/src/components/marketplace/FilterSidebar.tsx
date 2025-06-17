@@ -107,6 +107,28 @@ export const FilterSidebar = ({ onFiltersChange }: FilterSidebarProps) => {
     debouncedPriceChange(value);
   }, [debouncedPriceChange]);
 
+const categories = [
+  { name: "AI & ML", count: 245 },
+  { name: "Sustainable", count: 189 },
+  { name: "FinTech", count: 156 },
+  { name: "HealthTech", count: 134 },
+  { name: "EdTech", count: 98 },
+  { name: "IoT", count: 87 },
+  { name: "Blockchain", count: 76 },
+  { name: "Mobile", count: 234 }
+];
+
+
+const skills = [
+  "React", "Python", "JavaScript", "ML", "UI/UX",
+  "DataSci", "Blockchain", "Cloud"
+];
+
+
+const durations = [
+  "1-2w", "1m", "2-3m", "3-6m", "6+m"
+];
+
   return (
     <aside className="w-full max-w-xs lg:w-72 sticky top-8 z-20 font-sans">
       <Card
@@ -201,7 +223,6 @@ export const FilterSidebar = ({ onFiltersChange }: FilterSidebarProps) => {
               ))}
             </div>
           </section>
-
           {/* Skills */}
           <section>
             <h3 className="font-semibold text-gray-400 text-sm mb-3">Required Skills</h3>
@@ -256,7 +277,6 @@ export const FilterSidebar = ({ onFiltersChange }: FilterSidebarProps) => {
               ))}
             </div>
           </section>
-
           <Button
             className="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold shadow-sm mt-2 text-sm py-2 rounded-xl transition"
             onClick={handleApplyFilters}

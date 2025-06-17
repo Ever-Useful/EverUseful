@@ -9,6 +9,7 @@ import {
   RocketLaunchIcon,
   StarIcon,
 } from "@heroicons/react/24/solid";
+
 import marketplaceBackdrop from "@/assets/images/marketplace.jpg";
 import { Input } from "@/components/ui/input";
 
@@ -65,6 +66,7 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
       </svg>
 
       {/* Floating Icons */}
+
       <AcademicCapIcon className="floating-icon absolute top-8 left-8 w-11 h-11 text-blue-900 drop-shadow-xl" style={{ animationDelay: "0s", zIndex: 2 }} />
       <BriefcaseIcon className="floating-icon absolute top-24 right-24 w-9 h-9 text-orange-800 drop-shadow-xl" style={{ animationDelay: "0.5s", zIndex: 2 }} />
       <GlobeAltIcon className="floating-icon absolute bottom-16 left-20 w-12 h-12 text-red-900 drop-shadow-xl" style={{ animationDelay: "1.2s", zIndex: 2 }} />

@@ -8,7 +8,7 @@ import RecentProjects from "@/components/RecentProjects";
 import QuickActions from "@/components/QuickActions";
 import RecentActivity from "@/components/RecentActivity";
 import SkillsSection from '@/components/Skillssection';
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -17,29 +17,79 @@ import {
 import { Link } from "react-router-dom";
 import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
-import { useEffect } from "react";
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { useProfileStore } from "@/hooks/useProfileStore";
+import YourMeetings from '@/components/YourMeetings';
 
 const Profile = () => {
   const [backgroundImage, setBackgroundImage] = useState(
     "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
   );
   const [profileData, setProfileData] = useState({
-    name: "Alex Rivera",
-    title: "Digital Creator & Entrepreneur",
-    bio: "Passionate about technology, design, and creating meaningful connections. Building the future one project at a time.",
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
+    name: "",
+    title: "",
+    bio: "",
+    avatar: "",
+  });
+  const [stats, setStats] = useState({
+    followers: 0,
+    following: 0,
+    projects: 0,
+    likes: 0
   });
   const [showCamera, setShowCamera] = useState(false);
   const [stream, setStream] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const { profile, setProfile } = useProfileStore();
 
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [imageSrc, setImageSrc] = useState(null);
   const [showCropper, setShowCropper] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setProfileData({
+              name: userData.name || user.displayName || "Anonymous",
+              title: userData.title || "Member",
+              bio: userData.bio || "No bio available",
+              avatar: userData.photo || user.photoURL || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
+            });
+
+            // Initialize or fetch stats
+            const userStats = userData.stats || {
+              followers: 0,
+              following: 0,
+              projects: 0,
+              likes: 0
+            };
+            setStats(userStats);
+
+            // If stats don't exist, initialize them
+            if (!userData.stats) {
+              await updateDoc(doc(db, "users", user.uid), {
+                stats: userStats
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast.error("Failed to load profile data");
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     if (showCamera && navigator.mediaDevices) {
@@ -301,19 +351,27 @@ const Profile = () => {
         <Card className="p-4 shadow-lg border-0 backdrop-blur-sm transition-all duration-300 hover:shadow-xl bg-blue-50">
           <div className="grid grid-cols-4 gap-4">
             <div className="text-center group cursor-pointer">
-              <div className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">12K</div>
+              <div className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">
+                {stats.followers}
+              </div>
               <div className="text-sm text-slate-600">Followers</div>
             </div>
             <div className="text-center group cursor-pointer">
-              <div className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">850</div>
+              <div className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">
+                {stats.following}
+              </div>
               <div className="text-sm text-slate-600">Following</div>
             </div>
             <div className="text-center group cursor-pointer">
-              <div className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">45</div>
+              <div className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">
+                {stats.projects}
+              </div>
               <div className="text-sm text-slate-600">Projects</div>
             </div>
             <div className="text-center group cursor-pointer">
-              <div className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">2.5K</div>
+              <div className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">
+                {stats.likes}
+              </div>
               <div className="text-sm text-slate-600">Likes</div>
             </div>
           </div>
@@ -322,55 +380,26 @@ const Profile = () => {
 
       {/* Content Section */}
       <div className="max-w-7xl mx-auto px-8 py-12">
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Left Column - Bio, Projects, and Social Links */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Bio Section */}
-            <Card className="p-8 shadow-lg border-0 backdrop-blur-sm bg-[#f0ebe3]/70 my-0 mx-0 px-[34px] py-[32px] rounded-lg">
-              <h2 className="text-2xl font-bold text-slate-800 mb-6">About Me</h2>
-              <p className="text-slate-600 leading-relaxed text-lg">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum explicabo dignissimos voluptatum perferendis pariatur aperiam culpa ab? Nostrum earum recusandae consectetur in corrupti, exercitationem labore dolore? Quos numquam cum soluta animi sapiente, ullam quam eveniet molestiae laborum maiores pariatur doloribus dicta adipisci. Repellat, optio asperiores.</p>
-            </Card>
-             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full">Recent Projects</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full mt-2 p-2 bg-white rounded-lg shadow-md">
-                {/* Recent Projects */}
-                <RecentProjects />
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-    
-
-            {/* Social Links
-            <SocialLinks socialLinks={socialLinks} /> */}
-          </div>
-
-          {/* Right Column - Quick Actions and Activity */}
-          <div className="lg:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
             <QuickActions />
-              <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full">Skills</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full mt-2 p-2 bg-white rounded-lg shadow-md">
-                {/* Skills Section */}
-                <SkillsSection />
-              </DropdownMenuContent>
-            </DropdownMenu>
 
+            {/* Recent Projects */}
+            <RecentProjects />
 
-             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full">Recent Activity</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full mt-2 p-2 bg-white rounded-lg shadow-md">
-                 {/* Recent Activity */}
-                <RecentActivity />
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Your Meetings - Now separate */}
+            <YourMeetings />
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Skills Section */}
+            <SkillsSection />
+
+            {/* Recent Activity */}
+            <RecentActivity />
           </div>
         </div>
       </div>
