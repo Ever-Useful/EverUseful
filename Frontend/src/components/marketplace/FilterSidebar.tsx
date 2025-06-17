@@ -130,7 +130,7 @@ const durations = [
 ];
 
 
-export const FilterSidebar = () => {
+
   return (
     <aside className="w-full max-w-xs lg:w-72 sticky top-8 z-20 font-sans">
       <Card
