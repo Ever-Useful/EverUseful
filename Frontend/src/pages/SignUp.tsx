@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,12 @@ import { auth, handleGoogleAuth, handleGithubAuth } from "../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, addDoc, getFirestore, collection, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase"; // Make sure db is exported from your firebase config
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 const SignUp = () => {
+  const [selectedCode, setSelectedCode] = useState("+91");
+  const [user, setUser] = useState(null);
+  const [otpValue, setOtpValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -39,6 +44,9 @@ const SignUp = () => {
     enableMFA: true,
     mfaMethod: "authenticator"
   });
+  const [error, setError] = useState<string | null>(null);
+  const [passwordStrength, setPasswordStrength] = useState<'weak' | 'medium' | 'strong'>('weak');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const userTypes = [
     { 
@@ -86,6 +94,24 @@ const SignUp = () => {
   ];
 
   const currentUserType = userTypes.find(type => type.id === formData.userType);
+  useEffect(() => {
+    if (window.location.hostname === "localhost") {
+      auth.settings.appVerificationDisabledForTesting = true;
+    }
+  }, []);
+
+  const countryCodes = [
+    { code: "+1", country: "US/CA", flag: "🇺🇸" },
+    { code: "+44", country: "UK", flag: "🇬🇧" },
+    { code: "+91", country: "IN", flag: "🇮🇳" },
+    { code: "+86", country: "CN", flag: "🇨🇳" },
+    { code: "+49", country: "DE", flag: "🇩🇪" },
+    { code: "+33", country: "FR", flag: "🇫🇷" },
+    { code: "+81", country: "JP", flag: "🇯🇵" },
+    { code: "+82", country: "KR", flag: "🇰🇷" },
+    { code: "+61", country: "AU", flag: "🇦🇺" },
+    { code: "+55", country: "BR", flag: "🇧🇷" },
+  ];
 
   const mfaMethods = [
     { id: "authenticator", label: "Authenticator App", icon: Smartphone, description: "Most secure option" },
@@ -93,36 +119,112 @@ const SignUp = () => {
     { id: "email", label: "Email Code", icon: Mail, description: "Receive codes via email" },
   ];
 
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const checkPasswordStrength = (password: string) => {
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const isLongEnough = password.length >= 8;
+
+    if (isLongEnough && hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar) {
+      return 'strong';
+    } else if (isLongEnough && ((hasUpperCase && hasLowerCase) || (hasNumbers && hasSpecialChar))) {
+      return 'medium';
+    }
+    return 'weak';
   };
 
-  // This function is for Google authentication via Firebase
-  //  const loginWithGoogle = async () => {
-  //   try {
-  //     const provider = new GoogleAuthProvider();
-  //     const userCred = await signInWithPopup(auth, provider);
-  //     console.log("Google sign-up successful:", userCred.user);
-  //     navigate("/signin");
-  //   } catch (err: any) {
-  //     console.error("Google sign-up error:", err.message);
-  //     alert("Google login failed: " + err.message);
-  //   }
-  // };
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'password') {
+      setPasswordStrength(checkPasswordStrength(value as string));
+    }
+  };
+
   const handleContinue = async () => {
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
+      return;
+    }
+    if (passwordStrength === 'weak') {
+      setError("Please use a stronger password");
+      return;
+    }
+    if (formData.phone.length !== 10) {
+      setError("Please enter a valid 10-digit phone number");
       return;
     }
     try {
+      setIsLoading(true);
+      setError(null);
       await signUpWithEmailAndPassword();
-      // Proceed to OTP verification
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating account:", error);
+      if (error.code === 'auth/email-already-in-use') {
+        setError("An account with this email already exists. Please sign in instead.");
+      } else if (error.code === 'auth/invalid-email') {
+        setError("Please enter a valid email address");
+      } else if (error.code === 'auth/weak-password') {
+        setError("Please use a stronger password");
+      } else {
+        setError("An error occurred while creating your account. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-    const sendVerificationCode = async () => {
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+
+  const sendOTP = async () => {
+    try {
+      console.log(selectedCode+formData.phone);
+      // Only create reCAPTCHA verifier if not in development
+      if (!recaptchaVerifierRef.current && !auth.settings.appVerificationDisabledForTesting) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(
+          auth, 
+          "recaptcha",
+          { 
+            size: "normal", // Changed from "invisible"
+            callback: () => {},
+            'expired-callback': () => {
+              recaptchaVerifierRef.current?.clear();
+            }
+          }
+        );
+      }
+
+      const confirmation = await signInWithPhoneNumber(
+        auth,
+        selectedCode + formData.phone,
+        recaptchaVerifierRef.current || undefined
+      );
+
+      setConfirmationResult(confirmation);
+      setOtpValue("");
+    } catch (err) {
+      console.error("OTP Error:", err);
+      recaptchaVerifierRef.current?.clear();
+    }
+  };
+
+  const verifyOTP = async () => {
+    if (!confirmationResult) {
+      console.error("No confirmation result");
+      return;
+    }
+
+    try {
+      const result = await confirmationResult.confirm(otpValue);
+      console.log("Authentication successful:", result);
+      // Handle successful authentication
+    } catch (error) {
+      console.error("Verification Error:", error);
+    }
+  };
+
+  const sendVerificationCode = async () => {
     try {
       const user = auth.currentUser;
       if (user) {
@@ -255,7 +357,6 @@ const SignUp = () => {
             ))}
           </div>
         </div>
-
         {/* User Type Selection - Mobile optimized */}
         {currentStep === 1 && (
           <div className="animate-scale-in delay-400 mb-6 lg:mb-8">
@@ -365,14 +466,50 @@ const SignUp = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="text-gray-700 font-medium text-sm">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="+1 (555) 123-4567"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm"
-                    />
+                    <div className="flex space-x-2">
+                      <Select value={selectedCode} onValueChange={setSelectedCode}>
+                        <SelectTrigger className="w-[100px] sm:w-[120px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countryCodes.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              <div className="flex items-center space-x-2">
+                                <span>{country.flag}</span>
+                                <span className="hidden sm:inline">{country.code}</span>
+                                <span className="sm:hidden">{country.code}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="1234567890"
+                        value={formData.phone}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '');
+                          if (value.length <= 10) {
+                            handleInputChange('phone', value);
+                          }
+                        }}
+                        maxLength={10}
+                        className={`flex-1 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm ${
+                          formData.phone.length === 10 ? 'border-green-500' : ''
+                        }`}
+                      />
+                    </div>
+                    {formData.phone.length > 0 && formData.phone.length < 10 && (
+                      <p className="text-xs text-amber-600 mt-1">
+                        Please enter a valid 10-digit mobile number
+                      </p>
+                    )}
+                    {formData.phone.length === 10 && (
+                      <p className="text-xs text-green-600 mt-1">
+                        ✓ Valid mobile number
+                      </p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
@@ -384,7 +521,11 @@ const SignUp = () => {
                         placeholder="••••••••"
                         value={formData.password}
                         onChange={(e) => handleInputChange('password', e.target.value)}
-                        className="pr-12 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm"
+                        className={`pr-12 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm ${
+                          passwordStrength === 'strong' ? 'border-green-500' :
+                          passwordStrength === 'medium' ? 'border-yellow-500' :
+                          'border-red-500'
+                        }`}
                       />
                       <button
                         type="button"
@@ -394,28 +535,34 @@ const SignUp = () => {
                         {showPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />}
                       </button>
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-gray-700 font-medium text-sm">Confirm Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={formData.confirmPassword}
-                        onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                        className="pr-12 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />}
-                      </button>
+                    <div className="mt-1">
+                      <div className="flex items-center space-x-2">
+                        <div className={`h-1 flex-1 rounded-full ${
+                          passwordStrength === 'weak' ? 'bg-red-500' :
+                          passwordStrength === 'medium' ? 'bg-yellow-500' :
+                          'bg-green-500'
+                        }`}></div>
+                        <span className={`text-xs ${
+                          passwordStrength === 'weak' ? 'text-red-500' :
+                          passwordStrength === 'medium' ? 'text-yellow-500' :
+                          'text-green-500'
+                        }`}>
+                          {passwordStrength === 'weak' ? 'Weak' :
+                           passwordStrength === 'medium' ? 'Medium' :
+                           'Strong'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters
+                      </p>
                     </div>
                   </div>
+
+                  {error && (
+                    <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                      <p className="text-sm text-red-600">{error}</p>
+                    </div>
+                  )}
 
                   <div className="space-y-3 lg:space-y-4">
                     <div className="flex items-start space-x-3">
@@ -467,7 +614,6 @@ const SignUp = () => {
                     Continue
                     <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
-
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t border-gray-200" />
