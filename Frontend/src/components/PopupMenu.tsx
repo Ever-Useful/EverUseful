@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogOverlay, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -85,6 +84,10 @@ export const PopupMenu = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
       <DialogContent className="max-w-4xl w-full h-[600px] p-0 overflow-hidden">
+        <DialogTitle className="sr-only">Login to AMOGH</DialogTitle>
+        <DialogDescription className="sr-only">
+          Sign in to access your AMOGH account and explore our platform
+        </DialogDescription>
         <div className="grid lg:grid-cols-2 h-full">
           {/* Left Side - Form */}
           <div className="bg-white flex flex-col h-full">            

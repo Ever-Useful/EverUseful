@@ -221,13 +221,13 @@ export const Chatbot = () => {
         )}
       </div>
 
-      {/* PopupMenu Component */}
-      <PopupMenu 
-        isOpen={showPopupMenu}
-        onClose={() => setShowPopupMenu(false)}
-        title="Get Started with AMOGH"
-        formType="login"
-      />
+      {/* PopupMenu Component */
+      // PopupMenu 
+        // isOpen={showPopupMenu}
+        // onClose={() => setShowPopupMenu(false)}
+        // title="Get Started with AMOGH"
+        // formType="login"
+      }
     </>
   );
 };

@@ -1,0 +1,210 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "title": "AI-Powered Climate Change Prediction Model",
+      "description": "Advanced machine learning system for predicting climate patterns and environmental changes with 95% accuracy.",
+      "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+      "category": "AI & ML",
+      "price": 2500,
+      "duration": "2 months",
+      "rating": 4,
+      "reviews": 127,
+      "author": "Dr. Sarah Chen",
+      "authorImage": "https://randomuser.me/api/portraits/women/44.jpg",
+      "authorBio": "PhD in Environmental Science, 10+ years in AI research. Passionate about climate solutions.",
+      "status": "Active",
+      "posted": "2025-06-01",
+      "teamSize": 6,
+      "tags": [
+        "AI",
+        "Climate",
+        "Prediction",
+        "Sustainability"
+      ],
+      "skills": [
+        "Machine Learning",
+        "Python",
+        "Climate Science"
+      ],
+      "views": 1553,
+      "favoritedBy": []
+    },
+    {
+      "id": 2,
+      "title": "Blockchain-Based Supply Chain Tracker",
+      "description": "Transparent supply chain management system using blockchain technology for ethical sourcing verification.",
+      "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
+      "category": "Blockchain",
+      "price": 3200,
+      "duration": "3 months",
+      "rating": 2,
+      "reviews": 89,
+      "author": "Michael Rodriguez",
+      "authorImage": "https://randomuser.me/api/portraits/men/32.jpg",
+      "authorBio": "Blockchain enthusiast and full-stack developer. Loves building transparent systems.",
+      "status": "New",
+      "posted": "2025-06-06",
+      "teamSize": 4,
+      "tags": [
+        "Blockchain",
+        "Supply Chain",
+        "Transparency"
+      ],
+      "skills": [
+        "Blockchain",
+        "Solidity",
+        "React"
+      ],
+      "views": 2102,
+      "favoritedBy": []
+    },
+    {
+      "id": 3,
+      "title": "Smart Health Monitoring IoT Device",
+      "description": "Wearable device that monitors vital signs and provides real-time health analytics using advanced sensors.",
+      "image": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
+      "category": "HealthTech",
+      "price": 1800,
+      "duration": "6 weeks",
+      "rating": 3,
+      "reviews": 156,
+      "author": "Lisa Johnson",
+      "authorImage": "https://randomuser.me/api/portraits/women/65.jpg",
+      "authorBio": "Hardware and IoT specialist. Building smart devices for better health.",
+      "status": "Completed",
+      "posted": "2025-05-20",
+      "teamSize": 5,
+      "tags": [
+        "IoT",
+        "Healthcare",
+        "Wearable"
+      ],
+      "skills": [
+        "IoT",
+        "Hardware",
+        "Mobile App"
+      ],
+      "views": 980,
+      "favoritedBy": [
+        "q4aDCAlHqecS9D9scZy5a25Livm1"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Augmented Reality Art Gallery",
+      "description": "An interactive AR mobile app that brings famous artworks to life, offering immersive educational experiences.",
+      "image": "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80",
+      "category": "AR/VR",
+      "price": 2100,
+      "duration": "7 weeks",
+      "rating": 1,
+      "reviews": 73,
+      "author": "Priya Singh",
+      "authorImage": "https://randomuser.me/api/portraits/women/23.jpg",
+      "authorBio": "AR/VR developer and digital artist. Bridging technology and creativity.",
+      "status": "Active",
+      "posted": "2025-06-10",
+      "teamSize": 3,
+      "tags": [
+        "AR",
+        "Art",
+        "Education"
+      ],
+      "skills": [
+        "Unity",
+        "C#",
+        "3D Modeling"
+      ],
+      "views": 1344,
+      "favoritedBy": []
+    },
+    {
+      "id": 5,
+      "title": "Eco-Friendly Smart Home Automation",
+      "description": "IoT-based home automation system focused on energy efficiency and reducing carbon footprint.",
+      "image": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+      "category": "Smart Home",
+      "price": 2300,
+      "duration": "2 months",
+      "rating": 5,
+      "reviews": 112,
+      "author": "David Kim",
+      "authorImage": "https://randomuser.me/api/portraits/men/41.jpg",
+      "authorBio": "IoT engineer with a passion for sustainability and smart living.",
+      "status": "Active",
+      "posted": "2025-06-12",
+      "teamSize": 4,
+      "tags": [
+        "IoT",
+        "Smart Home",
+        "Sustainability"
+      ],
+      "skills": [
+        "Embedded Systems",
+        "Python",
+        "Home Automation"
+      ],
+      "views": 1215,
+      "favoritedBy": []
+    },
+    {
+      "id": 6,
+      "title": "Personal Finance Management App",
+      "description": "A cross-platform app that helps users track expenses, set budgets, and achieve financial goals using AI-driven insights.",
+      "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80",
+      "category": "FinTech",
+      "price": 1950,
+      "duration": "5 weeks",
+      "rating": 4.5,
+      "reviews": 68,
+      "author": "Emily Carter",
+      "authorImage": "https://randomuser.me/api/portraits/women/55.jpg",
+      "authorBio": "FinTech product manager and UI/UX designer. Making finance simple and accessible.",
+      "status": "New",
+      "posted": "2025-06-13",
+      "teamSize": 3,
+      "tags": [
+        "Finance",
+        "AI",
+        "Mobile App"
+      ],
+      "skills": [
+        "Flutter",
+        "Python",
+        "UI/UX"
+      ],
+      "views": 990,
+      "favoritedBy": []
+    },
+    {
+      "id": 7,
+      "title": "Automated Legal Document Analyzer",
+      "description": "NLP-powered web tool that reviews and summarizes legal documents, highlighting key clauses and potential risks.",
+      "image": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=400&q=80",
+      "category": "LegalTech",
+      "price": 2750,
+      "duration": "2.5 months",
+      "rating": 4.7,
+      "reviews": 54,
+      "author": "Amit Patel",
+      "authorImage": "https://randomuser.me/api/portraits/men/36.jpg",
+      "authorBio": "LegalTech entrepreneur and NLP specialist. Making law accessible with technology.",
+      "status": "Active",
+      "posted": "2025-06-14",
+      "teamSize": 5,
+      "tags": [
+        "NLP",
+        "Legal",
+        "Automation"
+      ],
+      "skills": [
+        "Python",
+        "NLP",
+        "Web Development"
+      ],
+      "views": 846,
+      "favoritedBy": []
+    }
+  ]
+}

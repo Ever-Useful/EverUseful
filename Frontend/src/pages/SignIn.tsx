@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,17 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/Header";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Github, Linkedin, Shield, Smartphone, Mail, Check, Phone } from "lucide-react";
 import { auth,handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "@/lib/firebase";
-import { sendEmailVerification,  RecaptchaVerifier, signInWithPhoneNumber, } from "firebase/auth";
+import { sendEmailVerification,  RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail } from "firebase/auth";
 
 // Extend the Window interface to include confirmationResult
 declare global {
   interface Window {
     confirmationResult: any; // You can specify a more precise type if needed
     recaptchaVerifier: RecaptchaVerifier | null;
+    recaptchaWidgetId: number;
   }
 }
 
@@ -46,7 +47,21 @@ const SignIn = () => {
   const [showMobileOTP, setShowMobileOTP] = useState(false);
   const [mobileOTP, setMobileOTP] = useState("");  
   
+  const [recaptchaInitialized, setRecaptchaInitialized] = useState(false);
+  
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const section = searchParams.get('section');
+    if (section === 'forgot-password') {
+      setShowForgotPassword(true);
+    }
+  }, [location.search]);
 
   const userTypes = [
     { 
@@ -101,6 +116,8 @@ const SignIn = () => {
 
   const handleSignIn = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
       const idToken = await loginWithEmailPassword(email, password);
       const response = await fetch('http://localhost:3000/token', {
         method: 'GET',
@@ -112,47 +129,91 @@ const SignIn = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
+      localStorage.setItem("isLoggedIn", "true");
+      window.dispatchEvent(new Event("storage"));
       navigate(data.redirectUrl);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed", error);
+      if (error.code === 'auth/invalid-credential') {
+        setError("Invalid email or password. Please try again.");
+      } else if (error.code === 'auth/user-not-found') {
+        setError("No account found with this email. Please sign up first.");
+      } else if (error.code === 'auth/wrong-password') {
+        setError("Incorrect password. Please try again.");
+      } else if (error.code === 'auth/too-many-requests') {
+        setError("Too many failed attempts. Please try again later.");
+      } else {
+        setError("An error occurred during sign in. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
   
-  let recaptchaVerifier: RecaptchaVerifier | null = null;
-  const sendOtp = () => {
-    
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear(); // or .reset() if available
-      window.recaptchaVerifier = null;
-    }
-    recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      'size': 'invisible',
-      'callback': (response) => {
-        // reCAPTCHA solved
-      },
-      'expired-callback': () => {
-        // reCAPTCHA expired
+  const sendOtp = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Clear any existing reCAPTCHA
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
       }
-    });
-    window.recaptchaVerifier = recaptchaVerifier;
-    recaptchaVerifier.render().then(() => {
-      signInWithPhoneNumber(auth, countryCode + mobileNumber, recaptchaVerifier)
-        .then((confirmationResult) => {
-          window.confirmationResult = confirmationResult;
-          console.log("OTP sent to phone");
-        }).catch((error) => {
-          console.error("Error sending OTP:", error);
-        });
-    });
+
+      // Create a new reCAPTCHA verifier
+      const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {
+          console.log("reCAPTCHA verified");
+        },
+        'expired-callback': () => {
+          console.log("reCAPTCHA expired");
+          setRecaptchaInitialized(false);
+        }
+      });
+
+      window.recaptchaVerifier = verifier;
+
+      // Wait for reCAPTCHA to be ready
+      await verifier.render();
+      setRecaptchaInitialized(true);
+
+      // Send OTP
+      const confirmationResult = await signInWithPhoneNumber(auth, countryCode + mobileNumber, verifier);
+      window.confirmationResult = confirmationResult;
+      console.log("OTP sent successfully");
+      setShowMobileOTP(true);
+    } catch (error: any) {
+      console.error("Error in sendOtp:", error);
+      setRecaptchaInitialized(false);
+      console.log(error);setError(error.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const verifyOtp = async () => {
-    const confirmationResult = window.confirmationResult;
     try {
+      setIsLoading(true);
+      setError(null);
+      const confirmationResult = window.confirmationResult;
       await confirmationResult.confirm(mobileOTP);
       console.log("OTP verified successfully");
-    } catch (error) {
+      localStorage.setItem("isLoggedIn", "true");
+      window.dispatchEvent(new Event("storage"));
+      navigate("/");
+    } catch (error: any) {
       console.error("Error verifying OTP:", error);
+      if (error.code === 'auth/invalid-verification-code') {
+        setError("Invalid OTP. Please check and try again.");
+      } else if (error.code === 'auth/code-expired') {
+        setError("OTP has expired. Please request a new one.");
+      } else {
+        setError("Failed to verify OTP. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -172,17 +233,30 @@ const SignIn = () => {
     }
   };
 
-  const handleMobileSignIn = () => {
-    console.log("Sending OTP to:", countryCode + mobileNumber);
-    sendOtp();
-    setShowMobileOTP(true);
+  const handleMobileSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      if (!recaptchaInitialized) {
+        await sendOtp();
+      } else {
+        const confirmationResult = await signInWithPhoneNumber(auth, countryCode + mobileNumber, window.recaptchaVerifier!);
+        window.confirmationResult = confirmationResult;
+        console.log("OTP sent successfully");
+        setShowMobileOTP(true);
+      }
+    } catch (error: any) {
+      console.error("Error sending OTP:", error);
+      setRecaptchaInitialized(false);
+      setError(error.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleMobileOTPVerify = () => {
-    console.log("Mobile OTP verified:", mobileOTP);
-    localStorage.setItem("isLoggedIn", "true");
-    window.dispatchEvent(new Event("storage"));
-    navigate("/");
+  const handleMobileOTPVerify = async () => {
+    await verifyOtp();
   };
 
   const handleMFAVerify = () => {
@@ -190,9 +264,18 @@ const SignIn = () => {
     // Handle successful sign in
   };
 
-  const handleForgotPasswordSubmit = () => {
-    console.log("Sending OTP to:", forgotPasswordEmail);
-    setShowForgotPasswordOTP(true);
+  const handleForgotPasswordSubmit = async () => {
+    try {
+      await sendPasswordResetEmail(auth, forgotPasswordEmail);
+      // Show success message
+      alert("Password reset link has been sent to your email. Please check your inbox.");
+      // Reset the form
+      setShowForgotPassword(false);
+      setForgotPasswordEmail("");
+    } catch (error: any) {
+      console.error("Error sending password reset email:", error);
+      alert(error.message || "Failed to send password reset email. Please try again.");
+    }
   };
 
   const handleForgotPasswordOTPVerify = () => {
@@ -223,6 +306,7 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-200 to-purple-200 flex items-center justify-center p-4 relative overflow-hidden">
+      <div id="recaptcha-container" className="fixed bottom-0 right-0 opacity-0"></div>
       <div className="w-full max-w-7xl relative z-10">
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Left side - Sign in form */}
@@ -272,7 +356,14 @@ const SignIn = () => {
                     {/* Authentication Method Selection */}
                     <div className="space-y-2 lg:space-y-3">
                       <Label className="text-gray-700 font-medium">Sign in with:</Label>
-                      <RadioGroup value={authMethod} onValueChange={setAuthMethod} className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6">
+                      <RadioGroup 
+                        value={authMethod} 
+                        onValueChange={(value) => {
+                          setAuthMethod(value);
+                          setError(null); // Clear any existing errors when switching methods
+                        }} 
+                        className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6"
+                      >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="email" id="email-auth" />
                           <Label htmlFor="email-auth" className="flex items-center space-x-2 cursor-pointer">
@@ -325,6 +416,12 @@ const SignIn = () => {
                           </div>
                         </div>
 
+                        {error && authMethod === "email" && (
+                          <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-sm text-red-600">{error}</p>
+                          </div>
+                        )}
+
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                           <div className="flex items-center space-x-2">
                             <Checkbox id="remember" />
@@ -343,10 +440,10 @@ const SignIn = () => {
                         <Button 
                           onClick={handleSignIn}
                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl"
-                          disabled={!email || !password}
+                          disabled={!email || !password || isLoading}
                         >
-                          Sign In
-                          <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          {isLoading ? "Signing in..." : "Sign In"}
+                          {!isLoading && <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                         </Button>
                       </>
                     ) : (
@@ -375,19 +472,52 @@ const SignIn = () => {
                               type="tel"
                               placeholder="1234567890"
                               value={mobileNumber}
-                              onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ''))}
-                              className="flex-1 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500"
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '');
+                                if (value.length <= 10) {
+                                  setMobileNumber(value);
+                                }
+                              }}
+                              maxLength={10}
+                              className={`flex-1 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 ${
+                                mobileNumber.length === 10 ? 'border-green-500' : ''
+                              }`}
                             />
                           </div>
+                          {mobileNumber.length > 0 && mobileNumber.length < 10 && (
+                            <p className="text-xs text-amber-600 mt-1">
+                              Please enter a valid 10-digit mobile number
+                            </p>
+                          )}
+                          {mobileNumber.length === 10 && (
+                            <p className="text-xs text-green-600 mt-1">
+                              ✓ Valid mobile number
+                            </p>
+                          )}
                         </div>
+
+                        {error && authMethod === "mobile" && (
+                          <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-sm text-red-600">{error}</p>
+                          </div>
+                        )}
 
                         <Button 
                           onClick={handleMobileSignIn}
                           className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl"
-                          disabled={!mobileNumber || mobileNumber.length < 10}
+                          disabled={!mobileNumber || mobileNumber.length < 10 || isLoading}
                         >
-                          Send OTP
-                          <Phone className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
+                          {isLoading ? (
+                            <div className="flex items-center">
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                              Sending...
+                            </div>
+                          ) : (
+                            <>
+                              Send OTP
+                              <Phone className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
+                            </>
+                          )}
                         </Button>
                       </>
                     )}
@@ -458,7 +588,7 @@ const SignIn = () => {
                             <Mail className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
                           </div>
                           <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-2">Reset Your Password</h3>
-                          <p className="text-sm text-gray-600">We'll send you a verification code</p>
+                          <p className="text-sm text-gray-600">We'll send you a password reset link to your email</p>
                         </div>
 
                         <div className="space-y-2">
@@ -474,11 +604,11 @@ const SignIn = () => {
                         </div>
 
                         <Button 
-                          onClick={sendVerificationCode}
+                          // onClick={handleForgotPasswordSubmit} will put it when added logic
                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg"
                           disabled={!forgotPasswordEmail}
                         >
-                          Send Verification Code
+                          Send Reset Link
                           <Mail className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
                         </Button>
                       </>

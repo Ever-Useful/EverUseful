@@ -9,10 +9,20 @@ import {
   RocketLaunchIcon,
   StarIcon,
 } from "@heroicons/react/24/solid";
+
 import marketplaceBackdrop from "@/assets/images/marketplace.jpg";
+import { Input } from "@/components/ui/input";
 
+interface MarketplaceHeroProps {
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+}
 
-export const MarketplaceHero = () => {
+export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHeroProps) => {
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(e.target.value);
+  };
+
   return (
     <section className="relative min-h-[70vh] flex items-center justify-center px-2 sm:px-4 overflow-hidden">
       {/* Blurred, semi-transparent image as background */}
@@ -55,8 +65,8 @@ export const MarketplaceHero = () => {
         </g>
       </svg>
 
+      {/* Floating Icons */}
 
-      {/* Floating, Heavy, Contrasted Icons */}
       <AcademicCapIcon className="floating-icon absolute top-8 left-8 w-11 h-11 text-blue-900 drop-shadow-xl" style={{ animationDelay: "0s", zIndex: 2 }} />
       <BriefcaseIcon className="floating-icon absolute top-24 right-24 w-9 h-9 text-orange-800 drop-shadow-xl" style={{ animationDelay: "0.5s", zIndex: 2 }} />
       <GlobeAltIcon className="floating-icon absolute bottom-16 left-20 w-12 h-12 text-red-900 drop-shadow-xl" style={{ animationDelay: "1.2s", zIndex: 2 }} />
@@ -65,7 +75,6 @@ export const MarketplaceHero = () => {
       <UserGroupIcon className="floating-icon absolute top-12 right-1/4 w-9 h-9 text-purple-900 drop-shadow-xl" style={{ animationDelay: "0.3s", zIndex: 2 }} />
       <RocketLaunchIcon className="floating-icon absolute bottom-24 left-1/2 w-10 h-10 text-purple-900 drop-shadow-xl" style={{ animationDelay: "1.1s", zIndex: 2 }} />
       <StarIcon className="floating-icon absolute top-1/3 right-12 w-7 h-7 text-pink-900 drop-shadow-xl" style={{ animationDelay: "0.7s", zIndex: 2 }} />
-
 
       {/* Main Content */}
       <div
@@ -79,7 +88,7 @@ export const MarketplaceHero = () => {
           Empowering Innovation, Globally
         </h1>
         <p className="text-base sm:text-lg md:text-xl mb-8 max-w-2xl mx-auto text-slate-700 font-medium">
-          Join the world’s brightest minds—explore, collaborate, and create in the next-generation global marketplace.
+          Join the world's brightest minds—explore, collaborate, and create in the next-generation global marketplace.
         </p>
         {/* Search Bar */}
         <form className="w-full max-w-lg mx-auto">
@@ -88,18 +97,13 @@ export const MarketplaceHero = () => {
             <input
               type="text"
               placeholder="Search for products, services, or talents..."
+              value={searchQuery}
+              onChange={handleSearch}
               className="flex-1 px-4 py-3 bg-transparent text-blue-900 placeholder-black-600 focus:outline-none text-base"
             />
-            <button
-              type="submit"
-              className="bg-blue-700 hover:bg-blue-900 transition px-7 py-3 text-white font-semibold rounded-full focus:outline-none text-base"
-            >
-              Search
-            </button>
           </div>
         </form>
       </div>
-
 
       {/* Floating Animation Styles */}
       <style>{`
