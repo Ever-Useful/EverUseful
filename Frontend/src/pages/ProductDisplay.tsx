@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
+import { Header } from "@/components/Header";
+
 
 const ProductDisplay = () => {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -88,6 +90,7 @@ const ProductDisplay = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-100">
+      <Header />
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-6 py-8">

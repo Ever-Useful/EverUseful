@@ -330,16 +330,22 @@ const Profile = () => {
               </div>
               
               {/* Profile Text */}
+              {/* Profile Text */}
               <div className="flex-1 text-white">
                 <h1 className="text-4xl font-bold mb-2 drop-shadow-lg flex items-center mb-1.5 ">{profileData.name}</h1>
                 <p className="text-xl text-slate-200 drop-shadow-md">{profileData.title}</p>
-                <div className="mt-4">
-                <Link to="/EditProfile">
-                  <Button variant="secondary" size="sm">
-                    Edit Profile
-                  </Button>
-                </Link>
-              </div>
+                <div className="mt-4 w-[280px] flex flex-row justify-between">
+                  <Link to="/dashboard">
+                    <Button variant="secondary" size="sm">
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Link to="/EditProfile">
+                    <Button variant="secondary" size="sm">
+                      Edit Profile
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
