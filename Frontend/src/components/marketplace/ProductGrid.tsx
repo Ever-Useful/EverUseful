@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
 import { PopupMenu } from "@/components/PopupMenu";
 import {
   Star,
@@ -17,6 +16,8 @@ import {
   Users,
   Share2,
   Download,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useAuthState } from "../../hooks/useAuthState";
 
@@ -30,9 +31,14 @@ interface Project {
   duration: string;
   rating: number;
   reviews: number;
-  author: string;
-  authorImage: string;
-  authorBio: string;
+  author: {
+    name: string;
+    image: string;
+    verified: boolean;
+    rating: number;
+    projects: number;
+    bio: string;
+  };
   status: string;
   posted: string;
   teamSize: number;
@@ -43,8 +49,8 @@ interface Project {
 }
 
 interface ProductGridProps {
-  searchQuery?: string;
-  filters?: {
+  searchQuery: string;
+  filters: {
     category?: string;
     minPrice?: number;
     maxPrice?: number;
@@ -54,6 +60,14 @@ interface ProductGridProps {
   };
 }
 
+interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  totalProjects: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
 export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   const [showPopupMenu, setShowPopupMenu] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -61,6 +75,15 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Project | null>(null);
   const [sortBy, setSortBy] = useState<string>('recent');
+  const [sortOrder, setSortOrder] = useState<string>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    currentPage: 1,
+    totalPages: 1,
+    totalProjects: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
   const navigate = useNavigate();
   const { user, token, isLoading: authLoading } = useAuthState();
 
@@ -85,12 +108,17 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
 
         // Add sort parameter
         queryParams.append('sort', sortBy);
+        
+        // Add pagination parameters
+        queryParams.append('page', currentPage.toString());
+        queryParams.append('limit', '6');
 
         const response = await fetch(`http://localhost:3000/api/marketplace/projects?${queryParams}`);
         if (!response.ok) throw new Error('Failed to fetch projects');
         
         const data = await response.json();
         setProjects(data.projects);
+        setPagination(data.pagination);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -99,10 +127,86 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
     };
 
     fetchProjects();
-  }, [searchQuery, filters, sortBy]);
+  }, [searchQuery, filters, sortBy, currentPage]);
 
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSortBy(event.target.value);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const renderPagination = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <Button
+          key={i}
+          variant={i === currentPage ? "default" : "outline"}
+          className={`w-8 h-8 p-0 ${i === currentPage ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </Button>
+      );
+    }
+
+    return (
+      <div className="w-full flex items-center justify-center mt-8">
+        <div className="flex items-center justify-center space-x-2 bg-white rounded-lg shadow-sm p-2">
+          <Button
+            variant="outline"
+            className="w-8 h-8 p-0"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={!pagination.hasPrevPage}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          {startPage > 1 && (
+            <>
+              <Button
+                variant="outline"
+                className="w-8 h-8 p-0"
+                onClick={() => handlePageChange(1)}
+              >
+                1
+              </Button>
+              {startPage > 2 && <span className="text-gray-500">...</span>}
+            </>
+          )}
+          {pages}
+          {endPage < pagination.totalPages && (
+            <>
+              {endPage < pagination.totalPages - 1 && <span className="text-gray-500">...</span>}
+              <Button
+                variant="outline"
+                className="w-8 h-8 p-0"
+                onClick={() => handlePageChange(pagination.totalPages)}
+              >
+                {pagination.totalPages}
+              </Button>
+            </>
+          )}
+          <Button
+            variant="outline"
+            className="w-8 h-8 p-0"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={!pagination.hasNextPage}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   const handleViewDetails = async (projectId: number) => {
@@ -134,8 +238,8 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
         )
       );
 
-      // For now, just show an alert that the project page is not ready
-      alert('Project details page is coming soon!');
+      // Navigate to the product page
+      navigate(`/product/${projectId}`);
     } catch (err) {
       console.error('Error:', err);
     }
@@ -190,6 +294,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   if (projects.length === 0) {
     return <div className="text-center py-8">No projects found</div>;
   }
+
   return (
     <div className="flex-1 font-sans flex" style={{ minHeight: "100vh" }}>
       {/* Product Grid */}
@@ -197,7 +302,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-5 gap-3">
           <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">Featured Projects</h2>
           <div className="flex items-center space-x-3">
-            <span className="text-gray-500 text-xs">Showing {projects.length} of 2,540 projects</span>
+            <span className="text-gray-500 text-xs">Showing {projects.length} of {pagination.totalProjects} projects</span>
             <select 
               className="bg-white border border-gray-300 text-gray-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-gray-300"
               value={sortBy}
@@ -244,23 +349,26 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                   </div>
                 </div>
               </div>
+
               <CardContent className="p-4 flex flex-col flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <img
-                    src={project.authorImage}
-                    alt={project.author}
+                    src={project.author.image}
+                    alt={project.author.name}
                     className="w-6 h-6 rounded-full border border-gray-200"
                   />
-                  <span className="text-gray-700 text-xs">{project.author}</span>
+                  <span className="text-gray-700 text-xs">{project.author.name}</span>
                   <div className="flex items-center space-x-1">
                     <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                     <span className="text-yellow-500 text-xs">{project.rating}</span>
                     <span className="text-gray-400 text-[10px]">({project.reviews})</span>
                   </div>
                 </div>
+
                 <h3 className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
                   {project.title}
                 </h3>
+
                 <div className="flex flex-wrap gap-1 mb-3">
                   {project.skills.map((skill, index) => (
                     <Badge
@@ -272,6 +380,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                     </Badge>
                   ))}
                 </div>
+
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2 text-sm font-sm font-semibold text-gray-500">
                     <div className="flex items-center space-x-1">
@@ -285,6 +394,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                   </div>
                 </div>
               </CardContent>
+
               {/* Fixed Buttons at Card Bottom */}
               <div className="px-4 pb-4 mt-auto flex gap-2">
                 <Button
@@ -309,16 +419,10 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
             </Card>
           ))}
         </div>
-        <div className="mt-8 text-center">
-          <Button
-            size="sm"
-            variant="outline"
-            className="border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold rounded-lg"
-          >
-            Load More Projects
-          </Button>
-        </div>
+
+        {renderPagination()}
       </div>
+
       {/* Detail Panel */}
       {selected && (
         <aside
@@ -362,14 +466,15 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
               alt={selected.title}
               className="w-full h-40 object-cover rounded-lg mb-4"
             />
+
             <div className="flex items-center mb-4">
               <img
-                src={selected.authorImage}
-                alt={selected.author}
+                src={selected.author.image}
+                alt={selected.author.name}
                 className="w-8 h-8 rounded-full border border-gray-200 mr-3"
               />
               <div>
-                <div className="text-sm font-semibold text-gray-800">{selected.author}</div>
+                <div className="text-sm font-semibold text-gray-800">{selected.author.name}</div>
                 <div className="flex items-center space-x-1 text-xs text-gray-500">
                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                   <span className="text-yellow-500">{selected.rating}</span>
@@ -377,17 +482,20 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                 </div>
               </div>
             </div>
+
             <div className="mb-3">
               <div className="text-xs text-gray-500 mb-1">Author Bio</div>
-              <div className="text-gray-700 text-xs mb-2">{selected.authorBio}</div>
+              <div className="text-gray-700 text-xs mb-2">{selected.author.bio}</div>
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <Users className="w-4 h-4" />
                 Team Size: <span className="font-semibold text-gray-700">{selected.teamSize}</span>
               </div>
             </div>
+
             <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow mb-4">
               {selected.category}
             </Badge>
+
             <h3 className="text-lg font-bold text-gray-900 mb-2">{selected.title}</h3>
             <div className="flex flex-wrap gap-1 mb-3">
               {selected.skills.map((skill, idx) => (
@@ -422,6 +530,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
               </div>
             </div>
             <p className="text-gray-700 text-sm mb-4">{selected.description}</p>
+
             <div className="flex gap-2 mb-6">
               <Button size="sm" variant="outline" className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100">
                 <Share2 className="w-4 h-4" /> Share
@@ -430,12 +539,14 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                 <Download className="w-4 h-4" /> Download Brochure
               </Button>
             </div>
+
             <Button 
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition-all duration-300 mb-6"
               onClick={() => handleViewDetails(selected.id)}
             >
               Let's Connect
             </Button>
+
             {/* Related Projects */}
             <div>
               <div className="text-xs text-gray-500 mb-2 font-semibold">Related Projects</div>
