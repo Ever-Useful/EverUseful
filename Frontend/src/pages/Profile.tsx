@@ -8,6 +8,7 @@ import RecentProjects from "@/components/RecentProjects";
 import QuickActions from "@/components/QuickActions";
 import RecentActivity from "@/components/RecentActivity";
 import SkillsSection from '@/components/Skillssection';
+import InitialsAvatar from '@/components/InitialsAvatar';
 import { useRef, useState, useEffect } from "react";
 import {
   DropdownMenu,
@@ -21,6 +22,7 @@ import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useProfileStore } from "@/hooks/useProfileStore";
 import YourMeetings from '@/components/YourMeetings';
+import { firestoreService } from "@/services/firestoreService";
 
 const Profile = () => {
   const [backgroundImage, setBackgroundImage] = useState(
@@ -49,18 +51,31 @@ const Profile = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [imageSrc, setImageSrc] = useState(null);
   const [showCropper, setShowCropper] = useState(false);
+  const [customUserId, setCustomUserId] = useState("");
+
+  // Extract first and last name from full name
+  const getFirstAndLastName = (fullName: string) => {
+    const nameParts = fullName.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    return { firstName, lastName };
+  };
+
+  const { firstName, lastName } = getFirstAndLastName(profileData.name);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const user = auth.currentUser;
-        if (user) {
+    if (user) {
           const userDoc = await getDoc(doc(db, "users", user.uid));
+          let name = "";
           if (userDoc.exists()) {
             const userData = userDoc.data();
+            name = userData.name || user.displayName || "";
             setProfileData({
-              name: userData.name || user.displayName || "Anonymous",
-              title: userData.title || "Member",
+              name: name || user.displayName || user.email?.split('@')[0] || "User",
+              title: userData.userType || userData.title || "Member",
               bio: userData.bio || "No bio available",
               avatar: userData.photo || user.photoURL || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
             });
@@ -80,6 +95,10 @@ const Profile = () => {
                 stats: userStats
               });
             }
+          } else {
+            // If no userDoc, use displayName or email prefix
+            name = user.displayName || user.email?.split('@')[0] || "User";
+            setProfileData((prev) => ({ ...prev, name }));
           }
         }
       } catch (error) {
@@ -89,6 +108,27 @@ const Profile = () => {
     };
 
     fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setProfileData((prev) => ({
+              ...prev,
+              name: userData.name || user.displayName || user.email?.split('@')[0] || "User"
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user name:", error);
+      }
+    };
+    fetchUserName();
   }, []);
 
   useEffect(() => {
@@ -111,6 +151,34 @@ const Profile = () => {
       }
     };
   }, [showCamera]);
+
+  useEffect(() => {
+    const fetchCustomUserId = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          console.log('User not authenticated, skipping customUserId fetch');
+          return;
+        }
+        
+        // Wait a bit for authentication to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const firestoreUser = await firestoreService.getCurrentUserData();
+        if (firestoreUser && firestoreUser.customUserId) {
+          setCustomUserId(firestoreUser.customUserId);
+        }
+    } catch (error) {
+        console.error("Error fetching customUserId:", error);
+      }
+    };
+    
+    // Only fetch if user is authenticated
+    const user = auth.currentUser;
+    if (user) {
+      fetchCustomUserId();
+    }
+  }, []);
 
   const handleAvatarChange = (event) => {
     const file = event.target.files?.[0];
@@ -299,7 +367,12 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row items-end gap-6">
               {/* Avatar */}
               <div className="relative">
-                <img src={profileData.avatar} alt={profileData.name} className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover justify-center flex items-center " />
+                <InitialsAvatar 
+                  firstName={firstName}
+                  lastName={lastName}
+                  size={128}
+                  className="w-32 h-32 border-4 border-white shadow-lg"
+                />
                  <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-slate-100 transition-colors">

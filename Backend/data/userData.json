@@ -1,0 +1,170 @@
+{
+  "users": {
+    "USER_000003": {
+      "customUserId": "USER_000003",
+      "firebaseUid": "CACQmHkf6VWk5fJycVnDM8N8ITj1",
+      "profile": {
+        "name": "User new",
+        "email": "user@gmail.com",
+        "avatar": null,
+        "bio": null,
+        "location": null,
+        "website": null,
+        "userType": "student",
+        "title": null,
+        "createdAt": "2025-06-18T19:37:47.680Z",
+        "updatedAt": "2025-06-18T19:37:47.680Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "JavaScript",
+        "React",
+        "Node.js"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-18T19:37:47.680Z"
+      }
+    },
+    "USER_000002": {
+      "customUserId": "USER_000002",
+      "firebaseUid": "OYpJhDEO0mU9IU4Uq3uhHmcKTSr2",
+      "profile": {
+        "name": "User22 new",
+        "email": "user2@gmail.com",
+        "avatar": null,
+        "bio": "hi helo",
+        "location": "Jammu, Jammu And Kashmir",
+        "website": "NA",
+        "userType": "student",
+        "title": null,
+        "createdAt": "2025-06-18T19:52:25.996Z",
+        "updatedAt": "2025-06-18T22:19:59.243Z",
+        "college": "CUJ",
+        "degree": "Btech",
+        "course": "CSE",
+        "year": "3"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [
+          {
+            "productId": "17",
+            "name": "AI-Based Fraud Detection System",
+            "price": 3100,
+            "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80",
+            "addedAt": "2025-06-18T20:22:23.131Z",
+            "quantity": 1
+          }
+        ],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "Python",
+        "Machine Learning",
+        "Data Science",
+        "SQL",
+        "1234567",
+        "python",
+        "frontend"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-18T19:52:25.996Z"
+      },
+      "studentData": {
+        "college": "CUJ",
+        "degree": "Btech",
+        "course": "CSE",
+        "year": "3",
+        "updatedAt": "2025-06-18T22:19:59.243Z"
+      }
+    }
+  },
+  "userCounter": 5,
+  "metadata": {
+    "lastUpdated": "2025-06-18T22:46:27.752Z",
+    "version": "1.0.0",
+    "description": "User data storage with custom user IDs"
+  }
+}

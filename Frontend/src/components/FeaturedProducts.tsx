@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -21,7 +22,7 @@ import {
 
 export const FeaturedProducts: React.FC = () => {
   const [expanded, setExpanded] = useState<number | null>(null);
-
+  const navigate = useNavigate();
   const featuredProjects = [
     {
       id: 1,
@@ -385,6 +386,7 @@ export const FeaturedProducts: React.FC = () => {
         {/* Footer Button */}
         <div className="text-center mt-14">
           <Button
+            onClick={() => navigate("/marketplace")}
             size="lg"
             variant="outline"
             className="hover:scale-105 transition-all duration-300 border-blue-200 text-blue-700 font-semibold rounded-lg"

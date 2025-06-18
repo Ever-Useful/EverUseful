@@ -108,14 +108,14 @@ export const FilterSidebar = ({ onFiltersChange }: FilterSidebarProps) => {
   }, [debouncedPriceChange]);
 
 const categories = [
-  { name: "AI & ML", count: 245 },
-  { name: "Sustainable", count: 189 },
-  { name: "FinTech", count: 156 },
-  { name: "HealthTech", count: 134 },
-  { name: "EdTech", count: 98 },
-  { name: "IoT", count: 87 },
-  { name: "Blockchain", count: 76 },
-  { name: "Mobile", count: 234 }
+  { name: "AI & ML" },
+  { name: "Sustainable" },
+  { name: "FinTech" },
+  { name: "HealthTech" },
+  { name: "EdTech" },
+  { name: "IoT" },
+  { name: "Blockchain" },
+  { name: "Mobile" }
 ];
 
 
@@ -166,9 +166,6 @@ const durations = [
                     onCheckedChange={() => handleCategoryChange(category.name)}
                   />
                   <span>{category.name}</span>
-                  <Badge variant="outline" className="border-gray-500 text-gray-400 bg-transparent px-1 font-medium">
-                    {category.count}
-                  </Badge>
                 </label>
               ))}
             </div>

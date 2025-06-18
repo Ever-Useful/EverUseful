@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
 import { auth, db } from '@/lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { incrementFollowing } from '@/lib/stats';
+
 
 interface User {
   id: string;
@@ -54,7 +54,7 @@ const Collaborators = () => {
     }
 
     try {
-      await incrementFollowing(currentUser.uid);
+      // await incrementFollowing(currentUser.uid);
       toast.success('Connection request sent!');
     } catch (error) {
       console.error('Error connecting with user:', error);

@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { db } from '@/lib/firebase';
 import { doc, setDoc, collection, query, where, getDocs, addDoc, updateDoc, increment, orderBy } from 'firebase/firestore';
-import { incrementFollowing, incrementProjects } from '@/lib/stats';
+
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
@@ -27,7 +27,7 @@ import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import SuccessAnimation from './SuccessAnimation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { addActivity } from '@/lib/activities';
+
 
 interface User {
   id: string;
@@ -145,11 +145,11 @@ const QuickActions = () => {
       console.log('Updated user project count');
       
       // Add activity
-      await addActivity(
-        user.uid,
-        'project',
-        `Created new project: ${projectData.title}`
-      );
+      // await addActivity(
+      //   user.uid,
+      //   'project',
+      //   `Created new project: ${projectData.title}`
+      // );
       
       // Reset form data
       setProjectData({
@@ -215,7 +215,7 @@ const QuickActions = () => {
     }
 
     try {
-      await incrementFollowing(user.uid);
+      // await incrementFollowing(user.uid);
       toast.success('Connection request sent!');
     } catch (error) {
       console.error('Error connecting with user:', error);
@@ -263,11 +263,11 @@ const QuickActions = () => {
       await setDoc(meetingRef, meetingDataToSave);
       
       // Add activity
-      await addActivity(
-        user.uid,
-        'meeting',
-        `Scheduled new meeting: ${meetingData.title}`
-      );
+      // await addActivity(
+      //   user.uid,
+      //   'meeting',
+      //   `Scheduled new meeting: ${meetingData.title}`
+      // );
       
       // Reset form data
       setMeetingData({
