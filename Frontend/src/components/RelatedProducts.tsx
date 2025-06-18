@@ -137,6 +137,24 @@ export const RelatedProducts = () => {
           </Link>
         ))}
       </div>
+
+      {/* Navigation Buttons */}
+      <div className="flex justify-center gap-4 mt-6">
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Previous Slide"
+        >
+          <ArrowRight className="w-5 h-5 rotate-180" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Next Slide"
+        >
+          <ArrowRight className="w-5 h-5" />
+        </Button>
+      </div>
     </div>
   );
 };

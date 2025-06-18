@@ -3,7 +3,15 @@ import { Badge } from "@/components/ui/badge";
 import { Menu, X, Sparkles, ShoppingCart, User, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout } from "../lib/firebase";
+import { logout, auth } from "../lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -14,12 +22,24 @@ export const Header = () => {
       setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
     };
 
+    // Listen to Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsLoggedIn(true);
+        localStorage.setItem("isLoggedIn", "true");
+      } else {
+        setIsLoggedIn(false);
+        localStorage.removeItem("isLoggedIn");
+      }
+    });
+
     checkLogin();
 
     window.addEventListener("storage", checkLogin);
 
     return () => {
       window.removeEventListener("storage", checkLogin);
+      unsubscribe();
     };
   }, []);
 
@@ -37,9 +57,9 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-purple-200/50 bg-white/95 backdrop-blur-md shadow-sm">
-      <div className="container h-14 w-full flex items-center justify-between">
+      <div className="container h-14 w-full flex items-center justify-between px-4">
         {/* Logo */}
-        <div className="w-30 flex items-left space-x-2">
+        <div className="flex items-center space-x-2">
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-lg group-hover:scale-110 transition-all duration-300 shadow-md">
               <Sparkles className="w-5 h-5 text-white" />
@@ -73,10 +93,21 @@ export const Header = () => {
           <Link to="/aboutus" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium hover:scale-105 transform duration-200">
             About Us
           </Link>
+          <Button 
+            variant="ghost" 
+            className="text-2xl hover:scale-110 transition-all duration-300 bg-white rounded-full p-2 shadow-lg hover:shadow-xl hover:bg-gradient-to-r hover:from-red-500 hover:via-yellow-500 hover:via-green-500 hover:via-blue-500 hover:to-purple-500"
+            asChild
+          >
+            <Link to="/aiagents">
+              <span className="bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent hover:text-white transition-all duration-300">
+                🤖
+              </span>
+            </Link>
+          </Button>
         </nav>
 
         {/* Right-aligned Buttons */}
-        <div className="hidden w-30 md:flex items-right space-x-3">
+        <div className="hidden md:flex items-center space-x-3 ml-auto">
           {!isLoggedIn ? (
             <>
               <Button variant="ghost" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base" asChild>
@@ -91,19 +122,27 @@ export const Header = () => {
               <Button variant="ghost" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base" asChild>
                 <Link to="/cart">
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  Cart
                 </Link>
               </Button>
-              <Button variant="ghost" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base" asChild>
-                <Link to="/profile">
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
-                </Link>
-              </Button>
-              <Button variant="ghost" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base">
+                    <User className="w-4 h-4 mr-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-36 border-0 shadow-lg">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center cursor-pointer">
+                      <User className="w-4 h-4 mr-2" />
+                      View Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="flex items-center cursor-pointer">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           )}
         </div>
@@ -125,6 +164,10 @@ export const Header = () => {
             <Link to="/freelancing" className="text-slate-600 hover:text-purple-500 transition-colors font-medium">Work</Link>
             <Link to="/sustainable" className="text-slate-600 hover:text-emerald-500 transition-colors font-medium">Green</Link>
             <Link to="/community" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium">Connect</Link>
+            <Link to="/aiagents" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium flex items-center">
+              <span className="text-2xl mr-2">🤖</span>
+              AI Agents
+            </Link>
 
             <div className="flex flex-col space-y-2 pt-4">
               {!isLoggedIn ? (

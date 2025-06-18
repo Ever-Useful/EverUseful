@@ -22,12 +22,9 @@ const RecentActivity = () => {
 
   useEffect(() => {
     if (!user) {
-      console.log('No user found in RecentActivity');
       setLoading(false);
       return;
     }
-
-    console.log('Setting up activities listener for user:', user.uid);
 
     // Query activities for the current user
     const q = query(
@@ -39,12 +36,8 @@ const RecentActivity = () => {
     // Set up real-time listener
     const unsubscribe = onSnapshot(q, 
       (snapshot) => {
-        console.log('Received activities update. Changes:', snapshot.docChanges().length);
-        console.log('Total activities:', snapshot.docs.length);
-        
         const activitiesData = snapshot.docs.map(doc => {
           const data = doc.data();
-          console.log('Activity data:', data);
           return {
             id: doc.id,
             type: data.type,
@@ -55,12 +48,10 @@ const RecentActivity = () => {
           };
         });
         
-        console.log('Processed activities data:', activitiesData);
         setActivities(activitiesData);
         setLoading(false);
       },
       (error) => {
-        console.error('Error in activities listener:', error);
         if (error.code === 'failed-precondition') {
           toast.error('Activities are being indexed. Please try again in a few minutes.');
         } else {
@@ -72,7 +63,6 @@ const RecentActivity = () => {
 
     // Cleanup subscription
     return () => {
-      console.log('Cleaning up activities listener');
       unsubscribe();
     };
   }, [user]);
@@ -128,7 +118,6 @@ const RecentActivity = () => {
       
       toast.success('Activities cleared successfully');
     } catch (error) {
-      console.error('Error clearing activities:', error);
       toast.error('Failed to clear activities');
     }
   };

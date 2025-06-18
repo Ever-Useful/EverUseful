@@ -9,22 +9,30 @@ import { UpcomingPhase } from "@/components/UpcomingPhase";
 import { WhatWeProvide } from "@/components/WhatWeProvide";
 import { Footer } from "@/components/Footer";
 import { Chatbot } from "@/components/Chatbot";
+import { lazy, Suspense } from "react";
+
+// Lazy load heavy components
+const LazyChatbot = lazy(() => import("@/components/Chatbot").then(module => ({ default: module.Chatbot })));
 
 // import { FreelancingPreview } from "@/components/FreelancingPreview";
 
 const Index = () => {
   return (
-    <div className="relative min-h-screen overflow-hidden transform-gpu">
-      {/* Rotating Conic-Gradient Background */}
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Optimized Background - Static gradient instead of animated */}
       <div
-        className="fixed inset-0 -z-10 bg-[conic-gradient(from_0deg_at_50%_50%,_rgb(10,25,47),_rgb(22,60,107),_rgb(10,25,47))] opacity-80 animate-spin-slow"
-        style={{ animationDuration: "30s" }}
+        className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
+        style={{
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%)'
+        }}
       />
 
-      {/* Scanline Overlay */}
+      {/* Simplified scanline overlay - reduced opacity and removed animation */}
       <div
-        className="fixed inset-0 -z-10 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.03),rgba(255,255,255,0.03)_1px,transparent_1px,transparent_2px)] animate-scroll-vertical"
-        style={{ animationDuration: "4s" }}
+        className="fixed inset-0 -z-10 opacity-5"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1) 1px, transparent 1px, transparent 2px)'
+        }}
       />
 
       {/* Main content */}
@@ -41,7 +49,11 @@ const Index = () => {
       <UpcomingPhase />
       <WhatWeProvide />
       <Footer />
-      <Chatbot />
+      
+      {/* Lazy load chatbot */}
+      <Suspense fallback={null}>
+        <LazyChatbot />
+      </Suspense>
     </div>
   );
 };

@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Code, Database, Globe, Smartphone, Palette, Wrench, Plus, X, Star } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { addActivity } from '@/lib/activities';
-import { auth } from '@/lib/firebase';
+
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { toast } from 'react-hot-toast';
+import { userService } from "@/services/userService";
 
 interface Skill {
   name: string;
   expertise: 'Beginner' | 'Intermediate' | 'Expert';
   category: string;
 }
-
 interface SkillCategory {
   title: string;
   icon: React.ReactNode;
@@ -22,13 +23,10 @@ interface SkillCategory {
 }
 
 const SkillsSection = () => {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [newSkill, setNewSkill] = useState<{
-    name: string;
-    expertise: 'Beginner' | 'Intermediate' | 'Expert';
-    category: string;
-  }>({ name: '', expertise: 'Beginner', category: '' });
-  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState('');
+  const [showAddInput, setShowAddInput] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const skillCategories: SkillCategory[] = [
     {
@@ -63,30 +61,148 @@ const SkillsSection = () => {
     }
   ];
 
-  const handleAddSkill = () => {
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Check if user is authenticated first
+        const user = auth.currentUser;
+        if (!user) {
+          console.log('User not authenticated, skipping skills fetch');
+          setSkills([]);
+          return;
+        }
+        
+        // Load from backend using token-based authentication
+        try {
+          const backendSkills = await userService.getUserSkills();
+          if (backendSkills && Array.isArray(backendSkills)) {
+            setSkills(backendSkills);
+          } else {
+            setSkills([]);
+          }
+        } catch (backendError) {
+          console.error('Failed to load backend skills:', backendError);
+          
+          // Fallback to Firestore if backend fails
+          try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              const firestoreSkills = userData.skills || [];
+              setSkills(firestoreSkills);
+            } else {
+              setSkills([]);
+            }
+          } catch (firestoreError) {
+            console.error('Failed to load Firestore skills:', firestoreError);
+            setSkills([]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load skills:', error);
+        toast.error('Failed to load skills');
+        setSkills([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchSkills();
+  }, []);
+
+  const handleAddSkill = async (skillName: string) => {
+    if (!skillName.trim()) {
+      toast.error('Please enter a skill name');
+      return;
+    }
+    
+    // Check if user is authenticated
     const user = auth.currentUser;
     if (!user) {
       toast.error('Please sign in to add skills');
       return;
     }
-
-    if (newSkill.name && newSkill.category) {
-      setSkills([...skills, newSkill]);
-      
-      // Add activity
-      addActivity(
-        user.uid,
-        'skill',
-        `Added new skill: ${newSkill.name} (${newSkill.expertise})`
-      );
-
-      setNewSkill({ name: '', expertise: 'Beginner', category: '' });
-      setShowAddDialog(false);
+    
+    try {
+      // Add to backend using token-based authentication
+      try {
+        await userService.addSkill({ name: skillName });
+        
+        // Update local state
+        setSkills(prev => [...prev, skillName]);
+        toast.success('Skill added successfully!');
+      } catch (backendError) {
+        console.error('Failed to add skill to backend:', backendError);
+        
+        // Fallback to Firestore if backend fails
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        let currentSkills: string[] = [];
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          currentSkills = userData.skills || [];
+        }
+        
+        // Add skill if not already present
+        if (!currentSkills.includes(skillName)) {
+          const updatedSkills = [...currentSkills, skillName];
+          await updateDoc(doc(db, "users", user.uid), {
+            skills: updatedSkills,
+            updatedAt: new Date().toISOString()
+          });
+          
+          setSkills(updatedSkills);
+          toast.success('Skill added successfully!');
+        } else {
+          toast.error('Skill already exists');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to add skill:', error);
+      toast.error('Failed to add skill');
     }
   };
 
-  const handleRemoveSkill = (index: number) => {
-    setSkills(skills.filter((_, i) => i !== index));
+  const handleRemoveSkill = async (skillName: string) => {
+    const user = auth.currentUser;
+    if (!user) {
+      toast.error('Please sign in to remove skills');
+      return;
+    }
+    
+    try {
+      // Remove from backend using token-based authentication
+      try {
+        await userService.deleteSkill(skillName);
+        
+        // Update local state
+        setSkills(prev => prev.filter(skill => skill !== skillName));
+        toast.success('Skill removed successfully');
+      } catch (backendError) {
+        console.error('Failed to remove skill from backend:', backendError);
+        
+        // Fallback to Firestore if backend fails
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const currentSkills = userData.skills || [];
+          const updatedSkills = currentSkills.filter(skill => skill !== skillName);
+          
+          await updateDoc(doc(db, "users", user.uid), {
+            skills: updatedSkills,
+            updatedAt: new Date().toISOString()
+          });
+          
+          setSkills(updatedSkills);
+          toast.success('Skill removed successfully');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to remove skill:', error);
+      toast.error('Failed to remove skill');
+    }
   };
 
   const getExpertiseColor = (expertise: string) => {
@@ -115,124 +231,68 @@ const SkillsSection = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-lg border p-6 space-y-6 relative" style={{ minHeight: '180px', height: '300px' }}>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-card-foreground">Skills & Expertise</h2>
+          <Button variant="outline" size="sm" className="gap-2" disabled>
+            <Plus className="w-4 h-4" />
+            Add Skill
+          </Button>
+        </div>
+        <div className="flex items-center justify-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-card rounded-lg border p-6 space-y-6">
+    <div className="bg-card rounded-lg border p-6 space-y-6 relative" style={{ minHeight: '180px', height: '300px' }}>
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-card-foreground">Skills & Expertise</h2>
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Plus className="w-4 h-4" />
-              Add Skill
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Skill</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Skill Name</label>
-                <Input
-                  value={newSkill.name}
-                  onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
-                  placeholder="e.g., React, Python, UI/UX"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Category</label>
-                <Select
-                  value={newSkill.category}
-                  onValueChange={(value) => setNewSkill({ ...newSkill, category: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {skillCategories.map((category) => (
-                      <SelectItem key={category.title} value={category.title}>
-                        <div className="flex items-center gap-2">
-                          {category.icon}
-                          <span>{category.title}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Expertise Level</label>
-                <Select
-                  value={newSkill.expertise}
-                  onValueChange={(value: 'Beginner' | 'Intermediate' | 'Expert') => 
-                    setNewSkill({ ...newSkill, expertise: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select expertise level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Beginner">Beginner</SelectItem>
-                    <SelectItem value="Intermediate">Intermediate</SelectItem>
-                    <SelectItem value="Expert">Expert</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddSkill}>
-                Add Skill
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAddInput((v) => !v)}>
+          <Plus className="w-4 h-4" />
+          Add Skill
+        </Button>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {skillCategories.map((category) => {
-          const categorySkills = skills.filter(skill => skill.category === category.title);
-          if (categorySkills.length === 0) return null;
-
-          return (
-            <div key={category.title} className="space-y-4 animate-fade-in">
-              <div className="flex items-center gap-2 mb-3">
-                <div className={`p-2 rounded-lg bg-gradient-to-r ${category.color} text-white`}>
-                  {category.icon}
-                </div>
-                <h3 className="font-medium text-card-foreground">{category.title}</h3>
-              </div>
-              
-              <div className="flex flex-wrap gap-2">
-                {categorySkills.map((skill, index) => (
-                  <Badge
-                    key={index}
-                    variant="outline"
-                    className={`${getExpertiseColor(skill.expertise)} flex items-center gap-1 group`}
-                  >
-                    {getExpertiseIcon(skill.expertise)}
-                    <span>{skill.name}</span>
-                    <button
-                      onClick={() => handleRemoveSkill(index)}
-                      className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {skills.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          <Code className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p>No skills added yet. Click "Add Skill" to get started!</p>
+      {showAddInput && (
+        <div className="flex gap-2 items-center mt-3 absolute left-0 right-0 px-6" style={{ top: 56, zIndex: 10 }}>
+          <Input
+            value={newSkill}
+            onChange={(e) => setNewSkill(e.target.value)}
+            placeholder="e.g., React, Python, UI/UX"
+            className="flex-1 min-w-[200px]"
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleAddSkill(newSkill);
+                setShowAddInput(false);
+                setNewSkill('');
+              }
+            }}
+          />
+          <Button style={{ minWidth: '70px' }} className="ml-auto" onClick={() => { handleAddSkill(newSkill); setShowAddInput(false); setNewSkill(''); }}>
+            Add
+          </Button>
         </div>
       )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-wrap gap-2">
+          {skills.length === 0 && (
+            <div className="text-gray-400 text-center w-full">No skills added yet. Click "Add Skill" to get started!</div>
+          )}
+          {skills.map((skill, idx) => (
+            <span key={idx} className="inline-flex items-center bg-gray-100 text-gray-800 rounded-full px-3 py-1 text-sm font-medium">
+              {skill}
+              <button className="ml-2 text-gray-500 hover:text-red-500" onClick={() => handleRemoveSkill(skill)}>
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

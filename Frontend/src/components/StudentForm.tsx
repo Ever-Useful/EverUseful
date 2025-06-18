@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useProfileStore, StudentProfile } from '@/hooks/useProfileStore';
 import { auth, db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 
 interface StudentFormProps {
@@ -15,10 +15,12 @@ interface StudentFormProps {
 
 const StudentForm = ({ onComplete }: StudentFormProps) => {
   const { profile, setProfile, updateProfile } = useProfileStore();
+  const [isLoading, setIsLoading] = useState(true);
   
   const [formData, setFormData] = useState<Omit<StudentProfile, 'projects'>>({
     userType: 'student',
     name: '',
+    lastName: '',
     bio: '',
     avatar: '',
     college: '',
@@ -30,20 +32,63 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
   });
 
   useEffect(() => {
-    if (profile?.userType === 'student') {
-      setFormData({
-        userType: 'student',
-        name: profile.name,
-        bio: profile.bio,
-        avatar: profile.avatar,
-        college: profile.college,
-        degree: profile.degree,
-        course: profile.course,
-        year: profile.year,
-        location: profile.location,
-        website: profile.website
-      });
-    }
+    const loadUserData = async () => {
+      try {
+        // Load data from Firestore (name and lastName)
+        if (profile?.userType === 'student') {
+          const user = auth.currentUser;
+          if (user) {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              
+              // Load data from backend (other student details)
+              const userService = (await import('@/services/userService')).userService;
+              try {
+                const backendData = await userService.getUserProfile();
+                
+                setFormData({
+                  userType: 'student',
+                  name: userData.name || '',
+                  lastName: userData.lastName || '',
+                  bio: backendData.profile?.bio || '',
+                  avatar: userData.avatar || '',
+                  college: backendData.studentData?.college || '',
+                  degree: backendData.studentData?.degree || '',
+                  course: backendData.studentData?.course || '',
+                  year: backendData.studentData?.year || '',
+                  location: backendData.profile?.location || '',
+                  website: backendData.profile?.website || ''
+                });
+              } catch (backendError) {
+                console.error('Failed to load backend data:', backendError);
+                // Fallback to Firestore data only
+                setFormData({
+                  userType: 'student',
+                  name: userData.name || '',
+                  lastName: userData.lastName || '',
+                  bio: userData.bio || '',
+                  avatar: userData.avatar || '',
+                  college: userData.college || '',
+                  degree: userData.degree || '',
+                  course: userData.course || '',
+                  year: userData.year || '',
+                  location: userData.location || '',
+                  website: userData.website || ''
+                });
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        toast.error('Failed to load profile data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
   }, [profile]);
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
@@ -59,18 +104,40 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
         throw new Error("No user logged in");
       }
 
+      // Split the name into first and last name for Firestore
+      const nameParts = formData.name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // Update Firestore with first and last name
+      await updateDoc(doc(db, "users", user.uid), {
+        name: formData.name,
+        lastName: lastName,
+        updatedAt: new Date().toISOString()
+      });
+
+      // Prepare data for backend (excluding first/last name)
+      const backendProfileData = {
+        bio: formData.bio,
+        college: formData.college,
+        degree: formData.degree,
+        course: formData.course,
+        year: formData.year,
+        location: formData.location,
+        website: formData.website,
+        userType: formData.userType
+      };
+
+      // Update backend with other details
+      const userService = (await import('@/services/userService')).userService;
+      await userService.updateProfile(backendProfileData);
+
+      // Update local state
       const studentProfile: StudentProfile = {
         ...formData,
         projects: profile?.userType === 'student' ? profile.projects : []
       };
 
-      // Update Firestore
-      await updateDoc(doc(db, "users", user.uid), {
-        ...formData,
-        updatedAt: new Date().toISOString()
-      });
-
-      // Update local state
       if (profile) {
         updateProfile(studentProfile);
       } else {
@@ -85,6 +152,19 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-8 py-12">
+        <Card className="p-8 shadow-lg">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading profile data...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-8 py-12">
       <Card className="p-8 shadow-lg">
@@ -93,23 +173,24 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="name">Full Name *</Label>
+              <Label htmlFor="name">First Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 required
-                placeholder="Enter your full name"
+                placeholder="Enter your first name"
               />
             </div>
             
             <div>
-              <Label htmlFor="avatar">Avatar Image URL</Label>
+              <Label htmlFor="lastName">Last Name *</Label>
               <Input
-                id="avatar"
-                value={formData.avatar}
-                onChange={(e) => handleInputChange('avatar', e.target.value)}
-                placeholder="https://example.com/avatar.jpg"
+                id="lastName"
+                value={formData.lastName}
+                onChange={(e) => handleInputChange('lastName', e.target.value)}
+                required
+                placeholder="Enter your last name"
               />
             </div>
           </div>

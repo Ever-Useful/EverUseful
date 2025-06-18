@@ -35,6 +35,7 @@ export interface BaseProfile {
 
 export interface StudentProfile extends BaseProfile {
   userType: 'student';
+  lastName: string;
   college: string;
   degree: string;
   course: string;
