@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
 
 // HERO SECTION DATA
 const heroFeatures = [
@@ -269,6 +271,7 @@ const Work: React.FC = () => {
   return (
     <main className="w-full min-h-screen bg-white">
       {/* HERO SECTION */}
+      <Header />
       <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1600&q=80"
@@ -624,6 +627,7 @@ const Work: React.FC = () => {
           </motion.button>
         </div>
       </section>
+      <Footer />
     </main>
   );
 };
