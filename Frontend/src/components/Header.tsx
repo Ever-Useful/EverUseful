@@ -87,7 +87,7 @@ export const Header = () => {
           <Link to="/sustainable" className="text-slate-600 hover:text-emerald-500 transition-colors font-medium hover:scale-105 transform duration-200">
             Green
           </Link>
-          <Link to="/community" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium hover:scale-105 transform duration-200">
+          <Link to="/connect" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium hover:scale-105 transform duration-200">
             Connect
           </Link>
           <Link to="/aboutus" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium hover:scale-105 transform duration-200">
@@ -99,8 +99,8 @@ export const Header = () => {
             asChild
           >
             <Link to="/aiagents">
-              <span className="bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent hover:text-white transition-all duration-300">
-                🤖
+              <span className="text-base font-medium bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent hover:text-white transition-all duration-300">
+                🤖 Agents
               </span>
             </Link>
           </Button>
@@ -169,7 +169,7 @@ export const Header = () => {
             <Link to="/marketplace" className="text-slate-600 hover:text-blue-500 transition-colors font-medium">Market</Link>
             <Link to="/freelancing" className="text-slate-600 hover:text-purple-500 transition-colors font-medium">Work</Link>
             <Link to="/sustainable" className="text-slate-600 hover:text-emerald-500 transition-colors font-medium">Green</Link>
-            <Link to="/community" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium">Connect</Link>
+            <Link to="/connect" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium">Connect</Link>
             <Link to="/aiagents" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium flex items-center">
               <span className="text-2xl mr-2">🤖</span>
               AI Agents
