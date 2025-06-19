@@ -137,6 +137,12 @@ export const Header = () => {
                       View Profile
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="flex items-center cursor-pointer">
+                      <span className="w-4 h-4 mr-2">📊</span>
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout} className="flex items-center cursor-pointer">
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout

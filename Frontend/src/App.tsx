@@ -25,7 +25,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import About from '@/pages/AboutUs';
 import Dashboard from "./pages/Dashboard";
 import AiAgents from "./pages/AiAgents";
-
+import FindExpert from "./pages/FindExpert";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +57,7 @@ const App = () => (
             <Route path="/paymentSuccess" element={<PaymentSuccess />} />
             <Route path="/aboutus" element={<About />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/findexpert" element={<FindExpert />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -65,5 +66,5 @@ const App = () => (
     </QueryClientProvider>
   </AuthProvider>
 );
-
+//testing
 export default App;

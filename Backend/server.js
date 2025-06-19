@@ -27,7 +27,7 @@ app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/users', userRoutes);
 
 app.get('/token', authorize, async (req, res) => {
-  const { uid, name, email, picture, firebase } = req.user;
+  const { uid, name, email, phone_number, firebase } = req.user;
 
   try {
     if (!uid) throw new Error("Missing UID from Firebase token");
@@ -38,25 +38,28 @@ app.get('/token', authorize, async (req, res) => {
     if (!userSnap.exists) {
       // Create custom user ID and save to both Firestore and userData.json
       const customUserId = await userService.generateCustomUserId();
-      
-      // Save to Firestore
+
+      // Parse firstName and lastName from name if available
+      let firstName = null;
+      let lastName = null;
+      if (name) {
+        const nameParts = name.split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
+      }
+
+      // Save to Firestore (minimal fields only)
       await userRef.set({
         customUserId: customUserId,
-        name: name ?? 'Anonymous',
+        firstName: firstName ?? '',
+        lastName: lastName ?? '',
+        phoneNumber: phone_number ?? '',
         email: email ?? 'no-email@example.com',
-        photo: picture ?? '',
-        provider: firebase?.sign_in_provider ?? 'unknown',
         userType: 'student', // Default userType for GET requests
-        createdAt: new Date().toISOString()
       });
 
       // Create user in userData.json
-      await userService.createUser(uid, {
-        name: name ?? 'Anonymous',
-        email: email ?? 'no-email@example.com',
-        avatar: picture ?? '',
-        userType: 'student'
-      });
+      await userService.createUser(uid, {}); // No name/email/userType/avatar
 
       console.log("New user created with custom ID:", customUserId);
     } else {
@@ -71,8 +74,8 @@ app.get('/token', authorize, async (req, res) => {
 });
 
 app.post('/token', authorize, async (req, res) => {
-  const { uid, name, email, picture, firebase } = req.user;
-  const { userType, firstName, lastName } = req.body;
+  const { uid, name, email, phone_number, firebase } = req.user;
+  const { userType, firstName, lastName, phoneNumber } = req.body;
 
   try {
     if (!uid) throw new Error("Missing UID from Firebase token");
@@ -83,39 +86,40 @@ app.post('/token', authorize, async (req, res) => {
     if (!userSnap.exists) {
       // Create custom user ID
       const customUserId = await userService.generateCustomUserId();
-      
-      // Create full name from firstName and lastName if provided, otherwise use Firebase token name
-      const fullName = firstName && lastName 
-        ? `${firstName} ${lastName}`.trim()
-        : name ?? 'Anonymous';
 
-      // Save to Firestore
+      // Use provided firstName/lastName or parse from name
+      let resolvedFirstName = firstName;
+      let resolvedLastName = lastName;
+      if ((!firstName || !lastName) && name) {
+        const nameParts = name.split(' ');
+        resolvedFirstName = resolvedFirstName || nameParts[0] || '';
+        resolvedLastName = resolvedLastName || nameParts.slice(1).join(' ') || '';
+      }
+
+      // Save to Firestore (minimal fields only)
       await userRef.set({
         customUserId: customUserId,
-        name: fullName,
+        firstName: resolvedFirstName ?? '',
+        lastName: resolvedLastName ?? '',
+        phoneNumber: phoneNumber ?? phone_number ?? '',
         email: email ?? 'no-email@example.com',
-        photo: picture ?? '',
-        provider: firebase?.sign_in_provider ?? 'unknown',
-        userType: userType ?? 'student', // Use provided userType or default
-        createdAt: new Date().toISOString()
+        userType: userType ?? 'student',
       });
 
       // Create user in userData.json
-      await userService.createUser(uid, {
-        name: fullName,
-        email: email ?? 'no-email@example.com',
-        avatar: picture ?? '',
-        userType: userType ?? 'student'
-      });
+      await userService.createUser(uid, {}); // No name/email/userType/avatar
 
-      console.log("New user created with custom ID:", customUserId, "userType:", userType, "name:", fullName);
+      console.log("New user created with custom ID:", customUserId, "userType:", userType, "firstName:", resolvedFirstName, "lastName:", resolvedLastName);
     } else {
-      // Update existing user's userType if provided
-      if (userType) {
-        await userRef.update({
-          userType: userType
-        });
-        console.log("Updated userType for existing user:", email ?? uid, "to:", userType);
+      // Update existing user's userType, firstName, lastName, phoneNumber if provided
+      const updateFields = {};
+      if (userType) updateFields.userType = userType;
+      if (firstName) updateFields.firstName = firstName;
+      if (lastName) updateFields.lastName = lastName;
+      if (phoneNumber) updateFields.phoneNumber = phoneNumber;
+      if (Object.keys(updateFields).length > 0) {
+        await userRef.update(updateFields);
+        console.log("Updated user fields for existing user:", email ?? uid, updateFields);
       } else {
         console.log("Existing user logged in:", email ?? uid);
       }

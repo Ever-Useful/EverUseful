@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useProfileStore, StudentProfile } from '@/hooks/useProfileStore';
 import { auth, db } from "@/lib/firebase";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc, deleteField } from "firebase/firestore";
 import toast from "react-hot-toast";
 
 interface StudentFormProps {
@@ -16,10 +16,12 @@ interface StudentFormProps {
 const StudentForm = ({ onComplete }: StudentFormProps) => {
   const { profile, setProfile, updateProfile } = useProfileStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   
   const [formData, setFormData] = useState<Omit<StudentProfile, 'projects'>>({
     userType: 'student',
     name: '',
+    firstName: '',
     lastName: '',
     bio: '',
     avatar: '',
@@ -34,49 +36,53 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        // Load data from Firestore (name and lastName)
+        // Load data from Firestore (firstName and lastName)
         if (profile?.userType === 'student') {
           const user = auth.currentUser;
           if (user) {
             const userDoc = await getDoc(doc(db, "users", user.uid));
+            let firstName = '';
+            let lastName = '';
             if (userDoc.exists()) {
               const userData = userDoc.data();
-              
-              // Load data from backend (other student details)
-              const userService = (await import('@/services/userService')).userService;
-              try {
-                const backendData = await userService.getUserProfile();
-                
-                setFormData({
-                  userType: 'student',
-                  name: userData.name || '',
-                  lastName: userData.lastName || '',
-                  bio: backendData.profile?.bio || '',
-                  avatar: userData.avatar || '',
-                  college: backendData.studentData?.college || '',
-                  degree: backendData.studentData?.degree || '',
-                  course: backendData.studentData?.course || '',
-                  year: backendData.studentData?.year || '',
-                  location: backendData.profile?.location || '',
-                  website: backendData.profile?.website || ''
-                });
-              } catch (backendError) {
-                console.error('Failed to load backend data:', backendError);
-                // Fallback to Firestore data only
-                setFormData({
-                  userType: 'student',
-                  name: userData.name || '',
-                  lastName: userData.lastName || '',
-                  bio: userData.bio || '',
-                  avatar: userData.avatar || '',
-                  college: userData.college || '',
-                  degree: userData.degree || '',
-                  course: userData.course || '',
-                  year: userData.year || '',
-                  location: userData.location || '',
-                  website: userData.website || ''
-                });
-              }
+              firstName = userData.firstName || '';
+              lastName = userData.lastName || '';
+            }
+            // Load data from backend (other student details)
+            const userService = (await import('@/services/userService')).userService;
+            try {
+              const backendData = await userService.getUserProfile();
+              setFormData({
+                userType: 'student',
+                name: '',
+                firstName,
+                lastName,
+                bio: backendData.profile?.bio || '',
+                avatar: backendData.profile?.avatar || '',
+                college: backendData.studentData?.college || '',
+                degree: backendData.studentData?.degree || '',
+                course: backendData.studentData?.course || '',
+                year: backendData.studentData?.year || '',
+                location: backendData.profile?.location || '',
+                website: backendData.profile?.website || ''
+              });
+            } catch (backendError) {
+              console.error('Failed to load backend data:', backendError);
+              // Fallback to Firestore data only
+              setFormData({
+                userType: 'student',
+                name: '',
+                firstName,
+                lastName,
+                bio: '',
+                avatar: '',
+                college: '',
+                degree: '',
+                course: '',
+                year: '',
+                location: '',
+                website: ''
+              });
             }
           }
         }
@@ -97,26 +103,18 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setSaving(true);
     try {
       const user = auth.currentUser;
       if (!user) {
         throw new Error("No user logged in");
       }
-
-      // Split the name into first and last name for Firestore
-      const nameParts = formData.name.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-
-      // Update Firestore with first and last name
       await updateDoc(doc(db, "users", user.uid), {
-        name: formData.name,
-        lastName: lastName,
-        updatedAt: new Date().toISOString()
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        updatedAt: new Date().toISOString(),
+        name: deleteField()
       });
-
-      // Prepare data for backend (excluding first/last name)
       const backendProfileData = {
         bio: formData.bio,
         college: formData.college,
@@ -127,28 +125,24 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
         website: formData.website,
         userType: formData.userType
       };
-
-      // Update backend with other details
       const userService = (await import('@/services/userService')).userService;
       await userService.updateProfile(backendProfileData);
-
-      // Update local state
       const studentProfile: StudentProfile = {
         ...formData,
         projects: profile?.userType === 'student' ? profile.projects : []
       };
-
       if (profile) {
         updateProfile(studentProfile);
       } else {
         setProfile(studentProfile);
       }
-
       toast.success("Profile updated successfully");
       onComplete();
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -173,11 +167,11 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="name">First Name *</Label>
+              <Label htmlFor="firstName">First Name *</Label>
               <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                id="firstName"
+                value={formData.firstName}
+                onChange={(e) => handleInputChange('firstName', e.target.value)}
                 required
                 placeholder="Enter your first name"
               />
@@ -278,8 +272,12 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              Save Changes
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={saving}>
+              {saving ? (
+                <span className="flex items-center"><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>Saving...</span>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </div>
         </form>
