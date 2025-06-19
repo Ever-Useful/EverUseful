@@ -23,16 +23,19 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useProfileStore } from "@/hooks/useProfileStore";
 import YourMeetings from '@/components/YourMeetings';
 import { firestoreService } from "@/services/firestoreService";
+import { userService } from '@/services/userService';
+import { onAuthStateChanged } from "firebase/auth";
 
 const Profile = () => {
   const [backgroundImage, setBackgroundImage] = useState(
     "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
   );
   const [profileData, setProfileData] = useState({
-    name: "",
-    title: "",
-    bio: "",
-    avatar: "",
+    firstName: '',
+    lastName: '',
+    userType: '',
+    bio: '',
+    avatar: '',
   });
   const [stats, setStats] = useState({
     followers: 0,
@@ -52,62 +55,42 @@ const Profile = () => {
   const [imageSrc, setImageSrc] = useState(null);
   const [showCropper, setShowCropper] = useState(false);
   const [customUserId, setCustomUserId] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // Extract first and last name from full name
-  const getFirstAndLastName = (fullName: string) => {
-    const nameParts = fullName.trim().split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
-    return { firstName, lastName };
+  const fetchUserData = async () => {
+    try {
+      const userProfile = await userService.getUserProfile();
+      const { auth, profile } = userProfile;
+      setProfileData({
+        firstName: auth.firstName || '',
+        lastName: auth.lastName || '',
+        userType: auth.userType ? auth.userType.charAt(0).toUpperCase() + auth.userType.slice(1) : '',
+        bio: profile.bio || 'No bio available',
+        avatar: profile.avatar || '',
+      });
+      // Optionally set stats if available
+      if (userProfile.stats) {
+        setStats({
+          followers: userProfile.stats.followersCount || 0,
+          following: userProfile.stats.followingCount || 0,
+          projects: userProfile.stats.projectsCount || 0,
+          likes: userProfile.stats.totalLikes || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      toast.error('Failed to load profile data');
+    }
   };
 
-  const { firstName, lastName } = getFirstAndLastName(profileData.name);
-
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const user = auth.currentUser;
-    if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          let name = "";
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            name = userData.name || user.displayName || "";
-            setProfileData({
-              name: name || user.displayName || user.email?.split('@')[0] || "User",
-              title: userData.userType || userData.title || "Member",
-              bio: userData.bio || "No bio available",
-              avatar: userData.photo || user.photoURL || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
-            });
-
-            // Initialize or fetch stats
-            const userStats = userData.stats || {
-              followers: 0,
-              following: 0,
-              projects: 0,
-              likes: 0
-            };
-            setStats(userStats);
-
-            // If stats don't exist, initialize them
-            if (!userData.stats) {
-              await updateDoc(doc(db, "users", user.uid), {
-                stats: userStats
-              });
-            }
-          } else {
-            // If no userDoc, use displayName or email prefix
-            name = user.displayName || user.email?.split('@')[0] || "User";
-            setProfileData((prev) => ({ ...prev, name }));
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        toast.error("Failed to load profile data");
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchUserData();
       }
-    };
-
-    fetchUserData();
+      setLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -273,6 +256,11 @@ const Profile = () => {
   //   icon: Mail
   // }]);
  
+  // Show loading spinner or skeleton while waiting for auth
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
   return (
   
   <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -368,8 +356,8 @@ const Profile = () => {
               {/* Avatar */}
               <div className="relative">
                 <InitialsAvatar 
-                  firstName={firstName}
-                  lastName={lastName}
+                  firstName={profileData.firstName}
+                  lastName={profileData.lastName}
                   size={128}
                   className="w-32 h-32 border-4 border-white shadow-lg"
                 />
@@ -405,14 +393,9 @@ const Profile = () => {
               {/* Profile Text */}
               {/* Profile Text */}
               <div className="flex-1 text-white">
-                <h1 className="text-4xl font-bold mb-2 drop-shadow-lg flex items-center mb-1.5 ">{profileData.name}</h1>
-                <p className="text-xl text-slate-200 drop-shadow-md">{profileData.title}</p>
+                <h1 className="text-4xl font-bold mb-2 drop-shadow-lg flex items-center mb-1.5 ">{`${profileData.firstName} ${profileData.lastName}`.trim()}</h1>
+                <p className="text-xl text-slate-200 drop-shadow-md">{profileData.userType}</p>
                 <div className="mt-4 w-[280px] flex flex-row justify-between">
-                  <Link to="/dashboard">
-                    <Button variant="secondary" size="sm">
-                      Dashboard
-                    </Button>
-                  </Link>
                   <Link to="/EditProfile">
                     <Button variant="secondary" size="sm">
                       Edit Profile

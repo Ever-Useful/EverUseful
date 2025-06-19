@@ -3,13 +3,10 @@ import { auth } from '../lib/firebase';
 const API_BASE_URL = 'http://localhost:3000/api/users';
 
 interface UserProfile {
-  name: string;
-  email: string;
   avatar: string;
   bio: string;
   location: string;
   website: string;
-  userType: string;
   title: string;
   createdAt: string;
   updatedAt: string;
@@ -26,7 +23,6 @@ interface UserStats {
 
 interface UserData {
   customUserId: string;
-  firebaseUid: string;
   profile: UserProfile;
   stats: UserStats;
   studentData?: {
@@ -116,8 +112,8 @@ class UserService {
     return response.data;
   }
 
-  // Get user profile
-  async getUserProfile(): Promise<UserData> {
+  // Get user profile (returns both auth and profile info)
+  async getUserProfile(): Promise<{ customUserId: string; auth: any; profile: any; stats: any; studentData?: any }> {
     const response = await this.makeRequest('/profile');
     return response.data;
   }
@@ -131,7 +127,7 @@ class UserService {
     return response.json();
   }
 
-  // Update user profile
+  // Update user profile (extended info in userData.json)
   async updateProfile(profileData: Partial<UserProfile>): Promise<UserProfile> {
     const response = await this.makeRequest('/profile', {
       method: 'PUT',
@@ -321,6 +317,14 @@ class UserService {
       throw new Error('Failed to update user');
     }
     return response.json();
+  }
+
+  // Update user auth info (Firestore fields)
+  async updateAuthInfo(authData: Partial<{ firstName: string; lastName: string; phoneNumber: string; userType: string }>): Promise<void> {
+    await this.makeRequest('/auth', {
+      method: 'PUT',
+      body: JSON.stringify(authData),
+    });
   }
 }
 
