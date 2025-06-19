@@ -86,32 +86,12 @@ const Profile = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        fetchUserData();
+        fetchUserData().finally(() => setLoading(false));
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const fetchUserName = async () => {
-      try {
-        const user = auth.currentUser;
-        if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setProfileData((prev) => ({
-              ...prev,
-              name: userData.name || user.displayName || user.email?.split('@')[0] || "User"
-            }));
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching user name:", error);
-      }
-    };
-    fetchUserName();
   }, []);
 
   useEffect(() => {

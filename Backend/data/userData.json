@@ -164,12 +164,17 @@
       "customUserId": "USER_000005",
       "profile": {
         "avatar": null,
-        "bio": null,
-        "location": null,
-        "website": null,
+        "bio": "hi myself Kritensh",
+        "location": "Jammu, Jammu And Kashmir",
+        "website": "NA",
         "title": null,
         "createdAt": "2025-06-19T10:01:09.817Z",
-        "updatedAt": "2025-06-19T10:01:09.817Z"
+        "updatedAt": "2025-06-19T11:54:01.874Z",
+        "college": "CUJ",
+        "degree": "Btech",
+        "course": "CSE",
+        "year": "3",
+        "userType": "student"
       },
       "projects": {
         "created": [],
@@ -224,12 +229,19 @@
         "totalViews": 0,
         "totalDownloads": 0,
         "memberSince": "2025-06-19T10:01:09.817Z"
+      },
+      "studentData": {
+        "college": "CUJ",
+        "degree": "Btech",
+        "course": "CSE",
+        "year": "3",
+        "updatedAt": "2025-06-19T11:54:01.874Z"
       }
     }
   },
   "userCounter": 5,
   "metadata": {
-    "lastUpdated": "2025-06-19T10:31:55.688Z",
+    "lastUpdated": "2025-06-19T11:54:01.875Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

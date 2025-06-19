@@ -143,9 +143,11 @@ export const Hero = () => {
                         animationDuration: "6s",
                         animationTimingFunction: "ease-in-out",
                         animationIterationCount: "infinite",
-                        willChange: "flex, transform",
+                        willChange: "transform",
                       }}
                     >
+                      {/* Use img tag for accessibility and lazy loading */}
+                      <img src={opt.imageUrl} alt={opt.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-0" />
                       {/* Simplified shadow overlay */}
                       <div
                         className="
