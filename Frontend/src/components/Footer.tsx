@@ -101,6 +101,7 @@ export const Footer = () => {
           <Link to="/privacypolicy" className="hover:text-slate-700">Privacy Policy</Link>
           <Link to="/termsofservice" className="hover:text-slate-700">Terms of Service</Link>
           <Link to="/sendfeedback" className="hover:text-slate-700">Send Feedback</Link>
+          <Link to="/aboutus" className="hover:text-slate-700">About Us</Link>
             <a href="#" className="hover:text-slate-700">Cookie Policy</a>
           </div>
           <div className="text-slate-400">© 2024 AMOGH. All rights reserved.</div>
