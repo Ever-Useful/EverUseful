@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useProfileStore, StudentProfile } from '@/hooks/useProfileStore';
 import { auth, db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc, deleteField } from "firebase/firestore";
 import toast from "react-hot-toast";
 
 interface StudentFormProps {
@@ -15,10 +15,14 @@ interface StudentFormProps {
 
 const StudentForm = ({ onComplete }: StudentFormProps) => {
   const { profile, setProfile, updateProfile } = useProfileStore();
+  const [isLoading, setIsLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   
   const [formData, setFormData] = useState<Omit<StudentProfile, 'projects'>>({
     userType: 'student',
     name: '',
+    firstName: '',
+    lastName: '',
     bio: '',
     avatar: '',
     college: '',
@@ -30,20 +34,67 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
   });
 
   useEffect(() => {
-    if (profile?.userType === 'student') {
-      setFormData({
-        userType: 'student',
-        name: profile.name,
-        bio: profile.bio,
-        avatar: profile.avatar,
-        college: profile.college,
-        degree: profile.degree,
-        course: profile.course,
-        year: profile.year,
-        location: profile.location,
-        website: profile.website
-      });
-    }
+    const loadUserData = async () => {
+      try {
+        // Load data from Firestore (firstName and lastName)
+        if (profile?.userType === 'student') {
+          const user = auth.currentUser;
+          if (user) {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            let firstName = '';
+            let lastName = '';
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              firstName = userData.firstName || '';
+              lastName = userData.lastName || '';
+            }
+            // Load data from backend (other student details)
+            const userService = (await import('@/services/userService')).userService;
+            try {
+              const backendData = await userService.getUserProfile();
+              setFormData({
+                userType: 'student',
+                name: '',
+                firstName,
+                lastName,
+                bio: backendData.profile?.bio || '',
+                avatar: backendData.profile?.avatar || '',
+                college: backendData.studentData?.college || '',
+                degree: backendData.studentData?.degree || '',
+                course: backendData.studentData?.course || '',
+                year: backendData.studentData?.year || '',
+                location: backendData.profile?.location || '',
+                website: backendData.profile?.website || ''
+              });
+            } catch (backendError) {
+              console.error('Failed to load backend data:', backendError);
+              // Fallback to Firestore data only
+              setFormData({
+                userType: 'student',
+                name: '',
+                firstName,
+                lastName,
+                bio: '',
+                avatar: '',
+                college: '',
+                degree: '',
+                course: '',
+                year: '',
+                location: '',
+                website: ''
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        toast.error('Failed to load profile data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
   }, [profile]);
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
@@ -52,38 +103,61 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setSaving(true);
     try {
       const user = auth.currentUser;
       if (!user) {
         throw new Error("No user logged in");
       }
-
+      await updateDoc(doc(db, "users", user.uid), {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        updatedAt: new Date().toISOString(),
+        name: deleteField()
+      });
+      const backendProfileData = {
+        bio: formData.bio,
+        college: formData.college,
+        degree: formData.degree,
+        course: formData.course,
+        year: formData.year,
+        location: formData.location,
+        website: formData.website,
+        userType: formData.userType
+      };
+      const userService = (await import('@/services/userService')).userService;
+      await userService.updateProfile(backendProfileData);
       const studentProfile: StudentProfile = {
         ...formData,
         projects: profile?.userType === 'student' ? profile.projects : []
       };
-
-      // Update Firestore
-      await updateDoc(doc(db, "users", user.uid), {
-        ...formData,
-        updatedAt: new Date().toISOString()
-      });
-
-      // Update local state
       if (profile) {
         updateProfile(studentProfile);
       } else {
         setProfile(studentProfile);
       }
-
       toast.success("Profile updated successfully");
       onComplete();
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
+    } finally {
+      setSaving(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-8 py-12">
+        <Card className="p-8 shadow-lg">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading profile data...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-12">
@@ -93,23 +167,24 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="name">Full Name *</Label>
+              <Label htmlFor="firstName">First Name *</Label>
               <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                id="firstName"
+                value={formData.firstName}
+                onChange={(e) => handleInputChange('firstName', e.target.value)}
                 required
-                placeholder="Enter your full name"
+                placeholder="Enter your first name"
               />
             </div>
             
             <div>
-              <Label htmlFor="avatar">Avatar Image URL</Label>
+              <Label htmlFor="lastName">Last Name *</Label>
               <Input
-                id="avatar"
-                value={formData.avatar}
-                onChange={(e) => handleInputChange('avatar', e.target.value)}
-                placeholder="https://example.com/avatar.jpg"
+                id="lastName"
+                value={formData.lastName}
+                onChange={(e) => handleInputChange('lastName', e.target.value)}
+                required
+                placeholder="Enter your last name"
               />
             </div>
           </div>
@@ -197,8 +272,12 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              Save Changes
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={saving}>
+              {saving ? (
+                <span className="flex items-center"><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>Saving...</span>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </div>
         </form>

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import {
@@ -26,7 +26,7 @@ const steps: Step[] = [
   {
     icon: UserPlus,
     title: "Create Profile",
-    subtitle: "Tell us who you are and what you’re looking for.",
+    subtitle: "Tell us who you are and what you're looking for.",
     iconColor: "text-blue-600",
     bgColor: "bg-blue-100",
   },
@@ -60,9 +60,27 @@ const steps: Step[] = [
   },
 ];
 
-export const HowItWorks: React.FC = () => {
+export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = false }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
+  const [playVideo, setPlayVideo] = useState(!deferVideo);
+
+  useEffect(() => {
+    if (!deferVideo) return;
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setPlayVideo(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
+    }
+    return () => observer.disconnect();
+  }, [deferVideo]);
 
   const handleMuteToggle = () => {
     setMuted((prev) => {
@@ -123,7 +141,7 @@ export const HowItWorks: React.FC = () => {
               <video
                 ref={videoRef}
                 src={mainVideo}
-                autoPlay
+                autoPlay={playVideo}
                 loop
                 muted={muted}
                 playsInline

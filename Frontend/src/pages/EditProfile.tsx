@@ -20,48 +20,49 @@ import toast from "react-hot-toast";
 const EditProfile = () => {
   const navigate = useNavigate();
   const { profile, setProfile } = useProfileStore();
-  const [selectedUserType, setSelectedUserType] = useState<UserType>(profile?.userType || 'student');
-  const [currentStep, setCurrentStep] = useState<'type' | 'profile' | 'content'>('type');
+  const [currentStep, setCurrentStep] = useState<'profile' | 'content'>('profile');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const user = auth.currentUser;
         if (user) {
+          // Load from Firestore
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setProfile({
-              ...userData,
-              userType: userData.userType || 'student'
-            });
-            setSelectedUserType(userData.userType || 'student');
+            
+            // Load from backend to get complete profile
+            try {
+              const userService = (await import('@/services/userService')).userService;
+              const backendData = await userService.getUserProfile();
+              
+              // Merge Firestore and backend data
+              const completeProfile = {
+                ...userData,
+                ...backendData.profile,
+                studentData: backendData.studentData
+              };
+              
+              setProfile(completeProfile as any);
+            } catch (backendError) {
+              console.error('Failed to load backend data:', backendError);
+              // Fallback to Firestore data only
+              setProfile(userData as any);
+            }
           }
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
         toast.error("Failed to load profile data");
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchUserData();
   }, []);
-
-  const handleUserTypeSelect = async (userType: UserType) => {
-    try {
-      const user = auth.currentUser;
-      if (user) {
-        await updateDoc(doc(db, "users", user.uid), {
-          userType: userType
-        });
-        setSelectedUserType(userType);
-        setCurrentStep('profile');
-      }
-    } catch (error) {
-      console.error("Error updating user type:", error);
-      toast.error("Failed to update user type");
-    }
-  };
 
   const handleProfileComplete = () => {
     setCurrentStep('content');
@@ -71,56 +72,10 @@ const EditProfile = () => {
     navigate('/profile');
   };
 
-  const renderUserTypeSelection = () => (
-    <div className="max-w-4xl mx-auto px-8 py-12">
-      <div className="p-8">
-        <h1 className="text-3xl font-bold text-center mb-8">Select Your Profile Type</h1>
-        <div className="grid md:grid-cols-3 gap-6">
-          <Card 
-            className="p-6 cursor-pointer rounded-3xl hover:shadow-lg transition-all border-2 hover:border-cyan-500"
-            onClick={() => handleUserTypeSelect('student')}
-          >
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl"><BookOpen /></span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Student</h3>
-              <p className="text-gray-600">Undergrad, Grad, or PhD Students</p>
-            </div>
-          </Card>
-          
-          <Card 
-            className="p-6 cursor-pointer rounded-3xl hover:shadow-lg transition-all border-2 hover:border-pink-500"
-            onClick={() => handleUserTypeSelect('professor')}
-          >
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl"><Star /></span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Professor</h3>
-              <p className="text-gray-600">Academic researcher or educator</p>
-            </div>
-          </Card>
-          
-          <Card 
-            className="p-6 cursor-pointer rounded-3xl hover:shadow-lg transition-all border-2 hover:border-emerald-500"
-            onClick={() => handleUserTypeSelect('enterprise')}
-          >
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl"><Building2 /></span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Enterprise</h3>
-              <p className="text-gray-600">Company or Organization</p>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-
   const renderProfileForm = () => {
-    switch (selectedUserType) {
+    if (!profile) return null;
+    
+    switch (profile.userType) {
       case 'student':
         return <StudentForm onComplete={handleProfileComplete} />;
       case 'professor':
@@ -133,17 +88,42 @@ const EditProfile = () => {
   };
 
   const renderContentManager = () => {
-    switch (selectedUserType) {
-      case 'student':
-        return <ProjectManager />;
-      case 'professor':
-        return <PaperManager />;
-      case 'enterprise':
-        return <ProductManager />;
-      default:
-        return null;
+    if (!profile) return null;
+    
+    try {
+      switch (profile.userType) {
+        case 'student':
+          return <ProjectManager />;
+        case 'professor':
+          return <PaperManager />;
+        case 'enterprise':
+          return <ProductManager />;
+        default:
+          return null;
+      }
+    } catch (error) {
+      console.error('Error rendering content manager:', error);
+      return (
+        <div className="max-w-6xl mx-auto px-8 py-12">
+          <Card className="p-8 text-center">
+            <p className="text-red-600 mb-4">Error loading content manager</p>
+            <Button onClick={() => window.location.reload()}>Reload Page</Button>
+          </Card>
+        </div>
+      );
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-300 to-purple-300 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-300 to-purple-300">
@@ -166,10 +146,10 @@ const EditProfile = () => {
           </div>
           <h1 className="text-2xl font-medium text-slate-600 text-lg">Edit Profile</h1>
           <div className="flex items-center gap-4">
-            {currentStep !== 'type' && (
+            {currentStep === 'content' && (
               <Button className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base"
                 variant="outline" 
-                onClick={() => setCurrentStep(currentStep === 'content' ? 'profile' : 'type')}
+                onClick={() => setCurrentStep('profile')}
               >
                 Back
               </Button>
@@ -184,22 +164,16 @@ const EditProfile = () => {
       {/* Progress Indicator */}
       <div>
         <div className="max-w-7xl mx-auto px-8 py-3">
-          <div className="flex justify-around items-center gap-4">
-            <div className={`flex items-center gap-2 ${currentStep === 'type' ? 'text-blue-600' : 'text-black'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'type' ? 'bg-blue-600 text-white' : 'bg-white'}`}>
-                1
-              </div>
-              <span>Select Type</span>
-            </div>
+          <div className="flex justify-center items-center gap-8">
             <div className={`flex items-center gap-2 ${currentStep === 'profile' ? 'text-blue-600' : 'text-black'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'profile' ? 'bg-blue-600 text-white' : 'bg-white'}`}>
-                2
+                1
               </div>
               <span>Profile Details</span>
             </div>
             <div className={`flex items-center gap-2 ${currentStep === 'content' ? 'text-blue-600' : 'text-black'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'content' ? 'bg-blue-600 text-white' : 'bg-white'}`}>
-                3
+                2
               </div>
               <span>Manage Content</span>
             </div>
@@ -208,7 +182,6 @@ const EditProfile = () => {
       </div>
 
       {/* Content */}
-      {currentStep === 'type' && renderUserTypeSelection()}
       {currentStep === 'profile' && renderProfileForm()}
       {currentStep === 'content' && renderContentManager()}
     </div>

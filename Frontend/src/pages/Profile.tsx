@@ -8,6 +8,7 @@ import RecentProjects from "@/components/RecentProjects";
 import QuickActions from "@/components/QuickActions";
 import RecentActivity from "@/components/RecentActivity";
 import SkillsSection from '@/components/Skillssection';
+import InitialsAvatar from '@/components/InitialsAvatar';
 import { useRef, useState, useEffect } from "react";
 import {
   DropdownMenu,
@@ -21,16 +22,20 @@ import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useProfileStore } from "@/hooks/useProfileStore";
 import YourMeetings from '@/components/YourMeetings';
+import { firestoreService } from "@/services/firestoreService";
+import { userService } from '@/services/userService';
+import { onAuthStateChanged } from "firebase/auth";
 
 const Profile = () => {
   const [backgroundImage, setBackgroundImage] = useState(
     "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
   );
   const [profileData, setProfileData] = useState({
-    name: "",
-    title: "",
-    bio: "",
-    avatar: "",
+    firstName: '',
+    lastName: '',
+    userType: '',
+    bio: '',
+    avatar: '',
   });
   const [stats, setStats] = useState({
     followers: 0,
@@ -49,46 +54,44 @@ const Profile = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [imageSrc, setImageSrc] = useState(null);
   const [showCropper, setShowCropper] = useState(false);
+  const [customUserId, setCustomUserId] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const fetchUserData = async () => {
+    try {
+      const userProfile = await userService.getUserProfile();
+      const { auth, profile } = userProfile;
+      setProfileData({
+        firstName: auth.firstName || '',
+        lastName: auth.lastName || '',
+        userType: auth.userType ? auth.userType.charAt(0).toUpperCase() + auth.userType.slice(1) : '',
+        bio: profile.bio || 'No bio available',
+        avatar: profile.avatar || '',
+      });
+      // Optionally set stats if available
+      if (userProfile.stats) {
+        setStats({
+          followers: userProfile.stats.followersCount || 0,
+          following: userProfile.stats.followingCount || 0,
+          projects: userProfile.stats.projectsCount || 0,
+          likes: userProfile.stats.totalLikes || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      toast.error('Failed to load profile data');
+    }
+  };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const user = auth.currentUser;
-        if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setProfileData({
-              name: userData.name || user.displayName || "Anonymous",
-              title: userData.title || "Member",
-              bio: userData.bio || "No bio available",
-              avatar: userData.photo || user.photoURL || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
-            });
-
-            // Initialize or fetch stats
-            const userStats = userData.stats || {
-              followers: 0,
-              following: 0,
-              projects: 0,
-              likes: 0
-            };
-            setStats(userStats);
-
-            // If stats don't exist, initialize them
-            if (!userData.stats) {
-              await updateDoc(doc(db, "users", user.uid), {
-                stats: userStats
-              });
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        toast.error("Failed to load profile data");
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchUserData().finally(() => setLoading(false));
+      } else {
+        setLoading(false);
       }
-    };
-
-    fetchUserData();
+    });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -111,6 +114,34 @@ const Profile = () => {
       }
     };
   }, [showCamera]);
+
+  useEffect(() => {
+    const fetchCustomUserId = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          console.log('User not authenticated, skipping customUserId fetch');
+          return;
+        }
+        
+        // Wait a bit for authentication to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const firestoreUser = await firestoreService.getCurrentUserData();
+        if (firestoreUser && firestoreUser.customUserId) {
+          setCustomUserId(firestoreUser.customUserId);
+        }
+    } catch (error) {
+        console.error("Error fetching customUserId:", error);
+      }
+    };
+    
+    // Only fetch if user is authenticated
+    const user = auth.currentUser;
+    if (user) {
+      fetchCustomUserId();
+    }
+  }, []);
 
   const handleAvatarChange = (event) => {
     const file = event.target.files?.[0];
@@ -205,6 +236,11 @@ const Profile = () => {
   //   icon: Mail
   // }]);
  
+  // Show loading spinner or skeleton while waiting for auth
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
   return (
   
   <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -299,7 +335,12 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row items-end gap-6">
               {/* Avatar */}
               <div className="relative">
-                <img src={profileData.avatar} alt={profileData.name} className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover justify-center flex items-center " />
+                <InitialsAvatar 
+                  firstName={profileData.firstName}
+                  lastName={profileData.lastName}
+                  size={128}
+                  className="w-32 h-32 border-4 border-white shadow-lg"
+                />
                  <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-slate-100 transition-colors">
@@ -332,14 +373,9 @@ const Profile = () => {
               {/* Profile Text */}
               {/* Profile Text */}
               <div className="flex-1 text-white">
-                <h1 className="text-4xl font-bold mb-2 drop-shadow-lg flex items-center mb-1.5 ">{profileData.name}</h1>
-                <p className="text-xl text-slate-200 drop-shadow-md">{profileData.title}</p>
+                <h1 className="text-4xl font-bold mb-2 drop-shadow-lg flex items-center mb-1.5 ">{`${profileData.firstName} ${profileData.lastName}`.trim()}</h1>
+                <p className="text-xl text-slate-200 drop-shadow-md">{profileData.userType}</p>
                 <div className="mt-4 w-[280px] flex flex-row justify-between">
-                  <Link to="/dashboard">
-                    <Button variant="secondary" size="sm">
-                      Dashboard
-                    </Button>
-                  </Link>
                   <Link to="/EditProfile">
                     <Button variant="secondary" size="sm">
                       Edit Profile

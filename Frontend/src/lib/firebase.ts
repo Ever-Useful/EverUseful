@@ -27,7 +27,7 @@ export const auth =  getAuth(app);
 export { db }; 
 export const storage = getStorage(app);
 
-export const handleGoogleAuth = async (navigate: (url: string) => void) => {
+export const handleGoogleAuth = async (navigate: (url: string) => void, userType: string = 'student') => {
   try {
     
     const provider = new GoogleAuthProvider();
@@ -35,22 +35,31 @@ export const handleGoogleAuth = async (navigate: (url: string) => void) => {
     const token = await userCredential.user.getIdToken();
 
     const response = await fetch("http://localhost:3000/token", {
-      method: "GET",
+      method: "POST",
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify({
+        userType: userType
+      })
     });
 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     const data = await response.json();
+    
+    // Set localStorage to indicate user is logged in
+    localStorage.setItem("isLoggedIn", "true");
+    window.dispatchEvent(new Event("storage"));
+    
     navigate(data.redirectUrl);
   } catch (error) {
     console.error("Error during Google auth:", error);
   }
 };
 
-export const handleGithubAuth = async (navigate: (url: string) => void) => {
+export const handleGithubAuth = async (navigate: (url: string) => void, userType: string = 'student') => {
   try {
     
     const provider = new GithubAuthProvider();
@@ -58,15 +67,24 @@ export const handleGithubAuth = async (navigate: (url: string) => void) => {
     const token = await userCredential.user.getIdToken();
 
     const response = await fetch("http://localhost:3000/token", {
-      method: "GET",
+      method: "POST",
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify({
+        userType: userType
+      })
     });
 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     const data = await response.json();
+    
+    // Set localStorage to indicate user is logged in
+    localStorage.setItem("isLoggedIn", "true");
+    window.dispatchEvent(new Event("storage"));
+    
     navigate(data.redirectUrl);
   } catch (error) {
     console.error("Error during Github auth:", error);

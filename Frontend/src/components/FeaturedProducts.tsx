@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -21,8 +22,8 @@ import {
 
 export const FeaturedProducts: React.FC = () => {
   const [expanded, setExpanded] = useState<number | null>(null);
-
-  const featuredProjects = [
+  const navigate = useNavigate();
+  const featuredProjects = useMemo(() => [
     {
       id: 1,
       title: "EcoTrack",
@@ -79,7 +80,7 @@ export const FeaturedProducts: React.FC = () => {
       tags: ["Robotics", "Agriculture", "AI"],
       gradient: "from-yellow-500 to-orange-600",
     }
-  ];
+  ], []);
 
   // Overlay for background blur/dim when a card is expanded
   const Overlay = () =>
@@ -114,6 +115,7 @@ export const FeaturedProducts: React.FC = () => {
             alt={project.title}
             className="w-full h-full object-cover object-center"
             style={{ aspectRatio: "4/3" }}
+            loading="lazy"
           />
           <div
             className={`absolute inset-0 bg-gradient-to-t ${project.gradient} opacity-20`}
@@ -229,6 +231,7 @@ export const FeaturedProducts: React.FC = () => {
                     width: "100%",
                     height: "100%",
                   }}
+                  loading="lazy"
                 />
                 <div
                   className={`absolute inset-0 bg-gradient-to-t ${p.gradient} opacity-20`}
@@ -323,6 +326,7 @@ export const FeaturedProducts: React.FC = () => {
                     src={p.image}
                     alt={p.title}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                   <div
                     className={`absolute inset-0 bg-gradient-to-t ${p.gradient} opacity-20`}
@@ -385,6 +389,7 @@ export const FeaturedProducts: React.FC = () => {
         {/* Footer Button */}
         <div className="text-center mt-14">
           <Button
+            onClick={() => navigate("/marketplace")}
             size="lg"
             variant="outline"
             className="hover:scale-105 transition-all duration-300 border-blue-200 text-blue-700 font-semibold rounded-lg"
