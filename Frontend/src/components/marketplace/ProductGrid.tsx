@@ -115,7 +115,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
         // Add pagination parameters
         queryParams.append('page', currentPage.toString());
         // Adjust limit based on sidebar state
-        const limit = selected ? '6' : '9';
+        const limit = selected ? '10' : '15';
         queryParams.append('limit', limit);
 
         const response = await fetch(`http://localhost:3000/api/marketplace/projects?${queryParams}`);
@@ -132,7 +132,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
     };
 
     fetchProjects();
-  }, [searchQuery, filters, sortBy, currentPage, selected]);
+  }, [searchQuery, filters, sortBy, currentPage]);
 
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSortBy(event.target.value);

@@ -62,15 +62,11 @@ class UserService {
     
     const newUser = {
       customUserId,
-      firebaseUid,
       profile: {
-        name: userData.name ?? null,
-        email: userData.email ?? null,
         avatar: userData.avatar ?? null,
         bio: userData.bio ?? null,
         location: userData.location ?? null,
         website: userData.website ?? null,
-        userType: userData.userType ?? null,
         title: userData.title ?? null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -130,28 +126,18 @@ class UserService {
 
     return {
       customUserId,
-      firebaseUid,
       profile: newUser.profile
     };
   }
 
   // Find user by Firebase UID
   findUserByFirebaseUid(firebaseUid) {
-    console.log('findUserByFirebaseUid - Looking for UID:', firebaseUid);
-    console.log('findUserByFirebaseUid - userData exists:', !!this.userData);
-    
     if (!this.userData) return null;
-    
-    console.log('findUserByFirebaseUid - Available users:', Object.keys(this.userData.users));
-    
     for (const [customUserId, user] of Object.entries(this.userData.users)) {
-      console.log('findUserByFirebaseUid - Checking user:', customUserId, 'with UID:', user.firebaseUid);
       if (user.firebaseUid === firebaseUid) {
-        console.log('findUserByFirebaseUid - Found user:', customUserId);
         return { customUserId, ...user };
       }
     }
-    console.log('findUserByFirebaseUid - No user found for UID:', firebaseUid);
     return null;
   }
 
@@ -416,7 +402,6 @@ class UserService {
     await this.loadUserData();
     return Object.keys(this.userData.users).map(customUserId => ({
       customUserId,
-      firebaseUid: this.userData.users[customUserId].firebaseUid,
       profile: this.userData.users[customUserId].profile,
       stats: this.userData.users[customUserId].stats
     }));

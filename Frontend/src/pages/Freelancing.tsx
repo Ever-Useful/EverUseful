@@ -301,7 +301,8 @@ const Work: React.FC = () => {
           </motion.p>
           <motion.div className="flex gap-6" variants={fadeUp} custom={3}>
             <Link
-              to="/find-expert"
+              
+              to="/findexpert"
               className="px-8 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_15px_rgba(250,89,84,0.8)] transition-all duration-300 text-lg"
             >
               Find a PhD Expert

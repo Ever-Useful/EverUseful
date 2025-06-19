@@ -94,13 +94,10 @@ const Sidebar = ({ userType }: SidebarProps) => {
         
         <div>
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">GENERAL</p>
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-3 h-10 text-gray-600 text-md"
-          >
+          <div className="w-full flex items-center gap-3 mb-2">
             <DarkModeToggle />
             <span>Dark Mode Toggle</span>
-          </Button>
+          </div>
           <nav className="space-y-1">
             {generalItems.map((item) => (
               <Button
