@@ -1,67 +1,155 @@
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp } from "lucide-react";
-import { UserType } from "@/pages/Dashboard";
+import { TrendingUp, BarChart3 } from "lucide-react";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 
-interface StatsCardsProps {
-  userType: UserType;
+interface StatsCardProps {
+  title: string;
+  value: string;
+  change: string;
+  primary?: boolean;
+  status?: boolean;
+  onClick: () => void;
+  hoverData: Array<{ name: string; value: number }>;
 }
 
-const StatsCards = ({ userType }: StatsCardsProps) => {
-  const getStatsData = () => {
-    switch (userType) {
-      case 'student':
-        return [
-          { title: "Total Projects", value: "18", change: "Increased from last month", primary: true },
-          { title: "Completed", value: "12", change: "Increased from last month" },
-          { title: "In Progress", value: "4", change: "Increased from last month" },
-          { title: "Sold", value: "2", change: "On Discuss", status: true },
-        ];
-      case 'professor':
-        return [
-          { title: "Total Sessions", value: "8", change: "Increased from last month", primary: true },
-          { title: "Active Students", value: "156", change: "Increased from last month" },
-          { title: "Projects Reviews", value: "24", change: "Increased from last month" },
-          { title: "Pending Reviews", value: "12", change: "On Discuss", status: true },
-        ];
-      case 'enterprise':
-        return [
-          { title: "Total Deals", value: "24", change: "Increased from last month", primary: true },
-          { title: "Past Deals", value: "10", change: "Increased from last month" },
-          { title: "Ongoing deals", value: "12", change: "Increased from last month" },
-          { title: "Inventory", value: "2", change: "Projects", status: true },
-        ];
-      default:
-        return [];
+const StatsCard: React.FC<StatsCardProps> = ({
+  title,
+  value,
+  change,
+  primary = false,
+  status = false,
+  onClick,
+  hoverData
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Create segments for the line chart with different colors based on trend
+  const createSegments = (data: Array<{ name: string; value: number }>) => {
+    const segments = [];
+    for (let i = 0; i < data.length - 1; i++) {
+      const current = data[i];
+      const next = data[i + 1];
+      const isDecline = next.value < current.value;
+      
+      segments.push({
+        data: [current, next],
+        color: isDecline ? "#ef4444" : "#16a34a" // red for decline, green for increase
+      });
     }
+    return segments;
   };
 
-  const stats = getStatsData();
+  const segments = createSegments(hoverData);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map((stat, index) => (
-        <Card key={index} className={`${stat.primary ? 'bg-green-600 text-white' : 'bg-white'} transition-all hover:shadow-lg`}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className={`text-sm font-medium ${stat.primary ? 'text-green-100' : 'text-gray-600'}`}>
-                {stat.title}
-              </h3>
-              <TrendingUp className={`w-4 h-4 ${stat.primary ? 'text-green-200' : 'text-gray-400'}`} />
-            </div>
-            <div className="space-y-2">
-              <p className="text-3xl font-bold">{stat.value}</p>
-              <div className="flex items-center gap-2">
-                <TrendingUp className={`w-3 h-3 ${stat.primary ? 'text-green-200' : 'text-green-600'}`} />
-                <span className={`text-xs ${stat.primary ? 'text-green-200' : stat.status ? 'text-green-600' : 'text-gray-500'}`}>
-                  {stat.change}
-                </span>
+    <Card 
+      className={`${
+        primary 
+          ? 'bg-green-600 text-white dark:bg-green-700' 
+          : 'bg-white dark:bg-gray-800 dark:border-gray-700'
+      } transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer relative overflow-hidden`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={onClick}
+    >
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className={`text-sm font-medium ${
+            primary 
+              ? 'text-green-100' 
+              : 'text-gray-600 dark:text-gray-300'
+          }`}>
+            {title}
+          </h3>
+          <div className="flex items-center gap-2">
+            <TrendingUp className={`w-4 h-4 ${
+              primary 
+                ? 'text-green-200' 
+                : 'text-gray-400 dark:text-gray-500'
+            }`} />
+            <BarChart3 className={`w-4 h-4 ${
+              primary 
+                ? 'text-green-200' 
+                : 'text-gray-400 dark:text-gray-500'
+            } ${isHovered ? 'animate-pulse' : ''}`} />
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <p className={`text-3xl font-bold ${
+            primary ? 'text-white' : 'text-gray-900 dark:text-white'
+          }`}>
+            {value}
+          </p>
+          <div className="flex items-center gap-2">
+            <TrendingUp className={`w-3 h-3 ${
+              primary 
+                ? 'text-green-200' 
+                : status 
+                  ? 'text-green-600 dark:text-green-400' 
+                  : 'text-gray-500 dark:text-gray-400'
+            }`} />
+            <span className={`text-xs ${
+              primary 
+                ? 'text-green-200' 
+                : status 
+                  ? 'text-green-600 dark:text-green-400' 
+                  : 'text-gray-500 dark:text-gray-400'
+            }`}>
+              {change}
+            </span>
+          </div>
+        </div>
+
+        {/* Hover Graph Overlay with improved padding */}
+        {isHovered && (
+          <div className="absolute inset-0 bg-black/20 dark:bg-black/40 flex items-center justify-center transition-all duration-300 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg w-full h-36">
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-3">
+                7-day trend
+              </p>
+              <div className="h-24">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={hoverData} margin={{ top: 5, right: 5, left: 5, bottom: 20 }}>
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10 }}
+                      className="text-gray-500 dark:text-gray-400"
+                    />
+                    <YAxis hide />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgb(17 24 39)',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: 'white',
+                        fontSize: '12px'
+                      }}
+                    />
+                    {segments.map((segment, index) => (
+                      <Line 
+                        key={index}
+                        type="monotone" 
+                        dataKey="value" 
+                        data={segment.data}
+                        stroke={segment.color}
+                        strokeWidth={2}
+                        dot={false}
+                        connectNulls={false}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
-export default StatsCards;
+export default StatsCard;

@@ -141,20 +141,22 @@ export const RelatedProducts = () => {
             </Card>
           </div>
         ))}
-      </div>
+      </Slider>
 
       {/* Navigation Buttons */}
       <div className="flex justify-center gap-4 mt-6">
         <Button
           variant="outline"
           size="icon"
+          onClick={() => sliderRef.current?.slickPrev()}
           aria-label="Previous Slide"
         >
-          <ArrowRight className="w-5 h-5 rotate-180" />
+          <ArrowLeft className="w-5 h-5" />
         </Button>
         <Button
           variant="outline"
           size="icon"
+          onClick={() => sliderRef.current?.slickNext()}
           aria-label="Next Slide"
         >
           <ArrowRight className="w-5 h-5" />
