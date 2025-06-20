@@ -7,7 +7,7 @@ import CartHeader from "@/components/cart/CartHeader";
 import OrderSummary from "@/components/cart/OrderSummary";
 import CartItem from "@/components/cart/CartItem";
 import SavedItems from "@/components/cart/SavedItems";
-import FeaturedProjects from "@/components/cart/FeaturedProjects";
+import { RelatedProducts } from "@/components/RelatedProducts";
 import { ShoppingCart, Loader2 } from 'lucide-react';
 import { ArrowLeft } from 'lucide-react'
 import { Link, useNavigate } from "react-router-dom";
@@ -18,12 +18,9 @@ import { useAuthState } from '@/hooks/useAuthState';
 import { firestoreService } from '@/services/firestoreService';
 import { userService } from '@/services/userService';
 import { toast } from 'sonner';
-
+import { Header } from "@/components/Header";
 interface BackendCartItem {
   productId: string;
-  name: string;
-  price: number;
-  image: string;
   addedAt: string;
   quantity: number;
 }
@@ -119,35 +116,97 @@ const Cart = () => {
     try {
       setLoading(true);
       
+      // Debug: Check if user is authenticated
+      console.log('Current user:', user);
+      console.log('Auth loading:', authLoading);
+      
+      if (!user) {
+        console.error('No user found, redirecting to signin');
+        navigate('/signin');
+        return;
+      }
+      
       // Get user data from Firestore to get customUserId
       const firestoreData = await firestoreService.getCurrentUserData();
+      console.log('Firestore data:', firestoreData);
+      
       if (!firestoreData) {
         toast.error('User data not found');
         return;
       }
 
+      console.log('Fetching cart for user:', firestoreData.customUserId);
+      console.log('Firebase UID:', user.uid);
+      
       // Fetch cart data from backend
       const cartData = await userService.getUserCartByCustomId(firestoreData.customUserId);
+      console.log('Cart data received:', cartData);
       
-      // Transform backend cart items to frontend format
-      const transformedCartItems: CartItemType[] = cartData.map((item: BackendCartItem) => ({
-        id: item.productId,
-        name: item.name,
-        description: 'Engineering solution from marketplace',
-        price: item.price,
-        category: 'software', // Default category
-        studentName: 'Engineering Student',
-        university: 'Engineering University',
-        rating: 4.5,
-        downloadable: true,
-        licenseType: 'commercial',
-        tags: ['Engineering', 'Innovation'],
-        quantity: item.quantity
-      }));
+      // Fetch project details from marketplace for each cart item
+      const transformedCartItems: CartItemType[] = await Promise.all(
+        cartData.map(async (item: BackendCartItem) => {
+          try {
+            // Fetch project details from marketplace
+            const response = await fetch(`http://localhost:3000/api/marketplace/projects/${item.productId}`);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch project ${item.productId}`);
+            }
+            const projectData = await response.json();
+            const project = projectData.project;
+            
+            return {
+              id: item.productId,
+              name: project.title,
+              description: project.description,
+              price: project.price,
+              category: project.category.toLowerCase(),
+              studentName: project.author.name,
+              university: 'University', // You can add university field to marketplace if needed
+              rating: project.rating,
+              downloadable: true,
+              licenseType: 'commercial',
+              tags: project.tags,
+              quantity: item.quantity,
+              image: project.image // Add the project image
+            };
+          } catch (error) {
+            console.error(`Error fetching project ${item.productId}:`, error);
+            // Fallback to basic data if project fetch fails
+            return {
+              id: item.productId,
+              name: `Project ${item.productId}`,
+              description: 'Project details not available',
+              price: 0,
+              category: 'software',
+              studentName: 'Unknown',
+              university: 'Unknown University',
+              rating: 0,
+              downloadable: true,
+              licenseType: 'commercial',
+              tags: ['Unknown'],
+              quantity: item.quantity
+            };
+          }
+        })
+      );
 
       setCartItems(transformedCartItems);
     } catch (error) {
       console.error('Error loading cart data:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
+      
+      // Additional debugging for user not found error
+      if (error.message === 'User not found') {
+        console.error('=== USER NOT FOUND DEBUGGING ===');
+        console.error('Firebase UID:', user?.uid);
+        const firestoreData = await firestoreService.getCurrentUserData();
+        console.error('Custom User ID from Firestore:', firestoreData?.customUserId);
+        console.error('=== END DEBUGGING ===');
+      }
+      
       toast.error('Failed to load cart data');
     } finally {
       setLoading(false);
@@ -236,18 +295,12 @@ const Cart = () => {
     
     const isAlreadyInWishlist = savedItems.some(item => item.id === project.id);
     if (isAlreadyInWishlist) {
-      toast({
-        title: "Already in wishlist",
-        description: `${project.name} is already in your wishlist`
-      });
+      toast.error(`${project.name} is already in your wishlist`);
       return;
     }
     
     setSavedItems(prev => [...prev, wishlistItem]);
-    toast({
-      title: "Added to wishlist",
-      description: `${project.name} has been added to your wishlist`
-    });
+    toast.success(`${project.name} has been added to your wishlist`);
   };
 
   const addToCart = (project: FeaturedProject) => {
@@ -258,10 +311,7 @@ const Cart = () => {
       licenseType: 'commercial'
     };
     setCartItems(prev => [...prev, newCartItem]);
-    toast({
-      title: "Added to cart",
-      description: `${project.name} has been added to your cart`
-    });
+    toast.success(`${project.name} has been added to your cart`);
   };
   
 
@@ -289,58 +339,79 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-4 mb-8">
-          <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-            <ArrowLeft className="w-5 h-5" />
-            Back to Home
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Cart Section */}
-          <div className="lg:col-span-2">
-            <CartHeader itemCount={cartItems.length} />
-            
-            {cartItems.length === 0 ? (
-              <Card className="p-8 text-center">
-                <ShoppingCart className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
-                <p className="text-gray-600 mb-6">Add some amazing engineering solutions to get started!</p>
-                <Link to="/marketplace">
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    Browse Marketplace
-                  </Button>
-                </Link>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <CartItem
-                    key={item.id}
-                    item={item}
-                    onRemove={removeItem}
-                    onSave={moveToSaved}
-                    onBuyNow={buyNow}
-                  />
-                ))}
+        <CartHeader itemCount={cartItems.length} />
+        
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          </div>
+        ) : cartItems.length === 0 ? (
+          <div className="text-center py-12">
+            <ShoppingCart className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
+            <p className="text-gray-600 mb-4">Looks like you haven't added any projects yet.</p>
+            <Link to="/marketplace">
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Continue Shopping
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-8">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-x-16 gap-y-8">
+              {/* Cart Items Section */}
+              <div className="xl:col-span-2 space-y-6">
+                <div className="space-y-6">
+                  {cartItems.map((item) => (
+                    <CartItem
+                      key={item.id}
+                      item={item}
+                      onRemove={removeItem}
+                      onSave={moveToSaved}
+                      onBuyNow={buyNow}
+                    />
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <OrderSummary items={cartItems} />
-            <SavedItems 
-              items={savedItems} 
+              {/* Order Summary Section */}
+              <div className="xl:col-span-1">
+                <div className="sticky top-6">
+                  <OrderSummary
+                    subtotal={cartItems.reduce((sum, item) => sum + item.price, 0)}
+                    platformFee={cartItems.reduce((sum, item) => sum + (item.price * 0.05), 0)}
+                    total={cartItems.reduce((sum, item) => sum + (item.price * 1.05), 0)}
+                    itemCount={cartItems.length}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Saved Items Section */}
+        {savedItems.length > 0 && (
+          <div className="mt-12">
+            <SavedItems
+              items={savedItems}
               onMoveToCart={moveToCart}
-            />
-            <FeaturedProjects 
-              projects={featuredProjects}
-              onAddToWishlist={addToWishlist}
+              onRemove={(id) => setSavedItems(items => items.filter(item => item.id !== id))}
             />
           </div>
+        )}
+
+        {/* Related Products Section */}
+        <div className="mt-16">
+          <RelatedProducts
+            title="You might also like"
+            projects={featuredProjects}
+            onAddToCart={addToCart}
+            onAddToWishlist={addToWishlist}
+          />
         </div>
       </div>
       <Footer />

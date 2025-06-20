@@ -175,19 +175,6 @@ const RecentActivity = () => {
           </div>
         )}
       </Card>
-
-      {/* Upgrade Card */}
-      <Card className="p-6 shadow-lg border-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white mx-px my-[23px]">
-        <div className="text-center">
-          <h3 className="text-xl font-bold mb-2">⭐ Upgrade to Premium</h3>
-          <p className="text-blue-100 mb-4">
-            Get unlimited projects, priority support, and exclusive features
-          </p>
-          <Button className="w-full bg-white text-blue-600 hover:bg-blue-50">
-            Upgrade Now
-          </Button>
-        </div>
-      </Card>
     </div>
   );
 };
