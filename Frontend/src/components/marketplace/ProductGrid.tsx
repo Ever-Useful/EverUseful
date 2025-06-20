@@ -299,19 +299,9 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
         return;
       }
 
-      // Find the project to get its details
-      const project = projects.find(p => p.id === projectId);
-      if (!project) {
-        toast.error('Project not found');
-        return;
-      }
-
-      // Add project to cart in userData.json
+      // Add project to cart in userData.json (only productId, addedAt, quantity)
       await userService.addToCart(firestoreData.customUserId, {
         productId: projectId.toString(),
-        name: project.title,
-        price: project.price,
-        image: project.image,
         addedAt: new Date().toISOString(),
         quantity: 1
       });
@@ -538,8 +528,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
             </div>
 
             <div className="mb-3">
-              <div className="text-xs text-gray-500 mb-1">Author Bio</div>
-              <div className="text-gray-700 text-xs mb-2">{selected.author.bio}</div>
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <Users className="w-4 h-4" />
                 Team Size: <span className="font-semibold text-gray-700">{selected.teamSize}</span>
@@ -578,19 +566,15 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                 <Clock className="w-3 h-3" />
                 <span>{selected.duration}</span>
               </div>
-              <div className="flex items-center space-x-1 text-pink-500">
-                <Heart className="w-3 h-3" />
-                <span>{selected.views}</span>
-              </div>
             </div>
             <p className="text-gray-700 text-sm mb-4">{selected.description}</p>
 
             <div className="flex gap-2 mb-6">
               <Button size="sm" variant="outline" className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100">
-                <Share2 className="w-4 h-4" /> Share
+                <Share2 className="w-4 h-4" />
               </Button>
               <Button size="sm" variant="outline" className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100">
-                <Download className="w-4 h-4" /> Download Brochure
+                <Download className="w-4 h-4" />
               </Button>
             </div>
 

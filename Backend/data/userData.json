@@ -164,12 +164,12 @@
       "customUserId": "USER_000005",
       "profile": {
         "avatar": null,
-        "bio": "hi myself Kritensh",
+        "bio": "hhi hello",
         "location": "Jammu, Jammu And Kashmir",
         "website": "NA",
         "title": null,
-        "createdAt": "2025-06-19T10:01:09.817Z",
-        "updatedAt": "2025-06-19T11:54:01.874Z",
+        "createdAt": "2025-06-19T21:16:02.064Z",
+        "updatedAt": "2025-06-20T06:30:55.397Z",
         "college": "CUJ",
         "degree": "Btech",
         "course": "CSE",
@@ -183,18 +183,25 @@
         "count": 0
       },
       "marketplace": {
-        "cart": [],
+        "cart": [
+          {
+            "productId": "10",
+            "addedAt": "2025-06-19T21:36:07.569Z",
+            "quantity": 1
+          },
+          {
+            "productId": "16",
+            "addedAt": "2025-06-19T21:37:05.062Z",
+            "quantity": 1
+          }
+        ],
         "orders": [],
         "favorites": [],
         "reviews": [],
         "wishlist": []
       },
       "skills": [
-        "python",
-        "backend",
-        "frontend",
-        "lolipop",
-        "database"
+        "python"
       ],
       "social": {
         "followers": [],
@@ -228,20 +235,20 @@
         "totalLikes": 0,
         "totalViews": 0,
         "totalDownloads": 0,
-        "memberSince": "2025-06-19T10:01:09.817Z"
+        "memberSince": "2025-06-19T21:16:02.064Z"
       },
       "studentData": {
         "college": "CUJ",
         "degree": "Btech",
         "course": "CSE",
         "year": "3",
-        "updatedAt": "2025-06-19T11:54:01.874Z"
+        "updatedAt": "2025-06-20T06:30:55.397Z"
       }
     }
   },
   "userCounter": 5,
   "metadata": {
-    "lastUpdated": "2025-06-19T11:54:01.875Z",
+    "lastUpdated": "2025-06-20T06:30:55.397Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

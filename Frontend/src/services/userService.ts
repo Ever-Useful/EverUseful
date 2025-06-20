@@ -59,9 +59,6 @@ interface Skill {
 
 interface CartItem {
   productId: string;
-  name: string;
-  price: number;
-  image: string;
   addedAt: string;
   quantity: number;
 }
@@ -77,14 +74,19 @@ interface Activity {
 class UserService {
   private async getAuthToken(): Promise<string> {
     const user = auth.currentUser;
+    console.log('Getting auth token, current user:', user);
     if (!user) {
       throw new Error('User not authenticated');
     }
-    return await user.getIdToken();
+    const token = await user.getIdToken();
+    console.log('Auth token retrieved successfully');
+    return token;
   }
 
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
+    console.log('Making request to:', endpoint);
     const token = await this.getAuthToken();
+    console.log('Token retrieved, making fetch request');
     
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
@@ -95,8 +97,12 @@ class UserService {
       },
     });
 
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+
     if (!response.ok) {
       const error = await response.json();
+      console.error('Request failed:', error);
       throw new Error(error.message || 'Request failed');
     }
 
@@ -120,11 +126,8 @@ class UserService {
 
   // Get user by custom ID (public profile)
   async getUserByCustomId(customUserId: string): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/${customUserId}`);
-    if (!response.ok) {
-      throw new Error('User not found');
-    }
-    return response.json();
+    const response = await this.makeRequest(`/${customUserId}`);
+    return response.data;
   }
 
   // Update user profile (extended info in userData.json)
@@ -202,42 +205,23 @@ class UserService {
 
   // Get user cart (by customUserId)
   async getUserCartByCustomId(customUserId: string): Promise<CartItem[]> {
-    const response = await fetch(`${API_BASE_URL}/${customUserId}/cart`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch cart');
-    }
-    const data = await response.json();
-    return data.data;
+    const response = await this.makeRequest(`/${customUserId}/cart`);
+    return response.data;
   }
 
   // Remove from cart
   async removeFromCart(customUserId: string, productId: string): Promise<CartItem[]> {
-    const response = await fetch(`${API_BASE_URL}/${customUserId}/cart/${productId}`, {
+    const response = await this.makeRequest(`/${customUserId}/cart/${productId}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${await this.getAuthToken()}`,
-      },
     });
-    if (!response.ok) {
-      throw new Error('Failed to remove item from cart');
-    }
-    const data = await response.json();
-    return data.data;
+    return response.data;
   }
 
   // Clear cart
   async clearCart(customUserId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/${customUserId}/cart`, {
+    await this.makeRequest(`/${customUserId}/cart`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${await this.getAuthToken()}`,
-      },
     });
-    if (!response.ok) {
-      throw new Error('Failed to clear cart');
-    }
   }
 
   // Add activity
@@ -305,18 +289,11 @@ class UserService {
 
   // Update user (by customUserId)
   async updateUser(customUserId: string, userData: any): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/${customUserId}`, {
+    const response = await this.makeRequest(`/${customUserId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${await this.getAuthToken()}`,
-      },
       body: JSON.stringify(userData),
     });
-    if (!response.ok) {
-      throw new Error('Failed to update user');
-    }
-    return response.json();
+    return response.data;
   }
 
   // Update user auth info (Firestore fields)

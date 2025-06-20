@@ -432,7 +432,7 @@ const Profile = () => {
             <RecentProjects />
 
             {/* Your Meetings - Now separate */}
-            <YourMeetings />
+            {/* <YourMeetings /> */}
           </div>
 
           {/* Right Column */}
