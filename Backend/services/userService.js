@@ -143,6 +143,13 @@ class UserService {
 
   // Find user by custom user ID
   findUserByCustomId(customUserId) {
+    console.log('=== findUserByCustomId DEBUGGING ===');
+    console.log('Looking for customUserId:', customUserId);
+    console.log('userData loaded:', !!this.userData);
+    console.log('userData.users:', this.userData ? Object.keys(this.userData.users) : 'No userData');
+    console.log('Direct access:', this.userData?.users?.[customUserId] ? 'Found' : 'Not found');
+    console.log('=== END findUserByCustomId DEBUGGING ===');
+    
     if (!this.userData || !this.userData.users[customUserId]) {
       return null;
     }
@@ -265,9 +272,6 @@ class UserService {
 
     const cartItem = {
       productId: productData.productId,
-      name: productData.name,
-      price: productData.price,
-      image: productData.image,
       addedAt: new Date().toISOString(),
       quantity: productData.quantity || 1
     };

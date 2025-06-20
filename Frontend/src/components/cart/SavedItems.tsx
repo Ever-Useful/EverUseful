@@ -8,11 +8,11 @@ import { getCategoryIcon } from '@/components/cart/utils';
 interface SavedItemsProps {
   items: SavedItem[];
   onMoveToCart: (item: SavedItem) => void;
+  onRemove: (id: string) => void;
 }
 
-const SavedItems = ({ items, onMoveToCart }: SavedItemsProps) => {
+const SavedItems = ({ items, onMoveToCart, onRemove }: SavedItemsProps) => {
   if (items.length === 0) return null;
-   const conversionRate = 83;
 
   return (
     <Card className="border-gray-200 shadow-sm bg-white">
@@ -24,25 +24,26 @@ const SavedItems = ({ items, onMoveToCart }: SavedItemsProps) => {
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {items.map(item => {
-            const priceINR = item.price * conversionRate;
-            
-            return (
-              <div key={item.id} className="flex gap-4 p-4 border border-gray-200 rounded-lg bg-white hover:shadow-sm transition-shadow">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-md border border-gray-200 flex items-center justify-center text-xl flex-shrink-0">
-                  {getCategoryIcon(item.category)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-900 mb-1 text-sm sm:text-base truncate">{item.name}</h4>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">by {item.studentName}</p>
-                  <p className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">₹{priceINR.toFixed(2)}</p>
-                  <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-50 text-xs w-full" onClick={() => onMoveToCart(item)}>
+          {items.map(item => (
+            <div key={item.id} className="flex gap-4 p-4 border border-gray-200 rounded-lg bg-white hover:shadow-sm transition-shadow">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-md border border-gray-200 flex items-center justify-center text-xl flex-shrink-0">
+                {getCategoryIcon(item.category)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-medium text-gray-900 mb-1 text-sm sm:text-base truncate">{item.name}</h4>
+                <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">by {item.studentName}</p>
+                <p className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">${item.price.toFixed(2)}</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-50 text-xs flex-1" onClick={() => onMoveToCart(item)}>
                     Add to Cart
+                  </Button>
+                  <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-50 text-xs" onClick={() => onRemove(item.id)}>
+                    Remove
                   </Button>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

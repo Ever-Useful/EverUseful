@@ -303,9 +303,18 @@ router.post('/:customUserId/cart', authorize, async (req, res) => {
   try {
     const { customUserId } = req.params;
     const productData = req.body;
-
-    const cart = await userService.addToCart(customUserId, productData);
     
+    // Load user data from JSON file
+    await userService.loadUserData();
+    
+    const user = userService.findUserByCustomId(customUserId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    const cart = await userService.addToCart(customUserId, productData);
     res.json({
       success: true,
       message: 'Item added to cart',
@@ -324,7 +333,16 @@ router.post('/:customUserId/cart', authorize, async (req, res) => {
 router.get('/:customUserId/cart', authorize, async (req, res) => {
   try {
     const { customUserId } = req.params;
+    console.log('=== CART DEBUGGING ===');
+    console.log('Requested customUserId:', customUserId);
+    
+    // Load user data from JSON file
+    await userService.loadUserData();
+    console.log('Available users in userData.json:', Object.keys(userService.userData?.users || {}));
+    
     const user = userService.findUserByCustomId(customUserId);
+    console.log('User found:', !!user);
+    console.log('=== END CART DEBUGGING ===');
     
     if (!user) {
       return res.status(404).json({
@@ -332,7 +350,6 @@ router.get('/:customUserId/cart', authorize, async (req, res) => {
         message: 'User not found'
       });
     }
-
     res.json({
       success: true,
       data: user.marketplace.cart
@@ -350,8 +367,18 @@ router.get('/:customUserId/cart', authorize, async (req, res) => {
 router.delete('/:customUserId/cart/:productId', authorize, async (req, res) => {
   try {
     const { customUserId, productId } = req.params;
-    const cart = await userService.removeFromCart(customUserId, productId);
     
+    // Load user data from JSON file
+    await userService.loadUserData();
+    
+    const user = userService.findUserByCustomId(customUserId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    const cart = await userService.removeFromCart(customUserId, productId);
     res.json({
       success: true,
       message: 'Item removed from cart',
@@ -370,8 +397,18 @@ router.delete('/:customUserId/cart/:productId', authorize, async (req, res) => {
 router.delete('/:customUserId/cart', authorize, async (req, res) => {
   try {
     const { customUserId } = req.params;
-    await userService.clearCart(customUserId);
     
+    // Load user data from JSON file
+    await userService.loadUserData();
+    
+    const user = userService.findUserByCustomId(customUserId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    await userService.clearCart(customUserId);
     res.json({
       success: true,
       message: 'Cart cleared successfully'
