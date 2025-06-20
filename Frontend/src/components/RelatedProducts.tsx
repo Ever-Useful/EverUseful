@@ -1,25 +1,10 @@
-import { useState, useEffect } from "react";
+
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, Heart, Eye, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import classNames from "classnames";
-
-interface Project {
-  id: number;
-  title: string;
-  subtitle: string;
-  description: string;
-  category: string;
-  price: number;
-  rating: number;
-  reviews: number;
-  views: number;
-  likes: number;
-  image: string;
-  author: string;
-}
+import React, { useRef } from "react";
 
 export const RelatedProducts = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -46,39 +31,94 @@ export const RelatedProducts = () => {
       }
     };
 
-    fetchProjects();
-  }, []);
+  const featuredProjects = [
+    {
+      id: 1,
+      title: "EcoTrack",
+      subtitle: "Carbon Footprint Monitor",
+      category: "Sustainability",
+      image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=250&fit=crop",
+      tags: ["AI", "Sustainability", "IoT"],
+    },
+    {
+      id: 2,
+      title: "QuantumMed",
+      subtitle: "Drug Discovery Platform",
+      category: "Healthcare",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=250&fit=crop",
+      tags: ["Quantum", "Healthcare", "Research"],
+    },
+    {
+      id: 3,
+      title: "AgriBot",
+      subtitle: "Smart Farming Assistant",
+      category: "Agriculture",
+      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=400&h=250&fit=crop",
+      tags: ["Robotics", "Agriculture", "AI"],
+    },
+    {
+      id: 4,
+      title: "ROBot",
+      subtitle: "Smart Farming Assistant",
+      category: "Agriculture",
+      image: "https://plus.unsplash.com/premium_photo-1678344170545-c3edef92a16e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      tags: ["Robotics", "Agriculture", "AI"],
+    },
+    {
+      id: 5,
+      title: "EcoTrack",
+      subtitle: "Carbon Footprint Monitor",
+      category: "Sustainability",
+      image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=250&fit=crop",
+      tags: ["AI", "Sustainability", "IoT"],
+    },
+    {
+      id: 6,
+      title: "QuantumMed",
+      subtitle: "Drug Discovery Platform",
+      category: "Healthcare",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=250&fit=crop",
+      tags: ["Quantum", "Healthcare", "Research"],
+    },
+    {
+      id: 7,
+      title: "AgriBot",
+      subtitle: "Smart Farming Assistant",
+      category: "Agriculture",
+      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=400&h=250&fit=crop",
+      tags: ["Robotics", "Agriculture", "AI"],
+    },
+    {
+      id: 8,
+      title: "ROBot",
+      subtitle: "Smart Farming Assistant",
+      category: "Agriculture",
+      image: "https://plus.unsplash.com/premium_photo-1678344170545-c3edef92a16e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      tags: ["Robotics", "Agriculture", "AI"],
+    }
+  ];
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-6 py-8">
-        <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[...Array(4)].map((_, index) => (
-            <Card key={index} className="animate-pulse">
-              <div className="h-48 bg-gray-200 rounded-t-lg" />
-              <CardContent className="p-4">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
-                <div className="h-4 bg-gray-200 rounded w-1/4" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
+    const sliderSettings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    arrows: false, // hide default arrows
+    responsive: [
+      { breakpoint: 1280, settings: { slidesToShow: 3 } },
+      { breakpoint: 1024, settings: { slidesToShow: 2 } },
+      { breakpoint: 640, settings: { slidesToShow: 1 } },
+    ],
+  };
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-6 py-8">
-        <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-        <div className="text-center text-red-600">
-          <p>Failed to load related products</p>
-        </div>
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-2xl font-bold text-gray-900">Related Products</h2>
       </div>
-    );
-  }
 
   const handlePrev = () => {
     setSlideDirection('left');
