@@ -1,9 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { IndianRupee, DollarSign, Shield, Award, Clock, Users } from 'lucide-react';
-import { useState } from 'react';
+import { Shield } from 'lucide-react';
 
 interface OrderSummaryProps {
   subtotal: number;
@@ -13,125 +10,90 @@ interface OrderSummaryProps {
 }
 
 const OrderSummary = ({ subtotal, platformFee, total, itemCount }: OrderSummaryProps) => {
-  const [isINR, setIsINR] = useState(true);
-  const conversionRate = 83;
-
-  const convertPrice = (price: number) => {
-    return isINR ? price * conversionRate : price;
-  };
-
   const formatPrice = (price: number) => {
-    const convertedPrice = convertPrice(price);
-    return isINR 
-      ? `₹${convertedPrice.toFixed(2)}`
-      : `$${convertedPrice.toFixed(2)}`;
+    return `$${price.toFixed(2)}`;
   };
 
-  const trustedIndicators = [
+  const trustedFeatures = [
     {
-      icon: Shield,
       title: "Secure Payments",
       description: "256-bit SSL encryption",
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=40&h=30&fit=crop"
     },
     {
-      icon: Award,
       title: "Quality Assured",
       description: "University verified",
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=40&h=30&fit=crop"
     },
     {
-      icon: Clock,
       title: "Instant Access",
       description: "Download immediately",
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=40&h=30&fit=crop"
     },
     {
-      icon: Users,
       title: "24/7 Support",
       description: "Expert assistance",
-      image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=40&h=30&fit=crop"
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Order Summary with Blue Gradient */}
-      <Card className="border-gray-200 shadow-lg bg-gradient-to-br from-blue-50 via-white to-blue-100 backdrop-blur-sm">
-        <CardHeader className="pb-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">Order Summary</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsINR(!isINR)}
-              className="flex items-center gap-1 text-xs bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              {isINR ? <IndianRupee className="h-3 w-3" /> : <DollarSign className="h-3 w-3" />}
-              {isINR ? 'INR' : 'USD'}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-fit">
+      {/* Order Summary Card */}
+      <div className="bg-white rounded-xl shadow-sm transition-all duration-300 hover:shadow-[0_8px_30px_rgb(59_130_246_0.15)] h-fit">
+        <div className="p-6">
+          <h2 className="text-xl font-semibold mb-6 text-blue-600">Order Summary</h2>
+          
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Items ({itemCount})</span>
+              <span className="font-medium">{formatPrice(subtotal)}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Platform Fee (5%)</span>
+              <span className="font-medium">{formatPrice(platformFee)}</span>
+            </div>
+            
+            <div className="border-t border-gray-200 pt-4 mt-4">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-lg">Total</span>
+                <span className="font-semibold text-lg text-blue-600">{formatPrice(total)}</span>
+              </div>
+            </div>
+
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg mt-4">
+              Proceed to Checkout
             </Button>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Items ({itemCount})</span>
-            <span className="font-medium">{formatPrice(subtotal)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Platform Fee (5%)</span>
-            <span className="font-medium">{formatPrice(platformFee)}</span>
-          </div>
-          <div className="border-t pt-3">
-            <div className="flex justify-between font-semibold text-lg">
-              <span>Total</span>
-              <span className="text-blue-600">{formatPrice(total)}</span>
-            </div>
-          </div>
-          <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white mt-4">
-            Proceed to Checkout
-          </Button>
-          <p className="text-xs text-gray-500 text-center mt-2">
-            {isINR ? 'Prices in Indian Rupees' : 'Prices in US Dollars'}
-          </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Trusted Indicators with Green Gradient */}
-      <Card className="border-gray-200 shadow-lg bg-gradient-to-br from-green-50 via-white to-emerald-100 backdrop-blur-sm">
-        <CardHeader className="pb-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-t-lg">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Trusted Platform
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {trustedIndicators.map((indicator, index) => {
-            const IconComponent = indicator.icon;
-            return (
-              <div key={index} className="flex items-center gap-3">
-                <div className="relative">
-                  <img 
-                    src={indicator.image} 
-                    alt={indicator.title}
-                    className="w-8 h-6 object-cover rounded border"
-                  />
-                  <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full p-0.5">
-                    <IconComponent className="h-2 w-2 text-white" />
-                  </div>
+      {/* Trusted Platform Card */}
+      <div className="bg-white rounded-xl shadow-sm transition-all duration-300 hover:shadow-[0_8px_30px_rgb(34_197_94_0.15)] h-fit">
+        <div className="p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Shield className="h-5 w-5 text-green-600" />
+            <h2 className="text-xl font-semibold text-green-600">Trusted Platform</h2>
+          </div>
+
+          <div className="space-y-4">
+            {trustedFeatures.map((feature, index) => (
+              <div key={index} className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-3 h-3 rounded-full bg-green-600" />
                 </div>
                 <div>
-                  <h4 className="font-medium text-sm text-gray-900">{indicator.title}</h4>
-                  <p className="text-xs text-gray-600">{indicator.description}</p>
+                  <h4 className="font-medium text-gray-900">{feature.title}</h4>
+                  <p className="text-sm text-gray-600">{feature.description}</p>
                 </div>
               </div>
-            );
-          })}
-          <Badge variant="outline" className="w-full justify-center mt-4 text-xs border-green-500 text-green-700 bg-gradient-to-r from-green-50 to-emerald-50">
-            <Award className="h-3 w-3 mr-1" />
-            Verified Engineering Solutions
-          </Badge>
-        </CardContent>
-      </Card>
+            ))}
+          </div>
+
+          <div className="mt-6 p-2 rounded-lg bg-green-50 border border-green-200">
+            <p className="text-center text-sm text-green-700 font-medium">
+              Verified Engineering Solutions
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

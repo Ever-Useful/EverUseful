@@ -324,110 +324,80 @@ const QuickActions = () => {
               <ArrowRight className="w-5 h-5" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle>Start a New Project</DialogTitle>
               <DialogDescription>
-                Fill in the details to create your project.
+                Fill in all the details to create your project.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-4 py-4 max-h-[90vh] overflow-y-auto">
+              {/* Project Main Info */}
               <div className="grid gap-2">
-                <Label htmlFor="project-title">Project Title</Label>
-                <Input
-                  id="project-title"
-                  value={projectData.title}
-                  onChange={(e) => setProjectData({ ...projectData, title: e.target.value })}
-                  placeholder="Enter project title"
-                />
+                <Label htmlFor="project-title">Title</Label>
+                <Input id="project-title" placeholder="Enter project title" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="project-description">Description</Label>
-                <Textarea
-                  id="project-description"
-                  value={projectData.description}
-                  onChange={(e) => setProjectData({ ...projectData, description: e.target.value })}
-                  placeholder="Describe your project"
-                />
+                <Textarea id="project-description" placeholder="Describe your project" />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="project-category">Category</Label>
-                <Select
-                  value={projectData.category}
-                  onValueChange={(value) => setProjectData({ ...projectData, category: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Web Development">Web Development</SelectItem>
-                    <SelectItem value="Mobile App">Mobile App</SelectItem>
-                    <SelectItem value="AI/ML">AI/ML</SelectItem>
-                    <SelectItem value="Data Science">Data Science</SelectItem>
-                    <SelectItem value="IoT">IoT</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="project-tags">Tags (comma-separated)</Label>
-                <Input
-                  id="project-tags"
-                  value={projectData.tags}
-                  onChange={(e) => setProjectData({ ...projectData, tags: e.target.value })}
-                  placeholder="e.g., React, Node.js, MongoDB"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="project-link">Project Link (optional)</Label>
-                <Input
-                  id="project-link"
-                  value={projectData.projectLink}
-                  onChange={(e) => setProjectData({ ...projectData, projectLink: e.target.value })}
-                  placeholder="https://your-project.com"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="github-link">GitHub Link (optional)</Label>
-                <Input
-                  id="github-link"
-                  value={projectData.githubLink}
-                  onChange={(e) => setProjectData({ ...projectData, githubLink: e.target.value })}
-                  placeholder="https://github.com/username/repo"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label>Project Image (optional)</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploadingImage}
-                  />
-                  {uploadingImage && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
-                  )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="project-image">Main Image</Label>
+                  <input id="project-image" type="file" accept="image/*" className="block w-full text-sm text-gray-700 border border-gray-300 rounded px-3 py-2" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-images">Gallery Images</Label>
+                  <input id="project-images" type="file" accept="image/*" multiple className="block w-full text-sm text-gray-700 border border-gray-300 rounded px-3 py-2" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-category">Category</Label>
+                  <Input id="project-category" placeholder="e.g., FinTech" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-price">Price (USD)</Label>
+                  <Input id="project-price" type="number" min="0" placeholder="e.g., 1000" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-duration">Duration</Label>
+                  <Input id="project-duration" placeholder="e.g., 3 months" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-status">Status</Label>
+                  <Input id="project-status" placeholder="e.g., Active" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-teamSize">Team Size</Label>
+                  <Input id="project-teamSize" type="number" min="1" placeholder="e.g., 5" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-tags">Tags (comma-separated)</Label>
+                  <Input id="project-tags" placeholder="e.g., AI, Security, Finance" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-skills">Skills (comma-separated)</Label>
+                  <Input id="project-skills" placeholder="e.g., Python, Data Analytics" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-features">Features (comma-separated)</Label>
+                  <Input id="project-features" placeholder="e.g., Real-time detection, Automated alerts" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-techStack">Tech Stack (comma-separated)</Label>
+                  <Input id="project-techStack" placeholder="e.g., Python, TensorFlow, AWS, React" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="project-deliverables">Deliverables (comma-separated)</Label>
+                  <Input id="project-deliverables" placeholder="e.g., Source code, API documentation" />
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => {
-                setProjectData({
-                  title: '',
-                  description: '',
-                  category: '',
-                  tags: '',
-                  projectLink: '',
-                  githubLink: '',
-                  imageUrl: '',
-                });
-                setShowProjectDialog(false);
-              }}>
+              <Button variant="outline" onClick={() => setShowProjectDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleStartProject} disabled={loading}>
-                {loading ? 'Creating...' : 'Create Project'}
+              <Button>
+                Create Project
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -513,113 +483,6 @@ const QuickActions = () => {
                 ))}
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      ),
-    },
-    {
-      icon: Calendar,
-      label: 'Schedule Meeting',
-      description: 'Book a time slot',
-      primary: false,
-      dialog: (
-        <Dialog open={showMeetingDialog} onOpenChange={setShowMeetingDialog}>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full justify-between p-4 h-auto border-slate-300 text-slate-700 hover:bg-slate-50 shadow-md hover:shadow-lg transition-all duration-300"
-            >
-              <div className="flex items-center">
-                <Calendar className="w-5 h-5 mr-3" />
-                <div className="text-left">
-                  <div className="font-semibold">Schedule Meeting</div>
-                  <div className="text-sm opacity-80">Book a time slot</div>
-                </div>
-              </div>
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Schedule a Meeting</DialogTitle>
-              <DialogDescription>
-                Fill in the details to schedule your meeting.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="meeting-title">Meeting Title</Label>
-                <Input
-                  id="meeting-title"
-                  value={meetingData.title}
-                  onChange={(e) => setMeetingData({ ...meetingData, title: e.target.value })}
-                  placeholder="Enter meeting title"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="meeting-date">Date</Label>
-                <Input
-                  id="meeting-date"
-                  type="date"
-                  value={meetingData.date}
-                  onChange={(e) => setMeetingData({ ...meetingData, date: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="meeting-time">Time</Label>
-                <Input
-                  id="meeting-time"
-                  type="time"
-                  value={meetingData.time}
-                  onChange={(e) => setMeetingData({ ...meetingData, time: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="meeting-id">Meeting ID</Label>
-                <Input
-                  id="meeting-id"
-                  value={meetingData.meetingId}
-                  onChange={(e) => setMeetingData({ ...meetingData, meetingId: e.target.value })}
-                  placeholder="Enter meeting ID"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="meeting-link">Meeting Link</Label>
-                <Input
-                  id="meeting-link"
-                  value={meetingData.meetingLink}
-                  onChange={(e) => setMeetingData({ ...meetingData, meetingLink: e.target.value })}
-                  placeholder="Enter meeting link"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="meeting-participants">Participants (Email addresses, comma-separated)</Label>
-                <Input
-                  id="meeting-participants"
-                  value={meetingData.participants}
-                  onChange={(e) => setMeetingData({ ...meetingData, participants: e.target.value })}
-                  placeholder="email1@example.com, email2@example.com"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => {
-                setMeetingData({
-                  title: '',
-                  date: '',
-                  time: '',
-                  participants: '',
-                  meetingId: '',
-                  meetingLink: '',
-                });
-                setShowMeetingDialog(false);
-              }}>
-                Cancel
-              </Button>
-              <Button onClick={handleScheduleMeeting} disabled={loading}>
-                {loading ? 'Scheduling...' : 'Schedule Meeting'}
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       ),
