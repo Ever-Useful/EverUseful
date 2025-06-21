@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock, DollarSign, Heart, ArrowLeft, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link } from "lucide-react";
 import { getFreelancerById } from "@/utils/freelancerData";
 import { ChatBox } from "@/components/ChatBox";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+
 
 const FreelancerProfile = () => {
   const { id } = useParams();
@@ -76,6 +79,7 @@ const FreelancerProfile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
+      <Header />
       <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Profile Header */}
         <Card className="mb-8 bg-white shadow-lg rounded-xl overflow-hidden">
@@ -122,13 +126,6 @@ const FreelancerProfile = () => {
                       <h1 className="text-3xl font-bold text-gray-900 mb-1">{freelancer.name}</h1>
                       <p className="text-xl text-purple-600 font-medium mb-3">{freelancer.title}</p>
                     </div>
-                    <div className="flex items-center space-x-2 mb-4 sm:mb-0">
-                      <div className="flex items-center bg-yellow-50 px-3 py-1 rounded-full">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="ml-1 font-semibold text-gray-800">{freelancer.rating}</span>
-                        <span className="ml-1 text-gray-600 text-sm">({freelancer.reviews})</span>
-                      </div>
-                    </div>
                   </div>
                   
                   <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -136,14 +133,11 @@ const FreelancerProfile = () => {
                       <MapPin className="w-4 h-4 mr-1" />
                       <span className="text-sm">{freelancer.location}</span>
                     </div>
-                    {/* <div className="flex items-center text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                      <GraduationCap className="w-4 h-4 mr-1" />
-                      <span className="text-sm">{freelancer.university || "Stanford University"}</span>
-                    </div>
-                    <div className="flex items-center text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                      <Briefcase className="w-4 h-4 mr-1" />
-                      <span className="text-sm">{freelancer.experience || "3 years"} experience</span>
-                    </div> */}
+                    <div className="flex items-center bg-yellow-50 px-3 py-1 rounded-full">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span className="ml-1 font-semibold text-gray-800">{freelancer.rating}</span>
+                        <span className="ml-1 text-gray-600 text-sm">({freelancer.reviews})</span>
+                      </div>
                   </div>
 
                   <p className="text-gray-700 max-w-3xl leading-relaxed">{freelancer.description}</p>
@@ -424,6 +418,7 @@ const FreelancerProfile = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

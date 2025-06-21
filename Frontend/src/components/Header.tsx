@@ -1,51 +1,91 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, Sparkles, ShoppingCart, User, LogOut } from "lucide-react";
+import { Menu, X, Sparkles, ShoppingCart, User, LogOut, Bell, MessageSquare } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout, auth } from "../lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+
+// Mock notification data - replace with real data from your backend
+const mockNotifications = [
+  {
+    id: 1,
+    title: "New order received",
+    message: "You have a new order for your product",
+    time: "2 minutes ago",
+    unread: true,
+  },
+  {
+    id: 2,
+    title: "Profile updated",
+    message: "Your profile has been successfully updated",
+    time: "1 hour ago",
+    unread: true,
+  },
+  {
+    id: 3,
+    title: "Welcome to AMOGH!",
+    message: "Thank you for joining our platform",
+    time: "2 days ago",
+    unread: false,
+  },
+];
+
+// Mock messages data - replace with real data from your backend
+const mockMessages = [
+  {
+    id: 1,
+    sender: "John Doe",
+    message: "Hey, are you available for a quick chat?",
+    time: "5 minutes ago",
+    unread: true,
+  },
+  {
+    id: 2,
+    sender: "Sarah Smith",
+    message: "Thanks for the help with the project!",
+    time: "30 minutes ago",
+    unread: true,
+  },
+  {
+    id: 3,
+    sender: "Mike Johnson",
+    message: "Let's schedule a meeting for tomorrow",
+    time: "2 hours ago",
+    unread: false,
+  },
+];
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [notifications, setNotifications] = useState(mockNotifications);
+  const [messages, setMessages] = useState(mockMessages);
   const navigate = useNavigate();
+
+  const unreadNotificationCount = notifications.filter(n => n.unread).length;
+  const unreadMessageCount = messages.filter(m => m.unread).length;
 
   useEffect(() => {
     const checkLogin = () => {
       setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
     };
 
-    // Listen to Firebase auth state changes
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsLoggedIn(true);
-        localStorage.setItem("isLoggedIn", "true");
-      } else {
-        setIsLoggedIn(false);
-        localStorage.removeItem("isLoggedIn");
-      }
-    });
-
     checkLogin();
-
     window.addEventListener("storage", checkLogin);
 
     return () => {
       window.removeEventListener("storage", checkLogin);
-      unsubscribe();
     };
   }, []);
 
   const handleLogout = async () => {
     try {
-      await logout(); // this signs the user out from Firebase
       localStorage.removeItem("isLoggedIn");
       setIsLoggedIn(false);
       navigate("/signin");
@@ -54,6 +94,19 @@ export const Header = () => {
     }
   };
 
+  const handleNotificationClick = (notificationId: number) => {
+    // Mark notification as read when clicked
+    setNotifications(prev => 
+      prev.map(n => n.id === notificationId ? { ...n, unread: false } : n)
+    );
+  };
+
+  const handleMessageClick = (messageId: number) => {
+    // Mark message as read when clicked
+    setMessages(prev => 
+      prev.map(m => m.id === messageId ? { ...m, unread: false } : m)
+    );
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-purple-200/50 bg-white/95 backdrop-blur-md shadow-sm">
@@ -119,6 +172,122 @@ export const Header = () => {
             </>
           ) : (
             <>
+              {/* Messages Button */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base">
+                    <MessageSquare className="w-4 h-4" />
+                    {unreadMessageCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
+                        {unreadMessageCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 border-0 shadow-lg bg-white/95 backdrop-blur-md">
+                  <div className="p-3 border-b">
+                    <h3 className="font-semibold text-slate-800">Messages</h3>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {messages.slice(0, 3).map((message) => (
+                      <DropdownMenuItem
+                        key={message.id}
+                        className="flex flex-col items-start p-3 cursor-pointer hover:bg-slate-50"
+                        onClick={() => handleMessageClick(message.id)}
+                      >
+                        <div className="flex items-start justify-between w-full">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-sm text-slate-800">
+                                {message.sender}
+                              </p>
+                              {message.unread && (
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-600 mt-1">
+                              {message.message}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {message.time}
+                            </p>
+                          </div>
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                    {messages.length === 0 && (
+                      <div className="p-4 text-center text-slate-500">
+                        No messages yet
+                      </div>
+                    )}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center justify-center p-3 cursor-pointer text-green-600 font-medium">
+                      See All
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Notifications Button */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base">
+                    <Bell className="w-4 h-4" />
+                    {unreadNotificationCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
+                        {unreadNotificationCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 border-0 shadow-lg bg-white/95 backdrop-blur-md">
+                  <div className="p-3 border-b">
+                    <h3 className="font-semibold text-slate-800">Notifications</h3>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {notifications.slice(0, 3).map((notification) => (
+                      <DropdownMenuItem
+                        key={notification.id}
+                        className="flex flex-col items-start p-3 cursor-pointer hover:bg-slate-50"
+                        onClick={() => handleNotificationClick(notification.id)}
+                      >
+                        <div className="flex items-start justify-between w-full">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-sm text-slate-800">
+                                {notification.title}
+                              </p>
+                              {notification.unread && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-600 mt-1">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {notification.time}
+                            </p>
+                          </div>
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                    {notifications.length === 0 && (
+                      <div className="p-4 text-center text-slate-500">
+                        No notifications yet
+                      </div>
+                    )}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center justify-center p-3 cursor-pointer text-blue-600 hover:text-blue-700 font-medium">
+                      See All
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button variant="ghost" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base" asChild>
                 <Link to="/cart">
                   <ShoppingCart className="w-4 h-4 mr-2" />
@@ -187,6 +356,18 @@ export const Header = () => {
                 </>
               ) : (
                 <>
+                  <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" asChild>
+                    <Link to="/profile">
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Messages {unreadMessageCount > 0 && `(${unreadMessageCount})`}
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" asChild>
+                    <Link to="/profile">
+                      <Bell className="w-4 h-4 mr-2" />
+                      Notifications {unreadNotificationCount > 0 && `(${unreadNotificationCount})`}
+                    </Link>
+                  </Button>
                   <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" asChild>
                     <Link to="/cart">
                       <ShoppingCart className="w-4 h-4 mr-2" />
