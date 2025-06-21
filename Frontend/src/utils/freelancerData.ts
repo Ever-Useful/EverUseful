@@ -10,8 +10,10 @@ export interface Freelancer {
   availability: string;
   skills: string[];
   description: string;
+  about: string;
   completedProjects: number;
   responseTime: string;
+  connections: number;
 }
 
 export const freelancersData: Freelancer[] = [
@@ -27,8 +29,10 @@ export const freelancersData: Freelancer[] = [
     availability: "Available",
     skills: ["Machine Learning", "Python", "TensorFlow", "Research"],
     description: "PhD in AI with 8+ years experience in machine learning research and development.",
+    about: "I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems.",
     completedProjects: 45,
-    responseTime: "2 hours"
+    responseTime: "2 hours",
+    connections: 500,
   },
   {
     id: 2,
@@ -42,8 +46,10 @@ export const freelancersData: Freelancer[] = [
     availability: "Available",
     skills: ["Solidity", "Web3", "Smart Contracts", "React"],
     description: "Full-stack blockchain developer specializing in DeFi and NFT platforms.",
+    about: "I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems.",
     completedProjects: 32,
-    responseTime: "1 hour"
+    responseTime: "1 hour",
+    connections: 500,
   },
   {
     id: 3,
@@ -57,8 +63,10 @@ export const freelancersData: Freelancer[] = [
     availability: "Busy until Feb 15",
     skills: ["Figma", "User Research", "Prototyping", "Design Systems"],
     description: "Senior UX designer with expertise in creating intuitive digital experiences.",
+    about: "I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems.",
     completedProjects: 67,
-    responseTime: "4 hours"
+    responseTime: "4 hours",
+    connections: 500,
   },
   {
     id: 4,
@@ -72,8 +80,10 @@ export const freelancersData: Freelancer[] = [
     availability: "Available",
     skills: ["Python", "R", "Machine Learning", "Statistics"],
     description: "Data scientist with PhD in Statistics, specialized in predictive modeling.",
+    about: "I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems.",
     completedProjects: 28,
-    responseTime: "3 hours"
+    responseTime: "3 hours",
+    connections: 500,
   },
   {
     id: 5,
@@ -87,8 +97,10 @@ export const freelancersData: Freelancer[] = [
     availability: "Available",
     skills: ["React Native", "Flutter", "iOS", "Android"],
     description: "Mobile app developer with 6+ years experience in cross-platform development.",
+    about: "I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems.",
     completedProjects: 54,
-    responseTime: "2 hours"
+    responseTime: "2 hours",
+    connections: 500,
   },
   {
     id: 6,
@@ -102,8 +114,10 @@ export const freelancersData: Freelancer[] = [
     availability: "Available",
     skills: ["Penetration Testing", "Security Audits", "Compliance", "Risk Assessment"],
     description: "Certified cybersecurity professional with expertise in enterprise security.",
+    about: "I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems. I am passionate about advancing AI technologies and have worked on various projects ranging from natural language processing to computer vision. My goal is to leverage AI to solve real-world problems.",
     completedProjects: 38,
-    responseTime: "1 hour"
+    responseTime: "1 hour",
+    connections: 500,
   }
 ];
 
