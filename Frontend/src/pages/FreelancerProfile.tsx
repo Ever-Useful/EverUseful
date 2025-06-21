@@ -92,6 +92,15 @@ const FreelancerProfile = () => {
               >
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back to Search
               </Button>
+              <div className="flex space-x-3">
+                <Button variant="outline" className="border-purple-300 text-purple-600 hover:bg-purple-50 rounded-lg">
+                  <Heart className="w-4 h-4 mr-2" />
+                  Save Profile
+                </Button>
+                <Button className="bg-purple-600 hover:bg-purple-700 rounded-lg">
+                  Request Collaboration
+                </Button>
+              </div>
             </div>
             
             <div className="flex flex-col md:flex-row items-start space-y-6 md:space-y-0 md:space-x-8">
@@ -415,3 +424,4 @@ const FreelancerProfile = () => {
 };
 
 export default FreelancerProfile;
+
