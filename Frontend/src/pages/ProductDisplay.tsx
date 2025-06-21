@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,67 +20,76 @@ import {
   ShoppingCart
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { useAuthState } from "@/hooks/useAuthState";
+import { firestoreService } from "@/services/firestoreService";
+import { userService } from "@/services/userService";
+import { toast } from "sonner";
 
 const ProductDisplay = () => {
+  const { id } = useParams();
+  const [project, setProject] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
   const MAX_LENGTH = 200;
+  const { user, token, isLoading: authLoading } = useAuthState();
+  const [showPopupMenu, setShowPopupMenu] = useState(false);
   
-  const project = {
-    id: 1,
-    title: "AI-Powered Climate Change Prediction Model",
-    subtitle: "Advanced machine learning system for environmental forecasting",
-    description: "Revolutionary machine learning system for predicting climate patterns and environmental changes with 95% accuracy. This comprehensive solution combines satellite data, weather patterns, and historical climate information to provide actionable insights for governments, researchers, and environmental organizations.",
-    category: "AI & Sustainability",
-    price: "$2,500",
-    originalPrice: "$3,200",
-    discount: "22%",
-    duration: "2 months",
-    rating: 4.9,
-    reviews: 127,
-    downloads: 1540,
-    likes: 284,
-    views: 8920,
-    author: {
-      name: "Dr. Sarah Chen",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-      verified: true,
-      rating: 4.9,
-      projects: 24,
-      bio: "Climate scientist and AI researcher with 10+ years experience in environmental modeling."
-    },
-    images: [
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1569163139394-de44aa8c3cc0?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=600&fit=crop"
-    ],
-    skills: ["Machine Learning", "Python", "Climate Science", "TensorFlow", "Data Analytics"],
-    features: [
-      "95% prediction accuracy",
-      "Real-time data processing",
-      "Global climate modeling",
-      "Historical data analysis",
-      "API integration ready",
-      "Custom alerts system"
-    ],
-    techStack: ["Python", "TensorFlow", "Pandas", "NumPy", "Matplotlib", "Jupyter"],
-    deliverables: [
-      "Complete source code",
-      "Documentation",
-      "Training dataset",
-      "API endpoints",
-      "Deployment guide",
-      "30-day support"
-    ]
-  };
+  useEffect(() => {
+    const fetchProject = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`http://localhost:3000/api/marketplace/projects/${id}`);
+        if (!response.ok) throw new Error('Failed to fetch project');
+        const data = await response.json();
+        setProject(data.project);
+      } catch (err: any) {
+        setError(err.message || 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchProject();
+  }, [id]);
 
   const showReceipt = () => {
     navigate("/paymentSuccess")
+  }
+
+  const handleAddToCart = async (projectId: number) => {
+    if (!user || !token) {
+      setShowPopupMenu(true);
+      return;
+    }
+    try {
+      const firestoreData = await firestoreService.getCurrentUserData();
+      if (!firestoreData) {
+        toast.error('User data not found');
+        return;
+      }
+      await userService.addToCart(firestoreData.customUserId, {
+        productId: projectId.toString(),
+        addedAt: new Date().toISOString(),
+        quantity: 1
+      });
+      toast.success('Project added to cart successfully');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add project to cart');
+    }
+  };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  if (error || !project) {
+    return <div className="min-h-screen flex items-center justify-center text-red-500">{error || 'Project not found'}</div>;
   }
 
   const shouldTruncate = project.description.length > MAX_LENGTH
@@ -99,28 +108,30 @@ const ProductDisplay = () => {
             <div>
               <div className="mb-4">
                 <img 
-                  src={project.images[selectedImage]} 
+                  src={project.images ? project.images[selectedImage] : project.image} 
                   alt={project.title}
                   className="w-full h-96 object-cover rounded-lg shadow-lg"
                 />
               </div>
-              <div className="grid grid-cols-4 gap-2">
-                {project.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`relative overflow-hidden rounded border-2 transition-all ${
-                      selectedImage === index ? 'border-blue-500' : 'border-gray-200'
-                    }`}
-                  >
-                    <img 
-                      src={image} 
-                      alt={`${project.title} ${index + 1}`}
-                      className="w-full h-20 object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
+              {project.images && project.images.length > 1 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {project.images.map((image: string, index: number) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`relative overflow-hidden rounded border-2 transition-all ${
+                        selectedImage === index ? 'border-blue-500' : 'border-gray-200'
+                      }`}
+                    >
+                      <img 
+                        src={image} 
+                        alt={`${project.title} ${index + 1}`}
+                        className="w-full h-20 object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Product Info */}
@@ -181,9 +192,9 @@ const ProductDisplay = () => {
               <div className="bg-gray-50 rounded-lg p-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <span className="text-3xl font-bold text-gray-900">{project.price}</span>
+                    <span className="text-3xl font-bold text-gray-900">${project.price}</span>
                     <span className="text-lg text-gray-500 line-through ml-2">{project.originalPrice}</span>
-                    <span className="text-lg text-gray-500 ml-2">{project.discount} off</span>
+                    <span className="text-lg text-gray-500 ml-2">{project.discount}</span>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center space-x-1 text-gray-600">
@@ -197,7 +208,7 @@ const ProductDisplay = () => {
                   <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={showReceipt}>
                     Purchase Now
                   </Button>
-                  <Button className="flex-1 items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600">
+                  <Button className="flex-1 items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600" onClick={() => handleAddToCart(project.id)}>
                     <ShoppingCart className="w-5 h-5" />
                     Add to Cart
                   </Button>
@@ -377,6 +388,15 @@ const ProductDisplay = () => {
         </div>
       </div>
       <Footer/>
+      {/* PopupMenu for login if not authenticated */}
+      {showPopupMenu && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-xl font-bold mb-4">Sign in to add to cart</h2>
+            <Button onClick={() => setShowPopupMenu(false)}>Close</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
