@@ -29,7 +29,7 @@ import FindExpert from "./pages/FindExpert";
 import PrivacyPolicy from "./pages/Privacy_Policy";
 import TermsOfService from "./pages/TermsOfService";
 import SendFeedback from "./pages/SendFeedback";
-
+import Agents from "./pages/Agents";
 const queryClient = new QueryClient();
 
 const App = () => (  
@@ -64,6 +64,7 @@ const App = () => (
             <Route path="/privacypolicy" element={<PrivacyPolicy />} />
             <Route path="/termsofservice" element={<TermsOfService />} />
             <Route path="/sendfeedback" element={<SendFeedback />} />
+            <Route path="/agents" element={<Agents />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
