@@ -86,24 +86,7 @@
         "count": 0
       },
       "marketplace": {
-        "cart": [
-          {
-            "productId": "17",
-            "name": "AI-Based Fraud Detection System",
-            "price": 3100,
-            "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80",
-            "addedAt": "2025-06-18T20:22:23.131Z",
-            "quantity": 1
-          },
-          {
-            "productId": "10",
-            "name": "Smart Agriculture Monitoring System",
-            "price": 2300,
-            "image": "https://images.unsplash.com/photo-1556742031-c6961e8560b0?auto=format&fit=crop&w=400&q=80",
-            "addedAt": "2025-06-19T05:49:18.885Z",
-            "quantity": 1
-          }
-        ],
+        "cart": [],
         "orders": [],
         "favorites": [],
         "reviews": [],
@@ -169,7 +152,7 @@
         "website": "NA",
         "title": null,
         "createdAt": "2025-06-19T21:16:02.064Z",
-        "updatedAt": "2025-06-20T06:30:55.397Z",
+        "updatedAt": "2025-06-20T13:57:15.057Z",
         "college": "CUJ",
         "degree": "Btech",
         "course": "CSE",
@@ -188,11 +171,6 @@
             "productId": "10",
             "addedAt": "2025-06-19T21:36:07.569Z",
             "quantity": 1
-          },
-          {
-            "productId": "16",
-            "addedAt": "2025-06-19T21:37:05.062Z",
-            "quantity": 1
           }
         ],
         "orders": [],
@@ -201,7 +179,9 @@
         "wishlist": []
       },
       "skills": [
-        "python"
+        "python",
+        "frontend",
+        "backend"
       ],
       "social": {
         "followers": [],
@@ -242,13 +222,13 @@
         "degree": "Btech",
         "course": "CSE",
         "year": "3",
-        "updatedAt": "2025-06-20T06:30:55.397Z"
+        "updatedAt": "2025-06-20T13:57:15.057Z"
       }
     }
   },
   "userCounter": 5,
   "metadata": {
-    "lastUpdated": "2025-06-20T06:30:55.397Z",
+    "lastUpdated": "2025-06-21T13:33:36.907Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

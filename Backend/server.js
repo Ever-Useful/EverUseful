@@ -20,6 +20,11 @@ app.use(cors({
 
 app.use(express.json());
 
+// Test endpoint to check if server is running
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Backend server is running!', timestamp: new Date().toISOString() });
+});
+
 // Marketplace routes
 app.use('/api/marketplace', marketplaceRoutes);
 

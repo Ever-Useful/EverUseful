@@ -238,4 +238,161 @@ router.post('/projects/:id/like', async (req, res) => {
   }
 });
 
+// Create a new project
+router.post('/projects', async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      image,
+      images,
+      category,
+      price,
+      duration,
+      status,
+      posted,
+      teamSize,
+      tags,
+      skills,
+      features,
+      techStack,
+      deliverables,
+      customUserId // required for author
+    } = req.body;
+
+    // Enforce required fields
+    if (!title || !description || !price || !category || !customUserId) {
+      return res.status(400).json({ error: 'Title, description, price, category, and customUserId are required' });
+    }
+
+    // Load marketplace data
+    const data = await readMarketplaceData();
+    // Load user data
+    const userService = require('../services/userService');
+    await userService.loadUserData();
+    const user = userService.findUserByCustomId(customUserId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Generate new project id
+    const newId = data.projects.length > 0 ? Math.max(...data.projects.map(p => p.id)) + 1 : 1;
+
+    // Build author object from user profile
+    const authorProfile = user.profile || {};
+    const author = {
+      name: authorProfile.title || 'Unknown',
+      image: authorProfile.avatar || null,
+      verified: true,
+      rating: 0,
+      projects: user.projects?.count || 0,
+      bio: authorProfile.bio || null
+    };
+
+    // Build new project object
+    const newProject = {
+      id: newId,
+      title,
+      description,
+      image: image || null,
+      images: images || [],
+      category,
+      price,
+      duration: duration || null,
+      rating: 0,
+      reviews: 0,
+      likes: 0,
+      views: 0,
+      author,
+      status: 'active',
+      posted: posted || new Date().toISOString().split('T')[0],
+      teamSize: teamSize || null,
+      tags: tags || [],
+      skills: skills || [],
+      features: features || [],
+      techStack: techStack || [],
+      deliverables: deliverables || [],
+      favoritedBy: []
+    };
+
+    data.projects.push(newProject);
+    await writeMarketplaceData(data);
+
+    res.status(201).json({ project: newProject });
+  } catch (error) {
+    console.error('Error creating new project:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete a project
+router.delete('/projects/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { customUserId } = req.body; // Get the user who owns the project
+
+    if (!customUserId) {
+      return res.status(400).json({ error: 'customUserId is required' });
+    }
+
+    console.log(`=== DELETE PROJECT DEBUGGING ===`);
+    console.log(`Deleting project ID: ${id}`);
+    console.log(`User ID: ${customUserId}`);
+
+    // Load marketplace data
+    const data = await readMarketplaceData();
+    const projectIndex = data.projects.findIndex(p => p.id === parseInt(id));
+
+    if (projectIndex === -1) {
+      console.log('Project not found in marketplace.json');
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const project = data.projects[projectIndex];
+    console.log(`Found project: ${project.title}`);
+
+    // Verify the user owns this project (check author name matches user profile)
+    const userService = require('../services/userService');
+    await userService.loadUserData();
+    const user = userService.findUserByCustomId(customUserId);
+    
+    if (!user) {
+      console.log('User not found in userData.json');
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if user owns this project (by checking if project ID is in their created list)
+    if (!user.projects.created.includes(parseInt(id))) {
+      console.log('User does not own this project');
+      return res.status(403).json({ error: 'You can only delete your own projects' });
+    }
+
+    // Remove project from marketplace.json
+    data.projects.splice(projectIndex, 1);
+    await writeMarketplaceData(data);
+    console.log('Project removed from marketplace.json');
+
+    // Remove project ID from user's created projects list
+    const projectIdIndex = user.projects.created.indexOf(parseInt(id));
+    if (projectIdIndex !== -1) {
+      user.projects.created.splice(projectIdIndex, 1);
+      user.projects.count = Math.max(0, user.projects.count - 1);
+      user.stats.projectsCount = Math.max(0, user.stats.projectsCount - 1);
+      await userService.saveUserData();
+      console.log('Project ID removed from user\'s created projects list');
+    }
+
+    console.log(`=== END DELETE PROJECT DEBUGGING ===`);
+
+    res.json({ 
+      success: true, 
+      message: 'Project deleted successfully',
+      deletedProjectId: parseInt(id)
+    });
+  } catch (error) {
+    console.error('Error deleting project:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router; 
