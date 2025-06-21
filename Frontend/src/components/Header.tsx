@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, Sparkles, ShoppingCart, User, LogOut, Bell, MessageSquare, Send } from "lucide-react";
+import { Menu, X, Sparkles, ShoppingCart, User, LogOut, Bell, MessageSquare, Send, Briefcase, List, Landmark, UserPlus, Users, Trophy, Heart, Bookmark, TrendingUp, Star, Shield, LayoutGrid, AlertCircle, Edit, Settings, HelpCircle, BarChart2, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -11,6 +11,11 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { EditProfile } from './EditProfile';
+import InitialsAvatar from './InitialsAvatar';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { userService } from '@/services/userService';
 
 // Mock notification data with more comprehensive entries
 const mockNotifications = [
@@ -159,11 +164,14 @@ const mockChatMessages: Record<string, Array<{
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Set to true for demo
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
+  const [profileData, setProfileData] = useState({ firstName: '', lastName: '' });
   const [notifications, setNotifications] = useState(mockNotifications);
   const [messages, setMessages] = useState(mockMessages);
   const [showNotificationsSidebar, setShowNotificationsSidebar] = useState(false);
   const [showMessagesSidebar, setShowMessagesSidebar] = useState(false);
+  const [showProfileSidebar, setShowProfileSidebar] = useState(false);
+  const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const navigate = useNavigate();
@@ -172,23 +180,27 @@ export const Header = () => {
   const unreadMessageCount = messages.filter(m => m.unread).length;
 
   useEffect(() => {
-    const checkLogin = () => {
-      setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true" || true); // Demo mode
-    };
-
-    checkLogin();
-    window.addEventListener("storage", checkLogin);
-
-    return () => {
-      window.removeEventListener("storage", checkLogin);
-    };
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setIsLoggedIn(true);
+        const userProfile = await userService.getUserProfile();
+        setProfileData({
+          firstName: userProfile.auth.firstName || '',
+          lastName: userProfile.auth.lastName || '',
+        });
+      } else {
+        setIsLoggedIn(false);
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleLogout = async () => {
     try {
       localStorage.removeItem("isLoggedIn");
       setIsLoggedIn(false);
-      navigate("/signin");
+      setShowProfileSidebar(false);
+      navigate("/signup");
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -420,34 +432,16 @@ export const Header = () => {
 
                 <Button variant="ghost" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base" asChild>
                   <Link to="/cart">
-                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    <ShoppingCart className="w-4 h-4" />
                   </Link>
                 </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base">
-                      <User className="w-4 h-4 mr-2" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-36 border-0 shadow-lg">
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile" className="flex items-center cursor-pointer">
-                        <User className="w-4 h-4 mr-2" />
-                        View Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/dashboard" className="flex items-center cursor-pointer">
-                        <span className="w-4 h-4 mr-2">📊</span>
-                        Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout} className="flex items-center cursor-pointer">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setShowProfileSidebar(true)} 
+                  className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base p-2 rounded-full"
+                >
+                  <User className="w-4 h-4" />
+                </Button>
               </>
             )}
           </div>
@@ -496,14 +490,12 @@ export const Header = () => {
                     </Button>
                     <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" asChild>
                       <Link to="/cart">
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        Cart
+                        <ShoppingCart className="w-4 h-4" />
                       </Link>
                     </Button>
                     <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" asChild>
                       <Link to="/profile">
-                        <User className="w-4 h-4 mr-2" />
-                        Profile
+                        <User className="w-4 h-4" />
                       </Link>
                     </Button>
                     <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" onClick={handleLogout}>
@@ -519,12 +511,14 @@ export const Header = () => {
       </header>
 
       {/* Overlay for sidebars */}
-      {(showNotificationsSidebar || showMessagesSidebar) && (
+      {(showNotificationsSidebar || showMessagesSidebar || showProfileSidebar || showEditProfileSidebar) && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
           onClick={() => {
             setShowNotificationsSidebar(false);
             setShowMessagesSidebar(false);
+            setShowProfileSidebar(false);
+            setShowEditProfileSidebar(false);
           }}
         />
       )}
@@ -712,6 +706,107 @@ export const Header = () => {
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Profile Sidebar */}
+      {showProfileSidebar && (
+        <div className="fixed top-0 right-0 w-96 max-w-[90vw] h-full bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="font-bold text-xl text-gray-900">Profile</h2>
+            <button 
+              onClick={() => setShowProfileSidebar(false)} 
+              className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex flex-col items-center text-center">
+              <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} size={96} />
+              <h3 className="font-bold text-lg text-gray-900 mt-3">{profileData.firstName} {profileData.lastName}</h3>
+              <Link to="/profile" className="text-sm text-blue-600 hover:underline mt-1">
+                View Profile &gt;
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="p-2 rounded-lg bg-gray-50">
+                <TrendingUp className="w-6 h-6 mx-auto text-green-500 mb-1" />
+                <p className="font-bold text-sm text-gray-900">111452</p>
+              </div>
+              <div className="p-2 rounded-lg bg-gray-50">
+                <Star className="w-6 h-6 mx-auto text-yellow-500 mb-1" />
+                <p className="font-bold text-sm text-gray-900">7083</p>
+              </div>
+              <div className="p-2 rounded-lg bg-gray-50">
+                <Shield className="w-6 h-6 mx-auto text-blue-500 mb-1" />
+                <p className="font-bold text-sm text-gray-900">528</p>
+              </div>
+            </div>
+            <div>
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">USER</h4>
+              <nav className="space-y-1">
+                <Link to="/dashboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <LayoutGrid className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">Dashboard</span>
+                </Link>
+                <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <Users className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">My Collaborations</span>
+                </Link>
+                <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <List className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">My Projects</span>
+                </Link>
+                <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <Heart className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">My Favourites</span>
+                </Link>
+                <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <BarChart2 className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">Analytics</span>
+                </Link>
+                <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <Calendar className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">Calendar</span>
+                </Link>
+                <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <button onClick={() => {setShowProfileSidebar(false); setShowEditProfileSidebar(true);}} className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors text-left">
+                    <Edit className="w-5 h-5 mr-3 text-gray-600" />
+                    <span className="text-gray-700 font-medium">Edit Profile</span>
+                  </button>
+                </Link>
+              </nav>
+            </div>
+            
+            <div className="border-t pt-4">
+              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">GENERAL</h4>
+              <nav className="space-y-1">
+                <button className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors text-left">
+                  <Edit className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">Add Project</span>
+                </button>
+                <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <Settings className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">Settings</span>
+                </Link>
+                <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <HelpCircle className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">Help</span>
+                </Link>
+                <Link to="/signin" onClick={handleLogout} className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <LogOut className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">Logout</span>
+                </Link>
+              </nav>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Sidebar */}
+      {showEditProfileSidebar && (
+        <EditProfile onClose={() => setShowEditProfileSidebar(false)} />
       )}
     </>
   );
