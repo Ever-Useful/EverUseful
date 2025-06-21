@@ -11,6 +11,8 @@ import {
   Github,
   Instagram,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import Logo1 from "@/assets/images/Logo1.png"; 
 
 export const Footer = () => {
   return (
@@ -20,11 +22,13 @@ export const Footer = () => {
           {/* Brand & Mission */}
           <div className="mb-8 md:mb-0 md:w-1/3 space-y-4 flex flex-col justify-between">
             <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-10 h-10 flex items-center justify-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-md">
-                  <Rocket className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl font-bold text-slate-800 tracking-tight">AMOGH</span>
+              <div className="flex items-center space-x-2">
+                <Link to="/" className="flex items-center space-x-2 group">
+                  <img src={Logo1} alt="AMOGH" className="h-12 w-auto" />
+                  <Badge variant="secondary" className="hidden w-10 h-6 text-sm px-1 sm:inline-flex text-purple-700">
+                    Beta
+                  </Badge>
+                </Link>
               </div>
               <p className="text-slate-600 text-base max-w-xs leading-relaxed font-medium">
                 Empowering students, educators, and businesses to collaborate, innovate, and shape the future of education and entrepreneurship.
