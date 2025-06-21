@@ -140,6 +140,74 @@ router.delete('/skills/:skillName', authorize, async (req, res) => {
   }
 });
 
+// Add project to user
+router.post('/projects', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    // Fetch customUserId from Firestore
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const project = await userService.addUserProject(customUserId, req.body);
+    res.status(201).json({ success: true, message: 'Project added successfully', data: project });
+  } catch (error) {
+    console.error('Error adding project:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Get user projects
+router.get('/projects', authorize, async (req, res) => {
+  try {
+    console.log('=== GET /api/users/projects DEBUGGING ===');
+    const firebaseUid = req.user.uid;
+    console.log('Firebase UID:', firebaseUid);
+    
+    // Fetch customUserId from Firestore
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      console.log('User not found in Firestore');
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    console.log('Custom User ID:', customUserId);
+    
+    try {
+      await userService.loadUserData();
+      console.log('User data loaded successfully');
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      return res.status(500).json({ success: false, message: 'Failed to load user data' });
+    }
+    
+    const user = userService.findUserByCustomId(customUserId);
+    if (!user) {
+      console.log('User not found in userData.json');
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    console.log('User projects:', user.projects);
+    console.log('=== END GET /api/users/projects DEBUGGING ===');
+    
+    res.json({
+      success: true,
+      data: {
+        created: user.projects.created,
+        collaborated: user.projects.collaborated,
+        favorites: user.projects.favorites,
+        count: user.projects.count
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // Get user by custom ID
 router.get('/:customUserId', async (req, res) => {
   try {
@@ -220,55 +288,6 @@ router.put('/profile', authorize, async (req, res) => {
   } catch (error) {
     console.error('Error updating profile:', error);
     res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// Add project to user
-router.post('/projects', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    const project = await userService.addUserProject(customUserId, req.body);
-    res.status(201).json({ success: true, message: 'Project added successfully', data: project });
-  } catch (error) {
-    console.error('Error adding project:', error);
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// Get user projects
-router.get('/projects', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    const user = userService.findUserByCustomId(customUserId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    res.json({
-      success: true,
-      data: {
-        created: user.projects.created,
-        collaborated: user.projects.collaborated,
-        favorites: user.projects.favorites,
-        count: user.projects.count
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching projects:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -583,6 +602,91 @@ router.delete('/admin/:customUserId', authorize, async (req, res) => {
       success: false,
       message: error.message
     });
+  }
+});
+
+// Add projectId to user's created projects (public endpoint for backend integration)
+router.post('/:customUserId/projects', async (req, res) => {
+  try {
+    const { customUserId } = req.params;
+    const { projectId, projectData } = req.body;
+    
+    if (!projectId) {
+      return res.status(400).json({ success: false, message: 'projectId is required' });
+    }
+    
+    await userService.loadUserData();
+    const user = userService.findUserByCustomId(customUserId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Check if project ID is already in the created array
+    if (!user.projects.created.includes(projectId)) {
+      // Add projectId to created array
+      user.projects.created.push(projectId);
+      user.projects.count += 1;
+      user.stats.projectsCount += 1;
+      
+      // If full project data is provided, also add it using addUserProject
+      if (projectData) {
+        try {
+          await userService.addUserProject(customUserId, {
+            projectId: projectId,
+            ...projectData
+          });
+        } catch (error) {
+          console.warn('Failed to add full project data:', error);
+          // Continue with just the project ID
+        }
+      }
+      
+      await userService.saveUserData();
+      console.log(`Project ID ${projectId} added to user ${customUserId}`);
+    } else {
+      console.log(`Project ID ${projectId} already exists for user ${customUserId}`);
+    }
+    
+    res.status(201).json({ 
+      success: true, 
+      message: 'Project ID added to user', 
+      data: { projectId } 
+    });
+  } catch (error) {
+    console.error('Error adding projectId to user:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Remove projectId from user's created projects
+router.delete('/:customUserId/projects/:projectId', async (req, res) => {
+  try {
+    const { customUserId, projectId } = req.params;
+    
+    console.log(`=== REMOVE PROJECT ID DEBUGGING ===`);
+    console.log(`Removing project ID ${projectId} from user ${customUserId}`);
+    
+    const removed = await userService.removeUserProject(customUserId, projectId);
+    
+    if (removed) {
+      console.log(`Project ID ${projectId} successfully removed from user ${customUserId}`);
+      res.json({ 
+        success: true, 
+        message: 'Project ID removed from user',
+        data: { projectId: parseInt(projectId) }
+      });
+    } else {
+      console.log(`Project ID ${projectId} not found for user ${customUserId}`);
+      res.status(404).json({ 
+        success: false, 
+        message: 'Project ID not found in user\'s created projects' 
+      });
+    }
+    
+    console.log(`=== END REMOVE PROJECT ID DEBUGGING ===`);
+  } catch (error) {
+    console.error('Error removing projectId from user:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 

@@ -224,8 +224,35 @@ class UserService {
     return project;
   }
 
-  
-// Add skill to user (flat array)
+  // Remove project ID from user's created projects
+  async removeUserProject(customUserId, projectId) {
+    await this.loadUserData();
+    
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    const projectIdNum = parseInt(projectId);
+    const projectIndex = this.userData.users[customUserId].projects.created.indexOf(projectIdNum);
+    
+    if (projectIndex !== -1) {
+      // Remove project ID from created array
+      this.userData.users[customUserId].projects.created.splice(projectIndex, 1);
+      
+      // Decrement counts
+      this.userData.users[customUserId].projects.count = Math.max(0, this.userData.users[customUserId].projects.count - 1);
+      this.userData.users[customUserId].stats.projectsCount = Math.max(0, this.userData.users[customUserId].stats.projectsCount - 1);
+      
+      await this.saveUserData();
+      console.log(`Project ID ${projectId} removed from user ${customUserId}`);
+      return true;
+    } else {
+      console.log(`Project ID ${projectId} not found in user ${customUserId}'s created projects`);
+      return false;
+    }
+  }
+
+  // Add skill to user (flat array)
   async addUserSkill(customUserId, skillData) {
     await this.loadUserData();
     if (!this.userData.users[customUserId]) {

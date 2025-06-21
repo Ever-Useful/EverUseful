@@ -48,6 +48,7 @@ const Profile = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const { profile, setProfile } = useProfileStore();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -56,6 +57,11 @@ const Profile = () => {
   const [showCropper, setShowCropper] = useState(false);
   const [customUserId, setCustomUserId] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // Callback function to trigger refresh of RecentProjects
+  const triggerProjectsRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const fetchUserData = async () => {
     try {
@@ -429,7 +435,7 @@ const Profile = () => {
             <QuickActions />
 
             {/* Recent Projects */}
-            <RecentProjects />
+            <RecentProjects refreshTrigger={refreshTrigger} />
 
             {/* Your Meetings - Now separate */}
             {/* <YourMeetings /> */}

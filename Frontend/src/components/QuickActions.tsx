@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Users, Calendar, ArrowRight, Upload, Link as LinkIcon, Github } from 'lucide-react';
+import { Plus, Users, ArrowRight, X } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { toast } from 'react-hot-toast';
 import { useState } from 'react';
@@ -10,24 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { db } from '@/lib/firebase';
-import { doc, setDoc, collection, query, where, getDocs, addDoc, updateDoc, increment, orderBy } from 'firebase/firestore';
-
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
-import { storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import SuccessAnimation from './SuccessAnimation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
+import SuccessAnimation from './SuccessAnimation';
 
 interface User {
   id: string;
@@ -37,149 +25,249 @@ interface User {
   skills: string[];
 }
 
-interface MeetingData {
+interface ProjectFormData {
   title: string;
-  date: string;
-  time: string;
-  participants: string;
-  meetingId: string;
-  meetingLink: string;
+  description: string;
+  image: string;
+  images: string;
+  category: string;
+  price: string;
+  duration: string;
+  status: string;
+  teamSize: string;
+  tags: string;
+  skills: string;
+  features: string;
+  techStack: string;
+  deliverables: string;
 }
 
-const QuickActions = () => {
+interface QuickActionsProps {
+  onProjectCreated?: () => void;
+}
+
+const QuickActions = ({ onProjectCreated }: QuickActionsProps) => {
   const user = auth.currentUser;
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [date, setDate] = useState<Date>();
+  const [showProjectPanel, setShowProjectPanel] = useState(false);
+  const [showProjectSuccess, setShowProjectSuccess] = useState(false);
+  const [isPanelAnimating, setIsPanelAnimating] = useState(false);
+  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
 
-  // Project form state
-  const [projectData, setProjectData] = useState({
+  // Project form state with all marketplace.json fields
+  const [projectData, setProjectData] = useState<ProjectFormData>({
     title: '',
     description: '',
+    image: '',
+    images: '',
     category: '',
+    price: '',
+    duration: '',
+    status: 'active',
+    teamSize: '',
     tags: '',
-    projectLink: '',
-    githubLink: '',
-    imageUrl: '',
+    skills: '',
+    features: '',
+    techStack: '',
+    deliverables: '',
   });
 
-  const [uploadingImage, setUploadingImage] = useState(false);
-
-  // Meeting form state
-  const [meetingData, setMeetingData] = useState<MeetingData>({
-    title: '',
-    date: '',
-    time: '',
-    participants: '',
-    meetingId: '',
-    meetingLink: '',
-  });
-
-  const [showProjectDialog, setShowProjectDialog] = useState(false);
-  const [showMeetingDialog, setShowMeetingDialog] = useState(false);
-  const [showMeetingSuccess, setShowMeetingSuccess] = useState(false);
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingImage(true);
-    try {
-      const storageRef = ref(storage, `project-images/${Date.now()}-${file.name}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      setProjectData(prev => ({ ...prev, imageUrl: downloadURL }));
-      toast.success('Image uploaded successfully!');
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error('Failed to upload image');
-    } finally {
-      setUploadingImage(false);
+  // Validation function
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {};
+    
+    if (!projectData.title.trim()) {
+      errors.title = 'Project title is required';
     }
+    
+    if (!projectData.description.trim()) {
+      errors.description = 'Project description is required';
+    }
+    
+    if (!projectData.category.trim()) {
+      errors.category = 'Project category is required';
+    }
+    
+    if (!projectData.price.trim()) {
+      errors.price = 'Project price is required';
+    } else if (isNaN(Number(projectData.price)) || Number(projectData.price) < 0) {
+      errors.price = 'Price must be a valid positive number';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Check if form is valid for button state
+  const isFormValid = () => {
+    return projectData.title.trim() && 
+           projectData.description.trim() && 
+           projectData.category.trim() && 
+           projectData.price.trim() && 
+           !isNaN(Number(projectData.price)) && 
+           Number(projectData.price) >= 0;
   };
 
   const handleStartProject = async () => {
     if (!user) {
-      console.log('No user found, cannot create project');
       toast.error('Please sign in to start a project');
       return;
     }
 
-    console.log('Current user:', user.uid);
-
-    if (!projectData.title || !projectData.description || !projectData.category) {
-      console.log('Missing required fields:', projectData);
-      toast.error('Please fill in all required fields');
+    // Validate form
+    if (!validateForm()) {
+      toast.error('Please fix the errors in the form');
       return;
     }
 
     setLoading(true);
     try {
-      const projectDataToSave = {
-        title: projectData.title,
-        description: projectData.description,
-        category: projectData.category,
-        tags: projectData.tags.split(',').map(tag => tag.trim()),
-        createdBy: user.uid,
-        createdAt: new Date().toISOString(),
-        status: 'Planning',
-        progress: 0,
-        collaborators: 0,
-        githubLink: projectData.githubLink || '',
-        projectLink: projectData.projectLink || '',
-        imageUrl: projectData.imageUrl || '',
+      // Get auth token like the working profile logic
+      const token = await user.getIdToken();
+      if (!token) {
+        toast.error('Authentication failed. Please refresh and try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Get customUserId from backend profile endpoint
+      const profileRes = await fetch('http://localhost:3000/api/users/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!profileRes.ok) {
+        throw new Error('Failed to get user profile');
+      }
+
+      const profileData = await profileRes.json();
+      const customUserId = profileData.data.customUserId;
+
+      if (!customUserId) {
+        toast.error('User ID not found. Please refresh and try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Prepare payload for backend with all marketplace.json fields
+      // All unfilled fields will be set to null or empty arrays
+      const payload = {
+        title: projectData.title.trim(),
+        description: projectData.description.trim(),
+        image: projectData.image.trim() || null,
+        images: projectData.images.trim() ? projectData.images.split(',').map(img => img.trim()).filter(img => img) : [],
+        category: projectData.category.trim(),
+        price: Number(projectData.price),
+        duration: projectData.duration.trim() || null,
+        status: projectData.status,
+        posted: new Date().toISOString().split('T')[0],
+        teamSize: projectData.teamSize.trim() ? Number(projectData.teamSize) : null,
+        tags: projectData.tags.trim() ? projectData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+        skills: projectData.skills.trim() ? projectData.skills.split(',').map(skill => skill.trim()).filter(skill => skill) : [],
+        features: projectData.features.trim() ? projectData.features.split(',').map(feature => feature.trim()).filter(feature => feature) : [],
+        techStack: projectData.techStack.trim() ? projectData.techStack.split(',').map(tech => tech.trim()).filter(tech => tech) : [],
+        deliverables: projectData.deliverables.trim() ? projectData.deliverables.split(',').map(delivery => delivery.trim()).filter(delivery => delivery) : [],
+        customUserId
       };
 
-      console.log('Saving project data:', projectDataToSave);
+      console.log('Creating project with payload:', payload);
 
-      // Create project in Firestore
-      const projectRef = await addDoc(collection(db, 'projects'), projectDataToSave);
-      console.log('Project created with ID:', projectRef.id);
-      
-      // Update user's project count
-      await updateDoc(doc(db, 'users', user.uid), {
-        'stats.projects': increment(1)
+      // Create project in backend
+      const res = await fetch('http://localhost:3000/api/marketplace/projects', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
       });
-      console.log('Updated user project count');
       
-      // Add activity
-      // await addActivity(
-      //   user.uid,
-      //   'project',
-      //   `Created new project: ${projectData.title}`
-      // );
+      console.log('Project creation response status:', res.status);
       
-      // Reset form data
+      if (!res.ok) {
+        const err = await res.json();
+        console.error('Project creation error:', err);
+        throw new Error(err.error || 'Failed to create project');
+      }
+      
+      const { project } = await res.json();
+      console.log('Project created successfully:', project);
+
+      // Add project id to user's created projects in userData.json
+      console.log('Adding project ID to user profile:', project.id);
+      const projectRes = await fetch(`http://localhost:3000/api/users/${customUserId}/projects`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          projectId: project.id,
+          projectData: {
+            title: project.title,
+            description: project.description,
+            category: project.category,
+            tags: project.tags || [],
+            imageUrl: project.image,
+            projectLink: project.projectLink,
+            githubLink: project.githubLink,
+            price: project.price,
+            status: project.status,
+            posted: project.posted,
+            teamSize: project.teamSize,
+            skills: project.skills || [],
+            features: project.features || [],
+            techStack: project.techStack || [],
+            deliverables: project.deliverables || []
+          }
+        })
+      });
+
+      console.log('Add project to user profile response status:', projectRes.status);
+
+      if (!projectRes.ok) {
+        const errorData = await projectRes.json();
+        console.warn('Failed to add project to user profile:', errorData);
+      } else {
+        console.log('Project added to user profile successfully');
+      }
+
+      // Reset form data and errors
       setProjectData({
         title: '',
         description: '',
+        image: '',
+        images: '',
         category: '',
+        price: '',
+        duration: '',
+        status: 'active',
+        teamSize: '',
         tags: '',
-        projectLink: '',
-        githubLink: '',
-        imageUrl: '',
+        skills: '',
+        features: '',
+        techStack: '',
+        deliverables: '',
       });
+      setFormErrors({});
       
-      // Close dialog and show success message
-      setShowProjectDialog(false);
+      setShowProjectPanel(false);
       toast.success('Project created successfully!');
+      setShowProjectSuccess(true);
       
-      // Show success animation
-      setShowMeetingSuccess(true);
-
-      // Force a refresh of the projects list
-      const projectsQuery = query(
-        collection(db, 'projects'),
-        where('createdBy', '==', user.uid),
-        orderBy('createdAt', 'desc')
-      );
-      const snapshot = await getDocs(projectsQuery);
-      console.log('Refreshed projects list:', snapshot.docs.length, 'projects');
+      // Trigger refresh of RecentProjects
+      if (onProjectCreated) {
+        onProjectCreated();
+      }
     } catch (error) {
       console.error('Error creating project:', error);
-      toast.error('Failed to create project');
+      toast.error(error instanceof Error ? error.message : 'Failed to create project');
     } finally {
       setLoading(false);
     }
@@ -192,16 +280,23 @@ const QuickActions = () => {
     }
 
     try {
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('type', 'in', ['student', 'professor']));
-      const querySnapshot = await getDocs(q);
+      // Fetch users from backend API instead of Firestore
+      const res = await fetch('http://localhost:3000/api/users/admin/all');
+      if (!res.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      const { data: usersData } = await res.json();
       
-      const usersData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as User[];
+      // Transform the data to match the expected format
+      const transformedUsers = usersData.map((user: any) => ({
+        id: user.customUserId,
+        name: user.profile?.title || 'Unknown User',
+        title: user.profile?.bio || 'No title',
+        avatar: user.profile?.avatar || '/default-avatar.png',
+        skills: user.skills || []
+      }));
 
-      setUsers(usersData);
+      setUsers(transformedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to load users');
@@ -215,81 +310,31 @@ const QuickActions = () => {
     }
 
     try {
-      // await incrementFollowing(user.uid);
-      toast.success('Connection request sent!');
+      // Get auth token like the working profile logic
+      const token = await user.getIdToken();
+      if (!token) {
+        toast.error('Authentication failed. Please refresh and try again.');
+        return;
+      }
+
+      // Use backend API to follow user
+      const res = await fetch(`http://localhost:3000/api/users/follow/${userId}`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        toast.success('Connection request sent!');
+      } else {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to connect');
+      }
     } catch (error) {
       console.error('Error connecting with user:', error);
-      toast.error('Failed to send connection request');
-    }
-  };
-
-  const generateMeetingId = () => {
-    return Math.random().toString(36).substring(2, 15);
-  };
-
-  const generateMeetingLink = (meetingId: string) => {
-    return `https://meet.google.com/${meetingId}`;
-  };
-
-  const handleScheduleMeeting = async () => {
-    if (!user) {
-      toast.error('Please sign in to schedule a meeting');
-      return;
-    }
-
-    if (!meetingData.title || !meetingData.date || !meetingData.time) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const meetingId = generateMeetingId();
-      const meetingLink = generateMeetingLink(meetingId);
-      
-      const meetingDataToSave = {
-        title: meetingData.title,
-        date: meetingData.date,
-        time: meetingData.time,
-        meetingId,
-        meetingLink,
-        participants: meetingData.participants ? meetingData.participants.split(',').map(email => email.trim()) : [],
-        createdBy: user.uid,
-        status: 'upcoming',
-        createdAt: new Date().toISOString(),
-      };
-
-      const meetingRef = doc(db, 'meetings', Date.now().toString());
-      await setDoc(meetingRef, meetingDataToSave);
-      
-      // Add activity
-      // await addActivity(
-      //   user.uid,
-      //   'meeting',
-      //   `Scheduled new meeting: ${meetingData.title}`
-      // );
-      
-      // Reset form data
-      setMeetingData({
-        title: '',
-        date: '',
-        time: '',
-        participants: '',
-        meetingId: '',
-        meetingLink: '',
-      });
-      
-      // Close dialog and show success message
-      setShowMeetingDialog(false);
-      toast.success('Meeting scheduled successfully!');
-      
-      // Show success animation
-      setShowMeetingSuccess(true);
-    } catch (error) {
-      console.error('Error scheduling meeting:', error);
-      toast.error('Failed to schedule meeting');
-    } finally {
-      setLoading(false);
+      toast.error(error instanceof Error ? error.message : 'Failed to send connection request');
     }
   };
 
@@ -307,102 +352,10 @@ const QuickActions = () => {
       label: 'Start Project',
       description: 'Create a new project',
       primary: true,
-      dialog: (
-        <Dialog open={showProjectDialog} onOpenChange={setShowProjectDialog}>
-          <DialogTrigger asChild>
-            <Button
-              id="start-project-trigger"
-              className="w-full justify-between p-4 h-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
-            >
-              <div className="flex items-center">
-                <Plus className="w-5 h-5 mr-3" />
-                <div className="text-left">
-                  <div className="font-semibold">Start Project</div>
-                  <div className="text-sm opacity-80">Create a new project</div>
-                </div>
-              </div>
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl">
-            <DialogHeader>
-              <DialogTitle>Start a New Project</DialogTitle>
-              <DialogDescription>
-                Fill in all the details to create your project.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4 max-h-[90vh] overflow-y-auto">
-              {/* Project Main Info */}
-              <div className="grid gap-2">
-                <Label htmlFor="project-title">Title</Label>
-                <Input id="project-title" placeholder="Enter project title" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="project-description">Description</Label>
-                <Textarea id="project-description" placeholder="Describe your project" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="project-image">Main Image</Label>
-                  <input id="project-image" type="file" accept="image/*" className="block w-full text-sm text-gray-700 border border-gray-300 rounded px-3 py-2" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-images">Gallery Images</Label>
-                  <input id="project-images" type="file" accept="image/*" multiple className="block w-full text-sm text-gray-700 border border-gray-300 rounded px-3 py-2" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-category">Category</Label>
-                  <Input id="project-category" placeholder="e.g., FinTech" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-price">Price (USD)</Label>
-                  <Input id="project-price" type="number" min="0" placeholder="e.g., 1000" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-duration">Duration</Label>
-                  <Input id="project-duration" placeholder="e.g., 3 months" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-status">Status</Label>
-                  <Input id="project-status" placeholder="e.g., Active" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-teamSize">Team Size</Label>
-                  <Input id="project-teamSize" type="number" min="1" placeholder="e.g., 5" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-tags">Tags (comma-separated)</Label>
-                  <Input id="project-tags" placeholder="e.g., AI, Security, Finance" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-skills">Skills (comma-separated)</Label>
-                  <Input id="project-skills" placeholder="e.g., Python, Data Analytics" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-features">Features (comma-separated)</Label>
-                  <Input id="project-features" placeholder="e.g., Real-time detection, Automated alerts" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-techStack">Tech Stack (comma-separated)</Label>
-                  <Input id="project-techStack" placeholder="e.g., Python, TensorFlow, AWS, React" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="project-deliverables">Deliverables (comma-separated)</Label>
-                  <Input id="project-deliverables" placeholder="e.g., Source code, API documentation" />
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowProjectDialog(false)}>
-                Cancel
-              </Button>
-              <Button>
-                Create Project
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      ),
+      action: () => {
+        setShowProjectPanel(true);
+        setIsPanelAnimating(true);
+      },
     },
     {
       icon: Users,
@@ -415,6 +368,7 @@ const QuickActions = () => {
             <Button
               variant="outline"
               className="w-full justify-between p-4 h-auto border-slate-300 text-slate-700 hover:bg-slate-50 shadow-md hover:shadow-lg transition-all duration-300"
+              onClick={handleFindCollaborators}
             >
               <div className="flex items-center">
                 <Users className="w-5 h-5 mr-3" />
@@ -497,16 +451,315 @@ const QuickActions = () => {
         <div className="space-y-3">
           {actions.map((action, index) => (
             <div key={index}>
-              {action.dialog}
+              {action.dialog ? (
+                action.dialog
+              ) : (
+                <Button
+                  onClick={action.action}
+                  className={`w-full justify-between p-4 h-auto shadow-md hover:shadow-lg transition-all duration-300 ${
+                    action.primary
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
+                      : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <action.icon className="w-5 h-5 mr-3" />
+                    <div className="text-left">
+                      <div className="font-semibold">{action.label}</div>
+                      <div className="text-sm opacity-80">{action.description}</div>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              )}
             </div>
           ))}
         </div>
       </Card>
+
+      {/* Right Side Project Creation Panel */}
+      {(showProjectPanel || isPanelAnimating) && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-end transition-all duration-300 ease-in-out">
+          <div 
+            className={`w-full max-w-2xl h-full bg-white shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+              showProjectPanel ? 'translate-x-0' : 'translate-x-full'
+            }`}
+            onTransitionEnd={() => {
+              if (!showProjectPanel) {
+                setIsPanelAnimating(false);
+              }
+            }}
+          >
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">Create New Project</h2>
+              </div>
+              <p className="text-gray-600 mt-2">Fill in all the details to create your project for the marketplace.</p>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Required Fields Section */}
+              <div className="space-y-4">
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="project-title" className="text-sm font-medium text-gray-700">
+                      Project Title *
+                    </Label>
+                    <Input
+                      id="project-title"
+                      placeholder="Enter project title"
+                      value={projectData.title}
+                      onChange={e => setProjectData(prev => ({ ...prev, title: e.target.value }))}
+                      className={`mt-1 ${formErrors.title ? 'border-red-500 focus:border-red-500' : ''}`}
+                    />
+                    {formErrors.title && (
+                      <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="project-description" className="text-sm font-medium text-gray-700">
+                      Description *
+                    </Label>
+                    <Textarea
+                      id="project-description"
+                      placeholder="Describe your project in detail"
+                      value={projectData.description}
+                      onChange={e => setProjectData(prev => ({ ...prev, description: e.target.value }))}
+                      className={`mt-1 ${formErrors.description ? 'border-red-500 focus:border-red-500' : ''}`}
+                      rows={4}
+                    />
+                    {formErrors.description && (
+                      <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="project-category" className="text-sm font-medium text-gray-700">
+                        Category *
+                      </Label>
+                      <Input
+                        id="project-category"
+                        placeholder="e.g., AI & ML, Web Development"
+                        value={projectData.category}
+                        onChange={e => setProjectData(prev => ({ ...prev, category: e.target.value }))}
+                        className={`mt-1 ${formErrors.category ? 'border-red-500 focus:border-red-500' : ''}`}
+                      />
+                      {formErrors.category && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="project-price" className="text-sm font-medium text-gray-700">
+                        Price (USD) *
+                      </Label>
+                      <Input
+                        id="project-price"
+                        type="number"
+                        min="0"
+                        placeholder="e.g., 2500"
+                        value={projectData.price}
+                        onChange={e => setProjectData(prev => ({ ...prev, price: e.target.value }))}
+                        className={`mt-1 ${formErrors.price ? 'border-red-500 focus:border-red-500' : ''}`}
+                      />
+                      {formErrors.price && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.price}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="project-status" className="text-sm font-medium text-gray-700">
+                        Status
+                      </Label>
+                      <Select
+                        value={projectData.status}
+                        onValueChange={(value) => setProjectData(prev => ({ ...prev, status: value }))}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="on-hold">On Hold</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="project-teamSize" className="text-sm font-medium text-gray-700">
+                        Team Size
+                      </Label>
+                      <Input
+                        id="project-teamSize"
+                        type="number"
+                        min="1"
+                        placeholder="e.g., 5"
+                        value={projectData.teamSize}
+                        onChange={e => setProjectData(prev => ({ ...prev, teamSize: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="project-duration" className="text-sm font-medium text-gray-700">
+                      Duration
+                    </Label>
+                    <Input
+                      id="project-duration"
+                      placeholder="e.g., 2 months, 6 weeks"
+                      value={projectData.duration}
+                      onChange={e => setProjectData(prev => ({ ...prev, duration: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Media Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Media & Links</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="project-image" className="text-sm font-medium text-gray-700">
+                      Main Image URL
+                    </Label>
+                    <Input
+                      id="project-image"
+                      placeholder="https://example.com/image.jpg"
+                      value={projectData.image}
+                      onChange={e => setProjectData(prev => ({ ...prev, image: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="project-images" className="text-sm font-medium text-gray-700">
+                      Gallery Images (comma-separated URLs)
+                    </Label>
+                    <Textarea
+                      id="project-images"
+                      placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                      value={projectData.images}
+                      onChange={e => setProjectData(prev => ({ ...prev, images: e.target.value }))}
+                      className="mt-1"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Technical Details Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Technical Details</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="project-tags" className="text-sm font-medium text-gray-700">
+                      Tags (comma-separated)
+                    </Label>
+                    <Input
+                      id="project-tags"
+                      placeholder="e.g., AI, Security, Finance, Blockchain"
+                      value={projectData.tags}
+                      onChange={e => setProjectData(prev => ({ ...prev, tags: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="project-skills" className="text-sm font-medium text-gray-700">
+                      Required Skills (comma-separated)
+                    </Label>
+                    <Input
+                      id="project-skills"
+                      placeholder="e.g., Python, Machine Learning, React, Node.js"
+                      value={projectData.skills}
+                      onChange={e => setProjectData(prev => ({ ...prev, skills: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="project-techStack" className="text-sm font-medium text-gray-700">
+                      Tech Stack (comma-separated)
+                    </Label>
+                    <Input
+                      id="project-techStack"
+                      placeholder="e.g., TensorFlow, Python, AWS, Docker, React"
+                      value={projectData.techStack}
+                      onChange={e => setProjectData(prev => ({ ...prev, techStack: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="project-features" className="text-sm font-medium text-gray-700">
+                      Features (comma-separated)
+                    </Label>
+                    <Textarea
+                      id="project-features"
+                      placeholder="e.g., Real-time detection, Automated alerts, API integration"
+                      value={projectData.features}
+                      onChange={e => setProjectData(prev => ({ ...prev, features: e.target.value }))}
+                      className="mt-1"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="project-deliverables" className="text-sm font-medium text-gray-700">
+                      Deliverables (comma-separated)
+                    </Label>
+                    <Textarea
+                      id="project-deliverables"
+                      placeholder="e.g., Source code, Documentation, API access, 1 month support"
+                      value={projectData.deliverables}
+                      onChange={e => setProjectData(prev => ({ ...prev, deliverables: e.target.value }))}
+                      className="mt-1"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-6 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowProjectPanel(false);
+                    // The panel will animate out and then isPanelAnimating will be set to false
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleStartProject}
+                  disabled={loading || !isFormValid()}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Creating Project..." : "Create Project"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
-      {showMeetingSuccess && (
+      {showProjectSuccess && (
         <SuccessAnimation
-          isVisible={showMeetingSuccess}
-          onClose={() => setShowMeetingSuccess(false)}
+          isVisible={showProjectSuccess}
+          onClose={() => setShowProjectSuccess(false)}
         />
       )}
     </>

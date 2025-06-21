@@ -6,7 +6,6 @@ import { useProfileStore, UserType } from '@/hooks/useProfileStore';
 import StudentForm from '@/components/StudentForm';
 import ProfessorForm from '@/components/ProfessorForm';
 import EnterpriseForm from '@/components/EnterpriseForm';
-import ProjectManager from '@/components/ProjectManager';
 import PaperManager from '@/components/PaperManager';
 import ProductManager from '@/components/ProductManager';
 import { useNavigate } from 'react-router-dom';
@@ -92,8 +91,6 @@ const EditProfile = () => {
     
     try {
       switch (profile.userType) {
-        case 'student':
-          return <ProjectManager />;
         case 'professor':
           return <PaperManager />;
         case 'enterprise':
@@ -131,6 +128,9 @@ const EditProfile = () => {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-6 py-2 flex justify-between items-center">
           <div className="flex items-left">
+            <Button className="mr-4" variant="outline" onClick={() => navigate(-1)}>
+              Back
+            </Button>
             <Link to="/" className="flex items-center space-x-2 group">
               <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-lg group-hover:scale-110 transition-all duration-300 shadow-md">
                 <Sparkles className="w-5 h-5 text-white" />
@@ -146,12 +146,15 @@ const EditProfile = () => {
           </div>
           <h1 className="text-2xl font-medium text-slate-600 text-lg">Edit Profile</h1>
           <div className="flex items-center gap-4">
+            <Button className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base" variant="outline" onClick={() => navigate('/profile')}>
+              Cancel
+            </Button>
             {currentStep === 'content' && (
               <Button className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base"
                 variant="outline" 
                 onClick={() => setCurrentStep('profile')}
               >
-                Back
+                Back to Profile
               </Button>
             )}
             <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white text-base" onClick={handleSaveAndExit}>
@@ -162,24 +165,7 @@ const EditProfile = () => {
       </div>
 
       {/* Progress Indicator */}
-      <div>
-        <div className="max-w-7xl mx-auto px-8 py-3">
-          <div className="flex justify-center items-center gap-8">
-            <div className={`flex items-center gap-2 ${currentStep === 'profile' ? 'text-blue-600' : 'text-black'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'profile' ? 'bg-blue-600 text-white' : 'bg-white'}`}>
-                1
-              </div>
-              <span>Profile Details</span>
-            </div>
-            <div className={`flex items-center gap-2 ${currentStep === 'content' ? 'text-blue-600' : 'text-black'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'content' ? 'bg-blue-600 text-white' : 'bg-white'}`}>
-                2
-              </div>
-              <span>Manage Content</span>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       {/* Content */}
       {currentStep === 'profile' && renderProfileForm()}

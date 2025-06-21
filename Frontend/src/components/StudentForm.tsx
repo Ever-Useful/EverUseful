@@ -8,6 +8,7 @@ import { useProfileStore, StudentProfile } from '@/hooks/useProfileStore';
 import { auth, db } from "@/lib/firebase";
 import { doc, updateDoc, getDoc, deleteField } from "firebase/firestore";
 import toast from "react-hot-toast";
+import { useNavigate } from 'react-router-dom';
 
 interface StudentFormProps {
   onComplete: () => void;
@@ -17,6 +18,7 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
   const { profile, setProfile, updateProfile } = useProfileStore();
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
   
   const [formData, setFormData] = useState<Omit<StudentProfile, 'projects'>>({
     userType: 'student',
@@ -137,7 +139,7 @@ const StudentForm = ({ onComplete }: StudentFormProps) => {
         setProfile(studentProfile);
       }
       toast.success("Profile updated successfully");
-      onComplete();
+      navigate('/profile');
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
