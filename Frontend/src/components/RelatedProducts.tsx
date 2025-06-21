@@ -5,16 +5,34 @@ import { Star, Heart, Eye, ArrowRight, ChevronLeft, ChevronRight } from "lucide-
 import { Link } from "react-router-dom";
 import classNames from "classnames";
 import React, { useRef } from "react";
+import { Badge } from "@/components/ui/badge";
+
+// Define the Project interface
+interface Project {
+  id: number;
+  title: string;
+  subtitle?: string;
+  category: string;
+  image: string;
+  tags?: string[];
+  description?: string;
+  rating?: number;
+  reviews?: number;
+  views?: number;
+  likes?: number;
+  price: number;
+}
 
 export const RelatedProducts = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [startIndex, setStartIndex] = useState(0);
-  const PRODUCTS_PER_PAGE = 4;
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
 
-  useEffect(() => {
+  const [projects, setProjects] = React.useState<Project[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [startIndex, setStartIndex] = React.useState(0);
+  const PRODUCTS_PER_PAGE = 4;
+  const [slideDirection, setSlideDirection] = React.useState<'left' | 'right' | null>(null);
+
+  React.useEffect(() => {
     const fetchProjects = async () => {
       try {
         setLoading(true);
@@ -31,94 +49,13 @@ export const RelatedProducts = () => {
       }
     };
 
-  const featuredProjects = [
-    {
-      id: 1,
-      title: "EcoTrack",
-      subtitle: "Carbon Footprint Monitor",
-      category: "Sustainability",
-      image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=250&fit=crop",
-      tags: ["AI", "Sustainability", "IoT"],
-    },
-    {
-      id: 2,
-      title: "QuantumMed",
-      subtitle: "Drug Discovery Platform",
-      category: "Healthcare",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=250&fit=crop",
-      tags: ["Quantum", "Healthcare", "Research"],
-    },
-    {
-      id: 3,
-      title: "AgriBot",
-      subtitle: "Smart Farming Assistant",
-      category: "Agriculture",
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=400&h=250&fit=crop",
-      tags: ["Robotics", "Agriculture", "AI"],
-    },
-    {
-      id: 4,
-      title: "ROBot",
-      subtitle: "Smart Farming Assistant",
-      category: "Agriculture",
-      image: "https://plus.unsplash.com/premium_photo-1678344170545-c3edef92a16e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      tags: ["Robotics", "Agriculture", "AI"],
-    },
-    {
-      id: 5,
-      title: "EcoTrack",
-      subtitle: "Carbon Footprint Monitor",
-      category: "Sustainability",
-      image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=250&fit=crop",
-      tags: ["AI", "Sustainability", "IoT"],
-    },
-    {
-      id: 6,
-      title: "QuantumMed",
-      subtitle: "Drug Discovery Platform",
-      category: "Healthcare",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=250&fit=crop",
-      tags: ["Quantum", "Healthcare", "Research"],
-    },
-    {
-      id: 7,
-      title: "AgriBot",
-      subtitle: "Smart Farming Assistant",
-      category: "Agriculture",
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=400&h=250&fit=crop",
-      tags: ["Robotics", "Agriculture", "AI"],
-    },
-    {
-      id: 8,
-      title: "ROBot",
-      subtitle: "Smart Farming Assistant",
-      category: "Agriculture",
-      image: "https://plus.unsplash.com/premium_photo-1678344170545-c3edef92a16e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      tags: ["Robotics", "Agriculture", "AI"],
-    }
-  ];
+    fetchProjects();
+  }, []);
 
-    const sliderSettings = {
-    dots: false,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    arrows: false, // hide default arrows
-    responsive: [
-      { breakpoint: 1280, settings: { slidesToShow: 3 } },
-      { breakpoint: 1024, settings: { slidesToShow: 2 } },
-      { breakpoint: 640, settings: { slidesToShow: 1 } },
-    ],
-  };
+  // If you want to use featuredProjects as fallback, you can do:
+  // const displayProjects = projects.length > 0 ? projects : featuredProjects;
 
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Related Products</h2>
-      </div>
+  // Remove duplicate/unused sliderSettings and inner return
 
   const handlePrev = () => {
     setSlideDirection('left');
