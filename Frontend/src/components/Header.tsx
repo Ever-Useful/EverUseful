@@ -871,6 +871,7 @@ export const Header = () => {
                     <Edit className="w-5 h-5 mr-3 text-gray-600" />
                     <span className="text-gray-700 font-medium">Edit Profile</span>
                   </button>
+                </Link>
                 </Link> */}
               </nav>
             </div>
@@ -899,6 +900,11 @@ export const Header = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Profile Sidebar */}
+      {/* {showEditProfileSidebar && (
+        <EditProfile onClose={() => setShowEditProfileSidebar(false)} />
+      )} */}
     </>
   );
 };

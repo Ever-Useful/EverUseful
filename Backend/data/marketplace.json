@@ -1002,8 +1002,58 @@
         "User manual",
         "2 months support"
       ],
-      "views": 1417,
+      "views": 1418,
       "favoritedBy": []
+    },
+    {
+      "id": 18,
+      "title": "Nova minds",
+      "description": "its just testing projects",
+      "image": "",
+      "images": [],
+      "category": "ai",
+      "price": 234567,
+      "duration": "2 months",
+      "status": "active",
+      "teamSize": 2,
+      "tags": [
+        "kdne",
+        "wdhek",
+        "kcndkjc"
+      ],
+      "skills": [
+        "dwhdj",
+        "hjd",
+        "dwhd"
+      ],
+      "features": [
+        "jvbehd",
+        "ncjdc",
+        "dkndj"
+      ],
+      "techStack": [
+        "jhdcjed",
+        "khnckj",
+        "kjc"
+      ],
+      "deliverables": [
+        "khndchjd",
+        "hcjd"
+      ],
+      "customUserId": "USER_000005",
+      "rating": 0,
+      "reviews": 0,
+      "posted": "2025-06-21",
+      "views": 0,
+      "favoritedBy": [],
+      "author": {
+        "name": "completed name",
+        "image": null,
+        "verified": true,
+        "rating": 0,
+        "projects": 0,
+        "bio": "hhi hello, testing the new edit"
+      }
     }
   ]
 }
