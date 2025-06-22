@@ -1,7 +1,7 @@
 // Artificial.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiStar, FiShoppingCart, FiTrendingUp, FiAward, FiGlobe, FiZap, FiArrowRight, FiVolume2, FiVolumeX } from 'react-icons/fi';
+import { FiSearch, FiStar, FiShoppingCart, FiTrendingUp, FiAward, FiGlobe, FiZap, FiArrowRight } from 'react-icons/fi';
 import { IoRocketSharp } from 'react-icons/io5';
 import { TbHexagon3D, TbBrandOpenai, TbRobot } from 'react-icons/tb';
 import { GiArtificialIntelligence, GiProcessor, GiCircuitry } from 'react-icons/gi';
@@ -15,8 +15,6 @@ const Artificial = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [heroText, setHeroText] = useState('Intelligent AI Agents');
-  const [isMuted, setIsMuted] = useState(false);
-  const [currentChar, setCurrentChar] = useState(0);
   const agentsRef = useRef<HTMLDivElement>(null);
   
   // Section refs for highlighting
@@ -229,9 +227,9 @@ const Artificial = () => {
   useEffect(() => {
     const heroTexts = [
       'Intelligent AI Agents', 
-      'Advanced AI Solutions', 
-      'Cutting-Edge AI Technology',
-      'Autonomous AI Systems'
+      'Adv AI Solutions', 
+      'Smart AI Technology',
+      'Auto AI Systems'
     ];
     let currentIndex = 0;
     
@@ -243,19 +241,6 @@ const Artificial = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Play robotic typing sound effect
-  useEffect(() => {
-    if (isMuted) return;
-    
-    const playSound = () => {
-      // In a real implementation, you would use Howler.js or similar
-      // For this example, we'll simulate the sound effect
-      console.log("Robotic typing sound played");
-    };
-    
-    playSound();
-  }, [currentChar, isMuted]);
-
   // Scroll to section
   const scrollToSection = (sectionRef: React.RefObject<HTMLElement>) => {
     window.scrollTo({
@@ -264,26 +249,9 @@ const Artificial = () => {
     });
   };
 
-  // Robotic typing sound effect
-  const playTypeSound = () => {
-    if (!isMuted) {
-      // In a real implementation, you would play an actual sound here
-      console.log("Typing sound played");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-indigo-950 text-white overflow-x-hidden">
       <Header />
-      
-      {/* Sound Control */}
-      
-      <button
-        className="fixed top-4 right-4 z-50 p-3 rounded-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 hover:bg-gray-700/50 transition-all"
-        onClick={() => setIsMuted(!isMuted)}
-      >
-        {isMuted ? <FiVolumeX className="text-xl" /> : <FiVolume2 className="text-xl" />}
-      </button>
       
       {/* Loading Animation */}
       <AnimatePresence>
@@ -496,7 +464,7 @@ const Artificial = () => {
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
         
-        <div className="max-w-7xl mx-auto w-full">
+        <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -527,10 +495,6 @@ const Artificial = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: i * 0.05 }}
-                      onAnimationStart={() => {
-                        setCurrentChar(i);
-                        playTypeSound();
-                      }}
                     >
                       {char}
                     </motion.span>

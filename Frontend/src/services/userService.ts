@@ -281,27 +281,21 @@ class UserService {
     }
   }
 
-  // Get current user's custom ID
-  async getCurrentUserId(): Promise<string> {
-    const userData = await this.getUserProfile();
-    return userData.customUserId;
-  }
-
-  // Update user (by customUserId)
-  async updateUser(customUserId: string, userData: any): Promise<any> {
-    const response = await this.makeRequest(`/${customUserId}`, {
-      method: 'PUT',
-      body: JSON.stringify(userData),
-    });
-    return response.data;
-  }
-
   // Update user auth info (Firestore fields)
   async updateAuthInfo(authData: Partial<{ firstName: string; lastName: string; phoneNumber: string; userType: string }>): Promise<void> {
     await this.makeRequest('/auth', {
       method: 'PUT',
       body: JSON.stringify(authData),
     });
+  }
+
+  // Update user student data
+  async updateStudentData(studentData: Partial<{ college: string; degree: string; course: string; year: string; }>): Promise<any> {
+    const response = await this.makeRequest('/student-data', {
+        method: 'PUT',
+        body: JSON.stringify(studentData),
+    });
+    return response.data;
   }
 }
 

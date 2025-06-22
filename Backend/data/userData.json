@@ -147,12 +147,12 @@
       "customUserId": "USER_000005",
       "profile": {
         "avatar": null,
-        "bio": "hhi hello",
-        "location": "Jammu, Jammu And Kashmir",
+        "bio": "hhi hello, testing the new edit",
+        "location": "Jammu, Jammu & Kashmir",
         "website": "NA",
         "title": null,
         "createdAt": "2025-06-19T21:16:02.064Z",
-        "updatedAt": "2025-06-20T13:57:15.057Z",
+        "updatedAt": "2025-06-21T21:05:12.711Z",
         "college": "CUJ",
         "degree": "Btech",
         "course": "CSE",
@@ -160,10 +160,12 @@
         "userType": "student"
       },
       "projects": {
-        "created": [],
+        "created": [
+          18
+        ],
         "collaborated": [],
         "favorites": [],
-        "count": 0
+        "count": 1
       },
       "marketplace": {
         "cart": [
@@ -181,7 +183,8 @@
       "skills": [
         "python",
         "frontend",
-        "backend"
+        "backend",
+        "Securities"
       ],
       "social": {
         "followers": [],
@@ -211,7 +214,7 @@
         "language": null
       },
       "stats": {
-        "projectsCount": 0,
+        "projectsCount": 1,
         "totalLikes": 0,
         "totalViews": 0,
         "totalDownloads": 0,
@@ -221,14 +224,14 @@
         "college": "CUJ",
         "degree": "Btech",
         "course": "CSE",
-        "year": "3",
-        "updatedAt": "2025-06-20T13:57:15.057Z"
+        "year": "4",
+        "updatedAt": "2025-06-21T21:05:08.641Z"
       }
     }
   },
   "userCounter": 5,
   "metadata": {
-    "lastUpdated": "2025-06-21T13:33:36.907Z",
+    "lastUpdated": "2025-06-21T21:31:28.732Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

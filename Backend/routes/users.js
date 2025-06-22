@@ -690,4 +690,32 @@ router.delete('/:customUserId/projects/:projectId', async (req, res) => {
   }
 });
 
+// Update user student data
+router.put('/student-data', authorize, async (req, res) => {
+    try {
+        const firebaseUid = req.user.uid;
+        const studentData = req.body;
+
+        const userRef = db.collection('users').doc(firebaseUid);
+        const userSnap = await userRef.get();
+        if (!userSnap.exists) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        const customUserId = userSnap.data().customUserId;
+
+        await userService.updateStudentData(customUserId, studentData);
+        
+        res.json({
+            success: true,
+            message: 'Student data updated successfully'
+        });
+    } catch (error) {
+        console.error('Error updating student data:', error);
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
 module.exports = router; 

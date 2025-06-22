@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import EditProfile from '../pages/EditProfile';
+import { EditProfile } from './EditProfile';
 import InitialsAvatar from './InitialsAvatar';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -871,6 +871,7 @@ export const Header = () => {
                     <Edit className="w-5 h-5 mr-3 text-gray-600" />
                     <span className="text-gray-700 font-medium">Edit Profile</span>
                   </button>
+                </Link>
                 </Link> */}
               </nav>
             </div>
@@ -898,6 +899,11 @@ export const Header = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Edit Profile Sidebar */}
+      {showEditProfileSidebar && (
+        <EditProfile onClose={() => setShowEditProfileSidebar(false)} />
       )}
     </>
   );
