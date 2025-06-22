@@ -1,0 +1,386 @@
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
+
+/* stylelint-disable-next-line at-rule-no-unknown */
+@tailwind base;
+/* stylelint-disable-next-line at-rule-no-unknown */
+@tailwind components;
+/* stylelint-disable-next-line at-rule-no-unknown */
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 98%;
+    --foreground: 220 20% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
+
+    --primary: 158 80% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 50% 92%;
+    --secondary-foreground: 220 20% 15%;
+
+    --muted: 210 40% 95%;
+    --muted-foreground: 215 25% 50%;
+
+    --accent: 210 50% 92%;
+    --accent-foreground: 220 20% 15%;
+
+    --destructive: 0 90% 65%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 85%;
+    --input: 214 32% 85%;
+    --ring: 158 80% 60%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 240 10% 98%;
+    --sidebar-foreground: 220 20% 15%;
+    --sidebar-primary: 158 80% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 50% 92%;
+    --sidebar-accent-foreground: 220 20% 15%;
+    --sidebar-border: 214 32% 85%;
+    --sidebar-ring: 158 80% 60%;
+  }
+
+  .dark {
+    --background: 220 15% 8%;
+    --foreground: 210 40% 95%;
+
+    --card: 220 15% 12%;
+    --card-foreground: 210 40% 95%;
+
+    --popover: 220 15% 12%;
+    --popover-foreground: 210 40% 95%;
+
+    --primary: 158 70% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 25% 20%;
+    --secondary-foreground: 210 40% 95%;
+
+    --muted: 217 25% 20%;
+    --muted-foreground: 215 20% 70%;
+
+    --accent: 217 25% 20%;
+    --accent-foreground: 210 40% 95%;
+
+    --destructive: 0 85% 70%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217 25% 20%;
+    --input: 217 25% 20%;
+    --ring: 158 70% 55%;
+    --sidebar-background: 220 15% 8%;
+    --sidebar-foreground: 210 40% 95%;
+    --sidebar-primary: 158 70% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 25% 20%;
+    --sidebar-accent-foreground: 210 40% 95%;
+    --sidebar-border: 217 25% 20%;
+    --sidebar-ring: 158 70% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/30 text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Performance-optimized animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+  
+  @keyframes slide-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes zoom-in {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes gradient-shift {
+    0%, 100% { 
+      background-position: 0% 50%;
+    }
+    50% { 
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes glow {
+    0%, 100% { 
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+    }
+    50% { 
+      box-shadow: 0 0 25px rgba(34, 197, 94, 0.6);
+    }
+  }
+
+  @keyframes morph {
+    0%, 100% { 
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    }
+    50% { 
+      border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    }
+  }
+
+  @keyframes orbit {
+    0% { transform: rotate(0deg) translateX(80px) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
+  }
+
+  @keyframes spiral {
+    0% { transform: rotate(0deg) scale(1); }
+    100% { transform: rotate(360deg) scale(1.1); }
+  }
+
+  @keyframes bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+  }
+
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  /* Optimized animation classes with will-change for better performance */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+    will-change: opacity;
+  }
+
+  .animate-wiggle {
+    animation: wiggle 2s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .animate-slide-in-up {
+    animation: slide-in-up 0.6s ease-out forwards;
+    will-change: transform, opacity;
+  }
+
+  .animate-zoom-in {
+    animation: zoom-in 0.5s ease-out forwards;
+    will-change: transform, opacity;
+  }
+
+  .animate-gradient-shift {
+    animation: gradient-shift 8s ease-in-out infinite;
+    will-change: background-position;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+    will-change: opacity, transform;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.4s ease-out forwards;
+    will-change: transform, opacity;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+    will-change: box-shadow;
+  }
+
+  .animate-morph {
+    animation: morph 8s ease-in-out infinite;
+    will-change: border-radius;
+  }
+
+  .animate-orbit {
+    animation: orbit 20s linear infinite;
+    will-change: transform;
+  }
+
+  .animate-spiral {
+    animation: spiral 10s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .animate-bounce-soft {
+    animation: bounce-soft 2s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    will-change: background-position;
+  }
+
+  .animate-heartbeat {
+    animation: heartbeat 1.5s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  /* Performance-optimized hover effects */
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease-out;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+    transition: box-shadow 0.2s ease-out;
+  }
+
+  /* Glass effect with better performance */
+  .glass-effect {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Optimized gradients */
+  .gradient-emerald {
+    background: linear-gradient(135deg, #10b981, #059669);
+  }
+
+  .gradient-teal {
+    background: linear-gradient(135deg, #14b8a6, #0d9488);
+  }
+
+  .gradient-sky {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  }
+
+  .gradient-purple {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  }
+
+  .gradient-pink {
+    background: linear-gradient(135deg, #ec4899, #db2777);
+  }
+
+  /* Text gradients */
+  .text-gradient-emerald {
+    background: linear-gradient(135deg, #10b981, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-rainbow {
+    background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Animation delays */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-1000 { animation-delay: 1000ms; }
+
+  /* Optimized bounce animation */
+  @keyframes bounce-slow { 
+    0% { transform: translateY(0); } 
+    100% { transform: translateY(-8px); } 
+  }
+  .animate-bounce-slow { 
+    animation: bounce-slow 2s infinite alternate;
+    will-change: transform;
+  }
+
+  /* Add missing animations that were referenced but not defined */
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .animate-spin-slow {
+    animation: spin-slow 30s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes scroll-vertical {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-100%); }
+  }
+  
+  .animate-scroll-vertical {
+    animation: scroll-vertical 4s linear infinite;
+    will-change: transform;
+  }
+}
