@@ -2,10 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2 } from "lucide-react";
+import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { userService } from '@/services/userService';
@@ -13,6 +13,8 @@ import { EditProfile } from '@/components/EditProfile';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import toast from "react-hot-toast";
 import { MyProjects } from '@/components/MyProjects';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import BackgroundUpload from '@/components/BackgroundUpload';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -49,6 +51,15 @@ const Profile = () => {
   const [showMyProjects, setShowMyProjects] = useState(false);
   const [editSection, setEditSection] = useState('');
 
+  // Camera functionality state
+  const [showCamera, setShowCamera] = useState(false);
+  const [showCropper, setShowCropper] = useState(false);
+  const [imageSrc, setImageSrc] = useState('');
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const MAX_LENGTH = 200;
   const [isExpanded, setIsExpanded] = useState(false);
   const shouldTruncate = profileData.bio && profileData.bio.length > MAX_LENGTH;
@@ -65,20 +76,6 @@ const Profile = () => {
       course: studentData.course || "Computer Science",
     }
   ];
-
-  // Mock portfolio projects - in real app, this would come from database
-  /*
-  const portfolioProjects = projects.length > 0 ? projects : [
-    {
-      title: "Sample Project",
-      description: "This is a sample project. Add your own projects to showcase your work.",
-      image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=300&h=200&fit=crop",
-      technologies: ["React", "Node.js", "MongoDB"],
-      university: studentData.college || "University",
-      publication: "Sample publication"
-    }
-  ];
-  */
 
   const fetchUserData = async () => {
     try {
@@ -224,6 +221,51 @@ const Profile = () => {
     fetchUserData(); // Refresh data after adding a project
   };
 
+  // Camera functionality handlers
+  const handleCapture = () => {
+    if (videoRef.current && canvasRef.current) {
+      const context = canvasRef.current.getContext('2d');
+      if (context) {
+        canvasRef.current.width = videoRef.current.videoWidth;
+        canvasRef.current.height = videoRef.current.videoHeight;
+        context.drawImage(videoRef.current, 0, 0);
+        const imageData = canvasRef.current.toDataURL('image/jpeg');
+        setImageSrc(imageData);
+        setShowCamera(false);
+        setShowCropper(true);
+      }
+    }
+  };
+
+  const handleCropComplete = (cropArea: any) => {
+    // Handle crop completion
+  };
+
+  const handleCropDone = () => {
+    setShowCropper(false);
+    // Handle the cropped image
+  };
+
+  const handleBackgroundChange = (newBackground: string) => {
+    setBackgroundImage(newBackground);
+  };
+
+  const handleRemoveAvatar = () => {
+    setProfileData(prev => ({ ...prev, avatar: '' }));
+  };
+
+  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setProfileData(prev => ({ ...prev, avatar: result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white">
@@ -237,79 +279,131 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
       <Header />
-      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        {/* Profile Header */}
-        <Card className="mb-8 mini-w-screen bg-white shadow-lg rounded-xl overflow-hidden relative">
-          {/* Sticky Banner at the top */}
-          <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-20 px-4 sticky top-0 z-10">
+      
+      {/* Hero Section */}
+      <div className="relative h-96 bg-cover bg-center bg-no-repeat" style={{
+        backgroundImage: `url(${backgroundImage})`
+      }}>
+        {/* Camera Modal */}
+        {showCamera && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center space-y-4 p-4">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="w-64 h-64 rounded-lg border-4 border-white object-cover"
+            />
+            <canvas ref={canvasRef} width={200} height={200} style={{ display: "none" }} />
+
+            <div className="flex space-x-4">
+              <button onClick={handleCapture} className="bg-green-600 text-white hover:bg-green-700 px-4 py-2 rounded-md">
+                Capture Photo
+              </button>
+              <button onClick={() => setShowCamera(false)} className="text-white border border-white hover:bg-white/10 px-4 py-2 rounded-md">
+                Cancel
+              </button>
+            </div>
           </div>
+        )}
 
-          <CardContent className="p-8 pt-6 flex flex-row items-center justify-between">
-            <div className="flex flex-col md:flex-row items-start space-y-6 md:space-y-0 md:space-x-8">
-              {/* Left side with avatar */}
-              <div className="flex flex-col items-center space-y-4 shrink-0">
-                <div className="relative">
-                  {profileData.avatar ? (
-                    <img
-                      src={profileData.avatar}
-                      alt={`${profileData.firstName} ${profileData.lastName}`}
-                      className="w-36 h-36 rounded-full object-cover border-4 border-white shadow-md"
-                    />
-                  ) : (
-                    <InitialsAvatar 
-                      firstName={profileData.firstName} 
-                      lastName={profileData.lastName} 
-                      size={144}
-                      className="w-36 h-36 border-4 border-white shadow-md"
-                    />
-                  )}
-                  <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center bg-green-500">
-                    <span className="text-white text-xs font-bold">A</span>
-                  </div>
-                </div>
-              </div>
+        {/* Cropper Modal */}
+        {showCropper && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center space-y-6 p-4">
+            <div className="relative w-80 h-80 bg-black">
+              <img src={imageSrc} alt="Crop preview" className="w-full h-full object-contain" />
+            </div>
+            <div className="flex gap-4">
+              <button onClick={handleCropDone} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md">
+                Set Photo
+              </button>
+              <button onClick={() => setShowCropper(false)} className="text-white border border-white hover:bg-white/10 px-4 py-2 rounded-md">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
-              {/* Right side with profile info */}
-              <div className="flex-1">
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h1 className="text-3xl font-bold text-gray-900 mb-1">
-                        {profileData.firstName} {profileData.lastName}
-                      </h1>
-                      <p className="text-xl text-purple-600 font-medium mb-3">
-                        {profileData.title || profileData.userType || 'Member'}
-                      </p>
-                    </div>
-                  </div>
+        {/* Dark overlay for better text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
 
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    {profileData.location && (
-                      <div className="flex items-center text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        <span className="text-sm">{profileData.location}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center bg-yellow-50 px-3 py-1 rounded-full">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="ml-1 font-semibold text-gray-800">4.8</span>
-                      <span className="ml-1 text-gray-600 text-sm">(12)</span>
-                    </div>
+        {/* Background Upload Button */}
+        <div className="absolute top-4 right-4 group z-10">
+          <button className="bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors">
+            <Camera className="text-slate-700 w-5 h-5" />
+          </button>
+          <div className="absolute right-0 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <BackgroundUpload onBackgroundChange={handleBackgroundChange} />
+          </div>
+        </div>
+
+        {/* Profile Content */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-end pb-12">
+          <div className="w-full py-8 px-6 md:px-8 flex flex-col md:flex-row items-start space-y-6 md:space-y-0 md:space-x-8">
+            {/* Avatar Section */}
+            <div className="flex flex-col items-center space-y-4 shrink-0">
+              <div className="relative">
+                {profileData.avatar ? (
+                  <img
+                    src={profileData.avatar}
+                    alt={`${profileData.firstName} ${profileData.lastName}`}
+                    className="w-36 h-36 rounded-full border-4 border-white shadow-lg object-cover"
+                  />
+                ) : (
+                  <div className="w-36 h-36 rounded-full border-4 border-white shadow-lg bg-gray-300 flex items-center justify-center text-4xl font-bold text-gray-600">
+                    {profileData.firstName?.charAt(0)}{profileData.lastName?.charAt(0)}
                   </div>
-                </div>
+                )}
+                <button
+                  onClick={() => document.getElementById('upload-avatar')?.click()}
+                  className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-slate-100 transition-colors"
+                >
+                  <Camera className="w-4 h-4 text-slate-600" />
+                </button>
+                <input
+                  id="upload-avatar"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
               </div>
             </div>
-            {/* Edit Profile Button */}
-            <Button 
-              onClick={() => handleEditSection('Basic Details')}
-              className="flex items-center justify-center space-x-2 w-[200px] bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full shadow-md transition-colors text-lg font-semibold"
-            >
-              <Edit className="w-4 h-4" />
-              <span>Edit Profile</span>
-            </Button>
-          </CardContent>
-        </Card>
 
+            {/* Profile Info Section */}
+            <div className="flex-1 text-white">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold mb-2 text-white drop-shadow-md">
+                  {`${profileData.firstName} ${profileData.lastName}`}
+                </h1>
+                <p className="text-xl md:text-2xl font-medium mb-4 text-gray-200 drop-shadow-md">
+                  {profileData.title || 'Title'}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                  {profileData.location && (
+                    <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <MapPin className="w-4 h-4 mr-1 text-white" />
+                      <span className="text-sm text-white">{profileData.location || 'Location'}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Edit Profile Button */}
+                <button
+                  onClick={() => handleEditSection('Basic Details')}
+                  className="mt-4 bg-transparent border-2 border-white text-white hover:bg-white/10 px-6 py-2 rounded-full font-semibold drop-shadow-md transition-all duration-200 flex items-center"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
@@ -456,7 +550,7 @@ const Profile = () => {
                     Add Project
                   </Button>
                 </div>
-                <div className="h-[500px] overflow-y-auto pr-2 space-y-6">
+                <div className="max-h-[500px] overflow-y-auto pr-2 space-y-6">
                   {projects.length > 0 ? (
                     projects.map((project, index) => (
                       <Card key={project.id || index} className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden">
@@ -606,6 +700,7 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      
       <Footer />
 
       {/* Edit Profile Sidebar */}
@@ -621,4 +716,4 @@ const Profile = () => {
   );
 };
 
-export default Profile; 
+export default Profile;
