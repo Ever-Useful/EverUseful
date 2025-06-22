@@ -104,31 +104,6 @@ export const FilterSidebar = ({ onFiltersChange }: FilterSidebarProps) => {
     debouncedPriceChange(value);
   }, [debouncedPriceChange]);
 
-<<<<<<< HEAD
-const categories = [
-  { name: "AI & ML", count: 245 },
-  { name: "Sustainable", count: 189 },
-  { name: "FinTech", count: 156 },
-  { name: "HealthTech", count: 134 },
-  { name: "EdTech", count: 98 },
-  { name: "IoT", count: 87 },
-  { name: "Blockchain", count: 76 },
-  { name: "Mobile", count: 234 }
-];
-
-
-const skills = [
-  "React", "Python", "JavaScript", "ML", "UI/UX",
-  "DataSci", "Blockchain", "Cloud"
-];
-
-
-const durations = [
-  "1-2w", "1m", "2-3m", "3-6m", "6+m"
-];
-
-=======
->>>>>>> ba84081 (Commit pending changes: update FilterSidebar, add useAuth hook, and add api lib)
   return (
     <aside className="w-full max-w-xs lg:w-72 sticky top-8 z-20 font-sans">
       <Card
@@ -285,5 +260,3 @@ const durations = [
     </aside>
   );
 };
-
-

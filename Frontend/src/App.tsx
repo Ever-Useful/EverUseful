@@ -21,10 +21,7 @@ import NewProject from '@/pages/NewProject';
 import Collaborators from '@/pages/Collaborators';
 import ScheduleMeeting from '@/pages/ScheduleMeeting';
 import { AuthProvider } from '@/contexts/AuthContext';
-<<<<<<< HEAD
 import About from '@/pages/AboutUs';
-=======
->>>>>>> ba84081 (Commit pending changes: update FilterSidebar, add useAuth hook, and add api lib)
 
 const queryClient = new QueryClient();
 
