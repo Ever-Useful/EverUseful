@@ -50,43 +50,27 @@ const OPTIONS: Option[] = [
 export const Hero = () => {
   return (
     <>
-      {/* ─── Floating Animations for Desktop ─── */}
+      {/* Optimized floating animations */}
       <style>
         {`
         @keyframes float-down {
-          0%   { transform: translateY(50px); }
-          50%  { transform: translateY(25px); }
-          100% { transform: translateY(50px); }
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(15px); }
         }
         @keyframes float-up {
-          0%   { transform: translateY(-50px); }
-          50%  { transform: translateY(-25px); }
-          100% { transform: translateY(-50px); }
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
         }
         `}
       </style>
 
       <section className="relative overflow-hidden py-20 sm:py-16 bg-[#0a0f24]">
-        {/* ── Technical Background Layers ── */}
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='0' width='40' height='40' fill='none' stroke='%23333f57' stroke-width='0.5'/%3E%3C/svg%3E")`,
-            backgroundSize: "40px 40px",
-          }}
-        />
+        {/* Simplified background layers - reduced complexity */}
         <div
           className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke='%2360779a' stroke-width='0.3'%3E%3Cpath d='M0 200 L400 200 M200 0 L200 400'/%3E%3Cpath d='M100 0 L100 400 M300 0 L300 400'/%3E%3Cpath d='M0 100 L400 100 M0 300 L400 300'/%3E%3C/g%3E%3C/svg%3E")`,
-            backgroundSize: "400px 400px",
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='0.5' fill='%239C92AC' fill-opacity='0.05'/%3E%3C/svg%3E")`,
-            backgroundSize: "20px 20px",
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='0' width='40' height='40' fill='none' stroke='%23333f57' stroke-width='0.5'/%3E%3C/svg%3E")`,
+            backgroundSize: "40px 40px",
           }}
         />
 
@@ -95,7 +79,7 @@ export const Hero = () => {
           <div className="flex flex-col lg:flex-row items-center gap-8">
             {/* LEFT: Text + Button */}
             <div className="w-full lg:w-1/3 text-center lg:text-left">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-4 animate-slide-in-left delay-400">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-4 animate-fade-in">
                 Connect{" "}
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
                   Innovation
@@ -105,12 +89,12 @@ export const Hero = () => {
                   Opportunity
                 </span>
               </h1>
-              <p className="text-base sm:text-lg text-gray-300 mb-16 max-w-sm lg:max-w-full leading-relaxed animate-slide-in-left delay-600">
+              <p className="text-base sm:text-lg text-gray-300 mb-16 max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200">
                 A platform where students, PhD holders, professors, and
                 businesses collaborate to transform ideas into real‐world impact.
                 Join the future of collaborative innovation today.
               </p>
-              <div className="flex justify-center lg:justify-start animate-slide-in-left delay-800">
+              <div className="flex justify-center lg:justify-start animate-fade-in delay-300">
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base transform transition-all duration-300 hover:scale-105 shadow-lg"
@@ -127,10 +111,10 @@ export const Hero = () => {
 
             {/* RIGHT: Gallery */}
             <div className="w-full lg:w-2/3 flex items-center justify-center">
-              {/* Desktop: original animated cards */}
+              {/* Desktop: optimized animated cards */}
               <div className="hidden lg:flex overflow-visible w-full h-[560px] py-[40px]">
                 {OPTIONS.map((opt) => {
-                  // Determine which animation and baseline to use:
+                  // Simplified animation logic
                   const isOdd = opt.id % 2 !== 0;
                   const animationName = isOdd ? "float-down" : "float-up";
                   return (
@@ -147,8 +131,8 @@ export const Hero = () => {
                         mx-[24px]
                         rounded-[64px]
                         transition-all
-                        duration-700
-                        ease-[cubic-bezier(0.22,1,0.36,1)]
+                        duration-500
+                        ease-out
                         hover:flex-[10_1_600px]
                         hover:rounded-[32px]
                         hover:bg-[length:auto_100%]
@@ -156,12 +140,15 @@ export const Hero = () => {
                       style={{
                         backgroundImage: `url(${opt.imageUrl})`,
                         animationName,
-                        animationDuration: "5s",
+                        animationDuration: "6s",
                         animationTimingFunction: "ease-in-out",
                         animationIterationCount: "infinite",
+                        willChange: "transform",
                       }}
                     >
-                      {/* Shadow overlay at bottom for gradient effect ONLY on hover */}
+                      {/* Use img tag for accessibility and lazy loading */}
+                      <img src={opt.imageUrl} alt={opt.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-0" />
+                      {/* Simplified shadow overlay */}
                       <div
                         className="
                           absolute
@@ -170,13 +157,13 @@ export const Hero = () => {
                           right-0
                           h-[80px]
                           transition-all
-                          duration-700
-                          ease-[cubic-bezier(0.22,1,0.36,1)]
+                          duration-500
+                          ease-out
                           group-hover:h-[120px]
                         "
                         style={{
                           boxShadow:
-                            "inset 0 -120px 120px -120px rgba(0,0,0,0.8), inset 0 -120px 120px -100px rgba(0,0,0,0.6)",
+                            "inset 0 -80px 80px -80px rgba(0,0,0,0.8)",
                         }}
                       />
                       {/* Label & Icon */}
@@ -188,59 +175,22 @@ export const Hero = () => {
                           bottom-[8px]
                           left-[64px]
                           transition-all
-                          duration-700
-                          ease-[cubic-bezier(0.22,1,0.36,1)]
+                          duration-500
+                          ease-out
                           group-hover:bottom-[54px]
                           group-hover:left-[12px]
                           z-10
-                          text-shadow-lg
                         "
-                        style={{
-                          textShadow: "0 0 8px rgba(0,0,0,0.75)",
-                        }}
                       >
-                        <div className="flex items-center justify-center w-[40px] h-[40px] bg-white rounded-full shadow-sm">
-                          <i className={`${opt.iconClass} text-gray-800`} />
-                        </div>
-                        <div className="flex flex-col justify-center ml-2 text-white whitespace-pre">
-                          <div
-                            className="
-                              relative
-                              transition-all
-                              duration-700
-                              ease-[cubic-bezier(0.22,1,0.36,1)]
-                              left-[16px]
-                              opacity-0
-                              group-hover:left-0
-                              group-hover:opacity-100
-                              font-semibold
-                              text-lg
-                            "
-                            style={{
-                              textShadow: "0 0 8px rgba(0,0,0,0.75)",
-                            }}
-                          >
-                            {opt.label}
+                        <div className="flex items-center text-white">
+                          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">
+                            <i className={`${opt.iconClass} text-sm`}></i>
                           </div>
-                          <div
-                            className="
-                              relative
-                              transition-all
-                              duration-700
-                              ease-[cubic-bezier(0.22,1,0.36,1)]
-                              delay-150
-                              left-[16px]
-                              opacity-0
-                              group-hover:left-0
-                              group-hover:opacity-100
-                              text-sm
-                              text-gray-200
-                            "
-                            style={{
-                              textShadow: "0 0 6px rgba(0,0,0,0.6)",
-                            }}
-                          >
-                            {opt.description}
+                          <div>
+                            <div className="font-bold text-sm">{opt.label}</div>
+                            <div className="text-xs opacity-80 max-w-0 group-hover:max-w-[200px] transition-all duration-500 ease-out overflow-hidden">
+                              {opt.description}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -249,56 +199,24 @@ export const Hero = () => {
                 })}
               </div>
 
-              {/* Mobile: Collage grid */}
-              <div className="flex lg:hidden w-full max-w-[400px] mx-auto mt-8">
-                <div className="grid grid-cols-3 grid-rows-3 gap-2 w-full h-[240px]">
-                  {/* Top left: large */}
-                  <div className="row-span-2 col-span-2 rounded-2xl overflow-hidden relative shadow-lg">
-                    <img
-                      src={OPTIONS[0].imageUrl}
-                      alt={OPTIONS[0].label}
-                      className="object-cover w-full h-full"
-                    />
-                    <div className="absolute bottom-2 left-2 bg-black/60 rounded px-2 py-1 text-xs text-white">
-                      {OPTIONS[0].label}
+              {/* Mobile: simplified static cards */}
+              <div className="lg:hidden grid grid-cols-2 gap-4 w-full">
+                {OPTIONS.map((opt) => (
+                  <div
+                    key={opt.id}
+                    className="relative h-48 rounded-2xl overflow-hidden bg-center bg-cover"
+                    style={{
+                      backgroundImage: `url(${opt.imageUrl})`,
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/40" />
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <div className="font-bold">{opt.label}</div>
+                      <div className="text-sm opacity-80">{opt.description}</div>
                     </div>
                   </div>
-                  {/* Top right: small */}
-                  <div className="row-span-1 col-span-1 rounded-xl overflow-hidden relative shadow-md">
-                    <img
-                      src={OPTIONS[1].imageUrl}
-                      alt={OPTIONS[1].label}
-                      className="object-cover w-full h-full"
-                    />
-                    <div className="absolute bottom-1 left-1 bg-black/60 rounded px-1 py-0.5 text-xs text-white">
-                      {OPTIONS[1].label}
-                    </div>
-                  </div>
-                  {/* Bottom left: small */}
-                  <div className="row-span-1 col-span-1 rounded-xl overflow-hidden relative shadow-md">
-                    <img
-                      src={OPTIONS[2].imageUrl}
-                      alt={OPTIONS[2].label}
-                      className="object-cover w-full h-full"
-                    />
-                    <div className="absolute bottom-1 left-1 bg-black/60 rounded px-1 py-0.5 text-xs text-white">
-                      {OPTIONS[2].label}
-                    </div>
-                  </div>
-                  {/* Bottom right: medium */}
-                  <div className="row-span-2 col-span-2 rounded-2xl overflow-hidden relative shadow-lg">
-                    <img
-                      src={OPTIONS[3].imageUrl}
-                      alt={OPTIONS[3].label}
-                      className="object-cover w-full h-full"
-                    />
-                    <div className="absolute bottom-2 left-2 bg-black/60 rounded px-2 py-1 text-xs text-white">
-                      {OPTIONS[3].label}
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
-              {/* End mobile collage */}
             </div>
           </div>
         </div>

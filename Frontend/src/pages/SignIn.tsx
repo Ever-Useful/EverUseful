@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Github, Linkedin, Shield, Smartphone, Mail, Check, Phone } from "lucide-react";
 import { auth,handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "@/lib/firebase";
 import { sendEmailVerification,  RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail } from "firebase/auth";
+import { userService } from '@/services/userService';
+import { firestoreService } from '@/services/firestoreService';
 
 // Extend the Window interface to include confirmationResult
 declare global {
@@ -52,6 +54,9 @@ const SignIn = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
+  // State for cycling through user types
+  const [currentUserTypeIndex, setCurrentUserTypeIndex] = useState(0);
+  
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -62,6 +67,15 @@ const SignIn = () => {
       setShowForgotPassword(true);
     }
   }, [location.search]);
+
+  // Effect to cycle through user types every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentUserTypeIndex((prevIndex) => (prevIndex + 1) % userTypes.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const userTypes = [
     { 
@@ -93,7 +107,7 @@ const SignIn = () => {
     },
   ];
 
-  const currentUserType = userTypes.find(type => type.id === userType);
+  const currentUserType = userTypes[currentUserTypeIndex];
 
   const mfaMethods = [
     { id: "authenticator", label: "Authenticator App", icon: Smartphone, description: "Use your authenticator app" },
@@ -119,6 +133,33 @@ const SignIn = () => {
       setIsLoading(true);
       setError(null);
       const idToken = await loginWithEmailPassword(email, password);
+
+      // Only fetch user profile, do not try to create
+      let backendUser = null;
+      try {
+        backendUser = await userService.getUserProfile();
+      } catch (error: any) {
+        if (error.message === 'User not found') {
+          setError('No account found, please sign up first.');
+          setIsLoading(false);
+          return;
+        } else {
+          throw error;
+        }
+      }
+
+      // Save backend customUserId in Firestore
+      const user = auth.currentUser;
+      if (user && backendUser) {
+        await firestoreService.setCurrentUserData({
+          customUserId: backendUser.customUserId,
+          name: user.displayName || null,
+          email: user.email || null,
+          userType: userType,
+          createdAt: user.metadata?.creationTime || new Date().toISOString(),
+        });
+      }
+
       const response = await fetch('http://localhost:3000/token', {
         method: 'GET',
         headers: {
@@ -142,6 +183,8 @@ const SignIn = () => {
         setError("Incorrect password. Please try again.");
       } else if (error.code === 'auth/too-many-requests') {
         setError("Too many failed attempts. Please try again later.");
+      } else if (error.message === 'User not found') {
+        setError('No account found, please sign up first.');
       } else {
         setError("An error occurred during sign in. Please try again.");
       }
@@ -311,32 +354,6 @@ const SignIn = () => {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Left side - Sign in form */}
           <div className="space-y-4 lg:space-y-6 order-2 lg:order-1">
-            {/* User Type Selection - moved to left */}
-            <div className="animate-scale-in delay-200">
-              <Label className="text-sm font-medium text-gray-700 mb-3 lg:mb-4 block">Sign in as:</Label>
-              <div className="grid grid-cols-3 gap-2 lg:gap-3">
-                {userTypes.map((type) => {
-                  const IconComponent = type.icon;
-                  return (
-                    <button
-                      key={type.id}
-                      onClick={() => setUserType(type.id)}
-                      className={`p-2 lg:p-4 rounded-lg lg:rounded-xl border-2 transition-all duration-500 bg-white ${
-                        userType === type.id
-                          ? "border-blue-500 bg-blue-50 scale-105 shadow-lg"
-                          : "border-gray-200 hover:border-gray-300 hover:scale-102 hover:shadow-md"
-                      }`}
-                    >
-                      <div className={`w-6 h-6 lg:w-10 lg:h-10 ${type.color} rounded-lg lg:rounded-xl mx-auto mb-1 lg:mb-3 flex items-center justify-center shadow-md`}>
-                        <IconComponent className="w-3 h-3 lg:w-5 lg:h-5 text-white" />
-                      </div>
-                      <span className="text-xs lg:text-sm font-medium text-gray-700">{type.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Sign In Form */}
             <Card className="backdrop-blur-xl bg-white/90 border-0 shadow-2xl animate-scale-in delay-300">
               <CardHeader className="text-center pb-4 lg:pb-6">
@@ -868,22 +885,22 @@ const SignIn = () => {
               <Card className={`backdrop-blur-lg bg-gradient-to-br ${currentUserType.gradient} border-0 shadow-xl transition-all duration-500 hover:shadow-2xl hover:scale-105 animate-scale-in delay-300 lg:block hidden`}>
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-3 mb-4">
-                    <div className={`w-10 h-10 lg:w-12 lg:h-12 ${currentUserType.color} rounded-xl flex items-center justify-center shadow-lg`}>
-                      <currentUserType.icon className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+                    <div className={`w-10 h-10 lg:w-12 lg:h-12 ${currentUserType.color} rounded-xl flex items-center justify-center shadow-lg transition-all duration-500`}>
+                      <currentUserType.icon className="w-5 h-5 lg:w-6 lg:h-6 text-white transition-all duration-500" />
                     </div>
-                    <div>
-                      <CardTitle className="text-base lg:text-lg text-gray-900">{currentUserType.label} Dashboard</CardTitle>
-                      <p className="text-xs lg:text-sm text-gray-600">{currentUserType.description}</p>
+                    <div className="transition-all duration-500">
+                      <CardTitle className="text-base lg:text-lg text-gray-900 transition-all duration-500">{currentUserType.label} Dashboard</CardTitle>
+                      <p className="text-xs lg:text-sm text-gray-600 transition-all duration-500">{currentUserType.description}</p>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {currentUserType.features.map((feature, index) => (
-                    <div key={index} className="flex items-start space-x-3 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
-                      <div className="flex-shrink-0 w-5 h-5 lg:w-6 lg:h-6 bg-white rounded-full flex items-center justify-center mt-0.5 shadow-sm">
-                        <Check className="w-2 h-2 lg:w-3 lg:h-3 text-green-600" />
+                    <div key={`${currentUserType.id}-${index}`} className="flex items-start space-x-3 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                      <div className="flex-shrink-0 w-5 h-5 lg:w-6 lg:h-6 bg-white rounded-full flex items-center justify-center mt-0.5 shadow-sm transition-all duration-500">
+                        <Check className="w-2 h-2 lg:w-3 lg:h-3 text-green-600 transition-all duration-500" />
                       </div>
-                      <span className="text-xs lg:text-sm text-gray-700">{feature}</span>
+                      <span className="text-xs lg:text-sm text-gray-700 transition-all duration-500">{feature}</span>
                     </div>
                   ))}
                 </CardContent>

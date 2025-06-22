@@ -10,6 +10,7 @@ export interface CartItem {
   downloadable: boolean;
   licenseType: 'personal' | 'commercial' | 'enterprise';
   tags: string[];
+  image?: string;
 }
 
 export interface SavedItem {
@@ -30,4 +31,5 @@ export interface FeaturedProject {
   university: string;
   rating: number;
   tags: string[];
+  image?: string;
 }

@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RelatedProducts } from "@/components/RelatedProducts";
 import { ReviewSection } from "@/components/ReviewSection";
-import { Header } from "@/components/Header";
 import { 
   Star, 
   Heart, 
@@ -22,106 +21,85 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { useNavigate, useParams } from "react-router-dom";
-
-interface Project {
-  id: number;
-  title: string;
-  subtitle: string;
-  description: string;
-  image: string;
-  images?: string[];
-  category: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviews: number;
-  views: number;
-  downloads: number;
-  duration: string;
-  skills: string[];
-  author: {
-    name: string;
-    image: string;
-    verified: boolean;
-    rating: number;
-    projects: number;
-    bio: string;
-  };
-  features: string[];
-  techStack: string[];
-  deliverables: string[];
-}
+import { Header } from "@/components/Header";
+import { useAuthState } from "@/hooks/useAuthState";
+import { firestoreService } from "@/services/firestoreService";
+import { userService } from "@/services/userService";
+import { toast } from "sonner";
 
 const ProductDisplay = () => {
+  const { id } = useParams();
+  const [project, setProject] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { id } = useParams();
   const MAX_LENGTH = 200;
-
+  const { user, token, isLoading: authLoading } = useAuthState();
+  const [showPopupMenu, setShowPopupMenu] = useState(false);
+  
   useEffect(() => {
     const fetchProject = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
         const response = await fetch(`http://localhost:3000/api/marketplace/projects/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch project');
-        }
+        if (!response.ok) throw new Error('Failed to fetch project');
         const data = await response.json();
         setProject(data.project);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+      } catch (err: any) {
+        setError(err.message || 'An error occurred');
       } finally {
         setLoading(false);
       }
     };
-
-    if (id) {
-      fetchProject();
-    }
+    if (id) fetchProject();
   }, [id]);
 
   const showReceipt = () => {
-    navigate("/paymentSuccess");
+    navigate("/paymentSuccess")
+  }
+
+  const handleAddToCart = async (projectId: number) => {
+    if (!user || !token) {
+      setShowPopupMenu(true);
+      return;
+    }
+    try {
+      const firestoreData = await firestoreService.getCurrentUserData();
+      if (!firestoreData) {
+        toast.error('User data not found');
+        return;
+      }
+      await userService.addToCart(firestoreData.customUserId, {
+        productId: projectId.toString(),
+        addedAt: new Date().toISOString(),
+        quantity: 1
+      });
+      toast.success('Project added to cart successfully');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add project to cart');
+    }
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading project details...</p>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
-
   if (error || !project) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error || 'Project not found'}</p>
-          <Button onClick={() => navigate('/marketplace')}>Back to Marketplace</Button>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center text-red-500">{error || 'Project not found'}</div>;
   }
 
-  const shouldTruncate = project.description.length > MAX_LENGTH;
+  const shouldTruncate = project.description.length > MAX_LENGTH
   const displayedText = isExpanded
-    ? project.description
-    : project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "");
-
-  // Get the main image URL
-  const mainImageUrl = project.images?.[selectedImage] || project.image;
+  ? project.description
+  : project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "")
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-100">
-      <Header/>
+      <Header />
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-6 py-8">
@@ -130,14 +108,14 @@ const ProductDisplay = () => {
             <div>
               <div className="mb-4">
                 <img 
-                  src={mainImageUrl}
+                  src={project.images ? project.images[selectedImage] : project.image} 
                   alt={project.title}
                   className="w-full h-96 object-cover rounded-lg shadow-lg"
                 />
               </div>
               {project.images && project.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-2">
-                  {project.images.map((image, index) => (
+                  {project.images.map((image: string, index: number) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
@@ -214,10 +192,9 @@ const ProductDisplay = () => {
               <div className="bg-gray-50 rounded-lg p-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <span className="text-3xl font-bold text-gray-900">${project.price.toLocaleString()}</span>
-                    {project.originalPrice && (
-                      <span className="text-lg text-gray-500 line-through ml-2">${project.originalPrice.toLocaleString()}</span>
-                    )}
+                    <span className="text-3xl font-bold text-gray-900">${project.price}</span>
+                    <span className="text-lg text-gray-500 line-through ml-2">{project.originalPrice}</span>
+                    <span className="text-lg text-gray-500 ml-2">{project.discount}</span>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center space-x-1 text-gray-600">
@@ -231,17 +208,9 @@ const ProductDisplay = () => {
                   <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={showReceipt}>
                     Purchase Now
                   </Button>
-                  <Button className="flex-1 items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600">
+                  <Button className="flex-1 items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600" onClick={() => handleAddToCart(project.id)}>
                     <ShoppingCart className="w-5 h-5" />
                     Add to Cart
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={() => setIsLiked(!isLiked)}
-                    className={isLiked ? "text-red-500 border-red-500" : ""}
-                  >
-                    <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
                   </Button>
                   <Button variant="outline" size="icon">
                     <Share2 className="w-4 h-4" />
@@ -258,7 +227,7 @@ const ProductDisplay = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-gray-100">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="features">Features</TabsTrigger>
                 <TabsTrigger value="tech">Tech Stack</TabsTrigger>
@@ -336,6 +305,14 @@ const ProductDisplay = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
+              
+              <TabsContent value="reviews" className="mt-6">
+                <ReviewSection 
+                  projectId={project.id}
+                  averageRating={project.rating}
+                  totalReviews={project.reviews}
+                />
+              </TabsContent>
             </Tabs>
           </div>
 
@@ -374,22 +351,22 @@ const ProductDisplay = () => {
             </Card>
 
             {/* Trust Indicators */}
-            <Card className="border-gray-200 bg-white">
+            <Card className="bg-orange-300">
               <CardHeader>
-                <CardTitle className="text-gray-900">Trust & Safety</CardTitle>
+                <CardTitle className="text-black">Trust & Safety</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center space-x-2">
-                  <Shield className="w-5 h-5 text-green-500" />
-                  <span className="text-sm text-gray-700">Money-back guarantee</span>
+                  <Shield className="w-5 h-5 text-black" />
+                  <span className="text-sm text-black">Money-back guarantee</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Award className="w-5 h-5 text-blue-500" />
-                  <span className="text-sm text-gray-700">Verified creator</span>
+                  <Award className="w-5 h-5 text-black" />
+                  <span className="text-sm text-black">Verified creator</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Users className="w-5 h-5 text-purple-500" />
-                  <span className="text-sm text-gray-700">24/7 support</span>
+                  <Users className="w-5 h-5 text-black" />
+                  <span className="text-sm text-black">24/7 support</span>
                 </div>
               </CardContent>
             </Card>
@@ -411,6 +388,15 @@ const ProductDisplay = () => {
         </div>
       </div>
       <Footer/>
+      {/* PopupMenu for login if not authenticated */}
+      {showPopupMenu && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-xl font-bold mb-4">Sign in to add to cart</h2>
+            <Button onClick={() => setShowPopupMenu(false)}>Close</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

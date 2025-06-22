@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs').promises;
 const path = require('path');
+const authorize = require('../authorize');
+const admin = require('firebase-admin');
+const db = admin.firestore();
 
 // Helper function to read marketplace data
 const readMarketplaceData = async () => {
@@ -13,6 +16,21 @@ const readMarketplaceData = async () => {
 const writeMarketplaceData = async (data) => {
   await fs.writeFile(
     path.join(__dirname, '../data/marketplace.json'),
+    JSON.stringify(data, null, 2),
+    'utf8'
+  );
+};
+
+// Helper function to read user data
+const readUserData = async () => {
+  const data = await fs.readFile(path.join(__dirname, '../data/userData.json'), 'utf8');
+  return JSON.parse(data);
+};
+
+// Helper function to write user data
+const writeUserData = async (data) => {
+  await fs.writeFile(
+    path.join(__dirname, '../data/userData.json'),
     JSON.stringify(data, null, 2),
     'utf8'
   );
@@ -234,6 +252,96 @@ router.post('/projects/:id/like', async (req, res) => {
     });
   } catch (error) {
     console.error('Error toggling like:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create a new project
+router.post('/projects', authorize, async (req, res) => {
+  try {
+    const marketplaceData = await readMarketplaceData();
+    const userData = await readUserData();
+    
+    const newProject = {
+      id: marketplaceData.projects.length > 0 ? Math.max(...marketplaceData.projects.map(p => p.id)) + 1 : 1,
+      ...req.body,
+      rating: 0,
+      reviews: 0,
+      posted: new Date().toISOString().split('T')[0],
+      views: 0,
+      favoritedBy: []
+    };
+    
+    // Add author details from user data
+    const user = userData.users[req.body.customUserId];
+    if (user) {
+      const userDoc = await db.collection('users').doc(req.user.uid).get();
+      const authData = userDoc.data();
+      newProject.author = {
+        name: `${authData.firstName} ${authData.lastName}`,
+        image: user.profile.avatar || null,
+        verified: true, // Or based on some logic
+        rating: user.stats.totalLikes / (user.stats.projectsCount || 1), // Example logic
+        projects: user.stats.projectsCount,
+        bio: user.profile.bio
+      };
+    }
+
+    marketplaceData.projects.push(newProject);
+    await writeMarketplaceData(marketplaceData);
+    
+    // Update user's project list
+    if (user) {
+      user.projects.created.push(newProject.id);
+      user.stats.projectsCount = (user.stats.projectsCount || 0) + 1;
+      await writeUserData(userData);
+    }
+    
+    res.status(201).json({ project: newProject });
+  } catch (error) {
+    console.error('Error creating project:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete a project
+router.delete('/projects/:id', authorize, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const projectId = parseInt(id);
+    
+    const marketplaceData = await readMarketplaceData();
+    const userData = await readUserData();
+
+    const projectIndex = marketplaceData.projects.findIndex(p => p.id === projectId);
+    if (projectIndex === -1) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const project = marketplaceData.projects[projectIndex];
+    const customUserId = project.customUserId;
+
+    // Verify that the user deleting the project is the author
+    const userRef = await db.collection('users').doc(req.user.uid).get();
+    if (!userRef.exists || userRef.data().customUserId !== customUserId) {
+      return res.status(403).json({ error: 'You are not authorized to delete this project' });
+    }
+
+    // Remove project from marketplace
+    marketplaceData.projects.splice(projectIndex, 1);
+    await writeMarketplaceData(marketplaceData);
+
+    // Remove project from user's created list
+    const user = userData.users[customUserId];
+    if (user) {
+      user.projects.created = user.projects.created.filter(pId => pId !== projectId);
+      user.stats.projectsCount = Math.max(0, (user.stats.projectsCount || 0) - 1);
+      await writeUserData(userData);
+    }
+
+    res.json({ message: 'Project deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting project:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -20,6 +20,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useAuthState } from "../../hooks/useAuthState";
+import { firestoreService } from "../../services/firestoreService";
+import { userService } from "../../services/userService";
+import { toast } from "sonner";
 
 interface Project {
   id: number;
@@ -111,7 +114,9 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
         
         // Add pagination parameters
         queryParams.append('page', currentPage.toString());
-        queryParams.append('limit', '6');
+        // Adjust limit based on sidebar state
+        const limit = selected ? '10' : '15';
+        queryParams.append('limit', limit);
 
         const response = await fetch(`http://localhost:3000/api/marketplace/projects?${queryParams}`);
         if (!response.ok) throw new Error('Failed to fetch projects');
@@ -280,6 +285,34 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
     }
   };
 
+  const handleAddToCart = async (projectId: number) => {
+    if (!user || !token) {
+      setShowPopupMenu(true);
+      return;
+    }
+
+    try {
+      // Get user data from Firestore to get customUserId
+      const firestoreData = await firestoreService.getCurrentUserData();
+      if (!firestoreData) {
+        toast.error('User data not found');
+        return;
+      }
+
+      // Add project to cart in userData.json (only productId, addedAt, quantity)
+      await userService.addToCart(firestoreData.customUserId, {
+        productId: projectId.toString(),
+        addedAt: new Date().toISOString(),
+        quantity: 1
+      });
+      
+      toast.success('Project added to cart successfully');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add project to cart');
+    }
+  };
+
   // Helper: get 2 related projects (different from selected)
   const getRelated = (id: number) => projects.filter((p) => p.id !== id).slice(0, 2);
 
@@ -302,7 +335,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-5 gap-3">
           <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">Featured Projects</h2>
           <div className="flex items-center space-x-3">
-            <span className="text-gray-500 text-xs">Showing {projects.length} of {pagination.totalProjects} projects</span>
+            
             <select 
               className="bg-white border border-gray-300 text-gray-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-gray-300"
               value={sortBy}
@@ -326,8 +359,9 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                 <img
                   src={project.image}
                   alt={project.title}
-                  className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
                   loading="lazy"
+                  onClick={() => setSelected(project)}
                 />
                 <div className="absolute top-2 left-2">
                   <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow">
@@ -339,7 +373,10 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                     size="icon" 
                     variant="ghost" 
                     className="w-7 h-7 p-0 bg-white/70 hover:bg-white/90 shadow"
-                    onClick={() => handleFavorite(project.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFavorite(project.id);
+                    }}
                   >
                     <Heart className={`w-4 h-4 ${project.isFavorited ? 'fill-pink-500 text-pink-500' : 'text-pink-500'}`} />
                   </Button>
@@ -365,7 +402,10 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                   </div>
                 </div>
 
-                <h3 className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                <h3 
+                  className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors cursor-pointer"
+                  onClick={() => setSelected(project)}
+                >
                   {project.title}
                 </h3>
 
@@ -404,7 +444,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                   onClick={() => handleViewDetails(project.id)}
                 >
                   <ArrowRight className="mr-2 w-4 h-4" />
-                  {user ? 'View Details' : 'Sign in to View'}
+                  {user ? 'Purchase Now' : 'Sign in to View'}
                 </Button>
                 <Button
                   size="icon"
@@ -412,6 +452,10 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                   className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center justify-center"
                   style={{ width: "15%", minWidth: 0, padding: 0 }}
                   aria-label="Add to Cart"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToCart(project.id);
+                  }}
                 >
                   <ShoppingCart className="w-5 h-5 mx-auto" />
                 </Button>
@@ -484,8 +528,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
             </div>
 
             <div className="mb-3">
-              <div className="text-xs text-gray-500 mb-1">Author Bio</div>
-              <div className="text-gray-700 text-xs mb-2">{selected.author.bio}</div>
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <Users className="w-4 h-4" />
                 Team Size: <span className="font-semibold text-gray-700">{selected.teamSize}</span>
@@ -524,19 +566,15 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                 <Clock className="w-3 h-3" />
                 <span>{selected.duration}</span>
               </div>
-              <div className="flex items-center space-x-1 text-pink-500">
-                <Heart className="w-3 h-3" />
-                <span>{selected.views}</span>
-              </div>
             </div>
             <p className="text-gray-700 text-sm mb-4">{selected.description}</p>
 
             <div className="flex gap-2 mb-6">
               <Button size="sm" variant="outline" className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100">
-                <Share2 className="w-4 h-4" /> Share
+                <Share2 className="w-4 h-4" />
               </Button>
               <Button size="sm" variant="outline" className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100">
-                <Download className="w-4 h-4" /> Download Brochure
+                <Download className="w-4 h-4" />
               </Button>
             </div>
 
