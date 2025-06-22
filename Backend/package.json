@@ -4,7 +4,7 @@
   "description": "Backend for EverUseful application",
   "main": "dist/index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "nodemon server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "test": "jest"

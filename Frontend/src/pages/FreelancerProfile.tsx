@@ -13,7 +13,7 @@ const FreelancerProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const freelancer = getFreelancerById(Number(id));
-  const [backgroundImage, setBackgroundImage] = useState(
+  const [backgroundImage] = useState(
     "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
   );
 
@@ -91,70 +91,71 @@ const FreelancerProfile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
       <Header />
-      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        {/* Profile Header */}
-        <Card className="mb-8 mini-w-screen bg-white shadow-lg rounded-xl overflow-hidden relative">
-          {/* Sticky Banner at the top */}
-          <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-20 px-4 sticky top-0 z-10">
-          </div>
+      <div className="relative h-96 bg-cover bg-center bg-no-repeat" style={{
+        backgroundImage: `url(${backgroundImage})`
+      }}>
+        {/* Darker overlay for better text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
 
-          <CardContent className="p-8 pt-6 flex flex-row items-center justify-between">
-            <div className="flex flex-col md:flex-row items-start space-y-6 md:space-y-0 md:space-x-8">
-              {/* Left side with avatar and follow button */}
-              <div className="flex flex-col items-center space-y-4 shrink-0">
-                <div className="relative">
-                  <img
-                    src={freelancer.image}
-                    alt={freelancer.name}
-                    className="w-36 h-36 rounded-full object-cover border-4 border-white shadow-md"
-                  />
-                  <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center ${freelancer.availability === "Available" ? "bg-green-500" : "bg-yellow-500"
-                    }`}>
-                    <span className="text-white text-xs font-bold">
-                      {freelancer.availability === "Available" ? "A" : "B"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right side with profile info */}
-              <div className="flex-1">
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h1 className="text-3xl font-bold text-gray-900 mb-1">{freelancer.name}</h1>
-                      <p className="text-xl text-purple-600 font-medium mb-3">{freelancer.title}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <div className="flex items-center text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      <span className="text-sm">{freelancer.location}</span>
-                    </div>
-                    <div className="flex items-center bg-yellow-50 px-3 py-1 rounded-full">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="ml-1 font-semibold text-gray-800">{freelancer.rating}</span>
-                      <span className="ml-1 text-gray-600 text-sm">({freelancer.reviews})</span>
-                    </div>
-                  </div>
-
-                  <div  className="flex flex-wrap items-center gap-3 ml-3">
-                    <UserPlus className="w-4 h-4 mr-1" />
-                    <span className="text-base text-slate-800">{freelancer.connections}+ Connections</span>
-                  </div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-end pb-12">
+          <div className="w-full py-8 px-6 md:px-8 flex flex-col md:flex-row items-start space-y-6 md:space-y-0 md:space-x-8">
+            {/* Left side with avatar */}
+            <div className="flex flex-col items-center space-y-4 shrink-0">
+              <div className="relative">
+                <img
+                  src={freelancer.image}
+                  alt={freelancer.name}
+                  className="w-36 h-36 rounded-full object-cover border-4 border-white shadow-lg"
+                />
+                <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center ${freelancer.availability === "Available" ? "bg-green-500" : "bg-yellow-500"
+                  }`}>
+                  <span className="text-white text-xs font-bold">
+                    {freelancer.availability === "Available" ? "A" : "B"}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Follow Button */}
-            <button className="flex items-center justify-center space-x-2 w-[200px] bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full shadow-md transition-colors text-2xl font-semibold">
-              <UserPlus className="w-4 h-4 text-2xl font-semibold" />
-              <span>Connect</span>
-            </button>
-          </CardContent>
-        </Card>
+            {/* Middle section with profile info */}
+            <div className="flex-1 text-white">
+              <div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2 text-white drop-shadow-md">{freelancer.name}</h1>
+                    <p className="text-xl md:text-2xl font-medium mb-4 text-grey-300 drop-shadow-md">{freelancer.title}</p>
+                  </div>
+                </div>
 
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                  <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                    <MapPin className="w-4 h-4 mr-1 text-white" />
+                    <span className="text-sm text-white">{freelancer.location}</span>
+                  </div>
+                  <div className="flex items-center bg-yellow-400/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="ml-1 font-semibold text-white">{freelancer.rating}</span>
+                    <span className="ml-1 text-gray-200 text-sm">({freelancer.reviews} reviews)</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-gray-200">
+                  <UserPlus className="w-5 h-5 text-white drop-shadow-md" />
+                  <span className="text-white drop-shadow-md">{freelancer.connections}+ Connections</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right side with connect button */}
+            <div className="flex items-center md:items-end">
+              <button className="mt-10 bg-white text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-full font-semibold drop-shadow-md transition-all duration-200 flex items-center">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Connect
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
@@ -384,11 +385,11 @@ const FreelancerProfile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="space-y-4">
-                    <h4 className="font-medium text-lg text-purple-800 mb-2">Consultation</h4>
-                    <p className="text-sm text-gray-600 mb-3">Expert advice on your research project or technical challenge</p>
-                    <Button variant="outline" className="w-full border-purple-300 text-purple-600 hover:bg-purple-100 rounded-lg">
-                      Request Consultation
-                    </Button>
+                  <h4 className="font-medium text-lg text-purple-800 mb-2">Consultation</h4>
+                  <p className="text-sm text-gray-600 mb-3">Expert advice on your research project or technical challenge</p>
+                  <Button variant="outline" className="w-full border-purple-300 text-purple-600 hover:bg-purple-100 rounded-lg">
+                    Request Consultation
+                  </Button>
                 </div>
               </CardContent>
             </Card>

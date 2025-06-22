@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { EditProfile } from '../components/EditProfile';
 import InitialsAvatar from './InitialsAvatar';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -280,107 +281,312 @@ export const Header = () => {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-purple-200/50 bg-white/95 backdrop-blur-md shadow-sm">
-        <div className="container h-14 w-full flex items-center justify-between px-4">
+        <div className="container h-14 w-[1320px] flex items-center justify-between px-4">
           {/* Left: Logo + Search Bar */}
           <div className="flex items-center space-x-4 flex-1">
             {/* Logo */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
               <Link to="/" className="flex items-center space-x-2 group">
                 <img src={Logo1} alt="AMOGH" className="h-8 w-auto" />
-                <div className="hidden w-10 h-6 text-sm px-1 sm:inline-flex text-purple-700">
+                <div className="py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
                   Beta
                 </div>
               </Link>
             </div>
 
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 w-40 h-8 border-gray-300 rounded-medium focus:outline-none focus:border-transparent"
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="search"
+                  placeholder="Search for people, jobs, companies..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-50 h-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Optional search suggestions dropdown */}
             </div>
           </div>
 
           {/* Centered Navigation */}
           <nav className="hidden md:flex items-center space-x-8 absolute left-1/2 transform -translate-x-1/2">
             {/* Market Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
-                  <span className="text-base">Market</span>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
-                {marketItems.map((item) => (
-                  <DropdownMenuItem key={item.title} asChild>
-                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
-                      {item.title}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="group relative">
+              <button className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium px-2 py-1">
+                <span className="text-base">Market</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              <div className="fixed left-1/2 top-[calc(100%+10px)] transform -translate-x-1/2 w-[100vw] bg-white border border-gray-200 shadow-lg rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="grid grid-cols-4 gap-8 p-8">
+                  {/* Column 1 - Actual Items */}
+                  <div className="space-y-4">
+                    {marketItems.map((item) => (
+                      <Link
+                        key={item.title}
+                        to={item.href}
+                        className="block text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg p-3 -ml-3"
+                      >
+                        <div className="font-medium">{item.title}</div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Column 2 - Dummy Items */}
+                  <div className="space-y-4">
+                    <div className="text-gray-700 p-3 -ml-3">
+                      <div className="font-medium">Popular Categories</div>
+                      <div className="text-xs text-gray-500 mt-1">Explore trending products</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">AI & ML</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">FinTech</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Robotics</div>
+                    </div>
+                  </div>
+
+                  {/* Column 3 - Dummy Items */}
+                  <div className="space-y-4">
+                    <div className="text-gray-700 p-3 -ml-3">
+                      <div className="font-medium">Featured Sellers</div>
+                      <div className="text-xs text-gray-500 mt-1">Top-rated vendors</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">EcoFriendly Goods</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Tech Innovators</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Mentors</div>
+                    </div>
+                  </div>
+
+                  {/* Column 4 - Dummy Promo */}
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="font-medium text-lg mb-2">Join Now</div>
+                    <p className="text-sm text-gray-600 mb-4">To be a part of our community</p>
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors">
+                      Sign Up
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Work Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
-                  <span className="text-base">Work</span>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
-                {workItems.map((item) => (
-                  <DropdownMenuItem key={item.title} asChild>
-                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
-                      {item.title}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="group relative">
+              <button className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium px-2 py-1">
+                <span className="text-base">Work</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              <div className="fixed left-1/2 top-[calc(100%+10px)] transform -translate-x-1/2 w-[100vw] bg-white border border-gray-200 shadow-lg rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="grid grid-cols-4 gap-8 p-8">
+                  {/* Column 1 - Actual Items */}
+                  <div className="space-y-4">
+                    {workItems.map((item) => (
+                      <Link
+                        key={item.title}
+                        to={item.href}
+                        className="block text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg p-3 -ml-3"
+                      >
+                        <div className="font-medium">{item.title}</div>
+                      </Link>
+                    ))}
+                  </div>
 
-            {/* Green Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
-                  <span className="text-base">Community</span>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
-                {community.map((item) => (
-                  <DropdownMenuItem key={item.title} asChild>
-                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
-                      {item.title}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {/* Connect Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
-                  <span className="text-base">About Us</span>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
-                {aboutus.map((item) => (
-                  <DropdownMenuItem key={item.title} asChild>
-                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
-                      {item.title}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {/* Column 2 - Dummy Items */}
+                  <div className="space-y-4">
+                    <div className="text-gray-700 p-3 -ml-3">
+                      <div className="font-medium">Popular Skills</div>
+                      <div className="text-xs text-gray-500 mt-1">Most in-demand services</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Web Development</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Graphic Design</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Content Writing</div>
+                    </div>
+                  </div>
+
+                  {/* Column 3 - Dummy Items */}
+                  <div className="space-y-4">
+                    <div className="text-gray-700 p-3 -ml-3">
+                      <div className="font-medium">Top Categories</div>
+                      <div className="text-xs text-gray-500 mt-1">Browse by industry</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Technology</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Marketing</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Business Consulting</div>
+                    </div>
+                  </div>
+
+                  {/* Column 4 - Dummy Promo */}
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="font-medium text-lg mb-2">New to freelancing?</div>
+                    <p className="text-sm text-gray-600 mb-4">Create your profile and start getting projects in minutes</p>
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors">
+                      Get Started
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Community Dropdown */}
+            <div className="group relative">
+              <button className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium px-2 py-1">
+                <span className="text-base">Community</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              <div className="fixed left-1/2 top-[calc(100%+10px)] transform -translate-x-1/2 w-[100vw] bg-white border border-gray-200 shadow-lg rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="grid grid-cols-4 gap-8 p-8">
+                  {/* Column 1 - Actual Items */}
+                  <div className="space-y-4">
+                    {community.map((item) => (
+                      <Link
+                        key={item.title}
+                        to={item.href}
+                        className="block text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg p-3 -ml-3"
+                      >
+                        <div className="font-medium">{item.title}</div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Column 2 - Dummy Items */}
+                  <div className="space-y-4">
+                    <div className="text-gray-700 p-3 -ml-3">
+                      <div className="font-medium">Popular Groups</div>
+                      <div className="text-xs text-gray-500 mt-1">Join the conversation</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Green Innovators</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Tech Enthusiasts</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Startup Founders</div>
+                    </div>
+                  </div>
+
+                  {/* Column 3 - Dummy Items */}
+                  <div className="space-y-4">
+                    <div className="text-gray-700 p-3 -ml-3">
+                      <div className="font-medium">Upcoming Events</div>
+                      <div className="text-xs text-gray-500 mt-1">Meet like-minded people</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Sustainability Summit</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">AI Workshop</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Networking Mixer</div>
+                    </div>
+                  </div>
+
+                  {/* Column 4 - Dummy Promo */}
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="font-medium text-lg mb-2">Community Spotlight</div>
+                    <p className="text-sm text-gray-600 mb-4">Featured member stories and achievements</p>
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors">
+                      View Stories
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* About Us Dropdown */}
+            <div className="group relative">
+              <button className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium px-2 py-1">
+                <span className="text-base">About Us</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              <div className="fixed left-1/2 top-[calc(100%+10px)] transform -translate-x-1/2 w-[100vw] bg-white border border-gray-200 shadow-lg rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="grid grid-cols-4 gap-8 p-8">
+                  {/* Column 1 - Actual Items */}
+                  <div className="space-y-4">
+                    {aboutus.map((item) => (
+                      <Link
+                        key={item.title}
+                        to={item.href}
+                        className="block text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg p-3 -ml-3"
+                      >
+                        <div className="font-medium">{item.title}</div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Column 2 - Dummy Items */}
+                  <div className="space-y-4">
+                    <div className="text-gray-700 p-3 -ml-3">
+                      <div className="font-medium">Our Mission</div>
+                      <div className="text-xs text-gray-500 mt-1">Why we do what we do</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Sustainability</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Innovation</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Community</div>
+                    </div>
+                  </div>
+
+                  {/* Column 3 - Dummy Items */}
+                  <div className="space-y-4">
+                    <div className="text-gray-700 p-3 -ml-3">
+                      <div className="font-medium">Press Center</div>
+                      <div className="text-xs text-gray-500 mt-1">Latest news and updates</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Newsroom</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Media Kit</div>
+                    </div>
+                    <div className="text-gray-400 p-3 -ml-3">
+                      <div className="font-medium">Press Contacts</div>
+                    </div>
+                  </div>
+
+                  {/* Column 4 - Dummy Promo */}
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="font-medium text-lg mb-2">Join Our Team</div>
+                    <p className="text-sm text-gray-600 mb-4">We're hiring! Explore career opportunities</p>
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors">
+                      View Openings
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </nav>
 
           {/* Right-aligned Buttons */}
@@ -861,16 +1067,11 @@ export const Header = () => {
                   <span className="text-gray-700 font-medium">Calendar</span>
                 </Link>
                 <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                  <Edit className="w-5 h-5 mr-3 text-gray-600" />
-                  <span className="text-gray-700 font-medium">Edit Profile</span>
-                </Link>
-                {/* <Link to="/editprofile" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                   <button onClick={() => {setShowProfileSidebar(false); setShowEditProfileSidebar(true);}} className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors text-left">
                     <Edit className="w-5 h-5 mr-3 text-gray-600" />
                     <span className="text-gray-700 font-medium">Edit Profile</span>
                   </button>
                 </Link>
-                </Link> */}
               </nav>
             </div>
             
