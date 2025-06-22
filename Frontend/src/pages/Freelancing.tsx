@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
 
 // HERO SECTION DATA
 const heroFeatures = [
@@ -269,6 +271,7 @@ const Work: React.FC = () => {
   return (
     <main className="w-full min-h-screen bg-white">
       {/* HERO SECTION */}
+      <Header />
       <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1600&q=80"
@@ -298,7 +301,8 @@ const Work: React.FC = () => {
           </motion.p>
           <motion.div className="flex gap-6" variants={fadeUp} custom={3}>
             <Link
-              to="/find-expert"
+              
+              to="/findexpert"
               className="px-8 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_15px_rgba(250,89,84,0.8)] transition-all duration-300 text-lg"
             >
               Find a PhD Expert
@@ -624,6 +628,7 @@ const Work: React.FC = () => {
           </motion.button>
         </div>
       </section>
+      <Footer />
     </main>
   );
 };

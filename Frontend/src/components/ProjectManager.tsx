@@ -19,7 +19,7 @@ const ProjectManager = () => {
     link: ''
   });
 
-  const projects = profile?.userType === 'student' ? profile.projects : [];
+  const projects = profile?.userType === 'student' ? (profile.projects || []) : [];
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

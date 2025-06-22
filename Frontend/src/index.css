@@ -1,15 +1,32 @@
-@import 'swiper/css';
-@import 'swiper/css/navigation';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-@import "slick-carousel/slick/slick.css";
-@import "slick-carousel/slick/slick-theme.css";
-
-
+/* Tailwind CSS directives - these are processed by PostCSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Custom styles using @apply */
+.btn-primary {
+  @apply bg-blue-500 text-white font-bold py-2 px-4 rounded;
+}
+
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+
 @layer base {
+   * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+  }
   :root {
     --background: 240 10% 98%;
     --foreground: 220 20% 15%;
@@ -49,6 +66,15 @@
     --sidebar-accent-foreground: 220 20% 15%;
     --sidebar-border: 214 32% 85%;
     --sidebar-ring: 158 80% 60%;
+
+        /* Custom color variables for consistent usage */
+    --mint-light: #E2F4ED;
+    --mint: #B8E6CC;
+    --mint-dark: #95D5B2;
+    --olive-light: #5A6B3F;
+    --olive: #3A4325;
+    --olive-dark: #2A311B;
+  
   }
 
   .dark {
@@ -90,15 +116,52 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
 
-  body {
-    @apply bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/30 text-foreground;
-  }
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+   background: var(--mint-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--olive);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--olive-dark);
+}
+
+/* Utility classes for consistent colors */
+.bg-mint-light { background-color: var(--mint-light); }
+.bg-mint { background-color: var(--mint); }
+.bg-mint-dark { background-color: var(--mint-dark); }
+.bg-olive-light { background-color: var(--olive-light); }
+.bg-olive { background-color: var(--olive); }
+.bg-olive-dark { background-color: var(--olive-dark); }
+
+.text-mint-light { color: var(--mint-light); }
+.text-mint { color: var(--mint); }
+.text-mint-dark { color: var(--mint-dark); }
+.text-olive-light { color: var(--olive-light); }
+.text-olive { color: var(--olive); }
+.text-olive-dark { color: var(--olive-dark); }
+
+.border-mint-light { border-color: var(--mint-light); }
+.border-mint { border-color: var(--mint); }
+.border-olive-light { border-color: var(--olive-light); }
+.border-olive {
+  border-color: var(--olive);
+}
+
+
 
 @layer utilities {
   /* Enhanced Creative Animations */
@@ -339,6 +402,3 @@
   .delay-500 { animation-delay: 500ms; }
   .delay-1000 { animation-delay: 1000ms; }
 }
-
-@keyframes bounce-slow { 0% { transform: translateY(0); } 100% { transform: translateY(-12px); } }
-.animate-bounce-slow { animation: bounce-slow 3s infinite alternate; }

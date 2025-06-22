@@ -22,6 +22,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, addDoc, getFirestore, collection, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase"; // Make sure db is exported from your firebase config
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { userService } from '@/services/userService';
+import { firestoreService } from '@/services/firestoreService';
 
 const SignUp = () => {
   const [selectedCode, setSelectedCode] = useState("+91");
@@ -47,6 +49,8 @@ const SignUp = () => {
   const [error, setError] = useState<string | null>(null);
   const [passwordStrength, setPasswordStrength] = useState<'weak' | 'medium' | 'strong'>('weak');
   const [isLoading, setIsLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const navigate = useNavigate();
   const userTypes = [
     { 
@@ -139,36 +143,81 @@ const SignUp = () => {
     if (field === 'password') {
       setPasswordStrength(checkPasswordStrength(value as string));
     }
+    
+    // Clear field-specific error when user starts typing
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  // Function to validate all required fields
+  const validateFields = () => {
+    const errors: {[key: string]: string} = {};
+    
+    if (!formData.firstName.trim()) {
+      errors.firstName = 'First name is required';
+    }
+    
+    if (!formData.lastName.trim()) {
+      errors.lastName = 'Last name is required';
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    if (!formData.phone.trim()) {
+      errors.phone = 'Phone number is required';
+    } else if (formData.phone.length !== 10) {
+      errors.phone = 'Please enter a valid 10-digit phone number';
+    }
+    
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else if (passwordStrength === 'weak') {
+      errors.password = 'Please use a stronger password';
+    }
+    
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    return formData.firstName.trim() && 
+           formData.lastName.trim() && 
+           formData.email.trim() && 
+           /\S+@\S+\.\S+/.test(formData.email) &&
+           formData.phone.trim() && 
+           formData.phone.length === 10 &&
+           formData.password && 
+           passwordStrength !== 'weak' &&
+           formData.confirmPassword && 
+           formData.password === formData.confirmPassword &&
+           formData.agreeToTerms;
   };
 
   const handleContinue = async () => {
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      return;
+    // Validate all fields first
+    if (!validateFields()) {
+      return; // Stop if validation fails
     }
-    if (passwordStrength === 'weak') {
-      setError("Please use a stronger password");
-      return;
-    }
-    if (formData.phone.length !== 10) {
-      setError("Please enter a valid 10-digit phone number");
-      return;
-    }
+    
     try {
       setIsLoading(true);
       setError(null);
       await signUpWithEmailAndPassword();
     } catch (error: any) {
-      console.error("Error creating account:", error);
-      if (error.code === 'auth/email-already-in-use') {
-        setError("An account with this email already exists. Please sign in instead.");
-      } else if (error.code === 'auth/invalid-email') {
-        setError("Please enter a valid email address");
-      } else if (error.code === 'auth/weak-password') {
-        setError("Please use a stronger password");
-      } else {
-        setError("An error occurred while creating your account. Please try again.");
-      }
+      // Error is already handled in signUpWithEmailAndPassword
+      console.error("Signup failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -243,6 +292,28 @@ const SignUp = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const idToken = await userCredential.user.getIdToken();
 
+      // Ensure user exists in backend and customUserId is saved
+      const backendUser = await userService.ensureUserExists({
+        name: formData.firstName + ' ' + formData.lastName,
+        email: formData.email,
+        avatar: userCredential.user.photoURL || null,
+        bio: null,
+        location: null,
+        website: null,
+        userType: formData.userType,
+        title: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      // Save backend customUserId in Firestore
+      await firestoreService.setCurrentUserData({
+        customUserId: backendUser.customUserId,
+        name: formData.firstName + ' ' + formData.lastName,
+        email: formData.email,
+        userType: formData.userType,
+        createdAt: new Date().toISOString(),
+      });
+
       await fetch('http://localhost:3000/token', {
         method: 'POST',
         headers: {
@@ -258,11 +329,19 @@ const SignUp = () => {
       });
       navigate('/signin');
     } catch (error: any) {
+      console.error("Error creating account:", error);
       if (error.code === 'auth/email-already-in-use') {
-        console.log("User already exists. Logging that instead of throwing.");
+        setError("An account with this email already exists. Please sign in instead.");
+      } else if (error.code === 'auth/invalid-email') {
+        setError("Please enter a valid email address");
+      } else if (error.code === 'auth/weak-password') {
+        setError("Please use a stronger password");
+      } else if (error.code === 'auth/network-request-failed') {
+        setError("Network error. Please check your connection and try again.");
       } else {
-        console.error("Error creating account:", error.message || error);
+        setError("An error occurred while creating your account. Please try again.");
       }
+      throw error; // Re-throw to be caught by handleContinue
     }
   };
 
@@ -437,8 +516,13 @@ const SignUp = () => {
                         placeholder="John"
                         value={formData.firstName}
                         onChange={(e) => handleInputChange('firstName', e.target.value)}
-                        className="transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm"
+                        className={`transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm ${
+                          fieldErrors.firstName ? 'border-red-500' : ''
+                        }`}
                       />
+                      {fieldErrors.firstName && (
+                        <p className="text-xs text-red-600">{fieldErrors.firstName}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName" className="text-gray-700 font-medium text-sm">Last Name</Label>
@@ -447,8 +531,13 @@ const SignUp = () => {
                         placeholder="Doe"
                         value={formData.lastName}
                         onChange={(e) => handleInputChange('lastName', e.target.value)}
-                        className="transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm"
+                        className={`transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm ${
+                          fieldErrors.lastName ? 'border-red-500' : ''
+                        }`}
                       />
+                      {fieldErrors.lastName && (
+                        <p className="text-xs text-red-600">{fieldErrors.lastName}</p>
+                      )}
                     </div>
                   </div>
 
@@ -460,8 +549,13 @@ const SignUp = () => {
                       placeholder="john.doe@example.com"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm"
+                      className={`transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm ${
+                        fieldErrors.email ? 'border-red-500' : ''
+                      }`}
                     />
+                    {fieldErrors.email && (
+                      <p className="text-xs text-red-600">{fieldErrors.email}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -496,16 +590,19 @@ const SignUp = () => {
                         }}
                         maxLength={10}
                         className={`flex-1 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm ${
-                          formData.phone.length === 10 ? 'border-green-500' : ''
+                          formData.phone.length === 10 ? 'border-green-500' : fieldErrors.phone ? 'border-red-500' : ''
                         }`}
                       />
                     </div>
-                    {formData.phone.length > 0 && formData.phone.length < 10 && (
+                    {fieldErrors.phone && (
+                      <p className="text-xs text-red-600">{fieldErrors.phone}</p>
+                    )}
+                    {formData.phone.length > 0 && formData.phone.length < 10 && !fieldErrors.phone && (
                       <p className="text-xs text-amber-600 mt-1">
                         Please enter a valid 10-digit mobile number
                       </p>
                     )}
-                    {formData.phone.length === 10 && (
+                    {formData.phone.length === 10 && !fieldErrors.phone && (
                       <p className="text-xs text-green-600 mt-1">
                         ✓ Valid mobile number
                       </p>
@@ -521,41 +618,91 @@ const SignUp = () => {
                         placeholder="••••••••"
                         value={formData.password}
                         onChange={(e) => handleInputChange('password', e.target.value)}
+                        onFocus={() => setIsPasswordFocused(true)}
+                        onBlur={() => setIsPasswordFocused(false)}
                         className={`pr-12 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm ${
                           passwordStrength === 'strong' ? 'border-green-500' :
                           passwordStrength === 'medium' ? 'border-yellow-500' :
-                          'border-red-500'
+                          fieldErrors.password ? 'border-red-500' : 'border-gray-200'
                         }`}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />}
+                        {/* {showPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />} */}
                       </button>
                     </div>
-                    <div className="mt-1">
-                      <div className="flex items-center space-x-2">
-                        <div className={`h-1 flex-1 rounded-full ${
-                          passwordStrength === 'weak' ? 'bg-red-500' :
-                          passwordStrength === 'medium' ? 'bg-yellow-500' :
-                          'bg-green-500'
-                        }`}></div>
-                        <span className={`text-xs ${
-                          passwordStrength === 'weak' ? 'text-red-500' :
-                          passwordStrength === 'medium' ? 'text-yellow-500' :
-                          'text-green-500'
-                        }`}>
-                          {passwordStrength === 'weak' ? 'Weak' :
-                           passwordStrength === 'medium' ? 'Medium' :
-                           'Strong'}
-                        </span>
+                    {fieldErrors.password && (
+                      <p className="text-xs text-red-600">{fieldErrors.password}</p>
+                    )}
+                    {isPasswordFocused && (
+                      <div className="mt-1">
+                        <div className="flex items-center space-x-2">
+                          <div className={`h-1 flex-1 rounded-full ${
+                            passwordStrength === 'weak' ? 'bg-red-500' :
+                            passwordStrength === 'medium' ? 'bg-yellow-500' :
+                            'bg-green-500'
+                          }`}></div>
+                          <span className={`text-xs ${
+                            passwordStrength === 'weak' ? 'text-red-500' :
+                            passwordStrength === 'medium' ? 'text-yellow-500' :
+                            'text-green-500'
+                          }`}>
+                            {passwordStrength === 'weak' ? 'Weak' :
+                             passwordStrength === 'medium' ? 'Medium' :
+                             'Strong'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters
+                        </p>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters
-                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-gray-700 font-medium text-sm">Confirm Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={formData.confirmPassword}
+                        onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                        className={`pr-12 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm ${
+                          formData.confirmPassword && formData.password === formData.confirmPassword ? 'border-green-500' :
+                          formData.confirmPassword && formData.password !== formData.confirmPassword ? 'border-red-500' :
+                          fieldErrors.confirmPassword ? 'border-red-500' : 'border-gray-200'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        style={{ zIndex: 10 }}
+                      >
+                        {/* {showConfirmPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />} */}
+                      </button>
                     </div>
+                    {fieldErrors.confirmPassword && (
+                      <p className="text-xs text-red-600">{fieldErrors.confirmPassword}</p>
+                    )}
+                    {formData.confirmPassword && !fieldErrors.confirmPassword && (
+                      <div className="mt-1">
+                        {formData.password === formData.confirmPassword ? (
+                          <p className="text-xs text-green-600">
+                            ✓ Passwords match
+                          </p>
+                        ) : (
+                          <p className="text-xs text-red-600">
+                            ✗ Passwords do not match
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {error && (
@@ -608,11 +755,11 @@ const SignUp = () => {
 
                   <Button 
                     onClick={handleContinue}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl"
-                    disabled={!formData.agreeToTerms}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    disabled={!isFormValid() || isLoading}
                   >
-                    Continue
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    {isLoading ? "Creating Account..." : "Continue"}
+                    {!isLoading && <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                   </Button>
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
@@ -625,7 +772,7 @@ const SignUp = () => {
 
                   <div className="flex justify-center gap-3 lg:gap-4">
                     <Button 
-                    onClick={() => handleGoogleAuth(navigate)}
+                    onClick={() => handleGoogleAuth(navigate, formData.userType)}
                     variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
                       <svg className="w-4 h-4 lg:w-5 lg:h-5" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -635,7 +782,7 @@ const SignUp = () => {
                       </svg>
                     </Button>
                     <Button 
-                    onClick={() => handleGithubAuth(navigate)}
+                    onClick={() => handleGithubAuth(navigate, formData.userType)}
                     variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
                       <Github className="w-4 h-4 lg:w-5 lg:h-5" />
                     </Button>

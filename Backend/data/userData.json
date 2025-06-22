@@ -1,0 +1,238 @@
+{
+  "users": {
+    "USER_000003": {
+      "customUserId": "USER_000003",
+      "profile": {
+        "avatar": null,
+        "bio": null,
+        "location": null,
+        "website": null,
+        "title": null,
+        "createdAt": "2025-06-18T19:37:47.680Z",
+        "updatedAt": "2025-06-18T19:37:47.680Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "JavaScript",
+        "React",
+        "Node.js"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-18T19:37:47.680Z"
+      }
+    },
+    "USER_000002": {
+      "customUserId": "USER_000002",
+      "profile": {
+        "avatar": null,
+        "bio": "hi helo",
+        "location": "Jammu, Jammu And Kashmir",
+        "website": "NA",
+        "title": null,
+        "createdAt": "2025-06-18T19:52:25.996Z",
+        "updatedAt": "2025-06-18T22:19:59.243Z",
+        "college": "CUJ",
+        "degree": "Btech",
+        "course": "CSE",
+        "year": "3"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "Python",
+        "Machine Learning",
+        "Data Science",
+        "SQL",
+        "1234567",
+        "python",
+        "frontend"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-18T19:52:25.996Z"
+      },
+      "studentData": {
+        "college": "CUJ",
+        "degree": "Btech",
+        "course": "CSE",
+        "year": "3",
+        "updatedAt": "2025-06-18T22:19:59.243Z"
+      }
+    },
+    "USER_000005": {
+      "customUserId": "USER_000005",
+      "profile": {
+        "avatar": null,
+        "bio": "hhi hello, testing the new edit",
+        "location": "Jammu, Jammu & Kashmir",
+        "website": "NA",
+        "title": null,
+        "createdAt": "2025-06-19T21:16:02.064Z",
+        "updatedAt": "2025-06-21T21:05:12.711Z",
+        "college": "CUJ",
+        "degree": "Btech",
+        "course": "CSE",
+        "year": "3",
+        "userType": "student"
+      },
+      "projects": {
+        "created": [
+          18
+        ],
+        "collaborated": [],
+        "favorites": [],
+        "count": 1
+      },
+      "marketplace": {
+        "cart": [
+          {
+            "productId": "10",
+            "addedAt": "2025-06-19T21:36:07.569Z",
+            "quantity": 1
+          }
+        ],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "python",
+        "frontend",
+        "backend",
+        "Securities"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 1,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-19T21:16:02.064Z"
+      },
+      "studentData": {
+        "college": "CUJ",
+        "degree": "Btech",
+        "course": "CSE",
+        "year": "4",
+        "updatedAt": "2025-06-21T21:05:08.641Z"
+      }
+    }
+  },
+  "userCounter": 5,
+  "metadata": {
+    "lastUpdated": "2025-06-21T21:31:28.732Z",
+    "version": "1.0.0",
+    "description": "User data storage with custom user IDs"
+  }
+}

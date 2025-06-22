@@ -43,14 +43,14 @@ const About = () => {
   ]
 
   const companies = [
-    { name: "Google", logo: "/google-logo.svg", color: "bg-white" },
-    { name: "Microsoft", logo: "/microsoft-logo.svg", color: "bg-white" },
-    { name: "Apple", logo: "/apple-logo.svg", color: "bg-white" },
-    { name: "Amazon", logo: "/amazon-logo.svg", color: "bg-white" },
-    { name: "Meta", logo: "/meta-logo.svg", color: "bg-white" },
-    { name: "Tesla", logo: "/tesla-logo.svg", color: "bg-white" },
-    { name: "Netflix", logo: "/netflix-logo.svg", color: "bg-white" },
-    { name: "Spotify", logo: "/spotify-logo.svg", color: "bg-white" },
+    { name: "Google", logo: null, color: "bg-white", textColor: "text-gray-800", brandColor: "#4285F4" },
+    { name: "Microsoft", logo: null, color: "bg-white", textColor: "text-gray-800", brandColor: "#00A4EF" },
+    { name: "Apple", logo: null, color: "bg-white", textColor: "text-gray-800", brandColor: "#555555" },
+    { name: "Amazon", logo: null, color: "bg-white", textColor: "text-gray-800", brandColor: "#FF9900" },
+    { name: "Meta", logo: null, color: "bg-white", textColor: "text-gray-800", brandColor: "#1877F2" },
+    { name: "Tesla", logo: null, color: "bg-white", textColor: "text-gray-800", brandColor: "#E82127" },
+    { name: "Netflix", logo: null, color: "bg-white", textColor: "text-gray-800", brandColor: "#E50914" },
+    { name: "Spotify", logo: null, color: "bg-white", textColor: "text-gray-800", brandColor: "#1DB954" },
   ]
 
   const [team, setTeam] = useState([
@@ -262,13 +262,25 @@ const About = () => {
               <div className="flex flex-col items-center justify-center hover:scale-105 transition-transform duration-300">
                 
                 {/* ✅ Company Logo */}
-                <div className="w-16 h-16 flex items-center justify-center bg-white rounded-lg shadow-md overflow-hidden">
-                  <img
-                    src={company.logo}
-                    alt={company.name}
-                    className="w-full h-full object-contain"
-                    loading="lazy"
-                  />
+                <div 
+                  className="w-16 h-16 flex items-center justify-center bg-white rounded-lg shadow-md overflow-hidden border-2 hover:shadow-lg transition-all duration-300"
+                  style={{ borderColor: company.brandColor }}
+                >
+                  {company.logo ? (
+                    <img
+                      src={company.logo}
+                      alt={company.name}
+                      className="w-full h-full object-contain"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div 
+                      className="w-full h-full flex items-center justify-center font-bold text-sm"
+                      style={{ color: company.brandColor }}
+                    >
+                      {company.name}
+                    </div>
+                  )}
                 </div>
 
                 {/* Company Name */}

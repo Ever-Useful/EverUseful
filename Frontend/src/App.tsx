@@ -8,7 +8,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Marketplace from "./pages/Marketplace";
 import Freelancing from "./pages/Freelancing";
-import Community from "./pages/Community";
+import Connect from "./pages/Connect";
 import Admin from "./pages/Admin";
 import Checkout from "./pages/Checkout";
 import Profile from "./pages/Profile";
@@ -22,6 +22,12 @@ import Collaborators from '@/pages/Collaborators';
 import ScheduleMeeting from '@/pages/ScheduleMeeting';
 import { AuthProvider } from '@/contexts/AuthContext';
 import About from '@/pages/AboutUs';
+import Dashboard from "./pages/Dashboard";
+import AiAgents from "./pages/AiAgents";
+import FindExpert from "./pages/FindExpert";
+import PrivacyPolicy from "./pages/Privacy_Policy";
+import TermsOfService from "./pages/TermsOfService";
+import SendFeedback from "./pages/SendFeedback";
 
 const queryClient = new QueryClient();
 
@@ -34,10 +40,11 @@ const App = () => (
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/aiagents" element={<AiAgents />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/freelancing" element={<Freelancing />} />
             <Route path="/product/:id" element={<ProductDisplay />} />
-            <Route path="/community" element={<Community />} />
+            <Route path="/connect" element={<Connect />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
@@ -50,6 +57,11 @@ const App = () => (
             <Route path="/meetings/schedule" element={<ScheduleMeeting />} />
             <Route path="/paymentSuccess" element={<PaymentSuccess />} />
             <Route path="/aboutus" element={<About />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/findexpert" element={<FindExpert />} />
+            <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+            <Route path="/termsofservice" element={<TermsOfService />} />
+            <Route path="/sendfeedback" element={<SendFeedback />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -58,5 +70,5 @@ const App = () => (
     </QueryClientProvider>
   </AuthProvider>
 );
-
+//testing
 export default App;
