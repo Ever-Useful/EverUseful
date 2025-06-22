@@ -171,25 +171,27 @@ class UserService {
       updatedAt: new Date().toISOString()
     };
 
-    // Handle student-specific fields
-    if (profileData.userType === 'student') {
-      // Store student-specific data in a separate section
-      if (!this.userData.users[customUserId].studentData) {
-        this.userData.users[customUserId].studentData = {};
-      }
-      
-      this.userData.users[customUserId].studentData = {
-        ...this.userData.users[customUserId].studentData,
-        college: profileData.college || null,
-        degree: profileData.degree || null,
-        course: profileData.course || null,
-        year: profileData.year || null,
-        updatedAt: new Date().toISOString()
-      };
-    }
-
     await this.saveUserData();
     return this.userData.users[customUserId].profile;
+  }
+
+  // Update student data
+  async updateStudentData(customUserId, studentData) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+        throw new Error('User not found');
+    }
+    
+    if (!this.userData.users[customUserId].studentData) {
+        this.userData.users[customUserId].studentData = {};
+    }
+
+    this.userData.users[customUserId].studentData = {
+        ...this.userData.users[customUserId].studentData,
+        ...studentData,
+        updatedAt: new Date().toISOString()
+    };
+    this.saveUserData();
   }
 
   // Add project to user
