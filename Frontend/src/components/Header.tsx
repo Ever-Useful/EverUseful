@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, Sparkles, ShoppingCart, User, LogOut, Bell, MessageSquare, Send, Briefcase, List, Landmark, UserPlus, Users, Trophy, Heart, Bookmark, TrendingUp, Star, Shield, LayoutGrid, AlertCircle, Edit, Settings, HelpCircle, BarChart2, Calendar } from "lucide-react";
+import { Menu, X, Sparkles, ShoppingCart, User, LogOut, Bell, MessageSquare, Send, Briefcase, List, Landmark, UserPlus, Users, Trophy, Heart, Bookmark, TrendingUp, Star, Shield, LayoutGrid, AlertCircle, Edit, Settings, HelpCircle, BarChart2, Calendar, ChevronDown, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -16,6 +16,7 @@ import InitialsAvatar from './InitialsAvatar';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { userService } from '@/services/userService';
+import Logo1 from '../assets/images/Logo1.png'
 
 // Mock notification data with more comprehensive entries
 const mockNotifications = [
@@ -162,6 +163,35 @@ const mockChatMessages: Record<string, Array<{
   ],
 };
 
+// Navigation menu items
+const marketItems = [
+  { title: "Products", href: "/marketplace" },
+  { title: "Sell Items", href: "/" },
+  { title: "Cart", href: "/cart" },
+  { title: "Wishlist", href: "/" },
+];
+
+const workItems = [
+  { title: "Freelancing", href: "/freelancing" },
+  { title: "Find Experts", href: "/findexpert" },
+  { title: "Become a Mentor", href: "/" },
+  { title: "Jobs", href: "/connect" },
+];
+
+const community = [
+  { title: "Sustainable", href: "/sustainable" },
+  { title: "Agents", href: "/aiagents" },
+  { title: "Events", href: "/" },
+  { title: "Mentorship", href: "/" },
+];
+
+const aboutus = [
+  { title: "About us", href: "/aboutus" },
+  { title: "Privacy Policy", href: "/privacypolicy" },
+  { title: "Terms", href: "/termsofservice" },
+  { title: "Send Feedback", href: "/sendfeedback" },
+];
+
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
@@ -174,6 +204,7 @@ export const Header = () => {
   const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   const unreadNotificationCount = notifications.filter(n => n.unread).length;
@@ -251,52 +282,107 @@ export const Header = () => {
     <>
       <header className="sticky top-0 z-50 w-full border-b border-purple-200/50 bg-white/95 backdrop-blur-md shadow-sm">
         <div className="container h-14 w-full flex items-center justify-between px-4">
-          {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <Link to="/" className="flex items-center space-x-2 group">
-              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-lg group-hover:scale-110 transition-all duration-300 shadow-md">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-bold bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">
-                  AMOGH
-                </span>
-                <span className="text-xs text-slate-500 -mt-1">connect hub</span>
-              </div>
-              <Badge variant="secondary" className="hidden w-10 h-6 text-sm px-1 sm:inline-flex animate-pulse bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border-purple-200">
-                Beta
-              </Badge>
-            </Link>
+          {/* Left: Logo + Search Bar */}
+          <div className="flex items-center space-x-4 flex-1">
+            {/* Logo */}
+            <div className="flex items-center space-x-2">
+              <Link to="/" className="flex items-center space-x-2 group">
+                <img src={Logo1} alt="AMOGH" className="h-8 w-auto" />
+                <div className="hidden w-10 h-6 text-sm px-1 sm:inline-flex text-purple-700">
+                  Beta
+                </div>
+              </Link>
+            </div>
+
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 w-40 h-8 border-gray-300 rounded-medium focus:outline-none focus:border-transparent"
+              />
+            </div>
           </div>
 
           {/* Centered Navigation */}
           <nav className="hidden md:flex items-center space-x-8 absolute left-1/2 transform -translate-x-1/2">
-            <Link to="/marketplace" className="text-slate-600 hover:text-blue-500 transition-colors font-medium hover:scale-105 transform duration-200">
-              Market
-            </Link>
-            <Link to="/freelancing" className="text-slate-600 hover:text-purple-500 transition-colors font-medium hover:scale-105 transform duration-200">
-              Work
-            </Link>
-            <Link to="/sustainable" className="text-slate-600 hover:text-emerald-500 transition-colors font-medium hover:scale-105 transform duration-200">
-              Green
-            </Link>
-            <Link to="/connect" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium hover:scale-105 transform duration-200">
-              Connect
-            </Link>
-            <Link to="/aboutus" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium hover:scale-105 transform duration-200">
-              About Us
-            </Link>
-            <Button
-              variant="ghost"
-              className="text-2xl hover:scale-110 transition-all duration-300 bg-white rounded-full p-2 shadow-lg hover:shadow-xl hover:bg-gradient-to-r hover:from-red-500 hover:via-yellow-500 hover:via-green-500 hover:via-blue-500 hover:to-purple-500"
-              asChild
-            >
-              <Link to="/aiagents">
-                <span className="text-base font-medium bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent hover:text-white transition-all duration-300">
-                  🤖 Agents
-                </span>
-              </Link>
-            </Button>
+            {/* Market Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
+                  <span className="text-base">Market</span>
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
+                {marketItems.map((item) => (
+                  <DropdownMenuItem key={item.title} asChild>
+                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
+                      {item.title}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Work Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
+                  <span className="text-base">Work</span>
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
+                {workItems.map((item) => (
+                  <DropdownMenuItem key={item.title} asChild>
+                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
+                      {item.title}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Green Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
+                  <span className="text-base">Community</span>
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
+                {community.map((item) => (
+                  <DropdownMenuItem key={item.title} asChild>
+                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
+                      {item.title}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Connect Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
+                  <span className="text-base">About Us</span>
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
+                {aboutus.map((item) => (
+                  <DropdownMenuItem key={item.title} asChild>
+                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
+                      {item.title}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* Right-aligned Buttons */}
@@ -482,11 +568,11 @@ export const Header = () => {
                   <>
                     <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" onClick={() => setShowMessagesSidebar(true)}>
                       <MessageSquare className="w-4 h-4 mr-2" />
-                      Messages {unreadMessageCount > 0 && `(${unreadMessageCount})`}
+                      Messages {unreadMessageCount > 0 && (`${unreadMessageCount}`)}
                     </Button>
                     <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" onClick={() => setShowNotificationsSidebar(true)}>
                       <Bell className="w-4 h-4 mr-2" />
-                      Notifications {unreadNotificationCount > 0 && `(${unreadNotificationCount})`}
+                      Notifications {unreadNotificationCount > 0 && (`${unreadNotificationCount}`)}
                     </Button>
                     <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" asChild>
                       <Link to="/cart">
@@ -647,23 +733,29 @@ export const Header = () => {
                       <div className="border-t bg-white shadow-inner">
                         <div className="max-h-64 overflow-y-auto p-3 space-y-2">
                           {mockChatMessages[message.conversationId]?.map((chatMsg) => (
-                            <div key={chatMsg.id} className={`flex ${chatMsg.isOwn ? 'justify-end' : 'justify-start'}`}>
-                              <div className={`max-w-[80%] p-2 rounded-lg text-sm ${
-                                chatMsg.isOwn 
-                                  ? 'bg-green-500 text-white' 
-                                  : 'bg-slate-100 text-slate-800'
-                              }`}>
+                            <div
+                              key={chatMsg.id}
+                              className={`flex ${chatMsg.isOwn ? 'justify-end' : 'justify-start'}`}
+                            >
+                              <div
+                                className={`max-w-[80%] p-2 rounded-lg text-sm ${
+                                  chatMsg.isOwn
+                                    ? 'bg-green-500 text-white'
+                                    : 'bg-slate-100 text-slate-800'
+                                }`}
+                              >
                                 <p>{chatMsg.message}</p>
-                                <p className={`text-xs mt-1 ${
-                                  chatMsg.isOwn ? 'text-green-100' : 'text-slate-500'
-                                }`}>
+                                <p
+                                  className={`text-xs mt-1 ${
+                                    chatMsg.isOwn ? 'text-green-100' : 'text-slate-500'
+                                  }`}
+                                >
                                   {chatMsg.time}
                                 </p>
                               </div>
                             </div>
                           ))}
                         </div>
-                        
                         {/* Message Input */}
                         <div className="p-3 border-t bg-slate-50">
                           <div className="flex gap-2">
@@ -678,8 +770,8 @@ export const Header = () => {
                               }}
                               className="flex-1 text-sm"
                             />
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               onClick={() => handleSendMessage(message.conversationId)}
                               className="bg-green-500 hover:bg-green-600"
                             >
@@ -771,20 +863,25 @@ export const Header = () => {
                   <span className="text-gray-700 font-medium">Calendar</span>
                 </Link>
                 <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                  <Edit className="w-5 h-5 mr-3 text-gray-600" />
+                  <span className="text-gray-700 font-medium">Edit Profile</span>
+                </Link>
+                {/* <Link to="/editprofile" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                   <button onClick={() => {setShowProfileSidebar(false); setShowEditProfileSidebar(true);}} className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors text-left">
                     <Edit className="w-5 h-5 mr-3 text-gray-600" />
                     <span className="text-gray-700 font-medium">Edit Profile</span>
                   </button>
                 </Link>
+                </Link> */}
               </nav>
             </div>
             
             <div className="border-t pt-4">
               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">GENERAL</h4>
               <nav className="space-y-1">
-                <button className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors text-left">
+                <button onClick={() => {setShowProfileSidebar(false); setShowEditProfileSidebar(true);}} className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors text-left">
                   <Edit className="w-5 h-5 mr-3 text-gray-600" />
-                  <span className="text-gray-700 font-medium">Add Project</span>
+                  <span className="text-gray-700 font-medium">Edit Profile</span>
                 </button>
                 <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                   <Settings className="w-5 h-5 mr-3 text-gray-600" />

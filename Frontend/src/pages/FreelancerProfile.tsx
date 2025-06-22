@@ -138,9 +138,15 @@ const FreelancerProfile = () => {
                       <span className="ml-1 text-gray-600 text-sm">({freelancer.reviews})</span>
                     </div>
                   </div>
+
+                  <div  className="flex flex-wrap items-center gap-3 ml-3">
+                    <UserPlus className="w-4 h-4 mr-1" />
+                    <span className="text-base text-slate-800">{freelancer.connections}+ Connections</span>
+                  </div>
                 </div>
               </div>
             </div>
+
             {/* Follow Button */}
             <button className="flex items-center justify-center space-x-2 w-[200px] bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full shadow-md transition-colors text-2xl font-semibold">
               <UserPlus className="w-4 h-4 text-2xl font-semibold" />
@@ -153,7 +159,7 @@ const FreelancerProfile = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <DollarSign className="w-6 h-6 mx-auto mb-2" />
@@ -183,14 +189,6 @@ const FreelancerProfile = () => {
                   <Users className="w-6 h-6 mx-auto mb-2" />
                   <div className="text-2xl font-bold">{freelancer.reviews}</div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Reviews</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <UserPlus className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancer.connections}+</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
                 </CardContent>
               </Card>
             </div>
