@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { EditProfile } from './EditProfile';
 import InitialsAvatar from './InitialsAvatar';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -364,7 +363,6 @@ export const Header = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-
             {/* Connect Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
