@@ -56,7 +56,7 @@ const App = () => (
             <Route path="/cart" element={<Cart />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/freelancer/:id" element={<FreelancerProfile />} />
+            <Route path="/freelancerprofile/:id" element={<FreelancerProfile />} />
             <Route path="/projects/new" element={<NewProject />} />
             <Route path="/collaborators" element={<Collaborators />} />
             <Route path="/meetings/schedule" element={<ScheduleMeeting />} />
@@ -68,6 +68,7 @@ const App = () => (
             <Route path="/termsofservice" element={<TermsOfService />} />
             <Route path="/sendfeedback" element={<SendFeedback />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/studentprofile/:id" element={<StudentProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

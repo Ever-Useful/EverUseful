@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { auth, db } from "../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
@@ -19,6 +19,7 @@ import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [user, setUser] = useState(auth.currentUser);
   const [userData, setUserData] = useState<any>({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -47,20 +48,18 @@ const Profile = () => {
     return unsubscribe;
   }, []);
 
-  // Move fetchUserData outside so it can be reused elsewhere
+  // Fetch user data by id from Firestore
   const fetchUserData = async () => {
-    if (user) {
+    if (id) {
       try {
-        const userRef = doc(db, "users", user.uid);
+        const userRef = doc(db, "users", id);
         const docSnap = await getDoc(userRef);
         if (docSnap.exists()) {
           setUserData(docSnap.data());
         } else {
-          console.log("No user data found");
           setUserData({});
         }
       } catch (err) {
-        console.error("Error fetching user data", err);
         setUserData({});
       }
     }
@@ -68,10 +67,8 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchUserData();
-    }
-  }, [user]);
+    fetchUserData();
+  }, [id]);
 
   // if (loading) {
   //   return (

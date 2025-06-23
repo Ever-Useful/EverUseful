@@ -353,96 +353,6 @@ export const Header = () => {
   const unreadNotificationCount = notifications.filter(n => n.unread).length;
   const unreadMessageCount = messages.filter(m => m.unread).length;
 
-  // Dynamic header styling based on current route
-  const getHeaderStyle = () => {
-    const path = location.pathname;
-    
-    if (path === '/marketplace' || path.startsWith('/product/')) {
-      return {
-        bg: 'bg-gradient-to-r from-blue-500 to-indigo-600',
-        border: 'border-blue-400/30',
-        textColor: 'text-white',
-        hoverBg: 'hover:bg-white/20',
-        buttonHover: 'hover:bg-white/20 hover:text-white'
-      };
-    } else if (path === '/freelancing') {
-      return {
-        bg: 'bg-gradient-to-r from-red-500 to-orange-600',
-        border: 'border-red-400/30',
-        textColor: 'text-white',
-        hoverBg: 'hover:bg-white/20',
-        buttonHover: 'hover:bg-white/20 hover:text-white'
-      };
-    } else if (path === '/connect') {
-      return {
-        bg: 'bg-gradient-to-r from-green-700 to-green-800',
-        border: 'border-green-600/30',
-        textColor: 'text-white',
-        hoverBg: 'hover:bg-white/20',
-        buttonHover: 'hover:bg-white/20 hover:text-white'
-      };
-    } else if (path === '/aiagents') {
-      return {
-        bg: 'bg-gradient-to-r from-gray-900 to-indigo-950',
-        border: 'border-indigo-600/30',
-        textColor: 'text-white',
-        hoverBg: 'hover:bg-white/10',
-        buttonHover: 'hover:bg-white/10 hover:text-white'
-      };
-    } else if (path === '/dashboard' || path === '/profile') {
-      return {
-        bg: 'bg-gradient-to-r from-slate-700 to-gray-800',
-        border: 'border-slate-600/30',
-        textColor: 'text-white',
-        hoverBg: 'hover:bg-white/20',
-        buttonHover: 'hover:bg-white/20 hover:text-white'
-      };
-    } else if (path === '/cart' || path === '/checkout') {
-      return {
-        bg: 'bg-gradient-to-r from-blue-600 to-indigo-700',
-        border: 'border-blue-500/30',
-        textColor: 'text-white',
-        hoverBg: 'hover:bg-white/20',
-        buttonHover: 'hover:bg-white/20 hover:text-white'
-      };
-    } else if (path === '/aboutus') {
-      return {
-        bg: 'bg-gradient-to-r from-teal-500 to-cyan-600',
-        border: 'border-teal-400/30',
-        textColor: 'text-white',
-        hoverBg: 'hover:bg-white/20',
-        buttonHover: 'hover:bg-white/20 hover:text-white'
-      };
-    } else if (path === '/signin' || path === '/signup') {
-      return {
-        bg: 'bg-gradient-to-r from-indigo-500 to-purple-600',
-        border: 'border-indigo-400/30',
-        textColor: 'text-white',
-        hoverBg: 'hover:bg-white/20',
-        buttonHover: 'hover:bg-white/20 hover:text-white'
-      };
-    } else if (path === '/findexpert') {
-      return {
-        bg: 'bg-gradient-to-r from-slate-900 to-indigo-900',
-        border: 'border-indigo-600/30',
-        textColor: 'text-white',
-        hoverBg: 'hover:bg-white/10',
-        buttonHover: 'hover:bg-white/10 hover:text-white'
-      };
-    } else {
-      // Default for home page and other pages
-      return {
-        bg: 'bg-gradient-to-r from-gray-50 to-white',
-        border: 'border-gray-200',
-        textColor: 'text-gray-700',
-        hoverBg: 'hover:bg-gray-100',
-        buttonHover: 'hover:bg-gray-100 hover:text-gray-800'
-      };
-    }
-  };
-
-  const headerStyle = getHeaderStyle();
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -546,7 +456,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 w-full border-b ${headerStyle.bg} ${headerStyle.border} shadow-lg`}>
+      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-gradient-to-r from-gray-900 to-indigo-950 border-indigo-600/30 shadow-lg">
         <div className="relative h-14 flex items-center justify-between">
           {/* Left Group */}
           <div className="flex items-center flex-1 lg:flex-none space-x-2 md:space-x-4">
@@ -585,17 +495,17 @@ export const Header = () => {
 
           {/* Centered Navigation (Absolutely positioned) */}
           <nav className="hidden lg:flex absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 items-center space-x-4 xl:space-x-6">
-            <Link to="/" className={`${headerStyle.textColor} hover:opacity-80 font-medium px-2 py-1 text-sm xl:text-base transition-opacity`}>
+            <Link to="/" className="text-white hover:opacity-80 font-medium px-2 py-1 text-sm xl:text-base transition-opacity">
               Home
             </Link>
-            <NavLink title="Market" textColor={headerStyle.textColor}>
+            <NavLink title="Market" textColor="text-white">
               {navLinks.market.map(item => (
                 <motion.div variants={subLinkVariants} key={item.href}>
                   <NavSubLink {...item} isLoggedIn={isLoggedIn} onAuthClick={() => setShowAuthPopup(true)} onShowMyProjects={() => setShowMyProjects(true)} />
                 </motion.div>
               ))}
             </NavLink>
-            <NavLink title="Work" textColor={headerStyle.textColor}>
+            <NavLink title="Work" textColor="text-white">
               {navLinks.work
                 .filter(item => item.authAction !== 'hide' || isLoggedIn)
                 .map(item => (
@@ -604,14 +514,14 @@ export const Header = () => {
                   </motion.div>
               ))}
             </NavLink>
-            <NavLink title="Community" textColor={headerStyle.textColor}>
+            <NavLink title="Community" textColor="text-white">
               {navLinks.community.map(item => (
                 <motion.div variants={subLinkVariants} key={item.href}>
                   <NavSubLink {...item} isLoggedIn={isLoggedIn} onAuthClick={() => setShowAuthPopup(true)} onShowMyProjects={() => setShowMyProjects(true)} />
                 </motion.div>
               ))}
             </NavLink>
-            <NavLink title="About Us" textColor={headerStyle.textColor}>
+            <NavLink title="About Us" textColor="text-white">
               {navLinks.about
                 .filter(item => item.authAction !== 'hide' || isLoggedIn)
                 .map(item => (
@@ -628,7 +538,7 @@ export const Header = () => {
             <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
               {!isLoggedIn ? (
                 <>
-                  <Button variant="ghost" className={`${headerStyle.textColor} ${headerStyle.buttonHover} hover:scale-105 transition-all duration-300 text-sm`} asChild>
+                  <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300 text-sm" asChild>
                     <Link to="/signin">Sign In</Link>
                   </Button>
                   <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white text-sm" asChild>
@@ -640,7 +550,7 @@ export const Header = () => {
                   {/* Messages Button */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className={`relative ${headerStyle.textColor} ${headerStyle.buttonHover} hover:scale-105 transition-all duration-300`}>
+                      <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
                         <MessageSquare className="w-4 h-4" />
                         {unreadMessageCount > 0 && (
                           <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
@@ -699,7 +609,7 @@ export const Header = () => {
                   {/* Notifications Button */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className={`relative ${headerStyle.textColor} ${headerStyle.buttonHover} hover:scale-105 transition-all duration-300`}>
+                      <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
                         <Bell className="w-4 h-4" />
                         {unreadNotificationCount > 0 && (
                           <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
@@ -755,7 +665,7 @@ export const Header = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  <Button variant="ghost" size="icon" className={`${headerStyle.textColor} ${headerStyle.buttonHover} hover:scale-105 transition-all duration-300`} asChild>
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300" asChild>
                     <Link to="/cart">
                       <ShoppingCart className="w-4 h-4" />
                     </Link>
@@ -765,7 +675,7 @@ export const Header = () => {
                   <Button 
                     variant="ghost" 
                     onClick={() => setShowProfileSidebar(true)} 
-                    className={`${headerStyle.textColor} ${headerStyle.buttonHover} hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2`}
+                    className="text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2"
                   >
                     <User className="w-4 h-4 flex-shrink-0" />
                     {profileData.firstName && (
@@ -780,7 +690,7 @@ export const Header = () => {
 
             {/* Mobile Menu Button */}
             <button
-              className={`lg:hidden transform transition-all duration-300 hover:scale-110 ${headerStyle.textColor}`}
+              className="lg:hidden transform transition-all duration-300 hover:scale-110 text-white"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -790,13 +700,13 @@ export const Header = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className={`lg:hidden py-4 border-t ${headerStyle.border} animate-fade-in ${headerStyle.bg}`}>
+          <div className="lg:hidden py-4 border-t border-indigo-600/30 animate-fade-in bg-gradient-to-r from-gray-900 to-indigo-950">
             <nav className="flex flex-col space-y-4 px-4">
-              <Link to="/marketplace" className={`${headerStyle.textColor} hover:opacity-80 transition-opacity font-medium`}>Market</Link>
-              <Link to="/freelancing" className={`${headerStyle.textColor} hover:opacity-80 transition-opacity font-medium`}>Work</Link>
-              <Link to="/sustainable" className={`${headerStyle.textColor} hover:opacity-80 transition-opacity font-medium`}>Green</Link>
-              <Link to="/connect" className={`${headerStyle.textColor} hover:opacity-80 transition-opacity font-medium`}>Connect</Link>
-              <Link to="/aiagents" className={`${headerStyle.textColor} hover:opacity-80 transition-opacity font-medium flex items-center`}>
+              <Link to="/marketplace" className="text-white hover:opacity-80 transition-opacity font-medium">Market</Link>
+              <Link to="/freelancing" className="text-white hover:opacity-80 transition-opacity font-medium">Work</Link>
+              <Link to="/sustainable" className="text-white hover:opacity-80 transition-opacity font-medium">Green</Link>
+              <Link to="/connect" className="text-white hover:opacity-80 transition-opacity font-medium">Connect</Link>
+              <Link to="/aiagents" className="text-white hover:opacity-80 transition-opacity font-medium flex items-center">
                 <span className="text-2xl mr-2">🤖</span>
                 AI Agents
               </Link>
@@ -804,7 +714,7 @@ export const Header = () => {
               <div className="flex flex-col space-y-2 pt-4">
                 {!isLoggedIn ? (
                   <>
-                    <Button variant="ghost" className={`${headerStyle.textColor} ${headerStyle.buttonHover} justify-start`} asChild>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" asChild>
                       <Link to="/signin">Sign In</Link>
                     </Button>
                     <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600" asChild>
@@ -814,31 +724,31 @@ export const Header = () => {
                 ) : (
                   <>
                     {profileData.firstName && (
-                      <div className={`px-3 py-2 text-sm ${headerStyle.textColor} border-b ${headerStyle.border} mb-2`}>
+                      <div className="px-3 py-2 text-sm text-white border-b border-indigo-600/30 mb-2">
                         Hi, {profileData.firstName}!
                       </div>
                     )}
-                    <Button variant="ghost" className={`${headerStyle.textColor} ${headerStyle.buttonHover} justify-start`} onClick={() => { setIsMenuOpen(false); setShowMessagesSidebar(true); }}>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" onClick={() => { setIsMenuOpen(false); setShowMessagesSidebar(true); }}>
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Messages {unreadMessageCount > 0 && (`(${unreadMessageCount})`)}
                     </Button>
-                    <Button variant="ghost" className={`${headerStyle.textColor} ${headerStyle.buttonHover} justify-start`} onClick={() => { setIsMenuOpen(false); setShowNotificationsSidebar(true); }}>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" onClick={() => { setIsMenuOpen(false); setShowNotificationsSidebar(true); }}>
                       <Bell className="w-4 h-4 mr-2" />
                       Notifications {unreadNotificationCount > 0 && (`(${unreadNotificationCount})`)}
                     </Button>
-                    <Button variant="ghost" className={`${headerStyle.textColor} ${headerStyle.buttonHover} justify-start`} asChild>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" asChild>
                       <Link to="/cart">
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         Cart
                       </Link>
                     </Button>
-                    <Button variant="ghost" className={`${headerStyle.textColor} ${headerStyle.buttonHover} justify-start`} asChild>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" asChild>
                       <Link to="/profile">
                         <User className="w-4 h-4 mr-2" />
                         Profile
                       </Link>
                     </Button>
-                    <Button variant="ghost" className={`${headerStyle.textColor} ${headerStyle.buttonHover} justify-start`} onClick={handleLogout}>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" onClick={handleLogout}>
                       <LogOut className="w-4 h-4 mr-2" />
                       Logout
                     </Button>

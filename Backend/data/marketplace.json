@@ -1010,7 +1010,11 @@
       "title": "Nova minds",
       "description": "its just testing projects",
       "image": "",
-      "images": [],
+      "images": [
+        "jvbehd",
+        "ncjdc",
+        "dkndj"
+      ],
       "category": "ai",
       "price": 234567,
       "duration": "2 months",
@@ -1043,7 +1047,8 @@
       "customUserId": "USER_000005",
       "rating": 0,
       "reviews": 0,
-      "posted": "2025-06-21",
+      "posted": "2025-06-23",
+      "dateAdded": "2025-06-23T20:00:53.176Z",
       "views": 0,
       "favoritedBy": [],
       "author": {
@@ -1052,7 +1057,7 @@
         "verified": true,
         "rating": 0,
         "projects": 0,
-        "bio": "hhi hello, testing the new edit"
+        "bio": "hhi hello, testing the new edit this testing"
       }
     }
   ]

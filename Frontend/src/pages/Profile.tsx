@@ -16,6 +16,7 @@ import { MyProjects } from '@/components/MyProjects';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import BackgroundUpload from '@/components/BackgroundUpload';
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
+import NoImageAvailable from "@/assets/images/no image available.png";
 
 
 // Add dummy state for conversations and selectedConversation
@@ -25,7 +26,39 @@ type Conversation = {
   // Add other properties as needed
 };
 
-const StudentProfessorProfileView = ({ profileData, studentData, stats, skills, projects, loading, showEditProfile, showMyProjects, editSection, setShowEditProfile, setEditSection, setShowMyProjects, handleEditProfileClose, handleMyProjectsClose, handleEditSection, handleAddProject, handleDeleteProject, displayedText, shouldTruncate, isExpanded, setIsExpanded, academicBackground, handleBackgroundChange, backgroundImage }) => {
+const StudentProfessorProfileView = ({
+  profileData,
+  studentData,
+  stats,
+  skills,
+  projects,
+  loading,
+  showEditProfile,
+  showMyProjects,
+  editSection,
+  setShowEditProfile,
+  setEditSection,
+  setShowMyProjects,
+  handleEditProfileClose,
+  handleMyProjectsClose,
+  handleEditSection,
+  handleAddProject,
+  handleDeleteProject,
+  displayedText,
+  shouldTruncate,
+  isExpanded,
+  setIsExpanded,
+  academicBackground,
+  handleBackgroundChange,
+  backgroundImage,
+  showAddProjectSidebar,
+  setShowAddProjectSidebar,
+  showEditProjectSidebar,
+  setShowEditProjectSidebar,
+  editingProject,
+  setEditingProject,
+  fetchUserData
+}) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Header />
@@ -163,38 +196,64 @@ const StudentProfessorProfileView = ({ profileData, studentData, stats, skills, 
                     </span>
                     Research Projects & Commercial Work
                   </h2>
-                  <Button variant="ghost" size="sm" onClick={() => setShowMyProjects(true)} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowMyProjects(true)}
+                    className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
+                  >
                     <Edit className="w-2 h-2 mr-1" />Add Project
                   </Button>
                 </div>
-                <div className="max-h-[500px] overflow-y-auto pr-2 space-y-6">
+                <div className="space-y-4">
                   {projects.length > 0 ? (
                     projects.map((project, index) => (
-                      <Card key={project.id || index} className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden">
-                        <div className="flex flex-col md:flex-row">
-                          <div className="md:w-1/3">
-                            <img src={project.image || "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=300&h=200&fit=crop"} alt={project.title} className="w-full h-48 md:h-full object-cover" />
-                          </div>
-                          <CardContent className="p-5 md:w-2/3">
-                            <div className="flex justify-between items-start">
-                              <h3 className="font-semibold text-gray-900 text-lg mb-2">{project.title}</h3>
-                              <Button variant="ghost" size="icon" className="text-gray-400 hover:text-red-500 hover:bg-red-50" onClick={() => handleDeleteProject(project.id)}>
+                      <Card
+                        key={project.id || index}
+                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[140px]"
+                      >
+                        <div className="w-full md:w-48 flex-shrink-0 h-36 md:h-auto bg-gray-100 flex items-center justify-center">
+                          <img
+                            src={project.image || NoImageAvailable}
+                            alt={project.title}
+                            className="object-cover w-full h-full rounded-l-lg"
+                            onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                          />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">{project.title}</h3>
+                              <p className="text-gray-600 text-sm mb-2 line-clamp-2">{project.description}</p>
+                              <div className="flex flex-wrap gap-2 mb-2">
+                                {(project.skills || project.tags || []).map((tech, techIndex) => (
+                                  <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">{tech}</Badge>
+                                ))}
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
+                                <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Date Added:</span> {
+                                  project.dateAdded ? new Date(project.dateAdded).toLocaleDateString() : 
+                                  project.posted ? new Date(project.posted).toLocaleDateString() : 'N/A'
+                                }</div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2 items-end ml-2">
+                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700" onClick={() => { setEditingProject(project); setShowEditProjectSidebar(true); }}>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-red-500 bg-white hover:bg-red-500 hover:bg-opacity-80 hover:text-white transition-colors shadow-sm"
+                                onClick={() => handleDeleteProject(project.id)}
+                              >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
-                            <p className="text-gray-600 mb-3">{project.description}</p>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {(project.skills || project.tags || []).map((tech, techIndex) => (
-                                <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">{tech}</Badge>
-                              ))}
-                            </div>
-                            <div className="space-y-2">
-                              {project.university && (<p className="text-sm text-gray-500"><span className="font-medium">Institution:</span> {project.university}</p>)}
-                              {project.publication && (<p className="text-sm text-gray-500"><span className="font-medium">Publication:</span> {project.publication}</p>)}
-                              {project.award && (<p className="text-sm text-green-600 font-medium"><Award className="w-4 h-4 inline mr-1" /> {project.award}</p>)}
-                              {project.patent && (<p className="text-sm text-blue-600 font-medium"><Link className="w-4 h-4 inline mr-1" /> {project.patent}</p>)}
-                            </div>
-                          </CardContent>
+                          </div>
                         </div>
                       </Card>
                     ))
@@ -242,11 +301,14 @@ const StudentProfessorProfileView = ({ profileData, studentData, stats, skills, 
       </div>
       {/* EditProfile Sidebar */}
       {showEditProfile && (
-        <EditProfile onClose={handleEditProfileClose} initialSection={editSection} />
+        <EditProfile onClose={handleEditProfileClose} initialSection={editSection} onProfileUpdated={fetchUserData} />
       )}
       <Footer />
       {showMyProjects && (
-        <MyProjects onClose={handleMyProjectsClose} />
+        <MyProjects onClose={handleMyProjectsClose} onProjectCreated={fetchUserData} />
+      )}
+      {showEditProjectSidebar && editingProject && (
+        <MyProjects onClose={() => { setShowEditProjectSidebar(false); setEditingProject(null); }} editMode={true} projectToEdit={editingProject} onProjectCreated={fetchUserData} />
       )}
     </div>
   );
@@ -319,6 +381,10 @@ const Profile = () => {
       course: studentData.course || "Computer Science",
     }
   ];
+
+  const [showAddProjectSidebar, setShowAddProjectSidebar] = useState(false);
+  const [showEditProjectSidebar, setShowEditProjectSidebar] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
 
   const fetchUserData = async () => {
     try {
@@ -537,6 +603,13 @@ const Profile = () => {
         academicBackground={academicBackground}
         handleBackgroundChange={handleBackgroundChange}
         backgroundImage={backgroundImage}
+        showAddProjectSidebar={showAddProjectSidebar}
+        setShowAddProjectSidebar={setShowAddProjectSidebar}
+        showEditProjectSidebar={showEditProjectSidebar}
+        setShowEditProjectSidebar={setShowEditProjectSidebar}
+        editingProject={editingProject}
+        setEditingProject={setEditingProject}
+        fetchUserData={fetchUserData}
       />
     );
   }
@@ -774,7 +847,7 @@ const Profile = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleEditSection('About')}
+                    onClick={() => { setEditSection('Education'); setShowEditProfile(true); }}
                     className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
                   >
                     <Edit className="w-2 h-2 mr-1" />
@@ -820,63 +893,61 @@ const Profile = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setShowMyProjects(true)}
+                    onClick={() => setShowAddProjectSidebar(true)}
                     className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
                   >
-                    <Edit className="w-2 h-2 mr-1" />
-                    Add Project
+                    <Edit className="w-2 h-2 mr-1" />Add Project
                   </Button>
                 </div>
-                <div className="max-h-[500px] overflow-y-auto pr-2 space-y-6">
+                <div className="space-y-4">
                   {projects.length > 0 ? (
                     projects.map((project, index) => (
-                      <Card key={project.id || index} className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden">
-                        <div className="flex flex-col md:flex-row">
-                          <div className="md:w-1/3">
-                            <img
-                              src={project.image || "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=300&h=200&fit=crop"}
-                              alt={project.title}
-                              className="w-full h-48 md:h-full object-cover"
-                            />
-                          </div>
-                          <CardContent className="p-5 md:w-2/3">
-                            <div className="flex justify-between items-start">
-                              <h3 className="font-semibold text-gray-900 text-lg mb-2">{project.title}</h3>
-                              <Button variant="ghost" size="icon" className="text-gray-400 hover:text-red-500 hover:bg-red-50" onClick={() => handleDeleteProject(project.id)}>
+                      <Card
+                        key={project.id || index}
+                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[140px]"
+                      >
+                        <div className="w-full md:w-48 flex-shrink-0 h-36 md:h-auto bg-gray-100 flex items-center justify-center">
+                          <img
+                            src={project.image || NoImageAvailable}
+                            alt={project.title}
+                            className="object-cover w-full h-full rounded-l-lg"
+                            onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                          />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">{project.title}</h3>
+                              <p className="text-gray-600 text-sm mb-2 line-clamp-2">{project.description}</p>
+                              <div className="flex flex-wrap gap-2 mb-2">
+                                {(project.skills || project.tags || []).map((tech, techIndex) => (
+                                  <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">{tech}</Badge>
+                                ))}
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
+                                <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Date Added:</span> {
+                                  project.dateAdded ? new Date(project.dateAdded).toLocaleDateString() : 
+                                  project.posted ? new Date(project.posted).toLocaleDateString() : 'N/A'
+                                }</div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2 items-end ml-2">
+                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700" onClick={() => { setEditingProject(project); setShowEditProjectSidebar(true); }}>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-red-500 bg-white hover:bg-red-500 hover:bg-opacity-80 hover:text-white transition-colors shadow-sm"
+                                onClick={() => handleDeleteProject(project.id)}
+                              >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
-                            <p className="text-gray-600 mb-3">{project.description}</p>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {(project.skills || project.tags || []).map((tech, techIndex) => (
-                                <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">
-                                  {tech}
-                                </Badge>
-                              ))}
-                            </div>
-                            <div className="space-y-2">
-                              {project.university && (
-                                <p className="text-sm text-gray-500">
-                                  <span className="font-medium">Institution:</span> {project.university}
-                                </p>
-                              )}
-                              {project.publication && (
-                                <p className="text-sm text-gray-500">
-                                  <span className="font-medium">Publication:</span> {project.publication}
-                                </p>
-                              )}
-                              {project.award && (
-                                <p className="text-sm text-green-600 font-medium">
-                                  <Award className="w-4 h-4 inline mr-1" /> {project.award}
-                                </p>
-                              )}
-                              {project.patent && (
-                                <p className="text-sm text-blue-600 font-medium">
-                                  <Link className="w-4 h-4 inline mr-1" /> {project.patent}
-                                </p>
-                              )}
-                            </div>
-                          </CardContent>
+                          </div>
                         </div>
                       </Card>
                     ))
@@ -884,9 +955,7 @@ const Profile = () => {
                     <div className="text-center py-20">
                       <Briefcase className="w-12 h-12 mx-auto text-gray-300" />
                       <h3 className="mt-4 text-lg font-medium text-gray-900">No projects yet</h3>
-                      <p className="mt-1 text-sm text-gray-500">
-                        Click "Add Project" to showcase your work.
-                      </p>
+                      <p className="mt-1 text-sm text-gray-500">Click "Add Project" to showcase your work.</p>
                     </div>
                   )}
                 </div>
@@ -909,7 +978,7 @@ const Profile = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleEditSection('About')}
+                    onClick={() => { setEditSection('Skills'); setShowEditProfile(true); }}
                     className="-translate-y-[20px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
                   >
                     <Edit className="w-2 h-2 mr-1" />
@@ -942,12 +1011,15 @@ const Profile = () => {
 
       {/* Edit Profile Sidebar */}
       {showEditProfile && (
-        <EditProfile onClose={handleEditProfileClose} initialSection={editSection} />
+        <EditProfile onClose={handleEditProfileClose} initialSection={editSection} onProfileUpdated={fetchUserData} />
       )}
 
       {/* My Projects Sidebar */}
-      {showMyProjects && (
-        <MyProjects onClose={handleMyProjectsClose} />
+      {showAddProjectSidebar && (
+        <MyProjects onClose={() => setShowAddProjectSidebar(false)} onProjectCreated={fetchUserData} />
+      )}
+      {showEditProjectSidebar && editingProject && (
+        <MyProjects onClose={() => { setShowEditProjectSidebar(false); setEditingProject(null); }} editMode={true} projectToEdit={editingProject} onProjectCreated={fetchUserData} />
       )}
     </div>
   );

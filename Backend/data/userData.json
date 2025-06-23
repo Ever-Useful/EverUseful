@@ -147,12 +147,12 @@
       "customUserId": "USER_000005",
       "profile": {
         "avatar": null,
-        "bio": "hhi hello, testing the new edit",
+        "bio": "hhi hello, testing the new edit this testing",
         "location": "Jammu, Jammu & Kashmir",
         "website": "NA",
         "title": null,
         "createdAt": "2025-06-19T21:16:02.064Z",
-        "updatedAt": "2025-06-21T21:05:12.711Z",
+        "updatedAt": "2025-06-23T18:40:07.106Z",
         "college": "CUJ",
         "degree": "Btech",
         "course": "CSE",
@@ -183,8 +183,7 @@
       "skills": [
         "python",
         "frontend",
-        "backend",
-        "Securities"
+        "backend"
       ],
       "social": {
         "followers": [],
@@ -224,14 +223,91 @@
         "college": "CUJ",
         "degree": "Btech",
         "course": "CSE",
+        "year": "3",
+        "updatedAt": "2025-06-23T18:40:03.506Z"
+      }
+    },
+    "USER_000006": {
+      "customUserId": "USER_000006",
+      "profile": {
+        "avatar": null,
+        "bio": "hi i am a freelancer.",
+        "location": "Delhi",
+        "website": null,
+        "title": null,
+        "createdAt": "2025-06-23T18:20:40.822Z",
+        "updatedAt": "2025-06-23T18:22:41.138Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [
+          {
+            "productId": "17",
+            "addedAt": "2025-06-23T18:41:12.288Z",
+            "quantity": 1
+          }
+        ],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "add",
+        "ai",
+        "ml"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-23T18:20:40.822Z"
+      },
+      "studentData": {
+        "college": "IIT delhi",
+        "degree": "Btech",
+        "course": "ECE",
         "year": "4",
-        "updatedAt": "2025-06-21T21:05:08.641Z"
+        "updatedAt": "2025-06-23T18:22:37.414Z"
       }
     }
   },
   "userCounter": 6,
   "metadata": {
-    "lastUpdated": "2025-06-22T18:11:50.819Z",
+    "lastUpdated": "2025-06-23T18:41:12.288Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

@@ -3,16 +3,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock, DollarSign, Heart, ArrowLeft, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus } from "lucide-react";
-import { getFreelancerById } from "@/utils/freelancerData";
 import { ChatBox } from "@/components/ChatBox";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { db } from "../lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
-const FreelancerProfile = () => {
+const VisitingProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const freelancer = getFreelancerById(Number(id));
+  const [freelancer, setFreelancer] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [backgroundImage] = useState(
     "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
   );
@@ -24,6 +26,26 @@ const FreelancerProfile = () => {
     shouldTruncate && !isExpanded
       ? freelancer.about.slice(0, MAX_LENGTH) + "..."
       : freelancer.about;
+
+  useEffect(() => {
+    const fetchFreelancer = async () => {
+      if (id) {
+        try {
+          const userRef = doc(db, "users", id);
+          const docSnap = await getDoc(userRef);
+          if (docSnap.exists()) {
+            setFreelancer(docSnap.data());
+          } else {
+            setFreelancer(null);
+          }
+        } catch (err) {
+          setFreelancer(null);
+        }
+      }
+      setLoading(false);
+    };
+    fetchFreelancer();
+  }, [id]);
 
   if (!freelancer) {
     return (
@@ -406,5 +428,5 @@ const FreelancerProfile = () => {
   );
 };
 
-export default FreelancerProfile;
+export default VisitingProfile;
 

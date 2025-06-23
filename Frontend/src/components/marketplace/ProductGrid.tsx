@@ -23,6 +23,8 @@ import { useAuthState } from "../../hooks/useAuthState";
 import { firestoreService } from "../../services/firestoreService";
 import { userService } from "../../services/userService";
 import { toast } from "sonner";
+import NoImageAvailable from "@/assets/images/no image available.png";
+import NoUserProfile from "@/assets/images/no user profile.png";
 
 interface Project {
   id: number;
@@ -41,6 +43,8 @@ interface Project {
     rating: number;
     projects: number;
     bio: string;
+    userType: string;
+    id: string;
   };
   status: string;
   posted: string;
@@ -360,11 +364,12 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
             >
               <div className="relative">
                 <img
-                  src={project.image}
+                  src={project.image || NoImageAvailable}
                   alt={project.title}
                   className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
                   loading="lazy"
                   onClick={() => setSelected(project)}
+                  onError={e => { e.currentTarget.src = NoImageAvailable; }}
                 />
                 <div className="absolute top-2 left-2">
                   <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow">
@@ -393,11 +398,35 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
               <CardContent className="p-4 flex flex-col flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <img
-                    src={project.author.image}
+                    src={project.author.image || NoUserProfile}
                     alt={project.author.name}
-                    className="w-6 h-6 rounded-full border border-gray-200"
+                    className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
+                    onError={e => { e.currentTarget.src = NoUserProfile; }}
+                    onClick={() => {
+                      const type = (project.author.userType || '').toLowerCase();
+                      if (type === 'freelancer') {
+                        navigate(`/freelancerprofile/${project.author.id}`);
+                      } else {
+                        navigate(`/studentprofile/${project.author.id}`);
+                      }
+                    }}
                   />
-                  <span className="text-gray-700 text-xs">{project.author.name}</span>
+                  <span
+                    className="text-gray-700 text-xs cursor-pointer"
+                    style={{ transition: 'color 0.2s' }}
+                    onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                    onMouseOut={e => e.currentTarget.style.color = ''}
+                    onClick={() => {
+                      const type = (project.author.userType || '').toLowerCase();
+                      if (type === 'freelancer') {
+                        navigate(`/freelancerprofile/${project.author.id}`);
+                      } else {
+                        navigate(`/studentprofile/${project.author.id}`);
+                      }
+                    }}
+                  >
+                    {project.author.name}
+                  </span>
                   <div className="flex items-center space-x-1">
                     <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                     <span className="text-yellow-500 text-xs">{project.rating}</span>
@@ -509,19 +538,44 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
           </div>
           <div className="overflow-y-auto flex-1 px-6 py-4">
             <img
-              src={selected.image}
+              src={selected.image || NoImageAvailable}
               alt={selected.title}
               className="w-full h-40 object-cover rounded-lg mb-4"
+              onError={e => { e.currentTarget.src = NoImageAvailable; }}
             />
 
             <div className="flex items-center mb-4">
               <img
-                src={selected.author.image}
+                src={selected.author.image || NoUserProfile}
                 alt={selected.author.name}
-                className="w-8 h-8 rounded-full border border-gray-200 mr-3"
+                className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
+                onError={e => { e.currentTarget.src = NoUserProfile; }}
+                onClick={() => {
+                  const type = (selected.author.userType || '').toLowerCase();
+                  if (type === 'freelancer') {
+                    navigate(`/freelancerprofile/${selected.author.id}`);
+                  } else {
+                    navigate(`/studentprofile/${selected.author.id}`);
+                  }
+                }}
               />
               <div>
-                <div className="text-sm font-semibold text-gray-800">{selected.author.name}</div>
+                <div
+                  className="text-sm font-semibold text-gray-800 cursor-pointer"
+                  style={{ transition: 'color 0.2s' }}
+                  onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                  onMouseOut={e => e.currentTarget.style.color = ''}
+                  onClick={() => {
+                    const type = (selected.author.userType || '').toLowerCase();
+                    if (type === 'freelancer') {
+                      navigate(`/freelancerprofile/${selected.author.id}`);
+                    } else {
+                      navigate(`/studentprofile/${selected.author.id}`);
+                    }
+                  }}
+                >
+                  {selected.author.name}
+                </div>
                 <div className="flex items-center space-x-1 text-xs text-gray-500">
                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                   <span className="text-yellow-500">{selected.rating}</span>
@@ -594,7 +648,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
               <div className="flex flex-col gap-3">
                 {getRelated(selected.id).map((rel) => (
                   <div key={rel.id} className="flex items-center gap-3 bg-gray-50 rounded p-2">
-                    <img src={rel.image} alt={rel.title} className="w-12 h-12 object-cover rounded" />
+                    <img src={rel.image || NoImageAvailable} alt={rel.title} className="w-12 h-12 object-cover rounded" onError={e => { e.currentTarget.src = NoImageAvailable; }} />
                     <div className="flex-1">
                       <div className="font-semibold text-xs text-gray-700">{rel.title}</div>
                       <div className="flex items-center gap-2 text-[11px] text-gray-500">

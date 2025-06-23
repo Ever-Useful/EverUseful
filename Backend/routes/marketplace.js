@@ -268,6 +268,7 @@ router.post('/projects', authorize, async (req, res) => {
       rating: 0,
       reviews: 0,
       posted: new Date().toISOString().split('T')[0],
+      dateAdded: new Date().toISOString(),
       views: 0,
       favoritedBy: []
     };
@@ -342,6 +343,49 @@ router.delete('/projects/:id', authorize, async (req, res) => {
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
     console.error('Error deleting project:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Edit (update) a project
+router.put('/projects/:id', authorize, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const projectId = parseInt(id);
+    const marketplaceData = await readMarketplaceData();
+    const userData = await readUserData();
+
+    const projectIndex = marketplaceData.projects.findIndex(p => p.id === projectId);
+    if (projectIndex === -1) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const project = marketplaceData.projects[projectIndex];
+    const customUserId = project.customUserId;
+
+    // Verify that the user editing the project is the author
+    const userRef = await db.collection('users').doc(req.user.uid).get();
+    if (!userRef.exists || userRef.data().customUserId !== customUserId) {
+      return res.status(403).json({ error: 'You are not authorized to edit this project' });
+    }
+
+    // Update allowed fields only
+    const allowedFields = [
+      'title', 'description', 'category', 'price', 'duration', 'status', 'tags', 'skills', 'image', 'attachments'
+    ];
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        project[field] = req.body[field];
+      }
+    });
+
+    // Save changes
+    marketplaceData.projects[projectIndex] = project;
+    await writeMarketplaceData(marketplaceData);
+
+    res.json({ project });
+  } catch (error) {
+    console.error('Error updating project:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
