@@ -27,7 +27,7 @@ export const auth =  getAuth(app);
 export { db }; 
 export const storage = getStorage(app);
 
-export const handleGoogleAuth = async (navigate: (url: string) => void, userType: string = 'student') => {
+export const handleGoogleAuth = async (navigate: (url: string) => void, userType: string = 'student', redirectPath?: string) => {
   try {
     
     const provider = new GoogleAuthProvider();
@@ -53,13 +53,14 @@ export const handleGoogleAuth = async (navigate: (url: string) => void, userType
     localStorage.setItem("isLoggedIn", "true");
     window.dispatchEvent(new Event("storage"));
     
-    navigate(data.redirectUrl);
+    // Use redirectPath if provided, otherwise use backend response
+    navigate(redirectPath || data.redirectUrl);
   } catch (error) {
     console.error("Error during Google auth:", error);
   }
 };
 
-export const handleGithubAuth = async (navigate: (url: string) => void, userType: string = 'student') => {
+export const handleGithubAuth = async (navigate: (url: string) => void, userType: string = 'student', redirectPath?: string) => {
   try {
     
     const provider = new GithubAuthProvider();
@@ -85,7 +86,8 @@ export const handleGithubAuth = async (navigate: (url: string) => void, userType
     localStorage.setItem("isLoggedIn", "true");
     window.dispatchEvent(new Event("storage"));
     
-    navigate(data.redirectUrl);
+    // Use redirectPath if provided, otherwise use backend response
+    navigate(redirectPath || data.redirectUrl);
   } catch (error) {
     console.error("Error during Github auth:", error);
   }
