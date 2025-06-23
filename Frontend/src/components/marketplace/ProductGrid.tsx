@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,7 @@ interface PaginationInfo {
 
 export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   const [showPopupMenu, setShowPopupMenu] = useState(false);
+  const [targetProductPath, setTargetProductPath] = useState<string>('');
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +90,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   });
   const navigate = useNavigate();
   const { user, token, isLoading: authLoading } = useAuthState();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -216,6 +218,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
 
   const handleViewDetails = async (projectId: number) => {
     if (!user || !token) {
+      setTargetProductPath(`/product/${projectId}`);
       setShowPopupMenu(true);
       return;
     }
@@ -617,9 +620,13 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
       )}
         <PopupMenu 
         isOpen={showPopupMenu}
-        onClose={() => setShowPopupMenu(false)}
+        onClose={() => {
+          setShowPopupMenu(false);
+          setTargetProductPath('');
+        }}
         title="Get Started with AMOGH"
         formType="login"
+        redirectPath={targetProductPath || location.pathname}
       />
     </div>
 
