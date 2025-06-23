@@ -12,6 +12,7 @@ import Connect from "./pages/Connect";
 import Admin from "./pages/Admin";
 import Checkout from "./pages/Checkout";
 import Profile from "./pages/Profile";
+import StudentProfile from "./pages/StudentProfile";
 import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 import FreelancerProfile from "./pages/FreelancerProfile";
@@ -28,6 +29,8 @@ import FindExpert from "./pages/FindExpert";
 import PrivacyPolicy from "./pages/Privacy_Policy";
 import TermsOfService from "./pages/TermsOfService";
 import SendFeedback from "./pages/SendFeedback";
+import Chat from "./pages/Chat";
+
 
 const queryClient = new QueryClient();
 
@@ -48,6 +51,7 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/studentprofile" element={<StudentProfile />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
@@ -62,6 +66,7 @@ const App = () => (
             <Route path="/privacypolicy" element={<PrivacyPolicy />} />
             <Route path="/termsofservice" element={<TermsOfService />} />
             <Route path="/sendfeedback" element={<SendFeedback />} />
+            <Route path="/chat" element={<Chat />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

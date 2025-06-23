@@ -98,7 +98,7 @@ const FreelancerProfile = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-end pb-12">
-          <div className="w-full py-8 px-6 md:px-8 flex flex-col md:flex-row items-start space-y-6 md:space-y-0 md:space-x-8">
+          <div className="w-full py-2 px-6 md:px-8 flex flex-col md:flex-row items-start space-y-6 md:space-y-0 md:space-x-8">
             {/* Left side with avatar */}
             <div className="flex flex-col items-center space-y-4 shrink-0">
               <div className="relative">
@@ -132,7 +132,7 @@ const FreelancerProfile = () => {
                     <span className="text-sm text-white">{freelancer.location}</span>
                   </div>
                   <div className="flex items-center bg-yellow-400/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400"/>
                     <span className="ml-1 font-semibold text-white">{freelancer.rating}</span>
                     <span className="ml-1 text-gray-200 text-sm">({freelancer.reviews} reviews)</span>
                   </div>
@@ -143,14 +143,13 @@ const FreelancerProfile = () => {
                   <span className="text-white drop-shadow-md">{freelancer.connections}+ Connections</span>
                 </div>
               </div>
-            </div>
-
-            {/* Right side with connect button */}
-            <div className="flex items-center md:items-end">
-              <button className="mt-10 bg-white text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-full font-semibold drop-shadow-md transition-all duration-200 flex items-center">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Connect
-              </button>
+              
+              <div className="-translate-x-[0px] mt-8 flex flex-col w-[200px] h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
+                <button className="flex items-center gap-2 text-white drop-shadow-md text-2xl">
+                  <UserPlus className="w-6 h-6" />
+                  Connect
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -270,7 +269,7 @@ const FreelancerProfile = () => {
                   </span>
                   Research Projects & Commercial Work
                 </h2>
-                <div className="h-[500px] overflow-y-auto pr-2 space-y-6">
+                <div className="h-[500px] overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full">
                   {portfolioProjects.map((project, index) => (
                     <Card key={index} className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden">
                       <div className="flex flex-col md:flex-row">

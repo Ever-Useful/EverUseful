@@ -15,8 +15,24 @@ import toast from "react-hot-toast";
 import { MyProjects } from '@/components/MyProjects';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import BackgroundUpload from '@/components/BackgroundUpload';
+import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
+
+
+// Add dummy state for conversations and selectedConversation
+type Conversation = {
+  id: string;
+  title: string;
+  // Add other properties as needed
+};
 
 const Profile = () => {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+
+  // Dummy handler for selecting a conversation
+  const handleSelectConversation = (id: string) => {
+    setSelectedConversation(id);
+  };
   const navigate = useNavigate();
   const [backgroundImage, setBackgroundImage] = useState(
     "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
@@ -266,15 +282,15 @@ const Profile = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white">
-        <div className="text-center">
-          <p className="text-gray-600 text-lg">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white">
+  //       <div className="text-center">
+  //         <p className="text-gray-600 text-lg">Loading profile...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
@@ -284,6 +300,8 @@ const Profile = () => {
       <div className="relative h-96 bg-cover bg-center bg-no-repeat" style={{
         backgroundImage: `url(${backgroundImage})`
       }}>
+        {/* Darker overlay for better text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
         {/* Camera Modal */}
         {showCamera && (
           <div className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center space-y-4 p-4">
@@ -376,7 +394,7 @@ const Profile = () => {
                   {`${profileData.firstName} ${profileData.lastName}`}
                 </h1>
                 <p className="text-xl md:text-2xl font-medium mb-4 text-gray-200 drop-shadow-md">
-                  {profileData.title || 'Title'}
+                  {profileData.title || 'Subtitle'}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -397,6 +415,22 @@ const Profile = () => {
                   Edit Profile
                 </button>
               </div>
+
+              <div className="flex flex-row items-center justify-between">
+                <div className="-translate-x-[0px] mt-8 flex flex-col w-[250px] h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
+                  <button className="flex items-center gap-2 text-white drop-shadow-md text-2xl">
+                    <UserPlus className="w-6 h-6" />
+                    Add Connections
+                  </button>
+                </div>
+                <div className="-translate-x-[200px] mt-8 flex flex-col w-[300px] h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
+                  <button className="flex items-center gap-2 text-white drop-shadow-md text-2xl">
+                    <UserPlus className="w-6 h-6" />
+                    See Your Connections
+                  </button>
+                </div>
+              </div>
+              
             </div>
           </div>
         </div>
@@ -408,7 +442,7 @@ const Profile = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <DollarSign className="w-6 h-6 mx-auto mb-2" />
@@ -430,14 +464,6 @@ const Profile = () => {
                   <Clock className="w-6 h-6 mx-auto mb-2" />
                   <div className="text-2xl font-bold">5</div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-amber-600 to-orange-500 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <Users className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{stats.followers}</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Followers</div>
                 </CardContent>
               </Card>
 
@@ -464,9 +490,9 @@ const Profile = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleEditSection('About')}
-                    className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                    className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
                   >
-                    <Edit className="w-4 h-4 mr-1" />
+                    <Edit className="w-2 h-2 mr-1" />
                     Edit
                   </Button>
                 </div>
@@ -499,10 +525,10 @@ const Profile = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleEditSection('Education')}
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    onClick={() => handleEditSection('About')}
+                    className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
                   >
-                    <Edit className="w-4 h-4 mr-1" />
+                    <Edit className="w-2 h-2 mr-1" />
                     Edit
                   </Button>
                 </div>
@@ -543,10 +569,12 @@ const Profile = () => {
                     Research Projects & Commercial Work
                   </h2>
                   <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleAddProject}
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
                   >
-                    <Plus className="w-4 h-4 mr-1" />
+                    <Edit className="w-2 h-2 mr-1" />
                     Add Project
                   </Button>
                 </div>
@@ -632,10 +660,10 @@ const Profile = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleEditSection('Skills')}
-                    className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                    onClick={() => handleEditSection('About')}
+                    className="-translate-y-[20px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
                   >
-                    <Edit className="w-4 h-4 mr-1" />
+                    <Edit className="w-2 h-2 mr-1" />
                     Edit
                   </Button>
                 </div>
@@ -656,47 +684,7 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            {/* Availability Card */}
-            <Card className="bg-white shadow-lg rounded-xl">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <span className="bg-amber-100 p-2 rounded-lg mr-3">
-                    <Calendar className="w-5 h-5 text-amber-600" />
-                  </span>
-                  Research Availability
-                </h3>
-                <Badge className="mb-4 text-sm px-3 py-1 rounded-lg bg-green-100 text-green-800 border-green-200">
-                  Currently Accepting Projects
-                </Badge>
-                <div className="space-y-3 text-sm text-gray-600">
-                  <div className="flex items-start">
-                    <Clock className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
-                    <span>Average response time: <span className="font-medium">5 hours</span></span>
-                  </div>
-                  <div className="flex items-start">
-                    <Calendar className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
-                    <span>Timezone: <span className="font-medium">GMT</span></span>
-                  </div>
-                  <div className="flex items-start">
-                    <BookOpen className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
-                    <span>Preferred project duration: <span className="font-medium">3-6 months</span></span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Collaboration Options */}
-            <Card className="bg-white shadow-lg rounded-xl">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <h4 className="font-medium text-lg text-purple-800 mb-2">Consultation</h4>
-                  <p className="text-sm text-gray-600 mb-3">Expert advice on your research project or technical challenge</p>
-                  <Button variant="outline" className="w-full border-purple-300 text-purple-600 hover:bg-purple-100 rounded-lg">
-                    Request Consultation
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <UnreadMessagesCard/>
           </div>
         </div>
       </div>
