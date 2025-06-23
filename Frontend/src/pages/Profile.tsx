@@ -25,6 +25,233 @@ type Conversation = {
   // Add other properties as needed
 };
 
+const StudentProfessorProfileView = ({ profileData, studentData, stats, skills, projects, loading, showEditProfile, showMyProjects, editSection, setShowEditProfile, setEditSection, setShowMyProjects, handleEditProfileClose, handleMyProjectsClose, handleEditSection, handleAddProject, handleDeleteProject, displayedText, shouldTruncate, isExpanded, setIsExpanded, academicBackground, handleBackgroundChange, backgroundImage }) => {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <Header />
+      {/* Hero Section */}
+      <div className="relative h-96 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${backgroundImage})` }}>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+        {/* Camera icon for background photo */}
+        <button
+          className="absolute top-6 right-6 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors z-10"
+          onClick={() => setShowEditProfile(true)}
+          title="Change Background Photo"
+        >
+          <Camera className="text-slate-700 w-5 h-5" />
+        </button>
+        <div className="absolute bottom-0 left-0 right-0 p-8 rounded-md bg-transparent my-[99px] py-[34px] px-[23px]">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row items-end gap-6">
+              <div className="relative">
+                {profileData.avatar ? (
+                  <img src={profileData.avatar} alt={`${profileData.firstName} ${profileData.lastName}`} className="w-36 h-36 border-4 border-white shadow-lg rounded-full object-cover" />
+                ) : (
+                  <div className="w-36 h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-4xl font-bold text-gray-600">
+                    {profileData.firstName?.charAt(0)}{profileData.lastName?.charAt(0)}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 text-white">
+                <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5">{`${profileData.firstName} ${profileData.lastName}`}</h1>
+                <p className="text-xl text-slate-200 drop-shadow-md">{profileData.userType}</p>
+                {/* Edit Profile Button */}
+                <button
+                  onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
+                  className="mt-4 bg-transparent border-2 border-white text-white hover:bg-white/10 px-6 py-2 rounded-full font-semibold drop-shadow-md transition-all duration-200 flex items-center"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Stats Cards */}
+      <div className="max-w-7xl mx-auto px-8 -mt-8 relative z-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
+            <CardContent className="p-4 text-center">
+              <Award className="w-6 h-6 mx-auto mb-2" />
+              <div className="text-2xl font-bold">{stats.projects}+</div>
+              <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
+            <CardContent className="p-4 text-center">
+              <UserPlus className="w-6 h-6 mx-auto mb-2" />
+              <div className="text-2xl font-bold">{stats.connections}+</div>
+              <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Column */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* About Section */}
+            <Card className="bg-white shadow-lg rounded-xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-purple-100 p-2 rounded-lg mr-3">
+                      <GraduationCap className="w-5 h-5 text-purple-600" />
+                    </span>
+                    About
+                  </h2>
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('About'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" />Edit
+                  </Button>
+                </div>
+                <div>
+                  <p className="text-gray-700 leading-relaxed">{displayedText}</p>
+                  {shouldTruncate && (
+                    <button className="mt-2 text-blue-600 hover:underline text-sm" onClick={() => setIsExpanded(!isExpanded)}>
+                      {isExpanded ? "Read Less" : "Read More"}
+                    </button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            {/* Academic Background */}
+            <Card className="bg-white shadow-lg rounded-xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-blue-100 p-2 rounded-lg mr-3">
+                      <BookOpen className="w-5 h-5 text-blue-600" />
+                    </span>
+                    Academic Background
+                  </h2>
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Education'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" />Edit
+                  </Button>
+                </div>
+                <div className="space-y-6">
+                  {academicBackground.map((item, index) => (
+                    <div key={index} className="flex">
+                      <div className="mr-4 flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                          <GraduationCap className="w-5 h-5 text-blue-500" />
+                        </div>
+                        {index < academicBackground.length - 1 && (
+                          <div className="w-0.5 h-full bg-gray-200 my-2"></div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">{item.degree}</h3>
+                        <p className="text-gray-600">{item.institution} • {item.year}</p>
+                        {item.course && (
+                          <p className="text-sm text-gray-500 mt-1"><span className="font-medium">Course:</span> {item.course}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            {/* Portfolio Section */}
+            <Card className="bg-white shadow-lg rounded-xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-green-100 p-2 rounded-lg mr-3">
+                      <Briefcase className="w-5 h-5 text-green-600" />
+                    </span>
+                    Research Projects & Commercial Work
+                  </h2>
+                  <Button variant="ghost" size="sm" onClick={() => setShowMyProjects(true)} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" />Add Project
+                  </Button>
+                </div>
+                <div className="max-h-[500px] overflow-y-auto pr-2 space-y-6">
+                  {projects.length > 0 ? (
+                    projects.map((project, index) => (
+                      <Card key={project.id || index} className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden">
+                        <div className="flex flex-col md:flex-row">
+                          <div className="md:w-1/3">
+                            <img src={project.image || "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=300&h=200&fit=crop"} alt={project.title} className="w-full h-48 md:h-full object-cover" />
+                          </div>
+                          <CardContent className="p-5 md:w-2/3">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-semibold text-gray-900 text-lg mb-2">{project.title}</h3>
+                              <Button variant="ghost" size="icon" className="text-gray-400 hover:text-red-500 hover:bg-red-50" onClick={() => handleDeleteProject(project.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <p className="text-gray-600 mb-3">{project.description}</p>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {(project.skills || project.tags || []).map((tech, techIndex) => (
+                                <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">{tech}</Badge>
+                              ))}
+                            </div>
+                            <div className="space-y-2">
+                              {project.university && (<p className="text-sm text-gray-500"><span className="font-medium">Institution:</span> {project.university}</p>)}
+                              {project.publication && (<p className="text-sm text-gray-500"><span className="font-medium">Publication:</span> {project.publication}</p>)}
+                              {project.award && (<p className="text-sm text-green-600 font-medium"><Award className="w-4 h-4 inline mr-1" /> {project.award}</p>)}
+                              {project.patent && (<p className="text-sm text-blue-600 font-medium"><Link className="w-4 h-4 inline mr-1" /> {project.patent}</p>)}
+                            </div>
+                          </CardContent>
+                        </div>
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="text-center py-20">
+                      <Briefcase className="w-12 h-12 mx-auto text-gray-300" />
+                      <h3 className="mt-4 text-lg font-medium text-gray-900">No projects yet</h3>
+                      <p className="mt-1 text-sm text-gray-500">Click "Add Project" to showcase your work.</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Skills Section */}
+            <Card className="bg-white shadow-lg rounded-xl max-w-md">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <span className="bg-indigo-100 p-2 rounded-lg mr-3">
+                      <Star className="w-5 h-5 text-indigo-600" />
+                    </span>
+                    Research Skills & Technical Expertise
+                  </h3>
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Skills'); setShowEditProfile(true); }} className="-translate-y-[20px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" />Edit
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {skills && skills.length > 0 ? (
+                    skills.map((skill, index) => (
+                      <Badge key={index} className="px-3 py-1 text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">{skill}</Badge>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">No skills added yet. Click edit to add your skills.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            <UnreadMessagesCard />
+          </div>
+        </div>
+      </div>
+      {/* EditProfile Sidebar */}
+      {showEditProfile && (
+        <EditProfile onClose={handleEditProfileClose} initialSection={editSection} />
+      )}
+      <Footer />
+      {showMyProjects && (
+        <MyProjects onClose={handleMyProjectsClose} />
+      )}
+    </div>
+  );
+};
+
 const Profile = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
@@ -282,15 +509,37 @@ const Profile = () => {
     }
   };
 
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white">
-  //       <div className="text-center">
-  //         <p className="text-gray-600 text-lg">Loading profile...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  // Conditional rendering based on userType
+  if (profileData.userType?.toLowerCase() === 'student' || profileData.userType?.toLowerCase() === 'professor') {
+    return (
+      <StudentProfessorProfileView
+        profileData={profileData}
+        studentData={studentData}
+        stats={stats}
+        skills={skills}
+        projects={projects}
+        loading={loading}
+        showEditProfile={showEditProfile}
+        showMyProjects={showMyProjects}
+        editSection={editSection}
+        setShowEditProfile={setShowEditProfile}
+        setEditSection={setEditSection}
+        setShowMyProjects={setShowMyProjects}
+        handleEditProfileClose={handleEditProfileClose}
+        handleMyProjectsClose={handleMyProjectsClose}
+        handleEditSection={handleEditSection}
+        handleAddProject={handleAddProject}
+        handleDeleteProject={handleDeleteProject}
+        displayedText={displayedText}
+        shouldTruncate={shouldTruncate}
+        isExpanded={isExpanded}
+        setIsExpanded={setIsExpanded}
+        academicBackground={academicBackground}
+        handleBackgroundChange={handleBackgroundChange}
+        backgroundImage={backgroundImage}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
@@ -394,7 +643,7 @@ const Profile = () => {
                   {`${profileData.firstName} ${profileData.lastName}`}
                 </h1>
                 <p className="text-xl md:text-2xl font-medium mb-4 text-gray-200 drop-shadow-md">
-                  {profileData.title || 'Subtitle'}
+                  {profileData.userType ? profileData.userType.charAt(0).toUpperCase() + profileData.userType.slice(1) : ''}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -571,7 +820,7 @@ const Profile = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={handleAddProject}
+                    onClick={() => setShowMyProjects(true)}
                     className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
                   >
                     <Edit className="w-2 h-2 mr-1" />
@@ -698,7 +947,7 @@ const Profile = () => {
 
       {/* My Projects Sidebar */}
       {showMyProjects && (
-        <MyProjects onClose={handleMyProjectsClose} onProjectCreated={fetchUserData} />
+        <MyProjects onClose={handleMyProjectsClose} />
       )}
     </div>
   );

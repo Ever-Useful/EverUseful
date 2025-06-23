@@ -45,6 +45,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     course: '',
     location: '',
     year: '',
+    userType: '',
   });
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
             course: userProfile.studentData?.course || '',
             location: userProfile.profile.location || '',
             year: userProfile.studentData?.year || '',
+            userType: userProfile.auth.userType || '',
           });
         } catch (error) {
           toast.error("Failed to fetch profile data.");
@@ -78,6 +80,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         await userService.updateAuthInfo({
           firstName: profileData.firstName,
           lastName: profileData.lastName,
+          userType: profileData.userType,
         });
       } else if (activeSection === 'About') {
         await userService.updateProfile({ bio: profileData.bio });
@@ -197,6 +200,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     }
   };
 
+  const handleUserTypeSelect = (type: string) => {
+    setProfileData(prev => ({ ...prev, userType: type }));
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
       <div className="w-full max-w-5xl h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
@@ -247,6 +254,31 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                                   <Input name="lastName" value={profileData.lastName} onChange={handleInputChange} className="mt-1" />
                               </div>
                           </div>
+                      </div>
+
+                      {/* User Type Selection */}
+                      <div className="mt-8">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">User Type <span className="text-red-500">*</span></label>
+                        <div className="flex gap-4">
+                          {[
+                            { value: 'student', label: 'Student' },
+                            { value: 'professor', label: 'Professor' },
+                            { value: 'freelancer', label: 'Freelancer' }
+                          ].map(type => (
+                            <button
+                              key={type.value}
+                              type="button"
+                              onClick={() => handleUserTypeSelect(type.value)}
+                              className={`flex items-center gap-2 px-6 py-2 rounded-full border text-base font-medium transition-colors
+                                ${profileData.userType === type.value
+                                  ? 'bg-blue-50 border-blue-600 text-blue-900 shadow-sm'
+                                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+                              style={{ minWidth: 160 }}
+                            >
+                              {type.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                   </div>
                   

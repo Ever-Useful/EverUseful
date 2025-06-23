@@ -188,20 +188,6 @@ const navLinks: { [key: string]: NavItem[] } = {
       icon: <ShoppingCart className="w-5 h-5 text-blue-500" /> 
     },
     { 
-      title: "Your Cart", 
-      href: "/cart",
-      description: "View and manage items you've selected.",
-      icon: <List className="w-5 h-5 text-green-500" />,
-      authAction: 'popup'
-    },
-    {
-      title: "Checkout",
-      href: "/checkout",
-      description: "Finalize your purchases securely.",
-      icon: <Landmark className="w-5 h-5 text-purple-500" />,
-      authAction: 'popup'
-    },
-    { 
       title: "Post a Project", 
       href: "/projects/new",
       description: "Create a new listing and attract talent.",
