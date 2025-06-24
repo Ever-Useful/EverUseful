@@ -31,6 +31,7 @@ import TermsOfService from "./pages/TermsOfService";
 import SendFeedback from "./pages/SendFeedback";
 import Chat from "./pages/Chat";
 import BussinessProfile from "./pages/bussinessprofile";
+import Sustainable from "./pages/Sustainable"
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
             <Route path="/sendfeedback" element={<SendFeedback />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/studentprofile/:id" element={<StudentProfile />} />
+            <Route path="/green" element={<Sustainable/>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
