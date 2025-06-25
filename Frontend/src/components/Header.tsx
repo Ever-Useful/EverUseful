@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Menu, X, Sparkles, ShoppingCart, User, LogOut, Bell, MessageSquare, Send, Briefcase, List, Landmark, 
   UserPlus, Users, Trophy, Heart, Bookmark, TrendingUp, Star, Shield, LayoutGrid, AlertCircle, Edit, 
-  Settings, HelpCircle, BarChart2, Calendar, ChevronDown, Search, Info, FileText 
+  Settings, HelpCircle, BarChart2, Calendar, ChevronDown, Search, Info, FileText, Leaf
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -235,6 +235,12 @@ const navLinks: { [key: string]: NavItem[] } = {
       href: "/aiagents",
       description: "Leverage AI-powered tools for your business.",
       icon: <Sparkles className="w-5 h-5 text-green-500" />
+    },
+    {
+      title: "Sustainable",
+      href: "/green",
+      description: "Explore our sustainable solutions.",
+      icon: <Leaf className="w-5 h-5 text-green-500" />
     }
   ],
   about: [

@@ -17,6 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 import BackgroundUpload from '@/components/BackgroundUpload';
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
 import NoImageAvailable from "@/assets/images/no image available.png";
+import { GlobeLoader } from "@/components/ui/globe-loader";
 
 
 // Add dummy state for conversations and selectedConversation
@@ -164,25 +165,33 @@ const StudentProfessorProfileView = ({
                   </Button>
                 </div>
                 <div className="space-y-6">
-                  {academicBackground.map((item, index) => (
-                    <div key={index} className="flex">
-                      <div className="mr-4 flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                          <GraduationCap className="w-5 h-5 text-blue-500" />
+                  {academicBackground.every(item => !item.degree && !item.institution && !item.year && !item.course) ? (
+                    <div className="text-gray-500 text-sm">No academic background added yet.</div>
+                  ) : (
+                    academicBackground.map((item, index) => (
+                      <div key={index} className="flex">
+                        <div className="mr-4 flex flex-col items-center">
+                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                            <GraduationCap className="w-5 h-5 text-blue-500" />
+                          </div>
+                          {index < academicBackground.length - 1 && (
+                            <div className="w-0.5 h-full bg-gray-200 my-2"></div>
+                          )}
                         </div>
-                        {index < academicBackground.length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 my-2"></div>
-                        )}
+                        <div className="flex-1">
+                          {item.degree && <h3 className="font-semibold text-gray-900">{item.degree}</h3>}
+                          {(item.institution || item.year) && (
+                            <p className="text-gray-600">
+                              {item.institution}{item.institution && item.year ? ' • ' : ''}{item.year}
+                            </p>
+                          )}
+                          {item.course && (
+                            <p className="text-sm text-gray-500 mt-1"><span className="font-medium">Course:</span> {item.course}</p>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{item.degree}</h3>
-                        <p className="text-gray-600">{item.institution} • {item.year}</p>
-                        {item.course && (
-                          <p className="text-sm text-gray-500 mt-1"><span className="font-medium">Course:</span> {item.course}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -375,12 +384,15 @@ const Profile = () => {
   // Mock academic background - in real app, this would come from database
   const academicBackground = [
     {
-      degree: studentData.degree || "Bachelor's Degree",
-      institution: studentData.college || "University",
-      year: studentData.year || "2020 - 2024",
-      course: studentData.course || "Computer Science",
+      degree: studentData.degree || '',
+      institution: studentData.college || '',
+      year: studentData.year || '',
+      course: studentData.course || '',
     }
   ];
+  const hasAcademicBackground = academicBackground.some(
+    (item) => item.degree || item.institution || item.year || item.course
+  );
 
   const [showAddProjectSidebar, setShowAddProjectSidebar] = useState(false);
   const [showEditProjectSidebar, setShowEditProjectSidebar] = useState(false);
@@ -576,6 +588,17 @@ const Profile = () => {
   };
 
   // Conditional rendering based on userType
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <GlobeLoader size={120} className="mx-auto mb-4" />
+          <p className="text-gray-600 text-lg font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (profileData.userType?.toLowerCase() === 'student' || profileData.userType?.toLowerCase() === 'professor') {
     return (
       <StudentProfessorProfileView
@@ -844,38 +867,38 @@ const Profile = () => {
                     </span>
                     Academic Background
                   </h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => { setEditSection('Education'); setShowEditProfile(true); }}
-                    className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
-                  >
-                    <Edit className="w-2 h-2 mr-1" />
-                    Edit
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Education'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" />Edit
                   </Button>
                 </div>
                 <div className="space-y-6">
-                  {academicBackground.map((item, index) => (
-                    <div key={index} className="flex">
-                      <div className="mr-4 flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                          <GraduationCap className="w-5 h-5 text-blue-500" />
+                  {academicBackground.every(item => !item.degree && !item.institution && !item.year && !item.course) ? (
+                    <div className="text-gray-500 text-sm">No academic background added yet.</div>
+                  ) : (
+                    academicBackground.map((item, index) => (
+                      <div key={index} className="flex">
+                        <div className="mr-4 flex flex-col items-center">
+                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                            <GraduationCap className="w-5 h-5 text-blue-500" />
+                          </div>
+                          {index < academicBackground.length - 1 && (
+                            <div className="w-0.5 h-full bg-gray-200 my-2"></div>
+                          )}
                         </div>
-                        {index < academicBackground.length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 my-2"></div>
-                        )}
+                        <div className="flex-1">
+                          {item.degree && <h3 className="font-semibold text-gray-900">{item.degree}</h3>}
+                          {(item.institution || item.year) && (
+                            <p className="text-gray-600">
+                              {item.institution}{item.institution && item.year ? ' • ' : ''}{item.year}
+                            </p>
+                          )}
+                          {item.course && (
+                            <p className="text-sm text-gray-500 mt-1"><span className="font-medium">Course:</span> {item.course}</p>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{item.degree}</h3>
-                        <p className="text-gray-600">{item.institution} • {item.year}</p>
-                        {item.course && (
-                          <p className="text-sm text-gray-500 mt-1">
-                            <span className="font-medium">Course:</span> {item.course}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

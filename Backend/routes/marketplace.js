@@ -41,6 +41,7 @@ router.get('/projects', async (req, res) => {
   try {
     const { search, category, minPrice, maxPrice, minRating, skills, duration, sort, page = 1, limit = 6 } = req.query;
     const data = await readMarketplaceData();
+    const userData = await readUserData();
     let projects = [...data.projects];
 
     // Apply search filter
@@ -116,8 +117,10 @@ router.get('/projects', async (req, res) => {
     const totalPages = Math.ceil(totalProjects / limitNum);
     const startIndex = (pageNum - 1) * limitNum;
     const endIndex = startIndex + limitNum;
-    const paginatedProjects = projects.slice(startIndex, endIndex);
-
+    const paginatedProjects = projects.slice(startIndex, endIndex).map(project => {
+      // Only return author as customUserId
+      return { ...project, author: project.author };
+    });
     res.json({ 
       projects: paginatedProjects,
       pagination: {
@@ -276,16 +279,7 @@ router.post('/projects', authorize, async (req, res) => {
     // Add author details from user data
     const user = userData.users[req.body.customUserId];
     if (user) {
-      const userDoc = await db.collection('users').doc(req.user.uid).get();
-      const authData = userDoc.data();
-      newProject.author = {
-        name: `${authData.firstName} ${authData.lastName}`,
-        image: user.profile.avatar || null,
-        verified: true, // Or based on some logic
-        rating: user.stats.totalLikes / (user.stats.projectsCount || 1), // Example logic
-        projects: user.stats.projectsCount,
-        bio: user.profile.bio
-      };
+      newProject.author = req.body.customUserId;
     }
 
     marketplaceData.projects.push(newProject);

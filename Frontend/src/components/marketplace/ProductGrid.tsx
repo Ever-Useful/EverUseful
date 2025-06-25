@@ -36,16 +36,7 @@ interface Project {
   duration: string;
   rating: number;
   reviews: number;
-  author: {
-    name: string;
-    image: string;
-    verified: boolean;
-    rating: number;
-    projects: number;
-    bio: string;
-    userType: string;
-    id: string;
-  };
+  author: string;
   status: string;
   posted: string;
   teamSize: number;
@@ -95,6 +86,26 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   const navigate = useNavigate();
   const { user, token, isLoading: authLoading } = useAuthState();
   const location = useLocation();
+  const [authorCache, setAuthorCache] = useState<Record<string, any>>({});
+  const [currentUserCustomId, setCurrentUserCustomId] = useState<string | null>(null);
+
+  // Fetch current user's customUserId
+  useEffect(() => {
+    const fetchCurrentUserData = async () => {
+      if (user) {
+        try {
+          const userData = await firestoreService.getCurrentUserData();
+          if (userData && userData.customUserId) {
+            setCurrentUserCustomId(userData.customUserId);
+          }
+        } catch (error) {
+          console.error('Error fetching current user data:', error);
+        }
+      }
+    };
+    
+    fetchCurrentUserData();
+  }, [user]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -139,6 +150,43 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
 
     fetchProjects();
   }, [searchQuery, filters, sortBy, currentPage]);
+
+  // Fetch author details for all projects
+  useEffect(() => {
+    const fetchAuthors = async () => {
+      const uniqueAuthorIds = Array.from(new Set(projects.map(p => p.author)));
+      const newCache: Record<string, any> = { ...authorCache };
+      for (const authorId of uniqueAuthorIds) {
+        if (authorId && !newCache[authorId]) {
+          try {
+            const res = await fetch(`http://localhost:3000/api/users/${authorId}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.success && data.data) {
+                newCache[authorId] = data.data;
+              }
+            }
+          } catch {}
+        }
+      }
+      setAuthorCache(newCache);
+    };
+    if (projects.length > 0) fetchAuthors();
+    // eslint-disable-next-line
+  }, [projects]);
+
+  // Helper to get author details
+  const getAuthorDetails = (authorId: string) => {
+    const user = authorCache[authorId];
+    if (!user) return { name: 'Unknown', image: NoUserProfile, userType: '', id: authorId };
+    const profile = user.profile || {};
+    return {
+      name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Unnamed User',
+      image: profile.avatar || NoUserProfile,
+      userType: profile.userType || '',
+      id: user.customUserId
+    };
+  };
 
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSortBy(event.target.value);
@@ -323,6 +371,23 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   // Helper: get 2 related projects (different from selected)
   const getRelated = (id: number) => projects.filter((p) => p.id !== id).slice(0, 2);
 
+  // Helper function to navigate to author profile based on userType
+  const goToAuthorProfile = (userType: string, id: string) => {
+    // Check if current user is the author
+    if (currentUserCustomId && currentUserCustomId === id) {
+      // Redirect to current user's own profile
+      navigate('/profile');
+      return;
+    }
+    
+    const type = (userType || '').toLowerCase();
+    if (type === 'freelancer') {
+      navigate(`/freelancerprofile/${id}`);
+    } else {
+      navigate(`/studentprofile/${id}`);
+    }
+  };
+
   if (loading || authLoading) {
     return <div className="text-center py-8">Loading...</div>;
   }
@@ -398,34 +463,20 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
               <CardContent className="p-4 flex flex-col flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <img
-                    src={project.author.image || NoUserProfile}
-                    alt={project.author.name}
+                    src={getAuthorDetails(project.author).image || NoUserProfile}
+                    alt={getAuthorDetails(project.author).name}
                     className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
                     onError={e => { e.currentTarget.src = NoUserProfile; }}
-                    onClick={() => {
-                      const type = (project.author.userType || '').toLowerCase();
-                      if (type === 'freelancer') {
-                        navigate(`/freelancerprofile/${project.author.id}`);
-                      } else {
-                        navigate(`/studentprofile/${project.author.id}`);
-                      }
-                    }}
+                    onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                   />
                   <span
                     className="text-gray-700 text-xs cursor-pointer"
                     style={{ transition: 'color 0.2s' }}
                     onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
                     onMouseOut={e => e.currentTarget.style.color = ''}
-                    onClick={() => {
-                      const type = (project.author.userType || '').toLowerCase();
-                      if (type === 'freelancer') {
-                        navigate(`/freelancerprofile/${project.author.id}`);
-                      } else {
-                        navigate(`/studentprofile/${project.author.id}`);
-                      }
-                    }}
+                    onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                   >
-                    {project.author.name}
+                    {getAuthorDetails(project.author).name}
                   </span>
                   <div className="flex items-center space-x-1">
                     <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
@@ -546,18 +597,11 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
 
             <div className="flex items-center mb-4">
               <img
-                src={selected.author.image || NoUserProfile}
-                alt={selected.author.name}
+                src={getAuthorDetails(selected.author).image || NoUserProfile}
+                alt={getAuthorDetails(selected.author).name}
                 className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
                 onError={e => { e.currentTarget.src = NoUserProfile; }}
-                onClick={() => {
-                  const type = (selected.author.userType || '').toLowerCase();
-                  if (type === 'freelancer') {
-                    navigate(`/freelancerprofile/${selected.author.id}`);
-                  } else {
-                    navigate(`/studentprofile/${selected.author.id}`);
-                  }
-                }}
+                onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
               />
               <div>
                 <div
@@ -565,16 +609,9 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                   style={{ transition: 'color 0.2s' }}
                   onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
                   onMouseOut={e => e.currentTarget.style.color = ''}
-                  onClick={() => {
-                    const type = (selected.author.userType || '').toLowerCase();
-                    if (type === 'freelancer') {
-                      navigate(`/freelancerprofile/${selected.author.id}`);
-                    } else {
-                      navigate(`/studentprofile/${selected.author.id}`);
-                    }
-                  }}
+                  onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
                 >
-                  {selected.author.name}
+                  {getAuthorDetails(selected.author).name}
                 </div>
                 <div className="flex items-center space-x-1 text-xs text-gray-500">
                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />

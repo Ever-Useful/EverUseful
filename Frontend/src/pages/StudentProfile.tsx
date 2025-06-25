@@ -16,6 +16,9 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
+import { userService } from "@/services/userService";
+import NoUserProfile from "@/assets/images/no user profile.png";
+import NoImageAvailable from "@/assets/images/no image available.png";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -24,6 +27,7 @@ const Profile = () => {
   const [userData, setUserData] = useState<any>({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
   const [backgroundImage, setBackgroundImage] = useState(
     "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
   );
@@ -48,19 +52,55 @@ const Profile = () => {
     return unsubscribe;
   }, []);
 
-  // Fetch user data by id from Firestore
+  // Fetch user data by customUserId from userData.json
   const fetchUserData = async () => {
     if (id) {
       try {
-        const userRef = doc(db, "users", id);
-        const docSnap = await getDoc(userRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
+        console.log('Fetching student with ID:', id);
+        // Make direct fetch call to backend without authentication for public profile
+        const response = await fetch(`http://localhost:3000/api/users/${id}`);
+        console.log('Response status:', response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Student data received:', data);
+          console.log('Full data structure:', JSON.stringify(data, null, 2));
+          if (data.success && data.data) {
+            setUserData(data.data);
+            console.log('User data set:', data.data);
+            console.log('Projects object:', data.data.projects);
+            console.log('Projects.created:', data.data.projects?.created);
+            console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
+            // Fetch full project details for each project ID
+            const projectIds = Array.isArray(data.data.projects) ? data.data.projects : [];
+            console.log('Project IDs found:', projectIds);
+            if (projectIds.length > 0) {
+              const projectPromises = projectIds.map((pid: string) =>
+                fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
+                  .then(res => res.ok ? res.json() : null)
+                  .then(res => res && res.project ? res.project : null)
+              );
+              const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
+              console.log('Full projects fetched:', fullProjects);
+              setPortfolioProjects(fullProjects);
+            } else {
+              console.log('No project IDs found');
+              setPortfolioProjects([]);
+            }
+          } else {
+            console.error('Invalid response format:', data);
+            setUserData({});
+            setPortfolioProjects([]);
+          }
         } else {
+          console.error('Failed to fetch student:', response.status);
           setUserData({});
+          setPortfolioProjects([]);
         }
       } catch (err) {
+        console.error('Error fetching student:', err);
         setUserData({});
+        setPortfolioProjects([]);
       }
     }
     setLoading(false);
@@ -81,20 +121,20 @@ const Profile = () => {
   // }
 
   const fullName =
-    `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unnamed User";
+    `${userData.profile?.firstName || ""} ${userData.profile?.lastName || ""}`.trim() || "Unnamed User";
 
   const profile = isLoggedIn
     ? {
         name: fullName,
-        title: userData.title || "New Member",
-        bio: userData.bio || "This is a new profile. Update your bio!",
-        avatar: userData.avatar || "",
+        title: userData.profile?.title || "New Member",
+        bio: userData.profile?.bio || "This is a new profile. Update your bio!",
+        avatar: userData.profile?.avatar || "",
         stats: {
-          followers: 0,
-          following: 0,
-          projects: 0,
-          likes: 0,
-          connections: 1500,
+          followers: userData.social?.followersCount || 0,
+          following: userData.social?.followingCount || 0,
+          projects: userData.stats?.projectsCount || 0,
+          likes: userData.stats?.totalLikes || 0,
+          connections: userData.social?.connections?.length || 0,
           skills: userData.skills || [],  
         },
       }
@@ -109,7 +149,7 @@ const Profile = () => {
           projects: 45,
           likes: 2.5,
           connections: 1500,
-        skills: userData.skills || [],  
+          skills: userData.skills || [],  
         },
       };
 
@@ -127,10 +167,10 @@ const Profile = () => {
   
   const academicBackground = [
     {
-      degree: userData.degree || "Bachelor's Degree",
-      institution: userData.college || "University",
-      year: userData.year || "2020 - 2024",
-      course: userData.course || "Computer Science",
+      degree: userData.studentData?.degree || "",
+      institution: userData.studentData?.college || "",
+      year: userData.studentData?.year || "",
+      course: userData.studentData?.course || "",
     }
   ];
 
@@ -171,6 +211,17 @@ const Profile = () => {
   //     console.error("Error deleting project:", error);
   //   }
   };
+
+  // Always use a safe array for rendering
+  const safePortfolioProjects = Array.isArray(portfolioProjects) ? portfolioProjects : [];
+  
+  // Debug logging
+  console.log('StudentProfile render data:', {
+    userData,
+    portfolioProjects,
+    safePortfolioProjects,
+    safePortfolioProjectsLength: safePortfolioProjects.length
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -296,13 +347,51 @@ const Profile = () => {
                     Research Projects & Commercial Work
                   </h2>
                 </div>
-                <div className="max-h-[500px] overflow-y-auto pr-2 space-y-6">
-                  {/* Render projects if available, else show call to action */}
-                  <div className="text-center py-20">
-                    <Briefcase className="w-12 h-12 mx-auto text-gray-300" />
-                    <h3 className="mt-4 text-lg font-medium text-gray-900">No projects yet</h3>
-                    <p className="mt-1 text-sm text-gray-500">Click "Add Project" to showcase your work.</p>
-                  </div>
+                <div className="space-y-4">
+                  {safePortfolioProjects.length > 0 ? (
+                    safePortfolioProjects.map((project, index) => (
+                      <Card
+                        key={project.id || index}
+                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[140px]"
+                      >
+                        <div className="w-full md:w-48 flex-shrink-0 h-36 md:h-auto bg-gray-100 flex items-center justify-center">
+                          <img
+                            src={project.image}
+                            alt={project.title}
+                            className="object-cover w-full h-full rounded-l-lg"
+                            onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                          />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">{project.title}</h3>
+                              <p className="text-gray-600 text-sm mb-2 line-clamp-2">{project.description}</p>
+                              <div className="flex flex-wrap gap-2 mb-2">
+                                {(project.skills || []).map((skill, skillIndex) => (
+                                  <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">{skill}</Badge>
+                                ))}
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
+                                <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Date Added:</span> {
+                                  project.posted ? new Date(project.posted).toLocaleDateString() : 'N/A'
+                                }</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="text-center py-20">
+                      <Briefcase className="w-12 h-12 mx-auto text-gray-300" />
+                      <h3 className="mt-4 text-lg font-medium text-gray-900">No projects yet</h3>
+                      <p className="mt-1 text-sm text-gray-500">This student hasn't added any projects yet.</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

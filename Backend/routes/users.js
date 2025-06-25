@@ -212,6 +212,10 @@ router.get('/projects', authorize, async (req, res) => {
 router.get('/:customUserId', async (req, res) => {
   try {
     const { customUserId } = req.params;
+    
+    // Load user data from JSON file first
+    await userService.loadUserData();
+    
     const user = userService.findUserByCustomId(customUserId);
     
     if (!user) {
@@ -221,7 +225,7 @@ router.get('/:customUserId', async (req, res) => {
       });
     }
 
-    // Return public profile data only (no name, email, or userType)
+    // Return full public profile data
     res.json({
       success: true,
       data: {
@@ -232,13 +236,19 @@ router.get('/:customUserId', async (req, res) => {
           title: user.profile.title,
           location: user.profile.location,
           website: user.profile.website,
-          createdAt: user.profile.createdAt
+          createdAt: user.profile.createdAt,
+          firstName: user.profile.firstName,
+          lastName: user.profile.lastName,
+          userType: user.profile.userType
         },
         stats: user.stats,
         social: {
           followersCount: user.social.followersCount,
           followingCount: user.social.followingCount
-        }
+        },
+        skills: user.skills,
+        studentData: user.studentData,
+        projects: user.projects.created // recent or all created projects
       }
     });
   } catch (error) {
@@ -265,6 +275,11 @@ router.put('/auth', authorize, async (req, res) => {
       if (req.body[field] !== undefined) updateFields[field] = req.body[field];
     }
     await userRef.update(updateFields);
+
+    // Also update userData.json
+    const customUserId = userSnap.data().customUserId;
+    await userService.updateUserAuthInfo(customUserId, updateFields);
+
     res.json({ success: true, message: 'Auth info updated successfully' });
   } catch (error) {
     console.error('Error updating auth info:', error);
