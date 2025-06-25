@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { Search, Users, UserPlus, TrendingUp, MessageCircle, UserCheck, MapPin, Building } from 'lucide-react';
+import { Search, Users, UserPlus, TrendingUp, MessageCircle, MapPin, Building } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/Header';
+import HeaderBackup from '@/components/HeaderBackup';
 import { Footer } from '@/components/Footer';
-
+import { Link } from "react-router-dom";
 
 type Connection = {
   id: string;
@@ -17,10 +16,8 @@ type Connection = {
   company: string;
   location: string;
   avatar?: string;
-  mutualConnections: number;
   isConnected: boolean;
-  skills: string[];
-};
+  };
 
 const mockConnections: Connection[] = [
   {
@@ -29,9 +26,7 @@ const mockConnections: Connection[] = [
     title: 'Senior Product Manager',
     company: 'TechCorp',
     location: 'San Francisco, CA',
-    mutualConnections: 15,
     isConnected: true,
-    skills: ['Product Strategy', 'UX Design', 'Data Analysis']
   },
   {
     id: '2',
@@ -39,9 +34,7 @@ const mockConnections: Connection[] = [
     title: 'Lead Developer',
     company: 'StartupXYZ',
     location: 'New York, NY',
-    mutualConnections: 8,
     isConnected: true,
-    skills: ['React', 'Node.js', 'AWS']
   },
   {
     id: '3',
@@ -49,9 +42,71 @@ const mockConnections: Connection[] = [
     title: 'Marketing Director',
     company: 'GrowthCo',
     location: 'Austin, TX',
-    mutualConnections: 12,
     isConnected: true,
-    skills: ['Digital Marketing', 'SEO', 'Analytics']
+  },
+  {
+    id: '2',
+    name: 'Marcus Johnson',
+    title: 'Lead Developer',
+    company: 'StartupXYZ',
+    location: 'New York, NY',
+    isConnected: true,
+  },
+  {
+    id: '3',
+    name: 'Elena Rodriguez',
+    title: 'Marketing Director',
+    company: 'GrowthCo',
+    location: 'Austin, TX',
+    isConnected: true,
+  },
+  {
+    id: '2',
+    name: 'Marcus Johnson',
+    title: 'Lead Developer',
+    company: 'StartupXYZ',
+    location: 'New York, NY',
+    isConnected: true,
+  },
+  {
+    id: '3',
+    name: 'Elena Rodriguez',
+    title: 'Marketing Director',
+    company: 'GrowthCo',
+    location: 'Austin, TX',
+    isConnected: true,
+  },
+  {
+    id: '2',
+    name: 'Marcus Johnson',
+    title: 'Lead Developer',
+    company: 'StartupXYZ',
+    location: 'New York, NY',
+    isConnected: true,
+  },
+  {
+    id: '3',
+    name: 'Elena Rodriguez',
+    title: 'Marketing Director',
+    company: 'GrowthCo',
+    location: 'Austin, TX',
+    isConnected: true,
+  },
+  {
+    id: '2',
+    name: 'Marcus Johnson',
+    title: 'Lead Developer',
+    company: 'StartupXYZ',
+    location: 'New York, NY',
+    isConnected: true,
+  },
+  {
+    id: '3',
+    name: 'Elena Rodriguez',
+    title: 'Marketing Director',
+    company: 'GrowthCo',
+    location: 'Austin, TX',
+    isConnected: true,
   }
 ];
 
@@ -62,9 +117,7 @@ const mockSuggestions: Connection[] = [
     title: 'UX Designer',
     company: 'DesignStudio',
     location: 'Seattle, WA',
-    mutualConnections: 5,
     isConnected: false,
-    skills: ['UI/UX', 'Figma', 'Design Systems']
   },
   {
     id: '5',
@@ -72,9 +125,71 @@ const mockSuggestions: Connection[] = [
     title: 'Data Scientist',
     company: 'DataTech',
     location: 'Boston, MA',
-    mutualConnections: 3,
     isConnected: false,
-    skills: ['Machine Learning', 'Python', 'Statistics']
+  },
+  {
+    id: '5',
+    name: 'Lisa Wang',
+    title: 'Data Scientist',
+    company: 'DataTech',
+    location: 'Boston, MA',
+    isConnected: false,
+  },
+  {
+    id: '5',
+    name: 'Lisa Wang',
+    title: 'Data Scientist',
+    company: 'DataTech',
+    location: 'Boston, MA',
+    isConnected: false,
+  },
+  {
+    id: '5',
+    name: 'Lisa Wang',
+    title: 'Data Scientist',
+    company: 'DataTech',
+    location: 'Boston, MA',
+    isConnected: false,
+  },
+  {
+    id: '5',
+    name: 'Lisa Wang',
+    title: 'Data Scientist',
+    company: 'DataTech',
+    location: 'Boston, MA',
+    isConnected: false,
+  },
+  {
+    id: '5',
+    name: 'Lisa Wang',
+    title: 'Data Scientist',
+    company: 'DataTech',
+    location: 'Boston, MA',
+    isConnected: false,
+  },
+  {
+    id: '5',
+    name: 'Lisa Wang',
+    title: 'Data Scientist',
+    company: 'DataTech',
+    location: 'Boston, MA',
+    isConnected: false,
+  },
+  {
+    id: '5',
+    name: 'Lisa Wang',
+    title: 'Data Scientist',
+    company: 'DataTech',
+    location: 'Boston, MA',
+    isConnected: false,
+  },
+  {
+    id: '5',
+    name: 'Lisa Wang',
+    title: 'Data Scientist',
+    company: 'DataTech',
+    location: 'Boston, MA',
+    isConnected: false,
   }
 ];
 
@@ -85,7 +200,7 @@ const Connections = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [connections, setConnections] = useState(mockConnections);
   const [suggestions, setSuggestions] = useState(mockSuggestions);
-    const navigate = useNavigate(); 
+
   const handleConnect = (personId: string) => {
     setSuggestions(prev => 
       prev.map(person => 
@@ -114,9 +229,9 @@ const Connections = () => {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-semibold text-lg text-gray-900">{person.name}</h3>
-              <p className="text-gray-600 font-medium">{person.title}</p>
-              <div className="flex items-center text-sm text-gray-500 mt-1">
+              <h3 className="font-semibold text-base text-gray-900">{person.name}</h3>
+              <p className="text-gray-600 font-medium text-xs">{person.title}</p>
+              <div className="flex items-center text-xs text-gray-500 mt-1">
                 <Building className="h-4 w-4 mr-1" />
                 <span>{person.company}</span>
                 <span className="mx-2">•</span>
@@ -125,44 +240,24 @@ const Connections = () => {
               </div>
             </div>
           </div>
-          {showConnectButton && !person.isConnected && (
-            <Button 
-              onClick={() => handleConnect(person.id)}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Connect
+          {person.isConnected ? (
+            <Button variant="ghost" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+              <MessageCircle className="h-4 w-4 mr-2" />
+              <Link to='/chat'>Message</Link>
             </Button>
-          )}
-          {person.isConnected && (
-            <Button variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">
-              <UserCheck className="h-4 w-4 mr-2" />
-              Connected
-            </Button>
+          ) : (
+            showConnectButton && (
+              <Button 
+                onClick={() => handleConnect(person.id)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Connect
+              </Button>
+            )
           )}
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="flex flex-wrap gap-2 mb-3">
-          {person.skills.slice(0, 3).map((skill, index) => (
-            <Badge key={index} variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100">
-              {skill}
-            </Badge>
-          ))}
-        </div>
-        <div className="flex items-center justify-between text-sm text-gray-500">
-          <div className="flex items-center">
-            <Users className="h-4 w-4 mr-1" />
-            <span>{person.mutualConnections} mutual connections</span>
-          </div>
-          {person.isConnected && (
-            <Button onClick={() => navigate('/chat')} variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-              <MessageCircle className="h-4 w-4 mr-1" />
-              Message
-            </Button>
-          )}
-        </div>
-      </CardContent>
     </Card>
   );
 
@@ -245,9 +340,7 @@ const Connections = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-        <Header />
-        
-        {/* Main Content Area */}
+      <HeaderBackup />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-8">
           {/* Main Content */}
@@ -302,7 +395,7 @@ const Connections = () => {
           </div>
         </div>
       </div>
-        <Footer />
+      <Footer />
     </div>
   );
 };

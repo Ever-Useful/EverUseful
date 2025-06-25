@@ -762,17 +762,21 @@ const Profile = () => {
               </div>
 
               <div className="flex flex-row items-center justify-between">
-                <div className="-translate-x-[0px] mt-8 flex flex-col w-[250px] h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
-                  <button className="flex items-center gap-2 text-white drop-shadow-md text-2xl">
-                    <UserPlus className="w-6 h-6" />
-                    Add Connections
-                  </button>
+                <div className="-translate-x-[0px] mt-8 flex flex-col px-6 py-2 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
+                  <a href="/connection">
+                    <button className="flex items-center gap-2 text-white drop-shadow-md text-lg">
+                      <UserPlus className="w-6 h-6" />
+                      Add Connections
+                    </button>
+                  </a>
                 </div>
-                <div className="-translate-x-[200px] mt-8 flex flex-col w-[300px] h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
-                  <button className="flex items-center gap-2 text-white drop-shadow-md text-2xl">
-                    <UserPlus className="w-6 h-6" />
-                    See Your Connections
-                  </button>
+                <div className="-translate-x-[200px] mt-8 flex flex-col px-6 py-2 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
+                  <a href="/connection">
+                    <button className="flex items-center gap-2 text-white drop-shadow-md text-lg">
+                      <UserPlus className="w-6 h-6" />
+                      See Your Connections
+                    </button>
+                  </a>
                 </div>
               </div>
               

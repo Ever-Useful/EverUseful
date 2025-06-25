@@ -245,10 +245,10 @@
         "website": "https://github.com/priyasharma",
         "title": "Business Student",
         "createdAt": "2025-06-24T19:56:23.742Z",
-        "updatedAt": "2025-06-24T21:42:32.824Z",
-        "firstName": "Priya",
-        "lastName": "Sharma",
-        "userType": "student"
+        "updatedAt": "2025-06-25T18:35:16.711Z",
+        "firstName": "Amrit",
+        "lastName": "Lal Paswan",
+        "userType": "freelancer"
       },
       "projects": {
         "created": [],
@@ -561,7 +561,7 @@
   },
   "userCounter": 6,
   "metadata": {
-    "lastUpdated": "2025-06-24T22:27:23.488Z",
+    "lastUpdated": "2025-06-25T18:35:16.711Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }
