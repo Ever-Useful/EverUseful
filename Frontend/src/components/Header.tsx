@@ -978,7 +978,7 @@ export const Header = () => {
       {/* Profile Sidebar */}
       {showProfileSidebar && (
         <div className="fixed top-0 right-0 w-96 max-w-[90vw] h-full bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-2.5 border-b">
             <h2 className="font-bold text-xl text-gray-900">Profile</h2>
             <button 
               onClick={() => setShowProfileSidebar(false)} 

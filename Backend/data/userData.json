@@ -12,7 +12,80 @@
         "updatedAt": "2025-06-18T19:37:47.680Z",
         "firstName": "Aravind",
         "lastName": "Kumar",
-        "userType": "student"
+        "userType": "student",
+        "username": "aravindkumar",
+        "email": "aravind@example.com",
+        "mobile": "9876543210",
+        "gender": "Male",
+        "domain": "Engineering",
+        "purpose": "To find a Job",
+        "role": "Frontend Developer"
+      },
+      "education": [
+        {
+          "id": "edu_001",
+          "qualification": "Graduation",
+          "course": "B.Tech/BE",
+          "specialization": "Computer Science and Engineering",
+          "college": "Anna University",
+          "startYear": "2020",
+          "endYear": "2024",
+          "courseType": "Full Time",
+          "percentage": "85",
+          "cgpa": "8.5",
+          "rollNumber": "CS20B001",
+          "lateralEntry": "No",
+          "skills": "JavaScript, React, Node.js",
+          "description": "Completed B.Tech in Computer Science with focus on web development technologies",
+          "attachments": null,
+          "createdAt": "2025-06-18T19:37:47.680Z",
+          "updatedAt": "2025-06-18T19:37:47.680Z"
+        }
+      ],
+      "workExperience": [
+        {
+          "id": "work_001",
+          "gotFromUnstop": false,
+          "designation": "Frontend Developer",
+          "organization": "Tech Solutions Inc",
+          "employmentType": "Full Time",
+          "startDate": "2024-06-01",
+          "endDate": null,
+          "currentlyWorking": true,
+          "location": "Chennai, Tamil Nadu",
+          "remote": false,
+          "skills": "React, TypeScript, CSS",
+          "description": "Developing responsive web applications using React and modern frontend technologies",
+          "attachments": null,
+          "createdAt": "2025-06-18T19:37:47.680Z",
+          "updatedAt": "2025-06-18T19:37:47.680Z"
+        }
+      ],
+      "personalDetails": {
+        "address1": "123 Main Street",
+        "address2": "Apartment 4B",
+        "landmark": "Near Central Park",
+        "pincode": "600001",
+        "location": "Chennai, Tamil Nadu",
+        "hobbies": "Reading, Coding, Traveling",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-18T19:37:47.680Z"
+      },
+      "socialLinks": {
+        "linkedin": "https://linkedin.com/in/aravindkumar",
+        "facebook": "https://facebook.com/aravindkumar",
+        "instagram": "https://instagram.com/aravindkumar",
+        "twitter": "https://twitter.com/aravindkumar",
+        "git": "https://github.com/aravindkumar",
+        "medium": "https://medium.com/@aravindkumar",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "https://codepen.io/aravindkumar",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-18T19:37:47.680Z"
       },
       "projects": {
         "created": [],
@@ -65,7 +138,19 @@
         "totalViews": 0,
         "totalDownloads": 0,
         "memberSince": "2025-06-18T19:37:47.680Z"
-      }
+      },
+      "studentData": {
+        "college": "Anna University",
+        "degree": "B.Tech",
+        "course": "Computer Science",
+        "year": "4",
+        "startYear": "2020",
+        "endYear": "2024",
+        "specialization": "Computer Science and Engineering",
+        "updatedAt": "2025-06-18T19:37:47.680Z"
+      },
+      "professorData": null,
+      "freelancerData": null
     },
     "USER_000002": {
       "customUserId": "USER_000002",
@@ -80,10 +165,61 @@
         "firstName": "Meera",
         "lastName": "Verma",
         "userType": "student",
-        "college": "CUJ",
-        "degree": "Btech",
-        "course": "CSE",
-        "year": "3"
+        "username": "meeraverma",
+        "email": "meera@example.com",
+        "mobile": "9876543211",
+        "gender": "Female",
+        "domain": "Engineering",
+        "purpose": "Compete & Upskill",
+        "role": "Data Scientist"
+      },
+      "education": [
+        {
+          "id": "edu_001",
+          "qualification": "Graduation",
+          "course": "B.Tech/BE",
+          "specialization": "Computer Science and Engineering",
+          "college": "CUJ",
+          "startYear": "2021",
+          "endYear": "2025",
+          "courseType": "Full Time",
+          "percentage": "88",
+          "cgpa": "8.8",
+          "rollNumber": "CS21B002",
+          "lateralEntry": "No",
+          "skills": "Python, Machine Learning, Data Science",
+          "description": "Pursuing B.Tech in Computer Science with focus on Data Science and AI",
+          "attachments": null,
+          "createdAt": "2025-06-18T19:52:25.996Z",
+          "updatedAt": "2025-06-18T19:52:25.996Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "456 University Road",
+        "address2": "Student Hostel Block A",
+        "landmark": "Near University Gate",
+        "pincode": "180006",
+        "location": "Jammu, Jammu And Kashmir",
+        "hobbies": "Data Analysis, Reading, Yoga",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-18T19:52:25.996Z"
+      },
+      "socialLinks": {
+        "linkedin": "https://linkedin.com/in/meeraverma",
+        "facebook": "",
+        "instagram": "https://instagram.com/meeraverma",
+        "twitter": "",
+        "git": "https://github.com/meeraverma",
+        "medium": "https://medium.com/@meeraverma",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-18T19:52:25.996Z"
       },
       "projects": {
         "created": [],
@@ -146,8 +282,13 @@
         "degree": "Btech",
         "course": "CSE",
         "year": "3",
+        "startYear": "2021",
+        "endYear": "2025",
+        "specialization": "Computer Science and Engineering",
         "updatedAt": "2025-06-18T22:19:59.243Z"
-      }
+      },
+      "professorData": null,
+      "freelancerData": null
     },
     "USER_000005": {
       "customUserId": "USER_000005",
@@ -158,14 +299,84 @@
         "website": "https://github.com/amitkumar",
         "title": "Full-Stack Developer",
         "createdAt": "2025-06-19T21:16:02.064Z",
-        "updatedAt": "2025-06-24T22:27:23.488Z",
+        "updatedAt": "2025-06-25T18:13:35.393Z",
         "firstName": "freelancer hai",
         "lastName": "sayad",
-        "userType": "freelancer",
-        "college": "CUJ",
-        "degree": "Btech",
-        "course": "CSE",
-        "year": "3"
+        "userType": "Students",
+        "username": "amitkumar",
+        "email": "amit@example.com",
+        "mobile": "9876543212",
+        "gender": "Male",
+        "domain": "Engineering",
+        "purpose": "To find a Job",
+        "role": "Full Stack Developer",
+        "phoneNumber": "9876543212"
+      },
+      "education": [
+        {
+          "id": "edu_001",
+          "qualification": "Graduation",
+          "course": "B.Tech/BE",
+          "specialization": "Computer Science and Engineering",
+          "college": "CUJ",
+          "startYear": "2020",
+          "endYear": "2024",
+          "courseType": "Full Time",
+          "percentage": "82",
+          "cgpa": "8.2",
+          "rollNumber": "CS20B005",
+          "lateralEntry": "No",
+          "skills": "Python, Frontend, Backend",
+          "description": "Completed B.Tech in Computer Science with focus on full-stack development",
+          "attachments": null,
+          "createdAt": "2025-06-19T21:16:02.064Z",
+          "updatedAt": "2025-06-19T21:16:02.064Z"
+        }
+      ],
+      "workExperience": [
+        {
+          "id": "work_001",
+          "gotFromUnstop": false,
+          "designation": "Freelance Developer",
+          "organization": "Self Employed",
+          "employmentType": "Freelance",
+          "startDate": "2024-01-01",
+          "endDate": null,
+          "currentlyWorking": true,
+          "location": "Jammu, Jammu & Kashmir",
+          "remote": true,
+          "skills": "Python, React, Node.js, MongoDB",
+          "description": "Working as a freelance full-stack developer on various client projects",
+          "attachments": null,
+          "createdAt": "2025-06-19T21:16:02.064Z",
+          "updatedAt": "2025-06-19T21:16:02.064Z"
+        }
+      ],
+      "personalDetails": {
+        "address1": "789 Freelance Street",
+        "address2": "Home Office",
+        "landmark": "Near Tech Park",
+        "pincode": "180006",
+        "location": "Jammu, Jammu & Kashmir",
+        "hobbies": "Coding, Gaming, Traveling",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-19T21:16:02.064Z"
+      },
+      "socialLinks": {
+        "linkedin": "https://linkedin.com/in/amitkumar",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "https://github.com/amitkumar",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-19T21:16:02.064Z"
       },
       "projects": {
         "created": [
@@ -233,7 +444,17 @@
         "degree": "Btech",
         "course": "CSE",
         "year": "3",
-        "updatedAt": "2025-06-23T18:40:03.506Z"
+        "startYear": "2020",
+        "endYear": "2024",
+        "specialization": "Computer Science and Engineering",
+        "updatedAt": "2025-06-25T16:45:27.992Z"
+      },
+      "professorData": null,
+      "freelancerData": {
+        "experience": "2",
+        "portfolio": "https://amitkumar.dev",
+        "skills": "Python, React, Node.js, MongoDB",
+        "updatedAt": "2025-06-19T21:16:02.064Z"
       }
     },
     "USER_000006": {
@@ -245,10 +466,10 @@
         "website": "https://github.com/priyasharma",
         "title": "Business Student",
         "createdAt": "2025-06-24T19:56:23.742Z",
-        "updatedAt": "2025-06-24T21:42:32.824Z",
+        "updatedAt": "2025-06-25T16:41:01.028Z",
         "firstName": "Priya",
         "lastName": "Sharma",
-        "userType": "student"
+        "userType": "Students"
       },
       "projects": {
         "created": [],
@@ -561,7 +782,7 @@
   },
   "userCounter": 6,
   "metadata": {
-    "lastUpdated": "2025-06-24T22:27:23.488Z",
+    "lastUpdated": "2025-06-25T18:13:35.393Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

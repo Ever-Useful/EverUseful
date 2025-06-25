@@ -15,7 +15,7 @@ import SkillsSection from "@/components/Skillssection";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
+import { ChatBox } from "@/components/ChatBox";
 import { userService } from "@/services/userService";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
@@ -128,7 +128,7 @@ const Profile = () => {
         name: fullName,
         title: userData.profile?.title || "New Member",
         bio: userData.profile?.bio || "This is a new profile. Update your bio!",
-        avatar: userData.profile?.avatar || "",
+        avatar: userData.profile?.avatar || NoUserProfile,
         stats: {
           followers: userData.social?.followersCount || 0,
           following: userData.social?.followingCount || 0,
@@ -142,7 +142,7 @@ const Profile = () => {
         name: "Guest",
         title: "Digital Creator & Entrepreneur",
         bio: "Passionate about technology, design, and creating meaningful connections. Building the future one project at a time.",
-        avatar: "",
+        avatar: NoUserProfile,
         stats: {
           followers: 12,
           following: 850,
@@ -234,7 +234,14 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row items-end gap-6">
               <div className="relative">
                 <Avatar className="w-36 h-36 border-4 border-white shadow-lg">
-                  <AvatarImage src={profile.avatar} alt={profile.name} className="object-cover" />
+                  <AvatarImage 
+                    src={profile.avatar} 
+                    alt={profile.name} 
+                    className="object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = NoUserProfile;
+                    }}
+                  />
                   <AvatarFallback className="bg-slate-200 text-slate-600 font-bold text-3xl flex items-center justify-center">
                     {profile.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "NA"}
                   </AvatarFallback>
@@ -420,7 +427,10 @@ const Profile = () => {
                 </div>
               </CardContent>
             </Card>
-            <UnreadMessagesCard />
+            <ChatBox
+              freelancerName={profile.name}
+              freelancerImage={profile.avatar}
+            />
           </div>
         </div>
       </div>

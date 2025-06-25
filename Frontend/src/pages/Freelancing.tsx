@@ -125,7 +125,7 @@ const stories = [
 
 // SLIDER SETTINGS
 const sliderSettings = {
-  dots: true,
+  dots: false,
   infinite: true,
   speed: 900,
   slidesToShow: 5,
@@ -194,7 +194,7 @@ const steps = [
   },
   {
     title: "Match with PhD Experts",
-    desc: "We’ll instantly recommend top PhD mentors and consultants tailored to your topic.",
+    desc: "We'll instantly recommend top PhD mentors and consultants tailored to your topic.",
     icon: (
       <svg width="44" height="44" fill="none" viewBox="0 0 44 44">
         <circle cx="22" cy="22" r="20" fill="#EFF6FF" />
@@ -332,7 +332,7 @@ const Work: React.FC = () => {
       </section>
 
       {/* WHY WE'RE UNIQUE SECTION */}
-      <section className="w-full bg-gradient-to-br from-white via-[#fff6f5] to-[#fbeeea] py-12 px-2">
+      <section className="w-full py-20 px-6 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -342,10 +342,10 @@ const Work: React.FC = () => {
             className="mb-8 text-center"
           >
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              Why We’re Unique
+              Why We're Unique
             </h2>
             <p className="text-base text-gray-600 max-w-xl mx-auto">
-              We connect you with the world’s brightest PhD minds for research, mentorship, and innovation—delivered with integrity, personalization, and global reach.
+              We connect you with the world's brightest PhD minds for research, mentorship, and innovation—delivered with integrity, personalization, and global reach.
             </p>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -370,7 +370,7 @@ const Work: React.FC = () => {
       </section>
 
       {/* SUCCESS STORIES SECTION */}
-      <section className="w-full bg-gradient-to-br from-[#f8fafc] via-[#fff6f5] to-[#fbeeea] py-12 px-2">
+      <section className="w-full py-20 px-6 bg-gray-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
@@ -419,7 +419,8 @@ const Work: React.FC = () => {
                       <img
                         src={story.img}
                         alt={story.name}
-                        className="w-16 h-16 rounded-full object-cover mb-3"
+                        className="w-16 h-16 rounded-full object-cover mb-4 ring-2 ring-blue-100 shadow"
+                        onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(story.name) + '&background=E0E7EF&color=374151&size=64'; }}
                       />
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-base font-bold text-gray-900">{story.name}</span>
@@ -537,7 +538,7 @@ const Work: React.FC = () => {
             <button className="px-8 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_18px_rgba(250,89,84,0.7)] transition-all duration-300 text-lg">
               Start Your Project
             </button>
-            <span className="mt-2 text-gray-500 text-sm">It’s free to post a requirement!</span>
+            <span className="mt-2 text-gray-500 text-sm">It's free to post a requirement!</span>
           </motion.div>
         </motion.ol>
         {/* Horizontal scroll for mobile */}
@@ -573,7 +574,7 @@ const Work: React.FC = () => {
             <button className="px-6 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_18px_rgba(250,89,84,0.7)] transition-all duration-300 text-base">
               Start Now
             </button>
-            <span className="mt-2 text-gray-500 text-xs">It’s free!</span>
+            <span className="mt-2 text-gray-500 text-xs">It's free!</span>
           </div>
         </motion.div>
       </section>
@@ -616,7 +617,7 @@ const Work: React.FC = () => {
             className="text-lg md:text-xl mb-8 max-w-2xl mx-auto drop-shadow-md"
           >
             Connect instantly with world-class PhD experts, get tailored guidance, and bring your R&D or academic vision to life as a freelancer or client. <br />
-            <span className="font-semibold text-[#fa5954]">It’s free to get started!</span>
+            <span className="font-semibold text-[#fa5954]">It's free to get started!</span>
           </motion.p>
           <motion.button
             initial={{ scale: 0.9, opacity: 0 }}

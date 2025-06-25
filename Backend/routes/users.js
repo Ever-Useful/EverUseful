@@ -42,20 +42,46 @@ router.get('/profile', authorize, async (req, res) => {
     // Fetch extended info from userData.json
     await userService.loadUserData();
     const user = userService.findUserByCustomId(customUserId);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found in userData.json' });
+    }
+
     res.json({
       success: true,
       data: {
         customUserId,
         auth: {
-          firstName: firestoreUser.firstName,
-          lastName: firestoreUser.lastName,
-          phoneNumber: firestoreUser.phoneNumber,
-          email: firestoreUser.email,
-          userType: firestoreUser.userType
+          firstName: user.profile.firstName || firestoreUser.firstName,
+          lastName: user.profile.lastName || firestoreUser.lastName,
+          phoneNumber: user.profile.mobile || firestoreUser.phoneNumber,
+          email: user.profile.email || firestoreUser.email,
+          userType: user.profile.userType || firestoreUser.userType,
+          username: user.profile.username,
+          mobile: user.profile.mobile,
+          gender: user.profile.gender,
+          domain: user.profile.domain,
+          purpose: user.profile.purpose,
+          role: user.profile.role,
         },
-        profile: user ? user.profile : {},
-        stats: user ? user.stats : {},
-        studentData: user && user.studentData ? user.studentData : null
+        profile: {
+          bio: user.profile.bio,
+          location: user.profile.location,
+          website: user.profile.website,
+          title: user.profile.title,
+          avatar: user.profile.avatar,
+          createdAt: user.profile.createdAt,
+          updatedAt: user.profile.updatedAt,
+        },
+        education: user.education || [],
+        workExperience: user.workExperience || [],
+        personalDetails: user.personalDetails || {},
+        socialLinks: user.socialLinks || {},
+        stats: user.stats || {},
+        studentData: user.studentData || null,
+        professorData: user.professorData || null,
+        freelancerData: user.freelancerData || null,
+        skills: user.skills || []
       }
     });
   } catch (error) {
@@ -269,18 +295,9 @@ router.put('/auth', authorize, async (req, res) => {
     if (!userSnap.exists) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const updateFields = {};
-    const allowedFields = ['firstName', 'lastName', 'phoneNumber', 'userType'];
-    for (const field of allowedFields) {
-      if (req.body[field] !== undefined) updateFields[field] = req.body[field];
-    }
-    await userRef.update(updateFields);
-
-    // Also update userData.json
     const customUserId = userSnap.data().customUserId;
-    await userService.updateUserAuthInfo(customUserId, updateFields);
-
-    res.json({ success: true, message: 'Auth info updated successfully' });
+    const updatedProfile = await userService.updateUserAuthInfo(customUserId, req.body);
+    res.json({ success: true, data: updatedProfile });
   } catch (error) {
     console.error('Error updating auth info:', error);
     res.status(400).json({ success: false, message: error.message });
@@ -707,30 +724,200 @@ router.delete('/:customUserId/projects/:projectId', async (req, res) => {
 
 // Update user student data
 router.put('/student-data', authorize, async (req, res) => {
-    try {
-        const firebaseUid = req.user.uid;
-        const studentData = req.body;
-
-        const userRef = db.collection('users').doc(firebaseUid);
-        const userSnap = await userRef.get();
-        if (!userSnap.exists) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-        const customUserId = userSnap.data().customUserId;
-
-        await userService.updateStudentData(customUserId, studentData);
-        
-        res.json({
-            success: true,
-            message: 'Student data updated successfully'
-        });
-    } catch (error) {
-        console.error('Error updating student data:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
+    const customUserId = userSnap.data().customUserId;
+    const updatedStudentData = await userService.updateStudentData(customUserId, req.body);
+    res.json({ success: true, data: updatedStudentData });
+  } catch (error) {
+    console.error('Error updating student data:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Update professor data
+router.put('/professor-data', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const updatedProfessorData = await userService.updateProfessorData(customUserId, req.body);
+    res.json({ success: true, data: updatedProfessorData });
+  } catch (error) {
+    console.error('Error updating professor data:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Update freelancer data
+router.put('/freelancer-data', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const updatedFreelancerData = await userService.updateFreelancerData(customUserId, req.body);
+    res.json({ success: true, data: updatedFreelancerData });
+  } catch (error) {
+    console.error('Error updating freelancer data:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Education routes
+router.post('/education', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const newEducation = await userService.addEducation(customUserId, req.body);
+    res.status(201).json({ success: true, data: newEducation });
+  } catch (error) {
+    console.error('Error adding education:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/education/:educationId', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const { educationId } = req.params;
+    const updatedEducation = await userService.updateEducation(customUserId, educationId, req.body);
+    res.json({ success: true, data: updatedEducation });
+  } catch (error) {
+    console.error('Error updating education:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.delete('/education/:educationId', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const { educationId } = req.params;
+    await userService.deleteEducation(customUserId, educationId);
+    res.json({ success: true, message: 'Education record deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting education:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Work Experience routes
+router.post('/work-experience', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const newWork = await userService.addWorkExperience(customUserId, req.body);
+    res.status(201).json({ success: true, data: newWork });
+  } catch (error) {
+    console.error('Error adding work experience:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/work-experience/:workId', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const { workId } = req.params;
+    const updatedWork = await userService.updateWorkExperience(customUserId, workId, req.body);
+    res.json({ success: true, data: updatedWork });
+  } catch (error) {
+    console.error('Error updating work experience:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.delete('/work-experience/:workId', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const { workId } = req.params;
+    await userService.deleteWorkExperience(customUserId, workId);
+    res.json({ success: true, message: 'Work experience record deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting work experience:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Personal Details routes
+router.put('/personal-details', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const updatedPersonalDetails = await userService.updatePersonalDetails(customUserId, req.body);
+    res.json({ success: true, data: updatedPersonalDetails });
+  } catch (error) {
+    console.error('Error updating personal details:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Social Links routes
+router.put('/social-links', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const updatedSocialLinks = await userService.updateSocialLinks(customUserId, req.body);
+    res.json({ success: true, data: updatedSocialLinks });
+  } catch (error) {
+    console.error('Error updating social links:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
 module.exports = router; 

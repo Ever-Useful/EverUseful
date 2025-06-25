@@ -73,6 +73,41 @@ class UserService {
         firstName: userData.firstName ?? '',
         lastName: userData.lastName ?? '',
         userType: userData.userType ?? 'student',
+        username: userData.username ?? '',
+        email: userData.email ?? '',
+        mobile: userData.mobile ?? '',
+        gender: userData.gender ?? '',
+        domain: userData.domain ?? '',
+        purpose: userData.purpose ?? '',
+        role: userData.role ?? '',
+      },
+      education: [],
+      workExperience: [],
+      personalDetails: {
+        address1: '',
+        address2: '',
+        landmark: '',
+        pincode: '',
+        location: '',
+        hobbies: '',
+        copyCurrent: false,
+        updatedAt: new Date().toISOString()
+      },
+      socialLinks: {
+        linkedin: '',
+        facebook: '',
+        instagram: '',
+        twitter: '',
+        git: '',
+        medium: '',
+        reddit: '',
+        slack: '',
+        dribbble: '',
+        behance: '',
+        codepen: '',
+        figma: '',
+        custom: '',
+        updatedAt: new Date().toISOString()
       },
       projects: {
         created: [],
@@ -121,7 +156,10 @@ class UserService {
         totalViews: 0,
         totalDownloads: 0,
         memberSince: new Date().toISOString()
-      }
+      },
+      studentData: null,
+      professorData: null,
+      freelancerData: null
     };
 
     this.userData.users[customUserId] = newUser;
@@ -194,7 +232,219 @@ class UserService {
         ...studentData,
         updatedAt: new Date().toISOString()
     };
-    this.saveUserData();
+    await this.saveUserData();
+    return this.userData.users[customUserId].studentData;
+  }
+
+  // Update professor data
+  async updateProfessorData(customUserId, professorData) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+        throw new Error('User not found');
+    }
+    
+    if (!this.userData.users[customUserId].professorData) {
+        this.userData.users[customUserId].professorData = {};
+    }
+
+    this.userData.users[customUserId].professorData = {
+        ...this.userData.users[customUserId].professorData,
+        ...professorData,
+        updatedAt: new Date().toISOString()
+    };
+    await this.saveUserData();
+    return this.userData.users[customUserId].professorData;
+  }
+
+  // Update freelancer data
+  async updateFreelancerData(customUserId, freelancerData) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+        throw new Error('User not found');
+    }
+    
+    if (!this.userData.users[customUserId].freelancerData) {
+        this.userData.users[customUserId].freelancerData = {};
+    }
+
+    this.userData.users[customUserId].freelancerData = {
+        ...this.userData.users[customUserId].freelancerData,
+        ...freelancerData,
+        updatedAt: new Date().toISOString()
+    };
+    await this.saveUserData();
+    return this.userData.users[customUserId].freelancerData;
+  }
+
+  // Education methods
+  async addEducation(customUserId, educationData) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    if (!this.userData.users[customUserId].education) {
+      this.userData.users[customUserId].education = [];
+    }
+
+    const newEducation = {
+      id: `edu_${Date.now()}`,
+      ...educationData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    this.userData.users[customUserId].education.push(newEducation);
+    await this.saveUserData();
+    return newEducation;
+  }
+
+  async updateEducation(customUserId, educationId, educationData) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    const educationIndex = this.userData.users[customUserId].education.findIndex(edu => edu.id === educationId);
+    if (educationIndex === -1) {
+      throw new Error('Education record not found');
+    }
+
+    this.userData.users[customUserId].education[educationIndex] = {
+      ...this.userData.users[customUserId].education[educationIndex],
+      ...educationData,
+      updatedAt: new Date().toISOString()
+    };
+
+    await this.saveUserData();
+    return this.userData.users[customUserId].education[educationIndex];
+  }
+
+  async deleteEducation(customUserId, educationId) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    const educationIndex = this.userData.users[customUserId].education.findIndex(edu => edu.id === educationId);
+    if (educationIndex === -1) {
+      throw new Error('Education record not found');
+    }
+
+    this.userData.users[customUserId].education.splice(educationIndex, 1);
+    await this.saveUserData();
+    return { success: true };
+  }
+
+  // Work Experience methods
+  async addWorkExperience(customUserId, workData) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    if (!this.userData.users[customUserId].workExperience) {
+      this.userData.users[customUserId].workExperience = [];
+    }
+
+    const newWork = {
+      id: `work_${Date.now()}`,
+      ...workData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    this.userData.users[customUserId].workExperience.push(newWork);
+    await this.saveUserData();
+    return newWork;
+  }
+
+  async updateWorkExperience(customUserId, workId, workData) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    const workIndex = this.userData.users[customUserId].workExperience.findIndex(work => work.id === workId);
+    if (workIndex === -1) {
+      throw new Error('Work experience record not found');
+    }
+
+    this.userData.users[customUserId].workExperience[workIndex] = {
+      ...this.userData.users[customUserId].workExperience[workIndex],
+      ...workData,
+      updatedAt: new Date().toISOString()
+    };
+
+    await this.saveUserData();
+    return this.userData.users[customUserId].workExperience[workIndex];
+  }
+
+  async deleteWorkExperience(customUserId, workId) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    const workIndex = this.userData.users[customUserId].workExperience.findIndex(work => work.id === workId);
+    if (workIndex === -1) {
+      throw new Error('Work experience record not found');
+    }
+
+    this.userData.users[customUserId].workExperience.splice(workIndex, 1);
+    await this.saveUserData();
+    return { success: true };
+  }
+
+  // Personal Details methods
+  async updatePersonalDetails(customUserId, personalDetails) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    this.userData.users[customUserId].personalDetails = {
+      ...this.userData.users[customUserId].personalDetails,
+      ...personalDetails,
+      updatedAt: new Date().toISOString()
+    };
+
+    await this.saveUserData();
+    return this.userData.users[customUserId].personalDetails;
+  }
+
+  // Social Links methods
+  async updateSocialLinks(customUserId, socialLinks) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    this.userData.users[customUserId].socialLinks = {
+      ...this.userData.users[customUserId].socialLinks,
+      ...socialLinks,
+      updatedAt: new Date().toISOString()
+    };
+
+    await this.saveUserData();
+    return this.userData.users[customUserId].socialLinks;
+  }
+
+  // Update user auth info (Firestore fields)
+  async updateUserAuthInfo(customUserId, authData) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    this.userData.users[customUserId].profile = {
+      ...this.userData.users[customUserId].profile,
+      ...authData,
+      updatedAt: new Date().toISOString()
+    };
+
+    await this.saveUserData();
+    return this.userData.users[customUserId].profile;
   }
 
   // Add project to user
@@ -455,24 +705,6 @@ class UserService {
     await this.saveUserData();
     
     return { success: true, message: 'User deleted successfully' };
-  }
-
-  // Update user auth info (firstName, lastName, userType)
-  async updateUserAuthInfo(customUserId, authData) {
-    await this.loadUserData();
-    if (!this.userData.users[customUserId]) {
-      throw new Error('User not found');
-    }
-    // Update fields in profile
-    const allowedFields = ['firstName', 'lastName', 'userType', 'phoneNumber'];
-    for (const field of allowedFields) {
-      if (authData[field] !== undefined) {
-        this.userData.users[customUserId].profile[field] = authData[field];
-      }
-    }
-    this.userData.users[customUserId].profile.updatedAt = new Date().toISOString();
-    await this.saveUserData();
-    return this.userData.users[customUserId].profile;
   }
 }
 
