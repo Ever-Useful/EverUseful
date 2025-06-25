@@ -30,7 +30,9 @@ import PrivacyPolicy from "./pages/Privacy_Policy";
 import TermsOfService from "./pages/TermsOfService";
 import SendFeedback from "./pages/SendFeedback";
 import Chat from "./pages/Chat";
-
+import BackUp from "./pages/Backup";
+import Sustainable from "./pages/Sustainable";
+import Connection from "./pages/Connections";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +69,9 @@ const App = () => (
             <Route path="/termsofservice" element={<TermsOfService />} />
             <Route path="/sendfeedback" element={<SendFeedback />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/backup" element={<BackUp />} />
+            <Route path="/sustainable" element={<Sustainable />} />
+            <Route path="/connection" element={<Connection />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

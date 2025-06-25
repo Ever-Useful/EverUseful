@@ -23,6 +23,8 @@ import {
   Users,
   MessageSquare
 } from "lucide-react";
+import Logo from '../assets/Logo/Logo Main.png'
+import { Link } from 'react-router-dom';
 
 export const Footer = () => {
   return (
@@ -34,13 +36,11 @@ export const Footer = () => {
           {/* Brand Column */}
           <div className="lg:col-span-3 space-y-6">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg">
-                <Rocket className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <span className="text-2xl font-bold text-white tracking-tight">AMOGH</span>
-                <span className="text-lg text-blue-400 font-light ml-1">- ever useful</span>
-                <p className="text-xs text-gray-400 mt-1">Future-Ready Education Solutions</p>
+              <Link to="/" className="flex items-center space-x-2 group">
+                <img src={Logo} alt="AMOGH" className="h-20 w-auto" />
+              </Link>
+              <div className="py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-gray-300">
+                  Beta
               </div>
             </div>
             
