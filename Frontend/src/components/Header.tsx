@@ -21,7 +21,7 @@ import InitialsAvatar from './InitialsAvatar';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { userService } from '@/services/userService';
-import Logo1 from '../assets/images/Logo1.png'
+import Logo from '../assets/Logo/Logo Side.png'
 import { PopupMenu } from "@/components/PopupMenu";
 import { MyProjects } from '@/components/MyProjects';
 
@@ -469,7 +469,7 @@ export const Header = () => {
             {/* Logo */}
             <div className="flex items-center space-x-1 flex-shrink-0">
               <Link to="/" className="flex items-center space-x-2 group">
-                <img src={Logo1} alt="AMOGH" className="h-7 w-auto md:h-8" />
+                <img src={Logo} alt="AMOGH" className="h-14 w-auto md:h-8" />
                 <div className="py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
                   Beta
                 </div>
