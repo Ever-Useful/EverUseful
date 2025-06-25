@@ -23,6 +23,7 @@ import {
   Users,
   MessageSquare
 } from "lucide-react";
+import LogoMain from "@/assets/images/Logo Main.png";
 
 export const Footer = () => {
   return (
@@ -32,17 +33,12 @@ export const Footer = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-10 mb-16 text-sm">
           {/* Brand Column */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-2">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg">
-                <Rocket className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <span className="text-2xl font-bold text-white tracking-tight">AMOGH</span>
-                <span className="text-lg text-blue-400 font-light ml-1">- ever useful</span>
-                <p className="text-xs text-gray-400 mt-1">Future-Ready Education Solutions</p>
-              </div>
+              <img src={LogoMain} alt="AMOGH Logo" className="w-50 h-20 object-contain" />
+              <span className="text-lg text-blue-400 font-light ml-1">- ever useful</span>
             </div>
+            <p className="text-xs text-gray-400 mt-1">Future-Ready Education Solutions</p>
             
             <p className="text-gray-400 leading-relaxed text-sm max-w-lg">
               Transforming education through cutting-edge technology, industry partnerships, 

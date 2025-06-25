@@ -69,7 +69,10 @@ class UserService {
         website: userData.website ?? null,
         title: userData.title ?? null,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        firstName: userData.firstName ?? '',
+        lastName: userData.lastName ?? '',
+        userType: userData.userType ?? 'student',
       },
       projects: {
         created: [],
@@ -452,6 +455,24 @@ class UserService {
     await this.saveUserData();
     
     return { success: true, message: 'User deleted successfully' };
+  }
+
+  // Update user auth info (firstName, lastName, userType)
+  async updateUserAuthInfo(customUserId, authData) {
+    await this.loadUserData();
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+    // Update fields in profile
+    const allowedFields = ['firstName', 'lastName', 'userType', 'phoneNumber'];
+    for (const field of allowedFields) {
+      if (authData[field] !== undefined) {
+        this.userData.users[customUserId].profile[field] = authData[field];
+      }
+    }
+    this.userData.users[customUserId].profile.updatedAt = new Date().toISOString();
+    await this.saveUserData();
+    return this.userData.users[customUserId].profile;
   }
 }
 

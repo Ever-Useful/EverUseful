@@ -11,11 +11,11 @@ import Freelancing from "./pages/Freelancing";
 import Connect from "./pages/Connect";
 import Admin from "./pages/Admin";
 import Checkout from "./pages/Checkout";
-import Profile from "./pages/Profile";
+import FreelancerProfile from "./pages/FreelancerProfile";
 import StudentProfile from "./pages/StudentProfile";
 import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
-import FreelancerProfile from "./pages/FreelancerProfile";
+import Profile from "./pages/Profile";
 import ProductDisplay from "./pages/ProductDisplay";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import NewProject from '@/pages/NewProject';
@@ -30,7 +30,8 @@ import PrivacyPolicy from "./pages/Privacy_Policy";
 import TermsOfService from "./pages/TermsOfService";
 import SendFeedback from "./pages/SendFeedback";
 import Chat from "./pages/Chat";
-
+import BussinessProfile from "./pages/bussinessprofile";
+import Sustainable from "./pages/Sustainable"
 
 const queryClient = new QueryClient();
 
@@ -52,10 +53,11 @@ const App = () => (
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/studentprofile" element={<StudentProfile />} />
+            <Route path="/bussinessprofile" element={<BussinessProfile />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/freelancer/:id" element={<FreelancerProfile />} />
+            <Route path="/freelancerprofile/:id" element={<FreelancerProfile />} />
             <Route path="/projects/new" element={<NewProject />} />
             <Route path="/collaborators" element={<Collaborators />} />
             <Route path="/meetings/schedule" element={<ScheduleMeeting />} />
@@ -67,6 +69,8 @@ const App = () => (
             <Route path="/termsofservice" element={<TermsOfService />} />
             <Route path="/sendfeedback" element={<SendFeedback />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/studentprofile/:id" element={<StudentProfile />} />
+            <Route path="/green" element={<Sustainable/>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

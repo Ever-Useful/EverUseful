@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface MyProjectsSidebarProps {
   onClose: () => void;
   onProjectCreated?: () => void;
+  editMode?: boolean;
+  projectToEdit?: any;
 }
 
 interface ProjectFormData {
@@ -31,7 +33,7 @@ interface ProjectFormData {
   deliverables: string;
 }
 
-export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjectCreated }) => {
+export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjectCreated, editMode = false, projectToEdit }) => {
   const user = auth.currentUser;
   const [loading, setLoading] = useState(false);
   const [showProjectSuccess, setShowProjectSuccess] = useState(false);
@@ -53,6 +55,28 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
     techStack: '',
     deliverables: '',
   });
+
+  // Pre-fill form if editing
+  React.useEffect(() => {
+    if (editMode && projectToEdit) {
+      setProjectData({
+        title: projectToEdit.title || '',
+        description: projectToEdit.description || '',
+        image: projectToEdit.image || '',
+        images: (projectToEdit.images || []).join(', '),
+        category: projectToEdit.category || '',
+        price: projectToEdit.price ? String(projectToEdit.price) : '',
+        duration: projectToEdit.duration || '',
+        status: projectToEdit.status || 'active',
+        teamSize: projectToEdit.teamSize ? String(projectToEdit.teamSize) : '',
+        tags: (projectToEdit.tags || []).join(', '),
+        skills: (projectToEdit.skills || []).join(', '),
+        features: (projectToEdit.features || []).join(', '),
+        techStack: (projectToEdit.techStack || []).join(', '),
+        deliverables: (projectToEdit.deliverables || []).join(', '),
+      });
+    }
+  }, [editMode, projectToEdit]);
 
   const validateForm = () => {
     const errors: {[key: string]: string} = {};
@@ -114,30 +138,48 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         customUserId,
       };
 
-      const res = await fetch('http://localhost:3000/api/marketplace/projects', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
+      let res;
+      if (editMode && projectToEdit && projectToEdit.id) {
+        console.log('Editing project:', projectToEdit);
+        console.log('Editing project id:', projectToEdit.id);
+        // Edit mode: update project
+        res = await fetch(`http://localhost:3000/api/marketplace/projects/${projectToEdit.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        // Add mode: create new project
+        res = await fetch('http://localhost:3000/api/marketplace/projects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+      }
+
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || 'Failed to create project');
+        throw new Error(err.error || (editMode ? 'Failed to update project' : 'Failed to create project'));
       }
-      
-      setShowProjectSuccess(true);
+
+      // Call the callback to refresh data immediately after successful operation
       if(onProjectCreated) onProjectCreated();
-      
+
+      setShowProjectSuccess(true);
+
       setTimeout(() => {
         setShowProjectSuccess(false);
         onClose();
-      }, 3000);
-      
+      }, 2000);
+
     } catch (error) {
-      toast.error(error.message || 'Failed to create project');
+      toast.error(error.message || (editMode ? 'Failed to update project' : 'Failed to create project'));
     } finally {
       setLoading(false);
     }
@@ -147,8 +189,15 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
     return (
       <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
         <div className="w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col justify-center items-center">
-            <SuccessAnimation isVisible={true} onClose={() => {}} />
-            <p className="text-xl font-semibold mt-4">Project Created Successfully!</p>
+          <SuccessAnimation 
+            isVisible={true} 
+            onClose={() => {}} 
+            title={editMode ? "Project Updated!" : "Project Created!"}
+            message={editMode ? "Your project has been successfully updated." : "Your project has been successfully created."}
+          />
+          <p className="text-xl font-semibold mt-4">
+            {editMode ? 'Project Updated Successfully!' : 'Project Created Successfully!'}
+          </p>
         </div>
       </div>
     );
@@ -162,7 +211,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             <Button variant="ghost" size="icon" onClick={onClose}>
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h2 className="font-semibold text-lg">Add New Project</h2>
+            <h2 className="font-semibold text-lg">{editMode ? 'Edit Project' : 'Add New Project'}</h2>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -245,7 +294,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             Cancel
           </Button>
           <Button onClick={handleSaveProject} disabled={loading}>
-            {loading ? 'Saving...' : 'Save Project'}
+            {loading ? (editMode ? 'Saving...' : 'Creating...') : (editMode ? 'Save Changes' : 'Create Project')}
           </Button>
         </footer>
       </div>

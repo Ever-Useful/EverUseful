@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { auth, db } from "../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
@@ -10,22 +10,24 @@ import { Footer } from "@/components/Footer";
 import { Camera, DollarSign, Award, Clock, GraduationCap, UserPlus, BookOpen, Edit, Link, Briefcase, Trash2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-import BackgroundUpload from "@/components/BackgroundUpload";
-// import RecentProjects from "@/components/RecentProjects";
-// import QuickActions from "@/components/QuickActions";
 import RecentActivity from "@/components/RecentActivity";
 import SkillsSection from "@/components/Skillssection";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
+import { userService } from "@/services/userService";
+import NoUserProfile from "@/assets/images/no user profile.png";
+import NoImageAvailable from "@/assets/images/no image available.png";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [user, setUser] = useState(auth.currentUser);
   const [userData, setUserData] = useState<any>({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
   const [backgroundImage, setBackgroundImage] = useState(
     "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
   );
@@ -50,31 +52,63 @@ const Profile = () => {
     return unsubscribe;
   }, []);
 
-  // Move fetchUserData outside so it can be reused elsewhere
+  // Fetch user data by customUserId from userData.json
   const fetchUserData = async () => {
-    if (user) {
+    if (id) {
       try {
-        const userRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(userRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
+        console.log('Fetching student with ID:', id);
+        // Make direct fetch call to backend without authentication for public profile
+        const response = await fetch(`http://localhost:3000/api/users/${id}`);
+        console.log('Response status:', response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Student data received:', data);
+          console.log('Full data structure:', JSON.stringify(data, null, 2));
+          if (data.success && data.data) {
+            setUserData(data.data);
+            console.log('User data set:', data.data);
+            console.log('Projects object:', data.data.projects);
+            console.log('Projects.created:', data.data.projects?.created);
+            console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
+            // Fetch full project details for each project ID
+            const projectIds = Array.isArray(data.data.projects) ? data.data.projects : [];
+            console.log('Project IDs found:', projectIds);
+            if (projectIds.length > 0) {
+              const projectPromises = projectIds.map((pid: string) =>
+                fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
+                  .then(res => res.ok ? res.json() : null)
+                  .then(res => res && res.project ? res.project : null)
+              );
+              const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
+              console.log('Full projects fetched:', fullProjects);
+              setPortfolioProjects(fullProjects);
+            } else {
+              console.log('No project IDs found');
+              setPortfolioProjects([]);
+            }
+          } else {
+            console.error('Invalid response format:', data);
+            setUserData({});
+            setPortfolioProjects([]);
+          }
         } else {
-          console.log("No user data found");
+          console.error('Failed to fetch student:', response.status);
           setUserData({});
+          setPortfolioProjects([]);
         }
       } catch (err) {
-        console.error("Error fetching user data", err);
+        console.error('Error fetching student:', err);
         setUserData({});
+        setPortfolioProjects([]);
       }
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    if (user) {
-      fetchUserData();
-    }
-  }, [user]);
+    fetchUserData();
+  }, [id]);
 
   // if (loading) {
   //   return (
@@ -87,20 +121,20 @@ const Profile = () => {
   // }
 
   const fullName =
-    `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unnamed User";
+    `${userData.profile?.firstName || ""} ${userData.profile?.lastName || ""}`.trim() || "Unnamed User";
 
   const profile = isLoggedIn
     ? {
         name: fullName,
-        title: userData.title || "New Member",
-        bio: userData.bio || "This is a new profile. Update your bio!",
-        avatar: userData.avatar || "",
+        title: userData.profile?.title || "New Member",
+        bio: userData.profile?.bio || "This is a new profile. Update your bio!",
+        avatar: userData.profile?.avatar || "",
         stats: {
-          followers: 0,
-          following: 0,
-          projects: 0,
-          likes: 0,
-          connections: 1500,
+          followers: userData.social?.followersCount || 0,
+          following: userData.social?.followingCount || 0,
+          projects: userData.stats?.projectsCount || 0,
+          likes: userData.stats?.totalLikes || 0,
+          connections: userData.social?.connections?.length || 0,
           skills: userData.skills || [],  
         },
       }
@@ -115,7 +149,7 @@ const Profile = () => {
           projects: 45,
           likes: 2.5,
           connections: 1500,
-        skills: userData.skills || [],  
+          skills: userData.skills || [],  
         },
       };
 
@@ -125,9 +159,6 @@ const Profile = () => {
   const displayedText = shouldTruncate && !isExpanded
     ? profile.bio.slice(0, MAX_LENGTH) + "..."
     : profile.bio;
-  const handleBackgroundChange = (newImageUrl: string) => {
-    setBackgroundImage(newImageUrl);
-  };
 
   const handleEditSection = (section: string) => {
     setEditSection(section);
@@ -136,10 +167,10 @@ const Profile = () => {
   
   const academicBackground = [
     {
-      degree: userData.degree || "Bachelor's Degree",
-      institution: userData.college || "University",
-      year: userData.year || "2020 - 2024",
-      course: userData.course || "Computer Science",
+      degree: userData.studentData?.degree || "",
+      institution: userData.studentData?.college || "",
+      year: userData.studentData?.year || "",
+      course: userData.studentData?.course || "",
     }
   ];
 
@@ -181,102 +212,75 @@ const Profile = () => {
   //   }
   };
 
+  // Always use a safe array for rendering
+  const safePortfolioProjects = Array.isArray(portfolioProjects) ? portfolioProjects : [];
+  
+  // Debug logging
+  console.log('StudentProfile render data:', {
+    userData,
+    portfolioProjects,
+    safePortfolioProjects,
+    safePortfolioProjectsLength: safePortfolioProjects.length
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Header />
-
-      {/* Background */}
-      <div
-        className="relative h-96 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
-      >
+      {/* Hero Section */}
+      <div className="relative h-96 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${backgroundImage})` }}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-        <BackgroundUpload onBackgroundChange={handleBackgroundChange} />
-
-        {/* Profile Info */}
         <div className="absolute bottom-0 left-0 right-0 p-8 rounded-md bg-transparent my-[99px] py-[34px] px-[23px]">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-end gap-6">
               <div className="relative">
-                <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
-                  <AvatarImage
-                    src={profile.avatar}
-                    alt={profile.name}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="bg-slate-200 text-slate-600 font-bold text-xl flex items-center justify-center">
-                    {profile.name
-                      ?.split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .slice(0, 2)
-                      .toUpperCase() || "NA"}
+                <Avatar className="w-36 h-36 border-4 border-white shadow-lg">
+                  <AvatarImage src={profile.avatar} alt={profile.name} className="object-cover" />
+                  <AvatarFallback className="bg-slate-200 text-slate-600 font-bold text-3xl flex items-center justify-center">
+                    {profile.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "NA"}
                   </AvatarFallback>
                 </Avatar>
-                <button className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-slate-100 transition-colors">
-                  <Camera className="w-4 h-4 text-slate-600" />
-                </button>
               </div>
               <div className="flex-1 text-white">
                 <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5">{profile.name}</h1>
                 <p className="text-xl text-slate-200 drop-shadow-md">{profile.title}</p>
+                {/* Connect Button */}
+                <div className="flex flex-row items-center justify-between mt-4">
+                  <div className="flex flex-col w-[200px] h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
+                    <button className="flex items-center gap-2 text-white drop-shadow-md text-lg">
+                      <UserPlus className="w-6 h-6" />
+                      Connect
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Stats */}
+      {/* Stats Cards */}
       <div className="max-w-7xl mx-auto px-8 -mt-8 relative z-10">
-        <Card className="p-4 shadow-lg border-0 backdrop-blur-sm bg-blue-50">
-          <div className="grid grid-cols-4 gap-4">
-            <StatCard label="Followers" value={`${profile.stats.followers}K`} />
-            <StatCard label="Following" value={profile.stats.following} />
-            <StatCard label="Projects" value={profile.stats.projects} />
-            <StatCard label="Likes" value={`${profile.stats.likes}K`} />
-          </div>
-        </Card>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
+            <CardContent className="p-4 text-center">
+              <Award className="w-6 h-6 mx-auto mb-2" />
+              <div className="text-2xl font-bold">{profile.stats.projects}+</div>
+              <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
+            <CardContent className="p-4 text-center">
+              <UserPlus className="w-6 h-6 mx-auto mb-2" />
+              <div className="text-2xl font-bold">{profile.stats.connections}+</div>
+              <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-      
+      {/* Main Content */}
       <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-          {/* Main Content */}
-          <div className="-translate-x-[30px] lg:col-span-2 space-y-8 max-w-8xl mx-auto px-4 py-8">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <DollarSign className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-xl font-bold">$50</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <Award className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-xl font-bold">{profile.stats.projects}+</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <Clock className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-xl font-bold">5</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <UserPlus className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-xl font-bold">{profile.stats.connections}+</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
-                </CardContent>
-              </Card>
-            </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Column */}
+          <div className="lg:col-span-2 space-y-8">
             {/* About Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
@@ -287,32 +291,17 @@ const Profile = () => {
                     </span>
                     About
                   </h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditSection('About')}
-                    className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
-                  >
-                    <Edit className="w-2 h-2 mr-1" />
-                    Edit
-                  </Button>
                 </div>
                 <div>
-                  <p className="text-gray-700 leading-relaxed">
-                    {displayedText}
-                  </p>
+                  <p className="text-gray-700 leading-relaxed">{displayedText}</p>
                   {shouldTruncate && (
-                    <button
-                      className="mt-2 text-blue-600 hover:underline text-sm"
-                      onClick={() => setIsExpanded(!isExpanded)}
-                    >
+                    <button className="mt-2 text-blue-600 hover:underline text-sm" onClick={() => setIsExpanded(!isExpanded)}>
                       {isExpanded ? "Read Less" : "Read More"}
                     </button>
                   )}
                 </div>
               </CardContent>
             </Card>
-
             {/* Academic Background */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
@@ -323,15 +312,6 @@ const Profile = () => {
                     </span>
                     Academic Background
                   </h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditSection('About')}
-                    className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
-                  >
-                    <Edit className="w-2 h-2 mr-1" />
-                    Edit
-                  </Button>
                 </div>
                 <div className="space-y-6">
                   {academicBackground.map((item, index) => (
@@ -348,9 +328,7 @@ const Profile = () => {
                         <h3 className="font-semibold text-gray-900">{item.degree}</h3>
                         <p className="text-gray-600">{item.institution} • {item.year}</p>
                         {item.course && (
-                          <p className="text-sm text-gray-500 mt-1">
-                            <span className="font-medium">Course:</span> {item.course}
-                          </p>
+                          <p className="text-sm text-gray-500 mt-1"><span className="font-medium">Course:</span> {item.course}</p>
                         )}
                       </div>
                     </div>
@@ -358,7 +336,6 @@ const Profile = () => {
                 </div>
               </CardContent>
             </Card>
-
             {/* Portfolio Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
@@ -369,66 +346,42 @@ const Profile = () => {
                     </span>
                     Research Projects & Commercial Work
                   </h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleAddProject}
-                    className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
-                  >
-                    <Edit className="w-2 h-2 mr-1" />
-                    Add Project
-                  </Button>
                 </div>
-                <div className="max-h-[500px] overflow-y-auto pr-2 space-y-6">
-                  {Array.isArray(profile.stats.projects) && profile.stats.projects.length > 0 ? (
-                    profile.stats.projects.map((project, index) => (
-                      <Card key={project.id || index} className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden">
-                        <div className="flex flex-col md:flex-row">
-                          <div className="md:w-1/3">
-                            <img
-                              src={project.image || "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=300&h=200&fit=crop"}
-                              alt={project.title}
-                              className="w-full h-48 md:h-full object-cover"
-                            />
+                <div className="space-y-4">
+                  {safePortfolioProjects.length > 0 ? (
+                    safePortfolioProjects.map((project, index) => (
+                      <Card
+                        key={project.id || index}
+                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[140px]"
+                      >
+                        <div className="w-full md:w-48 flex-shrink-0 h-36 md:h-auto bg-gray-100 flex items-center justify-center">
+                          <img
+                            src={project.image}
+                            alt={project.title}
+                            className="object-cover w-full h-full rounded-l-lg"
+                            onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                          />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">{project.title}</h3>
+                              <p className="text-gray-600 text-sm mb-2 line-clamp-2">{project.description}</p>
+                              <div className="flex flex-wrap gap-2 mb-2">
+                                {(project.skills || []).map((skill, skillIndex) => (
+                                  <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">{skill}</Badge>
+                                ))}
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
+                                <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Date Added:</span> {
+                                  project.posted ? new Date(project.posted).toLocaleDateString() : 'N/A'
+                                }</div>
+                              </div>
+                            </div>
                           </div>
-                          <CardContent className="p-5 md:w-2/3">
-                            <div className="flex justify-between items-start">
-                              <h3 className="font-semibold text-gray-900 text-lg mb-2">{project.title}</h3>
-                              <Button variant="ghost" size="icon" className="text-gray-400 hover:text-red-500 hover:bg-red-50" onClick={() => handleDeleteProject(project.id)}>
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                            <p className="text-gray-600 mb-3">{project.description}</p>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {(project.skills || project.tags || []).map((tech, techIndex) => (
-                                <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">
-                                  {tech}
-                                </Badge>
-                              ))}
-                            </div>
-                            <div className="space-y-2">
-                              {project.university && (
-                                <p className="text-sm text-gray-500">
-                                  <span className="font-medium">Institution:</span> {project.university}
-                                </p>
-                              )}
-                              {project.publication && (
-                                <p className="text-sm text-gray-500">
-                                  <span className="font-medium">Publication:</span> {project.publication}
-                                </p>
-                              )}
-                              {project.award && (
-                                <p className="text-sm text-green-600 font-medium">
-                                  <Award className="w-4 h-4 inline mr-1" /> {project.award}
-                                </p>
-                              )}
-                              {project.patent && (
-                                <p className="text-sm text-blue-600 font-medium">
-                                  <Link className="w-4 h-4 inline mr-1" /> {project.patent}
-                                </p>
-                              )}
-                            </div>
-                          </CardContent>
                         </div>
                       </Card>
                     ))
@@ -436,19 +389,16 @@ const Profile = () => {
                     <div className="text-center py-20">
                       <Briefcase className="w-12 h-12 mx-auto text-gray-300" />
                       <h3 className="mt-4 text-lg font-medium text-gray-900">No projects yet</h3>
-                      <p className="mt-1 text-sm text-gray-500">
-                        Click "Add Project" to showcase your work.
-                      </p>
+                      <p className="mt-1 text-sm text-gray-500">This student hasn't added any projects yet.</p>
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
           </div>
-          
-          {/* sidebar */}
-          <div className="-translate-x-[85px] space-y-6">
-            {/* Research Interests */}
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Skills Section */}
             <Card className="bg-white shadow-lg rounded-xl max-w-md">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -458,25 +408,11 @@ const Profile = () => {
                     </span>
                     Research Skills & Technical Expertise
                   </h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditSection('About')}
-                    className="-translate-y-[20px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
-                  >
-                    <Edit className="w-2 h-2 mr-1" />
-                    Edit
-                  </Button>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {profile.stats.skills && profile.stats.skills.length > 0 ? (
                     profile.stats.skills.map((skill: string, index: number) => (
-                      <Badge
-                        key={index}
-                        className="px-3 py-1 text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg"
-                      >
-                        {skill}
-                      </Badge>
+                      <Badge key={index} className="px-3 py-1 text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">{skill}</Badge>
                     ))
                   ) : (
                     <p className="text-gray-500 text-sm">No skills added yet. Click edit to add your skills.</p>
@@ -484,7 +420,6 @@ const Profile = () => {
                 </div>
               </CardContent>
             </Card>
-
             <UnreadMessagesCard />
           </div>
         </div>
