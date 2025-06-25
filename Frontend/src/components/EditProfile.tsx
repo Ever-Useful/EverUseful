@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 interface EditProfileSidebarProps {
   onClose: () => void;
   initialSection?: string;
+  onProfileUpdated?: () => void;
 }
 
 const steps = [
@@ -34,7 +35,7 @@ const userTypes = [
 const domains = ['Management', 'Engineering', 'Arts & Science', 'Medicine', 'Law', 'Others'];
 
 
-export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initialSection = 'Basic Details' }) => {
+export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initialSection = 'Basic Details', onProfileUpdated }) => {
   const [activeSection, setActiveSection] = useState(initialSection);
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -45,7 +46,9 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     course: '',
     location: '',
     year: '',
+    userType: '',
   });
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -61,6 +64,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
             course: userProfile.studentData?.course || '',
             location: userProfile.profile.location || '',
             year: userProfile.studentData?.year || '',
+            userType: userProfile.auth.userType || '',
           });
         } catch (error) {
           toast.error("Failed to fetch profile data.");
@@ -72,12 +76,14 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
   }, []);
 
   const handleSave = async () => {
+    setIsSaving(true);
     toast.loading('Saving...');
     try {
       if (activeSection === 'Basic Details') {
         await userService.updateAuthInfo({
           firstName: profileData.firstName,
           lastName: profileData.lastName,
+          userType: profileData.userType,
         });
       } else if (activeSection === 'About') {
         await userService.updateProfile({ bio: profileData.bio });
@@ -94,10 +100,22 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
       }
       toast.dismiss();
       toast.success('Profile updated successfully!');
+      // Move to next section
+      const currentIndex = steps.findIndex(s => s.name === activeSection);
+      if (currentIndex !== -1 && currentIndex < steps.length - 1) {
+        setActiveSection(steps[currentIndex + 1].name);
+      } else {
+        onClose();
+      }
+      if (onProfileUpdated) {
+        onProfileUpdated();
+      }
     } catch (error) {
       toast.dismiss();
       toast.error('Failed to update profile.');
       console.error('Failed to save profile:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -197,6 +215,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     }
   };
 
+  const handleUserTypeSelect = (type: string) => {
+    setProfileData(prev => ({ ...prev, userType: type }));
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
       <div className="w-full max-w-5xl h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
@@ -248,12 +270,31 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                               </div>
                           </div>
                       </div>
-                  </div>
-                  
-                  <div className="mt-8 pt-4 border-t flex justify-end">
-                      <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
-                          Save
-                      </Button>
+
+                      {/* User Type Selection */}
+                      <div className="mt-8">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">User Type <span className="text-red-500">*</span></label>
+                        <div className="flex gap-4">
+                          {[
+                            { value: 'student', label: 'Student' },
+                            { value: 'professor', label: 'Professor' },
+                            { value: 'freelancer', label: 'Freelancer' }
+                          ].map(type => (
+                            <button
+                              key={type.value}
+                              type="button"
+                              onClick={() => handleUserTypeSelect(type.value)}
+                              className={`flex items-center gap-2 px-6 py-2 rounded-full border text-base font-medium transition-colors
+                                ${profileData.userType === type.value
+                                  ? 'bg-blue-50 border-blue-600 text-blue-900 shadow-sm'
+                                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+                              style={{ minWidth: 160 }}
+                            >
+                              {type.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                   </div>
                 </>
               )}
@@ -276,12 +317,6 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         ></textarea>
                         <p className="text-xs text-red-500 mt-1 text-right">Minimum 30 characters are required</p>
                     </div>
-                  </div>
-                  
-                  <div className="mt-8 pt-4 border-t flex justify-end">
-                      <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
-                          Save
-                      </Button>
                   </div>
                 </>
               )}
@@ -334,12 +369,6 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         <p className="text-xs text-gray-500 mt-1">Press Enter to add the skill</p>
                     </div>
                   </div>
-                  
-                  <div className="mt-8 pt-4 border-t flex justify-end">
-                      <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
-                          Save
-                      </Button>
-                  </div>
                 </>
               )}
 
@@ -373,18 +402,19 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                             <Input name="location" value={profileData.location} onChange={handleInputChange} placeholder="e.g.Delhi" className="mt-1" />
                         </div>
                     </div>
-                    
-                    <div className="mt-8 pt-4 border-t flex justify-end gap-2">
-                      <Button variant="outline">
-                        Discard
-                      </Button>
-                      <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
-                          Save
-                      </Button>
-                    </div>
                 </>
               )}
             </main>
+        </div>
+        {/* Fixed Save Button */}
+        <div className="fixed bottom-8 right-8 z-50">
+          <Button
+            onClick={handleSave}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg shadow-xl rounded-full"
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : (steps.findIndex(s => s.name === activeSection) === steps.length - 1 ? 'Finish' : 'Save & Next')}
+          </Button>
         </div>
       </div>
     </div>

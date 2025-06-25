@@ -11,11 +11,11 @@ import Freelancing from "./pages/Freelancing";
 import Connect from "./pages/Connect";
 import Admin from "./pages/Admin";
 import Checkout from "./pages/Checkout";
-import Profile from "./pages/Profile";
+import FreelancerProfile from "./pages/FreelancerProfile";
 import StudentProfile from "./pages/StudentProfile";
 import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
-import FreelancerProfile from "./pages/FreelancerProfile";
+import Profile from "./pages/Profile";
 import ProductDisplay from "./pages/ProductDisplay";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import NewProject from '@/pages/NewProject';
@@ -33,6 +33,7 @@ import Chat from "./pages/Chat";
 import BackUp from "./pages/Backup";
 import Sustainable from "./pages/Sustainable";
 import Connection from "./pages/Connections";
+import BussinessProfile from "./pages/bussinessprofile";
 
 const queryClient = new QueryClient();
 
@@ -54,10 +55,11 @@ const App = () => (
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/studentprofile" element={<StudentProfile />} />
+            <Route path="/bussinessprofile" element={<BussinessProfile />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/freelancer/:id" element={<FreelancerProfile />} />
+            <Route path="/freelancerprofile/:id" element={<FreelancerProfile />} />
             <Route path="/projects/new" element={<NewProject />} />
             <Route path="/collaborators" element={<Collaborators />} />
             <Route path="/meetings/schedule" element={<ScheduleMeeting />} />
@@ -72,6 +74,8 @@ const App = () => (
             <Route path="/backup" element={<BackUp />} />
             <Route path="/sustainable" element={<Sustainable />} />
             <Route path="/connection" element={<Connection />} />
+            <Route path="/studentprofile/:id" element={<StudentProfile />} />
+            <Route path="/green" element={<Sustainable/>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

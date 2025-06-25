@@ -34,7 +34,7 @@ export const Footer = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-10 mb-16 text-sm">
           {/* Brand Column */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-2">
             <div className="flex items-center space-x-3">
               <Link to="/" className="flex items-center space-x-2 group">
                 <img src={Logo} alt="AMOGH" className="h-20 w-auto" />
@@ -43,6 +43,7 @@ export const Footer = () => {
                   Beta
               </div>
             </div>
+            <p className="text-xs text-gray-400 mt-1">Future-Ready Education Solutions</p>
             
             <p className="text-gray-400 leading-relaxed text-sm max-w-lg">
               Transforming education through cutting-edge technology, industry partnerships, 
