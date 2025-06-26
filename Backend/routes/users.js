@@ -400,4 +400,71 @@ router.get('/stats', authorize, async (req, res) => {
   }
 });
 
+// --- SKILLS ENDPOINTS ---
+// Get current user's skills
+router.get('/skills', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    await userService.loadUserData();
+    const user = userService.findUserByCustomId(customUserId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({ success: true, skills: user.skills || [] });
+  } catch (error) {
+    console.error('Error fetching skills:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Add a skill to current user
+router.post('/skills', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const { name } = req.body;
+    if (!name || typeof name !== 'string') {
+      return res.status(400).json({ success: false, message: 'Skill name is required' });
+    }
+    const skills = await userService.addUserSkill(customUserId, { name });
+    res.json({ success: true, skills });
+  } catch (error) {
+    console.error('Error adding skill:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Remove a skill from current user
+router.delete('/skills', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    const { name } = req.body;
+    if (!name || typeof name !== 'string') {
+      return res.status(400).json({ success: false, message: 'Skill name is required' });
+    }
+    const skills = await userService.removeUserSkill(customUserId, name);
+    res.json({ success: true, skills });
+  } catch (error) {
+    console.error('Error removing skill:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router; 

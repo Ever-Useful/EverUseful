@@ -1,8 +1,10 @@
 import React from 'react';
+import NoUserProfile from "@/assets/images/no user profile.png";
 
 interface InitialsAvatarProps {
   firstName: string;
   lastName: string;
+  avatar?: string;
   size?: number;
   className?: string;
 }
@@ -10,6 +12,7 @@ interface InitialsAvatarProps {
 const InitialsAvatar: React.FC<InitialsAvatarProps> = ({ 
   firstName, 
   lastName, 
+  avatar,
   size = 128, 
   className = "" 
 }) => {
@@ -48,17 +51,32 @@ const InitialsAvatar: React.FC<InitialsAvatarProps> = ({
   const gradientClass = getColorFromName(firstName + lastName);
   const fontSize = Math.max(size * 0.4, 16); // Responsive font size
 
-  if (!initials) {
+  // If avatar is provided, show the image
+  if (avatar) {
     return (
-      <div 
-        className={`bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center text-white font-semibold ${className}`}
+      <img
+        src={avatar}
+        alt="User profile"
+        className={`rounded-full object-cover border-2 border-indigo-200 shadow-md ${className}`}
         style={{ width: size, height: size }}
-      >
-        <span style={{ fontSize }}>?</span>
-      </div>
+        onError={e => { e.currentTarget.src = NoUserProfile; }}
+      />
     );
   }
 
+  // If no initials, show fallback image
+  if (!initials) {
+    return (
+      <img
+        src={NoUserProfile}
+        alt="No user profile"
+        className={`rounded-full object-cover border-2 border-gray-200 shadow-md ${className}`}
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+
+  // Otherwise, show initials avatar
   return (
     <div 
       className={`bg-gradient-to-br ${gradientClass} rounded-full flex items-center justify-center text-white font-bold shadow-lg ${className}`}

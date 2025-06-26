@@ -299,7 +299,7 @@
         "website": "https://github.com/amitkumar",
         "title": "Full-Stack Developer",
         "createdAt": "2025-06-19T21:16:02.064Z",
-        "updatedAt": "2025-06-25T20:33:26.842Z",
+        "updatedAt": "2025-06-26T11:56:52.023Z",
         "firstName": "freelancer hai",
         "lastName": "sayad",
         "userType": "freelancer",
@@ -403,7 +403,8 @@
       "skills": [
         "python",
         "frontend",
-        "backend"
+        "backend",
+        "ai"
       ],
       "social": {
         "followers": [],
@@ -1191,9 +1192,9 @@
       "freelancerData": null
     }
   },
-  "userCounter": 10,
+  "userCounter": 9,
   "metadata": {
-    "lastUpdated": "2025-06-25T20:33:26.842Z",
+    "lastUpdated": "2025-06-26T11:57:03.293Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

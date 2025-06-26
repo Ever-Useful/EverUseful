@@ -276,10 +276,28 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           setSkills([]);
           return;
         }
-        
-        const backendSkills = await userService.getUserSkills();
-        if (backendSkills && Array.isArray(backendSkills)) {
-          setSkills(backendSkills);
+        // Get user profile and customUserId
+        let userProfile;
+        try {
+          userProfile = await userService.getUserProfile();
+        } catch (err) {
+          // If user not found, try to create user
+          try {
+            await userService.createUser({});
+            userProfile = await userService.getUserProfile();
+          } catch (createErr) {
+            setSkills([]);
+            setIsLoadingSkills(false);
+            return;
+          }
+        }
+        const customUserId = userProfile.customUserId;
+        // Fetch user data using customUserId (same as Profile.tsx)
+        const userDataResponse = await fetch(`http://localhost:3000/api/users/${customUserId}`);
+        if (userDataResponse.ok) {
+          const userData = await userDataResponse.json();
+          const userSkills = userData.data?.skills || [];
+          setSkills(userSkills);
         } else {
           setSkills([]);
         }
@@ -290,7 +308,6 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         setIsLoadingSkills(false);
       }
     };
-    
     fetchSkills();
   }, []);
 

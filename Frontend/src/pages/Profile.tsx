@@ -17,7 +17,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 import BackgroundUpload from '@/components/BackgroundUpload';
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
 import NoImageAvailable from "@/assets/images/no image available.png";
-import { GlobeLoader } from "@/components/ui/globe-loader";
+import NoUserProfile from "@/assets/images/no user profile.png";
+import GlobeLoader from '@/components/GlobeLoader';
 
 
 // Add dummy state for conversations and selectedConversation
@@ -50,6 +51,8 @@ const StudentProfessorProfileView = ({
   isExpanded,
   setIsExpanded,
   academicBackground,
+  educationList,
+  workList,
   handleBackgroundChange,
   backgroundImage,
   showAddProjectSidebar,
@@ -165,32 +168,53 @@ const StudentProfessorProfileView = ({
                   </Button>
                 </div>
                 <div className="space-y-6">
-                  {academicBackground.every(item => !item.degree && !item.institution && !item.year && !item.course) ? (
-                    <div className="text-gray-500 text-sm">No academic background added yet.</div>
-                  ) : (
-                    academicBackground.map((item, index) => (
-                      <div key={index} className="flex">
-                        <div className="mr-4 flex flex-col items-center">
-                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                            <GraduationCap className="w-5 h-5 text-blue-500" />
-                          </div>
-                          {index < academicBackground.length - 1 && (
-                            <div className="w-0.5 h-full bg-gray-200 my-2"></div>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          {item.degree && <h3 className="font-semibold text-gray-900">{item.degree}</h3>}
-                          {(item.institution || item.year) && (
-                            <p className="text-gray-600">
-                              {item.institution}{item.institution && item.year ? ' • ' : ''}{item.year}
-                            </p>
-                          )}
-                          {item.course && (
-                            <p className="text-sm text-gray-500 mt-1"><span className="font-medium">Course:</span> {item.course}</p>
-                          )}
+                  {(educationList && educationList.length > 0) ? (
+                    educationList.map((edu, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                        <div>
+                          <div className="font-semibold text-gray-900">{edu.qualification} - {edu.course}</div>
+                          <div className="text-gray-700 text-sm">{edu.college} | {edu.startYear} - {edu.endYear}</div>
+                          {edu.specialization && <div className="text-gray-500 text-xs mt-1">{edu.specialization}</div>}
+                          {edu.description && <div className="text-gray-500 text-xs mt-1">{edu.description}</div>}
+                          {edu.skills && <div className="text-gray-500 text-xs mt-1">Skills: {edu.skills}</div>}
                         </div>
                       </div>
                     ))
+                  ) : (
+                    <div className="text-gray-500 text-sm">No education added yet.</div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            {/* Work Experience Section */}
+            <Card className="bg-white shadow-lg rounded-xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-green-100 p-2 rounded-lg mr-3">
+                      <Briefcase className="w-5 h-5 text-green-600" />
+                    </span>
+                    Work Experience
+                  </h2>
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Work Experience'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" />Edit
+                  </Button>
+                </div>
+                <div className="space-y-6">
+                  {(workList && workList.length > 0) ? (
+                    workList.map((work, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                        <div>
+                          <div className="font-semibold text-gray-900">{work.designation} - {work.organization}</div>
+                          <div className="text-gray-700 text-sm">{work.startDate} - {work.currentlyWorking ? 'Present' : work.endDate}</div>
+                          <div className="text-gray-500 text-xs mt-1">{work.employmentType}</div>
+                          {work.description && <div className="text-gray-500 text-xs mt-1">{work.description}</div>}
+                          {work.skills && <div className="text-gray-500 text-xs mt-1">Skills: {work.skills}</div>}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-500 text-sm">No work experience added yet.</div>
                   )}
                 </div>
               </CardContent>
@@ -279,6 +303,26 @@ const StudentProfessorProfileView = ({
           </div>
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* User Photo Section */}
+            <Card className="bg-white shadow-lg rounded-xl max-w-md flex flex-col items-center py-6">
+              {profileData.avatar ? (
+                <img
+                  src={profileData.avatar}
+                  alt="User profile"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-indigo-200 shadow-md mb-2"
+                  onError={e => { e.currentTarget.src = NoUserProfile; }}
+                />
+              ) : (
+                <img
+                  src={NoUserProfile}
+                  alt="No user profile"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-gray-200 shadow-md mb-2"
+                />
+              )}
+              <div className="text-lg font-semibold text-gray-800 mt-2">
+                {profileData.firstName} {profileData.lastName}
+              </div>
+            </Card>
             {/* Skills Section */}
             <Card className="bg-white shadow-lg rounded-xl max-w-md">
               <CardContent className="p-6">
@@ -398,11 +442,14 @@ const Profile = () => {
   const [showEditProjectSidebar, setShowEditProjectSidebar] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
 
+  const [education, setEducation] = useState([]);
+  const [workExperience, setWorkExperience] = useState([]);
+
   const fetchUserData = async () => {
     try {
       setLoading(true);
       const userProfile = await userService.getUserProfile();
-      const { auth: authData, profile: userProfileData, stats: userStats, studentData: studentInfo } = userProfile;
+      const { auth: authData, profile: userProfileData, stats: userStats, studentData: studentInfo, education: educationArr, workExperience: workArr } = userProfile;
       
       setProfileData({
         firstName: authData.firstName || '',
@@ -501,6 +548,9 @@ const Profile = () => {
         console.error('Error fetching projects:', error);
         setProjects([]);
       }
+
+      setEducation(educationArr || []);
+      setWorkExperience(workArr || []);
 
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -624,11 +674,8 @@ const Profile = () => {
   // Conditional rendering based on userType
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <GlobeLoader size={120} className="mx-auto mb-4" />
-          <p className="text-gray-600 text-lg font-medium">Loading...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <GlobeLoader />
       </div>
     );
   }
@@ -658,6 +705,8 @@ const Profile = () => {
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
         academicBackground={academicBackground}
+        educationList={education}
+        workList={workExperience}
         handleBackgroundChange={handleBackgroundChange}
         backgroundImage={backgroundImage}
         showAddProjectSidebar={showAddProjectSidebar}
@@ -910,32 +959,54 @@ const Profile = () => {
                   </Button>
                 </div>
                 <div className="space-y-6">
-                  {academicBackground.every(item => !item.degree && !item.institution && !item.year && !item.course) ? (
-                    <div className="text-gray-500 text-sm">No academic background added yet.</div>
-                  ) : (
-                    academicBackground.map((item, index) => (
-                      <div key={index} className="flex">
-                        <div className="mr-4 flex flex-col items-center">
-                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                            <GraduationCap className="w-5 h-5 text-blue-500" />
-                          </div>
-                          {index < academicBackground.length - 1 && (
-                            <div className="w-0.5 h-full bg-gray-200 my-2"></div>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          {item.degree && <h3 className="font-semibold text-gray-900">{item.degree}</h3>}
-                          {(item.institution || item.year) && (
-                            <p className="text-gray-600">
-                              {item.institution}{item.institution && item.year ? ' • ' : ''}{item.year}
-                            </p>
-                          )}
-                          {item.course && (
-                            <p className="text-sm text-gray-500 mt-1"><span className="font-medium">Course:</span> {item.course}</p>
-                          )}
+                  {(education && education.length > 0) ? (
+                    education.map((edu, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                        <div>
+                          <div className="font-semibold text-gray-900">{edu.degree} - {edu.course}</div>
+                          <div className="text-gray-700 text-sm">{edu.institution} | {edu.year}</div>
+                          <div className="text-gray-500 text-xs mt-1">{edu.specialization}</div>
+                          {edu.description && <div className="text-gray-500 text-xs mt-1">{edu.description}</div>}
+                          {edu.skills && <div className="text-gray-500 text-xs mt-1">Skills: {edu.skills}</div>}
                         </div>
                       </div>
                     ))
+                  ) : (
+                    <div className="text-gray-500 text-sm">No education added yet.</div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Work Experience Section */}
+            <Card className="bg-white shadow-lg rounded-xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-green-100 p-2 rounded-lg mr-3">
+                      <Briefcase className="w-5 h-5 text-green-600" />
+                    </span>
+                    Work Experience
+                  </h2>
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Work Experience'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" />Edit
+                  </Button>
+                </div>
+                <div className="space-y-6">
+                  {(workExperience && workExperience.length > 0) ? (
+                    workExperience.map((work, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                        <div>
+                          <div className="font-semibold text-gray-900">{work.designation} - {work.organization}</div>
+                          <div className="text-gray-700 text-sm">{work.startDate} - {work.currentlyWorking ? 'Present' : work.endDate}</div>
+                          <div className="text-gray-500 text-xs mt-1">{work.employmentType}</div>
+                          {work.description && <div className="text-gray-500 text-xs mt-1">{work.description}</div>}
+                          {work.skills && <div className="text-gray-500 text-xs mt-1">Skills: {work.skills}</div>}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-500 text-sm">No work experience added yet.</div>
                   )}
                 </div>
               </CardContent>
@@ -1026,7 +1097,8 @@ const Profile = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Research Interests */}
+            {/* User Photo Section */}
+            {/* Skills Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
