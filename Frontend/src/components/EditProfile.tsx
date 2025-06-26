@@ -209,7 +209,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         await userService.updateAuthInfo({
           firstName: profileData.firstName,
           lastName: profileData.lastName,
-          userType: profileData.userType,
+          userType: denormalizeUserType(profileData.userType),
           phoneNumber: profileData.mobile,
         });
       } else if (activeSection === 'About') {
@@ -461,6 +461,32 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
   const handleSocialInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setSocialLinks(prev => ({ ...prev, [name]: value }));
+  };
+
+  const normalizeUserType = (dbType: string) => {
+    switch ((dbType || '').toLowerCase()) {
+      case 'student':
+        return 'Students';
+      case 'professor':
+        return 'Professors';
+      case 'freelancer':
+        return 'Freelancers';
+      default:
+        return '';
+    }
+  };
+
+  const denormalizeUserType = (uiType: string) => {
+    switch (uiType) {
+      case 'Students':
+        return 'student';
+      case 'Professors':
+        return 'professor';
+      case 'Freelancers':
+        return 'freelancer';
+      default:
+        return '';
+    }
   };
 
   return (

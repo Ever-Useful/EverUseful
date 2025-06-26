@@ -179,11 +179,12 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   const getAuthorDetails = (authorId: string) => {
     const user = authorCache[authorId];
     if (!user) return { name: 'Unknown', image: NoUserProfile, userType: '', id: authorId };
+    const auth = user.auth || {};
     const profile = user.profile || {};
     return {
-      name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Unnamed User',
+      name: `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User',
       image: profile.avatar || NoUserProfile,
-      userType: profile.userType || '',
+      userType: auth.userType || '',
       id: user.customUserId
     };
   };

@@ -206,7 +206,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
       <div className="w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
-        <header className="flex items-center justify-between p-4 border-b">
+        <header className="flex items-center justify-between p-2 border-b">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={onClose}>
               <ArrowLeft className="w-5 h-5" />

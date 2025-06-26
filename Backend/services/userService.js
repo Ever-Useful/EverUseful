@@ -41,6 +41,19 @@ class UserService {
   // Generate custom user ID
   async generateCustomUserId() {
     await this.loadUserData();
+    // Scan all existing user IDs to find the highest number
+    const userIds = Object.keys(this.userData.users || {});
+    let maxId = 0;
+    userIds.forEach(id => {
+      const match = id.match(/^USER_(\d{6})$/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxId) maxId = num;
+      }
+    });
+    // Ensure userCounter is at least the highest found
+    this.userData.userCounter = Math.max(this.userData.userCounter, maxId);
+    // Increment for the new user
     this.userData.userCounter += 1;
     const customUserId = `USER_${this.userData.userCounter.toString().padStart(6, '0')}`;
     await this.saveUserData();

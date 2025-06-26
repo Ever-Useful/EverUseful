@@ -1,9 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { FreelanceFilterSidebar } from "../components/freelancing/FreelanceFilterSidebar";
+import { FreelancerGrid } from "../components/freelancing/FreelancerGrid";
+import { ArrowUpDown } from "lucide-react";
 
 // HERO SECTION DATA
 const heroFeatures = [
@@ -12,6 +15,128 @@ const heroFeatures = [
   { text: "Peer-Reviewed Experts", color: "bg-blue-100 text-blue-800" },
   { text: "Custom R&D Solutions", color: "bg-purple-100 text-purple-800" },
   { text: "Secure & Transparent", color: "bg-pink-100 text-pink-800" },
+];
+
+// POPULAR SKILLS DATA (NEW)
+const popularSkills = [
+  { name: "Machine Learning", icon: "🤖", count: "2.3k+ experts", color: "bg-blue-50 border-blue-200" },
+  { name: "Data Science", icon: "📊", count: "1.8k+ experts", color: "bg-green-50 border-green-200" },
+  { name: "AI Research", icon: "🧠", count: "1.5k+ experts", color: "bg-purple-50 border-purple-200" },
+  { name: "Biotechnology", icon: "🧬", count: "950+ experts", color: "bg-pink-50 border-pink-200" },
+  { name: "Quantum Computing", icon: "⚛️", count: "320+ experts", color: "bg-indigo-50 border-indigo-200" },
+  { name: "Blockchain", icon: "🔗", count: "780+ experts", color: "bg-orange-50 border-orange-200" },
+  { name: "Cybersecurity", icon: "🔒", count: "1.2k+ experts", color: "bg-red-50 border-red-200" },
+  { name: "Robotics", icon: "🤖", count: "650+ experts", color: "bg-gray-50 border-gray-200" },
+];
+
+// FEATURED CATEGORIES DATA (NEW)
+const featuredCategories = [
+  {
+    title: "Research & Development",
+    description: "Cutting-edge research projects and innovation consulting",
+    icon: "🔬",
+    experts: "3.2k+",
+    projects: "12.5k+",
+    color: "from-blue-500 to-purple-600",
+  },
+  {
+    title: "Academic Mentorship",
+    description: "PhD-level guidance for students and researchers",
+    icon: "🎓",
+    experts: "2.8k+",
+    projects: "8.9k+",
+    color: "from-green-500 to-teal-600",
+  },
+  {
+    title: "Industry Consulting",
+    description: "Expert consultation for business and technology",
+    icon: "💼",
+    experts: "1.9k+",
+    projects: "15.2k+",
+    color: "from-orange-500 to-red-600",
+  },
+  {
+    title: "Technical Writing",
+    description: "Research papers, documentation, and technical content",
+    icon: "✍️",
+    experts: "1.5k+",
+    projects: "6.7k+",
+    color: "from-purple-500 to-pink-600",
+  },
+];
+
+// CLIENT TESTIMONIALS DATA (NEW)
+const clientTestimonials = [
+  {
+    name: "Dr. Sarah Johnson",
+    role: "Research Director",
+    company: "TechCorp Labs",
+    content: "The PhD experts on this platform helped us develop breakthrough algorithms that reduced our processing time by 60%. Exceptional quality and professionalism.",
+    rating: 5,
+    avatar: "https://randomuser.me/api/portraits/women/32.jpg",
+  },
+  {
+    name: "Michael Chen",
+    role: "Startup Founder",
+    company: "InnovateAI",
+    content: "Found the perfect AI researcher for our startup. The collaboration was seamless, and the results exceeded our expectations. Highly recommended!",
+    rating: 5,
+    avatar: "https://randomuser.me/api/portraits/men/45.jpg",
+  },
+  {
+    name: "Dr. Elena Rodriguez",
+    role: "University Professor",
+    company: "MIT",
+    content: "As an academic, I needed specialized expertise for my research. The platform connected me with brilliant minds from around the world.",
+    rating: 5,
+    avatar: "https://randomuser.me/api/portraits/women/67.jpg",
+  },
+];
+
+// PRICING PLANS DATA (NEW)
+const pricingPlans = [
+  {
+    name: "Basic",
+    price: "Free",
+    description: "Perfect for exploring the platform",
+    features: [
+      "Browse expert profiles",
+      "Post project requirements",
+      "Basic messaging",
+      "Standard support",
+    ],
+    buttonText: "Get Started",
+    popular: false,
+  },
+  {
+    name: "Professional",
+    price: "$29",
+    period: "/month",
+    description: "For serious research projects",
+    features: [
+      "Everything in Basic",
+      "Priority expert matching",
+      "Advanced project tools",
+      "Priority support",
+      "Analytics dashboard",
+    ],
+    buttonText: "Start Free Trial",
+    popular: true,
+  },
+  {
+    name: "Enterprise",
+    price: "Custom",
+    description: "For large organizations",
+    features: [
+      "Everything in Professional",
+      "Dedicated account manager",
+      "Custom integrations",
+      "Team collaboration tools",
+      "Advanced security features",
+    ],
+    buttonText: "Contact Sales",
+    popular: false,
+  },
 ];
 
 // WHY UNIQUE DATA
@@ -257,6 +382,14 @@ const orbPulse = {
 const Work: React.FC = () => {
   const [visibleIndexes, setVisibleIndexes] = useState<number[]>([0, 1, 2, 3, 4]);
   const sliderRef = useRef<Slider | null>(null);
+  const [filters, setFilters] = useState({});
+  const [freelancers, setFreelancers] = useState<any[]>([]);
+  const [filtered, setFiltered] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("rating");
+  const [skillFilter, setSkillFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [showCount, setShowCount] = useState(4);
 
   // Update visible indexes on slide change
   const handleBeforeChange = (_: number, next: number) => {
@@ -268,8 +401,47 @@ const Work: React.FC = () => {
     setVisibleIndexes(newIndexes);
   };
 
+  // Fetch all users and filter for freelancers
+  useEffect(() => {
+    fetch("http://localhost:3000/api/users/all")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.users) {
+          const all = Object.values(data.users);
+          const onlyFreelancers = all.filter((u: any) => u.profile?.userType?.toLowerCase() === "freelancer");
+          setFreelancers(onlyFreelancers);
+        }
+      });
+  }, []);
+
+  // Filtering and sorting
+  useEffect(() => {
+    let result = freelancers;
+    if (skillFilter) {
+      result = result.filter((f) => (f.skills || []).some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase())));
+    }
+    if (locationFilter) {
+      result = result.filter((f) => (f.profile?.location || "").toLowerCase().includes(locationFilter.toLowerCase()));
+    }
+    if (search) {
+      result = result.filter((f) =>
+        (f.profile?.firstName + " " + f.profile?.lastName).toLowerCase().includes(search.toLowerCase()) ||
+        (f.profile?.title || "").toLowerCase().includes(search.toLowerCase()) ||
+        (f.skills || []).some((s: string) => s.toLowerCase().includes(search.toLowerCase()))
+      );
+    }
+    // Sort
+    if (sortBy === "rating") {
+      result = result.slice().sort((a, b) => (b.stats?.rating || 4.5) - (a.stats?.rating || 4.5));
+    } else if (sortBy === "projects") {
+      result = result.slice().sort((a, b) => (b.stats?.projectsCount || 0) - (a.stats?.projectsCount || 0));
+    }
+    setFiltered(result);
+  }, [freelancers, skillFilter, locationFilter, search, sortBy]);
+
   return (
     <main className="w-full min-h-screen bg-white">
+      
       {/* HERO SECTION */}
       <Header />
       <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden">
@@ -331,7 +503,259 @@ const Work: React.FC = () => {
         </motion.div>
       </section>
 
-      {/* WHY WE'RE UNIQUE SECTION */}
+      {/* HIRE THE BEST SECTION (Upwork-style, AMOGH themed) */}
+      <section className="w-full bg-white py-16 px-4 border-b border-gray-100 flex flex-col items-center justify-center text-center">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">Hire the Best Professionals</h2>
+        <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          Check out professionals on <span className="font-bold text-[#fa5954]">AMOGH</span>, with the skills you need for your next job.
+        </p>
+        <a
+          href="/findexpert"
+          className="inline-block px-10 py-3 rounded-lg bg-green-600 text-white font-bold text-lg shadow hover:bg-green-700 transition-all duration-300 min-w-[200px]"
+        >
+          Hire freelancers
+        </a>
+      </section>
+
+      {/* FILTER BAR + GRID (like FindExpert) */}
+      <section className="w-full bg-white py-8 px-4 flex flex-col items-center justify-center">
+        {/* Filter Bar */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full max-w-5xl">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+              Freelance Research Experts
+            </h2>
+            <p className="text-lg text-gray-600 font-medium">
+              {filtered.length} freelancers available for collaboration
+            </p>
+          </div>
+          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+            <div className="flex items-center w-full md:w-auto gap-2">
+              <ArrowUpDown className="w-4 h-4 text-gray-400" />
+              <span className="text-gray-500 text-xs font-medium">Sort by</span>
+              <select
+                className="bg-white border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm w-full md:w-auto ml-1"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="rating">Highest Rating</option>
+                <option value="projects">Most Projects</option>
+              </select>
+            </div>
+            <div className="relative w-full md:w-64">
+              <input
+                type="text"
+                placeholder="Filter by skill..."
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm"
+                value={skillFilter}
+                onChange={(e) => setSkillFilter(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+        {/* Freelancer Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
+          {filtered.slice(0, showCount).map((f, idx) => (
+            <div key={f.customUserId || idx} className="rounded-xl overflow-hidden shadow-lg transition-all flex flex-col h-full bg-gradient-to-br from-blue-50 to-purple-50">
+              <div className="flex flex-col h-full">
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className="flex justify-center mb-3">
+                    <img
+                      src={f.profile?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(f.profile?.firstName || 'Freelancer')}
+                      alt={f.profile?.firstName || 'Freelancer'}
+                      className="w-20 h-20 rounded-full object-cover border-3 border-white/80 shadow-lg"
+                    />
+                  </div>
+                  <div className="text-center mb-3">
+                    <h3 className="text-lg font-bold text-black">{f.profile?.firstName} {f.profile?.lastName}</h3>
+                    <p className="text-black font-medium text-sm">{f.profile?.title}</p>
+                    <p className="text-black text-xs mt-1">{f.profile?.location}</p>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-1 mb-3">
+                    {(f.skills || []).slice(0, 3).map((skill: string, i: number) => (
+                      <span key={i} className="bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-1 rounded-full">
+                        {skill}
+                      </span>
+                    ))}
+                    {(f.skills || []).length > 3 && (
+                      <span className="bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-1 rounded-full">
+                        +{(f.skills || []).length - 3} more
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex justify-center mb-3">
+                    <div className="flex text-amber-400">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          xmlns="http://www.w3.org/2000/svg"
+                          className={`h-4 w-4 ${i < Math.floor(f.stats?.rating || 4.5) ? 'fill-amber-400' : 'fill-gray-200'}`}
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <span className="ml-2 text-gray-700 text-sm font-medium">{(f.stats?.rating || 4.5).toFixed(1)}</span>
+                  </div>
+                  <button
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mt-auto transition"
+                    onClick={() => window.location.href = `/freelancerprofile/${f.customUserId}`}
+                  >
+                    View Profile
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {filtered.length > showCount && (
+          <div className="mt-8 text-center">
+            <button
+              className="px-8 py-3 rounded-xl bg-white border border-gray-300 text-gray-800 font-semibold shadow hover:bg-gray-50 transition-all"
+              onClick={() => setShowCount(showCount + 4)}
+            >
+              Load More Freelancers
+            </button>
+          </div>
+        )}
+      </section>
+
+      {/* POPULAR SKILLS SECTION (NEW) */}
+      <section className="w-full py-20 px-6 bg-gray-50 border-b border-gray-100">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="mb-12 text-center"
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              Popular Skills & Expertise
+            </h2>
+            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+              Discover top PhD experts across cutting-edge fields. From AI research to biotechnology, find the perfect match for your project.
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {popularSkills.map((skill, idx) => (
+              <motion.div
+                key={skill.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
+                className={`${skill.color} rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:scale-105`}
+              >
+                <div className="text-3xl mb-3">{skill.icon}</div>
+                <h3 className="font-semibold text-gray-900 mb-1">{skill.name}</h3>
+                <p className="text-sm text-gray-600">{skill.count}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURED CATEGORIES SECTION (NEW) */}
+      <section className="w-full py-20 px-6 bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="mb-12 text-center"
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              Featured Categories
+            </h2>
+            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+              Explore our most popular research and development categories with thousands of successful projects completed.
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredCategories.map((category, idx) => (
+              <motion.div
+                key={category.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.1, ease: "easeOut" }}
+                className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-90`} />
+                <div className="relative p-6 text-white">
+                  <div className="text-4xl mb-4">{category.icon}</div>
+                  <h3 className="text-lg font-bold mb-2">{category.title}</h3>
+                  <p className="text-sm opacity-90 mb-4">{category.description}</p>
+                  <div className="flex justify-between text-sm">
+                    <span>{category.experts} experts</span>
+                    <span>{category.projects} projects</span>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CLIENT TESTIMONIALS SECTION (NEW) */}
+      <section className="w-full py-20 px-6 bg-gray-50 border-b border-gray-100">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="mb-12 text-center"
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              What Our Clients Say
+            </h2>
+            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+              Real feedback from researchers, startups, and organizations who've found success with our PhD experts.
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {clientTestimonials.map((testimonial, idx) => (
+              <motion.div
+                key={testimonial.name}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.2, ease: "easeOut" }}
+                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <div className="flex items-center mb-4">
+                  <img
+                    src={testimonial.avatar}
+                    alt={testimonial.name}
+                    className="w-12 h-12 rounded-full object-cover mr-4"
+                    onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(testimonial.name) + '&background=E0E7EF&color=374151&size=48'; }}
+                  />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                    <p className="text-sm text-[#fa5954]">{testimonial.company}</p>
+                  </div>
+                </div>
+                <div className="flex mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-gray-700 italic">"{testimonial.content}"</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+       {/* WHY WE'RE UNIQUE SECTION */}
       <section className="w-full py-20 px-6 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto">
           <motion.div
@@ -368,6 +792,7 @@ const Work: React.FC = () => {
           </div>
         </div>
       </section>
+
 
       {/* SUCCESS STORIES SECTION */}
       <section className="w-full py-20 px-6 bg-gray-50 border-b border-gray-100">

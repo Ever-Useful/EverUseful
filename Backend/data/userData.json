@@ -299,10 +299,10 @@
         "website": "https://github.com/amitkumar",
         "title": "Full-Stack Developer",
         "createdAt": "2025-06-19T21:16:02.064Z",
-        "updatedAt": "2025-06-25T18:13:35.393Z",
+        "updatedAt": "2025-06-25T20:33:26.842Z",
         "firstName": "freelancer hai",
         "lastName": "sayad",
-        "userType": "Students",
+        "userType": "freelancer",
         "username": "amitkumar",
         "email": "amit@example.com",
         "mobile": "9876543212",
@@ -460,16 +460,51 @@
     "USER_000006": {
       "customUserId": "USER_000006",
       "profile": {
-        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
-        "bio": "Business student with a passion for technology and innovation. Currently exploring the intersection of business and technology through various projects and collaborations.",
-        "location": "Lucknow, Uttar Pradesh",
-        "website": "https://github.com/priyasharma",
-        "title": "Business Student",
-        "createdAt": "2025-06-24T19:56:23.742Z",
-        "updatedAt": "2025-06-25T16:41:01.028Z",
-        "firstName": "Priya",
-        "lastName": "Sharma",
-        "userType": "Students"
+        "avatar": null,
+        "bio": null,
+        "location": null,
+        "website": null,
+        "title": null,
+        "createdAt": "2025-06-25T18:57:20.316Z",
+        "updatedAt": "2025-06-25T18:57:20.316Z",
+        "firstName": "",
+        "lastName": "",
+        "userType": "student",
+        "username": "",
+        "email": "22beece21.cce@cujammu.ac.in",
+        "mobile": "",
+        "gender": "",
+        "domain": "",
+        "purpose": "",
+        "role": ""
+      },
+      "education": [],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-25T18:57:20.316Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-25T18:57:20.316Z"
       },
       "projects": {
         "created": [],
@@ -517,15 +552,11 @@
         "totalLikes": 0,
         "totalViews": 0,
         "totalDownloads": 0,
-        "memberSince": "2025-06-24T19:56:23.742Z"
+        "memberSince": "2025-06-25T18:57:20.316Z"
       },
-      "studentData": {
-        "college": "iit",
-        "degree": "bcom",
-        "course": "english",
-        "year": "2",
-        "updatedAt": "2025-06-24T20:42:58.306Z"
-      }
+      "studentData": null,
+      "professorData": null,
+      "freelancerData": null
     },
     "USER_DUMMY_001": {
       "customUserId": "USER_DUMMY_001",
@@ -698,7 +729,7 @@
     "USER_DUMMY_003": {
       "customUserId": "USER_DUMMY_003",
       "profile": {
-        "avatar": "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+        "avatar": "https://randomuser.me/api/portraits/women/44.jpg",
         "bio": "Associate Professor in Computer Science with 12+ years of teaching and research experience. Published 25+ papers in top-tier conferences. Leading research in Natural Language Processing and Computer Vision. Dedicated to fostering innovation in academia.",
         "location": "Delhi, NCR",
         "website": "https://drpriyasharma.academia.edu",
@@ -778,11 +809,391 @@
         "year": "3",
         "updatedAt": "2025-06-25T00:00:00.000Z"
       }
+    },
+    "USER_000007": {
+      "customUserId": "USER_000007",
+      "profile": {
+        "avatar": "https://randomuser.me/api/portraits/men/31.jpg",
+        "bio": "Professor of Quantum Physics with 20+ years of research and teaching experience.",
+        "location": "Cambridge, UK",
+        "website": "https://professorjohnphd.com",
+        "title": "Professor of Quantum Physics",
+        "createdAt": "2025-06-26T10:00:00.000Z",
+        "updatedAt": "2025-06-26T10:00:00.000Z",
+        "firstName": "John",
+        "lastName": "Smith",
+        "userType": "professor",
+        "username": "johnsmithphd",
+        "email": "john.smith@cambridge.edu",
+        "mobile": "9876543213",
+        "gender": "Male",
+        "domain": "Physics",
+        "purpose": "Research & Teach",
+        "role": "Professor"
+      },
+      "education": [
+        {
+          "id": "edu_007",
+          "qualification": "PhD",
+          "course": "Quantum Physics",
+          "specialization": "Quantum Computing",
+          "college": "University of Cambridge",
+          "startYear": "2000",
+          "endYear": "2004",
+          "courseType": "Full Time",
+          "percentage": "-",
+          "cgpa": "-",
+          "rollNumber": "PHY2000",
+          "lateralEntry": "No",
+          "skills": "Quantum Mechanics, Quantum Computing",
+          "description": "PhD in Quantum Physics with research in quantum algorithms.",
+          "attachments": null,
+          "createdAt": "2025-06-26T10:00:00.000Z",
+          "updatedAt": "2025-06-26T10:00:00.000Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-26T10:00:00.000Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-26T10:00:00.000Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "Quantum Mechanics",
+        "Quantum Computing"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-26T10:00:00.000Z"
+      },
+      "studentData": null,
+      "professorData": {
+        "department": "Physics",
+        "university": "University of Cambridge",
+        "updatedAt": "2025-06-26T10:00:00.000Z"
+      },
+      "freelancerData": null
+    },
+    "USER_000008": {
+      "customUserId": "USER_000008",
+      "profile": {
+        "avatar": "https://randomuser.me/api/portraits/men/45.jpg",
+        "bio": "PhD in Economics, policy advisor, and guest lecturer.",
+        "location": "London, UK",
+        "website": "https://drwilliamsecon.com",
+        "title": "Economist & Lecturer",
+        "createdAt": "2025-06-26T10:20:00.000Z",
+        "updatedAt": "2025-06-26T10:20:00.000Z",
+        "firstName": "William",
+        "lastName": "Evans",
+        "userType": "freelancer",
+        "username": "williamevansphd",
+        "email": "william.evans@lse.ac.uk",
+        "mobile": "9876543215",
+        "gender": "Male",
+        "domain": "Economics",
+        "purpose": "Consult & Teach",
+        "role": "Economist"
+      },
+      "education": [
+        {
+          "id": "edu_009",
+          "qualification": "Doctorate",
+          "course": "Economics",
+          "specialization": "Policy Analysis",
+          "college": "London School of Economics",
+          "startYear": "2012",
+          "endYear": "2016",
+          "courseType": "Full Time",
+          "percentage": "-",
+          "cgpa": "-",
+          "rollNumber": "EC2012",
+          "lateralEntry": "No",
+          "skills": "Economics, Policy Analysis",
+          "description": "Doctorate in Economics with focus on policy advisory.",
+          "attachments": null,
+          "createdAt": "2025-06-26T10:20:00.000Z",
+          "updatedAt": "2025-06-26T10:20:00.000Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-26T10:20:00.000Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-26T10:20:00.000Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "Economics",
+        "Policy Analysis"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-26T10:20:00.000Z"
+      },
+      "studentData": null,
+      "professorData": null,
+      "freelancerData": null
+    },
+    "USER_00009": {
+      "customUserId": "USER_00009",
+      "profile": {
+        "avatar": "https://randomuser.me/api/portraits/women/46.jpg",
+        "bio": "Professor of Environmental Science, PhD in Climate Studies.",
+        "location": "Vancouver, Canada",
+        "website": "https://profemilyclimate.com",
+        "title": "Professor of Environmental Science",
+        "createdAt": "2025-06-26T10:30:00.000Z",
+        "updatedAt": "2025-06-26T10:30:00.000Z",
+        "firstName": "Emily",
+        "lastName": "Clark",
+        "userType": "professor",
+        "username": "emilyclarkphd",
+        "email": "emily.clark@ubc.ca",
+        "mobile": "9876543216",
+        "gender": "Female",
+        "domain": "Environmental Science",
+        "purpose": "Research & Mentor",
+        "role": "Professor"
+      },
+      "education": [
+        {
+          "id": "edu_010",
+          "qualification": "PhD",
+          "course": "Climate Studies",
+          "specialization": "Climate Modeling",
+          "college": "University of British Columbia",
+          "startYear": "2011",
+          "endYear": "2015",
+          "courseType": "Full Time",
+          "percentage": "-",
+          "cgpa": "-",
+          "rollNumber": "EN2011",
+          "lateralEntry": "No",
+          "skills": "Climate Modeling, Sustainability",
+          "description": "PhD in Climate Studies with research in climate modeling.",
+          "attachments": null,
+          "createdAt": "2025-06-26T10:30:00.000Z",
+          "updatedAt": "2025-06-26T10:30:00.000Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-26T10:30:00.000Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-26T10:30:00.000Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "Climate Modeling",
+        "Sustainability"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-26T10:30:00.000Z"
+      },
+      "studentData": null,
+      "professorData": {
+        "department": "Environmental Science",
+        "university": "University of British Columbia",
+        "updatedAt": "2025-06-26T10:30:00.000Z"
+      },
+      "freelancerData": null
     }
   },
-  "userCounter": 6,
+  "userCounter": 10,
   "metadata": {
-    "lastUpdated": "2025-06-25T18:13:35.393Z",
+    "lastUpdated": "2025-06-25T20:33:26.842Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

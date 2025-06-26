@@ -72,14 +72,26 @@ const Profile = () => {
             console.log('Projects.created:', data.data.projects?.created);
             console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
             // Fetch full project details for each project ID
-            const projectIds = Array.isArray(data.data.projects) ? data.data.projects : [];
+            const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
             console.log('Project IDs found:', projectIds);
+            console.log('Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
             if (projectIds.length > 0) {
-              const projectPromises = projectIds.map((pid: string) =>
-                fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
-                  .then(res => res.ok ? res.json() : null)
-                  .then(res => res && res.project ? res.project : null)
-              );
+              const projectPromises = projectIds.map((pid: string) => {
+                console.log(`Fetching project with ID: ${pid} (type: ${typeof pid})`);
+                return fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
+                  .then(res => {
+                    console.log(`Response for project ${pid}:`, res.status, res.ok);
+                    return res.ok ? res.json() : null;
+                  })
+                  .then(res => {
+                    console.log(`Project data for ${pid}:`, res);
+                    return res && res.project ? res.project : null;
+                  })
+                  .catch(error => {
+                    console.error(`Error fetching project ${pid}:`, error);
+                    return null;
+                  });
+              });
               const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
               console.log('Full projects fetched:', fullProjects);
               setPortfolioProjects(fullProjects);
@@ -121,7 +133,7 @@ const Profile = () => {
   // }
 
   const fullName =
-    `${userData.profile?.firstName || ""} ${userData.profile?.lastName || ""}`.trim() || "Unnamed User";
+    `${userData.auth?.firstName || ""} ${userData.auth?.lastName || ""}`.trim() || "Unnamed User";
 
   const profile = isLoggedIn
     ? {
