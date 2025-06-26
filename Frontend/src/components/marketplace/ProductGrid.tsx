@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ import { useAuthState } from "../../hooks/useAuthState";
 import { firestoreService } from "../../services/firestoreService";
 import { userService } from "../../services/userService";
 import { toast } from "sonner";
+import NoImageAvailable from "@/assets/images/no image available.png";
+import NoUserProfile from "@/assets/images/no user profile.png";
 
 interface Project {
   id: number;
@@ -34,14 +36,7 @@ interface Project {
   duration: string;
   rating: number;
   reviews: number;
-  author: {
-    name: string;
-    image: string;
-    verified: boolean;
-    rating: number;
-    projects: number;
-    bio: string;
-  };
+  author: string;
   status: string;
   posted: string;
   teamSize: number;
@@ -73,6 +68,7 @@ interface PaginationInfo {
 
 export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   const [showPopupMenu, setShowPopupMenu] = useState(false);
+  const [targetProductPath, setTargetProductPath] = useState<string>('');
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +85,27 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   });
   const navigate = useNavigate();
   const { user, token, isLoading: authLoading } = useAuthState();
+  const location = useLocation();
+  const [authorCache, setAuthorCache] = useState<Record<string, any>>({});
+  const [currentUserCustomId, setCurrentUserCustomId] = useState<string | null>(null);
+
+  // Fetch current user's customUserId
+  useEffect(() => {
+    const fetchCurrentUserData = async () => {
+      if (user) {
+        try {
+          const userData = await firestoreService.getCurrentUserData();
+          if (userData && userData.customUserId) {
+            setCurrentUserCustomId(userData.customUserId);
+          }
+        } catch (error) {
+          console.error('Error fetching current user data:', error);
+        }
+      }
+    };
+    
+    fetchCurrentUserData();
+  }, [user]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -133,6 +150,44 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
 
     fetchProjects();
   }, [searchQuery, filters, sortBy, currentPage]);
+
+  // Fetch author details for all projects
+  useEffect(() => {
+    const fetchAuthors = async () => {
+      const uniqueAuthorIds = Array.from(new Set(projects.map(p => p.author)));
+      const newCache: Record<string, any> = { ...authorCache };
+      for (const authorId of uniqueAuthorIds) {
+        if (authorId && !newCache[authorId]) {
+          try {
+            const res = await fetch(`http://localhost:3000/api/users/${authorId}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.success && data.data) {
+                newCache[authorId] = data.data;
+              }
+            }
+          } catch {}
+        }
+      }
+      setAuthorCache(newCache);
+    };
+    if (projects.length > 0) fetchAuthors();
+    // eslint-disable-next-line
+  }, [projects]);
+
+  // Helper to get author details
+  const getAuthorDetails = (authorId: string) => {
+    const user = authorCache[authorId];
+    if (!user) return { name: 'Unknown', image: NoUserProfile, userType: '', id: authorId };
+    const auth = user.auth || {};
+    const profile = user.profile || {};
+    return {
+      name: `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User',
+      image: profile.avatar || NoUserProfile,
+      userType: auth.userType || '',
+      id: user.customUserId
+    };
+  };
 
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSortBy(event.target.value);
@@ -216,6 +271,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
 
   const handleViewDetails = async (projectId: number) => {
     if (!user || !token) {
+      setTargetProductPath(`/product/${projectId}`);
       setShowPopupMenu(true);
       return;
     }
@@ -316,6 +372,23 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   // Helper: get 2 related projects (different from selected)
   const getRelated = (id: number) => projects.filter((p) => p.id !== id).slice(0, 2);
 
+  // Helper function to navigate to author profile based on userType
+  const goToAuthorProfile = (userType: string, id: string) => {
+    // Check if current user is the author
+    if (currentUserCustomId && currentUserCustomId === id) {
+      // Redirect to current user's own profile
+      navigate('/profile');
+      return;
+    }
+    
+    const type = (userType || '').toLowerCase();
+    if (type === 'freelancer') {
+      navigate(`/freelancerprofile/${id}`);
+    } else {
+      navigate(`/studentprofile/${id}`);
+    }
+  };
+
   if (loading || authLoading) {
     return <div className="text-center py-8">Loading...</div>;
   }
@@ -357,11 +430,12 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
             >
               <div className="relative">
                 <img
-                  src={project.image}
+                  src={project.image || NoImageAvailable}
                   alt={project.title}
                   className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
                   loading="lazy"
                   onClick={() => setSelected(project)}
+                  onError={e => { e.currentTarget.src = NoImageAvailable; }}
                 />
                 <div className="absolute top-2 left-2">
                   <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow">
@@ -390,11 +464,21 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
               <CardContent className="p-4 flex flex-col flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <img
-                    src={project.author.image}
-                    alt={project.author.name}
-                    className="w-6 h-6 rounded-full border border-gray-200"
+                    src={getAuthorDetails(project.author).image || NoUserProfile}
+                    alt={getAuthorDetails(project.author).name}
+                    className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
+                    onError={e => { e.currentTarget.src = NoUserProfile; }}
+                    onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                   />
-                  <span className="text-gray-700 text-xs">{project.author.name}</span>
+                  <span
+                    className="text-gray-700 text-xs cursor-pointer"
+                    style={{ transition: 'color 0.2s' }}
+                    onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                    onMouseOut={e => e.currentTarget.style.color = ''}
+                    onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                  >
+                    {getAuthorDetails(project.author).name}
+                  </span>
                   <div className="flex items-center space-x-1">
                     <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                     <span className="text-yellow-500 text-xs">{project.rating}</span>
@@ -506,19 +590,30 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
           </div>
           <div className="overflow-y-auto flex-1 px-6 py-4">
             <img
-              src={selected.image}
+              src={selected.image || NoImageAvailable}
               alt={selected.title}
               className="w-full h-40 object-cover rounded-lg mb-4"
+              onError={e => { e.currentTarget.src = NoImageAvailable; }}
             />
 
             <div className="flex items-center mb-4">
               <img
-                src={selected.author.image}
-                alt={selected.author.name}
-                className="w-8 h-8 rounded-full border border-gray-200 mr-3"
+                src={getAuthorDetails(selected.author).image || NoUserProfile}
+                alt={getAuthorDetails(selected.author).name}
+                className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
+                onError={e => { e.currentTarget.src = NoUserProfile; }}
+                onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
               />
               <div>
-                <div className="text-sm font-semibold text-gray-800">{selected.author.name}</div>
+                <div
+                  className="text-sm font-semibold text-gray-800 cursor-pointer"
+                  style={{ transition: 'color 0.2s' }}
+                  onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                  onMouseOut={e => e.currentTarget.style.color = ''}
+                  onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
+                >
+                  {getAuthorDetails(selected.author).name}
+                </div>
                 <div className="flex items-center space-x-1 text-xs text-gray-500">
                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                   <span className="text-yellow-500">{selected.rating}</span>
@@ -591,7 +686,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
               <div className="flex flex-col gap-3">
                 {getRelated(selected.id).map((rel) => (
                   <div key={rel.id} className="flex items-center gap-3 bg-gray-50 rounded p-2">
-                    <img src={rel.image} alt={rel.title} className="w-12 h-12 object-cover rounded" />
+                    <img src={rel.image || NoImageAvailable} alt={rel.title} className="w-12 h-12 object-cover rounded" onError={e => { e.currentTarget.src = NoImageAvailable; }} />
                     <div className="flex-1">
                       <div className="font-semibold text-xs text-gray-700">{rel.title}</div>
                       <div className="flex items-center gap-2 text-[11px] text-gray-500">
@@ -617,9 +712,13 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
       )}
         <PopupMenu 
         isOpen={showPopupMenu}
-        onClose={() => setShowPopupMenu(false)}
+        onClose={() => {
+          setShowPopupMenu(false);
+          setTargetProductPath('');
+        }}
         title="Get Started with AMOGH"
         formType="login"
+        redirectPath={targetProductPath || location.pathname}
       />
     </div>
 

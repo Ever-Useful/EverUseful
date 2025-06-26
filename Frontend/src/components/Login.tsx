@@ -8,7 +8,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowRight, Github, Mail } from "lucide-react";
 import { auth, handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "@/lib/firebase";
 
-export const Login = () => {
+interface LoginProps {
+  redirectPath?: string;
+  onSuccess?: () => void;
+}
+
+export const Login = ({ redirectPath = "/profile", onSuccess }: LoginProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +38,14 @@ export const Login = () => {
       const data = await response.json();
       localStorage.setItem("isLoggedIn", "true");
       window.dispatchEvent(new Event("storage"));
-      navigate(data.redirectUrl);
+      
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+      // Navigate to the redirect path instead of backend response
+      navigate(redirectPath);
     } catch (error: any) {
       console.error("Login failed", error);
       if (error.code === 'auth/invalid-credential') {
@@ -51,10 +63,6 @@ export const Login = () => {
       setIsLoading(false);
     }
   };
-
-
-
-
 
   return (
     <Card className="backdrop-blur-xl bg-white/90 border-0 shadow-2xl animate-scale-in delay-300">
@@ -144,7 +152,10 @@ export const Login = () => {
 
         <div className="flex justify-center gap-3 lg:gap-4">
           <Button 
-            onClick={() => handleGoogleAuth(navigate)}
+            onClick={() => {
+              handleGoogleAuth(navigate, undefined, redirectPath);
+              if (onSuccess) onSuccess();
+            }}
             variant="outline" 
             className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center"
             disabled={isLoading}
@@ -157,7 +168,10 @@ export const Login = () => {
             </svg>
           </Button>
           <Button 
-            onClick={() => handleGithubAuth(navigate)}
+            onClick={() => {
+              handleGithubAuth(navigate, undefined, redirectPath);
+              if (onSuccess) onSuccess();
+            }}
             variant="outline" 
             className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center"
             disabled={isLoading}

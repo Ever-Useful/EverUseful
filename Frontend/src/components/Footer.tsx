@@ -1,114 +1,260 @@
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Link } from "react-router-dom";
+import { Input } from "@/components/ui/input";
 import {
   Rocket,
-  Mail,
-  Phone,
-  MapPin,
   Twitter,
   Linkedin,
   Github,
   Instagram,
+  Mail,
+  BookOpen,
+  Briefcase,
+  GraduationCap,
+  User,
+  Shield,
+  FileText,
+  Globe,
+  Award,
+  Laptop,
+  BookMarked,
+  Lightbulb,
+  HelpCircle,
+  Calendar,
+  Users,
+  MessageSquare
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import Logo1 from "@/assets/images/Logo1.png"; 
+import Logo from '../assets/Logo/Logo Main.png'
+import { Link } from 'react-router-dom';
 
 export const Footer = () => {
   return (
-    <footer className="bg-gradient-to-br from-slate-100 to-gray-200 text-slate-900 border-t border-slate-200">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-2">
-          {/* Brand & Mission */}
-          <div className="mb-8 md:mb-0 md:w-1/3 space-y-4 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center space-x-2">
-                <Link to="/" className="flex items-center space-x-2 group">
-                  <img src={Logo1} alt="AMOGH" className="h-12 w-auto" />
-                  <Badge variant="secondary" className="hidden w-10 h-6 text-sm px-1 sm:inline-flex text-purple-700">
-                    Beta
-                  </Badge>
-                </Link>
+    <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-gray-300 border-t border-gray-700">
+      {/* Decorative top border */}
+      
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-10 mb-16 text-sm">
+          {/* Brand Column */}
+          <div className="lg:col-span-3 space-y-2">
+            <div className="flex items-center space-x-3">
+              <Link to="/" className="flex items-center space-x-2 group">
+                <img src={Logo} alt="AMOGH" className="h-20 w-auto" />
+              </Link>
+              <div className="py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-gray-300">
+                  Beta
               </div>
-              <p className="text-slate-600 text-base max-w-xs leading-relaxed font-medium">
-                Empowering students, educators, and businesses to collaborate, innovate, and shape the future of education and entrepreneurship.
-              </p>
             </div>
-            {/* Socials */}
-            <div className="flex space-x-3 pt-2">
-              <a href="#" aria-label="Twitter" className="hover:text-blue-500 transition-colors"><Twitter className="w-5 h-5" /></a>
-              <a href="#" aria-label="LinkedIn" className="hover:text-blue-700 transition-colors"><Linkedin className="w-5 h-5" /></a>
-              <a href="#" aria-label="GitHub" className="hover:text-slate-700 transition-colors"><Github className="w-5 h-5" /></a>
-              <a href="#" aria-label="Instagram" className="hover:text-pink-500 transition-colors"><Instagram className="w-5 h-5" /></a>
+            <p className="text-xs text-gray-400 mt-1">Future-Ready Education Solutions</p>
+            
+            <p className="text-gray-400 leading-relaxed text-sm max-w-lg">
+              Transforming education through cutting-edge technology, industry partnerships, 
+              and innovative learning methodologies. Empowering students, educators, and 
+              institutions worldwide since 2018.
+            </p>
+            
+            {/* Contact Info */}
+            <div className="space-y-2 text-xs">
+              <div className="flex items-start">
+                <Mail className="h-4 w-4 text-blue-400 mt-0.5 mr-2 flex-shrink-0" />
+                <span>support@amoghedu.com</span>
+              </div>
+              <div className="flex items-start">
+                <Globe className="h-4 w-4 text-green-400 mt-0.5 mr-2 flex-shrink-0" />
+                <span>Bengaluru, India • San Francisco, USA • London, UK</span>
+              </div>
+              <div className="flex items-start">
+                <Award className="h-4 w-4 text-yellow-400 mt-0.5 mr-2 flex-shrink-0" />
+                <span>ISO 27001 Certified • GDPR Compliant</span>
+              </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="pt-2">
+              <h4 className="text-white font-medium mb-3 text-sm">Connect With Us</h4>
+              <div className="flex space-x-3">
+                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-blue-500 transition-all transform hover:-translate-y-0.5 shadow-md">
+                  <Twitter className="h-5 w-5 text-blue-300" />
+                </a>
+                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-blue-700 transition-all transform hover:-translate-y-0.5 shadow-md">
+                  <Linkedin className="h-5 w-5 text-blue-300" />
+                </a>
+                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-gray-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                  <Github className="h-5 w-5 text-gray-300" />
+                </a>
+                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-gradient-to-r from-purple-600 to-pink-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                  <Instagram className="h-5 w-5 text-purple-300" />
+                </a>
+                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-red-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                  <Mail className="h-5 w-5 text-red-300" />
+                </a>
+              </div>
             </div>
           </div>
-          {/* Grouped Link Sections */}
-          <div className="w-full md:w-2/3 flex justify-end">
-            <div className="flex flex-row gap-4 text-sm"> {/* slightly bigger text size */}
-              {/* Students */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-slate-800 mb-1">Students</h4>
-                <ul className="space-y-1 text-slate-600">
-                  <li><a href="#" className="hover:text-blue-600">Submit Project</a></li>
-                  <li><a href="#" className="hover:text-blue-600">Find Mentors</a></li>
-                  <li><a href="#" className="hover:text-blue-600">Learning Resources</a></li>
-                  <li><a href="#" className="hover:text-blue-600">Success Stories</a></li>
-                  <li><a href="#" className="hover:text-blue-600">Community</a></li>
-                </ul>
-              </div>
-              {/* Businesses */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-slate-800 mb-1">Businesses</h4>
-                <ul className="space-y-1 text-slate-600">
-                  <li><a href="#" className="hover:text-purple-600">Browse Projects</a></li>
-                  <li><a href="#" className="hover:text-purple-600">Partner Program</a></li>
-                  <li><a href="#" className="hover:text-purple-600">Talent Pipeline</a></li>
-                  <li><a href="#" className="hover:text-purple-600">Innovation Hub</a></li>
-                  <li><a href="#" className="hover:text-purple-600">Case Studies</a></li>
-                </ul>
-              </div>
-              {/* Researchers */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-slate-800 mb-1">Researchers</h4>
-                <ul className="space-y-1 text-slate-600">
-                  <li><a href="#" className="hover:text-green-600">Research Projects</a></li>
-                  <li><a href="#" className="hover:text-green-600">Funding Options</a></li>
-                  <li><a href="#" className="hover:text-green-600">Collaboration Tools</a></li>
-                  <li><a href="#" className="hover:text-green-600">Journals & Papers</a></li>
-                </ul>
-              </div>
-              {/* Educators */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-slate-800 mb-1">Educators</h4>
-                <ul className="space-y-1 text-slate-600">
-                  <li><a href="#" className="hover:text-red-500">Post Research</a></li>
-                  <li><a href="#" className="hover:text-red-500">Find Talent</a></li>
-                  <li><a href="#" className="hover:text-red-500">Academic Resources</a></li>
-                  <li><a href="#" className="hover:text-red-500">Industry Ties</a></li>
-                </ul>
-              </div>
+
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h4 className="text-white font-medium flex items-center text-sm">
+              <Laptop className="mr-2 h-5 w-5 text-blue-400" />
+              Learning Hub
+            </h4>
+            <ul className="space-y-2.5 text-xs">
+              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><BookMarked className="mr-2 h-4 w-4 text-gray-500" /> Interactive Courses</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><Lightbulb className="mr-2 h-4 w-4 text-gray-500" /> Skill Labs</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><HelpCircle className="mr-2 h-4 w-4 text-gray-500" /> Q&A Forums</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><Calendar className="mr-2 h-4 w-4 text-gray-500" /> Live Workshops</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><Users className="mr-2 h-4 w-4 text-gray-500" /> Study Groups</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Certifications</a></li>
+            </ul>
+          </div>
+
+          {/* Resources */}
+          <div className="space-y-4">
+            <h4 className="text-white font-medium flex items-center text-sm">
+              <Briefcase className="mr-2 h-5 w-5 text-purple-400" />
+              Enterprise
+            </h4>
+            <ul className="space-y-2.5 text-xs">
+              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><Users className="mr-2 h-4 w-4 text-gray-500" /> Team Training</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><BookOpen className="mr-2 h-4 w-4 text-gray-500" /> Custom Content</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><GraduationCap className="mr-2 h-4 w-4 text-gray-500" /> Academic Partnerships</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Certification Programs</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><Globe className="mr-2 h-4 w-4 text-gray-500" /> Global Campus</a></li>
+              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><MessageSquare className="mr-2 h-4 w-4 text-gray-500" /> API Integration</a></li>
+            </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div className="lg:col-span-2 space-y-5 bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+            <div className="flex items-center">
+              <Mail className="h-6 w-6 text-yellow-400 mr-2" />
+              <h3 className="text-white font-bold text-lg">Stay Ahead</h3>
             </div>
+            <p className="text-gray-400 text-xs leading-relaxed">
+              Subscribe to our newsletter for the latest courses, industry insights, 
+              and exclusive learning resources. Never miss an update!
+            </p>
+            <form className="space-y-3">
+              <div className="space-y-2">
+                <Input 
+                  type="email" 
+                  placeholder="Your work email" 
+                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 text-xs h-9"
+                />
+                <Input 
+                  type="text" 
+                  placeholder="Area of interest (e.g. AI, Business)" 
+                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 text-xs h-9"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-9 text-xs shadow-lg"
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                Subscribe to Insights
+              </Button>
+              <p className="text-gray-500 text-xs leading-tight">
+                By subscribing, you agree to our Privacy Policy and consent to receive 
+                updates from our company. You can unsubscribe at any time.
+              </p>
+            </form>
           </div>
         </div>
 
-        <Separator className="bg-slate-300 mb-2" />
+        {/* Bottom Section */}
+        <div className="border-t border-gray-700 pt-10 pb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* App Download */}
+            <div className="space-y-4">
+              <h4 className="text-white font-medium text-sm">Mobile Experience</h4>
+              <p className="text-gray-400 text-xs max-w-xs">
+                Download our app for on-the-go learning with offline access and personalized recommendations.
+              </p>
+              <div className="flex space-x-3">
+                <Button className="bg-black hover:bg-gray-900 text-white h-10 px-4 text-xs">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 384 512">
+                    <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+                  </svg>
+                  App Store
+                </Button>
+                <Button className="bg-black hover:bg-gray-900 text-white h-10 px-4 text-xs">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 512 512">
+                    <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
+                  </svg>
+                  Play Store
+                </Button>
+              </div>
+            </div>
+            
+            {/* Policy Links */}
+            <div className="space-y-4">
+              <h4 className="text-white font-medium text-sm">Legal</h4>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                  <Shield className="mr-2 h-4 w-4 text-gray-500" />
+                  Privacy Policy
+                </a>
+                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  Terms of Service
+                </a>
+                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  Cookie Policy
+                </a>
+                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  GDPR Compliance
+                </a>
+                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  Accessibility
+                </a>
+                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  Data Processing
+                </a>
+                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  Security Practices
+                </a>
+                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  Instructor Terms
+                </a>
+              </div>
+            </div>
+            
+            {/* Awards */}
+            <div className="space-y-4">
+              <h4 className="text-white font-medium text-sm">Recognitions</h4>
+              <div className="flex flex-wrap gap-3">
+                <div className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-xs flex items-center">
+                  <span className="text-yellow-400 mr-1">★</span> EdTech 100
+                </div>
+                <div className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-xs flex items-center">
+                  <span className="text-blue-400 mr-1">🏆</span> G2 Leader
+                </div>
+                <div className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-xs">
+                  ISO 27001
+                </div>
+                <div className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-xs">
+                  AWS EdStart
+                </div>
+              </div>
+              <div className="text-xs text-gray-500 pt-2">
+                Trusted by 850+ institutions and 1.2M+ learners worldwide
+              </div>
+            </div>
+          </div>
 
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center text-slate-500 text-xs space-y-1 md:space-y-0">
-          {/* Contact Info */}
-          <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-4">
-            <span className="flex items-center space-x-1"><Mail className="w-4 h-4 mr-1" /> <a href="mailto:info@amogh.com" className="hover:underline">info@amogh.com</a></span>
-            <span className="flex items-center space-x-1"><Phone className="w-4 h-4 mr-1" /> <a href="tel:+1234567890" className="hover:underline">+1 234 567 890</a></span>
-            <span className="flex items-center space-x-1"><MapPin className="w-4 h-4 mr-1" /> <span>123 EdTech Ave, Innovation City</span></span>
+          {/* Copyright */}
+          <div className="mt-12 pt-6 border-t border-gray-800 text-center">
+            <div className="text-xs text-gray-500">
+              © {new Date().getFullYear()} AMOGH - ever useful EdTech Platform. All rights reserved.<br />
+              AMOGH® is a registered trademark of Future Learning Solutions Inc. | GSTIN: 29ABCDE1234F1GH<br />
+              Patent Pending: US20210765432 | All course materials are protected by copyright laws.
+            </div>
           </div>
-          {/* Legal Links */}
-          <div className="flex space-x-5">
-          <Link to="/privacypolicy" className="hover:text-slate-700">Privacy Policy</Link>
-          <Link to="/termsofservice" className="hover:text-slate-700">Terms of Service</Link>
-          <Link to="/sendfeedback" className="hover:text-slate-700">Send Feedback</Link>
-          <Link to="/aboutus" className="hover:text-slate-700">About Us</Link>
-            <a href="#" className="hover:text-slate-700">Cookie Policy</a>
-          </div>
-          <div className="text-slate-400">© 2024 AMOGH. All rights reserved.</div>
         </div>
       </div>
     </footer>

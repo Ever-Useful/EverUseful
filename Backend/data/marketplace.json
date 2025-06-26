@@ -16,14 +16,7 @@
       "duration": "2 months",
       "rating": 4,
       "reviews": 127,
-      "author": {
-        "name": "Dr. Sarah Chen",
-        "image": "https://randomuser.me/api/portraits/women/44.jpg",
-        "verified": true,
-        "rating": 4.8,
-        "projects": 12,
-        "bio": "PhD in Environmental Science, 10+ years in AI research. Passionate about climate solutions."
-      },
+      "author": "USER_000005",
       "status": "Active",
       "posted": "2025-06-01",
       "teamSize": 6,
@@ -56,7 +49,7 @@
         "API access",
         "1 month support"
       ],
-      "views": 1553,
+      "views": 1554,
       "favoritedBy": []
     },
     {
@@ -75,14 +68,7 @@
       "duration": "3 months",
       "rating": 4.2,
       "reviews": 89,
-      "author": {
-        "name": "Michael Rodriguez",
-        "image": "https://randomuser.me/api/portraits/men/32.jpg",
-        "verified": true,
-        "rating": 4.5,
-        "projects": 8,
-        "bio": "Blockchain enthusiast and full-stack developer. Loves building transparent systems."
-      },
+      "author": "USER_DUMMY_001",
       "status": "Active",
       "posted": "2025-06-06",
       "teamSize": 5,
@@ -134,14 +120,7 @@
       "duration": "6 weeks",
       "rating": 4.3,
       "reviews": 156,
-      "author": {
-        "name": "Lisa Johnson",
-        "image": "https://randomuser.me/api/portraits/women/65.jpg",
-        "verified": false,
-        "rating": 4.1,
-        "projects": 6,
-        "bio": "Hardware and IoT specialist. Building smart devices for better health."
-      },
+      "author": "USER_DUMMY_002",
       "status": "Completed",
       "posted": "2025-05-20",
       "teamSize": 5,
@@ -195,14 +174,7 @@
       "duration": "2.5 months",
       "rating": 4.6,
       "reviews": 142,
-      "author": {
-        "name": "Anjali Mehra",
-        "image": "https://randomuser.me/api/portraits/women/68.jpg",
-        "verified": true,
-        "rating": 4.7,
-        "projects": 10,
-        "bio": "EdTech innovator and curriculum designer with a passion for adaptive learning."
-      },
+      "author": "USER_DUMMY_003",
       "status": "Active",
       "posted": "2025-06-10",
       "teamSize": 7,
@@ -254,14 +226,7 @@
       "duration": "3 months",
       "rating": 4.4,
       "reviews": 95,
-      "author": {
-        "name": "Rahul Singh",
-        "image": "https://randomuser.me/api/portraits/men/55.jpg",
-        "verified": true,
-        "rating": 4.6,
-        "projects": 14,
-        "bio": "FinTech specialist with a decade of experience in financial modeling and AI."
-      },
+      "author": "USER_DUMMY_001",
       "status": "Active",
       "posted": "2025-06-12",
       "teamSize": 6,
@@ -313,14 +278,7 @@
       "duration": "2 months",
       "rating": 4.5,
       "reviews": 120,
-      "author": {
-        "name": "Yuki Tanaka",
-        "image": "https://randomuser.me/api/portraits/men/41.jpg",
-        "verified": true,
-        "rating": 4.7,
-        "projects": 11,
-        "bio": "Mobile developer with a focus on language and communication technologies."
-      },
+      "author": "USER_DUMMY_002",
       "status": "Active",
       "posted": "2025-06-15",
       "teamSize": 4,
@@ -372,14 +330,7 @@
       "duration": "2.5 months",
       "rating": 4.3,
       "reviews": 112,
-      "author": {
-        "name": "Priya Patel",
-        "image": "https://randomuser.me/api/portraits/women/50.jpg",
-        "verified": true,
-        "rating": 4.6,
-        "projects": 7,
-        "bio": "IoT engineer passionate about smart living and automation."
-      },
+      "author": "USER_DUMMY_003",
       "status": "Active",
       "posted": "2025-06-18",
       "teamSize": 6,
@@ -431,14 +382,7 @@
       "duration": "3 months",
       "rating": 4.4,
       "reviews": 108,
-      "author": {
-        "name": "Lucas Brown",
-        "image": "https://randomuser.me/api/portraits/men/67.jpg",
-        "verified": true,
-        "rating": 4.7,
-        "projects": 9,
-        "bio": "AR/VR developer with a background in interactive design and visualization."
-      },
+      "author": "USER_DUMMY_001",
       "status": "Active",
       "posted": "2025-06-20",
       "teamSize": 5,
@@ -490,14 +434,7 @@
       "duration": "2 months",
       "rating": 4.3,
       "reviews": 88,
-      "author": {
-        "name": "Samantha Lee",
-        "image": "https://randomuser.me/api/portraits/women/23.jpg",
-        "verified": true,
-        "rating": 4.6,
-        "projects": 8,
-        "bio": "AI/ML engineer with a focus on HR automation and analytics."
-      },
+      "author": "USER_DUMMY_002",
       "status": "Active",
       "posted": "2025-06-22",
       "teamSize": 5,
@@ -549,14 +486,7 @@
       "duration": "2 months",
       "rating": 4.5,
       "reviews": 77,
-      "author": {
-        "name": "Vikram Rao",
-        "image": "https://randomuser.me/api/portraits/men/88.jpg",
-        "verified": true,
-        "rating": 4.7,
-        "projects": 13,
-        "bio": "AgriTech innovator specializing in IoT and smart farming solutions."
-      },
+      "author": "USER_DUMMY_003",
       "status": "Active",
       "posted": "2025-06-25",
       "teamSize": 6,
@@ -608,14 +538,7 @@
       "duration": "2 months",
       "rating": 4.2,
       "reviews": 99,
-      "author": {
-        "name": "Julia Müller",
-        "image": "https://randomuser.me/api/portraits/women/31.jpg",
-        "verified": true,
-        "rating": 4.5,
-        "projects": 7,
-        "bio": "Fitness enthusiast and AI developer, passionate about digital health."
-      },
+      "author": "USER_DUMMY_001",
       "status": "Active",
       "posted": "2025-06-28",
       "teamSize": 5,
@@ -667,14 +590,7 @@
       "duration": "2.5 months",
       "rating": 4.4,
       "reviews": 104,
-      "author": {
-        "name": "Ahmed El-Sayed",
-        "image": "https://randomuser.me/api/portraits/men/25.jpg",
-        "verified": true,
-        "rating": 4.7,
-        "projects": 11,
-        "bio": "Smart city solutions architect with a focus on urban mobility."
-      },
+      "author": "USER_DUMMY_002",
       "status": "Active",
       "posted": "2025-07-01",
       "teamSize": 6,
@@ -726,14 +642,7 @@
       "duration": "6 weeks",
       "rating": 4.1,
       "reviews": 82,
-      "author": {
-        "name": "Emily Carter",
-        "image": "https://randomuser.me/api/portraits/women/19.jpg",
-        "verified": true,
-        "rating": 4.5,
-        "projects": 8,
-        "bio": "Finance app developer with a passion for AI-driven insights."
-      },
+      "author": "USER_DUMMY_003",
       "status": "Active",
       "posted": "2025-07-04",
       "teamSize": 4,
@@ -785,14 +694,7 @@
       "duration": "2.5 months",
       "rating": 4.4,
       "reviews": 112,
-      "author": {
-        "name": "Dr. Omar Khalid",
-        "image": "https://randomuser.me/api/portraits/men/21.jpg",
-        "verified": true,
-        "rating": 4.8,
-        "projects": 13,
-        "bio": "Digital health expert with a focus on remote care and IoT."
-      },
+      "author": "USER_DUMMY_001",
       "status": "Active",
       "posted": "2025-07-07",
       "teamSize": 6,
@@ -844,14 +746,7 @@
       "duration": "1.5 months",
       "rating": 4.2,
       "reviews": 76,
-      "author": {
-        "name": "Carlos Silva",
-        "image": "https://randomuser.me/api/portraits/men/42.jpg",
-        "verified": true,
-        "rating": 4.6,
-        "projects": 8,
-        "bio": "Conversational AI developer with a focus on customer experience."
-      },
+      "author": "USER_DUMMY_002",
       "status": "Active",
       "posted": "2025-07-10",
       "teamSize": 5,
@@ -903,14 +798,7 @@
       "duration": "3 months",
       "rating": 4.5,
       "reviews": 134,
-      "author": {
-        "name": "Maria Gomez",
-        "image": "https://randomuser.me/api/portraits/women/10.jpg",
-        "verified": true,
-        "rating": 4.8,
-        "projects": 12,
-        "bio": "Mental health advocate and digital health entrepreneur."
-      },
+      "author": "USER_DUMMY_003",
       "status": "Active",
       "posted": "2025-07-13",
       "teamSize": 7,
@@ -943,7 +831,7 @@
         "User manual",
         "3 months support"
       ],
-      "views": 1309,
+      "views": 1311,
       "favoritedBy": []
     },
     {
@@ -962,14 +850,7 @@
       "duration": "3 months",
       "rating": 4.6,
       "reviews": 121,
-      "author": {
-        "name": "David Kim",
-        "image": "https://randomuser.me/api/portraits/men/53.jpg",
-        "verified": true,
-        "rating": 4.9,
-        "projects": 15,
-        "bio": "FinTech and AI security expert with a decade of experience."
-      },
+      "author": "USER_DUMMY_001",
       "status": "Active",
       "posted": "2025-07-15",
       "teamSize": 8,
@@ -1010,7 +891,11 @@
       "title": "Nova minds",
       "description": "its just testing projects",
       "image": "",
-      "images": [],
+      "images": [
+        "jvbehd",
+        "ncjdc",
+        "dkndj"
+      ],
       "category": "ai",
       "price": 234567,
       "duration": "2 months",
@@ -1043,17 +928,11 @@
       "customUserId": "USER_000005",
       "rating": 0,
       "reviews": 0,
-      "posted": "2025-06-21",
+      "posted": "2025-06-23",
+      "dateAdded": "2025-06-23T20:00:53.176Z",
       "views": 0,
       "favoritedBy": [],
-      "author": {
-        "name": "completed name",
-        "image": null,
-        "verified": true,
-        "rating": 0,
-        "projects": 0,
-        "bio": "hhi hello, testing the new edit"
-      }
+      "author": "USER_000005"
     }
   ]
 }

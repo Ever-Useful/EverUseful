@@ -26,6 +26,7 @@ import { useAuthState } from "@/hooks/useAuthState";
 import { firestoreService } from "@/services/firestoreService";
 import { userService } from "@/services/userService";
 import { toast } from "sonner";
+import NoUserProfile from "@/assets/images/no user profile.png";
 
 const ProductDisplay = () => {
   const { id } = useParams();
@@ -39,6 +40,26 @@ const ProductDisplay = () => {
   const MAX_LENGTH = 200;
   const { user, token, isLoading: authLoading } = useAuthState();
   const [showPopupMenu, setShowPopupMenu] = useState(false);
+  const [authorCache, setAuthorCache] = useState<Record<string, any>>({});
+  const [currentUserCustomId, setCurrentUserCustomId] = useState<string | null>(null);
+
+  // Fetch current user's customUserId
+  useEffect(() => {
+    const fetchCurrentUserData = async () => {
+      if (user) {
+        try {
+          const userData = await firestoreService.getCurrentUserData();
+          if (userData && userData.customUserId) {
+            setCurrentUserCustomId(userData.customUserId);
+          }
+        } catch (error) {
+          console.error('Error fetching current user data:', error);
+        }
+      }
+    };
+    
+    fetchCurrentUserData();
+  }, [user]);
   
   useEffect(() => {
     const fetchProject = async () => {
@@ -57,6 +78,60 @@ const ProductDisplay = () => {
     };
     if (id) fetchProject();
   }, [id]);
+
+  // Fetch author details for the project
+  useEffect(() => {
+    const fetchAuthor = async () => {
+      if (project && project.author && !authorCache[project.author]) {
+        try {
+          const res = await fetch(`http://localhost:3000/api/users/${project.author}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.data) {
+              setAuthorCache(prev => ({
+                ...prev,
+                [project.author]: data.data
+              }));
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching author details:', error);
+        }
+      }
+    };
+    
+    if (project) fetchAuthor();
+  }, [project, authorCache]);
+
+  // Helper to get author details
+  const getAuthorDetails = (authorId: string) => {
+    const user = authorCache[authorId];
+    if (!user) return { name: 'Unknown', image: NoUserProfile, userType: '', id: authorId };
+    const auth = user.auth || {};
+    const profile = user.profile || {};
+    return {
+      name: `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User',
+      image: profile.avatar || NoUserProfile,
+      userType: auth.userType || '',
+      id: user.customUserId
+    };
+  };
+
+  const goToAuthorProfile = (userType: string, id: string) => {
+    // Check if current user is the author
+    if (currentUserCustomId && currentUserCustomId === id) {
+      // Redirect to current user's own profile
+      navigate('/profile');
+      return;
+    }
+    
+    const type = (userType || '').toLowerCase();
+    if (type === 'freelancer') {
+      navigate(`/freelancerprofile/${id}`);
+    } else {
+      navigate(`/studentprofile/${id}`);
+    }
+  };
 
   const showReceipt = () => {
     navigate("/paymentSuccess")
@@ -166,13 +241,23 @@ const ProductDisplay = () => {
 
               <div className="flex items-center space-x-3 mb-6">
                 <img 
-                  src={project.author.image} 
-                  alt={project.author.name}
-                  className="w-12 h-12 rounded-full"
+                  src={getAuthorDetails(project.author).image} 
+                  alt={getAuthorDetails(project.author).name}
+                  className="w-12 h-12 rounded-full cursor-pointer"
+                  onError={e => { e.currentTarget.src = NoUserProfile; }}
+                  onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                 />
                 <div>
                   <div className="flex items-center space-x-2">
-                    <span className="font-semibold text-gray-900">{project.author.name}</span>
+                    <span 
+                      className="font-semibold text-gray-900 cursor-pointer"
+                      style={{ transition: 'color 0.2s' }}
+                      onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                      onMouseOut={e => e.currentTarget.style.color = ''}
+                      onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                    >
+                      {getAuthorDetails(project.author).name}
+                    </span>
                     {project.author.verified && (
                       <CheckCircle className="w-4 h-4 text-blue-500" />
                     )}
@@ -326,13 +411,23 @@ const ProductDisplay = () => {
               <CardContent>
                 <div className="flex items-center space-x-3 mb-4">
                   <img 
-                    src={project.author.image} 
-                    alt={project.author.name}
-                    className="w-16 h-16 rounded-full"
+                    src={getAuthorDetails(project.author).image} 
+                    alt={getAuthorDetails(project.author).name}
+                    className="w-16 h-16 rounded-full cursor-pointer"
+                    onError={e => { e.currentTarget.src = NoUserProfile; }}
+                    onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                   />
                   <div>
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold text-gray-900">{project.author.name}</h3>
+                      <h3 
+                        className="font-semibold text-gray-900 cursor-pointer"
+                        style={{ transition: 'color 0.2s' }}
+                        onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                        onMouseOut={e => e.currentTarget.style.color = ''}
+                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                      >
+                        {getAuthorDetails(project.author).name}
+                      </h3>
                       {project.author.verified && (
                         <CheckCircle className="w-4 h-4 text-blue-500" />
                       )}
@@ -344,7 +439,11 @@ const ProductDisplay = () => {
                   </div>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">{project.author.bio}</p>
-                <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                  onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                >
                   View Profile
                 </Button>
               </CardContent>
