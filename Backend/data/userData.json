@@ -12,7 +12,80 @@
         "updatedAt": "2025-06-18T19:37:47.680Z",
         "firstName": "Aravind",
         "lastName": "Kumar",
-        "userType": "student"
+        "userType": "student",
+        "username": "aravindkumar",
+        "email": "aravind@example.com",
+        "mobile": "9876543210",
+        "gender": "Male",
+        "domain": "Engineering",
+        "purpose": "To find a Job",
+        "role": "Frontend Developer"
+      },
+      "education": [
+        {
+          "id": "edu_001",
+          "qualification": "Graduation",
+          "course": "B.Tech/BE",
+          "specialization": "Computer Science and Engineering",
+          "college": "Anna University",
+          "startYear": "2020",
+          "endYear": "2024",
+          "courseType": "Full Time",
+          "percentage": "85",
+          "cgpa": "8.5",
+          "rollNumber": "CS20B001",
+          "lateralEntry": "No",
+          "skills": "JavaScript, React, Node.js",
+          "description": "Completed B.Tech in Computer Science with focus on web development technologies",
+          "attachments": null,
+          "createdAt": "2025-06-18T19:37:47.680Z",
+          "updatedAt": "2025-06-18T19:37:47.680Z"
+        }
+      ],
+      "workExperience": [
+        {
+          "id": "work_001",
+          "gotFromUnstop": false,
+          "designation": "Frontend Developer",
+          "organization": "Tech Solutions Inc",
+          "employmentType": "Full Time",
+          "startDate": "2024-06-01",
+          "endDate": null,
+          "currentlyWorking": true,
+          "location": "Chennai, Tamil Nadu",
+          "remote": false,
+          "skills": "React, TypeScript, CSS",
+          "description": "Developing responsive web applications using React and modern frontend technologies",
+          "attachments": null,
+          "createdAt": "2025-06-18T19:37:47.680Z",
+          "updatedAt": "2025-06-18T19:37:47.680Z"
+        }
+      ],
+      "personalDetails": {
+        "address1": "123 Main Street",
+        "address2": "Apartment 4B",
+        "landmark": "Near Central Park",
+        "pincode": "600001",
+        "location": "Chennai, Tamil Nadu",
+        "hobbies": "Reading, Coding, Traveling",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-18T19:37:47.680Z"
+      },
+      "socialLinks": {
+        "linkedin": "https://linkedin.com/in/aravindkumar",
+        "facebook": "https://facebook.com/aravindkumar",
+        "instagram": "https://instagram.com/aravindkumar",
+        "twitter": "https://twitter.com/aravindkumar",
+        "git": "https://github.com/aravindkumar",
+        "medium": "https://medium.com/@aravindkumar",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "https://codepen.io/aravindkumar",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-18T19:37:47.680Z"
       },
       "projects": {
         "created": [],
@@ -65,7 +138,19 @@
         "totalViews": 0,
         "totalDownloads": 0,
         "memberSince": "2025-06-18T19:37:47.680Z"
-      }
+      },
+      "studentData": {
+        "college": "Anna University",
+        "degree": "B.Tech",
+        "course": "Computer Science",
+        "year": "4",
+        "startYear": "2020",
+        "endYear": "2024",
+        "specialization": "Computer Science and Engineering",
+        "updatedAt": "2025-06-18T19:37:47.680Z"
+      },
+      "professorData": null,
+      "freelancerData": null
     },
     "USER_000002": {
       "customUserId": "USER_000002",
@@ -80,10 +165,61 @@
         "firstName": "Meera",
         "lastName": "Verma",
         "userType": "student",
-        "college": "CUJ",
-        "degree": "Btech",
-        "course": "CSE",
-        "year": "3"
+        "username": "meeraverma",
+        "email": "meera@example.com",
+        "mobile": "9876543211",
+        "gender": "Female",
+        "domain": "Engineering",
+        "purpose": "Compete & Upskill",
+        "role": "Data Scientist"
+      },
+      "education": [
+        {
+          "id": "edu_001",
+          "qualification": "Graduation",
+          "course": "B.Tech/BE",
+          "specialization": "Computer Science and Engineering",
+          "college": "CUJ",
+          "startYear": "2021",
+          "endYear": "2025",
+          "courseType": "Full Time",
+          "percentage": "88",
+          "cgpa": "8.8",
+          "rollNumber": "CS21B002",
+          "lateralEntry": "No",
+          "skills": "Python, Machine Learning, Data Science",
+          "description": "Pursuing B.Tech in Computer Science with focus on Data Science and AI",
+          "attachments": null,
+          "createdAt": "2025-06-18T19:52:25.996Z",
+          "updatedAt": "2025-06-18T19:52:25.996Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "456 University Road",
+        "address2": "Student Hostel Block A",
+        "landmark": "Near University Gate",
+        "pincode": "180006",
+        "location": "Jammu, Jammu And Kashmir",
+        "hobbies": "Data Analysis, Reading, Yoga",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-18T19:52:25.996Z"
+      },
+      "socialLinks": {
+        "linkedin": "https://linkedin.com/in/meeraverma",
+        "facebook": "",
+        "instagram": "https://instagram.com/meeraverma",
+        "twitter": "",
+        "git": "https://github.com/meeraverma",
+        "medium": "https://medium.com/@meeraverma",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-18T19:52:25.996Z"
       },
       "projects": {
         "created": [],
@@ -146,8 +282,13 @@
         "degree": "Btech",
         "course": "CSE",
         "year": "3",
+        "startYear": "2021",
+        "endYear": "2025",
+        "specialization": "Computer Science and Engineering",
         "updatedAt": "2025-06-18T22:19:59.243Z"
-      }
+      },
+      "professorData": null,
+      "freelancerData": null
     },
     "USER_000005": {
       "customUserId": "USER_000005",
@@ -158,14 +299,84 @@
         "website": "https://github.com/amitkumar",
         "title": "Full-Stack Developer",
         "createdAt": "2025-06-19T21:16:02.064Z",
-        "updatedAt": "2025-06-24T22:27:23.488Z",
+        "updatedAt": "2025-06-25T20:33:26.842Z",
         "firstName": "freelancer hai",
         "lastName": "sayad",
         "userType": "freelancer",
-        "college": "CUJ",
-        "degree": "Btech",
-        "course": "CSE",
-        "year": "3"
+        "username": "amitkumar",
+        "email": "amit@example.com",
+        "mobile": "9876543212",
+        "gender": "Male",
+        "domain": "Engineering",
+        "purpose": "To find a Job",
+        "role": "Full Stack Developer",
+        "phoneNumber": "9876543212"
+      },
+      "education": [
+        {
+          "id": "edu_001",
+          "qualification": "Graduation",
+          "course": "B.Tech/BE",
+          "specialization": "Computer Science and Engineering",
+          "college": "CUJ",
+          "startYear": "2020",
+          "endYear": "2024",
+          "courseType": "Full Time",
+          "percentage": "82",
+          "cgpa": "8.2",
+          "rollNumber": "CS20B005",
+          "lateralEntry": "No",
+          "skills": "Python, Frontend, Backend",
+          "description": "Completed B.Tech in Computer Science with focus on full-stack development",
+          "attachments": null,
+          "createdAt": "2025-06-19T21:16:02.064Z",
+          "updatedAt": "2025-06-19T21:16:02.064Z"
+        }
+      ],
+      "workExperience": [
+        {
+          "id": "work_001",
+          "gotFromUnstop": false,
+          "designation": "Freelance Developer",
+          "organization": "Self Employed",
+          "employmentType": "Freelance",
+          "startDate": "2024-01-01",
+          "endDate": null,
+          "currentlyWorking": true,
+          "location": "Jammu, Jammu & Kashmir",
+          "remote": true,
+          "skills": "Python, React, Node.js, MongoDB",
+          "description": "Working as a freelance full-stack developer on various client projects",
+          "attachments": null,
+          "createdAt": "2025-06-19T21:16:02.064Z",
+          "updatedAt": "2025-06-19T21:16:02.064Z"
+        }
+      ],
+      "personalDetails": {
+        "address1": "789 Freelance Street",
+        "address2": "Home Office",
+        "landmark": "Near Tech Park",
+        "pincode": "180006",
+        "location": "Jammu, Jammu & Kashmir",
+        "hobbies": "Coding, Gaming, Traveling",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-19T21:16:02.064Z"
+      },
+      "socialLinks": {
+        "linkedin": "https://linkedin.com/in/amitkumar",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "https://github.com/amitkumar",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-19T21:16:02.064Z"
       },
       "projects": {
         "created": [
@@ -233,22 +444,67 @@
         "degree": "Btech",
         "course": "CSE",
         "year": "3",
-        "updatedAt": "2025-06-23T18:40:03.506Z"
+        "startYear": "2020",
+        "endYear": "2024",
+        "specialization": "Computer Science and Engineering",
+        "updatedAt": "2025-06-25T16:45:27.992Z"
+      },
+      "professorData": null,
+      "freelancerData": {
+        "experience": "2",
+        "portfolio": "https://amitkumar.dev",
+        "skills": "Python, React, Node.js, MongoDB",
+        "updatedAt": "2025-06-19T21:16:02.064Z"
       }
     },
     "USER_000006": {
       "customUserId": "USER_000006",
       "profile": {
-        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
-        "bio": "Business student with a passion for technology and innovation. Currently exploring the intersection of business and technology through various projects and collaborations.",
-        "location": "Lucknow, Uttar Pradesh",
-        "website": "https://github.com/priyasharma",
-        "title": "Business Student",
-        "createdAt": "2025-06-24T19:56:23.742Z",
-        "updatedAt": "2025-06-25T18:35:16.711Z",
-        "firstName": "Amrit",
-        "lastName": "Lal Paswan",
-        "userType": "freelancer"
+        "avatar": null,
+        "bio": null,
+        "location": null,
+        "website": null,
+        "title": null,
+        "createdAt": "2025-06-25T18:57:20.316Z",
+        "updatedAt": "2025-06-25T18:57:20.316Z",
+        "firstName": "",
+        "lastName": "",
+        "userType": "student",
+        "username": "",
+        "email": "22beece21.cce@cujammu.ac.in",
+        "mobile": "",
+        "gender": "",
+        "domain": "",
+        "purpose": "",
+        "role": ""
+      },
+      "education": [],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-25T18:57:20.316Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-25T18:57:20.316Z"
       },
       "projects": {
         "created": [],
@@ -296,15 +552,11 @@
         "totalLikes": 0,
         "totalViews": 0,
         "totalDownloads": 0,
-        "memberSince": "2025-06-24T19:56:23.742Z"
+        "memberSince": "2025-06-25T18:57:20.316Z"
       },
-      "studentData": {
-        "college": "iit",
-        "degree": "bcom",
-        "course": "english",
-        "year": "2",
-        "updatedAt": "2025-06-24T20:42:58.306Z"
-      }
+      "studentData": null,
+      "professorData": null,
+      "freelancerData": null
     },
     "USER_DUMMY_001": {
       "customUserId": "USER_DUMMY_001",
@@ -477,7 +729,7 @@
     "USER_DUMMY_003": {
       "customUserId": "USER_DUMMY_003",
       "profile": {
-        "avatar": "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+        "avatar": "https://randomuser.me/api/portraits/women/44.jpg",
         "bio": "Associate Professor in Computer Science with 12+ years of teaching and research experience. Published 25+ papers in top-tier conferences. Leading research in Natural Language Processing and Computer Vision. Dedicated to fostering innovation in academia.",
         "location": "Delhi, NCR",
         "website": "https://drpriyasharma.academia.edu",
@@ -557,11 +809,391 @@
         "year": "3",
         "updatedAt": "2025-06-25T00:00:00.000Z"
       }
+    },
+    "USER_000007": {
+      "customUserId": "USER_000007",
+      "profile": {
+        "avatar": "https://randomuser.me/api/portraits/men/31.jpg",
+        "bio": "Professor of Quantum Physics with 20+ years of research and teaching experience.",
+        "location": "Cambridge, UK",
+        "website": "https://professorjohnphd.com",
+        "title": "Professor of Quantum Physics",
+        "createdAt": "2025-06-26T10:00:00.000Z",
+        "updatedAt": "2025-06-26T10:00:00.000Z",
+        "firstName": "John",
+        "lastName": "Smith",
+        "userType": "professor",
+        "username": "johnsmithphd",
+        "email": "john.smith@cambridge.edu",
+        "mobile": "9876543213",
+        "gender": "Male",
+        "domain": "Physics",
+        "purpose": "Research & Teach",
+        "role": "Professor"
+      },
+      "education": [
+        {
+          "id": "edu_007",
+          "qualification": "PhD",
+          "course": "Quantum Physics",
+          "specialization": "Quantum Computing",
+          "college": "University of Cambridge",
+          "startYear": "2000",
+          "endYear": "2004",
+          "courseType": "Full Time",
+          "percentage": "-",
+          "cgpa": "-",
+          "rollNumber": "PHY2000",
+          "lateralEntry": "No",
+          "skills": "Quantum Mechanics, Quantum Computing",
+          "description": "PhD in Quantum Physics with research in quantum algorithms.",
+          "attachments": null,
+          "createdAt": "2025-06-26T10:00:00.000Z",
+          "updatedAt": "2025-06-26T10:00:00.000Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-26T10:00:00.000Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-26T10:00:00.000Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "Quantum Mechanics",
+        "Quantum Computing"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-26T10:00:00.000Z"
+      },
+      "studentData": null,
+      "professorData": {
+        "department": "Physics",
+        "university": "University of Cambridge",
+        "updatedAt": "2025-06-26T10:00:00.000Z"
+      },
+      "freelancerData": null
+    },
+    "USER_000008": {
+      "customUserId": "USER_000008",
+      "profile": {
+        "avatar": "https://randomuser.me/api/portraits/men/45.jpg",
+        "bio": "PhD in Economics, policy advisor, and guest lecturer.",
+        "location": "London, UK",
+        "website": "https://drwilliamsecon.com",
+        "title": "Economist & Lecturer",
+        "createdAt": "2025-06-26T10:20:00.000Z",
+        "updatedAt": "2025-06-26T10:20:00.000Z",
+        "firstName": "William",
+        "lastName": "Evans",
+        "userType": "freelancer",
+        "username": "williamevansphd",
+        "email": "william.evans@lse.ac.uk",
+        "mobile": "9876543215",
+        "gender": "Male",
+        "domain": "Economics",
+        "purpose": "Consult & Teach",
+        "role": "Economist"
+      },
+      "education": [
+        {
+          "id": "edu_009",
+          "qualification": "Doctorate",
+          "course": "Economics",
+          "specialization": "Policy Analysis",
+          "college": "London School of Economics",
+          "startYear": "2012",
+          "endYear": "2016",
+          "courseType": "Full Time",
+          "percentage": "-",
+          "cgpa": "-",
+          "rollNumber": "EC2012",
+          "lateralEntry": "No",
+          "skills": "Economics, Policy Analysis",
+          "description": "Doctorate in Economics with focus on policy advisory.",
+          "attachments": null,
+          "createdAt": "2025-06-26T10:20:00.000Z",
+          "updatedAt": "2025-06-26T10:20:00.000Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-26T10:20:00.000Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-26T10:20:00.000Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "Economics",
+        "Policy Analysis"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-26T10:20:00.000Z"
+      },
+      "studentData": null,
+      "professorData": null,
+      "freelancerData": null
+    },
+    "USER_00009": {
+      "customUserId": "USER_00009",
+      "profile": {
+        "avatar": "https://randomuser.me/api/portraits/women/46.jpg",
+        "bio": "Professor of Environmental Science, PhD in Climate Studies.",
+        "location": "Vancouver, Canada",
+        "website": "https://profemilyclimate.com",
+        "title": "Professor of Environmental Science",
+        "createdAt": "2025-06-26T10:30:00.000Z",
+        "updatedAt": "2025-06-26T10:30:00.000Z",
+        "firstName": "Emily",
+        "lastName": "Clark",
+        "userType": "professor",
+        "username": "emilyclarkphd",
+        "email": "emily.clark@ubc.ca",
+        "mobile": "9876543216",
+        "gender": "Female",
+        "domain": "Environmental Science",
+        "purpose": "Research & Mentor",
+        "role": "Professor"
+      },
+      "education": [
+        {
+          "id": "edu_010",
+          "qualification": "PhD",
+          "course": "Climate Studies",
+          "specialization": "Climate Modeling",
+          "college": "University of British Columbia",
+          "startYear": "2011",
+          "endYear": "2015",
+          "courseType": "Full Time",
+          "percentage": "-",
+          "cgpa": "-",
+          "rollNumber": "EN2011",
+          "lateralEntry": "No",
+          "skills": "Climate Modeling, Sustainability",
+          "description": "PhD in Climate Studies with research in climate modeling.",
+          "attachments": null,
+          "createdAt": "2025-06-26T10:30:00.000Z",
+          "updatedAt": "2025-06-26T10:30:00.000Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-26T10:30:00.000Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-26T10:30:00.000Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "Climate Modeling",
+        "Sustainability"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-26T10:30:00.000Z"
+      },
+      "studentData": null,
+      "professorData": {
+        "department": "Environmental Science",
+        "university": "University of British Columbia",
+        "updatedAt": "2025-06-26T10:30:00.000Z"
+      },
+      "freelancerData": null
     }
   },
-  "userCounter": 6,
+  "userCounter": 10,
   "metadata": {
-    "lastUpdated": "2025-06-25T18:35:16.711Z",
+    "lastUpdated": "2025-06-25T20:33:26.842Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }
