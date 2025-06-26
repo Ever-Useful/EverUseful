@@ -32,7 +32,7 @@ export const Footer = () => {
       {/* Decorative top border */}
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-10 mb-16 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-10 mb-16 text-sm">
           {/* Brand Column */}
           <div className="lg:col-span-3 space-y-2">
             <div className="flex items-center space-x-3">

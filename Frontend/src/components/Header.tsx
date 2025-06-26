@@ -1017,6 +1017,10 @@ export const Header = () => {
                   <LayoutGrid className="w-5 h-5 mr-3 text-gray-600" />
                   <span className="text-gray-700 font-medium">Dashboard</span>
                 </Link>
+                <Link to="/connection" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                    <UserPlus className="w-5 h-5 mr-3 text-gray-600" />
+                    <span className="text-gray-700 font-medium">My Connections</span>
+                </Link>
                 <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                   <Users className="w-5 h-5 mr-3 text-gray-600" />
                   <span className="text-gray-700 font-medium">My Collaborations</span>
