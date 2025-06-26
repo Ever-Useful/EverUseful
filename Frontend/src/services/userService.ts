@@ -119,7 +119,19 @@ class UserService {
   }
 
   // Get user profile (returns both auth and profile info)
-  async getUserProfile(): Promise<{ customUserId: string; auth: any; profile: any; stats: any; studentData?: any }> {
+  async getUserProfile(): Promise<{
+    customUserId: string;
+    auth: any;
+    profile: any;
+    stats: any;
+    studentData?: any;
+    professorData?: any;
+    freelancerData?: any;
+    education?: any[];
+    workExperience?: any[];
+    personalDetails?: any;
+    socialLinks?: any;
+  }> {
     const response = await this.makeRequest('/profile');
     return response.data;
   }
@@ -294,6 +306,86 @@ class UserService {
     const response = await this.makeRequest('/student-data', {
         method: 'PUT',
         body: JSON.stringify(studentData),
+    });
+    return response.data;
+  }
+
+  // Education
+  async addEducation(educationData: any): Promise<any> {
+    const response = await this.makeRequest('/education', {
+      method: 'POST',
+      body: JSON.stringify(educationData),
+    });
+    return response.data;
+  }
+  async updateEducation(educationId: string, educationData: any): Promise<any> {
+    const response = await this.makeRequest(`/education/${educationId}`, {
+      method: 'PUT',
+      body: JSON.stringify(educationData),
+    });
+    return response.data;
+  }
+  async deleteEducation(educationId: string): Promise<any> {
+    const response = await this.makeRequest(`/education/${educationId}`, {
+      method: 'DELETE',
+    });
+    return response.data;
+  }
+
+  // Work Experience
+  async addWorkExperience(workData: any): Promise<any> {
+    const response = await this.makeRequest('/work-experience', {
+      method: 'POST',
+      body: JSON.stringify(workData),
+    });
+    return response.data;
+  }
+  async updateWorkExperience(workId: string, workData: any): Promise<any> {
+    const response = await this.makeRequest(`/work-experience/${workId}`, {
+      method: 'PUT',
+      body: JSON.stringify(workData),
+    });
+    return response.data;
+  }
+  async deleteWorkExperience(workId: string): Promise<any> {
+    const response = await this.makeRequest(`/work-experience/${workId}`, {
+      method: 'DELETE',
+    });
+    return response.data;
+  }
+
+  // Personal Details
+  async updatePersonalDetails(personalDetails: any): Promise<any> {
+    const response = await this.makeRequest('/personal-details', {
+      method: 'PUT',
+      body: JSON.stringify(personalDetails),
+    });
+    return response.data;
+  }
+
+  // Social Links
+  async updateSocialLinks(socialLinks: any): Promise<any> {
+    const response = await this.makeRequest('/social-links', {
+      method: 'PUT',
+      body: JSON.stringify(socialLinks),
+    });
+    return response.data;
+  }
+
+  // Professor Data
+  async updateProfessorData(professorData: any): Promise<any> {
+    const response = await this.makeRequest('/professor-data', {
+      method: 'PUT',
+      body: JSON.stringify(professorData),
+    });
+    return response.data;
+  }
+
+  // Freelancer Data
+  async updateFreelancerData(freelancerData: any): Promise<any> {
+    const response = await this.makeRequest('/freelancer-data', {
+      method: 'PUT',
+      body: JSON.stringify(freelancerData),
     });
     return response.data;
   }

@@ -434,8 +434,21 @@ const Profile = () => {
 
       // Fetch skills
       try {
-        const userSkills = await userService.getUserSkills();
-        setSkills(userSkills || []);
+        // Get current user's customUserId first
+        const userProfileData = await userService.getUserProfile();
+        const customUserId = userProfileData.customUserId;
+
+        // Fetch user data using the customUserId (same approach as other profile pages)
+        const userDataResponse = await fetch(`http://localhost:3000/api/users/${customUserId}`);
+        if (userDataResponse.ok) {
+          const userData = await userDataResponse.json();
+          const userSkills = userData.data?.skills || [];
+          console.log('Profile - Skills found:', userSkills);
+          setSkills(userSkills);
+        } else {
+          console.log('Profile - Failed to fetch user data for skills');
+          setSkills([]);
+        }
       } catch (error) {
         console.error('Error fetching skills:', error);
         setSkills([]);
@@ -447,20 +460,41 @@ const Profile = () => {
         if (!user) throw new Error("User not authenticated for fetching projects");
         const token = await user.getIdToken();
 
-        const userProjectsResponse = await userService.getUserProjects();
-        const projectIds = userProjectsResponse.created || [];
+        // Get current user's customUserId first
+        const userProfileData = await userService.getUserProfile();
+        const customUserId = userProfileData.customUserId;
+        console.log('Profile - Current user customUserId:', customUserId);
 
-        if (projectIds.length > 0) {
-          const projectPromises = projectIds.map(id =>
-            fetch(`http://localhost:3000/api/marketplace/projects/${id}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            }).then(res => res.ok ? res.json() : Promise.reject(`Failed to fetch project ${id}`))
-          );
-          
-          const results = await Promise.all(projectPromises);
-          const fullProjects = results.map(res => res.project).filter(Boolean);
-          setProjects(fullProjects);
+        // Fetch user data using the customUserId (same approach as other profile pages)
+        const userDataResponse = await fetch(`http://localhost:3000/api/users/${customUserId}`);
+        console.log('Profile - User data response status:', userDataResponse.status);
+        if (userDataResponse.ok) {
+          const userData = await userDataResponse.json();
+          console.log('Profile - User data received:', userData);
+          const projectIds = userData.data?.projects?.created || [];
+          console.log('Profile - Project IDs found:', projectIds);
+
+          if (projectIds.length > 0) {
+            const projectPromises = projectIds.map(id => {
+              console.log(`Profile - Fetching project with ID: ${id}`);
+              return fetch(`http://localhost:3000/api/marketplace/projects/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              }).then(res => {
+                console.log(`Profile - Project ${id} response:`, res.status, res.ok);
+                return res.ok ? res.json() : Promise.reject(`Failed to fetch project ${id}`);
+              });
+            });
+            
+            const results = await Promise.all(projectPromises);
+            const fullProjects = results.map(res => res.project).filter(Boolean);
+            console.log('Profile - Full projects fetched:', fullProjects);
+            setProjects(fullProjects);
+          } else {
+            console.log('Profile - No project IDs found');
+            setProjects([]);
+          }
         } else {
+          console.log('Profile - Failed to fetch user data');
           setProjects([]);
         }
       } catch (error) {

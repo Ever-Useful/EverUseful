@@ -15,7 +15,7 @@ import SkillsSection from "@/components/Skillssection";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
+import { ChatBox } from "@/components/ChatBox";
 import { userService } from "@/services/userService";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
@@ -72,14 +72,26 @@ const Profile = () => {
             console.log('Projects.created:', data.data.projects?.created);
             console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
             // Fetch full project details for each project ID
-            const projectIds = Array.isArray(data.data.projects) ? data.data.projects : [];
+            const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
             console.log('Project IDs found:', projectIds);
+            console.log('Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
             if (projectIds.length > 0) {
-              const projectPromises = projectIds.map((pid: string) =>
-                fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
-                  .then(res => res.ok ? res.json() : null)
-                  .then(res => res && res.project ? res.project : null)
-              );
+              const projectPromises = projectIds.map((pid: string) => {
+                console.log(`Fetching project with ID: ${pid} (type: ${typeof pid})`);
+                return fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
+                  .then(res => {
+                    console.log(`Response for project ${pid}:`, res.status, res.ok);
+                    return res.ok ? res.json() : null;
+                  })
+                  .then(res => {
+                    console.log(`Project data for ${pid}:`, res);
+                    return res && res.project ? res.project : null;
+                  })
+                  .catch(error => {
+                    console.error(`Error fetching project ${pid}:`, error);
+                    return null;
+                  });
+              });
               const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
               console.log('Full projects fetched:', fullProjects);
               setPortfolioProjects(fullProjects);
@@ -121,14 +133,14 @@ const Profile = () => {
   // }
 
   const fullName =
-    `${userData.profile?.firstName || ""} ${userData.profile?.lastName || ""}`.trim() || "Unnamed User";
+    `${userData.auth?.firstName || ""} ${userData.auth?.lastName || ""}`.trim() || "Unnamed User";
 
   const profile = isLoggedIn
     ? {
         name: fullName,
         title: userData.profile?.title || "New Member",
         bio: userData.profile?.bio || "This is a new profile. Update your bio!",
-        avatar: userData.profile?.avatar || "",
+        avatar: userData.profile?.avatar || NoUserProfile,
         stats: {
           followers: userData.social?.followersCount || 0,
           following: userData.social?.followingCount || 0,
@@ -142,7 +154,7 @@ const Profile = () => {
         name: "Guest",
         title: "Digital Creator & Entrepreneur",
         bio: "Passionate about technology, design, and creating meaningful connections. Building the future one project at a time.",
-        avatar: "",
+        avatar: NoUserProfile,
         stats: {
           followers: 12,
           following: 850,
@@ -234,7 +246,14 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row items-end gap-6">
               <div className="relative">
                 <Avatar className="w-36 h-36 border-4 border-white shadow-lg">
-                  <AvatarImage src={profile.avatar} alt={profile.name} className="object-cover" />
+                  <AvatarImage 
+                    src={profile.avatar} 
+                    alt={profile.name} 
+                    className="object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = NoUserProfile;
+                    }}
+                  />
                   <AvatarFallback className="bg-slate-200 text-slate-600 font-bold text-3xl flex items-center justify-center">
                     {profile.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "NA"}
                   </AvatarFallback>
@@ -420,7 +439,10 @@ const Profile = () => {
                 </div>
               </CardContent>
             </Card>
-            <UnreadMessagesCard />
+            <ChatBox
+              freelancerName={profile.name}
+              freelancerImage={profile.avatar}
+            />
           </div>
         </div>
       </div>

@@ -3,14 +3,44 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Heart, MessageCircle } from "lucide-react";
-import { freelancersData } from "@/utils/freelancerData";
+import { freelancersData, Freelancer } from "@/utils/freelancerData";
 
-export const FreelancerGrid = () => {
+interface FreelancerGridProps {
+  filters: {
+    skills?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    minRating?: number;
+    availability?: string[];
+  };
+}
+
+export const FreelancerGrid = ({ filters }: FreelancerGridProps) => {
   const navigate = useNavigate();
 
   const handleViewProfile = (freelancerId: number) => {
     navigate(`/freelancer/${freelancerId}`);
   };
+
+  // Filtering logic
+  const filteredFreelancers = freelancersData.filter((freelancer) => {
+    // Skills filter (at least one skill matches)
+    if (filters.skills && filters.skills.length > 0) {
+      const hasSkill = filters.skills.some(skill => freelancer.skills.includes(skill));
+      if (!hasSkill) return false;
+    }
+    // Price filter
+    if (filters.minPrice !== undefined && freelancer.hourlyRate < filters.minPrice) return false;
+    if (filters.maxPrice !== undefined && freelancer.hourlyRate > filters.maxPrice) return false;
+    // Rating filter
+    if (filters.minRating !== undefined && freelancer.rating < filters.minRating) return false;
+    // Availability filter
+    if (filters.availability && filters.availability.length > 0) {
+      const matches = filters.availability.some(a => freelancer.availability.toLowerCase().includes(a.toLowerCase()));
+      if (!matches) return false;
+    }
+    return true;
+  });
 
   return (
     <section className="bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-300 py-16">
@@ -21,18 +51,13 @@ export const FreelancerGrid = () => {
             <p className="text-slate-600 text-lg">Connect with verified experts worldwide</p>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-slate-700 font-medium">Showing {freelancersData.length} of 25,000+ professionals</span>
-            <select className="bg-white border border-slate-300 text-slate-800 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-              <option>Top Rated</option>
-              <option>Newest</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-            </select>
+            <span className="text-slate-700 font-medium">Showing {filteredFreelancers.length} of {freelancersData.length} professionals</span>
+            {/* Sorting select can be implemented here if needed */}
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {freelancersData.map((freelancer) => (
+          {filteredFreelancers.map((freelancer) => (
             <Card key={freelancer.id} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white border-slate-200 overflow-hidden flex flex-col h-full">
               <CardContent className="p-8 flex flex-col h-full">
                 {/* Header Section */}
