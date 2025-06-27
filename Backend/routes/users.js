@@ -231,7 +231,8 @@ router.get('/all', async (req, res) => {
         customUserId: customUserId,
         profile: user.profile,
         stats: user.stats,
-        skills: user.skills || []
+        skills: user.skills || [],
+        education: user.education || []
       };
     });
     

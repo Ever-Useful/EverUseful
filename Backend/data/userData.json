@@ -473,10 +473,10 @@
         "title": null,
         "createdAt": "2025-06-25T18:57:20.316Z",
         "updatedAt": "2025-06-27T16:51:20.233Z",
-        "firstName": "",
-        "lastName": "",
+        "firstName": "Ramesh",
+        "lastName": "Kumar",
         "userType": "student",
-        "username": "",
+        "username": "ramkumar",
         "email": "22beece21.cce@cujammu.ac.in",
         "mobile": "",
         "gender": "",
@@ -787,16 +787,65 @@
         "updatedAt": "2025-06-25T00:00:00.000Z",
         "firstName": "Dr. Priya",
         "lastName": "Sharma",
-        "userType": "professor"
+        "userType": "freelancer",
+        "username": "johnsmithphd",
+        "email": "john.smith@cambridge.edu",
+        "mobile": "9876543213",
+        "gender": "Male",
+        "domain": "Physics",
+        "purpose": "Research & Teach",
+        "role": "Professor"
+      },
+      "education": [
+        {
+          "id": "edu_007",
+          "qualification": "PhD",
+          "course": "Quantum Physics",
+          "specialization": "Quantum Computing",
+          "college": "University of Cambridge",
+          "startYear": "2000",
+          "endYear": "2004",
+          "courseType": "Full Time",
+          "percentage": "-",
+          "cgpa": "-",
+          "rollNumber": "PHY2000",
+          "lateralEntry": "No",
+          "skills": "Quantum Mechanics, Quantum Computing",
+          "description": "PhD in Quantum Physics with research in quantum algorithms.",
+          "attachments": null,
+          "createdAt": "2025-06-26T10:00:00.000Z",
+          "updatedAt": "2025-06-26T10:00:00.000Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-26T10:00:00.000Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-26T10:00:00.000Z"
       },
       "projects": {
-        "created": [
-          4,
-          7,
-          10,
-          13,
-          16
-        ],
+        "created": [],
         "collaborated": [],
         "favorites": [],
         "count": 0
@@ -809,13 +858,8 @@
         "wishlist": []
       },
       "skills": [
-        "Machine Learning",
-        "Natural Language Processing",
-        "Computer Vision",
-        "Python",
-        "TensorFlow",
-        "PyTorch",
-        "Research Methodology"
+        "Quantum Mechanics",
+        "Quantum Computing"
       ],
       "social": {
         "followers": [],
@@ -849,15 +893,15 @@
         "totalLikes": 0,
         "totalViews": 0,
         "totalDownloads": 0,
-        "memberSince": "2025-06-25T00:00:00.000Z"
+        "memberSince": "2025-06-26T10:00:00.000Z"
       },
-      "studentData": {
-        "college": "Indian Institute of Technology, Bangalore",
-        "degree": "BTech",
-        "course": "Computer Science & Engineering",
-        "year": "3",
-        "updatedAt": "2025-06-25T00:00:00.000Z"
-      }
+      "studentData": null,
+      "professorData": {
+        "department": "Physics",
+        "university": "University of Cambridge",
+        "updatedAt": "2025-06-26T10:00:00.000Z"
+      },
+      "freelancerData": null
     },
     "USER_000007": {
       "customUserId": "USER_000007",
@@ -1135,10 +1179,10 @@
       "education": [
         {
           "id": "edu_010",
-          "qualification": "PhD",
-          "course": "Climate Studies",
-          "specialization": "Climate Modeling",
-          "college": "University of British Columbia",
+          "qualification": "B.Tech",
+          "course": "Computer Science & Engineering",
+          "specialization": "Artificial Intelligence",
+          "college": "Indian Institute of Technology, Madras",
           "startYear": "2011",
           "endYear": "2015",
           "courseType": "Full Time",
