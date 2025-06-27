@@ -5,6 +5,7 @@ import { Footer } from '../components/Footer';
 import { Header } from '../components/Header';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowUpDown } from 'lucide-react';
+import noUserProfile from '../assets/images/no user profile.png';
 
 // Define types for freelancer data
 type Freelancer = {
@@ -40,7 +41,7 @@ const categories = [
 ];
 
 const stats = [
-  { id: 1, value: "2,500+", label: "PhD Experts", icon: "🎓" },
+  { id: 1, value: "PhD Experts", label: "Research Specialists", icon: "🎓" },
   { id: 2, value: "95%", label: "Success Rate", icon: "🏆" },
   { id: 3, value: "32h", label: "Avg. Response", icon: "⏱" },
   { id: 4, value: "4.9/5", label: "Satisfaction", icon: "⭐" },
@@ -60,16 +61,31 @@ const FindExpert = () => {
       .then(data => {
         if (data && data.users) {
           const phdUsers = Object.values(data.users).filter((user: any) => {
-            const isProfessor = user.profile?.userType?.toLowerCase() === 'professor';
-            const hasPhd = Array.isArray(user.education) && user.education.some((edu: any) => {
-              const q = (edu.qualification || '').toLowerCase();
-              const c = (edu.course || '').toLowerCase();
-              return q.includes('phd') || q.includes('doctorate') || c.includes('phd') || c.includes('doctorate');
+            // Check if user has education data
+            if (!user.education || !Array.isArray(user.education)) {
+              return false;
+            }
+            
+            // Look for PhD in education array - only check qualification attribute
+            const hasPhd = user.education.some((edu: any) => {
+              if (!edu || !edu.qualification) {
+                return false;
+              }
+              
+              // Check if qualification is "PhD" or "Doctorate"
+              const qualification = edu.qualification.toLowerCase();
+              return qualification === 'phd' || qualification === 'doctorate';
             });
-            return isProfessor || hasPhd;
+            
+            return hasPhd;
           });
+          
+          console.log('PhD Users found:', phdUsers.length);
           setPhdExperts(phdUsers);
         }
+      })
+      .catch(error => {
+        console.error('Error fetching users:', error);
       });
   }, []);
 
@@ -83,7 +99,7 @@ const FindExpert = () => {
       skills: user.skills || [],
       rate: '$50/hr',
       experience: '5+ years',
-      image: user.profile?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.profile?.firstName || 'PHD'),
+      image: user.profile?.avatar || noUserProfile,
       rating: 4.5,
       completedProjects: 10,
       isAvailable: true,
@@ -186,7 +202,7 @@ const FindExpert = () => {
                   Connect with <span className="text-amber-400">PhD Experts</span> for Research & Mentorship
                 </h1>
                 <p className="text-xl text-indigo-100 mb-8 max-w-xl">
-                  Access specialized knowledge from PhD researchers and academics. Collaborate on research projects, receive expert mentorship, and accelerate your R&D initiatives.
+                  Access specialized knowledge from verified PhD researchers and academics. Collaborate on research projects, receive expert mentorship, and accelerate your R&D initiatives with qualified doctoral experts.
                 </p>
               </motion.div>
               <motion.div
@@ -198,7 +214,7 @@ const FindExpert = () => {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Search by research field, university, or expertise..."
+                    placeholder="Search by PhD research field, university, or expertise..."
                     className="w-full px-5 py-4 rounded-xl border-0 bg-white/10 backdrop-blur-sm text-white placeholder-indigo-200 focus:ring-2 focus:ring-amber-400 focus:outline-none shadow-lg"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -232,7 +248,7 @@ const FindExpert = () => {
                       >
                         <div className="flex items-center">
                           <img
-                            src={user.profile?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.profile?.firstName || 'PHD')}
+                            src={user.profile?.avatar || noUserProfile}
                             alt={user.profile?.firstName || 'PhD'}
                             className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
                           />
@@ -332,7 +348,7 @@ const FindExpert = () => {
               PhD Research Experts
             </h2>
             <p className="text-gray-600 text-sm">
-              {filteredExperts.length} experts available for collaboration
+              {filteredExperts.length} PhD experts available for collaboration
             </p>
           </div>
           <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
@@ -353,7 +369,7 @@ const FindExpert = () => {
             <div className="relative w-full md:w-64">
               <input
                 type="text"
-                placeholder="Filter by expertise..."
+                placeholder="Filter by PhD expertise..."
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

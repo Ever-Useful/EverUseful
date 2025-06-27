@@ -303,26 +303,6 @@ const StudentProfessorProfileView = ({
           </div>
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* User Photo Section */}
-            <Card className="bg-white shadow-lg rounded-xl max-w-md flex flex-col items-center py-6">
-              {profileData.avatar ? (
-                <img
-                  src={profileData.avatar}
-                  alt="User profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-indigo-200 shadow-md mb-2"
-                  onError={e => { e.currentTarget.src = NoUserProfile; }}
-                />
-              ) : (
-                <img
-                  src={NoUserProfile}
-                  alt="No user profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-gray-200 shadow-md mb-2"
-                />
-              )}
-              <div className="text-lg font-semibold text-gray-800 mt-2">
-                {profileData.firstName} {profileData.lastName}
-              </div>
-            </Card>
             {/* Skills Section */}
             <Card className="bg-white shadow-lg rounded-xl max-w-md">
               <CardContent className="p-6">
