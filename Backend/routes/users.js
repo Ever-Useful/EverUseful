@@ -218,6 +218,33 @@ router.get('/projects', authorize, async (req, res) => {
   }
 });
 
+// Get all users (for freelancing page)
+router.get('/all', async (req, res) => {
+  try {
+    await userService.loadUserData();
+    
+    // Transform the data to match the expected format
+    const users = {};
+    Object.keys(userService.userData.users).forEach(customUserId => {
+      const user = userService.userData.users[customUserId];
+      users[customUserId] = {
+        customUserId: customUserId,
+        profile: user.profile,
+        stats: user.stats,
+        skills: user.skills || []
+      };
+    });
+    
+    res.json({
+      success: true,
+      users: users
+    });
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // Get user by custom ID
 router.get('/:id', async (req, res) => {
   try {

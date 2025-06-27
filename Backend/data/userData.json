@@ -467,12 +467,12 @@
       "customUserId": "USER_000006",
       "profile": {
         "avatar": null,
-        "bio": null,
+        "bio": "this is the first user POV.",
         "location": null,
         "website": null,
         "title": null,
         "createdAt": "2025-06-25T18:57:20.316Z",
-        "updatedAt": "2025-06-25T18:57:20.316Z",
+        "updatedAt": "2025-06-27T16:51:20.233Z",
         "firstName": "",
         "lastName": "",
         "userType": "student",
@@ -484,17 +484,55 @@
         "purpose": "",
         "role": ""
       },
-      "education": [],
-      "workExperience": [],
+      "education": [
+        {
+          "id": "edu_1751043138723",
+          "qualification": "PhD",
+          "course": "Other",
+          "specialization": "Other",
+          "college": "iit",
+          "startYear": "2024",
+          "endYear": "2026",
+          "courseType": "Full Time",
+          "percentage": "89",
+          "cgpa": "8.9",
+          "rollNumber": "22b3ccs21",
+          "lateralEntry": "No",
+          "skills": "Training, Fine-tuning",
+          "description": "NA",
+          "attachments": null,
+          "createdAt": "2025-06-27T16:52:18.723Z",
+          "updatedAt": "2025-06-27T16:52:18.723Z"
+        }
+      ],
+      "workExperience": [
+        {
+          "id": "work_1751043176598",
+          "gotFromUnstop": false,
+          "designation": "Software Engineer",
+          "organization": "Amogh pvt ltd",
+          "employmentType": "Full Time",
+          "startDate": "2025-06-01",
+          "endDate": "",
+          "currentlyWorking": true,
+          "location": "",
+          "remote": true,
+          "skills": "Training, Fine-tuning",
+          "description": "NA",
+          "attachments": null,
+          "createdAt": "2025-06-27T16:52:56.598Z",
+          "updatedAt": "2025-06-27T16:52:56.598Z"
+        }
+      ],
       "personalDetails": {
-        "address1": "",
+        "address1": "lucknow",
         "address2": "",
         "landmark": "",
-        "pincode": "",
-        "location": "",
-        "hobbies": "",
+        "pincode": "261125",
+        "location": "Sitapur, Uttar Pradesh",
+        "hobbies": "good",
         "copyCurrent": false,
-        "updatedAt": "2025-06-25T18:57:20.316Z"
+        "updatedAt": "2025-06-27T16:53:20.359Z"
       },
       "socialLinks": {
         "linkedin": "",
@@ -513,7 +551,9 @@
         "updatedAt": "2025-06-25T18:57:20.316Z"
       },
       "projects": {
-        "created": [],
+        "created": [
+          19
+        ],
         "collaborated": [],
         "favorites": [],
         "count": 0
@@ -525,7 +565,10 @@
         "reviews": [],
         "wishlist": []
       },
-      "skills": [],
+      "skills": [
+        "Deep Learning",
+        "Medical Malpractice"
+      ],
       "social": {
         "followers": [],
         "following": [],
@@ -554,7 +597,7 @@
         "language": null
       },
       "stats": {
-        "projectsCount": 0,
+        "projectsCount": 1,
         "totalLikes": 0,
         "totalViews": 0,
         "totalDownloads": 0,
@@ -1199,7 +1242,7 @@
   },
   "userCounter": 12,
   "metadata": {
-    "lastUpdated": "2025-06-27T13:02:39.689Z",
+    "lastUpdated": "2025-06-27T16:53:20.359Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }
