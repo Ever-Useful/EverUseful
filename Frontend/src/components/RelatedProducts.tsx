@@ -202,9 +202,9 @@ export const RelatedProducts = () => {
                     <img
                       src={project.image}
                       alt={project.title}
-                      className="w-full h-48 object-cover rounded-t-lg"
+                      className="w-full h-40 object-cover rounded-t-lg"
                     />
-                    <Badge className="absolute top-2 right-2 bg-blue-100 text-blue-800">
+                    <Badge className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-xs">
                       {project.category}
                     </Badge>
                   </div>
@@ -212,21 +212,21 @@ export const RelatedProducts = () => {
                     <h3 className="font-semibold text-lg mb-1 line-clamp-1">
                       {project.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                    <p className="text-xs text-gray-600 mb-2 line-clamp-2">
                       {project.description}
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-1">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium">{project.rating ?? '--'}</span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-xs font-medium">{project.rating ?? '--'}</span>
+                        <span className="text-xs text-gray-500">
                           ({project.reviews ?? 0})
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <div className="flex items-center space-x-1 text-gray-500">
                           <Eye className="w-4 h-4" />
-                          <span className="text-sm">{project.views ?? 0}</span>
+                          <span className="text-xs">{project.views ?? 0}</span>
                         </div>
                       </div>
                     </div>
@@ -237,7 +237,7 @@ export const RelatedProducts = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-blue-600 hover:text-blue-700"
+                        className="text-blue-600 hover:text-blue-700 text-lg"
                       >
                         View Details
                         <ArrowRight className="w-4 h-4 ml-1" />

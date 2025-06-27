@@ -15,13 +15,15 @@ interface PopupMenuProps {
   onClose: () => void;
   title?: string;
   formType?: "login";
+  redirectPath?: string;
 }
 
 export const PopupMenu = ({ 
   isOpen, 
   onClose, 
   title = "Get Started", 
-  formType = "login" 
+  formType = "login",
+  redirectPath = "/profile"
 }: PopupMenuProps) => {
   const [currentFormType, setCurrentFormType] = useState<"login">(formType as "login");
 
@@ -33,7 +35,7 @@ export const PopupMenu = ({
       case "login":
         return (
           <div className="flex flex-col items-center justify-center p-8 space-y-6">
-            <Login />
+            <Login redirectPath={redirectPath} onSuccess={onClose} />
           </div>
         );
     }

@@ -2,13 +2,8 @@ import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { ImpactMotive } from "@/components/ImpactMotive";
-import { GlobalCollaborations } from "@/components/GlobalCollaborations";
 import { HowItWorks } from "@/components/HowItWorks";
 import { CommunityConnect } from "@/components/CommunityConnect";
-import { UpcomingPhase } from "@/components/UpcomingPhase";
-import { WhatWeProvide } from "@/components/WhatWeProvide";
-import { Footer } from "@/components/Footer";
-import { Chatbot } from "@/components/Chatbot";
 import { lazy, Suspense, useMemo } from "react";
 
 // Lazy load heavy components
@@ -20,7 +15,7 @@ const LazyChatbot = lazy(() => import("@/components/Chatbot").then(module => ({ 
 
 // import { FreelancingPreview } from "@/components/FreelancingPreview";
 
-const Index = () => {
+const BackUp = () => {
   const MemoHeader = useMemo(() => <Header />, []);
   const MemoHero = useMemo(() => <Hero />, []);
   const MemoFeaturedProducts = useMemo(() => <FeaturedProducts />, []);
@@ -66,4 +61,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default BackUp;

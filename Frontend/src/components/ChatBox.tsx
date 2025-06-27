@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Heart, Star } from "lucide-react";
+import NoUserProfile from "@/assets/images/no user profile.png";
 
 interface Message {
   id: number;
@@ -48,6 +49,9 @@ export const ChatBox = ({ freelancerName, freelancerImage }: ChatBoxProps) => {
             src={freelancerImage} 
             alt={freelancerName}
             className="w-10 h-10 rounded-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = NoUserProfile;
+            }}
           />
           <div className="flex-1">
             <h3 className="font-semibold text-slate-700">{freelancerName}</h3>
