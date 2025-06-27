@@ -779,7 +779,7 @@
         "User manual",
         "1 month support"
       ],
-      "views": 891,
+      "views": 893,
       "favoritedBy": []
     },
     {
@@ -831,7 +831,7 @@
         "User manual",
         "3 months support"
       ],
-      "views": 1311,
+      "views": 1313,
       "favoritedBy": []
     },
     {
@@ -883,12 +883,12 @@
         "User manual",
         "2 months support"
       ],
-      "views": 1418,
+      "views": 1419,
       "favoritedBy": []
     },
     {
       "id": 18,
-      "title": "Nova minds",
+      "title": "Nova minds test",
       "description": "its just testing projects",
       "image": "",
       "images": [

@@ -315,7 +315,7 @@
       "education": [
         {
           "id": "edu_001",
-          "qualification": "Graduation",
+          "qualification": "Post Graduation",
           "course": "B.Tech/BE",
           "specialization": "Computer Science and Engineering",
           "college": "CUJ",
@@ -330,14 +330,14 @@
           "description": "Completed B.Tech in Computer Science with focus on full-stack development",
           "attachments": null,
           "createdAt": "2025-06-19T21:16:02.064Z",
-          "updatedAt": "2025-06-19T21:16:02.064Z"
+          "updatedAt": "2025-06-27T14:45:20.146Z"
         }
       ],
       "workExperience": [
         {
           "id": "work_001",
           "gotFromUnstop": false,
-          "designation": "Freelance Developer",
+          "designation": "Software Engineer",
           "organization": "Self Employed",
           "employmentType": "Freelance",
           "startDate": "2024-01-01",
@@ -349,7 +349,7 @@
           "description": "Working as a freelance full-stack developer on various client projects",
           "attachments": null,
           "createdAt": "2025-06-19T21:16:02.064Z",
-          "updatedAt": "2025-06-19T21:16:02.064Z"
+          "updatedAt": "2025-06-27T14:44:51.947Z"
         }
       ],
       "personalDetails": {
@@ -385,15 +385,10 @@
         ],
         "collaborated": [],
         "favorites": [],
-        "count": 1
+        "count": 2
       },
       "marketplace": {
         "cart": [
-          {
-            "productId": "10",
-            "addedAt": "2025-06-19T21:36:07.569Z",
-            "quantity": 1
-          },
           {
             "productId": "17",
             "addedAt": "2025-06-27T13:57:44.983Z",
@@ -409,7 +404,8 @@
         "python",
         "frontend",
         "backend",
-        "ai"
+        "ai",
+        "Deep Learning"
       ],
       "social": {
         "followers": [],
@@ -1199,7 +1195,7 @@
   },
   "userCounter": 9,
   "metadata": {
-    "lastUpdated": "2025-06-27T13:57:44.983Z",
+    "lastUpdated": "2025-06-27T14:45:20.146Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -88,6 +88,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   const location = useLocation();
   const [authorCache, setAuthorCache] = useState<Record<string, any>>({});
   const [currentUserCustomId, setCurrentUserCustomId] = useState<string | null>(null);
+  const [authorsLoading, setAuthorsLoading] = useState(false);
 
   // Fetch current user's customUserId
   useEffect(() => {
@@ -151,43 +152,73 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
     fetchProjects();
   }, [searchQuery, filters, sortBy, currentPage]);
 
-  // Fetch author details for all projects
-  useEffect(() => {
-    const fetchAuthors = async () => {
-      const uniqueAuthorIds = Array.from(new Set(projects.map(p => p.author)));
-      const newCache: Record<string, any> = { ...authorCache };
-      for (const authorId of uniqueAuthorIds) {
-        if (authorId && !newCache[authorId]) {
-          try {
-            const res = await fetch(`http://localhost:3000/api/users/${authorId}`);
-            if (res.ok) {
-              const data = await res.json();
-              if (data.success && data.data) {
-                newCache[authorId] = data.data;
-              }
-            }
-          } catch {}
-        }
-      }
-      setAuthorCache(newCache);
-    };
-    if (projects.length > 0) fetchAuthors();
-    // eslint-disable-next-line
+  // Memoize unique author IDs to prevent unnecessary API calls
+  const uniqueAuthorIds = useMemo(() => {
+    return Array.from(new Set(projects.map(p => p.author)));
   }, [projects]);
 
-  // Helper to get author details
+  // Memoize uncached author IDs
+  const uncachedAuthorIds = useMemo(() => {
+    return uniqueAuthorIds.filter(id => id && !authorCache[id]);
+  }, [uniqueAuthorIds, authorCache]);
+
+  // Fetch author details for all projects using bulk endpoint
+  useEffect(() => {
+    const fetchAuthors = async () => {
+      if (uncachedAuthorIds.length === 0) return;
+      
+      try {
+        setAuthorsLoading(true);
+        const response = await fetch(`http://localhost:3000/api/users/bulk/${uncachedAuthorIds.join(',')}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setAuthorCache(prevCache => ({
+              ...prevCache,
+              ...data.data
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching authors in bulk:', error);
+      } finally {
+        setAuthorsLoading(false);
+      }
+    };
+    
+    fetchAuthors();
+  }, [uncachedAuthorIds]);
+
+  // Helper to get author details with loading state
   const getAuthorDetails = (authorId: string) => {
-    const user = authorCache[authorId];
-    if (!user) return { name: 'Unknown', image: NoUserProfile, userType: '', id: authorId };
+    const user = authorCache[authorId as keyof typeof authorCache];
+    if (!user) {
+      return { 
+        name: authorsLoading ? 'Loading...' : 'Unknown', 
+        image: NoUserProfile, 
+        userType: '', 
+        id: authorId,
+        isLoading: authorsLoading
+      };
+    }
     const auth = user.auth || {};
     const profile = user.profile || {};
     return {
-      name: `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User',
+      name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Unnamed User',
       image: profile.avatar || NoUserProfile,
-      userType: auth.userType || '',
-      id: user.customUserId
+      userType: profile.userType || auth.userType || '',
+      id: user.customUserId,
+      isLoading: false
     };
   };
+
+  // Skeleton loader for author details
+  const AuthorSkeleton = () => (
+    <div className="flex items-center space-x-2 mb-2">
+      <div className="w-6 h-6 bg-gray-200 rounded-full animate-pulse"></div>
+      <div className="w-20 h-3 bg-gray-200 rounded animate-pulse"></div>
+    </div>
+  );
 
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSortBy(event.target.value);
@@ -382,10 +413,19 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
     }
     
     const type = (userType || '').toLowerCase();
-    if (type === 'freelancer') {
-      navigate(`/freelancerprofile/${id}`);
-    } else {
+    
+    // Check if user type is student or professor
+    if (type === 'student' || type === 'professor') {
       navigate(`/studentprofile/${id}`);
+    } 
+    // Check if user type is freelancer
+    else if (type === 'freelancer') {
+      navigate(`/freelancerprofile/${id}`);
+    } 
+    // Default fallback to student profile for unknown user types
+    else {
+      console.warn(`Unknown user type: ${userType}, redirecting to student profile`);
+      // navigate(`/studentprofile/${id}`);
     }
   };
 
@@ -462,29 +502,33 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
               </div>
 
               <CardContent className="p-4 flex flex-col flex-1">
-                <div className="flex items-center space-x-2 mb-2">
-                  <img
-                    src={getAuthorDetails(project.author).image || NoUserProfile}
-                    alt={getAuthorDetails(project.author).name}
-                    className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
-                    onError={e => { e.currentTarget.src = NoUserProfile; }}
-                    onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                  />
-                  <span
-                    className="text-gray-700 text-xs cursor-pointer"
-                    style={{ transition: 'color 0.2s' }}
-                    onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
-                    onMouseOut={e => e.currentTarget.style.color = ''}
-                    onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                  >
-                    {getAuthorDetails(project.author).name}
-                  </span>
-                  <div className="flex items-center space-x-1">
-                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                    <span className="text-yellow-500 text-xs">{project.rating}</span>
-                    <span className="text-gray-400 text-[10px]">({project.reviews})</span>
+                {getAuthorDetails(project.author).isLoading ? (
+                  <AuthorSkeleton />
+                ) : (
+                  <div className="flex items-center space-x-2 mb-2">
+                    <img
+                      src={getAuthorDetails(project.author).image || NoUserProfile}
+                      alt={getAuthorDetails(project.author).name}
+                      className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
+                      onError={e => { e.currentTarget.src = NoUserProfile; }}
+                      onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                    />
+                    <span
+                      className="text-gray-700 text-xs cursor-pointer"
+                      style={{ transition: 'color 0.2s' }}
+                      onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                      onMouseOut={e => e.currentTarget.style.color = ''}
+                      onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                    >
+                      {getAuthorDetails(project.author).name}
+                    </span>
+                    <div className="flex items-center space-x-1">
+                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                      <span className="text-yellow-500 text-xs">{project.rating}</span>
+                      <span className="text-gray-400 text-[10px]">({project.reviews})</span>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <h3 
                   className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors cursor-pointer"
@@ -597,29 +641,41 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
             />
 
             <div className="flex items-center mb-4">
-              <img
-                src={getAuthorDetails(selected.author).image || NoUserProfile}
-                alt={getAuthorDetails(selected.author).name}
-                className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
-                onError={e => { e.currentTarget.src = NoUserProfile; }}
-                onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
-              />
-              <div>
-                <div
-                  className="text-sm font-semibold text-gray-800 cursor-pointer"
-                  style={{ transition: 'color 0.2s' }}
-                  onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
-                  onMouseOut={e => e.currentTarget.style.color = ''}
-                  onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
-                >
-                  {getAuthorDetails(selected.author).name}
+              {getAuthorDetails(selected.author).isLoading ? (
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mr-3"></div>
+                  <div>
+                    <div className="w-24 h-4 bg-gray-200 rounded animate-pulse mb-1"></div>
+                    <div className="w-16 h-3 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-1 text-xs text-gray-500">
-                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                  <span className="text-yellow-500">{selected.rating}</span>
-                  <span>({selected.reviews} reviews)</span>
-                </div>
-              </div>
+              ) : (
+                <>
+                  <img
+                    src={getAuthorDetails(selected.author).image || NoUserProfile}
+                    alt={getAuthorDetails(selected.author).name}
+                    className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
+                    onError={e => { e.currentTarget.src = NoUserProfile; }}
+                    onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
+                  />
+                  <div>
+                    <div
+                      className="text-sm font-semibold text-gray-800 cursor-pointer"
+                      style={{ transition: 'color 0.2s' }}
+                      onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                      onMouseOut={e => e.currentTarget.style.color = ''}
+                      onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
+                    >
+                      {getAuthorDetails(selected.author).name}
+                    </div>
+                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                      <span className="text-yellow-500">{selected.rating}</span>
+                      <span>({selected.reviews} reviews)</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="mb-3">
