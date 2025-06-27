@@ -8,30 +8,31 @@ import {
     DropdownMenuTrigger,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { 
-    User, 
-    Settings, 
-    LogOut, 
-    Bell, 
-    Search, 
-    MessageSquare, 
-    TrendingUp, 
-    Star, 
-    Shield, 
-    Heart, 
-    BarChart2, 
-    Calendar, 
-    X, 
-    HelpCircle, 
-    Users, 
-    List, 
-    LayoutGrid, 
-    Send, 
-    UserPlus, 
-    Globe, 
-    Palette, 
-    Database, 
-    Lock } from 'lucide-react';
+import {
+    User,
+    Settings,
+    LogOut,
+    Bell,
+    Search,
+    MessageSquare,
+    TrendingUp,
+    Star,
+    Shield,
+    Heart,
+    BarChart2,
+    Calendar,
+    X,
+    HelpCircle,
+    Users,
+    List,
+    LayoutGrid,
+    Send,
+    UserPlus,
+    Globe,
+    Palette,
+    Database,
+    Lock
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Logo from '@/assets/Logo/Logo Side.png';
 import InitialsAvatar from './InitialsAvatar';
@@ -40,7 +41,8 @@ import Navigation from '@/components/Navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { userService } from '@/services/userService';
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Connections from '@/components/Connections';
 import { EditProfile } from '../components/EditProfile';
 import { MyProjects } from '@/components/MyProjects';
 import { Input } from '@/components/ui/input';
@@ -233,6 +235,85 @@ const Header = () => {
     const [showProjectsSidebar, setShowProjectsSidebar] = useState(false);
     const [showFavouritesSidebar, setShowFavouritesSidebar] = useState(false);
     const [showCalendarSidebar, setShowCalendarSidebar] = useState(false);
+    const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
+   
+    // Mock data for connections (replace with real data fetching as needed)
+    const existingConnections: Array<any> = [
+        {
+            id: '1',
+            name: 'Alice Johnson',
+            title: 'Frontend Developer',
+            company: 'TechCorp',
+            avatar: '',
+            mutualConnections: 8,
+            isConnected: true,
+        },
+        {
+            id: '2',
+            name: 'Bob Smith',
+            title: 'Backend Engineer',
+            company: 'CodeWorks',
+            avatar: '',
+            mutualConnections: 8,
+            isConnected: true,
+        },
+        {
+            id: '3',
+            name: 'Carla Brown',
+            title: 'Data Scientist',
+            company: 'DataSolutions',
+            avatar: '',
+            mutualConnections: 8,
+            isConnected: true,
+        },
+        {
+            id: '4',
+            name: 'Dwayne Johnson',
+            title: 'Archiologist',
+            company: 'Rockfellar',
+            avatar: '',
+            mutualConnections: 8,
+            isConnected: true,
+        }
+    ];
+    const suggestedConnections: Array<any> = [
+        {
+            id: '1',
+            name: 'Alice Johnson',
+            title: 'Frontend Developer',
+            company: 'TechCorp',
+            avatar: '',
+            mutualConnections: 8,
+            isConnected: false,
+        },
+        {
+            id: '2',
+            name: 'Bob Smith',
+            title: 'Backend Engineer',
+            company: 'CodeWorks',
+            avatar: '',
+            mutualConnections: 8,
+            isConnected: false,
+        },
+        {
+            id: '3',
+            name: 'Carla Brown',
+            title: 'Data Scientist',
+            company: 'DataSolutions',
+            avatar: '',
+            mutualConnections: 8,
+            isConnected: false,
+        },
+        {
+            id: '4',
+            name: 'Dwayne Johnson',
+            title: 'Archiologist',
+            company: 'Rockfellar',
+            avatar: '',
+            mutualConnections: 8,
+            isConnected: false,
+        }
+    ];
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -335,9 +416,17 @@ const Header = () => {
         setNewMessage("");
     };
 
+    function handleConnect(personId: string): void {
+        // Here you would typically send a connection request to your backend
+        // For now, just show a toast or alert for demonstration
+        alert(`Connection request sent to user with ID: ${personId}`);
+        // Optionally, update UI state to reflect the request was sent
+        // Example: setSuggestedConnections(prev => prev.filter(p => p.id !== personId));
+    }
+
     return (
         <>
-            <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+            <header className="sticky z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
                 <div className="container mx-auto px-4">
                     <div className="flex h-14 items-center justify-between">
                         {/* Logo */}
@@ -514,11 +603,15 @@ const Header = () => {
                         onClick={() => {
                             setShowProfileSidebar(false);
                             setShowSettingsSidebar(false);
+                            setShowCalendarSidebar(false);
+                            setShowFavouritesSidebar(false);
+                            setShowConnectionsSidebar(false);
+                            setShowProjectsSidebar(false);
                         }}
                     />
-                    {/* Settings Sidebar - appears only when showSettingsSidebar is true */}
+
                     {showSettingsSidebar && (
-                        <div className="fixed top-0 right-[24rem] w-96 h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
+                        <div className="fixed bottom-0 right-[24rem] w-96 h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
                             <div className="flex items-center justify-between p-4 border-b">
                                 <h2 className="font-bold text-xl text-gray-900">Settings</h2>
                                 <button
@@ -580,7 +673,7 @@ const Header = () => {
                     )}
 
                     {showProjectsSidebar && (
-                        <div className="fixed top-0 right-[24rem] w-96 h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
+                        <div className="fixed bottom-0 right-[24rem] w-96 h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
                             <div className="flex items-center justify-between p-4 border-b">
                                 <h2 className="font-bold text-xl text-gray-900">Projects</h2>
                                 <button
@@ -597,7 +690,7 @@ const Header = () => {
                     )}
 
                     {showFavouritesSidebar && (
-                        <div className="fixed top-0 right-[24rem] w-96 h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
+                        <div className="fixed bottom-0 right-[24rem] w-96 h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
                             <div className="flex items-center justify-between p-4 border-b">
                                 <h2 className="font-bold text-xl text-gray-900">Favourites</h2>
                                 <button
@@ -614,7 +707,7 @@ const Header = () => {
                     )}
 
                     {showCalendarSidebar && (
-                        <div className="fixed top-0 right-[24rem] w-96 h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
+                        <div className="fixed bottom-0 right-[24rem] w-96 h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
                             <div className="flex items-center justify-between p-4 border-b">
                                 <h2 className="font-bold text-xl text-gray-900">Calendar</h2>
                                 <button
@@ -630,116 +723,201 @@ const Header = () => {
                         </div>
                     )}
 
-                    <div className="relative w-96 max-w-[90vw] h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
-                        <div className="flex items-center justify-between p-4 border-b">
-                            <h2 className="font-bold text-xl text-gray-900">Profile</h2>
-                            <button
-                                onClick={() => setShowProfileSidebar(false)}
-                                className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                            <div className="flex flex-col items-center text-center">
-                                <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} size={96} />
-                                <h3 className="font-bold text-lg text-gray-900 mt-3">{profileData.firstName} {profileData.lastName}</h3>
-                                <Link to="/profile" className="text-sm text-blue-600 hover:underline mt-1">
-                                    View Profile &gt;
-                                </Link>
+                    {showConnectionsSidebar && (
+                        <div className="fixed bottom-0 right-[24rem] w-[50rem] h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right z-50">
+                            <div className="flex items-center justify-between p-4 border-b">
+                                <h2 className="font-bold text-xl text-gray-900">Connections</h2>
+                                <button
+                                    onClick={() => setShowConnectionsSidebar(false)}
+                                    className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-2 text-center">
-                                <div className="p-2 rounded-lg bg-gray-50">
-                                    <TrendingUp className="w-6 h-6 mx-auto text-green-500 mb-1" />
-                                    <p className="font-bold text-sm text-gray-900">111452</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-gray-50">
-                                    <Star className="w-6 h-6 mx-auto text-yellow-500 mb-1" />
-                                    <p className="font-bold text-sm text-gray-900">7083</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-gray-50">
-                                    <Shield className="w-6 h-6 mx-auto text-blue-500 mb-1" />
-                                    <p className="font-bold text-sm text-gray-900">528</p>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">USER</h4>
-                                <nav className="space-y-1">
-                                    <Link to="/dashboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                        <LayoutGrid className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Dashboard</span>
-                                    </Link>
-                                    <Link to="/connection" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                        <UserPlus className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">My Connections</span>
-                                    </Link>
-                                    <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                        <Users className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">My Collaborations</span>
-                                    </Link>
-                                    <Link to="#" 
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setShowProjectsSidebar(true);
-                                    }}
-                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                        <List className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">My Projects</span>
-                                    </Link>
-                                    <Link to="#" 
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setShowFavouritesSidebar(true);
-                                    }}
-                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                        <Heart className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">My Favourites</span>
-                                    </Link>
-                                    <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                        <BarChart2 className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Analytics</span>
-                                    </Link>
-                                    <Link to="#" 
-                                        onClick={(e) =>{
-                                            e.preventDefault();
-                                            setShowCalendarSidebar(true);
-                                    }}
-                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                        <Calendar className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Calendar</span>
-                                    </Link>
-                                </nav>
-                            </div>
+                            <div className="flex-1 overflow-y-auto">
+                                <Tabs defaultValue="existing" className="w-full h-full">
+                                    <TabsList className="grid w-auto grid-cols-2 mx-4 mt-4">
+                                        <TabsTrigger value="existing">Existing Connections</TabsTrigger>
+                                        <TabsTrigger value="new">Make New Connections</TabsTrigger>
+                                    </TabsList>
 
-                            <div className="border-t pt-4">
-                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">GENERAL</h4>
-                                <nav className="space-y-1">
-                                    <Link
-                                        to="#"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setShowSettingsSidebar(true);
-                                        }}
-                                        className="flex items-center p-2 rounded-md hover:bg-gray-100"
-                                    >
-                                        <Settings className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Settings</span>
-                                    </Link>
-                                    <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                        <HelpCircle className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Help</span>
-                                    </Link>
-                                    <Link to="/signin" onClick={handleLogout} className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                        <LogOut className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Logout</span>
-                                    </Link>
-                                </nav>
+                                    <TabsContent value="existing" className="p-6 space-y-4">
+                                        {existingConnections.length > 0 ? (
+                                            existingConnections.map((person) => (
+                                                <Connections
+                                                    key={person.id}
+                                                    person={person}
+                                                    onMessage={handleSendMessage}
+                                                    showConnectButton={false}
+                                                />
+                                            ))
+                                        ) : (
+                                            <div className="text-center text-gray-500 mt-8">
+                                                <p>No existing connections found</p>
+                                            </div>
+                                        )}
+                                    </TabsContent>
+
+                                    <TabsContent value="new" className="p-6 space-y-4">
+                                        {suggestedConnections.length > 0 ? (
+                                            suggestedConnections.map((person) => (
+                                                <Connections
+                                                    key={person.id}
+                                                    person={person}
+                                                    onConnect={handleConnect}
+                                                    onMessage={handleSendMessage}
+                                                    showConnectButton={true}
+                                                />
+                                            ))
+                                        ) : (
+                                            <div className="text-center text-gray-500 mt-8">
+                                                <p>No new connection suggestions available</p>
+                                            </div>
+                                        )}
+                                    </TabsContent>
+                                </Tabs>
                             </div>
                         </div>
+                    )}
 
-                        
-                    </div>
+                    {showProfileSidebar && (
+                        <div className="relative w-96 max-w-[90vw] h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
+                            <div className="flex items-center justify-between p-4 border-b">
+                                <h2 className="font-bold text-xl text-gray-900">Profile</h2>
+                                <button
+                                    onClick={() => setShowProfileSidebar(false)}
+                                    className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                <div className="flex flex-col items-center text-center">
+                                    <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} size={96} />
+                                    <h3 className="font-bold text-lg text-gray-900 mt-3">{profileData.firstName} {profileData.lastName}</h3>
+                                    <Link to="/profile" className="text-sm text-blue-600 hover:underline mt-1">
+                                        View Profile &gt;
+                                    </Link>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-2 text-center">
+                                    <div className="p-2 rounded-lg bg-gray-50">
+                                        <TrendingUp className="w-6 h-6 mx-auto text-green-500 mb-1" />
+                                        <p className="font-bold text-sm text-gray-900">111452</p>
+                                    </div>
+                                    <div className="p-2 rounded-lg bg-gray-50">
+                                        <Star className="w-6 h-6 mx-auto text-yellow-500 mb-1" />
+                                        <p className="font-bold text-sm text-gray-900">7083</p>
+                                    </div>
+                                    <div className="p-2 rounded-lg bg-gray-50">
+                                        <Shield className="w-6 h-6 mx-auto text-blue-500 mb-1" />
+                                        <p className="font-bold text-sm text-gray-900">528</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">USER</h4>
+                                    <nav className="space-y-1">
+                                        <Link to="/dashboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <LayoutGrid className="w-5 h-5 mr-3 text-gray-600" />
+                                            <span className="text-gray-700 font-medium">Dashboard</span>
+                                        </Link>
+                                        <Link to="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setShowConnectionsSidebar(true);
+                                                setShowProjectsSidebar(false);
+                                                setShowSettingsSidebar(false);
+                                                setShowCalendarSidebar(false);
+                                                setShowFavouritesSidebar(false);
+                                            }}
+                                            className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <UserPlus className="w-5 h-5 mr-3 text-gray-600" />
+                                            <span className="text-gray-700 font-medium">My Connections</span>
+                                        </Link>
+                                        <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <Users className="w-5 h-5 mr-3 text-gray-600" />
+                                            <span className="text-gray-700 font-medium">My Collaborations</span>
+                                        </Link>
+                                        <Link to="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setShowProjectsSidebar(true);
+                                                setShowSettingsSidebar(false);
+                                                setShowCalendarSidebar(false);
+                                                setShowFavouritesSidebar(false);
+                                                setShowConnectionsSidebar(false);
+                                            }}
+                                            className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <List className="w-5 h-5 mr-3 text-gray-600" />
+                                            <span className="text-gray-700 font-medium">My Projects</span>
+                                        </Link>
+                                        <Link to="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setShowFavouritesSidebar(true);
+                                                setShowProjectsSidebar(false);
+                                                setShowSettingsSidebar(false);
+                                                setShowConnectionsSidebar(false);
+                                                setShowCalendarSidebar(false);
+                                            }}
+                                            className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <Heart className="w-5 h-5 mr-3 text-gray-600" />
+                                            <span className="text-gray-700 font-medium">My Favourites</span>
+                                        </Link>
+                                        <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <BarChart2 className="w-5 h-5 mr-3 text-gray-600" />
+                                            <span className="text-gray-700 font-medium">Analytics</span>
+                                        </Link>
+                                        <Link to="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setShowCalendarSidebar(true);
+                                                setShowFavouritesSidebar(false);
+                                                setShowProjectsSidebar(false);
+                                                setShowConnectionsSidebar(false);
+                                                setShowSettingsSidebar(false);
+                                            }}
+                                            className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <Calendar className="w-5 h-5 mr-3 text-gray-600" />
+                                            <span className="text-gray-700 font-medium">Calendar</span>
+                                        </Link>
+                                    </nav>
+                                </div>
+
+                                <div className="border-t pt-4">
+                                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">GENERAL</h4>
+                                    <nav className="space-y-1">
+                                        <Link
+                                            to="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setShowSettingsSidebar(true);
+                                                setShowCalendarSidebar(false);
+                                                setShowFavouritesSidebar(false);
+                                                setShowConnectionsSidebar(false);
+                                                setShowProjectsSidebar(false);
+                                            }}
+                                            className="flex items-center p-2 rounded-md hover:bg-gray-100"
+                                        >
+                                            <Settings className="w-5 h-5 mr-3 text-gray-600" />
+                                            <span className="text-gray-700 font-medium">Settings</span>
+                                        </Link>
+                                        <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <HelpCircle className="w-5 h-5 mr-3 text-gray-600" />
+                                            <span className="text-gray-700 font-medium">Help</span>
+                                        </Link>
+                                        <Link to="/signin" onClick={handleLogout} className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <LogOut className="w-5 h-5 mr-3 text-gray-600" />
+                                            <span className="text-gray-700 font-medium">Logout</span>
+                                        </Link>
+                                    </nav>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    )}
                 </div>
             )}
 
