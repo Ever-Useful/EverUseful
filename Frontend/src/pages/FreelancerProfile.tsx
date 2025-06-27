@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Clock, DollarSign, Heart, ArrowLeft, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus } from "lucide-react";
+import { Star, MapPin, Clock, DollarSign, Heart, ArrowLeft, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit } from "lucide-react";
 import { ChatBox } from "@/components/ChatBox";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -22,65 +22,43 @@ const VisitingProfile = () => {
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
   const MAX_LENGTH = 200;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [education, setEducation] = useState([]);
+  const [workExperience, setWorkExperience] = useState([]);
 
   useEffect(() => {
     const fetchFreelancer = async () => {
       if (id) {
         try {
-          console.log('Fetching freelancer with ID:', id);
-          // Make direct fetch call to backend without authentication for public profile
           const response = await fetch(`http://localhost:3000/api/users/${id}`);
-          console.log('Response status:', response.status);
-          
           if (response.ok) {
             const data = await response.json();
-            console.log('Freelancer data received:', data);
-            console.log('Freelancer full response data:', JSON.stringify(data, null, 2));
             if (data.success && data.data) {
               setFreelancer(data.data);
-              console.log('Freelancer projects object:', data.data.projects);
-              console.log('Freelancer projects.created:', data.data.projects?.created);
-              console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
+              setEducation(data.data.education || []);
+              setWorkExperience(data.data.workExperience || []);
               // Fetch full project details for each project ID
               const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-              console.log('Freelancer Project IDs found:', projectIds);
-              console.log('Freelancer Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
               if (projectIds.length > 0) {
-                const projectPromises = projectIds.map((pid: string) => {
-                  console.log(`Freelancer fetching project with ID: ${pid} (type: ${typeof pid})`);
-                  return fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
-                    .then(res => {
-                      console.log(`Freelancer response for project ${pid}:`, res.status, res.ok);
-                      return res.ok ? res.json() : null;
-                    })
-                    .then(res => {
-                      console.log(`Freelancer project data for ${pid}:`, res);
-                      return res && res.project ? res.project : null;
-                    })
-                    .catch(error => {
-                      console.error(`Freelancer error fetching project ${pid}:`, error);
-                      return null;
-                    });
-                });
+                const projectPromises = projectIds.map((pid) =>
+                  fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
+                    .then(res => res.ok ? res.json() : null)
+                    .then(res => res && res.project ? res.project : null)
+                    .catch(() => null)
+                );
                 const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-                console.log('Freelancer full projects fetched:', fullProjects);
                 setPortfolioProjects(fullProjects);
               } else {
-                console.log('Freelancer no project IDs found');
                 setPortfolioProjects([]);
               }
             } else {
-              console.error('Invalid response format:', data);
               setFreelancer(null);
               setPortfolioProjects([]);
             }
           } else {
-            console.error('Failed to fetch freelancer:', response.status);
             setFreelancer(null);
             setPortfolioProjects([]);
           }
         } catch (err) {
-          console.error('Error fetching freelancer:', err);
           setFreelancer(null);
           setPortfolioProjects([]);
         }
@@ -115,12 +93,12 @@ const VisitingProfile = () => {
   const location = profile.location || '';
   const userType = auth.userType || '';
   const skills = freelancer.skills || [];
-  const education = freelancer.studentData || {};
+  const educationData = freelancer.studentData || {};
 
   // Debug logging
   console.log('Freelancer data structure:', {
     profile,
-    education,
+    education: educationData,
     projects: portfolioProjects,
     skills
   });
@@ -129,12 +107,12 @@ const VisitingProfile = () => {
   const displayedText = shouldTruncate && !isExpanded ? about.slice(0, MAX_LENGTH) + "..." : about;
 
   // Map education data from backend
-  const academicBackground = education ? [
+  const academicBackground = educationData ? [
     {
-      degree: education.degree || '',
-      institution: education.college || '',
-      year: education.year || '',
-      course: education.course || '',
+      degree: educationData.degree || '',
+      institution: educationData.college || '',
+      year: educationData.year || '',
+      course: educationData.course || '',
     }
   ].filter(item => item.degree || item.institution || item.year || item.course) : [];
 
@@ -272,38 +250,55 @@ const VisitingProfile = () => {
             </Card>
 
             {/* Academic Background */}
-            {academicBackground.length > 0 && (
+            {education && education.length > 0 && (
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span className="bg-blue-100 p-2 rounded-lg mr-3">
-                      <BookOpen className="w-5 h-5 text-blue-600" />
-                    </span>
-                    Academic Background
-                  </h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                      <span className="bg-blue-100 p-2 rounded-lg mr-3">
+                        <BookOpen className="w-5 h-5 text-blue-600" />
+                      </span>
+                      Academic Background
+                    </h2>
+                  </div>
                   <div className="space-y-6">
-                    {academicBackground.map((item, index) => (
-                      <div key={index} className="flex">
-                        <div className="mr-4 flex flex-col items-center">
-                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                            <GraduationCap className="w-5 h-5 text-blue-500" />
-                          </div>
-                          {index < academicBackground.length - 1 && (
-                            <div className="w-0.5 h-full bg-gray-200 my-2"></div>
-                          )}
+                    {education.map((edu, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                        <div>
+                          <div className="font-semibold text-gray-900">{edu.qualification} - {edu.course}</div>
+                          <div className="text-gray-700 text-sm">{edu.college} | {edu.startYear} - {edu.endYear}</div>
+                          {edu.specialization && <div className="text-gray-500 text-xs mt-1">{edu.specialization}</div>}
+                          {edu.description && <div className="text-gray-500 text-xs mt-1">{edu.description}</div>}
+                          {edu.skills && <div className="text-gray-500 text-xs mt-1">Skills: {edu.skills}</div>}
                         </div>
-                        <div className="flex-1">
-                          {item.degree && <h3 className="font-semibold text-gray-900">{item.degree}</h3>}
-                          {(item.institution || item.year) && (
-                            <p className="text-gray-600">
-                              {item.institution}{item.institution && item.year ? ' • ' : ''}{item.year}
-                            </p>
-                          )}
-                          {item.course && (
-                            <p className="text-sm text-gray-500 mt-1">
-                              <span className="font-medium">Course:</span> {item.course}
-                            </p>
-                          )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Work Experience Section */}
+            {workExperience && workExperience.length > 0 && (
+              <Card className="bg-white shadow-lg rounded-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                      <span className="bg-green-100 p-2 rounded-lg mr-3">
+                        <Briefcase className="w-5 h-5 text-green-600" />
+                      </span>
+                      Work Experience
+                    </h2>
+                  </div>
+                  <div className="space-y-6">
+                    {workExperience.map((work, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                        <div>
+                          <div className="font-semibold text-gray-900">{work.designation} - {work.organization}</div>
+                          <div className="text-gray-700 text-sm">{work.startDate} - {work.currentlyWorking ? 'Present' : work.endDate}</div>
+                          <div className="text-gray-500 text-xs mt-1">{work.employmentType}</div>
+                          {work.description && <div className="text-gray-500 text-xs mt-1">{work.description}</div>}
+                          {work.skills && <div className="text-gray-500 text-xs mt-1">Skills: {work.skills}</div>}
                         </div>
                       </div>
                     ))}

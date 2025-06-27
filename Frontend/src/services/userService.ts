@@ -183,15 +183,15 @@ class UserService {
   // Remove skill
   async deleteSkill(skillName: string): Promise<void> {
     const response = await this.makeRequest(`/skills/${encodeURIComponent(skillName)}`, {
-      method: 'DELETE',
+      method: 'DELETE'
     });
-    return response.data;
+    return response.skills;
   }
 
   // Get user skills
   async getUserSkills(): Promise<string[]> {
     const response = await this.makeRequest('/skills');
-    return response.data || [];
+    return response.skills || [];
   }
 
   // Debug method to check current user status

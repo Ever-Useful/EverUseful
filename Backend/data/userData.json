@@ -299,7 +299,7 @@
         "website": "https://github.com/amitkumar",
         "title": "Full-Stack Developer",
         "createdAt": "2025-06-19T21:16:02.064Z",
-        "updatedAt": "2025-06-25T20:33:26.842Z",
+        "updatedAt": "2025-06-26T11:56:52.023Z",
         "firstName": "freelancer hai",
         "lastName": "sayad",
         "userType": "freelancer",
@@ -393,6 +393,11 @@
             "productId": "10",
             "addedAt": "2025-06-19T21:36:07.569Z",
             "quantity": 1
+          },
+          {
+            "productId": "17",
+            "addedAt": "2025-06-27T13:57:44.983Z",
+            "quantity": 1
           }
         ],
         "orders": [],
@@ -403,7 +408,8 @@
       "skills": [
         "python",
         "frontend",
-        "backend"
+        "backend",
+        "ai"
       ],
       "social": {
         "followers": [],
@@ -461,16 +467,16 @@
       "customUserId": "USER_000006",
       "profile": {
         "avatar": null,
-        "bio": null,
+        "bio": "this is the first user POV.",
         "location": null,
         "website": null,
         "title": null,
         "createdAt": "2025-06-25T18:57:20.316Z",
-        "updatedAt": "2025-06-25T18:57:20.316Z",
-        "firstName": "",
-        "lastName": "",
+        "updatedAt": "2025-06-27T16:51:20.233Z",
+        "firstName": "Ramesh",
+        "lastName": "Kumar",
         "userType": "student",
-        "username": "",
+        "username": "ramkumar",
         "email": "22beece21.cce@cujammu.ac.in",
         "mobile": "",
         "gender": "",
@@ -478,17 +484,55 @@
         "purpose": "",
         "role": ""
       },
-      "education": [],
-      "workExperience": [],
+      "education": [
+        {
+          "id": "edu_1751043138723",
+          "qualification": "PhD",
+          "course": "Other",
+          "specialization": "Other",
+          "college": "iit",
+          "startYear": "2024",
+          "endYear": "2026",
+          "courseType": "Full Time",
+          "percentage": "89",
+          "cgpa": "8.9",
+          "rollNumber": "22b3ccs21",
+          "lateralEntry": "No",
+          "skills": "Training, Fine-tuning",
+          "description": "NA",
+          "attachments": null,
+          "createdAt": "2025-06-27T16:52:18.723Z",
+          "updatedAt": "2025-06-27T16:52:18.723Z"
+        }
+      ],
+      "workExperience": [
+        {
+          "id": "work_1751043176598",
+          "gotFromUnstop": false,
+          "designation": "Software Engineer",
+          "organization": "Amogh pvt ltd",
+          "employmentType": "Full Time",
+          "startDate": "2025-06-01",
+          "endDate": "",
+          "currentlyWorking": true,
+          "location": "",
+          "remote": true,
+          "skills": "Training, Fine-tuning",
+          "description": "NA",
+          "attachments": null,
+          "createdAt": "2025-06-27T16:52:56.598Z",
+          "updatedAt": "2025-06-27T16:52:56.598Z"
+        }
+      ],
       "personalDetails": {
-        "address1": "",
+        "address1": "lucknow",
         "address2": "",
         "landmark": "",
-        "pincode": "",
-        "location": "",
-        "hobbies": "",
+        "pincode": "261125",
+        "location": "Sitapur, Uttar Pradesh",
+        "hobbies": "good",
         "copyCurrent": false,
-        "updatedAt": "2025-06-25T18:57:20.316Z"
+        "updatedAt": "2025-06-27T16:53:20.359Z"
       },
       "socialLinks": {
         "linkedin": "",
@@ -507,7 +551,9 @@
         "updatedAt": "2025-06-25T18:57:20.316Z"
       },
       "projects": {
-        "created": [],
+        "created": [
+          19
+        ],
         "collaborated": [],
         "favorites": [],
         "count": 0
@@ -519,7 +565,10 @@
         "reviews": [],
         "wishlist": []
       },
-      "skills": [],
+      "skills": [
+        "Deep Learning",
+        "Medical Malpractice"
+      ],
       "social": {
         "followers": [],
         "following": [],
@@ -548,7 +597,7 @@
         "language": null
       },
       "stats": {
-        "projectsCount": 0,
+        "projectsCount": 1,
         "totalLikes": 0,
         "totalViews": 0,
         "totalDownloads": 0,
@@ -738,16 +787,65 @@
         "updatedAt": "2025-06-25T00:00:00.000Z",
         "firstName": "Dr. Priya",
         "lastName": "Sharma",
-        "userType": "professor"
+        "userType": "freelancer",
+        "username": "johnsmithphd",
+        "email": "john.smith@cambridge.edu",
+        "mobile": "9876543213",
+        "gender": "Male",
+        "domain": "Physics",
+        "purpose": "Research & Teach",
+        "role": "Professor"
+      },
+      "education": [
+        {
+          "id": "edu_007",
+          "qualification": "PhD",
+          "course": "Quantum Physics",
+          "specialization": "Quantum Computing",
+          "college": "University of Cambridge",
+          "startYear": "2000",
+          "endYear": "2004",
+          "courseType": "Full Time",
+          "percentage": "-",
+          "cgpa": "-",
+          "rollNumber": "PHY2000",
+          "lateralEntry": "No",
+          "skills": "Quantum Mechanics, Quantum Computing",
+          "description": "PhD in Quantum Physics with research in quantum algorithms.",
+          "attachments": null,
+          "createdAt": "2025-06-26T10:00:00.000Z",
+          "updatedAt": "2025-06-26T10:00:00.000Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-26T10:00:00.000Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-26T10:00:00.000Z"
       },
       "projects": {
-        "created": [
-          4,
-          7,
-          10,
-          13,
-          16
-        ],
+        "created": [],
         "collaborated": [],
         "favorites": [],
         "count": 0
@@ -760,13 +858,8 @@
         "wishlist": []
       },
       "skills": [
-        "Machine Learning",
-        "Natural Language Processing",
-        "Computer Vision",
-        "Python",
-        "TensorFlow",
-        "PyTorch",
-        "Research Methodology"
+        "Quantum Mechanics",
+        "Quantum Computing"
       ],
       "social": {
         "followers": [],
@@ -800,15 +893,15 @@
         "totalLikes": 0,
         "totalViews": 0,
         "totalDownloads": 0,
-        "memberSince": "2025-06-25T00:00:00.000Z"
+        "memberSince": "2025-06-26T10:00:00.000Z"
       },
-      "studentData": {
-        "college": "Indian Institute of Technology, Bangalore",
-        "degree": "BTech",
-        "course": "Computer Science & Engineering",
-        "year": "3",
-        "updatedAt": "2025-06-25T00:00:00.000Z"
-      }
+      "studentData": null,
+      "professorData": {
+        "department": "Physics",
+        "university": "University of Cambridge",
+        "updatedAt": "2025-06-26T10:00:00.000Z"
+      },
+      "freelancerData": null
     },
     "USER_000007": {
       "customUserId": "USER_000007",
@@ -1086,10 +1179,10 @@
       "education": [
         {
           "id": "edu_010",
-          "qualification": "PhD",
-          "course": "Climate Studies",
-          "specialization": "Climate Modeling",
-          "college": "University of British Columbia",
+          "qualification": "B.Tech",
+          "course": "Computer Science & Engineering",
+          "specialization": "Artificial Intelligence",
+          "college": "Indian Institute of Technology, Madras",
           "startYear": "2011",
           "endYear": "2015",
           "courseType": "Full Time",
@@ -1193,7 +1286,7 @@
   },
   "userCounter": 12,
   "metadata": {
-    "lastUpdated": "2025-06-27T13:02:39.689Z",
+    "lastUpdated": "2025-06-27T16:53:20.359Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }
