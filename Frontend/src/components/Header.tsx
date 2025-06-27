@@ -341,7 +341,7 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
-  const [profileData, setProfileData] = useState({ firstName: '', lastName: '' });
+  const [profileData, setProfileData] = useState({ firstName: '', lastName: '', avatar: '' });
   const [notifications, setNotifications] = useState(mockNotifications);
   const [messages, setMessages] = useState(mockMessages);
   const [showNotificationsSidebar, setShowNotificationsSidebar] = useState(false);
@@ -368,11 +368,12 @@ export const Header = () => {
         setProfileData({
           firstName: userProfile.auth.firstName || '',
           lastName: userProfile.auth.lastName || '',
+          avatar: userProfile.profile.avatar || '',
         });
       } else {
         setIsLoggedIn(false);
         localStorage.removeItem("isLoggedIn");
-        setProfileData({ firstName: '', lastName: '' });
+        setProfileData({ firstName: '', lastName: '', avatar: '' });
       }
     });
     return () => unsubscribe();
@@ -384,7 +385,7 @@ export const Header = () => {
       const loginStatus = localStorage.getItem("isLoggedIn") === "true";
       setIsLoggedIn(loginStatus);
       if (!loginStatus) {
-        setProfileData({ firstName: '', lastName: '' });
+        setProfileData({ firstName: '', lastName: '', avatar: '' });
         setShowNotificationsSidebar(false);
         setShowMessagesSidebar(false);
         setShowProfileSidebar(false);
@@ -400,7 +401,7 @@ export const Header = () => {
     try {
       // Clear all user-related state
       setIsLoggedIn(false);
-      setProfileData({ firstName: '', lastName: '' });
+      setProfileData({ firstName: '', lastName: '', avatar: '' });
       setShowNotificationsSidebar(false);
       setShowMessagesSidebar(false);
       setShowProfileSidebar(false);
@@ -989,7 +990,7 @@ export const Header = () => {
           </div>
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <div className="flex flex-col items-center text-center">
-              <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} size={96} />
+              <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} avatar={profileData.avatar} size={96} />
               <h3 className="font-bold text-lg text-gray-900 mt-3">{profileData.firstName} {profileData.lastName}</h3>
               <Link to="/profile" className="text-sm text-blue-600 hover:underline mt-1">
                 View Profile &gt;

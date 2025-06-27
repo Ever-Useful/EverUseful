@@ -34,6 +34,8 @@ const Profile = () => {
   const [editSection, setEditSection] = useState('');
   const [showMyProjects, setShowMyProjects] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [education, setEducation] = useState([]);
+  const [workExperience, setWorkExperience] = useState([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -67,6 +69,8 @@ const Profile = () => {
           console.log('Full data structure:', JSON.stringify(data, null, 2));
           if (data.success && data.data) {
             setUserData(data.data);
+            setEducation(data.data.education || []);
+            setWorkExperience(data.data.workExperience || []);
             console.log('User data set:', data.data);
             console.log('Projects object:', data.data.projects);
             console.log('Projects.created:', data.data.projects?.created);
@@ -322,39 +326,61 @@ const Profile = () => {
               </CardContent>
             </Card>
             {/* Academic Background */}
-            <Card className="bg-white shadow-lg rounded-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                    <span className="bg-blue-100 p-2 rounded-lg mr-3">
-                      <BookOpen className="w-5 h-5 text-blue-600" />
-                    </span>
-                    Academic Background
-                  </h2>
-                </div>
-                <div className="space-y-6">
-                  {academicBackground.map((item, index) => (
-                    <div key={index} className="flex">
-                      <div className="mr-4 flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                          <GraduationCap className="w-5 h-5 text-blue-500" />
+            {education && education.length > 0 && (
+              <Card className="bg-white shadow-lg rounded-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                      <span className="bg-blue-100 p-2 rounded-lg mr-3">
+                        <BookOpen className="w-5 h-5 text-blue-600" />
+                      </span>
+                      Academic Background
+                    </h2>
+                  </div>
+                  <div className="space-y-6">
+                    {education.map((edu, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                        <div>
+                          <div className="font-semibold text-gray-900">{edu.qualification} - {edu.course}</div>
+                          <div className="text-gray-700 text-sm">{edu.college} | {edu.startYear} - {edu.endYear}</div>
+                          {edu.specialization && <div className="text-gray-500 text-xs mt-1">{edu.specialization}</div>}
+                          {edu.description && <div className="text-gray-500 text-xs mt-1">{edu.description}</div>}
+                          {edu.skills && <div className="text-gray-500 text-xs mt-1">Skills: {edu.skills}</div>}
                         </div>
-                        {index < academicBackground.length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 my-2"></div>
-                        )}
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{item.degree}</h3>
-                        <p className="text-gray-600">{item.institution} • {item.year}</p>
-                        {item.course && (
-                          <p className="text-sm text-gray-500 mt-1"><span className="font-medium">Course:</span> {item.course}</p>
-                        )}
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            {/* Work Experience Section */}
+            {workExperience && workExperience.length > 0 && (
+              <Card className="bg-white shadow-lg rounded-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                      <span className="bg-green-100 p-2 rounded-lg mr-3">
+                        <Briefcase className="w-5 h-5 text-green-600" />
+                      </span>
+                      Work Experience
+                    </h2>
+                  </div>
+                  <div className="space-y-6">
+                    {workExperience.map((work, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                        <div>
+                          <div className="font-semibold text-gray-900">{work.designation} - {work.organization}</div>
+                          <div className="text-gray-700 text-sm">{work.startDate} - {work.currentlyWorking ? 'Present' : work.endDate}</div>
+                          <div className="text-gray-500 text-xs mt-1">{work.employmentType}</div>
+                          {work.description && <div className="text-gray-500 text-xs mt-1">{work.description}</div>}
+                          {work.skills && <div className="text-gray-500 text-xs mt-1">Skills: {work.skills}</div>}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             {/* Portfolio Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
