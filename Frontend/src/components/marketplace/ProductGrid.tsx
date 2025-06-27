@@ -253,7 +253,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
 
     return (
       <div className="w-full flex items-center justify-center mt-8">
-        <div className="flex items-center justify-center space-x-2 bg-white rounded-lg shadow-sm p-2">
+        <div className="flex items-center justify-center space-x-2 p-2">
           <Button
             variant="outline"
             className="w-8 h-8 p-0"
@@ -553,7 +553,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
                   <div className="flex items-center space-x-2 text-sm font-sm font-semibold text-gray-500">
                     <div className="flex items-center space-x-1">
                       <DollarSign className="w-3 h-3" />
-                      <span>${project.price}</span>
+                      <span>{project.price}</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Clock className="w-3 h-3" />
