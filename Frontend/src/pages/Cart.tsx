@@ -408,7 +408,7 @@ const Cart = () => {
         <div className="mt-16">
           <RelatedProducts
             title="You might also like"
-            projects={featuredProjects}
+            projects={featuredProjects.map(p => ({ ...p, title: p.name }))}
             onAddToCart={addToCart}
             onAddToWishlist={addToWishlist}
           />

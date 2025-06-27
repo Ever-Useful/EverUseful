@@ -393,6 +393,11 @@
             "productId": "10",
             "addedAt": "2025-06-19T21:36:07.569Z",
             "quantity": 1
+          },
+          {
+            "productId": "17",
+            "addedAt": "2025-06-27T13:57:44.983Z",
+            "quantity": 1
           }
         ],
         "orders": [],
@@ -1194,7 +1199,7 @@
   },
   "userCounter": 9,
   "metadata": {
-    "lastUpdated": "2025-06-26T11:57:03.293Z",
+    "lastUpdated": "2025-06-27T13:57:44.983Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }
