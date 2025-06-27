@@ -31,10 +31,11 @@ import {
     Globe,
     Palette,
     Database,
-    Lock
+    Lock, 
+    ShoppingCart
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Logo from '@/assets/Logo/Logo Side.png';
+import Logo from '@/assets/Logo/Logo Side Simple.png';
 import InitialsAvatar from './InitialsAvatar';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
@@ -427,14 +428,14 @@ const Header = () => {
     return (
         <>
             <header className="sticky z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-                <div className="container mx-auto px-4">
+                <div className="container w-[1320px] mx-auto px-4">
                     <div className="flex h-14 items-center justify-between">
                         {/* Logo */}
                         <div className="flex items-center space-x-1 flex-shrink-0">
                             <Link to="/" className="flex items-center space-x-2 group">
                                 <img src={Logo} alt="AMOGH" className="h-12 w-auto md:h-8" />
-                                <div className="py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
-                                    Beta
+                                <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
+                                    beta
                                 </div>
                             </Link>
                         </div>
@@ -459,7 +460,14 @@ const Header = () => {
                             <Button variant="ghost" size="sm" className="md:hidden p-2">
                                 <Search className="h-5 w-5 text-gray-600" />
                             </Button>
-
+                            
+                            {/* Cart Button */}
+                            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300" asChild>
+                                <Link to="/cart">
+                                    <ShoppingCart className="h-5 w-5 text-gray-600" />
+                                </Link>
+                            </Button>
+                            
                             {/* Messages Button */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
