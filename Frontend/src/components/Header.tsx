@@ -1,8 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, Sparkles, ShoppingCart, User, LogOut, Bell, MessageSquare, Send, Briefcase, List, Landmark, UserPlus, Users, Trophy, Heart, Bookmark, TrendingUp, Star, Shield, LayoutGrid, AlertCircle, Edit, Settings, HelpCircle, BarChart2, Calendar, ChevronDown, Search } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { 
+  Menu, X, Sparkles, ShoppingCart, User, LogOut, Bell, MessageSquare, Send, Briefcase, List, Landmark, 
+  UserPlus, Users, Trophy, Heart, Bookmark, TrendingUp, Star, Shield, LayoutGrid, AlertCircle, Edit, 
+  Settings, HelpCircle, BarChart2, Calendar, ChevronDown, Search, Info, FileText, Leaf
+} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +16,14 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { EditProfile } from './EditProfile';
+import { EditProfile } from '../components/EditProfile';
 import InitialsAvatar from './InitialsAvatar';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { userService } from '@/services/userService';
-import Logo1 from '../assets/images/Logo1.png'
+import Logo from '../assets/Logo/Logo Side.png'
+import { PopupMenu } from "@/components/PopupMenu";
+import { MyProjects } from '@/components/MyProjects';
 
 // Mock notification data with more comprehensive entries
 const mockNotifications = [
@@ -163,49 +170,191 @@ const mockChatMessages: Record<string, Array<{
   ],
 };
 
-// Navigation menu items
-const marketItems = [
-  { title: "Products", href: "/marketplace" },
-  { title: "Sell Items", href: "/" },
-  { title: "Cart", href: "/cart" },
-  { title: "Wishlist", href: "/" },
-];
+type NavItem = {
+  title: string;
+  href: string;
+  description: string;
+  icon: React.ReactNode;
+  authAction?: 'popup' | 'hide';
+};
 
-const workItems = [
-  { title: "Freelancing", href: "/freelancing" },
-  { title: "Find Experts", href: "/findexpert" },
-  { title: "Become a Mentor", href: "/" },
-  { title: "Jobs", href: "/connect" },
-];
+// New Navigation Structure with Icons and Descriptions
+const navLinks: { [key: string]: NavItem[] } = {
+  market: [
+    { 
+      title: "Explore Marketplace", 
+      href: "/marketplace",
+      description: "Browse and purchase products and services.",
+      icon: <ShoppingCart className="w-5 h-5 text-blue-500" /> 
+    },
+    { 
+      title: "Post a Project", 
+      href: "/projects/new",
+      description: "Create a new listing and attract talent.",
+      icon: <Briefcase className="w-5 h-5 text-orange-500" />,
+      authAction: 'popup' 
+    }
+  ],
+  work: [
+    { 
+      title: "Find Freelancers", 
+      href: "/freelancing",
+      description: "Discover and hire experts for your projects.",
+      icon: <Users className="w-5 h-5 text-blue-500" />
+    },
+    { 
+      title: "Find an Expert", 
+      href: "/findexpert",
+      description: "Get matched with top-tier professionals.",
+      icon: <UserPlus className="w-5 h-5 text-green-500" />
+    },
+    {
+        title: "My Dashboard",
+        href: "/dashboard",
+        description: "View your stats, projects, and activity.",
+        icon: <LayoutGrid className="w-5 h-5 text-purple-500" />,
+        authAction: 'hide'
+    },
+    {
+        title: "My Profile",
+        href: "/profile",
+        description: "Manage your public presence and skills.",
+        icon: <User className="w-5 h-5 text-red-500" />,
+        authAction: 'hide'
+    }
+  ],
+  community: [
+    { 
+      title: "Connect", 
+      href: "/connect",
+      description: "Join our community and collaborate with peers.",
+      icon: <Users className="w-5 h-5 text-blue-500" />
+    },
+    { 
+      title: "AI Agents", 
+      href: "/aiagents",
+      description: "Leverage AI-powered tools for your business.",
+      icon: <Sparkles className="w-5 h-5 text-green-500" />
+    },
+    {
+      title: "Sustainable",
+      href: "/green",
+      description: "Explore our sustainable solutions.",
+      icon: <Leaf className="w-5 h-5 text-green-500" />
+    }
+  ],
+  about: [
+    { 
+      title: "About Us", 
+      href: "/aboutus",
+      description: "Learn more about our mission and values.",
+      icon: <Info className="w-5 h-5 text-blue-500" />
+    },
+    { 
+      title: "Privacy Policy", 
+      href: "/privacypolicy",
+      description: "Read our commitment to your privacy.",
+      icon: <Shield className="w-5 h-5 text-green-500" />
+    },
+    { 
+      title: "Terms of Service", 
+      href: "/termsofservice",
+      description: "Understand the rules of our platform.",
+      icon: <FileText className="w-5 h-5 text-purple-500" />
+    },
+    {
+      title: "Send Feedback",
+      href: "/sendfeedback",
+      description: "Help us improve your experience.",
+      icon: <MessageSquare className="w-5 h-5 text-red-500" />
+    }
+  ]
+};
 
-const community = [
-  { title: "Sustainable", href: "/sustainable" },
-  { title: "Agents", href: "/aiagents" },
-  { title: "Events", href: "/" },
-  { title: "Mentorship", href: "/" },
-];
+const subLinkVariants = {
+  exit: { opacity: 0, y: -10, transition: { duration: 0.2, ease: "easeInOut" } },
+  enter: { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeInOut" } },
+};
 
-const aboutus = [
-  { title: "About us", href: "/aboutus" },
-  { title: "Privacy Policy", href: "/privacypolicy" },
-  { title: "Terms", href: "/termsofservice" },
-  { title: "Send Feedback", href: "/sendfeedback" },
-];
+const NavLink = ({ title, children, textColor }: { title: string, children: React.ReactNode, textColor: string }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const numChildren = React.Children.count(children);
+  const gridCols = numChildren > 4 ? 'grid-cols-3' : 'grid-cols-2';
+
+  return (
+    <div
+      className="relative group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <button className={`flex items-center space-x-1 ${textColor} hover:opacity-80 font-medium px-2 py-1 text-sm xl:text-base transition-opacity`}>
+        <span>{title}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isHovered ? 'rotate-180' : ''}`} />
+      </button>
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            className={`absolute top-full left-1/2 -translate-x-1/2 mt-4 grid ${gridCols} gap-4 w-max`}
+            initial="exit"
+            animate="enter"
+            exit="exit"
+            variants={{
+              enter: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } },
+              exit: { transition: { staggerChildren: 0.05, staggerDirection: -1 } },
+            }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, onAuthClick, onShowMyProjects }: { title: string, href: string, description: string, icon: React.ReactNode, authAction?: 'popup' | 'hide', isLoggedIn: boolean, onAuthClick: () => void, onShowMyProjects?: () => void }) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (authAction === 'popup' && !isLoggedIn) {
+      e.preventDefault();
+      onAuthClick();
+    } else if (title === "Post a Project" && isLoggedIn && onShowMyProjects) {
+      e.preventDefault();
+      onShowMyProjects();
+    }
+  };
+  
+  return (
+    <Link to={href} onClick={handleClick} className="block p-4 rounded-xl bg-white border border-gray-100 shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-200 group/sublink w-64">
+      <div className="flex items-start space-x-4">
+        <div className="flex-shrink-0 p-2 bg-gray-100 rounded-lg">
+          {icon}
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-800 group-hover/sublink:text-blue-600 transition-colors">{title}</h3>
+          <p className="text-sm text-gray-500 mt-1">{description}</p>
+        </div>
+      </div>
+    </Link>
+  );
+};
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
-  const [profileData, setProfileData] = useState({ firstName: '', lastName: '' });
+  const [profileData, setProfileData] = useState({ firstName: '', lastName: '', avatar: '' });
   const [notifications, setNotifications] = useState(mockNotifications);
   const [messages, setMessages] = useState(mockMessages);
   const [showNotificationsSidebar, setShowNotificationsSidebar] = useState(false);
   const [showMessagesSidebar, setShowMessagesSidebar] = useState(false);
   const [showProfileSidebar, setShowProfileSidebar] = useState(false);
   const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
+  const [showAuthPopup, setShowAuthPopup] = useState(false);
+  const [showMyProjects, setShowMyProjects] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const unreadNotificationCount = notifications.filter(n => n.unread).length;
   const unreadMessageCount = messages.filter(m => m.unread).length;
@@ -214,23 +363,57 @@ export const Header = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setIsLoggedIn(true);
+        localStorage.setItem("isLoggedIn", "true");
         const userProfile = await userService.getUserProfile();
         setProfileData({
           firstName: userProfile.auth.firstName || '',
           lastName: userProfile.auth.lastName || '',
+          avatar: userProfile.profile.avatar || '',
         });
       } else {
         setIsLoggedIn(false);
+        localStorage.removeItem("isLoggedIn");
+        setProfileData({ firstName: '', lastName: '', avatar: '' });
       }
     });
     return () => unsubscribe();
   }, []);
 
+  // Sync with localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const loginStatus = localStorage.getItem("isLoggedIn") === "true";
+      setIsLoggedIn(loginStatus);
+      if (!loginStatus) {
+        setProfileData({ firstName: '', lastName: '', avatar: '' });
+        setShowNotificationsSidebar(false);
+        setShowMessagesSidebar(false);
+        setShowProfileSidebar(false);
+        setShowEditProfileSidebar(false);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const handleLogout = async () => {
     try {
-      localStorage.removeItem("isLoggedIn");
+      // Clear all user-related state
       setIsLoggedIn(false);
+      setProfileData({ firstName: '', lastName: '', avatar: '' });
+      setShowNotificationsSidebar(false);
+      setShowMessagesSidebar(false);
       setShowProfileSidebar(false);
+      setShowEditProfileSidebar(false);
+      
+      // Clear localStorage
+      localStorage.removeItem("isLoggedIn");
+      
+      // Sign out from Firebase
+      await auth.signOut();
+      
+      // Navigate to signup page
       navigate("/signup");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -280,276 +463,257 @@ export const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-purple-200/50 bg-white/95 backdrop-blur-md shadow-sm">
-        <div className="container h-14 w-full flex items-center justify-between px-4">
-          {/* Left: Logo + Search Bar */}
-          <div className="flex items-center space-x-4 flex-1">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-gradient-to-r from-gray-900 to-indigo-950 border-indigo-600/30 shadow-lg">
+        <div className="relative h-14 flex items-center justify-between">
+          {/* Left Group */}
+          <div className="flex items-center flex-1 lg:flex-none space-x-2 md:space-x-4">
             {/* Logo */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 flex-shrink-0">
               <Link to="/" className="flex items-center space-x-2 group">
-                <img src={Logo1} alt="AMOGH" className="h-8 w-auto" />
-                <div className="hidden w-10 h-6 text-sm px-1 sm:inline-flex text-purple-700">
-                  Beta
+                <img src={Logo} alt="AMOGH" className="h-14 w-auto md:h-8" />
+                <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
+                  beta
                 </div>
               </Link>
             </div>
 
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 w-40 h-8 border-gray-300 rounded-medium focus:outline-none focus:border-transparent"
-              />
+            {/* Search Bar */}
+            <div className="relative flex-1 max-w-xs min-w-0 hidden sm:block">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="search"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 h-9 md:h-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200 text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Centered Navigation */}
-          <nav className="hidden md:flex items-center space-x-8 absolute left-1/2 transform -translate-x-1/2">
-            {/* Market Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
-                  <span className="text-base">Market</span>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
-                {marketItems.map((item) => (
-                  <DropdownMenuItem key={item.title} asChild>
-                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
-                      {item.title}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Work Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
-                  <span className="text-base">Work</span>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
-                {workItems.map((item) => (
-                  <DropdownMenuItem key={item.title} asChild>
-                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
-                      {item.title}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Green Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
-                  <span className="text-base">Community</span>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
-                {community.map((item) => (
-                  <DropdownMenuItem key={item.title} asChild>
-                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
-                      {item.title}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Connect Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-1 text-gray-700 hover:text-slate-600 font-medium">
-                  <span className="text-base">About Us</span>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-white border shadow-lg">
-                {aboutus.map((item) => (
-                  <DropdownMenuItem key={item.title} asChild>
-                    <Link to={item.href} className="flex items-center px-3 py-2 text-sm hover:bg-gray-50">
-                      {item.title}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* Centered Navigation (Absolutely positioned) */}
+          <nav className="hidden lg:flex absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 items-center space-x-4 xl:space-x-6">
+            <Link to="/" className="text-white hover:opacity-80 font-medium px-2 py-1 text-sm xl:text-base transition-opacity">
+              Home
+            </Link>
+            <NavLink title="Market" textColor="text-white">
+              {navLinks.market.map(item => (
+                <motion.div variants={subLinkVariants} key={item.href}>
+                  <NavSubLink {...item} isLoggedIn={isLoggedIn} onAuthClick={() => setShowAuthPopup(true)} onShowMyProjects={() => setShowMyProjects(true)} />
+                </motion.div>
+              ))}
+            </NavLink>
+            <NavLink title="Work" textColor="text-white">
+              {navLinks.work
+                .filter(item => item.authAction !== 'hide' || isLoggedIn)
+                .map(item => (
+                  <motion.div variants={subLinkVariants} key={item.href}>
+                    <NavSubLink {...item} isLoggedIn={isLoggedIn} onAuthClick={() => setShowAuthPopup(true)} onShowMyProjects={() => setShowMyProjects(true)} />
+                  </motion.div>
+              ))}
+            </NavLink>
+            <NavLink title="Community" textColor="text-white">
+              {navLinks.community.map(item => (
+                <motion.div variants={subLinkVariants} key={item.href}>
+                  <NavSubLink {...item} isLoggedIn={isLoggedIn} onAuthClick={() => setShowAuthPopup(true)} onShowMyProjects={() => setShowMyProjects(true)} />
+                </motion.div>
+              ))}
+            </NavLink>
+            <NavLink title="About Us" textColor="text-white">
+              {navLinks.about
+                .filter(item => item.authAction !== 'hide' || isLoggedIn)
+                .map(item => (
+                <motion.div variants={subLinkVariants} key={item.href}>
+                  <NavSubLink {...item} isLoggedIn={isLoggedIn} onAuthClick={() => setShowAuthPopup(true)} onShowMyProjects={() => setShowMyProjects(true)} />
+                </motion.div>
+              ))}
+            </NavLink>
           </nav>
 
-          {/* Right-aligned Buttons */}
-          <div className="hidden md:flex items-center space-x-3 ml-auto">
-            {!isLoggedIn ? (
-              <>
-                <Button variant="ghost" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base" asChild>
-                  <Link to="/signin">Sign In</Link>
-                </Button>
-                <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white text-base" asChild>
-                  <Link to="/signup">Join</Link>
-                </Button>
-              </>
-            ) : (
-              <>
-                {/* Messages Button */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base">
-                      <MessageSquare className="w-4 h-4" />
-                      {unreadMessageCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
-                          {unreadMessageCount}
-                        </Badge>
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-80 border-0 shadow-lg bg-white/95 backdrop-blur-md">
-                    <div className="p-3 border-b">
-                      <h3 className="font-semibold text-slate-800">Recent Messages</h3>
-                    </div>
-                    <div className="max-h-64 overflow-y-auto">
-                      {messages.slice(0, 3).map((message) => (
-                        <DropdownMenuItem
-                          key={message.id}
-                          className="flex flex-col items-start p-3 cursor-pointer hover:bg-slate-50"
-                          onClick={() => handleMessageClick(message.id)}
-                        >
-                          <div className="flex items-start justify-between w-full">
-                            <div className="flex items-start gap-3 flex-1">
-                              <span className="text-2xl">{message.avatar}</span>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <p className="font-medium text-sm text-slate-800">
-                                    {message.sender}
+          {/* Right Group */}
+          <div className="flex items-center flex-1 lg:flex-none justify-end space-x-1 lg:space-x-2 pr-4 sm:pr-6 lg:pr-8">
+            {/* Desktop Buttons */}
+            <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
+              {!isLoggedIn ? (
+                <>
+                  <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300 text-sm" asChild>
+                    <Link to="/signin">Sign In</Link>
+                  </Button>
+                  <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-white text-sm" asChild>
+                    <Link to="/signup">Join</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {/* Messages Button */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
+                        <MessageSquare className="w-4 h-4" />
+                        {unreadMessageCount > 0 && (
+                          <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
+                            {unreadMessageCount}
+                          </Badge>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
+                      <div className="p-3 border-b border-gray-200">
+                        <h3 className="font-semibold text-slate-800">Recent Messages</h3>
+                      </div>
+                      <div className="max-h-64 overflow-y-auto">
+                        {messages.slice(0, 3).map((message) => (
+                          <DropdownMenuItem
+                            key={message.id}
+                            className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
+                            onClick={() => handleMessageClick(message.id)}
+                          >
+                            <div className="flex items-start justify-between w-full">
+                              <div className="flex items-start gap-3 flex-1">
+                                <span className="text-2xl">{message.avatar}</span>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium text-sm text-slate-800">
+                                      {message.sender}
+                                    </p>
+                                    {message.unread && (
+                                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                                    {message.message}
                                   </p>
-                                  {message.unread && (
-                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                  )}
+                                  <p className="text-xs text-slate-400 mt-1">
+                                    {message.time}
+                                  </p>
                                 </div>
-                                <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                  {message.message}
-                                </p>
-                                <p className="text-xs text-slate-400 mt-1">
-                                  {message.time}
-                                </p>
                               </div>
                             </div>
+                          </DropdownMenuItem>
+                        ))}
+                        {messages.length === 0 && (
+                          <div className="p-4 text-center text-slate-500">
+                            No messages yet
                           </div>
-                        </DropdownMenuItem>
-                      ))}
-                      {messages.length === 0 && (
-                        <div className="p-4 text-center text-slate-500">
-                          No messages yet
-                        </div>
-                      )}
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setShowMessagesSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-green-600 font-medium hover:bg-green-50">
-                      See All Messages
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                        )}
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setShowMessagesSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-green-600 font-medium hover:bg-green-50">
+                        See All Messages
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-                {/* Notifications Button */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base">
-                      <Bell className="w-4 h-4" />
-                      {unreadNotificationCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
-                          {unreadNotificationCount}
-                        </Badge>
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-80 border-0 shadow-lg bg-white/95 backdrop-blur-md">
-                    <div className="p-3 border-b">
-                      <h3 className="font-semibold text-slate-800">Recent Notifications</h3>
-                    </div>
-                    <div className="max-h-64 overflow-y-auto">
-                      {notifications.slice(0, 3).map((notification) => (
-                        <DropdownMenuItem
-                          key={notification.id}
-                          className="flex flex-col items-start p-3 cursor-pointer hover:bg-slate-50"
-                          onClick={() => handleNotificationClick(notification.id)}
-                        >
-                          <div className="flex items-start justify-between w-full">
-                            <div className="flex items-start gap-3 flex-1">
-                              <span className="text-lg">{getNotificationIcon(notification.type)}</span>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <p className="font-medium text-sm text-slate-800">
-                                    {notification.title}
+                  {/* Notifications Button */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
+                        <Bell className="w-4 h-4" />
+                        {unreadNotificationCount > 0 && (
+                          <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
+                            {unreadNotificationCount}
+                          </Badge>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
+                      <div className="p-3 border-b border-gray-200">
+                        <h3 className="font-semibold text-slate-800">Recent Notifications</h3>
+                      </div>
+                      <div className="max-h-64 overflow-y-auto">
+                        {notifications.slice(0, 3).map((notification) => (
+                          <DropdownMenuItem
+                            key={notification.id}
+                            className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
+                            onClick={() => handleNotificationClick(notification.id)}
+                          >
+                            <div className="flex items-start justify-between w-full">
+                              <div className="flex items-start gap-3 flex-1">
+                                <span className="text-lg">{getNotificationIcon(notification.type)}</span>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium text-sm text-slate-800">
+                                      {notification.title}
+                                    </p>
+                                    {notification.unread && (
+                                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                                    {notification.message}
                                   </p>
-                                  {notification.unread && (
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                  )}
+                                  <p className="text-xs text-slate-400 mt-1">
+                                    {notification.time}
+                                  </p>
                                 </div>
-                                <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                  {notification.message}
-                                </p>
-                                <p className="text-xs text-slate-400 mt-1">
-                                  {notification.time}
-                                </p>
                               </div>
                             </div>
+                          </DropdownMenuItem>
+                        ))}
+                        {notifications.length === 0 && (
+                          <div className="p-4 text-center text-slate-500">
+                            No notifications yet
                           </div>
-                        </DropdownMenuItem>
-                      ))}
-                      {notifications.length === 0 && (
-                        <div className="p-4 text-center text-slate-500">
-                          No notifications yet
-                        </div>
-                      )}
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setShowNotificationsSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-blue-600 font-medium hover:bg-blue-50">
-                      See All Notifications
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                        )}
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setShowNotificationsSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-blue-600 font-medium hover:bg-blue-50">
+                        See All Notifications
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-                <Button variant="ghost" className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base" asChild>
-                  <Link to="/cart">
-                    <ShoppingCart className="w-4 h-4" />
-                  </Link>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setShowProfileSidebar(true)} 
-                  className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 hover:scale-105 transition-all duration-300 text-base p-2 rounded-full"
-                >
-                  <User className="w-4 h-4" />
-                </Button>
-              </>
-            )}
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300" asChild>
+                    <Link to="/cart">
+                      <ShoppingCart className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                  
+                  {/* Profile Button with User Name */}
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setShowProfileSidebar(true)} 
+                    className="text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2"
+                  >
+                    <User className="w-4 h-4 flex-shrink-0" />
+                    {profileData.firstName && (
+                      <span className="hidden sm:inline text-sm font-medium">
+                        Hi, {profileData.firstName}
+                      </span>
+                    )}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="lg:hidden transform transition-all duration-300 hover:scale-110 text-white"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden transform transition-all duration-300 hover:scale-110 text-slate-600"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
         </div>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-slate-200 animate-fade-in bg-white/95 backdrop-blur-md">
+          <div className="lg:hidden py-4 border-t border-indigo-600/30 animate-fade-in bg-gradient-to-r from-gray-900 to-indigo-950">
             <nav className="flex flex-col space-y-4 px-4">
-              <Link to="/marketplace" className="text-slate-600 hover:text-blue-500 transition-colors font-medium">Market</Link>
-              <Link to="/freelancing" className="text-slate-600 hover:text-purple-500 transition-colors font-medium">Work</Link>
-              <Link to="/sustainable" className="text-slate-600 hover:text-emerald-500 transition-colors font-medium">Green</Link>
-              <Link to="/connect" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium">Connect</Link>
-              <Link to="/aiagents" className="text-slate-600 hover:text-cyan-500 transition-colors font-medium flex items-center">
+              <Link to="/marketplace" className="text-white hover:opacity-80 transition-opacity font-medium">Market</Link>
+              <Link to="/freelancing" className="text-white hover:opacity-80 transition-opacity font-medium">Work</Link>
+              <Link to="/sustainable" className="text-white hover:opacity-80 transition-opacity font-medium">Green</Link>
+              <Link to="/connect" className="text-white hover:opacity-80 transition-opacity font-medium">Connect</Link>
+              <Link to="/aiagents" className="text-white hover:opacity-80 transition-opacity font-medium flex items-center">
                 <span className="text-2xl mr-2">🤖</span>
                 AI Agents
               </Link>
@@ -557,7 +721,7 @@ export const Header = () => {
               <div className="flex flex-col space-y-2 pt-4">
                 {!isLoggedIn ? (
                   <>
-                    <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" asChild>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" asChild>
                       <Link to="/signin">Sign In</Link>
                     </Button>
                     <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600" asChild>
@@ -566,25 +730,32 @@ export const Header = () => {
                   </>
                 ) : (
                   <>
-                    <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" onClick={() => setShowMessagesSidebar(true)}>
+                    {profileData.firstName && (
+                      <div className="px-3 py-2 text-sm text-white border-b border-indigo-600/30 mb-2">
+                        Hi, {profileData.firstName}!
+                      </div>
+                    )}
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" onClick={() => { setIsMenuOpen(false); setShowMessagesSidebar(true); }}>
                       <MessageSquare className="w-4 h-4 mr-2" />
-                      Messages {unreadMessageCount > 0 && (`${unreadMessageCount}`)}
+                      Messages {unreadMessageCount > 0 && (`(${unreadMessageCount})`)}
                     </Button>
-                    <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" onClick={() => setShowNotificationsSidebar(true)}>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" onClick={() => { setIsMenuOpen(false); setShowNotificationsSidebar(true); }}>
                       <Bell className="w-4 h-4 mr-2" />
-                      Notifications {unreadNotificationCount > 0 && (`${unreadNotificationCount}`)}
+                      Notifications {unreadNotificationCount > 0 && (`(${unreadNotificationCount})`)}
                     </Button>
-                    <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" asChild>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" asChild>
                       <Link to="/cart">
-                        <ShoppingCart className="w-4 h-4" />
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Cart
                       </Link>
                     </Button>
-                    <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" asChild>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" asChild>
                       <Link to="/profile">
-                        <User className="w-4 h-4" />
+                        <User className="w-4 h-4 mr-2" />
+                        Profile
                       </Link>
                     </Button>
-                    <Button variant="ghost" className="text-slate-600 hover:text-slate-800 justify-start" onClick={handleLogout}>
+                    <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white justify-start" onClick={handleLogout}>
                       <LogOut className="w-4 h-4 mr-2" />
                       Logout
                     </Button>
@@ -595,6 +766,11 @@ export const Header = () => {
           </div>
         )}
       </header>
+
+      {/* Header Spacer - prevents content from being hidden behind fixed header */}
+      <div className="h-14"></div>
+
+      <PopupMenu isOpen={showAuthPopup} onClose={() => setShowAuthPopup(false)} redirectPath={location.pathname} />
 
       {/* Overlay for sidebars */}
       {(showNotificationsSidebar || showMessagesSidebar || showProfileSidebar || showEditProfileSidebar) && (
@@ -803,7 +979,7 @@ export const Header = () => {
       {/* Profile Sidebar */}
       {showProfileSidebar && (
         <div className="fixed top-0 right-0 w-96 max-w-[90vw] h-full bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-2.5 border-b">
             <h2 className="font-bold text-xl text-gray-900">Profile</h2>
             <button 
               onClick={() => setShowProfileSidebar(false)} 
@@ -814,7 +990,7 @@ export const Header = () => {
           </div>
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <div className="flex flex-col items-center text-center">
-              <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} size={96} />
+              <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} avatar={profileData.avatar} size={96} />
               <h3 className="font-bold text-lg text-gray-900 mt-3">{profileData.firstName} {profileData.lastName}</h3>
               <Link to="/profile" className="text-sm text-blue-600 hover:underline mt-1">
                 View Profile &gt;
@@ -842,6 +1018,10 @@ export const Header = () => {
                   <LayoutGrid className="w-5 h-5 mr-3 text-gray-600" />
                   <span className="text-gray-700 font-medium">Dashboard</span>
                 </Link>
+                <Link to="/connection" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                    <UserPlus className="w-5 h-5 mr-3 text-gray-600" />
+                    <span className="text-gray-700 font-medium">My Connections</span>
+                </Link>
                 <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                   <Users className="w-5 h-5 mr-3 text-gray-600" />
                   <span className="text-gray-700 font-medium">My Collaborations</span>
@@ -862,27 +1042,12 @@ export const Header = () => {
                   <Calendar className="w-5 h-5 mr-3 text-gray-600" />
                   <span className="text-gray-700 font-medium">Calendar</span>
                 </Link>
-                <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                  <Edit className="w-5 h-5 mr-3 text-gray-600" />
-                  <span className="text-gray-700 font-medium">Edit Profile</span>
-                </Link>
-                {/* <Link to="/editprofile" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                  <button onClick={() => {setShowProfileSidebar(false); setShowEditProfileSidebar(true);}} className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors text-left">
-                    <Edit className="w-5 h-5 mr-3 text-gray-600" />
-                    <span className="text-gray-700 font-medium">Edit Profile</span>
-                  </button>
-                </Link>
-                </Link> */}
               </nav>
             </div>
             
             <div className="border-t pt-4">
               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">GENERAL</h4>
               <nav className="space-y-1">
-                <button onClick={() => {setShowProfileSidebar(false); setShowEditProfileSidebar(true);}} className="w-full flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors text-left">
-                  <Edit className="w-5 h-5 mr-3 text-gray-600" />
-                  <span className="text-gray-700 font-medium">Edit Profile</span>
-                </button>
                 <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                   <Settings className="w-5 h-5 mr-3 text-gray-600" />
                   <span className="text-gray-700 font-medium">Settings</span>
@@ -904,6 +1069,11 @@ export const Header = () => {
       {/* Edit Profile Sidebar */}
       {showEditProfileSidebar && (
         <EditProfile onClose={() => setShowEditProfileSidebar(false)} />
+      )}
+
+      {/* My Projects Sidebar */}
+      {showMyProjects && (
+        <MyProjects onClose={() => setShowMyProjects(false)} />
       )}
     </>
   );
