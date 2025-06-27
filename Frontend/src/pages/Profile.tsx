@@ -303,26 +303,6 @@ const StudentProfessorProfileView = ({
           </div>
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* User Photo Section */}
-            <Card className="bg-white shadow-lg rounded-xl max-w-md flex flex-col items-center py-6">
-              {profileData.avatar ? (
-                <img
-                  src={profileData.avatar}
-                  alt="User profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-indigo-200 shadow-md mb-2"
-                  onError={e => { e.currentTarget.src = NoUserProfile; }}
-                />
-              ) : (
-                <img
-                  src={NoUserProfile}
-                  alt="No user profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-gray-200 shadow-md mb-2"
-                />
-              )}
-              <div className="text-lg font-semibold text-gray-800 mt-2">
-                {profileData.firstName} {profileData.lastName}
-              </div>
-            </Card>
             {/* Skills Section */}
             <Card className="bg-white shadow-lg rounded-xl max-w-md">
               <CardContent className="p-6">
@@ -479,73 +459,44 @@ const Profile = () => {
         });
       }
 
-      // Fetch skills
-      try {
-        // Get current user's customUserId first
-        const userProfileData = await userService.getUserProfile();
-        const customUserId = userProfileData.customUserId;
+      // Set skills directly from userProfile
+      setSkills(
+        ((userProfile as any).skills && Array.isArray((userProfile as any).skills)) ? (userProfile as any).skills :
+        ((userProfile as any).freelancerData && Array.isArray((userProfile as any).freelancerData.skills)) ? (userProfile as any).freelancerData.skills :
+        []
+      );
 
-        // Fetch user data using the customUserId (same approach as other profile pages)
-        const userDataResponse = await fetch(`http://localhost:3000/api/users/${customUserId}`);
-        if (userDataResponse.ok) {
-          const userData = await userDataResponse.json();
-          const userSkills = userData.data?.skills || [];
-          console.log('Profile - Skills found:', userSkills);
-          setSkills(userSkills);
-        } else {
-          console.log('Profile - Failed to fetch user data for skills');
-          setSkills([]);
-        }
-      } catch (error) {
-        console.error('Error fetching skills:', error);
-        setSkills([]);
-      }
-
-      // Fetch projects
-      try {
-        const user = auth.currentUser;
-        if (!user) throw new Error("User not authenticated for fetching projects");
-        const token = await user.getIdToken();
-
-        // Get current user's customUserId first
-        const userProfileData = await userService.getUserProfile();
-        const customUserId = userProfileData.customUserId;
-        console.log('Profile - Current user customUserId:', customUserId);
-
-        // Fetch user data using the customUserId (same approach as other profile pages)
-        const userDataResponse = await fetch(`http://localhost:3000/api/users/${customUserId}`);
-        console.log('Profile - User data response status:', userDataResponse.status);
-        if (userDataResponse.ok) {
-          const userData = await userDataResponse.json();
-          console.log('Profile - User data received:', userData);
-          const projectIds = userData.data?.projects?.created || [];
-          console.log('Profile - Project IDs found:', projectIds);
-
-          if (projectIds.length > 0) {
-            const projectPromises = projectIds.map(id => {
-              console.log(`Profile - Fetching project with ID: ${id}`);
-              return fetch(`http://localhost:3000/api/marketplace/projects/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-              }).then(res => {
-                console.log(`Profile - Project ${id} response:`, res.status, res.ok);
-                return res.ok ? res.json() : Promise.reject(`Failed to fetch project ${id}`);
+      // Fetch projects robustly
+      if ((userProfile as any).projects && Array.isArray((userProfile as any).projects.created)) {
+        const projectIds = (userProfile as any).projects.created;
+        console.log('Profile - Project IDs found:', projectIds);
+        console.log('Profile - Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
+        if (projectIds.length > 0) {
+          const projectPromises = projectIds.map((pid: string | number) => {
+            console.log(`Profile - Fetching project with ID: ${pid} (type: ${typeof pid})`);
+            return fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
+              .then(res => {
+                console.log(`Profile - Response for project ${pid}:`, res.status, res.ok);
+                return res.ok ? res.json() : null;
+              })
+              .then(res => {
+                console.log(`Profile - Project data for ${pid}:`, res);
+                return res && res.project ? res.project : null;
+              })
+              .catch(error => {
+                console.error(`Profile - Error fetching project ${pid}:`, error);
+                return null;
               });
-            });
-            
-            const results = await Promise.all(projectPromises);
-            const fullProjects = results.map(res => res.project).filter(Boolean);
-            console.log('Profile - Full projects fetched:', fullProjects);
-            setProjects(fullProjects);
-          } else {
-            console.log('Profile - No project IDs found');
-            setProjects([]);
-          }
+          });
+          const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
+          console.log('Profile - Full projects fetched:', fullProjects);
+          setProjects(fullProjects);
         } else {
-          console.log('Profile - Failed to fetch user data');
+          console.log('Profile - No project IDs found');
           setProjects([]);
         }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
+      } else {
+        console.log('Profile - No projects object or created array');
         setProjects([]);
       }
 
@@ -1087,7 +1038,7 @@ const Profile = () => {
                     <div className="text-center py-20">
                       <Briefcase className="w-12 h-12 mx-auto text-gray-300" />
                       <h3 className="mt-4 text-lg font-medium text-gray-900">No projects yet</h3>
-                      <p className="mt-1 text-sm text-gray-500">Click "Add Project" to showcase your work.</p>
+                      <p className="mt-1 text-sm text-gray-500">No research or commercial projects found.</p>
                     </div>
                   )}
                 </div>

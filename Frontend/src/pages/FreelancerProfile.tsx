@@ -29,62 +29,36 @@ const VisitingProfile = () => {
     const fetchFreelancer = async () => {
       if (id) {
         try {
-          console.log('Fetching freelancer with ID:', id);
-          // Make direct fetch call to backend without authentication for public profile
           const response = await fetch(`http://localhost:3000/api/users/${id}`);
-          console.log('Response status:', response.status);
-          
           if (response.ok) {
             const data = await response.json();
-            console.log('Freelancer data received:', data);
-            console.log('Freelancer full response data:', JSON.stringify(data, null, 2));
             if (data.success && data.data) {
               setFreelancer(data.data);
               setEducation(data.data.education || []);
               setWorkExperience(data.data.workExperience || []);
-              console.log('Freelancer projects object:', data.data.projects);
-              console.log('Freelancer projects.created:', data.data.projects?.created);
-              console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
               // Fetch full project details for each project ID
               const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-              console.log('Freelancer Project IDs found:', projectIds);
-              console.log('Freelancer Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
               if (projectIds.length > 0) {
-                const projectPromises = projectIds.map((pid: string) => {
-                  console.log(`Freelancer fetching project with ID: ${pid} (type: ${typeof pid})`);
-                  return fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
-                    .then(res => {
-                      console.log(`Freelancer response for project ${pid}:`, res.status, res.ok);
-                      return res.ok ? res.json() : null;
-                    })
-                    .then(res => {
-                      console.log(`Freelancer project data for ${pid}:`, res);
-                      return res && res.project ? res.project : null;
-                    })
-                    .catch(error => {
-                      console.error(`Freelancer error fetching project ${pid}:`, error);
-                      return null;
-                    });
-                });
+                const projectPromises = projectIds.map((pid) =>
+                  fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
+                    .then(res => res.ok ? res.json() : null)
+                    .then(res => res && res.project ? res.project : null)
+                    .catch(() => null)
+                );
                 const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-                console.log('Freelancer full projects fetched:', fullProjects);
                 setPortfolioProjects(fullProjects);
               } else {
-                console.log('Freelancer no project IDs found');
                 setPortfolioProjects([]);
               }
             } else {
-              console.error('Invalid response format:', data);
               setFreelancer(null);
               setPortfolioProjects([]);
             }
           } else {
-            console.error('Failed to fetch freelancer:', response.status);
             setFreelancer(null);
             setPortfolioProjects([]);
           }
         } catch (err) {
-          console.error('Error fetching freelancer:', err);
           setFreelancer(null);
           setPortfolioProjects([]);
         }

@@ -23,9 +23,7 @@ import NoImageAvailable from "@/assets/images/no image available.png";
 const Profile = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [user, setUser] = useState(auth.currentUser);
   const [userData, setUserData] = useState<any>({});
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
   const [backgroundImage, setBackgroundImage] = useState(
@@ -37,22 +35,6 @@ const Profile = () => {
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (!currentUser) {
-        setUserData({});
-        localStorage.removeItem("isLoggedIn");
-        setIsLoggedIn(false);
-        setLoading(false);
-      } else {
-        localStorage.setItem("isLoggedIn", "true");
-        setIsLoggedIn(true);
-      }
-    });
-
-    return unsubscribe;
-  }, []);
 
   // Fetch user data by customUserId from userData.json
   const fetchUserData = async () => {
@@ -80,22 +62,12 @@ const Profile = () => {
             console.log('Project IDs found:', projectIds);
             console.log('Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
             if (projectIds.length > 0) {
-              const projectPromises = projectIds.map((pid: string) => {
-                console.log(`Fetching project with ID: ${pid} (type: ${typeof pid})`);
-                return fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
-                  .then(res => {
-                    console.log(`Response for project ${pid}:`, res.status, res.ok);
-                    return res.ok ? res.json() : null;
-                  })
-                  .then(res => {
-                    console.log(`Project data for ${pid}:`, res);
-                    return res && res.project ? res.project : null;
-                  })
-                  .catch(error => {
-                    console.error(`Error fetching project ${pid}:`, error);
-                    return null;
-                  });
-              });
+              const projectPromises = projectIds.map((pid) =>
+                fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
+                  .then(res => res.ok ? res.json() : null)
+                  .then(res => res && res.project ? res.project : null)
+                  .catch(() => null)
+              );
               const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
               console.log('Full projects fetched:', fullProjects);
               setPortfolioProjects(fullProjects);
@@ -136,38 +108,23 @@ const Profile = () => {
   //   );
   // }
 
-  const fullName =
-    `${userData.auth?.firstName || ""} ${userData.auth?.lastName || ""}`.trim() || "Unnamed User";
+  const auth = userData?.auth || {};
+  const fullName = `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User';
 
-  const profile = isLoggedIn
-    ? {
-        name: fullName,
-        title: userData.profile?.title || "New Member",
-        bio: userData.profile?.bio || "This is a new profile. Update your bio!",
-        avatar: userData.profile?.avatar || NoUserProfile,
-        stats: {
-          followers: userData.social?.followersCount || 0,
-          following: userData.social?.followingCount || 0,
-          projects: userData.stats?.projectsCount || 0,
-          likes: userData.stats?.totalLikes || 0,
-          connections: userData.social?.connections?.length || 0,
-          skills: userData.skills || [],  
-        },
-      }
-    : {
-        name: "Guest",
-        title: "Digital Creator & Entrepreneur",
-        bio: "Passionate about technology, design, and creating meaningful connections. Building the future one project at a time.",
-        avatar: NoUserProfile,
-        stats: {
-          followers: 12,
-          following: 850,
-          projects: 45,
-          likes: 2.5,
-          connections: 1500,
-          skills: userData.skills || [],  
-        },
-      };
+  const profile = {
+    name: fullName,
+    title: userData.profile?.title || "New Member",
+    bio: userData.profile?.bio || "This is a new profile. Update your bio!",
+    avatar: userData.profile?.avatar || NoUserProfile,
+    stats: {
+      followers: userData.social?.followersCount || 0,
+      following: userData.social?.followingCount || 0,
+      projects: userData.stats?.projectsCount || 0,
+      likes: userData.stats?.totalLikes || 0,
+      connections: userData.social?.connections?.length || 0,
+      skills: userData.skills || [],  
+    },
+  };
 
   const MAX_LENGTH = 200;
   const [isExpanded, setIsExpanded] = useState(false);

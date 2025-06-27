@@ -182,9 +182,8 @@ class UserService {
 
   // Remove skill
   async deleteSkill(skillName: string): Promise<void> {
-    const response = await this.makeRequest('/skills', {
-      method: 'DELETE',
-      body: JSON.stringify({ name: skillName }),
+    const response = await this.makeRequest(`/skills/${encodeURIComponent(skillName)}`, {
+      method: 'DELETE'
     });
     return response.skills;
   }
