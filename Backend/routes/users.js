@@ -39,9 +39,32 @@ router.get('/profile', authorize, async (req, res) => {
     }
     const firestoreUser = userSnap.data();
     const customUserId = firestoreUser.customUserId;
+    
     // Fetch extended info from userData.json
     await userService.loadUserData();
-    const user = userService.findUserByCustomId(customUserId);
+    let user = userService.findUserByCustomId(customUserId);
+    
+    // If user doesn't exist in userData.json, create them
+    if (!user) {
+      console.log('Profile endpoint - User not found in userData.json, creating user...');
+      try {
+        const newUser = await userService.createUser(firebaseUid, {
+          firstName: firestoreUser.firstName || '',
+          lastName: firestoreUser.lastName || '',
+          email: firestoreUser.email || '',
+          userType: firestoreUser.userType || 'student',
+          phoneNumber: firestoreUser.phoneNumber || '',
+          mobile: firestoreUser.mobile || '',
+          gender: firestoreUser.gender || ''
+        });
+        user = userService.findUserByCustomId(customUserId);
+        console.log('Profile endpoint - User created successfully');
+      } catch (createError) {
+        console.error('Profile endpoint - Error creating user:', createError);
+        return res.status(500).json({ success: false, message: 'Failed to create user' });
+      }
+    }
+    
     res.json({
       success: true,
       data: {
@@ -183,7 +206,8 @@ router.get('/projects', authorize, async (req, res) => {
       console.log('User not found in Firestore');
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
+    const firestoreUser = userSnap.data();
+    const customUserId = firestoreUser.customUserId;
     console.log('Custom User ID:', customUserId);
     
     try {
@@ -194,7 +218,29 @@ router.get('/projects', authorize, async (req, res) => {
       return res.status(500).json({ success: false, message: 'Failed to load user data' });
     }
     
-    const user = userService.findUserByCustomId(customUserId);
+    let user = userService.findUserByCustomId(customUserId);
+    
+    // If user doesn't exist in userData.json, create them
+    if (!user) {
+      console.log('Projects endpoint - User not found in userData.json, creating user...');
+      try {
+        const newUser = await userService.createUser(firebaseUid, {
+          firstName: firestoreUser.firstName || '',
+          lastName: firestoreUser.lastName || '',
+          email: firestoreUser.email || '',
+          userType: firestoreUser.userType || 'student',
+          phoneNumber: firestoreUser.phoneNumber || '',
+          mobile: firestoreUser.mobile || '',
+          gender: firestoreUser.gender || ''
+        });
+        user = userService.findUserByCustomId(customUserId);
+        console.log('Projects endpoint - User created successfully');
+      } catch (createError) {
+        console.error('Projects endpoint - Error creating user:', createError);
+        return res.status(500).json({ success: false, message: 'Failed to create user' });
+      }
+    }
+    
     if (!user) {
       console.log('User not found in userData.json');
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -214,6 +260,34 @@ router.get('/projects', authorize, async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching projects:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Get all users (for freelancing page)
+router.get('/all', async (req, res) => {
+  try {
+    await userService.loadUserData();
+    
+    // Transform the data to match the expected format
+    const users = {};
+    Object.keys(userService.userData.users).forEach(customUserId => {
+      const user = userService.userData.users[customUserId];
+      users[customUserId] = {
+        customUserId: customUserId,
+        profile: user.profile,
+        stats: user.stats,
+        skills: user.skills || [],
+        education: user.education || []
+      };
+    });
+    
+    res.json({
+      success: true,
+      users: users
+    });
+  } catch (error) {
+    console.error('Error fetching all users:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
@@ -632,17 +706,50 @@ router.post('/activities', authorize, async (req, res) => {
 router.get('/activities', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
+    console.log('Activities endpoint - Firebase UID:', firebaseUid);
+    
     // Fetch customUserId from Firestore
     const userRef = db.collection('users').doc(firebaseUid);
     const userSnap = await userRef.get();
     if (!userSnap.exists) {
+      console.log('Activities endpoint - Firestore user not found for firebaseUid:', firebaseUid);
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
-    const user = userService.findUserByCustomId(customUserId);
+    const firestoreUser = userSnap.data();
+    const customUserId = firestoreUser.customUserId;
+    console.log('Activities endpoint - Custom User ID:', customUserId);
+    
+    // Load user data before finding user
+    await userService.loadUserData();
+    let user = userService.findUserByCustomId(customUserId);
+    
+    // If user doesn't exist in userData.json, create them
     if (!user) {
+      console.log('Activities endpoint - User not found in userData.json, creating user...');
+      try {
+        const newUser = await userService.createUser(firebaseUid, {
+          firstName: firestoreUser.firstName || '',
+          lastName: firestoreUser.lastName || '',
+          email: firestoreUser.email || '',
+          userType: firestoreUser.userType || 'student',
+          phoneNumber: firestoreUser.phoneNumber || '',
+          mobile: firestoreUser.mobile || '',
+          gender: firestoreUser.gender || ''
+        });
+        user = userService.findUserByCustomId(customUserId);
+        console.log('Activities endpoint - User created successfully');
+      } catch (createError) {
+        console.error('Activities endpoint - Error creating user:', createError);
+        return res.status(500).json({ success: false, message: 'Failed to create user' });
+      }
+    }
+    
+    if (!user) {
+      console.log('Activities endpoint - User still not found after creation attempt');
       return res.status(404).json({ success: false, message: 'User not found' });
     }
+    
+    console.log('Activities endpoint - User found, activities count:', user.activities.recent.length);
     res.json({
       success: true,
       data: {
@@ -886,6 +993,62 @@ router.put('/student-data', authorize, async (req, res) => {
     }
 });
 
+// Update user freelancer data
+router.put('/freelancer-data', authorize, async (req, res) => {
+    try {
+        const firebaseUid = req.user.uid;
+        const freelancerData = req.body;
+
+        const userRef = db.collection('users').doc(firebaseUid);
+        const userSnap = await userRef.get();
+        if (!userSnap.exists) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        const customUserId = userSnap.data().customUserId;
+
+        await userService.updateFreelancerData(customUserId, freelancerData);
+        
+        res.json({
+            success: true,
+            message: 'Freelancer data updated successfully'
+        });
+    } catch (error) {
+        console.error('Error updating freelancer data:', error);
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Update user professor data
+router.put('/professor-data', authorize, async (req, res) => {
+    try {
+        const firebaseUid = req.user.uid;
+        const professorData = req.body;
+
+        const userRef = db.collection('users').doc(firebaseUid);
+        const userSnap = await userRef.get();
+        if (!userSnap.exists) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        const customUserId = userSnap.data().customUserId;
+
+        await userService.updateProfessorData(customUserId, professorData);
+        
+        res.json({
+            success: true,
+            message: 'Professor data updated successfully'
+        });
+    } catch (error) {
+        console.error('Error updating professor data:', error);
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
 // Add work experience
 router.post('/work-experience', authorize, async (req, res) => {
   try {
@@ -1052,6 +1215,28 @@ router.put('/social-links', authorize, async (req, res) => {
     res.json({ success: true, message: 'Social links updated successfully', data: updatedLinks });
   } catch (error) {
     console.error('Error updating social links:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Track project view
+router.post('/projects/:projectId/view', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { projectId } = req.params;
+    
+    // Fetch customUserId from Firestore
+    const userRef = db.collection('users').doc(firebaseUid);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const customUserId = userSnap.data().customUserId;
+    
+    const result = await userService.trackProjectView(customUserId, projectId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('Error tracking project view:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 });

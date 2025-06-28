@@ -26,16 +26,8 @@ export const Login = ({ redirectPath = "/profile", onSuccess }: LoginProps) => {
       setIsLoading(true);
       setError(null);
       const idToken = await loginWithEmailPassword(email, password);
-      const response = await fetch('http://localhost:3000/token', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+      
+      // Set localStorage to indicate user is logged in
       localStorage.setItem("isLoggedIn", "true");
       window.dispatchEvent(new Event("storage"));
       
@@ -44,7 +36,7 @@ export const Login = ({ redirectPath = "/profile", onSuccess }: LoginProps) => {
         onSuccess();
       }
       
-      // Navigate to the redirect path instead of backend response
+      // Navigate to the redirect path
       navigate(redirectPath);
     } catch (error: any) {
       console.error("Login failed", error);

@@ -61,7 +61,8 @@ const StudentProfessorProfileView = ({
   setShowEditProjectSidebar,
   editingProject,
   setEditingProject,
-  fetchUserData
+  fetchUserData,
+  freelancerData
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -108,6 +109,25 @@ const StudentProfessorProfileView = ({
       {/* Stats Cards */}
       <div className="max-w-7xl mx-auto px-8 -mt-8 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Only show Hourly Rate and Avg Response Time for freelancers */}
+          {profileData.userType?.toLowerCase() === 'freelancer' && (
+            <>
+              <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
+                <CardContent className="p-4 text-center">
+                  <DollarSign className="w-6 h-6 mx-auto mb-2" />
+                  <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : 'N/A'}</div>
+                  <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
+                <CardContent className="p-4 text-center">
+                  <Clock className="w-6 h-6 mx-auto mb-2" />
+                  <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : 'N/A'}</div>
+                  <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time (hrs)</div>
+                </CardContent>
+              </Card>
+            </>
+          )}
           <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
             <CardContent className="p-4 text-center">
               <Award className="w-6 h-6 mx-auto mb-2" />
@@ -303,26 +323,6 @@ const StudentProfessorProfileView = ({
           </div>
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* User Photo Section */}
-            <Card className="bg-white shadow-lg rounded-xl max-w-md flex flex-col items-center py-6">
-              {profileData.avatar ? (
-                <img
-                  src={profileData.avatar}
-                  alt="User profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-indigo-200 shadow-md mb-2"
-                  onError={e => { e.currentTarget.src = NoUserProfile; }}
-                />
-              ) : (
-                <img
-                  src={NoUserProfile}
-                  alt="No user profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-gray-200 shadow-md mb-2"
-                />
-              )}
-              <div className="text-lg font-semibold text-gray-800 mt-2">
-                {profileData.firstName} {profileData.lastName}
-              </div>
-            </Card>
             {/* Skills Section */}
             <Card className="bg-white shadow-lg rounded-xl max-w-md">
               <CardContent className="p-6">
@@ -444,6 +444,7 @@ const Profile = () => {
 
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
+  const [freelancerData, setFreelancerData] = useState({ hourlyRate: '', avgResponseTime: '' });
 
   const fetchUserData = async () => {
     try {
@@ -522,6 +523,12 @@ const Profile = () => {
 
       setEducation(educationArr || []);
       setWorkExperience(workArr || []);
+
+      // Fetch freelancerData
+      setFreelancerData({
+        hourlyRate: userProfile.freelancerData?.hourlyRate || '',
+        avgResponseTime: userProfile.freelancerData?.avgResponseTime || '',
+      });
 
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -687,6 +694,7 @@ const Profile = () => {
         editingProject={editingProject}
         setEditingProject={setEditingProject}
         fetchUserData={fetchUserData}
+        freelancerData={freelancerData}
       />
     );
   }
@@ -846,14 +854,25 @@ const Profile = () => {
           <div className="lg:col-span-2 space-y-8">
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <DollarSign className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">$50</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
-                </CardContent>
-              </Card>
-
+              {/* Only show Hourly Rate and Avg Response Time for freelancers */}
+              {profileData.userType?.toLowerCase() === 'freelancer' && (
+                <>
+                  <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
+                    <CardContent className="p-4 text-center">
+                      <DollarSign className="w-6 h-6 mx-auto mb-2" />
+                      <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : 'N/A'}</div>
+                      <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
+                    <CardContent className="p-4 text-center">
+                      <Clock className="w-6 h-6 mx-auto mb-2" />
+                      <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : 'N/A'}</div>
+                      <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time (hrs)</div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
               <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <Award className="w-6 h-6 mx-auto mb-2" />
@@ -861,15 +880,6 @@ const Profile = () => {
                   <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
                 </CardContent>
               </Card>
-
-              <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <Clock className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">5</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time</div>
-                </CardContent>
-              </Card>
-
               <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <UserPlus className="w-6 h-6 mx-auto mb-2" />
