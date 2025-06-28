@@ -1295,7 +1295,7 @@
         "website": null,
         "title": null,
         "createdAt": "2025-06-28T06:04:35.519Z",
-        "updatedAt": "2025-06-28T06:30:09.796Z",
+        "updatedAt": "2025-06-28T18:59:49.031Z",
         "firstName": "",
         "lastName": "",
         "userType": "student",
@@ -1434,7 +1434,7 @@
         "specialization": "Computer Science and Engineering",
         "startYear": "2020",
         "endYear": "2024",
-        "updatedAt": "2025-06-28T06:25:45.443Z"
+        "updatedAt": "2025-06-28T18:59:52.727Z"
       },
       "professorData": {
         "department": "",
@@ -1455,7 +1455,7 @@
   },
   "userCounter": 12,
   "metadata": {
-    "lastUpdated": "2025-06-28T06:30:35.183Z",
+    "lastUpdated": "2025-06-28T18:59:52.727Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }
