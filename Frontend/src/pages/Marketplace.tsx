@@ -3,8 +3,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Chatbot } from "@/components/Chatbot";
 import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
-import { ProductGrid } from "@/components/marketplace/ProductGrid";
-import { FilterSidebar } from "@/components/marketplace/FilterSidebar";
+import { ProductGrid } from "@/components/marketplace/ProductGrid2";
+import { FilterSidebar } from "@/components/marketplace/FilterSidebar2";
 
 
 const Marketplace = () => {

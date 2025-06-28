@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { Search, Users, UserPlus, TrendingUp, MessageCircle, MapPin, Building } from 'lucide-react';
+import { Search, Users, UserPlus, TrendingUp, MessageCircle, MapPin, Building, Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import HeaderBackup from '@/components/HeaderBackup';
-import { Footer } from '@/components/Footer';
-import { Link } from "react-router-dom";
-
+import Header from '@/components/HeaderBackup';
+import {Footer} from '@/components/Footer';
+import Logo from '@/assets/logo/Logo Main.png'; 
 type Connection = {
   id: string;
   name: string;
@@ -16,8 +15,11 @@ type Connection = {
   company: string;
   location: string;
   avatar?: string;
+  mutualConnections: number;
   isConnected: boolean;
-  };
+  skills: string[];
+  sentTime?: string;
+};
 
 const mockConnections: Connection[] = [
   {
@@ -26,7 +28,9 @@ const mockConnections: Connection[] = [
     title: 'Senior Product Manager',
     company: 'TechCorp',
     location: 'San Francisco, CA',
+    mutualConnections: 15,
     isConnected: true,
+    skills: ['Product Strategy', 'UX Design', 'Data Analysis']
   },
   {
     id: '2',
@@ -34,7 +38,9 @@ const mockConnections: Connection[] = [
     title: 'Lead Developer',
     company: 'StartupXYZ',
     location: 'New York, NY',
+    mutualConnections: 8,
     isConnected: true,
+    skills: ['React', 'Node.js', 'AWS']
   },
   {
     id: '3',
@@ -42,71 +48,9 @@ const mockConnections: Connection[] = [
     title: 'Marketing Director',
     company: 'GrowthCo',
     location: 'Austin, TX',
+    mutualConnections: 12,
     isConnected: true,
-  },
-  {
-    id: '2',
-    name: 'Marcus Johnson',
-    title: 'Lead Developer',
-    company: 'StartupXYZ',
-    location: 'New York, NY',
-    isConnected: true,
-  },
-  {
-    id: '3',
-    name: 'Elena Rodriguez',
-    title: 'Marketing Director',
-    company: 'GrowthCo',
-    location: 'Austin, TX',
-    isConnected: true,
-  },
-  {
-    id: '2',
-    name: 'Marcus Johnson',
-    title: 'Lead Developer',
-    company: 'StartupXYZ',
-    location: 'New York, NY',
-    isConnected: true,
-  },
-  {
-    id: '3',
-    name: 'Elena Rodriguez',
-    title: 'Marketing Director',
-    company: 'GrowthCo',
-    location: 'Austin, TX',
-    isConnected: true,
-  },
-  {
-    id: '2',
-    name: 'Marcus Johnson',
-    title: 'Lead Developer',
-    company: 'StartupXYZ',
-    location: 'New York, NY',
-    isConnected: true,
-  },
-  {
-    id: '3',
-    name: 'Elena Rodriguez',
-    title: 'Marketing Director',
-    company: 'GrowthCo',
-    location: 'Austin, TX',
-    isConnected: true,
-  },
-  {
-    id: '2',
-    name: 'Marcus Johnson',
-    title: 'Lead Developer',
-    company: 'StartupXYZ',
-    location: 'New York, NY',
-    isConnected: true,
-  },
-  {
-    id: '3',
-    name: 'Elena Rodriguez',
-    title: 'Marketing Director',
-    company: 'GrowthCo',
-    location: 'Austin, TX',
-    isConnected: true,
+    skills: ['Digital Marketing', 'SEO', 'Analytics']
   }
 ];
 
@@ -117,7 +61,10 @@ const mockSuggestions: Connection[] = [
     title: 'UX Designer',
     company: 'DesignStudio',
     location: 'Seattle, WA',
+    mutualConnections: 5,
     isConnected: false,
+    skills: ['UI/UX', 'Figma', 'Design Systems'],
+    sentTime: 'Sent 2 weeks ago'
   },
   {
     id: '5',
@@ -125,78 +72,17 @@ const mockSuggestions: Connection[] = [
     title: 'Data Scientist',
     company: 'DataTech',
     location: 'Boston, MA',
+    mutualConnections: 3,
     isConnected: false,
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    isConnected: false,
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    isConnected: false,
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    isConnected: false,
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    isConnected: false,
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    isConnected: false,
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    isConnected: false,
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    isConnected: false,
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    isConnected: false,
+    skills: ['Machine Learning', 'Python', 'Statistics'],
+    sentTime: 'Sent 3 weeks ago'
   }
 ];
 
-type TabType = 'connections' | 'find' | 'recommended';
+type TabType = 'received' | 'sent' | 'find';
 
 const Connections = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('connections');
+  const [activeTab, setActiveTab] = useState<TabType>('received');
   const [searchQuery, setSearchQuery] = useState('');
   const [connections, setConnections] = useState(mockConnections);
   const [suggestions, setSuggestions] = useState(mockSuggestions);
@@ -211,81 +97,129 @@ const Connections = () => {
     );
   };
 
+  const handleWithdraw = (personId: string) => {
+    setSuggestions(prev => 
+      prev.filter(person => person.id !== personId)
+    );
+  };
+
   const filteredConnections = connections.filter(person =>
     person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     person.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     person.company.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const ConnectionCard = ({ person, showConnectButton = false }: { person: Connection; showConnectButton?: boolean }) => (
-    <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-sm">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={person.avatar} />
-              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                {person.name.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="font-semibold text-base text-gray-900">{person.name}</h3>
-              <p className="text-gray-600 font-medium text-xs">{person.title}</p>
-              <div className="flex items-center text-xs text-gray-500 mt-1">
-                <Building className="h-4 w-4 mr-1" />
-                <span>{person.company}</span>
-                <span className="mx-2">•</span>
-                <MapPin className="h-4 w-4 mr-1" />
-                <span>{person.location}</span>
-              </div>
-            </div>
-          </div>
-          {person.isConnected ? (
-            <Button variant="ghost" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              <Link to='/chat'>Message</Link>
-            </Button>
-          ) : (
-            showConnectButton && (
-              <Button 
-                onClick={() => handleConnect(person.id)}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Connect
-              </Button>
-            )
+  const ConnectionItem = ({ person, showWithdrawButton = false, showConnectButton = false }: { 
+    person: Connection; 
+    showWithdrawButton?: boolean;
+    showConnectButton?: boolean;
+  }) => (
+    <div className="flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
+      <div className="flex items-center space-x-4 flex-1">
+        <Avatar className="h-14 w-14">
+          <AvatarImage src={person.avatar} />
+          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-base">
+            {person.name.split(' ').map(n => n[0]).join('')}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <h3 className="font-semibold text-base text-gray-900">{person.name}</h3>
+          <p className="text-gray-600 text-xs">{person.title}</p>
+          <p className="text-gray-500 text-xs">{person.company}</p>
+          {person.sentTime && (
+            <p className="text-gray-400 text-xs mt-1">{person.sentTime}</p>
           )}
         </div>
-      </CardHeader>
-    </Card>
+      </div>
+      <div className="flex items-center space-x-2">
+        {showWithdrawButton && (
+          <Button 
+            variant="outline" 
+            onClick={() => handleWithdraw(person.id)}
+            className="text-gray-600 hover:text-gray-700"
+          >
+            Withdraw
+          </Button>
+        )}
+        {showConnectButton && !person.isConnected && (
+          <Button 
+            onClick={() => handleConnect(person.id)}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            Connect
+          </Button>
+        )}
+        {person.isConnected && (
+          <Button variant="outline" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Message
+          </Button>
+        )}
+      </div>
+    </div>
   );
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'connections':
+      case 'received':
         return (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">My Connections</h2>
-              <Badge variant="outline" className="px-3 py-1">
-                {connections.length} connections
-              </Badge>
+          <div className="bg-white rounded-lg border border-gray-200">
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="textlg font-semibold text-gray-900">Manage invitations</h2>
+                <Button variant="ghost" size="sm">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div className="grid gap-4">
-              {filteredConnections.map(person => (
-                <ConnectionCard key={person.id} person={person} />
-              ))}
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <Badge variant="secondary" className="bg-green-100 text-green-800 px-3 py-1 text-base">
+                  People ({connections.length})
+                </Badge>
+              </div>
+              <div>
+                {connections.map(person => (
+                  <ConnectionItem key={person.id} person={person} />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 'sent':
+        return (
+          <div className="bg-white rounded-lg border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">Manage invitations</h2>
+                <Button variant="ghost" size="sm">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <Badge variant="secondary" className="bg-green-100 text-green-800 px-3 py-1">
+                  People ({suggestions.length})
+                </Badge>
+              </div>
+              <div>
+                {suggestions.map(person => (
+                  <ConnectionItem key={person.id} person={person} showWithdrawButton />
+                ))}
+              </div>
             </div>
           </div>
         );
       
       case 'find':
         return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Find People</h2>
-              <div className="relative">
+          <div className="bg-white rounded-lg border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">Find People</h2>
+              <div className="relative mt-4">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search by name, title, or company..."
@@ -295,12 +229,14 @@ const Connections = () => {
                 />
               </div>
             </div>
-            <div className="grid gap-4">
+            <div className="p-4">
               {searchQuery ? (
                 filteredConnections.length > 0 ? (
-                  filteredConnections.map(person => (
-                    <ConnectionCard key={person.id} person={person} showConnectButton />
-                  ))
+                  <div>
+                    {filteredConnections.map(person => (
+                      <ConnectionItem key={person.id} person={person} showConnectButton />
+                    ))}
+                  </div>
                 ) : (
                   <div className="text-center py-12">
                     <Search className="h-12 w-12 text-gray-300 mx-auto mb-4" />
@@ -316,55 +252,50 @@ const Connections = () => {
             </div>
           </div>
         );
-      
-      case 'recommended':
-        return (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Recommended Connections</h2>
-              <Badge variant="outline" className="px-3 py-1 bg-green-50 text-green-700 border-green-200">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                AI Powered
-              </Badge>
-            </div>
-            <p className="text-gray-600 mb-6">People you might know based on your network and interests</p>
-            <div className="grid gap-4">
-              {suggestions.map(person => (
-                <ConnectionCard key={person.id} person={person} showConnectButton />
-              ))}
-            </div>
-          </div>
-        );
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <HeaderBackup />
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-blue-100">
+      <Header />
+      
+      {/* Main Container */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex gap-8">
           {/* Main Content */}
           <div className="flex-1">
             {renderTabContent()}
           </div>
           
-          {/* Right Sidebar with Tabs */}
+          {/* Right Sidebar with Navigation */}
           <div className="w-80">
-            <Card className="sticky top-8 border-0 shadow-lg">
+            <Card className="sticky top-8 border-0 shadow-sm">
               <CardHeader className="pb-3">
                 <h3 className="font-semibold text-gray-900">Navigation</h3>
               </CardHeader>
               <CardContent className="space-y-2">
                 <button
-                  onClick={() => setActiveTab('connections')}
+                  onClick={() => setActiveTab('received')}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                    activeTab === 'connections'
+                    activeTab === 'received'
                       ? 'bg-blue-600 text-white shadow-md'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <Users className="h-5 w-5" />
-                  <span className="font-medium">My Connections</span>
+                  <span className="font-medium">Received Invitations</span>
+                </button>
+                
+                <button
+                  onClick={() => setActiveTab('sent')}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                    activeTab === 'sent'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <TrendingUp className="h-5 w-5" />
+                  <span className="font-medium">Sent Invitations</span>
                 </button>
                 
                 <button
@@ -378,18 +309,20 @@ const Connections = () => {
                   <Search className="h-5 w-5" />
                   <span className="font-medium">Find People</span>
                 </button>
-                
-                <button
-                  onClick={() => setActiveTab('recommended')}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                    activeTab === 'recommended'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <TrendingUp className="h-5 w-5" />
-                  <span className="font-medium">Recommended</span>
-                </button>
+              </CardContent>
+            </Card>
+
+            {/* Sticky Logo Box */}
+            <Card className="sticky top-44 mt-6 border-0 shadow-sm flex flex-col items-center justify-center py-8">
+              <CardContent className="flex flex-col items-center">
+                <img
+                  src={Logo}
+                  alt="Logo"
+                  className="w-auto h-20 mb-3"
+                />
+                <p className="text-gray-500 text-sm text-center">
+                  Connect, grow, and collaborate with professionals on EverUseful.
+                </p>
               </CardContent>
             </Card>
           </div>

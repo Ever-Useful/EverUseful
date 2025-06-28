@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Heart, MessageCircle } from "lucide-react";
 import { freelancersData, Freelancer } from "@/utils/freelancerData";
+import noUserProfile from "../../assets/images/no user profile.png";
 
 interface FreelancerGridProps {
   filters: {
@@ -65,7 +66,7 @@ export const FreelancerGrid = ({ filters }: FreelancerGridProps) => {
                   <div className="flex items-start space-x-4">
                     <div className="relative">
                       <img 
-                        src={freelancer.image} 
+                        src={freelancer.image || noUserProfile} 
                         alt={freelancer.name}
                         className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
                       />

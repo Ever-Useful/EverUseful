@@ -7,6 +7,7 @@ import { Footer } from "../components/Footer";
 import { FreelanceFilterSidebar } from "../components/freelancing/FreelanceFilterSidebar";
 import { FreelancerGrid } from "../components/freelancing/FreelancerGrid";
 import { ArrowUpDown } from "lucide-react";
+import noUserProfile from "../assets/images/no user profile.png";
 
 // HERO SECTION DATA
 const heroFeatures = [
@@ -561,7 +562,7 @@ const Work: React.FC = () => {
                 <div className="p-5 flex-1 flex flex-col">
                   <div className="flex justify-center mb-3">
                     <img
-                      src={f.profile?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(f.profile?.firstName || 'Freelancer')}
+                      src={f.profile?.avatar || noUserProfile}
                       alt={f.profile?.firstName || 'Freelancer'}
                       className="w-20 h-20 rounded-full object-cover border-3 border-white/80 shadow-lg"
                     />

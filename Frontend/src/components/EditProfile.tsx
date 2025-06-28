@@ -170,7 +170,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           userType: normalizeUserType(userProfile.auth.userType),
           username: userProfile.auth.username || '',
           email: userProfile.auth.email || '',
-          mobile: userProfile.auth.mobile || '',
+          mobile: userProfile.auth.mobile || userProfile.auth.phoneNumber || '',
           gender: userProfile.auth.gender || '',
           domain: userProfile.auth.domain || '',
           startYear: userProfile.studentData?.startYear || '',
@@ -181,12 +181,13 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           department: userProfile.professorData?.department || '',
           designation: userProfile.professorData?.designation || '',
           researchInterests: userProfile.professorData?.researchInterests || '',
-          skills: userProfile.freelancerData?.skills || '',
+          skills: (((userProfile as any).skills && Array.isArray((userProfile as any).skills)) ? (userProfile as any).skills : (userProfile.freelancerData?.skills && Array.isArray(userProfile.freelancerData.skills) ? userProfile.freelancerData.skills : [])).join(','),
           experience: userProfile.freelancerData?.experience || '',
           portfolio: userProfile.freelancerData?.portfolio || '',
         });
         setEducationList(userProfile.education || []);
         setWorkList(userProfile.workExperience || []);
+        setSkills(((userProfile as any).skills && Array.isArray((userProfile as any).skills)) ? (userProfile as any).skills : (userProfile.freelancerData?.skills && Array.isArray(userProfile.freelancerData.skills) ? userProfile.freelancerData.skills : []));
         setPersonalDetails(userProfile.personalDetails || {
           address1: '', address2: '', landmark: '', pincode: '', location: '', hobbies: '', copyCurrent: false
         });
@@ -196,6 +197,9 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
       } catch (error) {
         toast.error("Failed to fetch profile data.");
         console.error(error);
+        setEducationList([]);
+        setWorkList([]);
+        setSkills([]);
       }
     };
     fetchProfile();
@@ -264,52 +268,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
   
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState('');
-  const [isLoadingSkills, setIsLoadingSkills] = useState(true);
-
-  // Load skills from database
-  useEffect(() => {
-    const fetchSkills = async () => {
-      try {
-        setIsLoadingSkills(true);
-        const user = auth.currentUser;
-        if (!user) {
-          setSkills([]);
-          return;
-        }
-        // Get user profile and customUserId
-        let userProfile;
-        try {
-          userProfile = await userService.getUserProfile();
-        } catch (err) {
-          // If user not found, try to create user
-          try {
-            await userService.createUser({});
-            userProfile = await userService.getUserProfile();
-          } catch (createErr) {
-            setSkills([]);
-            setIsLoadingSkills(false);
-            return;
-          }
-        }
-        const customUserId = userProfile.customUserId;
-        // Fetch user data using customUserId (same as Profile.tsx)
-        const userDataResponse = await fetch(`http://localhost:3000/api/users/${customUserId}`);
-        if (userDataResponse.ok) {
-          const userData = await userDataResponse.json();
-          const userSkills = userData.data?.skills || [];
-          setSkills(userSkills);
-        } else {
-          setSkills([]);
-        }
-      } catch (error) {
-        console.error('Failed to load skills:', error);
-        setSkills([]);
-      } finally {
-        setIsLoadingSkills(false);
-      }
-    };
-    fetchSkills();
-  }, []);
+  const [isLoadingSkills, setIsLoadingSkills] = useState(false);
 
   const handleAddSkill = async (skillToAdd: string) => {
     const trimmedSkill = skillToAdd.trim();
@@ -544,19 +503,19 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-gray-700">First Name <span className="text-red-500">*</span></label>
-                      <Input name="firstName" value={profileData.firstName} onChange={handleInputChange} className="mt-1" />
+                      <Input name="firstName" value={profileData.firstName ?? ''} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Last Name <span className="text-red-500">*</span></label>
-                      <Input name="lastName" value={profileData.lastName} onChange={handleInputChange} className="mt-1" />
+                      <Input name="lastName" value={profileData.lastName ?? ''} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Username</label>
-                      <Input name="username" value={profileData.username || 'username'} disabled className="mt-1 bg-gray-100" />
+                      <Input name="username" value={profileData.username ?? ''} disabled className="mt-1 bg-gray-100" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Email</label>
-                      <Input name="email" value={profileData.email || 'user@email.com'} disabled className="mt-1 bg-gray-100 cursor-not-allowed text-gray-500" />
+                      <Input name="email" value={profileData.email ?? ''} disabled className="mt-1 bg-gray-100 cursor-not-allowed text-gray-500" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Mobile <span className="text-red-500">*</span></label>
@@ -566,7 +525,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                           <option value="+1">+1</option>
                           <option value="+44">+44</option>
                         </select>
-                        <Input name="mobile" value={profileData.mobile || ''} onChange={handleInputChange} className="flex-1" />
+                        <Input name="mobile" value={profileData.mobile ?? ''} onChange={handleInputChange} className="flex-1" />
                       </div>
                     </div>
                     <div>
@@ -601,12 +560,13 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       ))}
                     </div>
                   </div>
+                  
                   {/* Conditional Fields by User Type */}
                   {profileData.userType === 'Students' && (
                     <div className="space-y-6">
                       <div>
                         <label className="text-sm font-medium text-gray-700">Course <span className="text-red-500">*</span></label>
-                        <select name="course" value={profileData.course} onChange={handleSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
+                        <select name="course" value={profileData.course ?? ''} onChange={handleSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
                           <option value="">Select Course</option>
                           <option value="B.Tech/BE">B.Tech/BE (Bachelor of Technology / Bachelor of Engineering)</option>
                           <option value="B.Sc">B.Sc</option>
@@ -616,7 +576,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Course Specialization <span className="text-red-500">*</span></label>
-                        <select name="specialization" value={profileData.specialization} onChange={handleSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
+                        <select name="specialization" value={profileData.specialization ?? ''} onChange={handleSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
                           <option value="">Select Specialization</option>
                           <option value="Computer Science and Engineering">Computer Science and Engineering</option>
                           <option value="Electronics">Electronics</option>
@@ -627,15 +587,15 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-sm font-medium text-gray-700">Course Duration <span className="text-red-500">*</span></label>
-                          <Input name="startYear" value={profileData.startYear} onChange={handleInputChange} className="mt-1" placeholder="Start Year" />
+                          <Input name="startYear" value={profileData.startYear ?? ''} onChange={handleInputChange} className="mt-1" placeholder="Start Year" />
                         </div>
                         <div className="pt-6">
-                          <Input name="endYear" value={profileData.endYear} onChange={handleInputChange} className="mt-1" placeholder="End Year" />
+                          <Input name="endYear" value={profileData.endYear ?? ''} onChange={handleInputChange} className="mt-1" placeholder="End Year" />
                         </div>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Organisation/College <span className="text-red-500">*</span></label>
-                        <Input name="college" value={profileData.college} onChange={handleInputChange} className="mt-1" />
+                        <Input name="college" value={profileData.college ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Purpose <span className="text-red-500">*</span></label>
@@ -654,12 +614,12 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Select Role</label>
-                        <Input name="role" value={profileData.role || ''} onChange={handleInputChange} className="mt-1" placeholder="Hiring For" />
+                        <Input name="role" value={profileData.role ?? ''} onChange={handleInputChange} className="mt-1" placeholder="Hiring For" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Location <span className="text-red-500">*</span></label>
                         <div className="flex items-center gap-2 mt-1">
-                          <Input name="location" value={profileData.location} onChange={handleInputChange} className="flex-1" placeholder="City, State, Country" />
+                          <Input name="location" value={profileData.location ?? ''} onChange={handleInputChange} className="flex-1" placeholder="City, State, Country" />
                           <span className="text-gray-400"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M12 21c-4.418 0-8-3.582-8-8 0-4.418 3.582-8 8-8s8 3.582 8 8c0 4.418-3.582 8-8 8zm0-10a2 2 0 100 4 2 2 0 000-4z"/></svg></span>
                         </div>
                       </div>
@@ -669,24 +629,24 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                     <div className="space-y-6">
                       <div>
                         <label className="text-sm font-medium text-gray-700">Department <span className="text-red-500">*</span></label>
-                        <Input name="department" value={profileData.department || ''} onChange={handleInputChange} className="mt-1" />
+                        <Input name="department" value={profileData.department ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Designation <span className="text-red-500">*</span></label>
-                        <Input name="designation" value={profileData.designation || ''} onChange={handleInputChange} className="mt-1" />
+                        <Input name="designation" value={profileData.designation ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">College/University <span className="text-red-500">*</span></label>
-                        <Input name="college" value={profileData.college} onChange={handleInputChange} className="mt-1" />
+                        <Input name="college" value={profileData.college ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Research Interests</label>
-                        <Input name="researchInterests" value={profileData.researchInterests || ''} onChange={handleInputChange} className="mt-1" />
+                        <Input name="researchInterests" value={profileData.researchInterests ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Location <span className="text-red-500">*</span></label>
                         <div className="flex items-center gap-2 mt-1">
-                          <Input name="location" value={profileData.location} onChange={handleInputChange} className="flex-1" placeholder="City, State, Country" />
+                          <Input name="location" value={profileData.location ?? ''} onChange={handleInputChange} className="flex-1" placeholder="City, State, Country" />
                           <span className="text-gray-400"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M12 21c-4.418 0-8-3.582-8-8 0-4.418 3.582-8 8-8s8 3.582 8 8c0 4.418-3.582 8-8 8zm0-10a2 2 0 100 4 2 2 0 000-4z"/></svg></span>
                         </div>
                       </div>
@@ -696,16 +656,16 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                     <div className="space-y-6">
                       <div>
                         <label className="text-sm font-medium text-gray-700">Experience (years)</label>
-                        <Input name="experience" value={profileData.experience || ''} onChange={handleInputChange} className="mt-1" />
+                        <Input name="experience" value={profileData.experience ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Portfolio/Website</label>
-                        <Input name="portfolio" value={profileData.portfolio || ''} onChange={handleInputChange} className="mt-1" />
+                        <Input name="portfolio" value={profileData.portfolio ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Location <span className="text-red-500">*</span></label>
                         <div className="flex items-center gap-2 mt-1">
-                          <Input name="location" value={profileData.location} onChange={handleInputChange} className="flex-1" placeholder="City, State, Country" />
+                          <Input name="location" value={profileData.location ?? ''} onChange={handleInputChange} className="flex-1" placeholder="City, State, Country" />
                           <span className="text-gray-400"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M12 21c-4.418 0-8-3.582-8-8 0-4.418 3.582-8 8-8s8 3.582 8 8c0 4.418-3.582 8-8 8zm0-10a2 2 0 100 4 2 2 0 000-4z"/></svg></span>
                         </div>
                       </div>
@@ -725,7 +685,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         <p className="text-xs text-gray-500">Maximum 1000 characters can be added</p>
                         <textarea
                             name="bio"
-                            value={profileData.bio}
+                            value={profileData.bio ?? ''}
                             onChange={handleInputChange}
                             className="w-full mt-2 p-3 border border-gray-300 rounded-md min-h-[150px] text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                             placeholder="Introduce yourself here! Share a brief overview of who you are, your interests, and connect with fellow users, recruiters & organizers."
@@ -799,7 +759,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                     <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSaveEducation(); }}>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Qualification <span className="text-red-500">*</span></label>
-                        <select name="qualification" value={educationForm.qualification} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
+                        <select name="qualification" value={educationForm.qualification ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
                           <option value="">Select Qualification</option>
                           <option value="PhD">PhD</option>
                           <option value="Post Graduation">Post Graduation</option>
@@ -810,7 +770,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Course <span className="text-red-500">*</span></label>
-                        <select name="course" value={educationForm.course} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
+                        <select name="course" value={educationForm.course ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
                           <option value="">Select Course</option>
                           <option value="B.Tech/BE">B.Tech/BE (Bachelor of Technology / Bachelor of Engineering)</option>
                           <option value="B.Sc">B.Sc</option>
@@ -820,7 +780,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Specialization <span className="text-red-500">*</span></label>
-                        <select name="specialization" value={educationForm.specialization} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
+                        <select name="specialization" value={educationForm.specialization ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
                           <option value="">Select Specialization</option>
                           <option value="Computer Science and Engineering">Computer Science and Engineering</option>
                           <option value="Electronics">Electronics</option>
@@ -830,21 +790,21 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">College <span className="text-red-500">*</span></label>
-                        <Input name="college" value={educationForm.college} onChange={handleEducationInputChange} className="mt-1" />
+                        <Input name="college" value={educationForm.college ?? ''} onChange={handleEducationInputChange} className="mt-1" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-sm font-medium text-gray-700">Start Year</label>
-                          <Input name="startYear" value={educationForm.startYear} onChange={handleEducationInputChange} className="mt-1" placeholder="Start Year" />
+                          <Input name="startYear" value={educationForm.startYear ?? ''} onChange={handleEducationInputChange} className="mt-1" placeholder="Start Year" />
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-700">End Year</label>
-                          <Input name="endYear" value={educationForm.endYear} onChange={handleEducationInputChange} className="mt-1" placeholder="End Year" />
+                          <Input name="endYear" value={educationForm.endYear ?? ''} onChange={handleEducationInputChange} className="mt-1" placeholder="End Year" />
                         </div>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Course Type</label>
-                        <select name="courseType" value={educationForm.courseType} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
+                        <select name="courseType" value={educationForm.courseType ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
                           <option value="">Select Course Type</option>
                           <option value="Full Time">Full Time</option>
                           <option value="Part Time">Part Time</option>
@@ -854,21 +814,21 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-sm font-medium text-gray-700">Percentage</label>
-                          <Input name="percentage" value={educationForm.percentage} onChange={handleEducationInputChange} className="mt-1" placeholder="Percentage" />
+                          <Input name="percentage" value={educationForm.percentage ?? ''} onChange={handleEducationInputChange} className="mt-1" placeholder="Percentage" />
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-700">CGPA</label>
-                          <Input name="cgpa" value={educationForm.cgpa} onChange={handleEducationInputChange} className="mt-1" placeholder="CGPA" />
+                          <Input name="cgpa" value={educationForm.cgpa ?? ''} onChange={handleEducationInputChange} className="mt-1" placeholder="CGPA" />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-sm font-medium text-gray-700">Roll Number</label>
-                          <Input name="rollNumber" value={educationForm.rollNumber} onChange={handleEducationInputChange} className="mt-1" placeholder="Roll number" />
+                          <Input name="rollNumber" value={educationForm.rollNumber ?? ''} onChange={handleEducationInputChange} className="mt-1" placeholder="Roll number" />
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-700">Are you a Lateral Entry Student?</label>
-                          <select name="lateralEntry" value={educationForm.lateralEntry} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
+                          <select name="lateralEntry" value={educationForm.lateralEntry ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
                             <option value="">Lateral entry</option>
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
@@ -877,11 +837,11 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Skills</label>
-                        <Input name="skills" value={educationForm.skills} onChange={handleEducationInputChange} className="mt-1" placeholder="Add skills" />
+                        <Input name="skills" value={educationForm.skills ?? ''} onChange={handleEducationInputChange} className="mt-1" placeholder="Add skills" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Description</label>
-                        <textarea name="description" value={educationForm.description} onChange={handleEducationInputChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md min-h-[80px] text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Detail your education journey: degrees, accomplishments, skills gained. Share your academic and learning experiences to stand out" />
+                        <textarea name="description" value={educationForm.description ?? ''} onChange={handleEducationInputChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md min-h-[80px] text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Detail your education journey: degrees, accomplishments, skills gained. Share your academic and learning experiences to stand out" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Attachments</label>
@@ -928,7 +888,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                     <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSaveWork(); }}>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Designation <span className="text-red-500">*</span></label>
-                        <select name="designation" value={workForm.designation} onChange={handleWorkSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
+                        <select name="designation" value={workForm.designation ?? ''} onChange={handleWorkSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
                           <option value="">Select Designation</option>
                           <option value="Software Engineer">Software Engineer</option>
                           <option value="Research Intern">Research Intern</option>
@@ -938,11 +898,11 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Organisation <span className="text-red-500">*</span></label>
-                        <Input name="organization" value={workForm.organization} onChange={handleWorkInputChange} className="mt-1" placeholder="Select Organisation" />
+                        <Input name="organization" value={workForm.organization ?? ''} onChange={handleWorkInputChange} className="mt-1" placeholder="Select Organisation" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Employment Type <span className="text-red-500">*</span></label>
-                        <select name="employmentType" value={workForm.employmentType} onChange={handleWorkSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
+                        <select name="employmentType" value={workForm.employmentType ?? ''} onChange={handleWorkSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
                           <option value="">Select Employment Type</option>
                           <option value="Full Time">Full Time</option>
                           <option value="Part Time">Part Time</option>
@@ -955,11 +915,11 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       <div className="grid grid-cols-2 gap-4 items-end">
                         <div>
                           <label className="text-sm font-medium text-gray-700">Start Date <span className="text-red-500">*</span></label>
-                          <Input type="date" name="startDate" value={workForm.startDate} onChange={handleWorkInputChange} className="mt-1" />
+                          <Input type="date" name="startDate" value={workForm.startDate ?? ''} onChange={handleWorkInputChange} className="mt-1" />
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-700">End Date</label>
-                          <Input type="date" name="endDate" value={workForm.endDate} onChange={handleWorkInputChange} className="mt-1" disabled={workForm.currentlyWorking} />
+                          <Input type="date" name="endDate" value={workForm.endDate ?? ''} onChange={handleWorkInputChange} className="mt-1" disabled={workForm.currentlyWorking} />
                         </div>
                         <div className="flex items-center gap-2 col-span-2">
                           <input type="checkbox" name="currentlyWorking" checked={workForm.currentlyWorking} onChange={handleWorkInputChange} />
@@ -968,17 +928,17 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div className="flex items-center gap-2">
                         <label className="text-sm font-medium text-gray-700">Location <span className="text-red-500">*</span></label>
-                        <Input name="location" value={workForm.location} onChange={handleWorkInputChange} className="mt-1 flex-1" placeholder="Select Location" />
+                        <Input name="location" value={workForm.location ?? ''} onChange={handleWorkInputChange} className="mt-1 flex-1" placeholder="Select Location" />
                         <input type="checkbox" name="remote" checked={workForm.remote} onChange={handleWorkInputChange} />
                         <label className="text-sm text-gray-700">Remote</label>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Skills</label>
-                        <Input name="skills" value={workForm.skills} onChange={handleWorkInputChange} className="mt-1" placeholder="Add skills" />
+                        <Input name="skills" value={workForm.skills ?? ''} onChange={handleWorkInputChange} className="mt-1" placeholder="Add skills" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Description</label>
-                        <textarea name="description" value={workForm.description} onChange={handleWorkInputChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md min-h-[80px] text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Describe your role here, detailing the responsibilities you handled, the skills you applied and developed, and the significant experiences you gained during your tenure." />
+                        <textarea name="description" value={workForm.description ?? ''} onChange={handleWorkInputChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md min-h-[80px] text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Describe your role here, detailing the responsibilities you handled, the skills you applied and developed, and the significant experiences you gained during your tenure." />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Attachments</label>
@@ -1022,29 +982,29 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium text-gray-700">Address Line 1</label>
-                        <Input name="address1" value={personalDetails.address1} onChange={handlePersonalInputChange} className="mt-1" placeholder="Address 1" />
+                        <Input name="address1" value={personalDetails.address1 ?? ''} onChange={handlePersonalInputChange} className="mt-1" placeholder="Address 1" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Address Line 2</label>
-                        <Input name="address2" value={personalDetails.address2} onChange={handlePersonalInputChange} className="mt-1" placeholder="Address 2" />
+                        <Input name="address2" value={personalDetails.address2 ?? ''} onChange={handlePersonalInputChange} className="mt-1" placeholder="Address 2" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Landmark</label>
-                        <Input name="landmark" value={personalDetails.landmark} onChange={handlePersonalInputChange} className="mt-1" placeholder="Landmark" />
+                        <Input name="landmark" value={personalDetails.landmark ?? ''} onChange={handlePersonalInputChange} className="mt-1" placeholder="Landmark" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Pincode</label>
-                        <Input name="pincode" value={personalDetails.pincode} onChange={handlePersonalInputChange} className="mt-1" placeholder="Pincode" />
+                        <Input name="pincode" value={personalDetails.pincode ?? ''} onChange={handlePersonalInputChange} className="mt-1" placeholder="Pincode" />
                       </div>
                       <div className="md:col-span-2">
                         <label className="text-sm font-medium text-gray-700">Location</label>
-                        <Input name="location" value={personalDetails.location} onChange={handlePersonalInputChange} className="mt-1" placeholder="Select Location" />
+                        <Input name="location" value={personalDetails.location ?? ''} onChange={handlePersonalInputChange} className="mt-1" placeholder="Select Location" />
                       </div>
                     </div>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">Hobbies</label>
-                    <Input name="hobbies" value={personalDetails.hobbies} onChange={handlePersonalInputChange} className="mt-1" placeholder="List your hobbies." />
+                    <Input name="hobbies" value={personalDetails.hobbies ?? ''} onChange={handlePersonalInputChange} className="mt-1" placeholder="List your hobbies." />
                   </div>
                 </form>
               )}
@@ -1054,55 +1014,55 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-gray-700">Linkedin</label>
-                      <Input name="linkedin" value={socialLinks.linkedin} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="linkedin" value={socialLinks.linkedin ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Facebook</label>
-                      <Input name="facebook" value={socialLinks.facebook} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="facebook" value={socialLinks.facebook ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Instagram</label>
-                      <Input name="instagram" value={socialLinks.instagram} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="instagram" value={socialLinks.instagram ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Twitter</label>
-                      <Input name="twitter" value={socialLinks.twitter} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="twitter" value={socialLinks.twitter ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Git</label>
-                      <Input name="git" value={socialLinks.git} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="git" value={socialLinks.git ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Medium</label>
-                      <Input name="medium" value={socialLinks.medium} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="medium" value={socialLinks.medium ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Reddit</label>
-                      <Input name="reddit" value={socialLinks.reddit} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="reddit" value={socialLinks.reddit ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Slack</label>
-                      <Input name="slack" value={socialLinks.slack} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="slack" value={socialLinks.slack ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Dribbble</label>
-                      <Input name="dribbble" value={socialLinks.dribbble} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="dribbble" value={socialLinks.dribbble ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Behance</label>
-                      <Input name="behance" value={socialLinks.behance} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="behance" value={socialLinks.behance ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">CodePen</label>
-                      <Input name="codepen" value={socialLinks.codepen} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="codepen" value={socialLinks.codepen ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Figma</label>
-                      <Input name="figma" value={socialLinks.figma} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="figma" value={socialLinks.figma ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                     <div className="md:col-span-2">
                       <label className="text-sm font-medium text-gray-700">Custom Link</label>
-                      <Input name="custom" value={socialLinks.custom} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
+                      <Input name="custom" value={socialLinks.custom ?? ''} onChange={handleSocialInputChange} className="mt-1" placeholder="Add link" />
                     </div>
                   </div>
                 </form>

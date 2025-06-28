@@ -471,8 +471,8 @@ export const Header = () => {
             <div className="flex items-center space-x-1 flex-shrink-0">
               <Link to="/" className="flex items-center space-x-2 group">
                 <img src={Logo} alt="AMOGH" className="h-14 w-auto md:h-8" />
-                <div className="py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
-                  Beta
+                <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
+                  beta
                 </div>
               </Link>
             </div>
