@@ -10,6 +10,10 @@ interface UserProfile {
   title: string;
   createdAt: string;
   updatedAt: string;
+  gender?: string;
+  domain?: string;
+  purpose?: string;
+  role?: string;
 }
 
 interface UserStats {
@@ -302,7 +306,15 @@ class UserService {
   }
 
   // Update user student data
-  async updateStudentData(studentData: Partial<{ college: string; degree: string; course: string; year: string; }>): Promise<any> {
+  async updateStudentData(studentData: Partial<{ 
+    college: string; 
+    degree: string; 
+    course: string; 
+    year: string; 
+    specialization: string;
+    startYear: string;
+    endYear: string;
+  }>): Promise<any> {
     const response = await this.makeRequest('/student-data', {
         method: 'PUT',
         body: JSON.stringify(studentData),
@@ -386,6 +398,14 @@ class UserService {
     const response = await this.makeRequest('/freelancer-data', {
       method: 'PUT',
       body: JSON.stringify(freelancerData),
+    });
+    return response.data;
+  }
+
+  // Track project view
+  async trackProjectView(projectId: string): Promise<{ views: number }> {
+    const response = await this.makeRequest(`/projects/${projectId}/view`, {
+      method: 'POST',
     });
     return response.data;
   }

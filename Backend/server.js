@@ -63,8 +63,15 @@ app.get('/token', authorize, async (req, res) => {
         userType: 'student', // Default userType for GET requests
       });
 
-      // Create user in userData.json
-      await userService.createUser(uid, {}); // No name/email/userType/avatar
+      // Create user in userData.json with all the user data
+      await userService.createUser(uid, {
+        firstName: firstName ?? '',
+        lastName: lastName ?? '',
+        email: email ?? 'no-email@example.com',
+        userType: 'student',
+        mobile: phone_number ?? '',
+        phoneNumber: phone_number ?? '',
+      });
 
       console.log("New user created with custom ID:", customUserId);
     } else {
@@ -111,8 +118,15 @@ app.post('/token', authorize, async (req, res) => {
         userType: userType ?? 'student',
       });
 
-      // Create user in userData.json
-      await userService.createUser(uid, {}); // No name/email/userType/avatar
+      // Create user in userData.json with all the user data
+      await userService.createUser(uid, {
+        firstName: resolvedFirstName ?? '',
+        lastName: resolvedLastName ?? '',
+        email: email ?? 'no-email@example.com',
+        userType: userType ?? 'student',
+        mobile: phoneNumber ?? phone_number ?? '',
+        phoneNumber: phoneNumber ?? phone_number ?? '',
+      });
 
       console.log("New user created with custom ID:", customUserId, "userType:", userType, "firstName:", resolvedFirstName, "lastName:", resolvedLastName);
     } else {

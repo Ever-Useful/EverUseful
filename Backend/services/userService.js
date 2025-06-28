@@ -74,6 +74,7 @@ class UserService {
     const customUserId = `USER_${this.userData.userCounter.toString().padStart(6, '0')}`;
     
     const newUser = {
+      firebaseUid, // Add Firebase UID to link with Firestore
       customUserId,
       profile: {
         avatar: userData.avatar ?? null,
@@ -88,7 +89,7 @@ class UserService {
         userType: userData.userType ?? 'student',
         username: userData.username ?? '',
         email: userData.email ?? '',
-        mobile: userData.mobile ?? '',
+        mobile: userData.mobile ?? userData.phoneNumber ?? '',
         gender: userData.gender ?? '',
         domain: userData.domain ?? '',
         purpose: userData.purpose ?? '',
@@ -172,7 +173,15 @@ class UserService {
       },
       studentData: null,
       professorData: null,
-      freelancerData: null
+      freelancerData: {
+        experience: '',
+        portfolio: '',
+        location: '',
+        skills: [],
+        hourlyRate: '',
+        avgResponseTime: '',
+        updatedAt: new Date().toISOString()
+      }
     };
 
     this.userData.users[customUserId] = newUser;
@@ -488,6 +497,13 @@ class UserService {
     this.userData.users[customUserId].projects.count += 1;
     this.userData.users[customUserId].stats.projectsCount += 1;
 
+    // Add activity for project creation
+    await this.addActivity(customUserId, {
+      type: 'project_created',
+      description: `Created new project: ${project.title}`,
+      metadata: { projectId: project.projectId, projectTitle: project.title }
+    });
+
     await this.saveUserData();
     return project;
   }
@@ -520,21 +536,34 @@ class UserService {
     }
   }
 
-  // Add skill to user (flat array)
+  // Add a skill (flat array)
   async addUserSkill(customUserId, skillData) {
     await this.loadUserData();
+    
     if (!this.userData.users[customUserId]) {
       throw new Error('User not found');
     }
-    // Ensure skills is an array
-    if (!Array.isArray(this.userData.users[customUserId].skills)) {
-      this.userData.users[customUserId].skills = [];
+
+    const { name } = skillData;
+    if (!name) {
+      throw new Error('Skill name is required');
     }
-    // Add the skill string if not already present
-    if (!this.userData.users[customUserId].skills.includes(skillData.name)) {
-      this.userData.users[customUserId].skills.push(skillData.name);
-      await this.saveUserData();
+
+    // Check if skill already exists
+    if (this.userData.users[customUserId].skills.includes(name)) {
+      throw new Error('Skill already exists');
     }
+
+    this.userData.users[customUserId].skills.push(name);
+    await this.saveUserData();
+
+    // Add activity for skill addition
+    await this.addActivity(customUserId, {
+      type: 'skill_added',
+      description: `Added new skill: ${name}`,
+      metadata: { skillName: name }
+    });
+
     return this.userData.users[customUserId].skills;
   }
 
@@ -655,19 +684,40 @@ class UserService {
       throw new Error('User not found');
     }
 
-    // Add to following list
+    if (followerId === followingId) {
+      throw new Error('Cannot follow yourself');
+    }
+
+    // Add to following list if not already following
     if (!this.userData.users[followerId].social.following.includes(followingId)) {
       this.userData.users[followerId].social.following.push(followingId);
       this.userData.users[followerId].social.followingCount += 1;
     }
 
-    // Add to followers list
+    // Add to followers list if not already a follower
     if (!this.userData.users[followingId].social.followers.includes(followerId)) {
       this.userData.users[followingId].social.followers.push(followerId);
       this.userData.users[followingId].social.followersCount += 1;
     }
 
     await this.saveUserData();
+
+    // Add activity for following
+    const followerName = this.userData.users[followerId].profile.firstName || 'User';
+    const followingName = this.userData.users[followingId].profile.firstName || 'User';
+    
+    await this.addActivity(followerId, {
+      type: 'user_followed',
+      description: `Started following ${followingName}`,
+      metadata: { followingId, followingName }
+    });
+
+    await this.addActivity(followingId, {
+      type: 'user_followed',
+      description: `${followerName} started following you`,
+      metadata: { followerId, followerName }
+    });
+
     return {
       followersCount: this.userData.users[followingId].social.followersCount,
       followingCount: this.userData.users[followerId].social.followingCount
@@ -718,6 +768,37 @@ class UserService {
     await this.saveUserData();
     
     return { success: true, message: 'User deleted successfully' };
+  }
+
+  // Track project view
+  async trackProjectView(customUserId, projectId) {
+    await this.loadUserData();
+    
+    if (!this.userData.users[customUserId]) {
+      throw new Error('User not found');
+    }
+
+    // Find the project in user's created projects
+    const user = this.userData.users[customUserId];
+    const project = user.projects.created.find(p => p.projectId === projectId);
+    
+    if (project) {
+      project.views = (project.views || 0) + 1;
+      user.stats.totalViews = (user.stats.totalViews || 0) + 1;
+      
+      await this.saveUserData();
+      
+      // Add activity for project view milestone
+      if (project.views === 10 || project.views === 50 || project.views === 100) {
+        await this.addActivity(customUserId, {
+          type: 'project_milestone',
+          description: `Your project "${project.title}" reached ${project.views} views!`,
+          metadata: { projectId, projectTitle: project.title, views: project.views }
+        });
+      }
+    }
+
+    return { views: project?.views || 0 };
   }
 }
 

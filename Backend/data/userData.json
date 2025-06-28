@@ -385,7 +385,7 @@
         ],
         "collaborated": [],
         "favorites": [],
-        "count": 1
+        "count": 2
       },
       "marketplace": {
         "cart": [
@@ -460,7 +460,10 @@
         "experience": "2",
         "portfolio": "https://amitkumar.dev",
         "skills": "Python, React, Node.js, MongoDB",
-        "updatedAt": "2025-06-19T21:16:02.064Z"
+        "updatedAt": "2025-06-27T21:11:43.802Z",
+        "location": "Jammu, Jammu & Kashmir",
+        "hourlyRate": "20",
+        "avgResponseTime": "5"
       }
     },
     "USER_000006": {
@@ -1282,11 +1285,177 @@
         "updatedAt": "2025-06-26T10:30:00.000Z"
       },
       "freelancerData": null
+    },
+    "USER_000012": {
+      "customUserId": "USER_000012",
+      "profile": {
+        "avatar": null,
+        "bio": "hi",
+        "location": "Jammu, Jammu & Kashmir",
+        "website": null,
+        "title": null,
+        "createdAt": "2025-06-28T06:04:35.519Z",
+        "updatedAt": "2025-06-28T06:30:09.796Z",
+        "firstName": "",
+        "lastName": "",
+        "userType": "student",
+        "username": "",
+        "email": "Ankit@gmail.com",
+        "mobile": "",
+        "gender": "Male",
+        "domain": "",
+        "purpose": "To find a Job",
+        "role": "Full Stack Developer"
+      },
+      "education": [
+        {
+          "id": "edu_1751090932841",
+          "qualification": "PhD",
+          "course": "Other",
+          "specialization": "Other",
+          "college": "CUJ",
+          "startYear": "2021",
+          "endYear": "2024",
+          "courseType": "Full Time",
+          "percentage": "89",
+          "cgpa": "9",
+          "rollNumber": "23456789",
+          "lateralEntry": "",
+          "skills": "dwhdj, hjd, dwhd",
+          "description": "",
+          "attachments": null,
+          "createdAt": "2025-06-28T06:08:52.841Z",
+          "updatedAt": "2025-06-28T06:08:52.841Z"
+        }
+      ],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-06-28T06:04:35.519Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-06-28T06:04:35.519Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [
+          {
+            "productId": "16",
+            "addedAt": "2025-06-28T06:30:29.987Z",
+            "quantity": 1
+          },
+          {
+            "productId": "13",
+            "addedAt": "2025-06-28T06:30:35.182Z",
+            "quantity": 1
+          }
+        ],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [
+        "Securities"
+      ],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [
+          {
+            "id": "1751090904963",
+            "type": "skill_added",
+            "description": "Added new skill: Securities",
+            "timestamp": "2025-06-28T06:08:24.963Z",
+            "metadata": {
+              "skillName": "Securities"
+            }
+          }
+        ],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-06-28T06:04:35.519Z"
+      },
+      "studentData": {
+        "college": "iit",
+        "degree": "",
+        "course": "B.Tech/BE",
+        "year": "",
+        "specialization": "Computer Science and Engineering",
+        "startYear": "2020",
+        "endYear": "2024",
+        "updatedAt": "2025-06-28T06:25:45.443Z"
+      },
+      "professorData": {
+        "department": "",
+        "designation": "",
+        "researchInterests": "",
+        "updatedAt": "2025-06-28T06:26:42.220Z"
+      },
+      "freelancerData": {
+        "experience": "2",
+        "portfolio": "https://amitkumar.dev",
+        "location": "Jammu, Jammu & Kashmir",
+        "skills": [],
+        "hourlyRate": "20",
+        "avgResponseTime": "5",
+        "updatedAt": "2025-06-28T06:30:13.873Z"
+      }
     }
   },
   "userCounter": 12,
   "metadata": {
-    "lastUpdated": "2025-06-27T16:53:20.359Z",
+    "lastUpdated": "2025-06-28T06:30:35.183Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }
