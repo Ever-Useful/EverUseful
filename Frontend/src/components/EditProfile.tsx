@@ -95,6 +95,8 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     skills: '',
     experience: '',
     portfolio: '',
+    hourlyRate: '',
+    avgResponseTime: '',
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -184,6 +186,8 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           skills: (((userProfile as any).skills && Array.isArray((userProfile as any).skills)) ? (userProfile as any).skills : (userProfile.freelancerData?.skills && Array.isArray(userProfile.freelancerData.skills) ? userProfile.freelancerData.skills : [])).join(','),
           experience: userProfile.freelancerData?.experience || '',
           portfolio: userProfile.freelancerData?.portfolio || '',
+          hourlyRate: userProfile.freelancerData?.hourlyRate || '',
+          avgResponseTime: userProfile.freelancerData?.avgResponseTime || '',
         });
         setEducationList(userProfile.education || []);
         setWorkList(userProfile.workExperience || []);
@@ -216,6 +220,15 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           userType: denormalizeUserType(profileData.userType),
           phoneNumber: profileData.mobile,
         });
+        if (profileData.userType === 'Freelancers') {
+          await userService.updateFreelancerData({
+            experience: profileData.experience,
+            portfolio: profileData.portfolio,
+            location: profileData.location,
+            hourlyRate: profileData.hourlyRate,
+            avgResponseTime: profileData.avgResponseTime,
+          });
+        }
       } else if (activeSection === 'About') {
         await userService.updateProfile({ bio: profileData.bio });
       } else if (activeSection === 'Education') {
@@ -661,6 +674,14 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       <div>
                         <label className="text-sm font-medium text-gray-700">Portfolio/Website</label>
                         <Input name="portfolio" value={profileData.portfolio ?? ''} onChange={handleInputChange} className="mt-1" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Hourly Rate ($/hr)</label>
+                        <Input name="hourlyRate" value={profileData.hourlyRate ?? ''} onChange={handleInputChange} className="mt-1" placeholder="e.g. 50" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Avg Response Time (hrs)</label>
+                        <Input name="avgResponseTime" value={profileData.avgResponseTime ?? ''} onChange={handleInputChange} className="mt-1" placeholder="e.g. 5" />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Location <span className="text-red-500">*</span></label>

@@ -385,7 +385,7 @@
         ],
         "collaborated": [],
         "favorites": [],
-        "count": 1
+        "count": 2
       },
       "marketplace": {
         "cart": [
@@ -460,7 +460,10 @@
         "experience": "2",
         "portfolio": "https://amitkumar.dev",
         "skills": "Python, React, Node.js, MongoDB",
-        "updatedAt": "2025-06-19T21:16:02.064Z"
+        "updatedAt": "2025-06-27T21:11:43.802Z",
+        "location": "Jammu, Jammu & Kashmir",
+        "hourlyRate": "20",
+        "avgResponseTime": "5"
       }
     },
     "USER_000006": {
@@ -1286,7 +1289,7 @@
   },
   "userCounter": 12,
   "metadata": {
-    "lastUpdated": "2025-06-27T16:53:20.359Z",
+    "lastUpdated": "2025-06-27T21:11:43.802Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

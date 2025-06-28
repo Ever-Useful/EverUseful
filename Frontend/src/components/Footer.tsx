@@ -189,18 +189,26 @@ export const Footer = () => {
             <div className="space-y-4">
               <h4 className="text-white font-medium text-sm">Legal</h4>
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                <Link to="/privacy-policy" className="hover:text-blue-400 transition-colors flex items-center">
                   <Shield className="mr-2 h-4 w-4 text-gray-500" />
                   Privacy Policy
-                </a>
-                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                </Link>
+                <Link to="/terms-conditions" className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Terms of Service
-                </a>
-                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                </Link>
+                <Link to="/cookie-policy" className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Cookie Policy
-                </a>
+                </Link>
+                <Link to="/delivery-policy" className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  Delivery Policy
+                </Link>
+                <Link to="/refund-policy" className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  Refund Policy
+                </Link>
                 <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   GDPR Compliance
@@ -211,15 +219,7 @@ export const Footer = () => {
                 </a>
                 <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
-                  Data Processing
-                </a>
-                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
-                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Security Practices
-                </a>
-                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
-                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
-                  Instructor Terms
                 </a>
               </div>
             </div>

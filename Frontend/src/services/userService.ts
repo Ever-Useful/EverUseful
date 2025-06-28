@@ -389,6 +389,14 @@ class UserService {
     });
     return response.data;
   }
+
+  // Track project view
+  async trackProjectView(projectId: string): Promise<{ views: number }> {
+    const response = await this.makeRequest(`/projects/${projectId}/view`, {
+      method: 'POST',
+    });
+    return response.data;
+  }
 }
 
 export const userService = new UserService();

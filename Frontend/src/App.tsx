@@ -26,14 +26,18 @@ import About from '@/pages/AboutUs';
 import Dashboard from "./pages/Dashboard";
 import AiAgents from "./pages/AiAgents";
 import FindExpert from "./pages/FindExpert";
-import PrivacyPolicy from "./pages/Privacy_Policy";
-import TermsOfService from "./pages/TermsOfService";
 import SendFeedback from "./pages/SendFeedback";
 import Chat from "./pages/Chat";
 import BackUp from "./pages/Backup";
 import Sustainable from "./pages/Sustainable";
 import Connection from "./pages/Connections";
 import BussinessProfile from "./pages/bussinessprofile";
+// Import new policy pages
+import PrivacyPolicy from "./pages/Policy/PrivacyPolicy";
+import TermsConditions from "./pages/Policy/TermsConditions";
+import CookiePolicy from "./pages/Policy/CookiePolicy";
+import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
+import RefundPolicy from "./pages/Policy/RefundPolicy";
 
 const queryClient = new QueryClient();
 
@@ -67,8 +71,6 @@ const App = () => (
             <Route path="/aboutus" element={<About />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/findexpert" element={<FindExpert />} />
-            <Route path="/privacypolicy" element={<PrivacyPolicy />} />
-            <Route path="/termsofservice" element={<TermsOfService />} />
             <Route path="/sendfeedback" element={<SendFeedback />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/backup" element={<BackUp />} />
@@ -76,6 +78,12 @@ const App = () => (
             <Route path="/connection" element={<Connection />} />
             <Route path="/studentprofile/:id" element={<StudentProfile />} />
             <Route path="/green" element={<Sustainable/>} />
+            {/* Policy Routes */}
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-conditions" element={<TermsConditions />} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
+            <Route path="/delivery-policy" element={<DeliveryPolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
