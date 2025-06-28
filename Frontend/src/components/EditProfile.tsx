@@ -160,25 +160,27 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     const fetchProfile = async () => {
       try {
         const userProfile = await userService.getUserProfile();
+        console.log('Fetched user profile:', userProfile); // Debug log
+        
         setProfileData({
-          firstName: userProfile.auth.firstName || '',
-          lastName: userProfile.auth.lastName || '',
-          bio: userProfile.profile.bio || '',
+          firstName: userProfile.auth?.firstName || userProfile.profile?.firstName || '',
+          lastName: userProfile.auth?.lastName || userProfile.profile?.lastName || '',
+          bio: userProfile.profile?.bio || '',
           college: userProfile.studentData?.college || '',
           degree: userProfile.studentData?.degree || '',
           course: userProfile.studentData?.course || '',
-          location: userProfile.profile.location || '',
+          location: userProfile.profile?.location || '',
           year: userProfile.studentData?.year || '',
-          userType: normalizeUserType(userProfile.auth.userType),
-          username: userProfile.auth.username || '',
-          email: userProfile.auth.email || '',
-          mobile: userProfile.auth.mobile || userProfile.auth.phoneNumber || '',
-          gender: userProfile.auth.gender || '',
-          domain: userProfile.auth.domain || '',
+          userType: normalizeUserType(userProfile.auth?.userType || userProfile.profile?.userType),
+          username: userProfile.auth?.username || userProfile.profile?.username || '',
+          email: userProfile.auth?.email || userProfile.profile?.email || '',
+          mobile: userProfile.auth?.mobile || userProfile.auth?.phoneNumber || userProfile.profile?.mobile || '',
+          gender: userProfile.auth?.gender || userProfile.profile?.gender || '',
+          domain: userProfile.auth?.domain || userProfile.profile?.domain || '',
           startYear: userProfile.studentData?.startYear || '',
           endYear: userProfile.studentData?.endYear || '',
-          purpose: userProfile.auth.purpose || '',
-          role: userProfile.auth.role || '',
+          purpose: userProfile.auth?.purpose || userProfile.profile?.purpose || '',
+          role: userProfile.auth?.role || userProfile.profile?.role || '',
           specialization: userProfile.studentData?.specialization || '',
           department: userProfile.professorData?.department || '',
           designation: userProfile.professorData?.designation || '',
@@ -214,12 +216,37 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     toast.loading('Saving...');
     try {
       if (activeSection === 'Basic Details') {
+        // Update auth info (Firestore fields)
         await userService.updateAuthInfo({
           firstName: profileData.firstName,
           lastName: profileData.lastName,
           userType: denormalizeUserType(profileData.userType),
           phoneNumber: profileData.mobile,
         });
+        
+        // Update profile info (userData.json fields)
+        await userService.updateProfile({
+          gender: profileData.gender,
+          domain: profileData.domain,
+          purpose: profileData.purpose,
+          role: profileData.role,
+          location: profileData.location,
+        });
+        
+        // Update student data if user is a student
+        if (profileData.userType === 'Students') {
+          await userService.updateStudentData({
+            college: profileData.college,
+            degree: profileData.degree,
+            course: profileData.course,
+            year: profileData.year,
+            specialization: profileData.specialization,
+            startYear: profileData.startYear,
+            endYear: profileData.endYear,
+          });
+        }
+        
+        // Update freelancer data if user is a freelancer
         if (profileData.userType === 'Freelancers') {
           await userService.updateFreelancerData({
             experience: profileData.experience,
@@ -227,6 +254,15 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
             location: profileData.location,
             hourlyRate: profileData.hourlyRate,
             avgResponseTime: profileData.avgResponseTime,
+          });
+        }
+        
+        // Update professor data if user is a professor
+        if (profileData.userType === 'Professors') {
+          await userService.updateProfessorData({
+            department: profileData.department,
+            designation: profileData.designation,
+            researchInterests: profileData.researchInterests,
           });
         }
       } else if (activeSection === 'About') {

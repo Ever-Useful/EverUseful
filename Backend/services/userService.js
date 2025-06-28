@@ -74,6 +74,7 @@ class UserService {
     const customUserId = `USER_${this.userData.userCounter.toString().padStart(6, '0')}`;
     
     const newUser = {
+      firebaseUid, // Add Firebase UID to link with Firestore
       customUserId,
       profile: {
         avatar: userData.avatar ?? null,
@@ -88,7 +89,7 @@ class UserService {
         userType: userData.userType ?? 'student',
         username: userData.username ?? '',
         email: userData.email ?? '',
-        mobile: userData.mobile ?? '',
+        mobile: userData.mobile ?? userData.phoneNumber ?? '',
         gender: userData.gender ?? '',
         domain: userData.domain ?? '',
         purpose: userData.purpose ?? '',

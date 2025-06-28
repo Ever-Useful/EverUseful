@@ -109,25 +109,30 @@ const StudentProfessorProfileView = ({
       {/* Stats Cards */}
       <div className="max-w-7xl mx-auto px-8 -mt-8 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
-            <CardContent className="p-4 text-center">
-              <DollarSign className="w-6 h-6 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : 'N/A'}</div>
-              <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
-            </CardContent>
-          </Card>
+          {/* Only show Hourly Rate and Avg Response Time for freelancers */}
+          {profileData.userType?.toLowerCase() === 'freelancer' && (
+            <>
+              <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
+                <CardContent className="p-4 text-center">
+                  <DollarSign className="w-6 h-6 mx-auto mb-2" />
+                  <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : 'N/A'}</div>
+                  <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
+                <CardContent className="p-4 text-center">
+                  <Clock className="w-6 h-6 mx-auto mb-2" />
+                  <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : 'N/A'}</div>
+                  <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time (hrs)</div>
+                </CardContent>
+              </Card>
+            </>
+          )}
           <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
             <CardContent className="p-4 text-center">
               <Award className="w-6 h-6 mx-auto mb-2" />
               <div className="text-2xl font-bold">{stats.projects}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
-            <CardContent className="p-4 text-center">
-              <Clock className="w-6 h-6 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : 'N/A'}</div>
-              <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time (hrs)</div>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
@@ -849,14 +854,25 @@ const Profile = () => {
           <div className="lg:col-span-2 space-y-8">
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <DollarSign className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : '0'}</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
-                </CardContent>
-              </Card>
-
+              {/* Only show Hourly Rate and Avg Response Time for freelancers */}
+              {profileData.userType?.toLowerCase() === 'freelancer' && (
+                <>
+                  <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
+                    <CardContent className="p-4 text-center">
+                      <DollarSign className="w-6 h-6 mx-auto mb-2" />
+                      <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : 'N/A'}</div>
+                      <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
+                    <CardContent className="p-4 text-center">
+                      <Clock className="w-6 h-6 mx-auto mb-2" />
+                      <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : 'N/A'}</div>
+                      <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time (hrs)</div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
               <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <Award className="w-6 h-6 mx-auto mb-2" />
@@ -864,15 +880,6 @@ const Profile = () => {
                   <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
                 </CardContent>
               </Card>
-
-              <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <Clock className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : '0'}</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time (hrs)</div>
-                </CardContent>
-              </Card>
-
               <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <UserPlus className="w-6 h-6 mx-auto mb-2" />
