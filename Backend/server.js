@@ -5,6 +5,8 @@ const admin = require('firebase-admin');
 const marketplaceRoutes = require('./routes/marketplace');
 const userRoutes = require('./routes/users');
 const userService = require('./services/userService');
+const dashboardRoutes = require('./routes/dashboard');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 
@@ -30,6 +32,9 @@ app.use('/api/marketplace', marketplaceRoutes);
 
 // User routes
 app.use('/api/users', userRoutes);
+
+app.use('/api', dashboardRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/token', authorize, async (req, res) => {
   const { uid, name, email, phone_number, firebase } = req.user;
@@ -63,8 +68,15 @@ app.get('/token', authorize, async (req, res) => {
         userType: 'student', // Default userType for GET requests
       });
 
-      // Create user in userData.json
-      await userService.createUser(uid, {}); // No name/email/userType/avatar
+      // Create user in userData.json with all the user data
+      await userService.createUser(uid, {
+        firstName: firstName ?? '',
+        lastName: lastName ?? '',
+        email: email ?? 'no-email@example.com',
+        userType: 'student',
+        mobile: phone_number ?? '',
+        phoneNumber: phone_number ?? '',
+      });
 
       console.log("New user created with custom ID:", customUserId);
     } else {
@@ -111,8 +123,15 @@ app.post('/token', authorize, async (req, res) => {
         userType: userType ?? 'student',
       });
 
-      // Create user in userData.json
-      await userService.createUser(uid, {}); // No name/email/userType/avatar
+      // Create user in userData.json with all the user data
+      await userService.createUser(uid, {
+        firstName: resolvedFirstName ?? '',
+        lastName: resolvedLastName ?? '',
+        email: email ?? 'no-email@example.com',
+        userType: userType ?? 'student',
+        mobile: phoneNumber ?? phone_number ?? '',
+        phoneNumber: phoneNumber ?? phone_number ?? '',
+      });
 
       console.log("New user created with custom ID:", customUserId, "userType:", userType, "firstName:", resolvedFirstName, "lastName:", resolvedLastName);
     } else {
