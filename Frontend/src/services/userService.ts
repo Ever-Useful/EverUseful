@@ -1,6 +1,7 @@
 import { auth } from '../lib/firebase';
 
 const API_BASE_URL = 'http://localhost:3000/api/users';
+const ADMIN_API_BASE_URL = 'http://localhost:3000/api/admin';
 
 interface UserProfile {
   avatar: string;
@@ -405,11 +406,51 @@ class UserService {
   // Track project view
   async trackProjectView(projectId: string): Promise<{ views: number }> {
     const response = await this.makeRequest(`/projects/${projectId}/view`, {
-      method: 'POST',
+      method: 'POST'
     });
     return response.data;
+  }
+
+  // Get dashboard data (aggregated stats)
+  async getDashboardData(): Promise<{
+    totalViews: number;
+    totalEarnings: number;
+    projectCount: number;
+    activities: any[];
+    connections: number;
+    favourites: number;
+  }> {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    
+    const token = await user.getIdToken();
+    const response = await fetch(`http://localhost:3000/api/dashboarddata?userId=${user.uid}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch dashboard data');
+    }
+
+    return response.json();
+  }
+
+  // Admin API call to fetch admin overview stats
+  async getAdminOverview() {
+    const response = await fetch(`${ADMIN_API_BASE_URL}/overview`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch admin overview');
+    }
+    return response.json();
   }
 }
 
 export const userService = new UserService();
+export const getAdminOverview = userService.getAdminOverview.bind(userService);
 export default userService; 

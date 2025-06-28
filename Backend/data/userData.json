@@ -299,7 +299,7 @@
         "website": "https://github.com/amitkumar",
         "title": "Full-Stack Developer",
         "createdAt": "2025-06-19T21:16:02.064Z",
-        "updatedAt": "2025-06-26T11:56:52.023Z",
+        "updatedAt": "2025-06-28T22:38:00.935Z",
         "firstName": "freelancer hai",
         "lastName": "sayad",
         "userType": "freelancer",
@@ -408,8 +408,7 @@
       "skills": [
         "python",
         "frontend",
-        "backend",
-        "ai"
+        "backend"
       ],
       "social": {
         "followers": [],
@@ -419,7 +418,127 @@
         "followingCount": 0
       },
       "activities": {
-        "recent": [],
+        "recent": [
+          {
+            "id": "1751150280939",
+            "type": "profile_updated",
+            "description": "Updated profile information",
+            "timestamp": "2025-06-28T22:38:00.939Z",
+            "metadata": {
+              "updatedFields": [
+                "gender",
+                "domain",
+                "purpose",
+                "role",
+                "location"
+              ],
+              "oldValues": {
+                "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+                "bio": "Full-stack developer with expertise in Python, frontend, and backend technologies. Passionate about building scalable applications and contributing to open-source projects. Always eager to take on new challenges.",
+                "location": "Jammu, Jammu & Kashmir",
+                "website": "https://github.com/amitkumar",
+                "title": "Full-Stack Developer",
+                "createdAt": "2025-06-19T21:16:02.064Z",
+                "updatedAt": "2025-06-28T20:57:21.304Z",
+                "firstName": "freelancer hai",
+                "lastName": "sayad",
+                "userType": "freelancer",
+                "username": "amitkumar",
+                "email": "amit@example.com",
+                "mobile": "9876543212",
+                "gender": "Male",
+                "domain": "Engineering",
+                "purpose": "To find a Job",
+                "role": "Full Stack Developer",
+                "phoneNumber": "9876543212"
+              },
+              "newValues": {
+                "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+                "bio": "Full-stack developer with expertise in Python, frontend, and backend technologies. Passionate about building scalable applications and contributing to open-source projects. Always eager to take on new challenges.",
+                "location": "Jammu, Jammu & Kashmir",
+                "website": "https://github.com/amitkumar",
+                "title": "Full-Stack Developer",
+                "createdAt": "2025-06-19T21:16:02.064Z",
+                "updatedAt": "2025-06-28T22:38:00.935Z",
+                "firstName": "freelancer hai",
+                "lastName": "sayad",
+                "userType": "freelancer",
+                "username": "amitkumar",
+                "email": "amit@example.com",
+                "mobile": "9876543212",
+                "gender": "Male",
+                "domain": "Engineering",
+                "purpose": "To find a Job",
+                "role": "Full Stack Developer",
+                "phoneNumber": "9876543212"
+              }
+            }
+          },
+          {
+            "id": "1751144369040",
+            "type": "skill_removed",
+            "description": "Removed skill: ai",
+            "timestamp": "2025-06-28T20:59:29.040Z",
+            "metadata": {
+              "skillName": "ai"
+            }
+          },
+          {
+            "id": "1751144241307",
+            "type": "profile_updated",
+            "description": "Updated profile information",
+            "timestamp": "2025-06-28T20:57:21.307Z",
+            "metadata": {
+              "updatedFields": [
+                "gender",
+                "domain",
+                "purpose",
+                "role",
+                "location"
+              ],
+              "oldValues": {
+                "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+                "bio": "Full-stack developer with expertise in Python, frontend, and backend technologies. Passionate about building scalable applications and contributing to open-source projects. Always eager to take on new challenges.",
+                "location": "Jammu, Jammu & Kashmir",
+                "website": "https://github.com/amitkumar",
+                "title": "Full-Stack Developer",
+                "createdAt": "2025-06-19T21:16:02.064Z",
+                "updatedAt": "2025-06-28T20:29:06.271Z",
+                "firstName": "freelancer hai",
+                "lastName": "sayad",
+                "userType": "freelancer",
+                "username": "amitkumar",
+                "email": "amit@example.com",
+                "mobile": "9876543212",
+                "gender": "Male",
+                "domain": "Engineering",
+                "purpose": "To find a Job",
+                "role": "Full Stack Developer",
+                "phoneNumber": "9876543212"
+              },
+              "newValues": {
+                "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+                "bio": "Full-stack developer with expertise in Python, frontend, and backend technologies. Passionate about building scalable applications and contributing to open-source projects. Always eager to take on new challenges.",
+                "location": "Jammu, Jammu & Kashmir",
+                "website": "https://github.com/amitkumar",
+                "title": "Full-Stack Developer",
+                "createdAt": "2025-06-19T21:16:02.064Z",
+                "updatedAt": "2025-06-28T20:57:21.304Z",
+                "firstName": "freelancer hai",
+                "lastName": "sayad",
+                "userType": "freelancer",
+                "username": "amitkumar",
+                "email": "amit@example.com",
+                "mobile": "9876543212",
+                "gender": "Male",
+                "domain": "Engineering",
+                "purpose": "To find a Job",
+                "role": "Full Stack Developer",
+                "phoneNumber": "9876543212"
+              }
+            }
+          }
+        ],
         "achievements": [],
         "badges": [],
         "points": 0
@@ -453,14 +572,14 @@
         "startYear": "2020",
         "endYear": "2024",
         "specialization": "Computer Science and Engineering",
-        "updatedAt": "2025-06-25T16:45:27.992Z"
+        "updatedAt": "2025-06-28T20:28:41.643Z"
       },
       "professorData": null,
       "freelancerData": {
         "experience": "2",
         "portfolio": "https://amitkumar.dev",
         "skills": "Python, React, Node.js, MongoDB",
-        "updatedAt": "2025-06-27T21:11:43.802Z",
+        "updatedAt": "2025-06-28T22:38:05.183Z",
         "location": "Jammu, Jammu & Kashmir",
         "hourlyRate": "20",
         "avgResponseTime": "5"
@@ -1455,7 +1574,7 @@
   },
   "userCounter": 12,
   "metadata": {
-    "lastUpdated": "2025-06-28T06:30:35.183Z",
+    "lastUpdated": "2025-06-28T22:38:05.183Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

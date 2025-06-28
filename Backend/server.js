@@ -5,6 +5,8 @@ const admin = require('firebase-admin');
 const marketplaceRoutes = require('./routes/marketplace');
 const userRoutes = require('./routes/users');
 const userService = require('./services/userService');
+const dashboardRoutes = require('./routes/dashboard');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 
@@ -30,6 +32,9 @@ app.use('/api/marketplace', marketplaceRoutes);
 
 // User routes
 app.use('/api/users', userRoutes);
+
+app.use('/api', dashboardRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/token', authorize, async (req, res) => {
   const { uid, name, email, phone_number, firebase } = req.user;

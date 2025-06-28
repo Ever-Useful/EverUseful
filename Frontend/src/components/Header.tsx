@@ -338,7 +338,7 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
   );
 };
 
-export const Header = ({ disableProfileSidebar = false }: { disableProfileSidebar?: boolean }) => {
+export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
   const [profileData, setProfileData] = useState({ firstName: '', lastName: '', avatar: '' });
@@ -681,9 +681,8 @@ export const Header = ({ disableProfileSidebar = false }: { disableProfileSideba
                   {/* Profile Button with User Name */}
                   <Button 
                     variant="ghost" 
-                    onClick={() => { if (disableProfileSidebar) return; setShowProfileSidebar(true); }} 
+                    onClick={() => setShowProfileSidebar(true)} 
                     className="text-white hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2"
-                    disabled={disableProfileSidebar}
                   >
                     <User className="w-4 h-4 flex-shrink-0" />
                     {profileData.firstName && (

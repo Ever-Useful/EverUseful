@@ -41,7 +41,7 @@ export const handleGoogleAuth = async (navigate: (url: string) => void, userType
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        userType: userType
+        userType: userType // Only used for new users, existing users keep their current userType
       })
     });
 
@@ -74,7 +74,7 @@ export const handleGithubAuth = async (navigate: (url: string) => void, userType
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        userType: userType
+        userType: userType // Only used for new users, existing users keep their current userType
       })
     });
 
