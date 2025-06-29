@@ -1,98 +1,301 @@
-
 import { Link } from "react-router-dom";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { ArrowLeft, Shield, Mail, Phone, MapPin, Calendar } from "lucide-react";
 
 const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen bg-gray-900 text-white py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <Link 
-            to="/" 
-            className="text-blue-400 hover:text-blue-300 mb-4 inline-block"
-          >
-            ← Back to Home
-          </Link>
-          <h1 className="text-4xl font-bold mb-2">Privacy Policy</h1>
-          <p className="text-gray-400">Latest update: 26 June 2024</p>
-        </div>
-
-        <div className="prose prose-lg max-w-none text-white">
-          <h2 className="text-2xl font-semibold mt-8 mb-4">1. Introduction</h2>
-          <p className="mb-6">
-            At [Your Company], your privacy is important to us. We value your privacy and are committed to protecting 
-            your personal information. This Privacy Policy outlines our practices regarding the 
-            collection, use, and protection of information when you visit our website 
-            [yourwebsite.com]. By using our services, you agree to the terms of this policy. Please read it 
-            carefully to understand how we handle your information.
-          </p>
-
-          <h2 className="text-2xl font-semibold mt-8 mb-4">2. Information We Collect</h2>
-          
-          <h3 className="text-xl font-semibold mt-6 mb-3">2.1 Personal Data</h3>
-          <p className="mb-6">
-            We collect personally identifiable information ("Personal Data") that you voluntarily provide 
-            to us. This may include your name, email address, phone number, postal address, and 
-            billing information. You may provide this information when you sign up for our services, 
-            contact us for inquiries, or participate in surveys and promotions. We also collect details 
-            about your preferences and interests to tailor our services to your needs.
-          </p>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">2.2 Non-Personal Data</h3>
-          <p className="mb-6">
-            In addition to Personal Data, we collect non-personal information ("Non-Personal Data") 
-            that cannot be used to identify you individually. This includes data such as your IP address, 
-            browser type, operating system, referring website, pages visited, and the date and time of 
-            visits. Non-Personal Data helps us understand user behavior and improve our website's 
-            performance and user experience. We may also collect aggregated data from multiple 
-            users, which is not linked to any specific individual.
-          </p>
-
-          <h2 className="text-2xl font-semibold mt-8 mb-4">3. How We Use Your Information</h2>
-          
-          <h3 className="text-xl font-semibold mt-6 mb-3">3.1 Personal Data</h3>
-          <p className="mb-4">We use the Personal Data we collect for various purposes, including:</p>
-          <ul className="list-disc list-inside mb-6 space-y-2">
-            <li>Service Provision: To deliver the services you request, manage your account, and process transactions.</li>
-            <li>Communication: To communicate with you about your account, respond to inquiries, provide updates, and send promotional materials.</li>
-            <li>Personalization: To tailor our services to your preferences and enhance your user experience.</li>
-            <li>Improvement: To analyze and improve our services, develop new features, and understand how users interact with our website.</li>
-          </ul>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">3.2 Non-Personal Data</h3>
-          <p className="mb-4">Non-Personal Data is used primarily to:</p>
-          <ul className="list-disc list-inside mb-6 space-y-2">
-            <li>Enhance User Experience: By understanding how visitors use our website, we can improve navigation, content, and functionality.</li>
-            <li>Analytics: To gather statistics and insights about user preferences and behavior, helping us make informed decisions about our services.</li>
-          </ul>
-
-          <h2 className="text-2xl font-semibold mt-8 mb-4">4. Sharing Your Information</h2>
-          <p className="mb-6">
-            We do not sell, trade, or otherwise transfer your Personal Data to outside parties without your consent, 
-            except as described in this policy. We may share your information with trusted third parties who assist 
-            us in operating our website, conducting our business, or servicing you, provided that those parties agree 
-            to keep this information confidential.
-          </p>
-
-          <h2 className="text-2xl font-semibold mt-8 mb-4">5. Changes to This Privacy Policy</h2>
-          <p className="mb-6">
-            We may update this Privacy Policy from time to time to reflect changes in our practices or for other 
-            operational, legal, or regulatory reasons. We will notify you of any significant changes by posting the 
-            updated policy on our website and updating the "Last updated" date at the top of this page.
-          </p>
-
-          <h2 className="text-2xl font-semibold mt-8 mb-4">6. Contact Us</h2>
-          <p className="mb-6">
-            If you have any questions about this Privacy Policy or our data practices, please contact us at:
-          </p>
-          <div className="border border-gray-700 p-4 rounded-lg">
-            <p>
-              Email: privacy@yourcompany.com<br />
-              Phone: +1 (555) 123-4567<br />
-              Address: 123 Business Street, City, State 12345
+    <div className="min-h-screen bg-white">
+      <Header />
+      
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-100 border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <div className="flex justify-center mb-6">
+              <div className="bg-blue-100 p-4 rounded-full">
+                <Shield className="w-8 h-8 text-blue-600" />
+              </div>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Privacy Policy
+            </h1>
+            <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
+              We are committed to protecting your privacy and ensuring the security of your personal information. 
+              This policy outlines how we collect, use, and safeguard your data.
             </p>
+            <div className="flex items-center justify-center text-sm text-gray-500">
+              <Calendar className="w-4 h-4 mr-2" />
+              Last Updated: February 4, 2025
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="prose prose-lg max-w-none">
+          
+          {/* Introduction */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Introduction</h2>
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-r-lg mb-8">
+              <p className="text-gray-700 leading-relaxed">
+                This privacy policy (the "Policy") sets out AMOGH Technologies' data processing practices and approach 
+                to data privacy in furtherance of its obligations under the applicable data privacy laws. Reference to 
+                "we", "us", "our", "ours" and "AMOGH" refers to AMOGH Technologies (including its affiliates). Further, 
+                the terms "you", "your", "yours" refer to you as a user of the platform.
+              </p>
+            </div>
+            <p className="text-gray-700 leading-relaxed mb-6">
+              This Policy is aimed at providing individuals notice of the basic practices and principles by which we 
+              process the personal data of individuals ("Personal Data") who visit, use, interact with and/or transact 
+              through our website and services. If you are a California, Virginia, or Colorado resident you may have 
+              certain rights and are entitled to certain disclosures regarding the processing of your Personal Data 
+              that are reflected in the sections below.
+            </p>
+          </section>
+
+          {/* Types of Personal Data Collected */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Types of Personal Data Collected</h2>
+            <p className="text-gray-700 mb-6">
+              We may collect the following types of Personal Data:
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-green-800 mb-3">Personal Information</h3>
+                <ul className="text-gray-700 space-y-2">
+                  <li>• Name, title, gender, date of birth</li>
+                  <li>• Email address and phone number</li>
+                  <li>• Postal address and location data</li>
+                  <li>• Profile pictures and display names</li>
+                  <li>• Educational and employment history</li>
+                  <li>• Resume/CV and professional credentials</li>
+                </ul>
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-blue-800 mb-3">Technical Data</h3>
+                <ul className="text-gray-700 space-y-2">
+                  <li>• IP addresses and device information</li>
+                  <li>• Browser type and operating system</li>
+                  <li>• Website usage patterns and analytics</li>
+                  <li>• Social media profile information</li>
+                  <li>• Payment and financial information</li>
+                  <li>• Communication preferences</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* Sources of Personal Data */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Sources of Obtaining Personal Data</h2>
+            <p className="text-gray-700 mb-6">
+              The Personal Data that is processed by us can broadly be categorised as follows:
+            </p>
+            
+            <div className="space-y-6">
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-purple-800 mb-3">Data Shared by You</h3>
+                <p className="text-gray-700 mb-4">
+                  The Personal Data provided by you in most cases is direct when you:
+                </p>
+                <ul className="text-gray-700 space-y-2">
+                  <li>• Register to use our products and/or services including free trials</li>
+                  <li>• Apply for roles as instructors, teaching assistants, mentors, or career coaches</li>
+                  <li>• Participate in surveys, feedback forms, or community discussions</li>
+                  <li>• Update your profile or account information</li>
+                </ul>
+              </div>
+              
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-orange-800 mb-3">Data from Third Parties</h3>
+                <p className="text-gray-700 mb-4">
+                  The Personal Data collected from third parties includes:
+                </p>
+                <ul className="text-gray-700 space-y-2">
+                  <li>• Social media platforms (Facebook, Google, GitHub, LinkedIn)</li>
+                  <li>• Service providers and advertising partners</li>
+                  <li>• Educational partners and scholarship providers</li>
+                  <li>• Analytics providers and recruiters</li>
+                  <li>• Other networks connected to our service</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* Purpose of Data Collection */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Purpose of Obtaining Personal Data</h2>
+            <p className="text-gray-700 mb-6">
+              In addition to verifying your identity, we collect and process your Personal Data for various reasons including:
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-indigo-800 mb-2">Service Delivery</h4>
+                  <p className="text-gray-700 text-sm">Deliver our products and services, manage your account, and process transactions.</p>
+                </div>
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-indigo-800 mb-2">Communication</h4>
+                  <p className="text-gray-700 text-sm">Respond to inquiries, provide updates, and send promotional materials.</p>
+                </div>
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-indigo-800 mb-2">Personalization</h4>
+                  <p className="text-gray-700 text-sm">Tailor our services to your preferences and enhance user experience.</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-indigo-800 mb-2">Improvement</h4>
+                  <p className="text-gray-700 text-sm">Analyze and improve our services, develop new features.</p>
+                </div>
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-indigo-800 mb-2">Security</h4>
+                  <p className="text-gray-700 text-sm">Prevent, detect and mitigate fraudulent activities.</p>
+                </div>
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-indigo-800 mb-2">Compliance</h4>
+                  <p className="text-gray-700 text-sm">Comply with legal obligations and enforce our agreements.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Legal Basis */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Legal Basis of Processing Your Personal Data</h2>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Our basis for collecting your Personal Data is based on the fact that you have consented to us 
+                processing your Personal Data for a specific reason. This includes:
+              </p>
+              <ul className="text-gray-700 space-y-2">
+                <li>• Information you have made public through your social media accounts</li>
+                <li>• Information shared during sign-up and sign-in processes</li>
+                <li>• Processing necessary for the performance of our contract with you</li>
+                <li>• Compliance with legal obligations under applicable law</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Withdrawing Consent */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Withdrawing Consent</h2>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+              <p className="text-gray-700 leading-relaxed mb-4">
+                At all times you have the right to withdraw your consent to our collection and processing of your 
+                Personal Data. Please note that such withdrawal may lead to us not being able to continue offering 
+                our products and services to you.
+              </p>
+              <p className="text-gray-700">
+                Please email us at <span className="text-blue-600 font-medium">privacy@amoghedu.com</span> to withdraw your consent.
+              </p>
+            </div>
+          </section>
+
+          {/* Contact Information */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Contact Us</h2>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+              <p className="text-gray-700 mb-6">
+                If you have any questions about this Privacy Policy or our data practices, please contact us:
+              </p>
+              
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="flex items-start">
+                  <Mail className="w-5 h-5 text-blue-600 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Email</h4>
+                    <p className="text-gray-700">privacy@amoghedu.com</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <Phone className="w-5 h-5 text-green-600 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Phone</h4>
+                    <p className="text-gray-700">+1 (555) 123-4567</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <MapPin className="w-5 h-5 text-red-600 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Address</h4>
+                    <p className="text-gray-700">123 Business Street, City, State 12345</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Additional Rights for Specific States */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Additional Rights for Specific States</h2>
+            
+            <div className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-blue-800 mb-3">California Residents</h3>
+                <p className="text-gray-700 mb-4">
+                  California residents have the right to know, correct, and delete their Personal Data. 
+                  You may also appoint an authorized agent to submit requests on your behalf.
+                </p>
+                <p className="text-gray-700">
+                  Submit requests to: <span className="text-blue-600 font-medium">us-support@amoghedu.com</span>
+                </p>
+              </div>
+              
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-green-800 mb-3">Virginia & Colorado Residents</h3>
+                <p className="text-gray-700 mb-4">
+                  Virginia and Colorado residents have similar rights to access, correct, and delete their Personal Data.
+                </p>
+                <p className="text-gray-700">
+                  Submit requests to: <span className="text-green-600 font-medium">us-support@amoghedu.com</span>
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Notification of Changes */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Notification of Changes</h2>
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+              <p className="text-gray-700 leading-relaxed">
+                We regularly review and update our Policy to ensure it is up-to-date and accurate. Any changes we may 
+                make to this Policy will be in effect immediately after being posted on this page. We reserve the right 
+                to update or change our Policy at any time and you should check this Policy periodically. Your continued 
+                use of the service after we post any modifications to the Policy on this page will constitute your 
+                acknowledgment of the modifications and your consent to abide and be bound by the modified Policy.
+              </p>
+            </div>
+          </section>
+
+          {/* Grievance */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Grievance</h2>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <p className="text-gray-700 leading-relaxed mb-4">
+                If you have any issue or grievance with respect to our policy or with the manner in which we collect 
+                or store your information, or in any respect related to your Personal Data provided to us, please 
+                contact <span className="text-red-600 font-medium">tech@amoghedu.com</span>.
+              </p>
+              <p className="text-gray-700">
+                We will take reasonable actions to ensure that your grievance is attended to and addressed within 
+                a period of 30 days from the date of receipt of your grievance.
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <Footer />
     </div>
   );
 };
