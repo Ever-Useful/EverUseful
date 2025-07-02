@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Filter, Star, DollarSign, Clock, Users } from "lucide-react";
 import debounce from "lodash/debounce";
 
-interface FilterSidebarProps {
+export interface FilterSidebarProps {
   onFiltersChange: (filters: {
     category?: string;
     minPrice?: number;
@@ -16,6 +16,7 @@ interface FilterSidebarProps {
     skills?: string[];
     duration?: string;
   }) => void;
+  onClose?: () => void;
 }
 
 const categories = [
@@ -29,19 +30,7 @@ const categories = [
   { name: "Mobile", count: 234 }
 ];
 
-
-const skills = [
-  "React", "Python", "JavaScript", "ML", "UI/UX",
-  "DataSci", "Blockchain", "Cloud"
-];
-
-
-const durations = [
-  "1-2w", "1m", "2-3m", "3-6m", "6+m"
-];
-
-
-export const FilterSidebar = ({ onFiltersChange }: FilterSidebarProps) => {
+export const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFiltersChange, onClose }) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
@@ -118,12 +107,10 @@ const categories = [
   { name: "Mobile" }
 ];
 
-
 const skills = [
   "React", "Python", "JavaScript", "ML", "UI/UX",
   "DataSci", "Blockchain", "Cloud"
 ];
-
 
 const durations = [
   "1-2w", "1m", "2-3m", "3-6m", "6+m"
@@ -220,6 +207,7 @@ const durations = [
               ))}
             </div>
           </section>
+
           {/* Skills */}
           <section>
             <h3 className="font-semibold text-gray-400 text-sm mb-3">Required Skills</h3>
@@ -274,6 +262,7 @@ const durations = [
               ))}
             </div>
           </section>
+          
           <Button
             className="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold shadow-sm mt-2 text-sm py-2 rounded-xl transition"
             onClick={handleApplyFilters}
@@ -285,5 +274,4 @@ const durations = [
     </aside>
   );
 };
-
 

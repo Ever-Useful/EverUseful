@@ -34,6 +34,7 @@ import BackUp from "./pages/Backup";
 import Sustainable from "./pages/Sustainable";
 import Connection from "./pages/Connections";
 import BussinessProfile from "./pages/bussinessprofile";
+import BecomeAMentor from "./pages/BecomeAMentor";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ const App = () => (
             <Route path="/connection" element={<Connection />} />
             <Route path="/studentprofile/:id" element={<StudentProfile />} />
             <Route path="/green" element={<Sustainable/>} />
+            <Route path="/become-mentor" element={<BecomeAMentor/>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

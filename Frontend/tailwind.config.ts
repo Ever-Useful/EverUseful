@@ -15,6 +15,11 @@ export default {
       padding: "2rem",
       screens: {
         "2xl": "1920px",
+        "xl": "1440px",
+        "lg": "1024px",
+        "md": "768px",
+        "sm": "640px",
+        "xs": "480px",
       },
     },
     extend: {
