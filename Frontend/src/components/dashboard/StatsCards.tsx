@@ -45,10 +45,10 @@ const StatsCard: React.FC<StatsCardProps> = ({
   return (
     <Card 
       className={`${
-        primary 
-          ? 'bg-green-600 text-white dark:bg-green-700' 
+        primary || status
+          ? '!bg-[#10b981] !text-white border-0'
           : 'bg-white dark:bg-gray-800 dark:border-gray-700'
-      } transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer relative overflow-hidden`}
+      } transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:bg-[#059669] cursor-pointer relative overflow-hidden rounded-xl glass-effect`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
@@ -57,7 +57,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
         <div className="flex items-center justify-between mb-4">
           <h3 className={`text-sm font-medium ${
             primary 
-              ? 'text-green-100' 
+              ? 'text-white' 
               : 'text-gray-600 dark:text-gray-300'
           }`}>
             {title}
@@ -65,12 +65,12 @@ const StatsCard: React.FC<StatsCardProps> = ({
           <div className="flex items-center gap-2">
             <TrendingUp className={`w-4 h-4 ${
               primary 
-                ? 'text-green-200' 
+                ? 'text-white' 
                 : 'text-gray-400 dark:text-gray-500'
             }`} />
             <BarChart3 className={`w-4 h-4 ${
               primary 
-                ? 'text-green-200' 
+                ? 'text-white' 
                 : 'text-gray-400 dark:text-gray-500'
             } ${isHovered ? 'animate-pulse' : ''}`} />
           </div>
@@ -85,14 +85,14 @@ const StatsCard: React.FC<StatsCardProps> = ({
           <div className="flex items-center gap-2">
             <TrendingUp className={`w-3 h-3 ${
               primary 
-                ? 'text-green-200' 
+                ? 'text-white' 
                 : status 
                   ? 'text-green-600 dark:text-green-400' 
                   : 'text-gray-500 dark:text-gray-400'
             }`} />
             <span className={`text-xs ${
               primary 
-                ? 'text-green-200' 
+                ? 'text-white' 
                 : status 
                   ? 'text-green-600 dark:text-green-400' 
                   : 'text-gray-500 dark:text-gray-400'
