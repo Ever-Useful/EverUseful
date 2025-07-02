@@ -44,13 +44,11 @@ const StatsCard: React.FC<StatsCardProps> = ({
 
   return (
     <Card 
-      className={`${
+      className={`border-0 shadow-lg ${
         primary || status
-          ? '!bg-[#10b981] !text-white border-0'
-          : 'bg-white dark:bg-gray-800 dark:border-gray-700'
-      } transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:bg-[#059669] cursor-pointer relative overflow-hidden rounded-xl glass-effect`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+          ? '!bg-[#10b981] !text-white'
+          : 'bg-white dark:bg-gray-800'
+      }`}
       onClick={onClick}
     >
       <CardContent className="p-6">
@@ -72,7 +70,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
               primary 
                 ? 'text-white' 
                 : 'text-gray-400 dark:text-gray-500'
-            } ${isHovered ? 'animate-pulse' : ''}`} />
+            }`} />
           </div>
         </div>
         
@@ -101,52 +99,6 @@ const StatsCard: React.FC<StatsCardProps> = ({
             </span>
           </div>
         </div>
-
-        {/* Hover Graph Overlay with improved padding */}
-        {isHovered && (
-          <div className="absolute inset-0 bg-black/20 dark:bg-black/40 flex items-center justify-center transition-all duration-300 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg w-full h-36">
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-3">
-                7-day trend
-              </p>
-              <div className="h-24">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={hoverData} margin={{ top: 5, right: 5, left: 5, bottom: 20 }}>
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 10 }}
-                      className="text-gray-500 dark:text-gray-400"
-                    />
-                    <YAxis hide />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'rgb(17 24 39)',
-                        border: 'none',
-                        borderRadius: '8px',
-                        color: 'white',
-                        fontSize: '12px'
-                      }}
-                    />
-                    {segments.map((segment, index) => (
-                      <Line 
-                        key={index}
-                        type="monotone" 
-                        dataKey="value" 
-                        data={segment.data}
-                        stroke={segment.color}
-                        strokeWidth={2}
-                        dot={false}
-                        connectNulls={false}
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

@@ -195,6 +195,7 @@ export const RelatedProducts = () => {
             if (projects.length === 0) return null;
             const idx = (startIndex + i) % projects.length;
             const project = projects[idx];
+            if (!project) return null;
             return (
               <Link to={`/product/${project.id}`} key={i + '-' + project.id}>
                 <Card className="h-full hover:shadow-lg transition-shadow duration-200">

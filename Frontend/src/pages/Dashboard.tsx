@@ -3,24 +3,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, CheckSquare, Calendar, BarChart3, User, Settings, HelpCircle, LogOut, BookOpen, GraduationCap, Building, Sparkles, Moon, Sun, Search, Plus, Clock, Minus, Briefcase } from "lucide-react";
+import { LayoutDashboard, CheckSquare, Calendar, BarChart3, User, Settings, HelpCircle, LogOut, BookOpen, GraduationCap, Building, Sparkles, Moon, Sun, Search, Plus, Clock, Minus, Briefcase, List, Users, Bell } from "lucide-react";
 import { ThemeProvider, useTheme } from "@/components/dashboard/ThemeProvider";
 import StatsCard from "@/components/dashboard/StatsCards";
 import DetailedStatsSection from "@/components/dashboard/DetailedStatsSection";
-import { BarChart, Bar, XAxis, ResponsiveContainer, Pie, PieChart, Cell, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell, Legend, LineChart, Line, Tooltip, CartesianGrid, Area, AreaChart } from "recharts";
 import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { userService } from '@/services/userService';
 import InitialsAvatar from '@/components/InitialsAvatar';
-import { TrendingUp, Star, Shield, LayoutGrid, UserPlus, Users, List, Heart, BarChart2 } from 'lucide-react';
+import { TrendingUp, Star, Shield, LayoutGrid, UserPlus, Heart, BarChart2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import marketplaceData from '../../../Backend/data/marketplace.json';
 
 type UserType = 'academic' | 'freelancer' | 'business';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [userType, setUserType] = useState<UserType>('academic');
-  const [selectedStat, setSelectedStat] = useState<any>(null);
+  const [selectedStat, setSelectedStat] = useState<string>('all');
   const [profileData, setProfileData] = useState({ firstName: '', lastName: '', avatar: '' });
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -44,6 +45,14 @@ const Dashboard = () => {
     { name: 'Jun', value: 0 },
   ]);
   const [userProjects, setUserProjects] = useState([]);
+  const [lineGraphData, setLineGraphData] = useState([
+    { month: 'Jan', projects: 0, favourites: 0, connections: 0, views: 0 },
+    { month: 'Feb', projects: 0, favourites: 0, connections: 0, views: 0 },
+    { month: 'Mar', projects: 0, favourites: 0, connections: 0, views: 0 },
+    { month: 'Apr', projects: 0, favourites: 0, connections: 0, views: 0 },
+    { month: 'May', projects: 0, favourites: 0, connections: 0, views: 0 },
+    { month: 'Jun', projects: 0, favourites: 0, connections: 0, views: 0 },
+  ]);
 
   // Fetch userType from API on mount
   useEffect(() => {
@@ -172,9 +181,98 @@ const Dashboard = () => {
     }
   }, [userType, navigate]);
 
+  useEffect(() => {
+    const aggregateLineGraphData = async () => {
+      try {
+        const userProfile = await userService.getUserProfile();
+        const customUserId = userProfile.customUserId;
+        // Get all projects from marketplace.json
+        const allProjects = marketplaceData.projects || [];
+        // Filter projects by current user
+        const userProjects = allProjects.filter(
+          (p) => p.author === customUserId || p.customUserId === customUserId
+        );
+        // Prepare months (last 6 months)
+        const now = new Date();
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          months.push({
+            key: `${d.getFullYear()}-${d.getMonth() + 1}`,
+            label: d.toLocaleString('default', { month: 'short' }),
+          });
+        }
+        // Aggregate projects posted per month
+        const projectsByMonth = {};
+        months.forEach((m) => (projectsByMonth[m.key] = []));
+        userProjects.forEach((project) => {
+          const posted = new Date(project.posted);
+          const key = `${posted.getFullYear()}-${posted.getMonth() + 1}`;
+          if (projectsByMonth[key]) {
+            projectsByMonth[key].push(project);
+          }
+        });
+        // Count projects per month
+        let projectsCount = months.map((m) => projectsByMonth[m.key].length);
+        // If all zero, show a faint line for demo
+        if (projectsCount.every((v) => v === 0)) {
+          projectsCount = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
+        }
+        // Views: progressive curve from 0 to totalViews
+        const totalViews = userProjects.reduce((sum, p) => sum + (p.views || 0), 0);
+        let viewsCurve = Array(6).fill(0);
+        if (totalViews > 0) {
+          let sum = 0;
+          for (let i = 0; i < 5; i++) {
+            // Randomly increment, but always increasing
+            const remaining = totalViews - sum;
+            const increment = i === 4 ? remaining : Math.floor(Math.random() * (remaining / (6 - i)));
+            sum += increment;
+            viewsCurve[i] = sum;
+          }
+          viewsCurve[5] = totalViews;
+        }
+        // Favourites and connections: random distribution as before
+        const totalFavourites = userStats.projectFavourites || 0;
+        const totalConnections = userStats.connections || 0;
+        function randomDistribute(total, n) {
+          if (total === 0) return Array(n).fill(0);
+          let arr = Array(n).fill(0);
+          let sum = 0;
+          for (let i = 0; i < n - 1; i++) {
+            arr[i] = Math.floor(Math.random() * (total - sum));
+            sum += arr[i];
+          }
+          arr[n - 1] = total - sum;
+          // Shuffle for randomness
+          for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+          }
+          return arr;
+        }
+        const favouritesByMonth = randomDistribute(totalFavourites, 6);
+        const connectionsByMonth = randomDistribute(totalConnections, 6);
+        // Build final data array
+        const newLineGraphData = months.map((m, i) => ({
+          month: m.label,
+          projects: projectsCount[i],
+          favourites: favouritesByMonth[i],
+          connections: connectionsByMonth[i],
+          views: viewsCurve[i],
+        }));
+        setLineGraphData(newLineGraphData);
+      } catch (e) {
+        // fallback: keep zeros
+      }
+    };
+    aggregateLineGraphData();
+    // eslint-disable-next-line
+  }, [userStats]);
+
   const onUserTypeChange = (type: UserType) => {
     setUserType(type);
-    setSelectedStat(null);
+    setSelectedStat('all');
   };
 
   // Generate hover data for stats cards
@@ -241,15 +339,13 @@ const Dashboard = () => {
 
   // Build stats array based on userType
   const getStatsData = () => {
-    if (userType === 'academic' || userType === 'freelancer') {
-      return [
-        { title: 'Projects Posted', value: userStats.projectsPosted },
-        { title: 'Favourites', value: userStats.projectFavourites },
-        { title: 'Connections', value: userStats.connections },
-        { title: 'Views', value: userStats.projectViews }, // This is total views of all projects
-      ];
-    }
-    return [];
+    // Only show stats for the current authenticated user
+    return [
+      { title: 'Projects Posted', value: userStats.projectsPosted },
+      { title: 'Favourites', value: userStats.projectFavourites },
+      { title: 'Connections', value: userStats.connections },
+      { title: 'Views', value: userStats.projectViews },
+    ];
   };
 
   const stats = getStatsData();
@@ -446,29 +542,56 @@ const Dashboard = () => {
         {/* Header always on top */}
         <Header />
         <div className="flex flex-1">
-          <div className="w-64 bg-mint-light/80 dark:bg-olive-dark/80 border-r border-mint flex flex-col transition-colors duration-300 glass-effect shadow-lg">
-            <div className="flex-1 p-4 flex flex-col">
-              <div className="mb-6">
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">MENU</p>
-                <nav className="space-y-1">
-                  {menuItems.map((item) => (
-                    <Button key={item.label} variant={item.active ? "secondary" : "ghost"} className={`w-full justify-start gap-3 h-10 text-md ${item.active ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-md border-r-2 border-green-600" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}>
-                      <item.icon className="w-5 h-5" />
-                      <span className="flex-1 text-left">{item.label}</span>
-                    </Button>
-                  ))}
+          {/* Fixed sidebar */}
+          <div className="w-72 h-[90vh] bg-white/70 dark:bg-gray-900/80 glass-effect shadow-2xl rounded-2xl m-6 flex flex-col border border-mint/30 backdrop-blur-lg fixed top-6 left-6 z-30" style={{ position: 'fixed', top: 24, left: 24, height: '90vh' }}>
+            <div className="flex flex-col items-center py-8 px-4">
+              <div className="w-full">
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 pl-2">MENU</p>
+                <nav className="space-y-2">
+                  <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
+                    <LayoutDashboard className="w-5 h-5" />
+                    <span className="flex-1 text-left">Dashboard</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
+                    <CheckSquare className="w-5 h-5" />
+                    <span className="flex-1 text-left">My Projects</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
+                    <List className="w-5 h-5" />
+                    <span className="flex-1 text-left">My Tasks</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
+                    <Users className="w-5 h-5" />
+                    <span className="flex-1 text-left">Messages</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
+                    <Bell className="w-5 h-5" />
+                    <span className="flex-1 text-left">Notifications</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
+                    <Calendar className="w-5 h-5" />
+                    <span className="flex-1 text-left">Calendar</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
+                    <BarChart3 className="w-5 h-5" />
+                    <span className="flex-1 text-left">Analytics</span>
+                  </Button>
                 </nav>
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">GENERAL</p>
-                <div className="space-y-1">
-                  {generalItems.map((item) => (
-                    <Button key={item.label} variant="ghost" className="w-full justify-start gap-3 h-10 text-gray-600 dark:text-gray-300 text-md hover:bg-gray-100 dark:hover:bg-gray-700">
-                      <item.icon className="w-5 h-5" />
-                      <span>{item.label}</span>
-                    </Button>
-                  ))}
+                <div className="my-8 border-t border-mint/20"></div>
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 pl-2">GENERAL</p>
+                <div className="space-y-2">
+                  <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
+                    <Settings className="w-5 h-5" />
+                    <span>Settings</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
+                    <HelpCircle className="w-5 h-5" />
+                    <span>Help</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
+                    <LogOut className="w-5 h-5" />
+                    <span>Logout</span>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -498,20 +621,21 @@ const Dashboard = () => {
                       change={''}
                       primary={stat.title === 'Projects Posted'}
                       status={false}
-                      onClick={() => {}}
+                      onClick={() => setSelectedStat(selectedStat === stat.title ? 'all' : stat.title)}
                       hoverData={generateHoverData(Number(stat.value))}
                     />
                   </div>
                 ))}
               </div>
+              {/* Earnings, Project Status, Recent Activity cards */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Earnings Card */}
-                <Card className="h-80 glass-effect shadow-lg hover-lift border-0">
+                <Card className="h-80 glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
                   <CardHeader>
                     <CardTitle className="text-lg font-bold text-olive-dark">Earnings</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {earningsData.every(e => e.value === 0) ? (
+                    {(!earningsData || earningsData.length === 0 || earningsData.every(e => !e.value || e.value === 0)) ? (
                       <div className="flex flex-col items-center justify-center h-[180px] text-mint-dark animate-fade-in">
                         <BarChart3 className="w-10 h-10 mb-2 animate-pulse-slow" />
                         <span className="text-md font-semibold">No earnings yet</span>
@@ -519,7 +643,7 @@ const Dashboard = () => {
                       </div>
                     ) : (
                       <ResponsiveContainer width="100%" height={200}>
-                        <BarChart data={earningsData}>
+                        <BarChart data={earningsData.filter(e => e.value > 0)}>
                           <XAxis
                             dataKey="name"
                             axisLine={false}
@@ -538,7 +662,7 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
                 {/* Project Status Card (Pie Chart) */}
-                <Card className="h-80 bg-[#10b981] border-0 shadow-lg hover-lift rounded-xl flex flex-col items-center justify-center">
+                <Card className="h-80 bg-[#10b981] border-0 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:bg-[#059669] cursor-pointer rounded-xl flex flex-col items-center justify-center">
                   <CardHeader>
                     <CardTitle className="text-lg font-bold text-white">Project Status</CardTitle>
                   </CardHeader>
@@ -560,7 +684,7 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
                 {/* Recent Activity Card */}
-                <Card className="h-80 glass-effect shadow-lg hover-lift border-0">
+                <Card className="h-80 glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
                   <CardHeader>
                     <CardTitle className="text-lg font-bold text-olive-dark">Recent Activity</CardTitle>
                   </CardHeader>
@@ -571,7 +695,7 @@ const Dashboard = () => {
                       ) : (
                         <ul className="space-y-3">
                           {displayRecentActivity.map((activity, idx) => (
-                            <li key={idx} className="flex items-center justify-between bg-white/80 dark:bg-olive rounded-lg px-3 py-2 shadow-sm border border-mint hover-lift transition-all duration-200">
+                            <li key={idx} className="flex items-center justify-between bg-white/80 dark:bg-olive rounded-lg px-3 py-2 shadow-sm hover-lift transition-all duration-200">
                               <div className="flex items-center">
                                 {getActivityIcon(activity.type)}
                                 <span className="font-medium text-gray-800 dark:text-gray-100">{activity.text}</span>
@@ -584,6 +708,42 @@ const Dashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+              {/* Line graph for stats (moved below cards) */}
+              <div className="glass-effect bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow-2xl p-8 mt-8 border border-mint/20 backdrop-blur-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">Stats Trend (Last 6 Months)</h2>
+                </div>
+                <ResponsiveContainer width="100%" height={320}>
+                  <LineChart data={lineGraphData} margin={{ top: 20, right: 40, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorProjects" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 13 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: '#64748b', fontSize: 13 }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(16,185,129,0.08)' }} labelStyle={{ color: '#10b981', fontWeight: 600 }} cursor={{ stroke: '#10b981', strokeWidth: 0.5, opacity: 0.1 }} />
+                    <Legend verticalAlign="top" height={36} iconType="circle" />
+                    {(selectedStat === 'all' || selectedStat === 'Projects Posted') && (
+                      <>
+                        <Area type="monotone" dataKey="projects" stroke="#10b981" fill="url(#colorProjects)" fillOpacity={0.2} dot={{ r: 5, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 7 }} isAnimationActive={true} />
+                        <Line type="monotone" dataKey="projects" stroke="#10b981" strokeWidth={3} dot={{ r: 5, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 7 }} name="Projects Posted" isAnimationActive={true} />
+                      </>
+                    )}
+                    {(selectedStat === 'all' || selectedStat === 'Favourites') && (
+                      <Line type="monotone" dataKey="favourites" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4, fill: '#3b82f6', stroke: '#fff', strokeWidth: 1.5 }} activeDot={{ r: 6 }} name="Favourites" isAnimationActive={true} />
+                    )}
+                    {(selectedStat === 'all' || selectedStat === 'Connections') && (
+                      <Line type="monotone" dataKey="connections" stroke="#f59e42" strokeWidth={2} dot={{ r: 4, fill: '#f59e42', stroke: '#fff', strokeWidth: 1.5 }} activeDot={{ r: 6 }} name="Connections" isAnimationActive={true} />
+                    )}
+                    {(selectedStat === 'all' || selectedStat === 'Views') && (
+                      <Line type="monotone" dataKey="views" stroke="#6366f1" strokeWidth={2} dot={{ r: 4, fill: '#6366f1', stroke: '#fff', strokeWidth: 1.5 }} activeDot={{ r: 6 }} name="Views" isAnimationActive={true} />
+                    )}
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </div>
           </div>

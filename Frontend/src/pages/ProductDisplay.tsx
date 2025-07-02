@@ -27,6 +27,8 @@ import { firestoreService } from "@/services/firestoreService";
 import { userService } from "@/services/userService";
 import { toast } from "sonner";
 import NoUserProfile from "@/assets/images/no user profile.png";
+import { Skeleton } from "@/components/ui/skeleton";
+import NoImageAvailable from "@/assets/images/no image available.png";
 
 const ProductDisplay = () => {
   const { id } = useParams();
@@ -183,9 +185,10 @@ const ProductDisplay = () => {
             <div>
               <div className="mb-4">
                 <img 
-                  src={project.images ? project.images[selectedImage] : project.image} 
+                  src={project.images && project.images[selectedImage] ? project.images[selectedImage] : (project.image || NoImageAvailable)} 
                   alt={project.title}
                   className="w-full h-96 object-cover rounded-lg shadow-lg"
+                  onError={e => { e.currentTarget.src = NoImageAvailable; }}
                 />
               </div>
               {project.images && project.images.length > 1 && (
@@ -240,30 +243,42 @@ const ProductDisplay = () => {
               </div>
 
               <div className="flex items-center space-x-3 mb-6">
-                <img 
-                  src={getAuthorDetails(project.author).image} 
-                  alt={getAuthorDetails(project.author).name}
-                  className="w-12 h-12 rounded-full cursor-pointer"
-                  onError={e => { e.currentTarget.src = NoUserProfile; }}
-                  onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                />
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span 
-                      className="font-semibold text-gray-900 cursor-pointer"
-                      style={{ transition: 'color 0.2s' }}
-                      onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
-                      onMouseOut={e => e.currentTarget.style.color = ''}
+                {(!authorCache[project.author]) ? (
+                  <>
+                    <Skeleton className="w-12 h-12 rounded-full" />
+                    <div>
+                      <Skeleton className="w-32 h-5 mb-2 rounded" />
+                      <Skeleton className="w-20 h-4 rounded" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <img 
+                      src={getAuthorDetails(project.author).image} 
+                      alt={getAuthorDetails(project.author).name}
+                      className="w-12 h-12 rounded-full cursor-pointer"
+                      onError={e => { e.currentTarget.src = NoUserProfile; }}
                       onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                    >
-                      {getAuthorDetails(project.author).name}
-                    </span>
-                    {project.author.verified && (
-                      <CheckCircle className="w-4 h-4 text-blue-500" />
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-500">{project.author.projects} projects</p>
-                </div>
+                    />
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span 
+                          className="font-semibold text-gray-900 cursor-pointer"
+                          style={{ transition: 'color 0.2s' }}
+                          onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                          onMouseOut={e => e.currentTarget.style.color = ''}
+                          onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                        >
+                          {getAuthorDetails(project.author).name}
+                        </span>
+                        {project.author.verified && (
+                          <CheckCircle className="w-4 h-4 text-blue-500" />
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500">{project.author.projects} projects</p>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-2 mb-6">
@@ -409,36 +424,50 @@ const ProductDisplay = () => {
                 <CardTitle className="text-gray-900">About the Creator</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center space-x-3 mb-4">
-                  <img 
-                    src={getAuthorDetails(project.author).image} 
-                    alt={getAuthorDetails(project.author).name}
-                    className="w-16 h-16 rounded-full cursor-pointer"
-                    onError={e => { e.currentTarget.src = NoUserProfile; }}
-                    onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                  />
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h3 
-                        className="font-semibold text-gray-900 cursor-pointer"
-                        style={{ transition: 'color 0.2s' }}
-                        onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
-                        onMouseOut={e => e.currentTarget.style.color = ''}
-                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                      >
-                        {getAuthorDetails(project.author).name}
-                      </h3>
-                      {project.author.verified && (
-                        <CheckCircle className="w-4 h-4 text-blue-500" />
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-gray-600">{project.author.rating}</span>
+                {(!authorCache[project.author]) ? (
+                  <div className="flex items-center space-x-3 mb-4">
+                    <Skeleton className="w-16 h-16 rounded-full" />
+                    <div>
+                      <Skeleton className="w-32 h-6 mb-2 rounded" />
+                      <Skeleton className="w-20 h-4 rounded" />
                     </div>
                   </div>
-                </div>
-                <p className="text-sm text-gray-600 mb-4">{project.author.bio}</p>
+                ) : (
+                  <div className="flex items-center space-x-3 mb-4">
+                    <img 
+                      src={getAuthorDetails(project.author).image} 
+                      alt={getAuthorDetails(project.author).name}
+                      className="w-16 h-16 rounded-full cursor-pointer"
+                      onError={e => { e.currentTarget.src = NoUserProfile; }}
+                      onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                    />
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <h3 
+                          className="font-semibold text-gray-900 cursor-pointer"
+                          style={{ transition: 'color 0.2s' }}
+                          onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                          onMouseOut={e => e.currentTarget.style.color = ''}
+                          onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                        >
+                          {getAuthorDetails(project.author).name}
+                        </h3>
+                        {project.author.verified && (
+                          <CheckCircle className="w-4 h-4 text-blue-500" />
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm text-gray-600">{project.author.rating}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {(!authorCache[project.author]) ? (
+                  <Skeleton className="w-full h-4 mb-4 rounded" />
+                ) : (
+                  <p className="text-sm text-gray-600 mb-4">{project.author.bio}</p>
+                )}
                 <Button 
                   variant="outline" 
                   className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
