@@ -38,6 +38,7 @@ import TermsConditions from "./pages/Policy/TermsConditions";
 import CookiePolicy from "./pages/Policy/CookiePolicy";
 import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
+import BecomeAMentor from "./pages/BecomeAMentor";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,7 @@ const App = () => (
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/delivery-policy" element={<DeliveryPolicy />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/become-mentor" element={<BecomeAMentor/>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

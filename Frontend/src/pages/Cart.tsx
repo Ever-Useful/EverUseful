@@ -342,7 +342,7 @@ const Cart = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <div className="container mx-auto px-4 py-8">
-        <CartHeader itemCount={cartItems.length} />
+        {/* <CartHeader itemCount={cartItems.length} /> */}
         
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -354,8 +354,8 @@ const Cart = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
             <p className="text-gray-600 mb-4">Looks like you haven't added any projects yet.</p>
             <Link to="/marketplace">
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+              <Button className="h-9 w-50 bg-blue-600 hover:bg-blue-700 text-base">
+                <ArrowLeft className="h-3 w-3 mr-2" />
                 Continue Shopping
               </Button>
             </Link>
@@ -407,10 +407,6 @@ const Cart = () => {
         {/* Related Products Section */}
         <div className="mt-16">
           <RelatedProducts
-            title="You might also like"
-            projects={featuredProjects.map(p => ({ ...p, title: p.name }))}
-            onAddToCart={addToCart}
-            onAddToWishlist={addToWishlist}
           />
         </div>
       </div>

@@ -442,429 +442,431 @@ const Work: React.FC = () => {
 
   return (
     <main className="w-full min-h-screen bg-white">
-      
-      {/* HERO SECTION */}
-      <Header />
-      <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1600&q=80"
-          alt="PhD freelancing R&D platform"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-white/40 to-transparent"></div>
-        <motion.div
-          initial="hidden"
-          animate="visible"
+    {/* HERO SECTION */}
+    <Header />
+    <section className="relative w-full min-h-[70vh] flex items-center justify-center overflow-hidden">
+      <img
+        src="https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1600&q=80"
+        alt="PhD freelancing R&D platform"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/60 to-transparent" />
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeUp}
+        className="relative z-10 max-w-4xl mx-auto px-4 xs:px-4 sm:px-8 py-16 xs:py-20 sm:py-24 text-center flex flex-col items-center"
+      >
+        <motion.h1
+          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 drop-shadow-[0_0_8px_rgba(250,89,84,0.7)] mb-4 xs:mb-6 leading-tight"
           variants={fadeUp}
-          className="relative z-10 max-w-4xl mx-auto px-8 py-24 text-center flex flex-col items-center"
+          custom={1}
         >
-          <motion.h1
-            className="text-4xl md:text-5xl font-bold text-gray-900 drop-shadow-[0_0_8px_rgba(250,89,84,0.7)] mb-6 leading-tight"
-            variants={fadeUp}
-            custom={1}
+          Connect with World-Class <span className="text-[#fa5954]">PhD Experts</span> for R&D and Mentorship
+        </motion.h1>
+        <motion.p
+          className="text-base xs:text-lg sm:text-xl text-gray-700 mb-6 xs:mb-10 max-w-xl font-medium"
+          variants={fadeUp}
+          custom={2}
+        >
+          Unlock global innovation by collaborating with top PhD scholars and graduates. Access cutting-edge research, personalized mentorship, and specialized consulting—anytime, anywhere.
+        </motion.p>
+        <motion.div 
+          className="flex flex-col xs:flex-row lg:flex-row xl:flex-row gap-4 xs:gap-6 w-full xs:w-auto justify-center items-center lg:flex-row lg:w-auto xl:flex-row xl:w-auto
+            md:flex-row md:w-auto"
+          variants={fadeUp}
+          custom={3}
+        >
+          <Link
+            to="/findexpert"
+            className="w-full md:w-auto px-6 xs:px-8 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_15px_rgba(250,89,84,0.8)] transition-all duration-300 text-base xs:text-lg"
           >
-            Connect with World-Class <span className="text-[#fa5954]">PhD Experts</span> for R&D and Mentorship
-          </motion.h1>
-          <motion.p
-            className="text-lg md:text-xl text-gray-700 mb-10 max-w-xl font-medium"
-            variants={fadeUp}
-            custom={2}
+            Find a PhD Expert
+          </Link>
+          <Link
+            to="/become-mentor"
+            className="w-full md:w-auto px-6 xs:px-8 py-3 rounded-full bg-white text-[#e0514d] font-bold border border-[#e0514d] shadow hover:shadow-[0_0_15px_rgba(224,81,77,0.8)] transition-all duration-300 text-base xs:text-lg"
           >
-            Unlock global innovation by collaborating with top PhD scholars and graduates. Access cutting-edge research, personalized mentorship, and specialized consulting—anytime, anywhere.
-          </motion.p>
-          <motion.div className="flex gap-6" variants={fadeUp} custom={3}>
-            <Link
-              
-              to="/findexpert"
-              className="px-8 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_15px_rgba(250,89,84,0.8)] transition-all duration-300 text-lg"
-            >
-              Find a PhD Expert
-            </Link>
-            <Link
-              to="/become-mentor"
-              className="px-8 py-3 rounded-full bg-white text-[#e0514d] font-bold border border-[#e0514d] shadow hover:shadow-[0_0_15px_rgba(224,81,77,0.8)] transition-all duration-300 text-lg"
-            >
-              Become a Mentor
-            </Link>
-          </motion.div>
-          <motion.div
-            className="flex flex-wrap gap-3 justify-center mt-12"
-            variants={fadeUp}
-            custom={4}
-          >
-            {heroFeatures.map((feature) => (
-              <span
-                key={feature.text}
-                className={`text-xs px-3 py-1 rounded-full font-semibold ${feature.color} shadow-md`}
-              >
-                {feature.text}
-              </span>
-            ))}
-          </motion.div>
+            Become a Mentor
+          </Link>
         </motion.div>
-      </section>
-
-      {/* HIRE THE BEST SECTION (Upwork-style, AMOGH themed) */}
-      <section className="w-full bg-white py-16 px-4 border-b border-gray-100 flex flex-col items-center justify-center text-center">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">Hire the Best Professionals</h2>
-        <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-          Check out professionals on <span className="font-bold text-[#fa5954]">AMOGH</span>, with the skills you need for your next job.
-        </p>
-        <a
-          href="/findexpert"
-          className="inline-block px-10 py-3 rounded-lg bg-green-600 text-white font-bold text-lg shadow hover:bg-green-700 transition-all duration-300 min-w-[200px]"
+        <motion.div
+          className="flex flex-wrap gap-2 xs:gap-3 justify-center mt-8 xs:mt-12"
+          variants={fadeUp}
+          custom={4}
         >
-          Hire freelancers
-        </a>
-      </section>
+          {heroFeatures.map((feature) => (
+            <span
+              key={feature.text}
+              className={`text-[10px] xs:text-xs px-2 xs:px-3 py-1 rounded-full font-semibold ${feature.color} shadow-md`}
+            >
+              {feature.text}
+            </span>
+          ))}
+        </motion.div>
+      </motion.div>
+    </section>
 
-      {/* FILTER BAR + GRID (like FindExpert) */}
-      <section className="w-full bg-white py-8 px-4 flex flex-col items-center justify-center">
-        {/* Filter Bar */}
-        <div className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full max-w-5xl">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
-              Freelance Research Experts
-            </h2>
-            <p className="text-lg text-gray-600 font-medium">
-              {filtered.length} freelancers available for collaboration
-            </p>
+    {/* HIRE THE BEST SECTION */}
+    <section className="w-full bg-white py-10 xs:py-16 px-2 xs:px-4 border-b border-gray-100 flex flex-col items-center justify-center text-center">
+      <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 xs:mb-6">Hire the Best Professionals</h2>
+      <p className="text-base xs:text-lg text-gray-600 mb-6 xs:mb-8 max-w-2xl mx-auto">
+        Check out professionals on <span className="font-bold text-[#fa5954]">AMOGH</span>, with the skills you need for your next job.
+      </p>
+      <a
+        href="/findexpert"
+        className="inline-block px-6 xs:px-10 py-2 xs:py-3 rounded-lg bg-green-600 text-white font-bold text-base xs:text-lg shadow hover:bg-green-700 transition-all duration-300 min-w-[140px] xs:min-w-[200px]"
+      >
+        Hire freelancers
+      </a>
+    </section>
+
+    {/* FILTER BAR + GRID */}
+    <section className="w-full bg-white py-6 xs:py-8 px-2 xs:px-4 flex flex-col items-center justify-center">
+      {/* Filter Bar */}
+      <div className="bg-white rounded-xl shadow-sm p-3 xs:p-4 mb-6 xs:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 xs:gap-4 w-full max-w-5xl">
+        <div>
+          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+            Freelance Research Experts
+          </h2>
+          <p className="text-sm xs:text-lg text-gray-600 font-medium">
+            {filtered.length} freelancers available for collaboration
+          </p>
+        </div>
+        <div className="flex flex-col md:flex-row gap-3 xs:gap-4 w-full md:w-auto">
+          <div className="flex items-center w-full md:w-auto gap-2">
+            <ArrowUpDown className="w-4 h-4 text-gray-400" />
+            <span className="text-gray-500 text-xs font-medium">Sort by</span>
+            <select
+              className="bg-white border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm w-full md:w-auto ml-1 text-xs xs:text-sm"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="rating">Highest Rating</option>
+              <option value="projects">Most Projects</option>
+            </select>
           </div>
-          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-            <div className="flex items-center w-full md:w-auto gap-2">
-              <ArrowUpDown className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-500 text-xs font-medium">Sort by</span>
-              <select
-                className="bg-white border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm w-full md:w-auto ml-1"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="rating">Highest Rating</option>
-                <option value="projects">Most Projects</option>
-              </select>
-            </div>
-            <div className="relative w-full md:w-64">
-              <input
-                type="text"
-                placeholder="Filter by skill..."
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm"
-                value={skillFilter}
-                onChange={(e) => setSkillFilter(e.target.value)}
-              />
-            </div>
+          <div className="relative w-full md:w-64">
+            <input
+              type="text"
+              placeholder="Filter by skill..."
+              className="w-full px-3 xs:px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm text-xs xs:text-sm"
+              value={skillFilter}
+              onChange={(e) => setSkillFilter(e.target.value)}
+            />
           </div>
         </div>
-        {/* Freelancer Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
-          {filtered.slice(0, showCount).map((f, idx) => (
-            <div key={f.customUserId || idx} className="rounded-xl overflow-hidden shadow-lg transition-all flex flex-col h-full bg-gradient-to-br from-blue-50 to-purple-50">
-              <div className="flex flex-col h-full">
-                <div className="p-5 flex-1 flex flex-col">
-                  <div className="flex justify-center mb-3">
-                    <img
-                      src={f.profile?.avatar || noUserProfile}
-                      alt={f.profile?.firstName || 'Freelancer'}
-                      className="w-20 h-20 rounded-full object-cover border-3 border-white/80 shadow-lg"
-                    />
-                  </div>
-                  <div className="text-center mb-3">
-                    <h3 className="text-lg font-bold text-black">{f.profile?.firstName} {f.profile?.lastName}</h3>
-                    <p className="text-black font-medium text-sm">{f.profile?.title}</p>
-                    <p className="text-black text-xs mt-1">{f.profile?.location}</p>
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-1 mb-3">
-                    {(f.skills || []).slice(0, 3).map((skill: string, i: number) => (
-                      <span key={i} className="bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-1 rounded-full">
-                        {skill}
-                      </span>
-                    ))}
-                    {(f.skills || []).length > 3 && (
-                      <span className="bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-1 rounded-full">
-                        +{(f.skills || []).length - 3} more
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex justify-center mb-3">
-                    <div className="flex text-amber-400">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          xmlns="http://www.w3.org/2000/svg"
-                          className={`h-4 w-4 ${i < Math.floor(f.stats?.rating || 4.5) ? 'fill-amber-400' : 'fill-gray-200'}`}
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <span className="ml-2 text-gray-700 text-sm font-medium">{(f.stats?.rating || 4.5).toFixed(1)}</span>
-                  </div>
-                  <button
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mt-auto transition"
-                    onClick={() => window.location.href = `/freelancerprofile/${f.customUserId}`}
-                  >
-                    View Profile
-                  </button>
+      </div>
+      {/* Freelancer Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xs:gap-6 w-full max-w-5xl">
+        {filtered.slice(0, showCount).map((f, idx) => (
+          <div key={f.customUserId || idx} className="rounded-xl overflow-hidden shadow-lg transition-all flex flex-col h-full bg-gradient-to-br from-blue-50 to-purple-50">
+            <div className="flex flex-col h-full">
+              <div className="p-4 xs:p-5 flex-1 flex flex-col">
+                <div className="flex justify-center mb-2 xs:mb-3">
+                  <img
+                    src={f.profile?.avatar || noUserProfile}
+                    alt={f.profile?.firstName || 'Freelancer'}
+                    className="w-16 xs:w-20 h-16 xs:h-20 rounded-full object-cover border-2 xs:border-3 border-white/80 shadow-lg"
+                  />
                 </div>
+                <div className="text-center mb-2 xs:mb-3">
+                  <h3 className="text-base xs:text-lg font-bold text-black">{f.profile?.firstName} {f.profile?.lastName}</h3>
+                  <p className="text-black font-medium text-xs xs:text-sm">{f.profile?.title}</p>
+                  <p className="text-black text-xs mt-1">{f.profile?.location}</p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-1 mb-2 xs:mb-3">
+                  {(f.skills || []).slice(0, 3).map((skill: string, i: number) => (
+                    <span key={i} className="bg-indigo-100 text-indigo-700 text-[10px] xs:text-xs font-medium px-2 py-1 rounded-full">
+                      {skill}
+                    </span>
+                  ))}
+                  {(f.skills || []).length > 3 && (
+                    <span className="bg-indigo-100 text-indigo-700 text-[10px] xs:text-xs font-medium px-2 py-1 rounded-full">
+                      +{(f.skills || []).length - 3} more
+                    </span>
+                  )}
+                </div>
+                <div className="flex justify-center mb-2 xs:mb-3">
+                  <div className="flex text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <svg
+                        key={i}
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`h-3 w-3 xs:h-4 xs:w-4 ${i < Math.floor(f.stats?.rating || 4.5) ? 'fill-amber-400' : 'fill-gray-200'}`}
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <span className="ml-2 text-gray-700 text-xs xs:text-sm font-medium">{(f.stats?.rating || 4.5).toFixed(1)}</span>
+                </div>
+                <button
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mt-auto transition text-xs xs:text-sm"
+                  onClick={() => window.location.href = `/freelancerprofile/${f.customUserId}`}
+                >
+                  View Profile
+                </button>
               </div>
             </div>
+          </div>
+        ))}
+      </div>
+      {filtered.length > showCount && (
+        <div className="mt-6 xs:mt-8 text-center">
+          <button
+            className="px-6 xs:px-8 py-2 xs:py-3 rounded-xl bg-white border border-gray-300 text-gray-800 font-semibold shadow hover:bg-gray-50 transition-all text-xs xs:text-base"
+            onClick={() => setShowCount(showCount + 4)}
+          >
+            Load More Freelancers
+          </button>
+        </div>
+      )}
+    </section>
+
+    {/* POPULAR SKILLS SECTION */}
+    <section className="w-full py-10 xs:py-20 px-2 xs:px-6 bg-gray-50 border-b border-gray-100">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mb-8 xs:mb-12 text-center"
+        >
+          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+            Popular Skills & Expertise
+          </h2>
+          <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
+            Discover top PhD experts across cutting-edge fields. From AI research to biotechnology, find the perfect match for your project.
+          </p>
+        </motion.div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 xs:gap-4">
+          {popularSkills.map((skill, idx) => (
+            <motion.div
+              key={skill.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
+              className={`${skill.color} rounded-xl p-3 xs:p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:scale-105`}
+            >
+              <div className="text-xl xs:text-3xl mb-2 xs:mb-3">{skill.icon}</div>
+              <h3 className="font-semibold text-gray-900 mb-1 text-xs xs:text-base">{skill.name}</h3>
+              <p className="text-xs xs:text-sm text-gray-600">{skill.count}</p>
+            </motion.div>
           ))}
         </div>
-        {filtered.length > showCount && (
-          <div className="mt-8 text-center">
-            <button
-              className="px-8 py-3 rounded-xl bg-white border border-gray-300 text-gray-800 font-semibold shadow hover:bg-gray-50 transition-all"
-              onClick={() => setShowCount(showCount + 4)}
+      </div>
+    </section>
+
+    {/* FEATURED CATEGORIES SECTION */}
+    <section className="w-full py-10 xs:py-20 px-2 xs:px-6 bg-white border-b border-gray-100">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mb-8 xs:mb-12 text-center"
+        >
+          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+            Featured Categories
+          </h2>
+          <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
+            Explore our most popular research and development categories with thousands of successful projects completed.
+          </p>
+        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 xs:gap-6">
+          {featuredCategories.map((category, idx) => (
+            <motion.div
+              key={category.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: idx * 0.1, ease: "easeOut" }}
+              className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              Load More Freelancers
-            </button>
-          </div>
-        )}
-      </section>
-
-      {/* POPULAR SKILLS SECTION (NEW) */}
-      <section className="w-full py-20 px-6 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="mb-12 text-center"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              Popular Skills & Expertise
-            </h2>
-            <p className="text-base text-gray-600 max-w-2xl mx-auto">
-              Discover top PhD experts across cutting-edge fields. From AI research to biotechnology, find the perfect match for your project.
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {popularSkills.map((skill, idx) => (
-              <motion.div
-                key={skill.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
-                className={`${skill.color} rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:scale-105`}
-              >
-                <div className="text-3xl mb-3">{skill.icon}</div>
-                <h3 className="font-semibold text-gray-900 mb-1">{skill.name}</h3>
-                <p className="text-sm text-gray-600">{skill.count}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURED CATEGORIES SECTION (NEW) */}
-      <section className="w-full py-20 px-6 bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="mb-12 text-center"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              Featured Categories
-            </h2>
-            <p className="text-base text-gray-600 max-w-2xl mx-auto">
-              Explore our most popular research and development categories with thousands of successful projects completed.
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredCategories.map((category, idx) => (
-              <motion.div
-                key={category.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: idx * 0.1, ease: "easeOut" }}
-                className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-90`} />
-                <div className="relative p-6 text-white">
-                  <div className="text-4xl mb-4">{category.icon}</div>
-                  <h3 className="text-lg font-bold mb-2">{category.title}</h3>
-                  <p className="text-sm opacity-90 mb-4">{category.description}</p>
-                  <div className="flex justify-between text-sm">
-                    <span>{category.experts} experts</span>
-                    <span>{category.projects} projects</span>
-                  </div>
+              <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-90`} />
+              <div className="relative p-4 xs:p-6 text-white">
+                <div className="text-2xl xs:text-4xl mb-2 xs:mb-4">{category.icon}</div>
+                <h3 className="text-base xs:text-lg font-bold mb-1 xs:mb-2">{category.title}</h3>
+                <p className="text-xs xs:text-sm opacity-90 mb-2 xs:mb-4">{category.description}</p>
+                <div className="flex justify-between text-xs xs:text-sm">
+                  <span>{category.experts} experts</span>
+                  <span>{category.projects} projects</span>
                 </div>
-                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-              </motion.div>
-            ))}
-          </div>
+              </div>
+              <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+            </motion.div>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
 
-      {/* CLIENT TESTIMONIALS SECTION (NEW) */}
-      <section className="w-full py-20 px-6 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="mb-12 text-center"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              What Our Clients Say
-            </h2>
-            <p className="text-base text-gray-600 max-w-2xl mx-auto">
-              Real feedback from researchers, startups, and organizations who've found success with our PhD experts.
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {clientTestimonials.map((testimonial, idx) => (
-              <motion.div
-                key={testimonial.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: idx * 0.2, ease: "easeOut" }}
-                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="flex items-center mb-4">
-                  <img
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover mr-4"
-                    onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(testimonial.name) + '&background=E0E7EF&color=374151&size=48'; }}
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
-                    <p className="text-sm text-[#fa5954]">{testimonial.company}</p>
-                  </div>
-                </div>
-                <div className="flex mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-700 italic">"{testimonial.content}"</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-       {/* WHY WE'RE UNIQUE SECTION */}
-      <section className="w-full py-20 px-6 bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="mb-8 text-center"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              Why We're Unique
-            </h2>
-            <p className="text-base text-gray-600 max-w-xl mx-auto">
-              We connect you with the world's brightest PhD minds for research, mentorship, and innovation—delivered with integrity, personalization, and global reach.
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {uniquePoints.map((point, idx) => (
-              <motion.div
-                key={point.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.1 + idx * 0.12, ease: "easeOut" }}
-                className={`flex items-start space-x-3 rounded-lg shadow-sm p-4 hover:shadow-lg transition ${point.color}`}
-              >
-                <div className="flex-shrink-0">{point.icon}</div>
+    {/* CLIENT TESTIMONIALS SECTION */}
+    <section className="w-full py-10 xs:py-20 px-2 xs:px-6 bg-gray-50 border-b border-gray-100">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mb-8 xs:mb-12 text-center"
+        >
+          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+            What Our Clients Say
+          </h2>
+          <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
+            Real feedback from researchers, startups, and organizations who've found success with our PhD experts.
+          </p>
+        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 xs:gap-8">
+          {clientTestimonials.map((testimonial, idx) => (
+            <motion.div
+              key={testimonial.name}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: idx * 0.2, ease: "easeOut" }}
+              className="bg-white rounded-xl p-4 xs:p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <div className="flex items-center mb-3 xs:mb-4">
+                <img
+                  src={testimonial.avatar}
+                  alt={testimonial.name}
+                  className="w-10 xs:w-12 h-10 xs:h-12 rounded-full object-cover mr-3 xs:mr-4"
+                  onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(testimonial.name) + '&background=E0E7EF&color=374151&size=48'; }}
+                />
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900 mb-1">{point.title}</h3>
-                  <p className="text-sm text-gray-700">{point.description}</p>
+                  <h4 className="font-semibold text-gray-900 text-xs xs:text-base">{testimonial.name}</h4>
+                  <p className="text-xs xs:text-sm text-gray-600">{testimonial.role}</p>
+                  <p className="text-xs xs:text-sm text-[#fa5954]">{testimonial.company}</p>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+              <div className="flex mb-3 xs:mb-4">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <svg key={i} className="w-4 xs:w-5 h-4 xs:h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <p className="text-gray-700 italic text-xs xs:text-base">"{testimonial.content}"</p>
+            </motion.div>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
 
-
-      {/* SUCCESS STORIES SECTION */}
-      <section className="w-full py-20 px-6 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8 text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              Success Stories
-            </h2>
-            <p className="text-base text-gray-600 max-w-xl mx-auto">
-              Real impact, real results. Explore how PhD experts have transformed research, innovation, and mentorship for clients worldwide.
-            </p>
-            <div className="w-16 h-1 mx-auto mt-2 rounded-full bg-[#fa5954]/30" />
-          </div>
-          <div className="relative">
-            <Slider
-              {...sliderSettings}
-              ref={sliderRef}
-              beforeChange={(_: number, next: number) => {
-                const slidesToShow = sliderSettings.slidesToShow as number;
-                const newIndexes: number[] = [];
-                for (let i = 0; i < slidesToShow; i++) {
-                  newIndexes.push((next + i) % stories.length);
-                }
-                setVisibleIndexes(newIndexes);
-              }}
+    {/* WHY WE'RE UNIQUE SECTION */}
+    <section className="w-full py-10 xs:py-20 px-2 xs:px-6 bg-white border-b border-gray-100">
+      <div className="max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mb-6 xs:mb-8 text-center"
+        >
+          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+            Why We're Unique
+          </h2>
+          <p className="text-xs xs:text-base text-gray-600 max-w-xl mx-auto">
+            We connect you with the world's brightest PhD minds for research, mentorship, and innovation—delivered with integrity, personalization, and global reach.
+          </p>
+        </motion.div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 xs:gap-5">
+          {uniquePoints.map((point, idx) => (
+            <motion.div
+              key={point.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 + idx * 0.12, ease: "easeOut" }}
+              className={`flex items-start space-x-2 xs:space-x-3 rounded-lg shadow-sm p-3 xs:p-4 hover:shadow-lg transition ${point.color}`}
             >
-              {stories.map((story, idx) => (
-                <div key={story.name} className="h-full flex items-stretch">
-                  <motion.div
-                    key={visibleIndexes.includes(idx) ? `active-${idx}` : `inactive-${idx}`}
-                    initial="initial"
-                    animate={visibleIndexes.includes(idx) ? "animate" : "initial"}
-                    variants={cardVariants}
-                    className={`
-                      flex flex-col items-center justify-between
-                      rounded-xl shadow-lg ${story.color}
-                      border border-white/60 px-6 py-8 mx-3
-                      w-[220px] h-[${cardFixedHeight}px] min-h-[${cardFixedHeight}px] max-h-[${cardFixedHeight}px]
-                      transition-all
-                    `}
-                    style={{
-                      minHeight: cardFixedHeight,
-                      maxHeight: cardFixedHeight,
-                      height: cardFixedHeight,
-                      width: 220,
-                    }}
-                  >
-                    <div className="flex flex-col items-center">
-                      <img
-                        src={story.img}
-                        alt={story.name}
-                        className="w-16 h-16 rounded-full object-cover mb-4 ring-2 ring-blue-100 shadow"
-                        onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(story.name) + '&background=E0E7EF&color=374151&size=64'; }}
-                      />
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-base font-bold text-gray-900">{story.name}</span>
-                        <span className="text-md">{story.country}</span>
-                      </div>
-                      <span className="text-xs font-semibold text-[#fa5954] mb-1 text-center">{story.title}</span>
-                      <p className="text-xs text-gray-700 text-center mb-2">{story.desc}</p>
+              <div className="flex-shrink-0">{point.icon}</div>
+              <div>
+                <h3 className="text-xs xs:text-base font-semibold text-gray-900 mb-1">{point.title}</h3>
+                <p className="text-xs xs:text-sm text-gray-700">{point.description}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* SUCCESS STORIES SECTION */}
+    <section className="w-full py-10 xs:py-20 px-2 xs:px-6 bg-gray-50 border-b border-gray-100">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-6 xs:mb-8 text-center">
+          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+            Success Stories
+          </h2>
+          <p className="text-xs xs:text-base text-gray-600 max-w-xl mx-auto">
+            Real impact, real results. Explore how PhD experts have transformed research, innovation, and mentorship for clients worldwide.
+          </p>
+          <div className="w-12 xs:w-16 h-1 mx-auto mt-2 rounded-full bg-[#fa5954]/30" />
+        </div>
+        {/* Desktop: Carousel, Mobile: Horizontal Scroll Cards */}
+        <div className="hidden sm:block relative">
+          <Slider
+            {...sliderSettings}
+            ref={sliderRef}
+            beforeChange={(_: number, next: number) => {
+              const slidesToShow = sliderSettings.slidesToShow as number;
+              const newIndexes: number[] = [];
+              for (let i = 0; i < slidesToShow; i++) {
+                newIndexes.push((next + i) % stories.length);
+              }
+              setVisibleIndexes(newIndexes);
+            }}
+          >
+            {stories.map((story, idx) => (
+              <div key={story.name} className="h-full flex items-stretch">
+                <motion.div
+                  key={visibleIndexes.includes(idx) ? `active-${idx}` : `inactive-${idx}`}
+                  initial="initial"
+                  animate={visibleIndexes.includes(idx) ? "animate" : "initial"}
+                  variants={cardVariants}
+                  className={`
+                    flex flex-col items-center justify-between
+                    rounded-xl shadow-lg ${story.color}
+                    border border-white/60 px-4 xs:px-6 py-6 xs:py-8 mx-2 xs:mx-3
+                    w-[180px] xs:w-[220px] h-[${cardFixedHeight - 40}px] xs:h-[${cardFixedHeight}px] min-h-[${cardFixedHeight - 40}px] xs:min-h-[${cardFixedHeight}px] max-h-[${cardFixedHeight}px]
+                    transition-all
+                  `}
+                  style={{
+                    minHeight: cardFixedHeight - 40,
+                    maxHeight: cardFixedHeight,
+                    height: cardFixedHeight - 40,
+                    width: 180,
+                  }}
+                >
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={story.img}
+                      alt={story.name}
+                      className="w-12 xs:w-16 h-12 xs:h-16 rounded-full object-cover mb-2 xs:mb-4 ring-2 ring-blue-100 shadow"
+                      onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(story.name) + '&background=E0E7EF&color=374151&size=64'; }}
+                    />
+                    <div className="flex items-center gap-1 xs:gap-2 mb-1">
+                      <span className="text-xs xs:text-base font-bold text-gray-900">{story.name}</span>
+                      <span className="text-xs xs:text-md">{story.country}</span>
                     </div>
-                    <div className="mt-2 flex items-center justify-center w-full">
-                      <span className="text-xs px-3 py-1 rounded bg-white/90 text-[#fa5954] font-semibold shadow">
-                        {story.impact}
-                      </span>
-                    </div>
-                  </motion.div>
-                </div>
-              ))}
-            </Slider>
-          </div>
+                    <span className="text-[10px] xs:text-xs font-semibold text-[#fa5954] mb-1 text-center">{story.title}</span>
+                    <p className="text-[10px] xs:text-xs text-gray-700 text-center mb-1 xs:mb-2">{story.desc}</p>
+                  </div>
+                  <div className="mt-1 xs:mt-2 flex items-center justify-center w-full">
+                    <span className="text-[10px] xs:text-xs px-2 xs:px-3 py-1 rounded bg-white/90 text-[#fa5954] font-semibold shadow">
+                      {story.impact}
+                    </span>
+                  </div>
+                </motion.div>
+              </div>
+            ))}
+          </Slider>
           {/* CSS for slick spacing and fixed height */}
           <style>{`
             .slick-track {
@@ -872,192 +874,233 @@ const Work: React.FC = () => {
               align-items: stretch !important;
             }
             .slick-slide {
-              height: ${cardFixedHeight}px !important;
+              height: ${cardFixedHeight - 40}px !important;
               display: flex !important;
               align-items: stretch !important;
               justify-content: center !important;
-              padding: 0 12px;
+              padding: 0 8px;
               box-sizing: border-box;
             }
             .slick-list {
-              margin: 0 -12px;
+              margin: 0 -8px;
               padding-bottom: 8px;
             }
             .slick-dots {
-              margin-top: 16px;
+              margin-top: 12px;
             }
           `}</style>
         </div>
-      </section>
-
-      {/* HOW IT WORKS SECTION */}
-      <section className="w-full py-16 px-4 bg-white relative">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            How it works
-          </h2>
-          <p className="text-base text-gray-600 max-w-2xl mx-auto mb-10">
-            Your journey to world-class research and mentorship starts here. Just follow these simple steps!
-          </p>
-        </div>
-        {/* Timeline for desktop */}
-        <motion.ol
-          className="hidden md:flex flex-col items-center relative max-w-3xl mx-auto"
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-        >
-          {/* Animated vertical line */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-8 bottom-8 w-1 z-0">
-            <motion.div
-              initial={{ height: 0 }}
-              whileInView={{ height: "100%" }}
-              transition={{ duration: 1.2, delay: 0.2, ease: "easeInOut" }}
-              className="w-full h-full bg-gradient-to-b from-[#fa5954] via-[#fa5954]/10 to-transparent rounded-full"
-            />
-          </div>
-          {steps.map((step, idx) => (
-            <motion.li
-              key={step.title}
-              variants={stepVariant}
-              className="relative flex items-center w-full mb-0 z-10"
+        {/* Mobile: Horizontal Scroll Cards */}
+        <div className="sm:hidden flex overflow-x-auto gap-4 py-2 px-1">
+          {stories.map((story, idx) => (
+            <div
+              key={story.name}
+              className={`
+                flex flex-col items-center justify-between
+                rounded-xl shadow-lg ${story.color}
+                border border-white/60 px-4 py-6 mx-1 min-w-[220px] max-w-[240px]
+                transition-all
+              `}
+              style={{
+                minHeight: 220,
+                maxHeight: 260,
+                height: 220,
+                width: 220,
+              }}
             >
-              <div className={`flex-1 ${idx % 2 === 0 ? "justify-end flex pr-8" : "hidden"}`}>
-                <div className={`bg-gradient-to-br ${step.color} rounded-xl shadow-lg px-7 py-6 text-left max-w-md w-full border border-[#fa5954]/10`}>
-                  <h3 className="text-lg font-bold mb-1 text-gray-900">{step.title}</h3>
-                  <p className="text-sm text-gray-600">{step.desc}</p>
+              <div className="flex flex-col items-center">
+                <img
+                  src={story.img}
+                  alt={story.name}
+                  className="w-12 h-12 rounded-full object-cover mb-2 ring-2 ring-blue-100 shadow"
+                  onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(story.name) + '&background=E0E7EF&color=374151&size=64'; }}
+                />
+                <div className="flex items-center gap-1 mb-1">
+                  <span className="text-xs font-bold text-gray-900">{story.name}</span>
+                  <span className="text-xs">{story.country}</span>
                 </div>
+                <span className="text-[10px] font-semibold text-[#fa5954] mb-1 text-center">{story.title}</span>
+                <p className="text-[10px] text-gray-700 text-center mb-1">{story.desc}</p>
               </div>
-              {/* Timeline orb */}
-              <div className="flex flex-col items-center relative z-20">
-                <motion.div
-                  className="rounded-full bg-white border-4 border-[#fa5954] shadow-lg p-2 mb-2"
-                  variants={orbPulse}
-                  animate="animate"
-                >
-                  {step.icon}
-                </motion.div>
-                {idx < steps.length - 1 && (
-                  <motion.div
-                    initial={{ height: 0 }}
-                    whileInView={{ height: 54 }}
-                    transition={{ delay: idx * 0.17 + 0.3, duration: 0.5, ease: "easeInOut" }}
-                    className="w-1 bg-[#fa5954]/20"
-                    style={{ minHeight: 54 }}
-                  />
-                )}
+              <div className="mt-1 flex items-center justify-center w-full">
+                <span className="text-[10px] px-2 py-1 rounded bg-white/90 text-[#fa5954] font-semibold shadow">
+                  {story.impact}
+                </span>
               </div>
-              <div className={`flex-1 ${idx % 2 !== 0 ? "justify-start flex pl-8" : "hidden"}`}>
-                <div className={`bg-gradient-to-bl ${step.color} rounded-xl shadow-lg px-7 py-6 text-left max-w-md w-full border border-[#fa5954]/10`}>
-                  <h3 className="text-lg font-bold mb-1 text-gray-900">{step.title}</h3>
-                  <p className="text-sm text-gray-600">{step.desc}</p>
-                </div>
-              </div>
-            </motion.li>
+            </div>
           ))}
-          {/* CTA at the end */}
+        </div>
+      </div>
+    </section>
+
+    {/* HOW IT WORKS SECTION */}
+    <section className="w-full py-16 px-4 bg-white relative">
+      <div className="max-w-4xl mx-auto text-center">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          How it works
+        </h2>
+        <p className="text-base text-gray-600 max-w-2xl mx-auto mb-10">
+          Your journey to world-class research and mentorship starts here. Just follow these simple steps!
+        </p>
+      </div>
+      {/* Timeline for desktop */}
+      <motion.ol
+        className="hidden md:flex flex-col items-center relative max-w-3xl mx-auto"
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+      >
+        {/* Animated vertical line */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-8 bottom-8 w-1 z-0">
           <motion.div
+            initial={{ height: 0 }}
+            whileInView={{ height: "100%" }}
+            transition={{ duration: 1.2, delay: 0.2, ease: "easeInOut" }}
+            className="w-full h-full bg-gradient-to-b from-[#fa5954] via-[#fa5954]/10 to-transparent rounded-full"
+          />
+        </div>
+        {steps.map((step, idx) => (
+          <motion.li
+            key={step.title}
             variants={stepVariant}
-            className="mt-12 flex flex-col items-center"
+            className="relative flex items-center w-full mb-0 z-10"
           >
-            <button className="px-8 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_18px_rgba(250,89,84,0.7)] transition-all duration-300 text-lg">
-              Start Your Project
-            </button>
-            <span className="mt-2 text-gray-500 text-sm">It's free to post a requirement!</span>
-          </motion.div>
-        </motion.ol>
-        {/* Horizontal scroll for mobile */}
-        <motion.div
-          className="md:hidden flex overflow-x-auto gap-6 py-6 px-1"
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-        >
-          {steps.map((step, idx) => (
-            <motion.div
-              key={step.title}
-              variants={stepVariant}
-              className="flex flex-col items-center min-w-[220px] max-w-[240px] bg-gradient-to-br from-white via-[#fff6f5] to-[#fbeeea] rounded-xl shadow-lg px-5 py-6 border border-[#fa5954]/10 mx-1"
-            >
+            <div className={`flex-1 ${idx % 2 === 0 ? "justify-end flex pr-8" : "hidden"}`}>
+              <div className={`bg-gradient-to-br ${step.color} rounded-xl shadow-lg px-7 py-6 text-left max-w-md w-full border border-[#fa5954]/10`}>
+                <h3 className="text-lg font-bold mb-1 text-gray-900">{step.title}</h3>
+                <p className="text-sm text-gray-600">{step.desc}</p>
+              </div>
+            </div>
+            {/* Timeline orb */}
+            <div className="flex flex-col items-center relative z-20">
               <motion.div
-                className="rounded-full bg-white border-4 border-[#fa5954] shadow-lg p-2 mb-3"
+                className="rounded-full bg-white border-4 border-[#fa5954] shadow-lg p-2 mb-2"
                 variants={orbPulse}
                 animate="animate"
               >
                 {step.icon}
               </motion.div>
-              <h3 className="text-base font-bold mb-1 text-gray-900">{step.title}</h3>
-              <p className="text-xs text-gray-600">{step.desc}</p>
               {idx < steps.length - 1 && (
-                <div className="w-8 h-1 bg-gradient-to-r from-[#fa5954]/40 to-transparent mt-4 rounded-full" />
+                <motion.div
+                  initial={{ height: 0 }}
+                  whileInView={{ height: 54 }}
+                  transition={{ delay: idx * 0.17 + 0.3, duration: 0.5, ease: "easeInOut" }}
+                  className="w-1 bg-[#fa5954]/20"
+                  style={{ minHeight: 54 }}
+                />
               )}
-            </motion.div>
-          ))}
-          {/* CTA at the end */}
-          <div className="flex flex-col items-center justify-center min-w-[160px]">
-            <button className="px-6 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_18px_rgba(250,89,84,0.7)] transition-all duration-300 text-base">
-              Start Now
-            </button>
-            <span className="mt-2 text-gray-500 text-xs">It's free!</span>
-          </div>
+            </div>
+            <div className={`flex-1 ${idx % 2 !== 0 ? "justify-start flex pl-8" : "hidden"}`}>
+              <div className={`bg-gradient-to-bl ${step.color} rounded-xl shadow-lg px-7 py-6 text-left max-w-md w-full border border-[#fa5954]/10`}>
+                <h3 className="text-lg font-bold mb-1 text-gray-900">{step.title}</h3>
+                <p className="text-sm text-gray-600">{step.desc}</p>
+              </div>
+            </div>
+          </motion.li>
+        ))}
+        {/* CTA at the end */}
+        <motion.div
+          variants={stepVariant}
+          className="mt-12 flex flex-col items-center"
+        >
+          <button className="px-8 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_18px_rgba(250,89,84,0.7)] transition-all duration-300 text-lg">
+            Start Your Project
+          </button>
+          <span className="mt-2 text-gray-500 text-sm">It's free to post a requirement!</span>
         </motion.div>
-      </section>
+      </motion.ol>
+      {/* Horizontal scroll for mobile */}
+      <motion.div
+        className="md:hidden flex overflow-x-auto gap-6 py-6 px-1"
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+      >
+        {steps.map((step, idx) => (
+          <motion.div
+            key={step.title}
+            variants={stepVariant}
+            className="flex flex-col items-center min-w-[220px] max-w-[240px] bg-gradient-to-br from-white via-[#fff6f5] to-[#fbeeea] rounded-xl shadow-lg px-5 py-6 border border-[#fa5954]/10 mx-1"
+          >
+            <motion.div
+              className="rounded-full bg-white border-4 border-[#fa5954] shadow-lg p-2 mb-3"
+              variants={orbPulse}
+              animate="animate"
+            >
+              {step.icon}
+            </motion.div>
+            <h3 className="text-base font-bold mb-1 text-gray-900">{step.title}</h3>
+            <p className="text-xs text-gray-600">{step.desc}</p>
+            {idx < steps.length - 1 && (
+              <div className="w-8 h-1 bg-gradient-to-r from-[#fa5954]/40 to-transparent mt-4 rounded-full" />
+            )}
+          </motion.div>
+        ))}
+        {/* CTA at the end */}
+        <div className="flex flex-col items-center justify-center min-w-[160px]">
+          <button className="px-6 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_18px_rgba(250,89,84,0.7)] transition-all duration-300 text-base">
+            Start Now
+          </button>
+          <span className="mt-2 text-gray-500 text-xs">It's free!</span>
+        </div>
+      </motion.div>
+    </section>
 
-      {/* FINAL CTA SECTION */}
-      <section className="relative w-full overflow-hidden">
-        {/* Curved SVG top */}
-        <div className="absolute top-0 left-0 w-full z-10 pointer-events-none">
-          <svg viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-[80px] md:h-[100px]">
-            <path
-              d="M0,80 C400,0 1040,0 1440,80 L1440,0 L0,0 Z"
-              fill="#fff"
-            />
-          </svg>
-        </div>
-        {/* Backdrop image with blur */}
-        <div className="absolute inset-0 w-full h-full">
-          <img
-            src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1600&q=80"
-            alt="Freelancer workspace"
-            className="w-full h-full object-cover object-center"
-            style={{ filter: 'blur(1px)' }}
+    {/* FINAL CTA SECTION */}
+    <section className="relative w-full overflow-hidden">
+      {/* Curved SVG top */}
+      <div className="absolute top-0 left-0 w-full z-10 pointer-events-none">
+        <svg viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-[60px] xs:h-[80px] md:h-[100px]">
+          <path
+            d="M0,80 C400,0 1040,0 1440,80 L1440,0 L0,0 Z"
+            fill="#fff"
           />
-          <div className="absolute inset-0 bg-black/40" />
-        </div>
-        {/* Inner content */}
-        <div className="relative z-20 max-w-3xl mx-auto px-6 py-20 md:py-28 flex flex-col items-center text-center text-white">
-          <motion.h2
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, type: "spring", bounce: 0.3 }}
-            className="text-3xl md:text-4xl font-bold mb-4 drop-shadow-lg"
-          >
-            Ready to Accelerate Your Freelance Research Journey?
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-lg md:text-xl mb-8 max-w-2xl mx-auto drop-shadow-md"
-          >
-            Connect instantly with world-class PhD experts, get tailored guidance, and bring your R&D or academic vision to life as a freelancer or client. <br />
-            <span className="font-semibold text-[#fa5954]">It's free to get started!</span>
-          </motion.p>
-          <motion.button
-            initial={{ scale: 0.9, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="px-10 py-4 rounded-full bg-[#fa5954] text-white font-bold text-lg shadow-xl hover:shadow-[0_0_20px_rgba(250,89,84,0.7)] hover:bg-[#e0514d] transition-all duration-300"
-          >
-            Let&apos;s Start
-          </motion.button>
-        </div>
-      </section>
-      <Footer />
-    </main>
-  );
+        </svg>
+      </div>
+      {/* Backdrop image with blur */}
+      <div className="absolute inset-0 w-full h-full">
+        <img
+          src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1600&q=80"
+          alt="Freelancer workspace"
+          className="w-full h-full object-cover object-center"
+          style={{ filter: 'blur(1px)' }}
+        />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+      {/* Inner content */}
+      <div className="relative z-20 max-w-3xl mx-auto px-4 xs:px-6 py-12 xs:py-20 md:py-28 flex flex-col items-center text-center text-white">
+        <motion.h2
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, type: "spring", bounce: 0.3 }}
+          className="text-xl xs:text-3xl md:text-4xl font-bold mb-3 xs:mb-4 drop-shadow-lg"
+        >
+          Ready to Accelerate Your Freelance Research Journey?
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="text-sm xs:text-lg md:text-xl mb-6 xs:mb-8 max-w-2xl mx-auto drop-shadow-md"
+        >
+          Connect instantly with world-class PhD experts, get tailored guidance, and bring your R&D or academic vision to life as a freelancer or client. <br />
+          <span className="font-semibold text-[#fa5954]">It's free to get started!</span>
+        </motion.p>
+        <motion.button
+          initial={{ scale: 0.9, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="px-6 xs:px-10 py-3 xs:py-4 rounded-full bg-[#fa5954] text-white font-bold text-base xs:text-lg shadow-xl hover:shadow-[0_0_20px_rgba(250,89,84,0.7)] hover:bg-[#e0514d] transition-all duration-300"
+        >
+          Let&apos;s Start
+        </motion.button>
+      </div>
+    </section>
+    <Footer />
+  </main>
+);
 };
 
 export default Work;
