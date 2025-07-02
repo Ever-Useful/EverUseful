@@ -104,7 +104,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
   const [showFilterTab, setShowFilterTab] = useState(false);
   const [mobileFilters, setMobileFilters] = useState(filters);
 
-  const isMobile = useIsMobile();
+  // const isMobile = useIsMobile();
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -705,21 +705,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                       </div>
                     </div>
                   </div>
-                </CardContent>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-2 text-sm font-sm font-semibold text-gray-500">
-                      <div className="flex items-center space-x-1">
-                        <DollarSign className="w-3 h-3" />
-                        <span>{project.price}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{project.duration}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-
+                  </CardContent>
                   {/* Fixed Buttons at Card Bottom */}
                   <div className="px-3 sm:px-4 pb-3 sm:pb-4 mt-auto flex gap-2">
                     <Button
@@ -749,8 +735,6 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
             )
             ))}
           </div>
-        </div>
-
         {renderPagination()}
       </div>
 

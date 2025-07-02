@@ -1451,11 +1451,121 @@
         "avgResponseTime": "5",
         "updatedAt": "2025-06-28T06:30:13.873Z"
       }
+    },
+    "USER_000014": {
+      "firebaseUid": "z9aCTT7kuGday67TpIRS1SIXdzG3",
+      "customUserId": "USER_000014",
+      "profile": {
+        "avatar": null,
+        "bio": null,
+        "location": null,
+        "website": null,
+        "title": null,
+        "createdAt": "2025-07-02T16:11:10.428Z",
+        "updatedAt": "2025-07-02T16:11:10.428Z",
+        "firstName": "Amrit",
+        "lastName": "Lal Paswan",
+        "userType": "student",
+        "username": "",
+        "email": "amritpaswan5952@gmail.com",
+        "mobile": "",
+        "gender": "",
+        "domain": "",
+        "purpose": "",
+        "role": ""
+      },
+      "education": [],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-07-02T16:11:10.428Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-07-02T16:11:10.428Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-07-02T16:11:10.428Z"
+      },
+      "studentData": null,
+      "professorData": null,
+      "freelancerData": {
+        "experience": "",
+        "portfolio": "",
+        "location": "",
+        "skills": [],
+        "hourlyRate": "",
+        "avgResponseTime": "",
+        "updatedAt": "2025-07-02T16:11:10.428Z"
+      }
     }
   },
   "userCounter": 14,
   "metadata": {
-    "lastUpdated": "2025-06-29T20:11:32.779Z",
+    "lastUpdated": "2025-07-02T16:11:10.428Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }
