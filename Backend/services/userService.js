@@ -227,15 +227,27 @@ class UserService {
       throw new Error('User not found');
     }
 
-    // Update basic profile fields
-    this.userData.users[customUserId].profile = {
-      ...this.userData.users[customUserId].profile,
-      ...profileData,
-      updatedAt: new Date().toISOString()
-    };
+    const user = this.userData.users[customUserId];
+    const oldProfile = { ...user.profile };
+    
+    // Update profile fields
+    Object.assign(user.profile, profileData);
+    user.profile.updatedAt = new Date().toISOString();
 
     await this.saveUserData();
-    return this.userData.users[customUserId].profile;
+
+    // Add activity for profile update
+    await this.addActivity(customUserId, {
+      type: 'profile_updated',
+      description: 'Updated profile information',
+      metadata: { 
+        updatedFields: Object.keys(profileData),
+        oldValues: oldProfile,
+        newValues: user.profile
+      }
+    });
+
+    return user.profile;
   }
 
   // Update student data
@@ -301,24 +313,34 @@ class UserService {
   // Education methods
   async addEducation(customUserId, educationData) {
     await this.loadUserData();
+    
     if (!this.userData.users[customUserId]) {
       throw new Error('User not found');
     }
 
-    if (!this.userData.users[customUserId].education) {
-      this.userData.users[customUserId].education = [];
-    }
-
-    const newEducation = {
+    const education = {
       id: `edu_${Date.now()}`,
       ...educationData,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    this.userData.users[customUserId].education.push(newEducation);
+    this.userData.users[customUserId].education.push(education);
     await this.saveUserData();
-    return newEducation;
+
+    // Add activity for education addition
+    await this.addActivity(customUserId, {
+      type: 'education_added',
+      description: `Added education: ${education.course} at ${education.college}`,
+      metadata: { 
+        educationId: education.id,
+        course: education.course,
+        college: education.college,
+        qualification: education.qualification
+      }
+    });
+
+    return education;
   }
 
   async updateEducation(customUserId, educationId, educationData) {
@@ -361,24 +383,34 @@ class UserService {
   // Work Experience methods
   async addWorkExperience(customUserId, workData) {
     await this.loadUserData();
+    
     if (!this.userData.users[customUserId]) {
       throw new Error('User not found');
     }
 
-    if (!this.userData.users[customUserId].workExperience) {
-      this.userData.users[customUserId].workExperience = [];
-    }
-
-    const newWork = {
+    const workExperience = {
       id: `work_${Date.now()}`,
       ...workData,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    this.userData.users[customUserId].workExperience.push(newWork);
+    this.userData.users[customUserId].workExperience.push(workExperience);
     await this.saveUserData();
-    return newWork;
+
+    // Add activity for work experience addition
+    await this.addActivity(customUserId, {
+      type: 'work_experience_added',
+      description: `Added work experience: ${workExperience.designation} at ${workExperience.organization}`,
+      metadata: { 
+        workId: workExperience.id,
+        designation: workExperience.designation,
+        organization: workExperience.organization,
+        employmentType: workExperience.employmentType
+      }
+    });
+
+    return workExperience;
   }
 
   async updateWorkExperience(customUserId, workId, workData) {
@@ -469,7 +501,7 @@ class UserService {
     return this.userData.users[customUserId].profile;
   }
 
-  // Add project to user
+  // Add user project
   async addUserProject(customUserId, projectData) {
     await this.loadUserData();
     
@@ -478,14 +510,14 @@ class UserService {
     }
 
     const project = {
-      projectId: projectData.projectId,
+      projectId: Date.now().toString(),
       title: projectData.title,
       description: projectData.description,
       category: projectData.category,
       tags: projectData.tags || [],
-      imageUrl: projectData.imageUrl,
-      projectLink: projectData.projectLink,
-      githubLink: projectData.githubLink,
+      imageUrl: projectData.imageUrl || '',
+      projectLink: projectData.projectLink || '',
+      githubLink: projectData.githubLink || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       likes: 0,
@@ -494,8 +526,8 @@ class UserService {
     };
 
     this.userData.users[customUserId].projects.created.push(project);
-    this.userData.users[customUserId].projects.count += 1;
-    this.userData.users[customUserId].stats.projectsCount += 1;
+    this.userData.users[customUserId].projects.count = this.userData.users[customUserId].projects.created.length;
+    this.userData.users[customUserId].stats.projectsCount = this.userData.users[customUserId].projects.created.length;
 
     // Add activity for project creation
     await this.addActivity(customUserId, {
@@ -505,10 +537,22 @@ class UserService {
     });
 
     await this.saveUserData();
+
+    // Add activity for project creation
+    await this.addActivity(customUserId, {
+      type: 'project_created',
+      description: `Created new project: ${project.title}`,
+      metadata: { 
+        projectId: project.projectId,
+        projectTitle: project.title,
+        category: project.category
+      }
+    });
+
     return project;
   }
 
-  // Remove project ID from user's created projects
+  // Remove user project
   async removeUserProject(customUserId, projectId) {
     await this.loadUserData();
     
@@ -516,27 +560,36 @@ class UserService {
       throw new Error('User not found');
     }
 
-    const projectIdNum = parseInt(projectId);
-    const projectIndex = this.userData.users[customUserId].projects.created.indexOf(projectIdNum);
+    const user = this.userData.users[customUserId];
+    const projectIndex = user.projects.created.findIndex(p => p.projectId === projectId);
     
-    if (projectIndex !== -1) {
-      // Remove project ID from created array
-      this.userData.users[customUserId].projects.created.splice(projectIndex, 1);
-      
-      // Decrement counts
-      this.userData.users[customUserId].projects.count = Math.max(0, this.userData.users[customUserId].projects.count - 1);
-      this.userData.users[customUserId].stats.projectsCount = Math.max(0, this.userData.users[customUserId].stats.projectsCount - 1);
-      
-      await this.saveUserData();
-      console.log(`Project ID ${projectId} removed from user ${customUserId}`);
-      return true;
-    } else {
-      console.log(`Project ID ${projectId} not found in user ${customUserId}'s created projects`);
-      return false;
+    if (projectIndex === -1) {
+      throw new Error('Project not found');
     }
+
+    const removedProject = user.projects.created[projectIndex];
+    user.projects.created.splice(projectIndex, 1);
+    user.projects.count = user.projects.created.length;
+    user.stats.projectsCount = user.projects.created.length;
+
+    await this.saveUserData();
+
+    // Add activity for project removal
+    await this.addActivity(customUserId, {
+      type: 'project_removed',
+      description: `Removed project: ${removedProject.title}`,
+      metadata: { 
+        projectId: removedProject.projectId,
+        projectTitle: removedProject.title,
+        category: removedProject.category
+      }
+    });
+
+    return { success: true, message: 'Project removed successfully' };
   }
 
-  // Add a skill (flat array)
+  // Add user skill
+
   async addUserSkill(customUserId, skillData) {
     await this.loadUserData();
     
@@ -544,46 +597,78 @@ class UserService {
       throw new Error('User not found');
     }
 
-    const { name } = skillData;
-    if (!name) {
-      throw new Error('Skill name is required');
+    // Ensure skills is an array and filter out invalid entries
+    let skills = this.userData.users[customUserId].skills || [];
+    skills = skills.filter(s => s && (typeof s === 'string' || (typeof s === 'object' && s.name)));
+    this.userData.users[customUserId].skills = skills;
+
+    // Always store as object
+    const skill = {
+      name: skillData.name,
+      category: skillData.category || 'General',
+      expertise: skillData.expertise || 'Beginner',
+      addedAt: new Date().toISOString()
+    };
+
+    // Check if skill already exists (string or object)
+    const existingSkillIndex = skills.findIndex(
+      s => (typeof s === 'string' && s.toLowerCase() === skill.name.toLowerCase()) ||
+           (typeof s === 'object' && s.name && s.name.toLowerCase() === skill.name.toLowerCase())
+    );
+
+    if (existingSkillIndex !== -1) {
+      // Update existing skill (convert to object if needed)
+      skills[existingSkillIndex] = skill;
+      // Add activity for skill update
+      await this.addActivity(customUserId, {
+        type: 'skill_updated',
+        description: `Updated skill: ${skill.name}`,
+        metadata: { skillName: skill.name, category: skill.category, expertise: skill.expertise }
+      });
+    } else {
+      // Add new skill
+      skills.push(skill);
+      // Add activity for skill addition
+      await this.addActivity(customUserId, {
+        type: 'skill_added',
+        description: `Added new skill: ${skill.name}`,
+        metadata: { skillName: skill.name, category: skill.category, expertise: skill.expertise }
+      });
     }
 
-    // Check if skill already exists
-    if (this.userData.users[customUserId].skills.includes(name)) {
-      throw new Error('Skill already exists');
-    }
-
-    this.userData.users[customUserId].skills.push(name);
+    this.userData.users[customUserId].skills = skills;
     await this.saveUserData();
-
-    // Add activity for skill addition
-    await this.addActivity(customUserId, {
-      type: 'skill_added',
-      description: `Added new skill: ${name}`,
-      metadata: { skillName: name }
-    });
-
-    return this.userData.users[customUserId].skills;
+    return skill;
   }
 
-  // Remove skill from user (flat array)
+  // Remove user skill
   async removeUserSkill(customUserId, skillName) {
     await this.loadUserData();
+    
     if (!this.userData.users[customUserId]) {
       throw new Error('User not found');
     }
-    // Ensure skills is an array
-    if (!Array.isArray(this.userData.users[customUserId].skills)) {
-      this.userData.users[customUserId].skills = [];
+
+    let skills = this.userData.users[customUserId].skills || [];
+    skills = skills.filter(s => s && (typeof s === 'string' || (typeof s === 'object' && s.name)));
+    const skillIndex = skills.findIndex(
+      s => (typeof s === 'string' && s.toLowerCase() === skillName.toLowerCase()) ||
+           (typeof s === 'object' && s.name && s.name.toLowerCase() === skillName.toLowerCase())
+    );
+    if (skillIndex === -1) {
+      throw new Error('Skill not found');
     }
-    // Remove the skill if present
-    const skillIndex = this.userData.users[customUserId].skills.indexOf(skillName);
-    if (skillIndex > -1) {
-      this.userData.users[customUserId].skills.splice(skillIndex, 1);
-      await this.saveUserData();
-    }
-    return this.userData.users[customUserId].skills;
+    const removedSkill = skills[skillIndex];
+    skills.splice(skillIndex, 1);
+    this.userData.users[customUserId].skills = skills;
+    await this.saveUserData();
+    // Add activity for skill removal
+    await this.addActivity(customUserId, {
+      type: 'skill_removed',
+      description: `Removed skill: ${typeof removedSkill === 'string' ? removedSkill : removedSkill.name}`,
+      metadata: { skillName: typeof removedSkill === 'string' ? removedSkill : removedSkill.name }
+    });
+    return skills;
   }
 
   // Add to cart
@@ -666,10 +751,10 @@ class UserService {
 
     this.userData.users[customUserId].activities.recent.unshift(activity);
     
-    // Keep only last 50 activities
-    if (this.userData.users[customUserId].activities.recent.length > 50) {
+    // Keep only last 5 activities (FIFO - First In, First Out)
+    if (this.userData.users[customUserId].activities.recent.length > 5) {
       this.userData.users[customUserId].activities.recent = 
-        this.userData.users[customUserId].activities.recent.slice(0, 50);
+        this.userData.users[customUserId].activities.recent.slice(0, 5);
     }
 
     await this.saveUserData();

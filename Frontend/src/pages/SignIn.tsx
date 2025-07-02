@@ -156,24 +156,15 @@ const SignIn = () => {
           customUserId: backendUser.customUserId,
           name: user.displayName || null,
           email: user.email || null,
-          userType: userType,
+          userType: backendUser.auth?.userType || userType, // Use the actual userType from backend
           createdAt: user.metadata?.creationTime || new Date().toISOString(),
         });
       }
 
-      const response = await fetch('http://localhost:3000/token', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+      // Set localStorage to indicate user is logged in
       localStorage.setItem("isLoggedIn", "true");
       window.dispatchEvent(new Event("storage"));
-      navigate(data.redirectUrl);
+      navigate('/profile'); // Navigate directly to profile
     } catch (error: any) {
       console.error("Login failed", error);
       if (error.code === 'auth/invalid-credential') {
