@@ -24,6 +24,7 @@ import { db } from "../lib/firebase"; // Make sure db is exported from your fire
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { userService } from '@/services/userService';
 import { firestoreService } from '@/services/firestoreService';
+import Logo from '../assets/Logo/Logo Side.png'
 
 const SignUp = () => {
   const [selectedCode, setSelectedCode] = useState("+91");
@@ -362,12 +363,12 @@ const SignUp = () => {
     }
   };
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-white">
       {/* Back Button - Mobile optimized */}
       {currentStep > 1 && (
         <button
           onClick={handleBackStep}
-          className="absolute top-4 left-4 lg:top-6 lg:left-6 flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors z-10 bg-white/80 rounded-full px-3 py-1 shadow-md"
+          className="fixed top-3 left-3 z-30 flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors bg-white/90 rounded-full px-3 py-1 shadow-md lg:static lg:top-6 lg:left-6"
           aria-label="Go back"
           type="button"
         >
@@ -378,31 +379,22 @@ const SignUp = () => {
         </button>
       )}
 
-      {/* Right side - Header, Progress, User Types, and Benefits - Mobile first */}
-      <div className="w-full lg:w-1/2 bg-gradient-to-br from-purple-400 to-slate-400 flex flex-col p-4 lg:p-8 relative overflow-hidden order-1 lg:order-2">
+      {/* Right side - Header, Progress, User Types, and Benefits */}
+      <div className="w-full lg:w-1/2 bg-gradient-to-br from-purple-400 to-slate-400 flex flex-col p-3 xs:p-4 sm:p-6 lg:p-8 relative overflow-hidden order-1 lg:order-2">
         {/* Header */}
-        <div className="text-center mb-6 lg:mb-8 animate-fade-in">
-          <div className="bg-white rounded-xl px-4 lg:px-6 items-center justify-around shadow-md w-fit mx-auto">
-            <div className="flex items-center justify-center space-x-2 mb-4 lg:mb-6">
+        <div className="text-center mb-5 xs:mb-6 lg:mb-8 animate-fade-in">
+          <div className="bg-white rounded-xl px-3 xs:px-4 lg:px-6 items-center justify-around shadow-md w-fit mx-auto">
+            <div className="flex items-center space-x-1 flex-shrink-0">
               <Link to="/" className="flex items-center space-x-2 group">
-                <div className="flex items-center justify-center w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-lg group-hover:scale-110 transition-all duration-300 shadow-md">
-                  <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                <img src={Logo} alt="AMOGH" className="h-10 xs:h-14 w-auto md:h-8" />
+                <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
+                  beta
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-lg lg:text-xl font-bold bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">
-                    AMOGH
-                  </span>
-                  <span className="text-xs text-slate-500 -mt-1">ever useful</span>
-                </div>
-                <Badge variant="secondary" className="hidden w-8 h-5 lg:w-10 lg:h-6 text-xs lg:text-sm px-1 sm:inline-flex animate-pulse bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border-purple-200">
-                  Beta
-                </Badge>
               </Link>
             </div>
           </div>
-
-          <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-2 lg:mb-4">Join the Innovation Network</h1>
-          <p className="text-lg lg:text-xl text-gray-600 mb-3 lg:mb-4">Create your account and start building the future</p>
+          <h1 className="text-xl xs:text-2xl lg:text-4xl font-bold text-gray-900 mb-2 lg:mb-4">Join the Innovation Network</h1>
+          <p className="text-base xs:text-lg lg:text-xl text-gray-600 mb-2 xs:mb-3 lg:mb-4">Create your account and start building the future</p>
           <div className="flex items-center justify-center space-x-2 flex-wrap gap-2">
             <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:scale-105 transition-transform text-xs lg:text-sm">
               <Star className="w-3 h-3 mr-1" />
@@ -416,11 +408,11 @@ const SignUp = () => {
         </div>
 
         {/* Progress indicator */}
-        <div className="flex items-center justify-center mb-6 lg:mb-8 animate-scale-in delay-200">
+        <div className="flex items-center justify-center mb-5 xs:mb-6 lg:mb-8 animate-scale-in delay-200">
           <div className="flex items-center space-x-2 lg:space-x-4">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
-                <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center font-medium transition-all duration-500 ${
+                <div className={`w-7 h-7 xs:w-8 xs:h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center font-medium transition-all duration-500 ${
                   step <= currentStep 
                     ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-110" 
                     : "bg-gray-200 text-gray-500"
@@ -428,7 +420,7 @@ const SignUp = () => {
                   {step < currentStep ? <Check className="w-4 h-4 lg:w-5 lg:h-5" /> : step}
                 </div>
                 {step < 3 && (
-                  <div className={`w-8 lg:w-16 h-1 mx-1 lg:mx-2 transition-all duration-500 ${
+                  <div className={`w-6 xs:w-8 lg:w-16 h-1 mx-1 lg:mx-2 transition-all duration-500 ${
                     step < currentStep ? "bg-gradient-to-r from-blue-600 to-purple-600" : "bg-gray-200"
                   }`} />
                 )}
@@ -436,23 +428,23 @@ const SignUp = () => {
             ))}
           </div>
         </div>
-        {/* User Type Selection - Mobile optimized */}
+        {/* User Type Selection */}
         {currentStep === 1 && (
-          <div className="animate-scale-in delay-400 mb-6 lg:mb-8">
-            <Label className="text-sm font-medium text-gray-700 mb-4 block text-center">I am a:</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+          <div className="animate-scale-in delay-400 mb-5 xs:mb-6 lg:mb-8">
+            <Label className="text-xs xs:text-sm font-medium text-gray-700 mb-3 xs:mb-4 block text-center">I am a:</Label>
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 xs:gap-3">
               {userTypes.map((type) => {
                 const IconComponent = type.icon;
                 return (
                   <button
                     key={type.id}
                     onClick={() => handleInputChange('userType', type.id)}
-                    className={`p-3 lg:p-4 rounded-xl border-2 transition-all duration-500 text-center ${formData.userType === type.id
+                    className={`p-2 xs:p-3 lg:p-4 rounded-xl border-2 transition-all duration-500 text-center ${formData.userType === type.id
                         ? "border-blue-500 bg-blue-50 scale-105 shadow-lg"
                         : "bg-white/70 hover:scale-102 hover:shadow-md"
                       }`}
                   >
-                    <div className={`w-6 h-6 lg:w-8 lg:h-8 ${type.color} rounded-xl mb-2 flex items-center justify-center shadow-md mx-auto`}>
+                    <div className={`w-6 h-6 lg:w-8 lg:h-8 ${type.color} rounded-xl mb-1 xs:mb-2 flex items-center justify-center shadow-md mx-auto`}>
                       <IconComponent className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
                     </div>
                     <div className="text-xs font-medium text-gray-900">{type.label}</div>
@@ -464,26 +456,26 @@ const SignUp = () => {
           </div>
         )}
 
-        {/* Benefits sidebar - Mobile optimized */}
-        <div className="mb-8 lg:mb-20 flex-1 flex items-center justify-center">
+        {/* Benefits sidebar */}
+        <div className="mb-6 xs:mb-8 lg:mb-20 flex-1 flex items-center justify-center">
           {currentUserType && (
             <Card className={`backdrop-blur-lg bg-gradient-to-br ${currentUserType.gradient} border-0 shadow-xl transition-all duration-500 hover:shadow-2xl hover:scale-105 w-full max-w-md`}>
-              <CardHeader className="pb-3 lg:pb-4">
-                <div className="flex items-center space-x-3 mb-3 lg:mb-4">
-                  <div className={`w-10 h-10 lg:w-12 lg:h-12 ${currentUserType.color} rounded-xl flex items-center justify-center shadow-lg`}>
-                    <currentUserType.icon className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+              <CardHeader className="pb-2 xs:pb-3 lg:pb-4">
+                <div className="flex items-center space-x-2 xs:space-x-3 mb-2 xs:mb-3 lg:mb-4">
+                  <div className={`w-8 h-8 xs:w-10 xs:h-10 lg:w-12 lg:h-12 ${currentUserType.color} rounded-xl flex items-center justify-center shadow-lg`}>
+                    <currentUserType.icon className="w-4 h-4 xs:w-5 xs:h-5 lg:w-6 lg:h-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-base lg:text-lg text-gray-900">{currentUserType.label} Benefits</CardTitle>
+                    <CardTitle className="text-sm xs:text-base lg:text-lg text-gray-900">{currentUserType.label} Benefits</CardTitle>
                     <p className="text-xs lg:text-sm text-gray-600 hidden sm:block">{currentUserType.description}</p>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2 lg:space-y-3">
+              <CardContent className="space-y-1 xs:space-y-2 lg:space-y-3">
                 {currentUserType.benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-start space-x-3 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
-                    <div className="flex-shrink-0 w-5 h-5 lg:w-6 lg:h-6 bg-white rounded-full flex items-center justify-center mt-0.5 shadow-sm">
-                      <Check className="w-2 h-2 lg:w-3 lg:h-3 text-green-600" />
+                  <div key={index} className="flex items-start space-x-2 xs:space-x-3 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                    <div className="flex-shrink-0 w-4 h-4 xs:w-5 xs:h-5 lg:w-6 lg:h-6 bg-white rounded-full flex items-center justify-center mt-0.5 shadow-sm">
+                      <Check className="w-2 h-2 xs:w-3 xs:h-3 lg:w-3 lg:h-3 text-green-600" />
                     </div>
                     <span className="text-xs lg:text-sm text-gray-700">{benefit}</span>
                   </div>
@@ -494,8 +486,8 @@ const SignUp = () => {
         </div>
       </div>
 
-      {/* Left side - Form - Mobile optimized */}
-      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-4 lg:p-8 order-2 lg:order-1 min-h-screen lg:min-h-0">
+      {/* Left side - Form */}
+      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-3 xs:p-4 sm:p-6 lg:p-8 order-2 lg:order-1 min-h-screen lg:min-h-0">
         <div className="w-full max-w-md">
           {currentStep === 1 && (
             <div className="space-y-6">

@@ -11,10 +11,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Github, Linkedin, Shield, Smartphone, Mail, Check, Phone } from "lucide-react";
-import { auth,handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "@/lib/firebase";
-import { sendEmailVerification,  RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail } from "firebase/auth";
+import { auth, handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "@/lib/firebase";
+import { sendEmailVerification, RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail } from "firebase/auth";
 import { userService } from '@/services/userService';
 import { firestoreService } from '@/services/firestoreService';
+import Logo from '../assets/Logo/Logo Side.png'
 
 // Extend the Window interface to include confirmationResult
 declare global {
@@ -41,22 +42,22 @@ const SignIn = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // New states for mobile authentication
   const [authMethod, setAuthMethod] = useState("email");
   const [countryCode, setCountryCode] = useState("+1");
   const [mobileNumber, setMobileNumber] = useState("");
   const [showMobileOTP, setShowMobileOTP] = useState(false);
-  const [mobileOTP, setMobileOTP] = useState("");  
-  
+  const [mobileOTP, setMobileOTP] = useState("");
+
   const [recaptchaInitialized, setRecaptchaInitialized] = useState(false);
-  
+
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // State for cycling through user types
   const [currentUserTypeIndex, setCurrentUserTypeIndex] = useState(0);
-  
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -78,28 +79,28 @@ const SignIn = () => {
   }, []);
 
   const userTypes = [
-    { 
-      id: "student", 
-      label: "Student", 
-      icon: BookOpen, 
+    {
+      id: "student",
+      label: "Student",
+      icon: BookOpen,
       color: "bg-gradient-to-br from-blue-500 to-cyan-500",
       gradient: "from-blue-50 to-cyan-50",
       description: "Access course projects and collaborate with peers",
       features: ["Project repositories", "Peer collaboration", "Academic resources"]
     },
-    { 
-      id: "professor", 
-      label: "Professor", 
-      icon: Star, 
+    {
+      id: "professor",
+      label: "Professor",
+      icon: Star,
       color: "bg-gradient-to-br from-purple-500 to-pink-500",
       gradient: "from-purple-50 to-pink-50",
       description: "Manage courses and mentor student projects",
       features: ["Course management", "Student mentoring", "Research collaboration"]
     },
-    { 
-      id: "business", 
-      label: "Business", 
-      icon: Building2, 
+    {
+      id: "business",
+      label: "Business",
+      icon: Building2,
       color: "bg-gradient-to-br from-green-500 to-emerald-500",
       gradient: "from-green-50 to-emerald-50",
       description: "Connect with talent and sponsor innovative projects",
@@ -183,12 +184,12 @@ const SignIn = () => {
       setIsLoading(false);
     }
   };
-  
+
   const sendOtp = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Clear any existing reCAPTCHA
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.clear();
@@ -221,7 +222,7 @@ const SignIn = () => {
     } catch (error: any) {
       console.error("Error in sendOtp:", error);
       setRecaptchaInitialized(false);
-      console.log(error);setError(error.message || "Failed to send OTP. Please try again.");
+      console.log(error); setError(error.message || "Failed to send OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -271,7 +272,7 @@ const SignIn = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       if (!recaptchaInitialized) {
         await sendOtp();
       } else {
@@ -339,37 +340,36 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-200 to-purple-200 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-200 to-purple-200 flex items-center justify-center p-2 xs:p-4 relative overflow-hidden">
       <div id="recaptcha-container" className="fixed bottom-0 right-0 opacity-0"></div>
       <div className="w-full max-w-7xl relative z-10">
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 xs:gap-8">
           {/* Left side - Sign in form */}
-          <div className="space-y-4 lg:space-y-6 order-2 lg:order-1">
-            {/* Sign In Form */}
+          <div className="order-2 lg:order-1 w-full">
             <Card className="backdrop-blur-xl bg-white/90 border-0 shadow-2xl animate-scale-in delay-300">
-              <CardHeader className="text-center pb-4 lg:pb-6">
-                <CardTitle className="text-xl lg:text-2xl font-bold text-gray-900">
+              <CardHeader className="text-center pb-4 xs:pb-6">
+                <CardTitle className="text-lg xs:text-xl lg:text-2xl font-bold text-gray-900">
                   {showForgotPassword ? "Reset Password" : "Sign In"}
                 </CardTitle>
-                <CardDescription className="text-sm lg:text-base text-gray-600">
-                  {showForgotPassword 
+                <CardDescription className="text-xs xs:text-sm lg:text-base text-gray-600">
+                  {showForgotPassword
                     ? "Enter your email to receive a verification code"
                     : "Enter your credentials to access your account"
                   }
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 lg:space-y-6">
+              <CardContent className="space-y-4 xs:space-y-6">
                 {!showMFA && !showForgotPassword && !showMobileOTP ? (
                   <>
                     {/* Authentication Method Selection */}
                     <div className="space-y-2 lg:space-y-3">
                       <Label className="text-gray-700 font-medium">Sign in with:</Label>
-                      <RadioGroup 
-                        value={authMethod} 
+                      <RadioGroup
+                        value={authMethod}
                         onValueChange={(value) => {
                           setAuthMethod(value);
                           setError(null); // Clear any existing errors when switching methods
-                        }} 
+                        }}
                         className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6"
                       >
                         <div className="flex items-center space-x-2">
@@ -402,7 +402,7 @@ const SignIn = () => {
                             className="transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500"
                           />
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
                           <div className="relative">
@@ -437,7 +437,7 @@ const SignIn = () => {
                               Remember me
                             </Label>
                           </div>
-                          <button 
+                          <button
                             onClick={() => setShowForgotPassword(true)}
                             className="text-sm text-blue-600 hover:text-blue-700 transition-colors font-medium text-left sm:text-right"
                           >
@@ -445,7 +445,7 @@ const SignIn = () => {
                           </button>
                         </div>
 
-                        <Button 
+                        <Button
                           onClick={handleSignIn}
                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl"
                           disabled={!email || !password || isLoading}
@@ -487,9 +487,8 @@ const SignIn = () => {
                                 }
                               }}
                               maxLength={10}
-                              className={`flex-1 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 ${
-                                mobileNumber.length === 10 ? 'border-green-500' : ''
-                              }`}
+                              className={`flex-1 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 ${mobileNumber.length === 10 ? 'border-green-500' : ''
+                                }`}
                             />
                           </div>
                           {mobileNumber.length > 0 && mobileNumber.length < 10 && (
@@ -510,7 +509,7 @@ const SignIn = () => {
                           </div>
                         )}
 
-                        <Button 
+                        <Button
                           onClick={handleMobileSignIn}
                           className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl"
                           disabled={!mobileNumber || mobileNumber.length < 10 || isLoading}
@@ -562,7 +561,7 @@ const SignIn = () => {
 
                     <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
                       <span>Didn't receive the code?</span>
-                      <button 
+                      <button
                         onClick={handleMobileSignIn}
                         className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
                       >
@@ -570,7 +569,7 @@ const SignIn = () => {
                       </button>
                     </div>
 
-                    <Button 
+                    <Button
                       onClick={handleMobileOTPVerify}
                       className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-500 hover:scale-105 group shadow-lg"
                       disabled={mobileOTP.length !== 6}
@@ -579,8 +578,8 @@ const SignIn = () => {
                       <Check className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
                     </Button>
 
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       onClick={resetToSignIn}
                       className="w-full"
                     >
@@ -611,7 +610,7 @@ const SignIn = () => {
                           />
                         </div>
 
-                        <Button 
+                        <Button
                           // onClick={handleForgotPasswordSubmit} will put it when added logic
                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg"
                           disabled={!forgotPasswordEmail}
@@ -693,7 +692,7 @@ const SignIn = () => {
                           </div>
                         </div>
 
-                        <Button 
+                        <Button
                           onClick={handleForgotPasswordOTPVerify}
                           className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-500 hover:scale-105 group shadow-lg"
                           disabled={forgotPasswordOTP.length !== 6 || !newPassword || !confirmPassword || newPassword !== confirmPassword}
@@ -704,8 +703,8 @@ const SignIn = () => {
                       </>
                     )}
 
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       onClick={resetToSignIn}
                       className="w-full"
                     >
@@ -729,11 +728,10 @@ const SignIn = () => {
                           <button
                             key={method.id}
                             onClick={() => setMfaMethod(method.id)}
-                            className={`p-3 lg:p-4 rounded-lg border-2 text-left transition-all duration-300 ${
-                              mfaMethod === method.id
+                            className={`p-3 lg:p-4 rounded-lg border-2 text-left transition-all duration-300 ${mfaMethod === method.id
                                 ? "border-blue-500 bg-blue-50 scale-105"
                                 : "border-gray-200 hover:border-gray-300 hover:scale-102"
-                            }`}
+                              }`}
                           >
                             <div className="flex items-center space-x-3">
                               <IconComponent className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600" />
@@ -766,7 +764,7 @@ const SignIn = () => {
                       </InputOTP>
                     </div>
 
-                    <Button 
+                    <Button
                       onClick={handleMFAVerify}
                       className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg"
                       disabled={mfaCode.length !== 6}
@@ -775,8 +773,8 @@ const SignIn = () => {
                       <Shield className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
                     </Button>
 
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       onClick={() => setShowMFA(false)}
                       className="w-full"
                     >
@@ -797,9 +795,9 @@ const SignIn = () => {
                     </div>
 
                     <div className="flex justify-center gap-3 lg:gap-4">
-                      <Button 
+                      <Button
                         onClick={() => handleGoogleAuth(navigate)}
-                        variant="outline" 
+                        variant="outline"
                         className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center"
                       >
                         <svg className="w-4 h-4 lg:w-5 lg:h-5" viewBox="0 0 24 24">
@@ -809,9 +807,9 @@ const SignIn = () => {
                           <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                         </svg>
                       </Button>
-                      <Button 
+                      <Button
                         onClick={() => handleGithubAuth(navigate)}
-                        variant="outline" 
+                        variant="outline"
                         className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center"
                       >
                         <Github className="w-4 h-4 lg:w-5 lg:h-5" />
@@ -831,31 +829,25 @@ const SignIn = () => {
           </div>
 
           {/* Right side - Header and Benefits */}
-          <div className="space-y-6 lg:space-y-8 animate-fade-in order-1 lg:order-2">
+          <div className="order-1 lg:order-2 w-full space-y-4 xs:space-y-6 lg:space-y-8 animate-fade-in">
             {/* Header */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-8 shadow-xl animate-fade-in">
-              <div className="w-30 flex items-left space-x-2 mb-4 lg:mb-8">
+            <div className="bg-white rounded-xl xs:rounded-2xl p-3 xs:p-4 lg:p-8 shadow-xl animate-fade-in">
+              <div className="flex items-center space-x-1 flex-shrink-0">
                 <Link to="/" className="flex items-center space-x-2 group">
-                  <div className="flex items-center justify-center w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-lg group-hover:scale-110 transition-all duration-300 shadow-md">
-                    <Sparkles className="w-3 h-3 lg:w-5 lg:h-5 text-white" />
+                  <img src={Logo} alt="AMOGH" className="h-10 xs:h-14 w-auto md:h-8" />
+                  <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
+                    beta
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-lg lg:text-xl font-bold bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">
-                      AMOGH
-                    </span>
-                    <span className="text-xs text-slate-500 -mt-1">ever useful</span>
-                  </div>
-                  <Badge variant="secondary" className="hidden w-8 h-5 lg:w-10 lg:h-6 text-xs lg:text-sm px-1 sm:inline-flex animate-pulse bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border-purple-200">Beta</Badge>
                 </Link>
               </div>
               <div className="text-center">
-                <h1 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-2 lg:mb-4 leading-tight">
+                <h1 className="text-xl xs:text-2xl lg:text-5xl font-bold text-gray-900 mb-2 xs:mb-4 lg:mb-4 leading-tight">
                   Welcome Back to
                   <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Innovation
                   </span>
                 </h1>
-                <p className="text-sm lg:text-xl text-gray-600 leading-relaxed mb-2 lg:mb-4">
+                <p className="text-xs xs:text-sm lg:text-xl text-gray-600 leading-relaxed mb-2 xs:mb-4 lg:mb-4">
                   Continue your journey of building the future with cutting-edge projects and collaborations.
                 </p>
                 <div className="flex items-center justify-center space-x-2">
@@ -873,23 +865,27 @@ const SignIn = () => {
 
             {/* Dynamic content based on user type */}
             {currentUserType && (
-              <Card className={`backdrop-blur-lg bg-gradient-to-br ${currentUserType.gradient} border-0 shadow-xl transition-all duration-500 hover:shadow-2xl hover:scale-105 animate-scale-in delay-300 lg:block hidden`}>
-                <CardHeader className="pb-4">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className={`w-10 h-10 lg:w-12 lg:h-12 ${currentUserType.color} rounded-xl flex items-center justify-center shadow-lg transition-all duration-500`}>
-                      <currentUserType.icon className="w-5 h-5 lg:w-6 lg:h-6 text-white transition-all duration-500" />
+              <Card className={`
+              backdrop-blur-lg bg-gradient-to-br ${currentUserType.gradient} border-0 shadow-xl
+              transition-all duration-500 hover:shadow-2xl hover:scale-105 animate-scale-in delay-300
+              ${'lg:block'} ${'hidden xs:block'}
+            `}>
+                <CardHeader className="pb-2 xs:pb-4">
+                  <div className="flex items-center space-x-2 xs:space-x-3 mb-2 xs:mb-4">
+                    <div className={`w-8 h-8 xs:w-10 xs:h-10 lg:w-12 lg:h-12 ${currentUserType.color} rounded-xl flex items-center justify-center shadow-lg transition-all duration-500`}>
+                      <currentUserType.icon className="w-4 h-4 xs:w-5 xs:h-5 lg:w-6 lg:h-6 text-white transition-all duration-500" />
                     </div>
                     <div className="transition-all duration-500">
-                      <CardTitle className="text-base lg:text-lg text-gray-900 transition-all duration-500">{currentUserType.label} Dashboard</CardTitle>
-                      <p className="text-xs lg:text-sm text-gray-600 transition-all duration-500">{currentUserType.description}</p>
+                      <CardTitle className="text-xs xs:text-base lg:text-lg text-gray-900 transition-all duration-500">{currentUserType.label} Dashboard</CardTitle>
+                      <p className="text-[10px] xs:text-xs lg:text-sm text-gray-600 transition-all duration-500">{currentUserType.description}</p>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2 xs:space-y-3">
                   {currentUserType.features.map((feature, index) => (
-                    <div key={`${currentUserType.id}-${index}`} className="flex items-start space-x-3 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
-                      <div className="flex-shrink-0 w-5 h-5 lg:w-6 lg:h-6 bg-white rounded-full flex items-center justify-center mt-0.5 shadow-sm transition-all duration-500">
-                        <Check className="w-2 h-2 lg:w-3 lg:h-3 text-green-600 transition-all duration-500" />
+                    <div key={`${currentUserType.id}-${index}`} className="flex items-start space-x-2 xs:space-x-3 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                      <div className="flex-shrink-0 w-4 h-4 xs:w-5 xs:h-5 lg:w-6 lg:h-6 bg-white rounded-full flex items-center justify-center mt-0.5 shadow-sm transition-all duration-500">
+                        <Check className="w-2 h-2 xs:w-3 xs:h-3 lg:w-3 lg:h-3 text-green-600 transition-all duration-500" />
                       </div>
                       <span className="text-xs lg:text-sm text-gray-700 transition-all duration-500">{feature}</span>
                     </div>
