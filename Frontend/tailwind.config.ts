@@ -1,4 +1,7 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
+import aspectRatio from "@tailwindcss/aspect-ratio";
+import scrollbarHide from "tailwind-scrollbar-hide";
 
 export default {
   darkMode: ["class"],
@@ -107,5 +110,9 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/aspect-ratio")],
+  plugins: [
+    tailwindcssAnimate,
+    aspectRatio,
+    scrollbarHide
+  ],
 } satisfies Config;

@@ -21,6 +21,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
+     fontFamily: "'Dancing Script', 'Brush Script MT', cursive"
+            
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -204,6 +206,20 @@ html {
     }
   }
   
+ @keyframes typing {
+    from { width: 0 }
+    to { width: 65% }
+            }
+ .animate-typing {
+     width: 0;
+     animation: typing 2s steps(8) forwards, blink 0.75s step-end infinite;
+            }
+   @keyframes blink {
+              50% { border-color: transparent }
+            }
+          
+            
+  
   @keyframes gradient-shift {
     0%, 100% { 
       background-position: 0% 50%;
@@ -256,6 +272,31 @@ html {
       transform: rotate(180deg);
     }
   }
+  @keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.8,0,1,1);
+  }
+  50% {
+    transform: translateY(-20%);
+    animation-timing-function: cubic-bezier(0,0,0.2,1);
+  }
+}
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* Spin Slow Animation */
+@keyframes spin-slow {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+
 
   @keyframes orbit {
     0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
