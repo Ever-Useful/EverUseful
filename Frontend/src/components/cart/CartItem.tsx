@@ -77,13 +77,28 @@ const CartItem = ({ item, onRemove, onSave, onBuyNow }: CartItemProps) => {
             <div className="text-2xl lg:text-3xl font-bold text-gray-900">${item.price.toFixed(2)}</div>
           </div>
           <div className="flex flex-col gap-2 w-full">
-            <Button size="sm" variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50" onClick={() => onSave(item)}>
+            <Button
+              size="sm"
+              variant="default"
+              className="w-full border-blue-300 text-blue-700 hover:bg-blue-50 text-xs"
+              onClick={() => onSave(item)}
+            >
               <Bookmark className="h-4 w-4 mr-1" /> Save for Later
             </Button>
-            <Button size="sm" variant="destructive" className="w-full" onClick={() => onRemove(item.id)}>
+            <Button
+              size="sm"
+              variant="default"
+              className="w-full text-xs"
+              onClick={() => onRemove(item.id)}
+            >
               <Trash2 className="h-4 w-4 mr-1" /> Remove
             </Button>
-            <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => onBuyNow(item)}>
+            <Button
+              size="sm"
+              variant="default"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs"
+              onClick={() => onBuyNow(item)}
+            >
               <ShoppingCart className="h-4 w-4 mr-1" /> Buy Now
             </Button>
           </div>

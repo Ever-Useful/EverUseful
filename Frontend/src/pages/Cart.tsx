@@ -321,15 +321,15 @@ const Cart = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-6 h-6 animate-spin" />
-              <span>Loading cart...</span>
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            <Loader2 className="w-6 h-6 animate-spin" />
+            <span className="text-lg font-medium text-blue-900">Loading cart...</span>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -339,55 +339,113 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        {/* <CartHeader itemCount={cartItems.length} /> */}
-        
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="container mx-auto px-2 xs:px-4 py-4 xs:py-8 flex-1 w-full relative">
+        {/* Cart Header */}
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-2">
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="h-7 w-7 text-blue-600" />
+            <h2 className="text-xl xs:text-2xl font-bold text-gray-900">
+              Your Cart
+            </h2>
+            <span className="ml-2 bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded-full">
+              {cartItems.length}
+            </span>
           </div>
-        ) : cartItems.length === 0 ? (
-          <div className="text-center py-12">
-            <ShoppingCart className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
-            <p className="text-gray-600 mb-4">Looks like you haven't added any projects yet.</p>
+          {/* Desktop Clear Cart button */}
+          {cartItems.length > 0 && (
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50 hidden sm:inline-flex"
+              onClick={clearCart}
+              size="sm"
+            >
+              Clear Cart
+            </Button>
+          )}
+        </div>
+
+        {/* Main Cart Content */}
+        {cartItems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <ShoppingCart className="h-14 w-14 text-gray-300 mb-4" />
+            <h3 className="text-lg xs:text-xl font-semibold text-gray-800 mb-2">Your cart is empty</h3>
+            <p className="text-gray-500 mb-4 text-center max-w-xs">
+              Looks like you haven't added any projects yet. Browse the marketplace to find innovative student projects.
+            </p>
             <Link to="/marketplace">
-              <Button className="h-9 w-50 bg-blue-600 hover:bg-blue-700 text-base">
-                <ArrowLeft className="h-3 w-3 mr-2" />
+              <Button className="h-10 px-6 bg-blue-600 hover:bg-blue-700 text-base rounded-full shadow">
+                <ArrowLeft className="h-4 w-4 mr-2" />
                 Continue Shopping
               </Button>
             </Link>
           </div>
         ) : (
-          <div className="mt-8">
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-x-16 gap-y-8">
-              {/* Cart Items Section */}
-              <div className="xl:col-span-2 space-y-6">
-                <div className="space-y-6">
-                  {cartItems.map((item) => (
-                    <CartItem
-                      key={item.id}
-                      item={item}
-                      onRemove={removeItem}
-                      onSave={moveToSaved}
-                      onBuyNow={buyNow}
-                    />
-                  ))}
-                </div>
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-x-8 gap-y-10">
+            {/* Cart Items Section */}
+            <div className="xl:col-span-2 space-y-6">
+              <div className="space-y-6">
+                {cartItems.map((item) => (
+                  <div key={item.id} className="rounded-xl bg-white shadow-md hover:shadow-lg transition-all border border-gray-100 p-3 xs:p-4 flex flex-col sm:flex-row gap-4">
+                    <div className="flex-shrink-0 flex items-center justify-center w-full sm:w-32">
+                      <img
+                        src={item.image || "/project-placeholder.png"}
+                        alt={item.name}
+                        className="w-24 h-24 object-cover rounded-lg border border-gray-200 bg-gray-50"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold">
+                            {item.category}
+                          </span>
+                          <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-semibold">
+                            {item.licenseType}
+                          </span>
+                        </div>
+                        <h4 className="text-base xs:text-lg font-bold text-gray-900 mb-1">{item.name}</h4>
+                        <p className="text-xs xs:text-sm text-gray-600 mb-1 line-clamp-2">{item.description}</p>
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          {item.tags?.map((tag, i) => (
+                            <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-500">{tag}</span>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span>By <span className="font-semibold text-gray-700">{item.studentName}</span></span>
+                          <span className="hidden xs:inline">|</span>
+                          <span>{item.university}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between mt-2 gap-2">
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" className="border-green-300 text-green-700 hover:bg-green-50" onClick={() => moveToSaved(item)}>
+                            Save for later
+                          </Button>
+                          <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={() => removeItem(item.id)}>
+                            Remove
+                          </Button>
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => buyNow(item)}>
+                            Buy Now
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
+            </div>
 
-              {/* Order Summary Section */}
-              <div className="xl:col-span-1">
-                <div className="sticky top-6">
-                  <OrderSummary
-                    subtotal={cartItems.reduce((sum, item) => sum + item.price, 0)}
-                    platformFee={cartItems.reduce((sum, item) => sum + (item.price * 0.05), 0)}
-                    total={cartItems.reduce((sum, item) => sum + (item.price * 1.05), 0)}
-                    itemCount={cartItems.length}
-                  />
-                </div>
+            {/* Order Summary Section */}
+            <div className="xl:col-span-1">
+              <div className="sticky top-6">
+                <OrderSummary
+                  subtotal={subtotal}
+                  platformFee={platformFee}
+                  total={total}
+                  itemCount={cartItems.length}
+                />
               </div>
             </div>
           </div>
@@ -396,19 +454,36 @@ const Cart = () => {
         {/* Saved Items Section */}
         {savedItems.length > 0 && (
           <div className="mt-12">
-            <SavedItems
-              items={savedItems}
-              onMoveToCart={moveToCart}
-              onRemove={(id) => setSavedItems(items => items.filter(item => item.id !== id))}
-            />
+            <Card className="bg-white/90 shadow-lg border-0">
+              <CardHeader>
+                <CardTitle className="text-lg xs:text-xl font-bold text-gray-900">Saved for Later</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SavedItems
+                  items={savedItems}
+                  onMoveToCart={moveToCart}
+                  onRemove={(id) => setSavedItems(items => items.filter(item => item.id !== id))}
+                />
+              </CardContent>
+            </Card>
           </div>
         )}
 
-        {/* Related Products Section */}
-        <div className="mt-16">
-          <RelatedProducts
-          />
-        </div>
+        <RelatedProducts/>
+
+        {/* Mobile Clear Cart Button */}
+        {cartItems.length > 0 && (
+          <div className="fixed bottom-0 left-0 w-full z-30 sm:hidden bg-white/90 border-t border-gray-200 px-4 py-3 flex justify-center">
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50 w-full max-w-xs"
+              onClick={clearCart}
+              size="sm"
+            >
+              Clear Cart
+            </Button>
+          </div>
+        )}
       </div>
       <Footer />
       <Chatbot />
