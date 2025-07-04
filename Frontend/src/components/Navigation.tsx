@@ -513,9 +513,6 @@ export default function Navigation() {
                     {/* Left Column - Categories */}
                     <div className="col-span-3 bg-gray-50 border-r border-gray-200">
                         <div className="p-4">
-                            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                                Categories
-                            </h3>
                             <div className="space-y-1">
                                 {menuData.categories.map((category) => (
                                     <div
@@ -536,9 +533,6 @@ export default function Navigation() {
                     {/* Middle Column - Subcategories */}
                     <div className="col-span-5 border-r border-gray-200">
                         <div className="p-4">
-                            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                                Subcategories
-                            </h3>
                             <div className="grid grid-cols-2 gap-2">
                                 {currentContent?.subcategories?.map((subcategory, index) => (
                                     <div
@@ -555,9 +549,6 @@ export default function Navigation() {
                     {/* Right Column - Featured Items */}
                     <div className="col-span-4 bg-gray-50">
                         <div className="p-4">
-                            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                                Featured
-                            </h3>
                             <div className="space-y-4">
                                 {currentContent?.featured?.map((item, index) => (
                                     <div

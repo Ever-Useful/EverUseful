@@ -529,6 +529,13 @@ class UserService {
     this.userData.users[customUserId].projects.count = this.userData.users[customUserId].projects.created.length;
     this.userData.users[customUserId].stats.projectsCount = this.userData.users[customUserId].projects.created.length;
 
+    // Add activity for project creation
+    await this.addActivity(customUserId, {
+      type: 'project_created',
+      description: `Created new project: ${project.title}`,
+      metadata: { projectId: project.projectId, projectTitle: project.title }
+    });
+
     await this.saveUserData();
 
     // Add activity for project creation
@@ -582,6 +589,7 @@ class UserService {
   }
 
   // Add user skill
+
   async addUserSkill(customUserId, skillData) {
     await this.loadUserData();
     

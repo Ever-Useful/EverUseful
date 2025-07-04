@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PopupMenu } from "@/components/PopupMenu";
+import { FilterSidebar } from "./FilterSidebar";
 import {
   Star,
   Clock,
@@ -25,6 +26,7 @@ import { userService } from "../../services/userService";
 import { toast } from "sonner";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Project {
   id: number;
@@ -46,7 +48,15 @@ interface Project {
   isFavorited: boolean;
 }
 
-interface ProductGridProps {
+interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  totalProjects: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface ProductGridProps {
   searchQuery: string;
   filters: {
     category?: string;
@@ -56,17 +66,16 @@ interface ProductGridProps {
     skills?: string[];
     duration?: string;
   };
+  onFiltersChange: (filters: ProductGridProps['filters']) => void;
+  sortBy: string;
+  setSortBy: React.Dispatch<React.SetStateAction<string>>;
+  showSortTab: boolean;
+  setShowSortTab: React.Dispatch<React.SetStateAction<boolean>>;
+  showFilterTab: boolean;
+  setShowFilterTab: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-interface PaginationInfo {
-  currentPage: number;
-  totalPages: number;
-  totalProjects: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
-
-export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
+export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGridProps) => {
   const [showPopupMenu, setShowPopupMenu] = useState(false);
   const [targetProductPath, setTargetProductPath] = useState<string>('');
   const [projects, setProjects] = useState<Project[]>([]);
@@ -89,6 +98,27 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   const [authorCache, setAuthorCache] = useState<Record<string, any>>({});
   const [currentUserCustomId, setCurrentUserCustomId] = useState<string | null>(null);
   const [authorsLoading, setAuthorsLoading] = useState(false);
+
+  // Mobile specific states
+  const [showSortTab, setShowSortTab] = useState(false);
+  const [showFilterTab, setShowFilterTab] = useState(false);
+  const [mobileFilters, setMobileFilters] = useState(filters);
+
+  // const isMobile = useIsMobile();
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch current user's customUserId
   useEffect(() => {
@@ -132,9 +162,28 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
         
         // Add pagination parameters
         queryParams.append('page', currentPage.toString());
-        // Adjust limit based on sidebar state
-        const limit = selected ? '10' : '15';
-        queryParams.append('limit', limit);
+        
+        // Calculate optimal limit based on grid columns to ensure full rows
+        let optimalLimit = 12; // Default for 3 columns (4 rows)
+        if (selected && !isMobile) {
+          optimalLimit = 8; // 2 columns (4 rows)
+        } else if (isMobile) {
+          optimalLimit = 6; // 1 column (6 rows)
+        } else {
+          // For desktop: 
+          // 4 columns (xl) = 16, 3 columns (lg) = 12, 2 columns (sm/md) = 8
+          // We'll use 12 as default which works well for most layouts
+          const screenWidth = window.innerWidth;
+          if (screenWidth >= 1280) { // xl breakpoint
+            optimalLimit = 16; // 4 rows of 4 columns
+          } else if (screenWidth >= 1024) { // lg breakpoint
+            optimalLimit = 12; // 4 rows of 3 columns
+          } else {
+            optimalLimit = 8; // 4 rows of 2 columns
+          }
+        }
+        
+        queryParams.append('limit', optimalLimit.toString());
 
         const response = await fetch(`http://localhost:3000/api/marketplace/projects?${queryParams}`);
         if (!response.ok) throw new Error('Failed to fetch projects');
@@ -150,7 +199,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
     };
 
     fetchProjects();
-  }, [searchQuery, filters, sortBy, currentPage]);
+  }, [searchQuery, filters, sortBy, currentPage, selected, isMobile]);
 
   // Memoize unique author IDs to prevent unnecessary API calls
   const uniqueAuthorIds = useMemo(() => {
@@ -442,161 +491,255 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
   }
 
   return (
-    <div className="flex-1 font-sans flex" style={{ minHeight: "100vh" }}>
+    <div className="flex-1 font-sans flex overflow-x-hidden" style={{ minHeight: "100vh" }}>
       {/* Product Grid */}
-      <div className={`flex-1 transition-all duration-300 ${selected ? "pr-0 md:pr-[440px]" : ""}`}>
+      <div className={`flex-1 transition-all duration-300 ${selected && !isMobile ? "pr-0 md:pr-[440px]" : ""}`}>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-5 gap-3">
-          <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">Featured Projects</h2>
-          <div className="flex items-center space-x-3">
-            
-            <select 
-              className="bg-white border border-gray-300 text-gray-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-gray-300"
-              value={sortBy}
-              onChange={handleSortChange}
-            >
-              <option value="recent">Most Recent</option>
-              <option value="rating">Highest Rated</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-            </select>
-          </div>
+          {/* Hide sorting select on mobile */}
+          {!isMobile && (
+            <div className="flex items-center space-x-3">
+              <select
+                className="bg-white border border-gray-300 text-gray-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-gray-300"
+                value={sortBy}
+                onChange={handleSortChange}
+              >
+                <option value="recent">Most Recent</option>
+                <option value="rating">Highest Rated</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+              </select>
+            </div>
+          )}
         </div>
-
-        <div className={`grid ${selected ? "grid-cols-2" : "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"} gap-8`}>
-          {projects.map((project) => (
-            <Card
-              key={project.id}
-              className="group hover:shadow-xl transition-all duration-300 hover:scale-102 bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col"
-            >
-              <div className="relative">
+        {/* Responsive Product List */}
+        <div
+          className={
+            isMobile
+              ? "w-full mx-auto flex flex-col divide-y divide-gray-200"
+              : `grid ${selected ? "grid-cols-2" : "grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"} gap-8`
+          }
+        >
+          {projects.map((project, idx) => (
+            isMobile ? (
+              <div
+                key={project.id}
+                className="flex items-center gap-4 py-4 cursor-pointer bg-white w-full"
+                onClick={() => navigate(`/product/${project.id}`)}
+                style={{ boxSizing: "border-box" }}
+              >
                 <img
                   src={project.image || NoImageAvailable}
                   alt={project.title}
-                  className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
-                  loading="lazy"
-                  onClick={() => setSelected(project)}
+                  className="w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-cover flex-shrink-0 border border-gray-200 rounded"
                   onError={e => { e.currentTarget.src = NoImageAvailable; }}
                 />
-                <div className="absolute top-2 left-2">
-                  <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow">
-                    {project.category}
-                  </Badge>
-                </div>
-                <div className="absolute top-2 right-2 flex space-x-1">
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="w-7 h-7 p-0 bg-white/70 hover:bg-white/90 shadow"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFavorite(project.id);
-                    }}
-                  >
-                    <Heart className={`w-4 h-4 ${project.isFavorited ? 'fill-pink-500 text-pink-500' : 'text-pink-500'}`} />
-                  </Button>
-                  <div className="flex items-center space-x-1 bg-white/70 rounded px-1 py-0.5 shadow">
-                    <Eye className="w-3 h-3 text-gray-700" />
-                    <span className="text-gray-700 text-[10px]">{project.views}</span>
+                <div className="flex flex-col flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[6px] rounded shadow">
+                      {project.category}
+                    </Badge>
+                    <div className="flex items-center space-x-1 bg-white/90 rounded px-1 py-0.5 shadow border border-gray-200">
+                      <Eye className="w-3 h-3 text-gray-700" />
+                      <span className="text-gray-700 text-[6px]">{project.views}</span>
+                    </div>
                   </div>
-                </div>
-              </div>
-
-              <CardContent className="p-4 flex flex-col flex-1">
-                {getAuthorDetails(project.author).isLoading ? (
-                  <AuthorSkeleton />
-                ) : (
-                  <div className="flex items-center space-x-2 mb-2">
+                  <h3 className="font-semibold text-xs text-gray-900 break-words whitespace-normal mb-1">
+                    {project.title}
+                  </h3>
+                  <div className="flex items-center gap-2 mb-1">
                     <img
                       src={getAuthorDetails(project.author).image || NoUserProfile}
                       alt={getAuthorDetails(project.author).name}
-                      className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
+                      className="w-5 h-5 rounded-full border border-gray-200"
                       onError={e => { e.currentTarget.src = NoUserProfile; }}
-                      onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                     />
-                    <span
-                      className="text-gray-700 text-xs cursor-pointer"
-                      style={{ transition: 'color 0.2s' }}
-                      onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
-                      onMouseOut={e => e.currentTarget.style.color = ''}
-                      onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                    >
-                      {getAuthorDetails(project.author).name}
+                    <span className="text-[10px] text-gray-700 truncate">{getAuthorDetails(project.author).name}</span>
+                    <span className="flex items-center gap-0.5 text-[10px] text-yellow-500">
+                      <Star className="w-3 h-3 fill-yellow-400" />
+                      {project.rating}
+                      <span className="text-gray-400 text-[10px] ml-1">({project.reviews})</span>
                     </span>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span className="text-yellow-500 text-xs">{project.rating}</span>
-                      <span className="text-gray-400 text-[10px]">({project.reviews})</span>
-                    </div>
                   </div>
-                )}
-
-                <h3 
-                  className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors cursor-pointer"
-                  onClick={() => setSelected(project)}
-                >
-                  {project.title}
-                </h3>
-
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {project.skills.map((skill, index) => (
-                    <Badge
-                      key={index}
-                      variant="outline"
-                      className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
-                    >
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-2 text-sm font-sm font-semibold text-gray-500">
-                    <div className="flex items-center space-x-1">
+                  <div className="flex flex-wrap gap-1 mb-1">
+                    {project.skills.slice(0, 2).map((skill, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="text-[8px] border-gray-200 text-gray-600 bg-gray-100 font-medium px-1 py-1 "
+                      >
+                        {skill}
+                      </Badge>
+                    ))}
+                    {project.skills.length > 2 && (
+                      <span className="text-[10px] text-gray-400">+{project.skills.length - 2} more</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center gap-1 text-xs text-gray-700 font-medium">
                       <DollarSign className="w-3 h-3" />
-                      <span>{project.price}</span>
+                      {project.price}
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center gap-1 text-xs text-gray-700 font-medium">
                       <Clock className="w-3 h-3" />
-                      <span>{project.duration}</span>
+                      {project.duration}
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center justify-center"
+                      style={{ minWidth: 0, padding: 0 }}
+                      aria-label="Add to Cart"
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleAddToCart(project.id);
+                      }}
+                    >
+                      <ShoppingCart className="w-5 h-5 mx-auto" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Card
+                key={project.id}
+                className="group hover:shadow-xl transition-all duration-300 hover:scale-102 bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col"
+              >
+                <div className="relative">
+                  <img
+                    src={project.image || NoImageAvailable}
+                    alt={project.title}
+                    className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+                    loading="lazy"
+                    onClick={() => setSelected(project)}
+                    onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                  />
+                  <div className="absolute top-2 left-2">
+                    <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow">
+                      {project.category}
+                    </Badge>
+                  </div>
+                  <div className="absolute top-2 right-2 flex space-x-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="w-7 h-7 p-0 bg-white/70 hover:bg-white/90 shadow"
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleFavorite(project.id);
+                      }}
+                    >
+                      <Heart className={`w-4 h-4 ${project.isFavorited ? 'fill-pink-500 text-pink-500' : 'text-pink-500'}`} />
+                    </Button>
+                    <div className="flex items-center space-x-1 bg-white/70 rounded px-1 py-0.5 shadow">
+                      <Eye className="w-3 h-3 text-gray-700" />
+                      <span className="text-gray-700 text-[10px]">{project.views}</span>
                     </div>
                   </div>
                 </div>
-              </CardContent>
 
-              {/* Fixed Buttons at Card Bottom */}
-              <div className="px-4 pb-4 mt-auto flex gap-2">
-                <Button
-                  size="sm"
-                  className="rounded-lg shadow transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-                  style={{ width: "85%" }}
-                  onClick={() => handleViewDetails(project.id)}
-                >
-                  <ArrowRight className="mr-2 w-4 h-4" />
-                  {user ? 'Purchase Now' : 'Sign in to View'}
-                </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center justify-center"
-                  style={{ width: "15%", minWidth: 0, padding: 0 }}
-                  aria-label="Add to Cart"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToCart(project.id);
-                  }}
-                >
-                  <ShoppingCart className="w-5 h-5 mx-auto" />
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
+                <CardContent className="p-4 flex flex-col flex-1">
+                  {getAuthorDetails(project.author).isLoading ? (
+                    <AuthorSkeleton />
+                  ) : (
+                    <div className="flex items-center space-x-2 mb-2">
+                      <img
+                        src={getAuthorDetails(project.author).image || NoUserProfile}
+                        alt={getAuthorDetails(project.author).name}
+                        className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
+                        onError={e => { e.currentTarget.src = NoUserProfile; }}
+                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                      />
+                      <span
+                        className="text-gray-700 text-xs cursor-pointer"
+                        style={{ transition: 'color 0.2s' }}
+                        onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
+                        onMouseOut={e => e.currentTarget.style.color = ''}
+                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                      >
+                        {getAuthorDetails(project.author).name}
+                      </span>
+                      <div className="flex items-center space-x-1">
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                        <span className="text-yellow-500 text-xs">{project.rating}</span>
+                        <span className="text-gray-400 text-[10px]">({project.reviews})</span>
+                      </div>
+                    </div>
+                  )}
 
+                  <h3
+                    className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors cursor-pointer"
+                    onClick={() => setSelected(project)}
+                  >
+                    {project.title}
+                  </h3>
+
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {project.skills.slice(0, 3).map((skill, index) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                      {project.skills.length > 3 && (
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
+                      >
+                        +{project.skills.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2 text-sm font-sm font-semibold text-gray-500">
+                      <div className="flex items-center space-x-1">
+                        <DollarSign className="w-3 h-3" />
+                        <span>{project.price}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{project.duration}</span>
+                      </div>
+                    </div>
+                  </div>
+                  </CardContent>
+                  {/* Fixed Buttons at Card Bottom */}
+                  <div className="px-3 sm:px-4 pb-3 sm:pb-4 mt-auto flex gap-2">
+                    <Button
+                      size="sm"
+                      className="rounded-lg shadow transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm"
+                      style={{ width: "85%" }}
+                      onClick={() => handleViewDetails(project.id)}
+                    >
+                      <ArrowRight className="mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
+                      {user ? 'Purchase Now' : 'Sign in to View'}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center justify-center"
+                      style={{ width: "15%", minWidth: 0, padding: 0 }}
+                      aria-label="Add to Cart"
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleAddToCart(project.id);
+                      }}
+                    >
+                      <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 mx-auto" />
+                    </Button>
+                  </div>
+                </Card>
+            )
+            ))}
+          </div>
         {renderPagination()}
       </div>
 
       {/* Detail Panel */}
-      {selected && (
+      {!isMobile && selected && (
         <aside
           className="fixed right-0 z-40 top-0 bg-white shadow-2xl border-l border-gray-200 flex flex-col"
           style={{
@@ -766,7 +909,7 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
           </div>
         </aside>
       )}
-        <PopupMenu 
+      <PopupMenu
         isOpen={showPopupMenu}
         onClose={() => {
           setShowPopupMenu(false);
@@ -777,7 +920,6 @@ export const ProductGrid = ({ searchQuery, filters }: ProductGridProps) => {
         redirectPath={targetProductPath || location.pathname}
       />
     </div>
-
   );
 };
 

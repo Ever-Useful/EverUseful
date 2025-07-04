@@ -12,6 +12,7 @@ import {
 
 import marketplaceBackdrop from "@/assets/images/marketplace.jpg";
 import { Input } from "@/components/ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MarketplaceHeroProps {
   searchQuery: string;
@@ -23,8 +24,14 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
     onSearchChange(e.target.value);
   };
 
+  const isMobile = useIsMobile();
+
   return (
-    <section className="relative min-h-[70vh] flex items-center justify-center px-2 sm:px-4 overflow-hidden">
+    <section
+      className={`relative flex items-center justify-center px-2 sm:px-4 overflow-hidden ${
+        isMobile ? "min-h-[32vh] py-4" : "min-h-[70vh]"
+      }`}
+    >
       {/* Blurred, semi-transparent image as background */}
       <div
         className="absolute inset-0 w-full h-full z-0"
@@ -78,20 +85,24 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
 
       {/* Main Content */}
       <div
-        className="relative z-10 w-full max-w-2xl mx-auto text-center rounded-3xl shadow-2xl py-10 sm:py-16 px-4 sm:px-10 backdrop-blur-md"
+        className={`relative z-10 w-full max-w-2xl mx-auto text-center rounded-3xl shadow-2xl
+          ${isMobile ? "py-5 px-2" : "py-10 sm:py-16 px-4 sm:px-10"} backdrop-blur-md`}
         style={{
           background: "rgba(232,244,255,0.93)",
           border: "1px solid #b6d4fe",
         }}
       >
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 tracking-tight leading-tight drop-shadow-sm bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-400 bg-clip-text text-transparent">
+        <h1 className={`font-extrabold mb-3 tracking-tight leading-tight drop-shadow-sm bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-400 bg-clip-text text-transparent
+          ${isMobile ? "text-2xl" : "text-3xl sm:text-3xl md:text-3xl"}`}>
           Empowering Innovation, Globally
         </h1>
-        <p className="text-base sm:text-lg md:text-xl mb-8 max-w-2xl mx-auto text-slate-700 font-medium">
-          Join the world's brightest minds—explore, collaborate, and create in the next-generation global marketplace.
-        </p>
+        {!isMobile && (
+          <p className="text-base sm:text-lg md:text-xl mb-8 max-w-2xl mx-auto text-slate-700 font-medium">
+            Join the world's brightest minds—explore, collaborate, and create in the next-generation global marketplace.
+          </p>
+        )}
         {/* Search Bar */}
-        <form className="w-full max-w-lg mx-auto">
+        <form className={`w-full ${isMobile ? "max-w-xs" : "max-w-lg"} mx-auto`}>
           <div className="flex items-center bg-white/90 border border-blue-100 rounded-full shadow-md overflow-hidden focus-within:ring-2 focus-within:ring-blue-300 transition">
             <Search className="ml-4 w-5 h-5 text-black-200" />
             <input
@@ -99,7 +110,8 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
               placeholder="Search for products, services, or talents..."
               value={searchQuery}
               onChange={handleSearch}
-              className="flex-1 px-4 py-3 bg-transparent text-blue-900 placeholder-black-600 focus:outline-none text-base"
+              className={`flex-1 bg-transparent text-blue-900 placeholder-black-600 focus:outline-none
+                ${isMobile ? "px-3 py-2 text-sm" : "px-4 py-3 sm:py-2 text-base sm:text-xs"}`}
             />
           </div>
         </form>
