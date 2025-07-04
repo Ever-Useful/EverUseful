@@ -6,11 +6,8 @@ import * as THREE from 'three';
 function WireframeGlobe() {
   const group = useRef<THREE.Group>(null);
 
-  // Create geometry for a geodesic sphere (icosahedron)
-  let geometry: THREE.BufferGeometry | THREE.IcosahedronGeometry = new THREE.IcosahedronGeometry(1, 1);
-  if (!geometry.index) {
-    geometry = geometry.toNonIndexed() as THREE.BufferGeometry;
-  }
+  // Create geometry for a geodesic sphere (icosahedron with more subdivisions)
+  const geometry = useMemo(() => new THREE.IcosahedronGeometry(1, 2), []);
   const position = geometry.getAttribute('position');
   const index = geometry.index;
 
@@ -21,36 +18,83 @@ function WireframeGlobe() {
   // Memoize line positions for performance
   const linePositions = useMemo(() => {
     const positions: number[] = [];
-    const edgeSet = new Set();
+    const edgeSet = new Set<string>();
+    
     if (index) {
+      // Create all edges from the indexed geometry
       for (let i = 0; i < index.count; i += 3) {
-        for (let j = 0; j < 3; j++) {
-          const a = index.getX(i + j);
-          const b = index.getX(i + ((j + 1) % 3));
-          const key = a < b ? `${a}-${b}` : `${b}-${a}`;
-          if (edgeSet.has(key)) continue;
-          edgeSet.add(key);
-          const vA = new THREE.Vector3().fromBufferAttribute(position, a);
-          const vB = new THREE.Vector3().fromBufferAttribute(position, b);
-          positions.push(...vA.toArray(), ...vB.toArray());
-        }
+        const a = index.getX(i);
+        const b = index.getX(i + 1);
+        const c = index.getX(i + 2);
+        
+        // Create edges for each triangle
+        [ [a, b], [b, c], [c, a] ].forEach(([start, end]) => {
+          const key = start < end ? `${start}-${end}` : `${end}-${start}`;
+          if (!edgeSet.has(key)) {
+            edgeSet.add(key);
+            const vStart = new THREE.Vector3().fromBufferAttribute(position, start);
+            const vEnd = new THREE.Vector3().fromBufferAttribute(position, end);
+            positions.push(...vStart.toArray(), ...vEnd.toArray());
+          }
+        });
       }
     }
+    
     return new Float32Array(positions);
   }, [index, position]);
 
-  // Create nodes (spheres) at each vertex
-  const nodes = [];
-  for (let i = 0; i < position.count; i++) {
-    const v = new THREE.Vector3().fromBufferAttribute(position, i);
-    const color = colorA.clone().lerp(colorB, (v.y + 1) / 2);
-    nodes.push(
-      <mesh key={i} position={v.toArray()}>
-        <sphereGeometry args={[0.04, 16, 16]} />
-        <meshBasicMaterial color={color.getStyle()} />
+  // Create nodes (spheres) at each vertex with gradient colors
+  const nodes = useMemo(() => {
+    const nodeElements = [];
+    for (let i = 0; i < position.count; i++) {
+      const v = new THREE.Vector3().fromBufferAttribute(position, i);
+      const color = colorA.clone().lerp(colorB, (v.y + 1) / 2);
+      nodeElements.push(
+        <mesh key={i} position={v.toArray()}>
+          <sphereGeometry args={[0.04, 16, 16]} />
+          <meshBasicMaterial color={color.getStyle()} />
+        </mesh>
+      );
+    }
+    return nodeElements;
+  }, [position]);
+
+  // Create faces (optional) - uncomment if you want to see the faces
+  const faces = useMemo(() => {
+    if (!index) return null;
+    
+    const facePositions: number[] = [];
+    for (let i = 0; i < index.count; i += 3) {
+      const a = index.getX(i);
+      const b = index.getX(i + 1);
+      const c = index.getX(i + 2);
+      
+      const vA = new THREE.Vector3().fromBufferAttribute(position, a);
+      const vB = new THREE.Vector3().fromBufferAttribute(position, b);
+      const vC = new THREE.Vector3().fromBufferAttribute(position, c);
+      
+      facePositions.push(...vA.toArray(), ...vB.toArray(), ...vC.toArray());
+    }
+    
+    return (
+      <mesh>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={facePositions.length / 3}
+            array={new Float32Array(facePositions)}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <meshBasicMaterial 
+          color="#ffffff" 
+          transparent 
+          opacity={0.1} 
+          side={THREE.DoubleSide}
+        />
       </mesh>
     );
-  }
+  }, [index, position]);
 
   useFrame(() => {
     if (group.current) {
@@ -60,7 +104,9 @@ function WireframeGlobe() {
 
   return (
     <group ref={group}>
-      {/* Render all lines as a single LineSegments object */}
+      {/* Optional: Render semi-transparent faces */}
+      {faces}
+      
       <lineSegments>
         <bufferGeometry>
           <bufferAttribute
@@ -70,8 +116,9 @@ function WireframeGlobe() {
             itemSize={3}
           />
         </bufferGeometry>
-        <lineBasicMaterial color="#1e90ff" />
+        <lineBasicMaterial color="#1e90ff" linewidth={1} />
       </lineSegments>
+      
       {nodes}
     </group>
   );
@@ -79,17 +126,30 @@ function WireframeGlobe() {
 
 export default function GlobeLoader() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-      <Canvas style={{ width: 200, height: 200, background: 'white' }} camera={{ position: [0, 0, 3] }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+    }}>
+      <Canvas 
+        style={{ 
+          width: '200px', 
+          height: '200px', 
+          background: 'transparent' 
+        }} 
+        camera={{ position: [0, 0, 3], fov: 50 }}
+      >
         <ambientLight intensity={0.7} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} />
         <WireframeGlobe />
-        <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
+        <OrbitControls 
+          enableZoom={false} 
+          enablePan={false} 
+          autoRotate 
+          autoRotateSpeed={1.5}
+        />
       </Canvas>
-      <div style={{ marginTop: 16, fontSize: 18, fontWeight: 500, color: '#333' }}>loading...</div>
     </div>
   );
 }
-
-// If you haven't already, install dependencies:
-// npm install three @react-three/fiber @react-three/drei three-stdlib 
