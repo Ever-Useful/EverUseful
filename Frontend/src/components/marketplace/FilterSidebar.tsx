@@ -431,4 +431,3 @@ export const FilterSidebar = ({ onFiltersChange }: FilterSidebarProps) => {
     </aside>
   );
 };
-
