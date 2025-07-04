@@ -41,7 +41,7 @@ import RefundPolicy from "./pages/Policy/RefundPolicy";
 import BecomeAMentor from "./pages/BecomeAMentor";
 
 const queryClient = new QueryClient();
-
+//testing
 const App = () => (  
   <AuthProvider>
     <QueryClientProvider client={queryClient}>
