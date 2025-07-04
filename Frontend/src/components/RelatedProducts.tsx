@@ -194,6 +194,7 @@ export const RelatedProducts = () => {
   }
 
   return (
+
     <div className={`container mx-auto ${isMobile ? 'px-4' : 'px-6'} py-8`}>
       
       {/* Mobile Layout */}
@@ -210,6 +211,36 @@ export const RelatedProducts = () => {
             {displayProjects.slice(startIndex, startIndex + 1).map((project) => (
               <Link to={`/product/${project.id}`} key={project.id} className="block">
                 <Card className="hover:shadow-lg transition-shadow duration-200 bg-white rounded-lg">
+
+    <div className="container mx-auto px-6 py-8">
+      <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Previous"
+          className="rounded-full"
+          onClick={handlePrev}
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </Button>
+        <div className={classNames(
+          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 flex-1 transition-transform duration-300",
+          {
+            "-translate-x-10 opacity-0": slideDirection === 'right',
+            "translate-x-10 opacity-0": slideDirection === 'left',
+            "opacity-100": !slideDirection
+          }
+        )}>
+          {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => {
+            if (projects.length === 0) return null;
+            const idx = (startIndex + i) % projects.length;
+            const project = projects[idx];
+            if (!project) return null;
+            return (
+              <Link to={`/product/${project.id}`} key={i + '-' + project.id}>
+                <Card className="h-full hover:shadow-lg transition-shadow duration-200">
+
                   <div className="relative">
                     <img
                       src={project.image}
