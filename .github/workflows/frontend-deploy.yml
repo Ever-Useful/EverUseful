@@ -3,6 +3,7 @@ name: Deploy Frontend to Hostinger
 on:
   push:
     branches: [ Demo ]
+    paths: [ 'Frontend/**' ]
 
 jobs:
   build-and-deploy:
