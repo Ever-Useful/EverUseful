@@ -23,7 +23,7 @@ export const Hero = () => {
             muted
           >
             <source src="main.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
+            Your browser does not support the video lala tag.
           </video>
         ) : (
           <img
