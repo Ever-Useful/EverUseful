@@ -252,13 +252,13 @@ const navLinks: { [key: string]: NavItem[] } = {
     },
     { 
       title: "Privacy Policy", 
-      href: "/privacypolicy",
+      href: "/privacy-policy",
       description: "Read our commitment to your privacy.",
       icon: <Shield className="w-5 h-5 text-green-500" />
     },
     { 
       title: "Terms of Service", 
-      href: "/termsofservice",
+      href: "/terms-conditions",
       description: "Understand the rules of our platform.",
       icon: <FileText className="w-5 h-5 text-purple-500" />
     },

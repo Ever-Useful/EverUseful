@@ -257,38 +257,6 @@ export const RelatedProducts = () => {
               </Link>
             ))}
           </div>
-          
-          {/* Mobile Navigation */}
-          <div className="flex justify-center items-center mt-6 space-x-4">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Previous"
-              className="rounded-full w-12 h-12 shadow-md"
-              onClick={handlePrev}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex space-x-2">
-              {Array.from({ length: Math.ceil(displayProjects.length / productsPerPage) }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    Math.floor(startIndex / productsPerPage) === i ? 'bg-blue-600' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Next"
-              className="rounded-full w-12 h-12 shadow-md"
-              onClick={handleNext}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </Button>
-          </div>
         </div>
       ) : (
         /* Desktop Layout */
@@ -302,7 +270,6 @@ export const RelatedProducts = () => {
           >
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          
           <div className={classNames(
             "grid gap-6 flex-1 transition-all duration-300 ease-in-out",
             {
@@ -368,7 +335,6 @@ export const RelatedProducts = () => {
               );
             })}
           </div>
-          
           <Button
             variant="outline"
             size="icon"

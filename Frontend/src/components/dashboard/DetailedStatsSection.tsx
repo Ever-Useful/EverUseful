@@ -149,7 +149,7 @@ const DetailedStatsSection: React.FC<DetailedStatsSectionProps> = ({
           {/* Insights Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {insights.map((insight, index) => (
-              <Card key={index} className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+              <Card key={index} className="border-0 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:bg-[#059669] cursor-pointer bg-gray-50 dark:bg-gray-700">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">

@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Header from '@/components/HeaderBackup';
 import {Footer} from '@/components/Footer';
-import Logo from '@/assets/logo/Logo Main.png'; 
+import Logo from '@/assets/Logo/Logo Main.png'; 
 type Connection = {
   id: string;
   name: string;
