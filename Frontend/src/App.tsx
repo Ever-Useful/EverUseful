@@ -26,7 +26,7 @@ import About from '@/pages/AboutUs';
 import Dashboard from "./pages/Dashboard";
 import AiAgents from "./pages/AiAgents";
 import FindExpert from "./pages/FindExpert";
-import SendFeedback from "./pages/SendFeedback";
+import SendFeedback from "./pages/Policy/SendFeedback";
 import Chat from "./pages/Chat";
 import BackUp from "./pages/Backup";
 import Sustainable from "./pages/Sustainable";
@@ -41,7 +41,7 @@ import RefundPolicy from "./pages/Policy/RefundPolicy";
 import BecomeAMentor from "./pages/BecomeAMentor";
 
 const queryClient = new QueryClient();
-
+//testing
 const App = () => (  
   <AuthProvider>
     <QueryClientProvider client={queryClient}>
