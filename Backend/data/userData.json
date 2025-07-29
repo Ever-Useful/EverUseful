@@ -1572,7 +1572,7 @@
       }
     },
     "USER_000014": {
-      "firebaseUid": "z9aCTT7kuGday67TpIRS1SIXdzG3",
+      "firebaseUid": "KgcUPgEahIbaMX0emLHBzoGplU52",
       "customUserId": "USER_000014",
       "profile": {
         "avatar": null,
@@ -1580,13 +1580,13 @@
         "location": null,
         "website": null,
         "title": null,
-        "createdAt": "2025-07-02T16:11:10.428Z",
-        "updatedAt": "2025-07-02T16:11:10.428Z",
+        "createdAt": "2025-07-28T19:44:57.505Z",
+        "updatedAt": "2025-07-28T19:44:57.505Z",
         "firstName": "Amrit",
         "lastName": "Lal Paswan",
         "userType": "student",
         "username": "",
-        "email": "amritpaswan5952@gmail.com",
+        "email": "amritemperor123@gmail.com",
         "mobile": "",
         "gender": "",
         "domain": "",
@@ -1603,7 +1603,7 @@
         "location": "",
         "hobbies": "",
         "copyCurrent": false,
-        "updatedAt": "2025-07-02T16:11:10.428Z"
+        "updatedAt": "2025-07-28T19:44:57.505Z"
       },
       "socialLinks": {
         "linkedin": "",
@@ -1619,7 +1619,7 @@
         "codepen": "",
         "figma": "",
         "custom": "",
-        "updatedAt": "2025-07-02T16:11:10.428Z"
+        "updatedAt": "2025-07-28T19:44:57.505Z"
       },
       "projects": {
         "created": [],
@@ -1667,7 +1667,7 @@
         "totalLikes": 0,
         "totalViews": 0,
         "totalDownloads": 0,
-        "memberSince": "2025-07-02T16:11:10.428Z"
+        "memberSince": "2025-07-28T19:44:57.505Z"
       },
       "studentData": null,
       "professorData": null,
@@ -1678,13 +1678,13 @@
         "skills": [],
         "hourlyRate": "",
         "avgResponseTime": "",
-        "updatedAt": "2025-07-02T16:11:10.428Z"
+        "updatedAt": "2025-07-28T19:44:57.505Z"
       }
     }
   },
   "userCounter": 14,
   "metadata": {
-    "lastUpdated": "2025-07-02T16:11:10.428Z",
+    "lastUpdated": "2025-07-28T19:44:57.505Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

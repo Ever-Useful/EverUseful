@@ -16,13 +16,13 @@ export const Hero = () => {
       <div className="absolute right-0 top-0 h-full w-1/2 opacity-90 hidden md:block">
         {showVideo ? (
           <video
-            src="Sustainable.mp4"
+            src="main.mp4"
             className="h-full w-full object-cover"
             controls
             autoPlay
             muted
           >
-            <source src="Sustainable.mp4" type="video/mp4" />
+            <source src="main.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         ) : (
