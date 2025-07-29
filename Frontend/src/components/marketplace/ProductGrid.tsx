@@ -543,7 +543,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                       <span className="text-gray-700 text-[6px]">{project.views}</span>
                     </div>
                   </div>
-                  <h3 className="font-semibold text-xs text-gray-900 break-words whitespace-normal mb-1">
+                  <h3
+                    className="font-semibold text-xs text-gray-900 break-words whitespace-normal line-clamp-2"
+                    style={{ wordBreak: "break-word" }}
+                  >
                     {project.title}
                   </h3>
                   <div className="flex items-center gap-2 mb-1">
@@ -667,7 +670,8 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                   )}
 
                   <h3
-                    className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors cursor-pointer"
+                    className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors cursor-pointer break-words whitespace-normal line-clamp-2"
+                    style={{ wordBreak: "break-word" }}
                     onClick={() => setSelected(project)}
                   >
                     {project.title}
