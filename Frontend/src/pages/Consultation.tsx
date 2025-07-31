@@ -5,6 +5,7 @@ import { ConsultationForm } from "@/components/consultation/ConsultationForm";
 import { BenefitsSection } from "@/components/consultation/BenefitsSection";
 import { NewsletterSection } from "@/components/consultation/NewsletterSection";
 import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
 
 const Consultation = () => {
   const [isConsultationFormOpen, setIsConsultationFormOpen] = useState(false);
@@ -19,6 +20,7 @@ const Consultation = () => {
 
   return (
     <div className="min-h-screen">
+      <Header/>
       <HeroSection onBookConsultation={handleBookConsultation} />
       <ServicesSection />
       <BenefitsSection />
