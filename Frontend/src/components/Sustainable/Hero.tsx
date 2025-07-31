@@ -3,6 +3,10 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
+// Import assets correctly
+import sustainableVideo from "@/assets/videos/Sustainable.mp4";
+import sustainableHeroImage from "@/assets/images/sustainable-hero.jpg";
+
 export const Hero = () => {
   const [showVideo, setShowVideo] = useState(false);
 
@@ -16,18 +20,18 @@ export const Hero = () => {
       <div className="absolute right-0 top-0 h-full w-full md:w-1/2 opacity-90">
         {showVideo ? (
           <video
-            src="Sustainable.mp4"
+            src={sustainableVideo}
             className="h-full min-w-full object-cover"
             controls
             autoPlay
             muted
           >
-            <source src="main.mp4" type="video/mp4" />
+            <source src={sustainableVideo} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         ) : (
           <img
-            src="image.png"
+            src={sustainableHeroImage}
             alt="Sustainable development and green innovation"
             className="h-full w-full object-cover"
           />
@@ -62,18 +66,18 @@ export const Hero = () => {
         <div className="w-full mt-8 md:hidden">
           {showVideo ? (
             <video
-              src="Sustainable.mp4"
+              src={sustainableVideo}
               className="w-full h-48 object-cover rounded-lg"
               controls
               autoPlay
               muted
             >
-              <source src="Sustainable.mp4" type="video/mp4" />
+              <source src={sustainableVideo} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           ) : (
             <img
-              src="image.png"
+              src={sustainableHeroImage}
               alt="Sustainable development and green innovation"
               className="w-full h-48 object-cover rounded-lg"
             />

@@ -24,7 +24,7 @@ const About = () => {
         <FAQSection /> 
       {/* <TestimonialsSection />  */}
        <CTASection />
-    
+
       <Footer />
     </div>
   );
