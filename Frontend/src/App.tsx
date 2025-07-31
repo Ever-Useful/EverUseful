@@ -39,6 +39,7 @@ import CookiePolicy from "./pages/Policy/CookiePolicy";
 import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
 import BecomeAMentor from "./pages/BecomeAMentor";
+import Consultation from "./pages/Consultation";
 
 const queryClient = new QueryClient();
 //testing
@@ -79,6 +80,9 @@ const App = () => (
             <Route path="/connection" element={<Connection />} />
             <Route path="/studentprofile/:id" element={<StudentProfile />} />
             <Route path="/green" element={<Sustainable/>} />
+            <Route path="/consultation" element={<Consultation/>} />
+
+      
             {/* Policy Routes */}
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-conditions" element={<TermsConditions />} />

@@ -1409,8 +1409,8 @@
       "customUserId": "USER_000012",
       "profile": {
         "avatar": null,
-        "bio": "hi",
-        "location": "Jammu, Jammu & Kashmir",
+        "bio": "hi i am kalen wanna be a slayer but can't slay",
+        "location": "Jammu, Jammindiau & Kashmir",
         "website": null,
         "title": null,
         "createdAt": "2025-06-28T06:04:35.519Z",
@@ -1421,10 +1421,10 @@
         "username": "",
         "email": "Ankit@gmail.com",
         "mobile": "",
-        "gender": "Male",
+        "gender": "Female",
         "domain": "",
-        "purpose": "To find a Job",
-        "role": "Full Stack Developer"
+        "purpose": "Compete & Upskill",
+        "role": "cyber"
       },
       "education": [
         {
@@ -1445,6 +1445,25 @@
           "attachments": null,
           "createdAt": "2025-06-28T06:08:52.841Z",
           "updatedAt": "2025-06-28T06:08:52.841Z"
+        },
+        {
+          "id": "edu_1751180035486",
+          "qualification": "Intermediate (12th)",
+          "course": "B.Tech/BE",
+          "specialization": "Electronics",
+          "college": "ITI",
+          "startYear": "202023",
+          "endYear": "20278",
+          "courseType": "Full Time",
+          "percentage": "89",
+          "cgpa": "9.0",
+          "rollNumber": "4456",
+          "lateralEntry": "No",
+          "skills": "koi hai hi nai",
+          "description": "",
+          "attachments": null,
+          "createdAt": "2025-06-29T06:53:55.486Z",
+          "updatedAt": "2025-06-29T06:53:55.486Z"
         }
       ],
       "workExperience": [],
@@ -1511,12 +1530,219 @@
       "activities": {
         "recent": [
           {
-            "id": "1751090904963",
-            "type": "skill_added",
-            "description": "Added new skill: Securities",
-            "timestamp": "2025-06-28T06:08:24.963Z",
+            "id": "1751180043414",
+            "type": "profile_updated",
+            "description": "Updated profile information",
+            "timestamp": "2025-06-29T06:54:03.414Z",
             "metadata": {
-              "skillName": "Securities"
+              "updatedFields": [
+                "location"
+              ],
+              "oldValues": {
+                "avatar": null,
+                "bio": "hi i am kalen wanna be a slayer but can't slay",
+                "location": "Jammu, Jammindiau & Kashmir",
+                "website": null,
+                "title": null,
+                "createdAt": "2025-06-28T06:04:35.519Z",
+                "updatedAt": "2025-06-29T06:52:32.453Z",
+                "firstName": "",
+                "lastName": "",
+                "userType": "student",
+                "username": "",
+                "email": "Ankit@gmail.com",
+                "mobile": "",
+                "gender": "Female",
+                "domain": "",
+                "purpose": "Compete & Upskill",
+                "role": "cyber"
+              },
+              "newValues": {
+                "avatar": null,
+                "bio": "hi i am kalen wanna be a slayer but can't slay",
+                "location": "Jammu, Jammindiau & Kashmir",
+                "website": null,
+                "title": null,
+                "createdAt": "2025-06-28T06:04:35.519Z",
+                "updatedAt": "2025-06-29T06:54:03.411Z",
+                "firstName": "",
+                "lastName": "",
+                "userType": "student",
+                "username": "",
+                "email": "Ankit@gmail.com",
+                "mobile": "",
+                "gender": "Female",
+                "domain": "",
+                "purpose": "Compete & Upskill",
+                "role": "cyber"
+              }
+            }
+          },
+          {
+            "id": "1751180035488",
+            "type": "education_added",
+            "description": "Added education: B.Tech/BE at ITI",
+            "timestamp": "2025-06-29T06:53:55.488Z",
+            "metadata": {
+              "educationId": "edu_1751180035486",
+              "course": "B.Tech/BE",
+              "college": "ITI",
+              "qualification": "Intermediate (12th)"
+            }
+          },
+          {
+            "id": "1751179952456",
+            "type": "profile_updated",
+            "description": "Updated profile information",
+            "timestamp": "2025-06-29T06:52:32.456Z",
+            "metadata": {
+              "updatedFields": [
+                "bio"
+              ],
+              "oldValues": {
+                "avatar": null,
+                "bio": "hi",
+                "location": "Jammu, Jammindiau & Kashmir",
+                "website": null,
+                "title": null,
+                "createdAt": "2025-06-28T06:04:35.519Z",
+                "updatedAt": "2025-06-29T06:51:30.843Z",
+                "firstName": "",
+                "lastName": "",
+                "userType": "student",
+                "username": "",
+                "email": "Ankit@gmail.com",
+                "mobile": "",
+                "gender": "Female",
+                "domain": "",
+                "purpose": "Compete & Upskill",
+                "role": "cyber"
+              },
+              "newValues": {
+                "avatar": null,
+                "bio": "hi i am kalen wanna be a slayer but can't slay",
+                "location": "Jammu, Jammindiau & Kashmir",
+                "website": null,
+                "title": null,
+                "createdAt": "2025-06-28T06:04:35.519Z",
+                "updatedAt": "2025-06-29T06:52:32.453Z",
+                "firstName": "",
+                "lastName": "",
+                "userType": "student",
+                "username": "",
+                "email": "Ankit@gmail.com",
+                "mobile": "",
+                "gender": "Female",
+                "domain": "",
+                "purpose": "Compete & Upskill",
+                "role": "cyber"
+              }
+            }
+          },
+          {
+            "id": "1751179890846",
+            "type": "profile_updated",
+            "description": "Updated profile information",
+            "timestamp": "2025-06-29T06:51:30.846Z",
+            "metadata": {
+              "updatedFields": [
+                "gender",
+                "domain",
+                "purpose",
+                "role",
+                "location"
+              ],
+              "oldValues": {
+                "avatar": null,
+                "bio": "hi",
+                "location": "Jammu, Jammindiau & Kashmir",
+                "website": null,
+                "title": null,
+                "createdAt": "2025-06-28T06:04:35.519Z",
+                "updatedAt": "2025-06-29T06:51:13.940Z",
+                "firstName": "",
+                "lastName": "",
+                "userType": "student",
+                "username": "",
+                "email": "Ankit@gmail.com",
+                "mobile": "",
+                "gender": "Female",
+                "domain": "",
+                "purpose": "To find a Job",
+                "role": "cyber"
+              },
+              "newValues": {
+                "avatar": null,
+                "bio": "hi",
+                "location": "Jammu, Jammindiau & Kashmir",
+                "website": null,
+                "title": null,
+                "createdAt": "2025-06-28T06:04:35.519Z",
+                "updatedAt": "2025-06-29T06:51:30.843Z",
+                "firstName": "",
+                "lastName": "",
+                "userType": "student",
+                "username": "",
+                "email": "Ankit@gmail.com",
+                "mobile": "",
+                "gender": "Female",
+                "domain": "",
+                "purpose": "Compete & Upskill",
+                "role": "cyber"
+              }
+            }
+          },
+          {
+            "id": "1751179873954",
+            "type": "profile_updated",
+            "description": "Updated profile information",
+            "timestamp": "2025-06-29T06:51:13.954Z",
+            "metadata": {
+              "updatedFields": [
+                "gender",
+                "domain",
+                "purpose",
+                "role",
+                "location"
+              ],
+              "oldValues": {
+                "avatar": null,
+                "bio": "hi",
+                "location": "Jammu, Jammu & Kashmir",
+                "website": null,
+                "title": null,
+                "createdAt": "2025-06-28T06:04:35.519Z",
+                "updatedAt": "2025-06-28T06:30:09.796Z",
+                "firstName": "",
+                "lastName": "",
+                "userType": "student",
+                "username": "",
+                "email": "Ankit@gmail.com",
+                "mobile": "",
+                "gender": "Male",
+                "domain": "",
+                "purpose": "To find a Job",
+                "role": "Full Stack Developer"
+              },
+              "newValues": {
+                "avatar": null,
+                "bio": "hi",
+                "location": "Jammu, Jammindiau & Kashmir",
+                "website": null,
+                "title": null,
+                "createdAt": "2025-06-28T06:04:35.519Z",
+                "updatedAt": "2025-06-29T06:51:13.940Z",
+                "firstName": "",
+                "lastName": "",
+                "userType": "student",
+                "username": "",
+                "email": "Ankit@gmail.com",
+                "mobile": "",
+                "gender": "Female",
+                "domain": "",
+                "purpose": "To find a Job",
+                "role": "cyber"
+              }
             }
           }
         ],

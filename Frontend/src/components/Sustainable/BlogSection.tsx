@@ -104,20 +104,20 @@ export const BlogSection = () => {
   return (
     <section className="py-20 bg-gradient-to-br from-stone-50 via-green-25 to-emerald-25">
       <div className="container mx-auto px-6">
-        <div className="flex justify-between items-center mb-16">
-          <div>
+         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
+          <div className="mb-8 md:mb-0">
             <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
               SUSTAINABLE INSIGHTS
             </p>
-            <h2 className="text-5xl font-bold text-gray-900">Latest Articles on Sustainable Solutions</h2>
-            <p className="text-lg text-gray-600 mt-4 max-w-2xl">
+             <h2 className="text-3xl md:text-5xl font-bold text-gray-900">Latest Articles on Sustainable Solutions</h2>
+            <p className="text-base md:text-lg text-gray-600 mt-4 max-w-2xl">
               Explore real-time insights on how sustainable innovations are optimizing natural resource usage and creating positive environmental impact across the globe.
             </p>
           </div>
           
           <button 
             onClick={handleViewMore}
-            className="flex items-center text-gray-900 font-semibold hover:text-green-600 transition-colors group"
+            className="hidden md:flex items-center text-gray-900 font-semibold hover:text-green-600 transition-colors group"
           >
             View More 
             <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -153,7 +153,7 @@ export const BlogSection = () => {
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {articles.map((article) => (
-              <div key={article.id} className="flex-shrink-0 w-96 bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+              <div key={article.id} className="flex-shrink-0 w-80 md:w-96 bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
                 <div className="relative overflow-hidden">
                   <img 
                     src={article.image}

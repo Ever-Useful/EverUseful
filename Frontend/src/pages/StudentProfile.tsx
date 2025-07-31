@@ -200,33 +200,36 @@ const Profile = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Header />
       {/* Hero Section */}
-      <div className="relative h-96 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${backgroundImage})` }}>
+      <div
+        className="relative h-64 sm:h-80 md:h-96 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-8 rounded-md bg-transparent my-[99px] py-[34px] px-[23px]">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-12 sm:my-[99px] py-6 sm:py-[34px] px-3 sm:px-[23px]">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-end gap-6">
-              <div className="relative">
-                <Avatar className="w-36 h-36 border-4 border-white shadow-lg">
-                  <AvatarImage 
-                    src={profile.avatar} 
-                    alt={profile.name} 
+            <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 w-full">
+              <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0">
+                <Avatar className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg mx-auto md:mx-0">
+                  <AvatarImage
+                    src={profile.avatar}
+                    alt={profile.name}
                     className="object-cover"
                     onError={(e) => {
                       e.currentTarget.src = NoUserProfile;
                     }}
                   />
-                  <AvatarFallback className="bg-slate-200 text-slate-600 font-bold text-3xl flex items-center justify-center">
+                  <AvatarFallback className="bg-slate-200 text-slate-600 font-bold text-2xl sm:text-3xl flex items-center justify-center">
                     {profile.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "NA"}
                   </AvatarFallback>
                 </Avatar>
               </div>
-              <div className="flex-1 text-white">
-                <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5">{profile.name}</h1>
-                <p className="text-xl text-slate-200 drop-shadow-md">{profile.title}</p>
+              <div className="flex-1 text-white mt-4 md:mt-0 w-full">
+                <h1 className="text-2xl sm:text-4xl font-bold drop-shadow-lg mb-1.5 text-center md:text-left">{profile.name}</h1>
+                <p className="text-lg sm:text-xl text-slate-200 drop-shadow-md text-center md:text-left">{profile.title}</p>
                 {/* Connect Button */}
-                <div className="flex flex-row items-center justify-between mt-4">
-                  <div className="flex flex-col w-[200px] h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
-                    <button className="flex items-center gap-2 text-white drop-shadow-md text-lg">
+                <div className="flex flex-row items-center justify-center md:justify-start mt-4">
+                  <div className="flex flex-col w-full max-w-xs h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
+                    <button className="flex items-center gap-2 text-white drop-shadow-md text-base sm:text-lg">
                       <UserPlus className="w-6 h-6" />
                       Connect
                     </button>
@@ -238,35 +241,35 @@ const Profile = () => {
         </div>
       </div>
       {/* Stats Cards */}
-      <div className="max-w-7xl mx-auto px-8 -mt-8 relative z-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="max-w-7xl mx-auto px-2 sm:px-8 -mt-8 relative z-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
-            <CardContent className="p-4 text-center">
+            <CardContent className="p-3 sm:p-4 text-center">
               <Award className="w-6 h-6 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{profile.stats.projects}+</div>
+              <div className="text-lg sm:text-2xl font-bold">{profile.stats.projects}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
-            <CardContent className="p-4 text-center">
+            <CardContent className="p-3 sm:p-4 text-center">
               <UserPlus className="w-6 h-6 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{profile.stats.connections}+</div>
+              <div className="text-lg sm:text-2xl font-bold">{profile.stats.connections}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
             </CardContent>
           </Card>
         </div>
       </div>
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Column */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             {/* About Section */}
             <Card className="bg-white shadow-lg rounded-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                    <span className="bg-purple-100 p-2 rounded-lg mr-3">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-purple-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <GraduationCap className="w-5 h-5 text-purple-600" />
                     </span>
                     About
@@ -285,18 +288,18 @@ const Profile = () => {
             {/* Academic Background */}
             {education && education.length > 0 && (
               <Card className="bg-white shadow-lg rounded-xl">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                      <span className="bg-blue-100 p-2 rounded-lg mr-3">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+                      <span className="bg-blue-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <BookOpen className="w-5 h-5 text-blue-600" />
                       </span>
                       Academic Background
                     </h2>
                   </div>
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {education.map((edu, idx) => (
-                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                      <div key={idx} className="border rounded-lg p-3 sm:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 bg-white">
                         <div>
                           <div className="font-semibold text-gray-900">{edu.qualification} - {edu.course}</div>
                           <div className="text-gray-700 text-sm">{edu.college} | {edu.startYear} - {edu.endYear}</div>
@@ -313,18 +316,18 @@ const Profile = () => {
             {/* Work Experience Section */}
             {workExperience && workExperience.length > 0 && (
               <Card className="bg-white shadow-lg rounded-xl">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                      <span className="bg-green-100 p-2 rounded-lg mr-3">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+                      <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <Briefcase className="w-5 h-5 text-green-600" />
                       </span>
                       Work Experience
                     </h2>
                   </div>
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {workExperience.map((work, idx) => (
-                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                      <div key={idx} className="border rounded-lg p-3 sm:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 bg-white">
                         <div>
                           <div className="font-semibold text-gray-900">{work.designation} - {work.organization}</div>
                           <div className="text-gray-700 text-sm">{work.startDate} - {work.currentlyWorking ? 'Present' : work.endDate}</div>
@@ -340,23 +343,23 @@ const Profile = () => {
             )}
             {/* Portfolio Section */}
             <Card className="bg-white shadow-lg rounded-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                    <span className="bg-green-100 p-2 rounded-lg mr-3">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <Briefcase className="w-5 h-5 text-green-600" />
                     </span>
                     Research Projects & Commercial Work
                   </h2>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {safePortfolioProjects.length > 0 ? (
                     safePortfolioProjects.map((project, index) => (
                       <Card
                         key={project.id || index}
-                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[140px]"
+                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[120px] sm:min-h-[140px]"
                       >
-                        <div className="w-full md:w-48 flex-shrink-0 h-36 md:h-auto bg-gray-100 flex items-center justify-center">
+                        <div className="w-full md:w-40 lg:w-48 flex-shrink-0 h-28 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
                             src={project.image}
                             alt={project.title}
@@ -364,11 +367,11 @@ const Profile = () => {
                             onError={e => { e.currentTarget.src = NoImageAvailable; }}
                           />
                         </div>
-                        <div className="flex-1 flex flex-col justify-between p-4">
+                        <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">{project.title}</h3>
-                              <p className="text-gray-600 text-sm mb-2 line-clamp-2">{project.description}</p>
+                              <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 line-clamp-1">{project.title}</h3>
+                              <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{project.description}</p>
                               <div className="flex flex-wrap gap-2 mb-2">
                                 {(project.skills || []).map((skill, skillIndex) => (
                                   <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">{skill}</Badge>
@@ -388,10 +391,10 @@ const Profile = () => {
                       </Card>
                     ))
                   ) : (
-                    <div className="text-center py-20">
-                      <Briefcase className="w-12 h-12 mx-auto text-gray-300" />
-                      <h3 className="mt-4 text-lg font-medium text-gray-900">No projects yet</h3>
-                      <p className="mt-1 text-sm text-gray-500">This student hasn't added any projects yet.</p>
+                    <div className="text-center py-10 sm:py-20">
+                      <Briefcase className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-gray-300" />
+                      <h3 className="mt-4 text-base sm:text-lg font-medium text-gray-900">No projects yet</h3>
+                      <p className="mt-1 text-xs sm:text-sm text-gray-500">This student hasn't added any projects yet.</p>
                     </div>
                   )}
                 </div>
@@ -399,25 +402,25 @@ const Profile = () => {
             </Card>
           </div>
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Skills Section */}
-            <Card className="bg-white shadow-lg rounded-xl max-w-md">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <span className="bg-indigo-100 p-2 rounded-lg mr-3">
+            <Card className="bg-white shadow-lg rounded-xl max-w-full">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+                    <span className="bg-indigo-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <Star className="w-5 h-5 text-indigo-600" />
                     </span>
                     Research Skills & Technical Expertise
                   </h3>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   {profile.stats.skills && profile.stats.skills.length > 0 ? (
                     profile.stats.skills.map((skill: string, index: number) => (
-                      <Badge key={index} className="px-3 py-1 text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">{skill}</Badge>
+                      <Badge key={index} className="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">{skill}</Badge>
                     ))
                   ) : (
-                    <p className="text-gray-500 text-sm">No skills added yet. Click edit to add your skills.</p>
+                    <p className="text-gray-500 text-xs sm:text-sm">No skills added yet. Click edit to add your skills.</p>
                   )}
                 </div>
               </CardContent>

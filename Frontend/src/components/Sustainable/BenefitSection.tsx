@@ -5,22 +5,22 @@ export const BenefitsSection = () => {
     {
       icon: Wind,
       title: "Renewable Source",
-      description: "Sed do eiusm od tempor"
+      description: "Harness clean, sustainable energy from natural resources."
     },
     {
       icon: Zap,
       title: "Easy Installation",
-      description: "Sed do eiusm od tempor"
+      description: "Quick and hassle-free setup for immediate energy savings."
     },
     {
       icon: Plug,
       title: "Low Maintenance",
-      description: "Sed do eiusm od tempor"
+      description: "Minimal upkeep required, ensuring long-term reliability."
     },
     {
       icon: Wrench,
       title: "Affordable Power",
-      description: "Sed do eiusm od tempor"
+      description: "Cost-effective solutions that lower your energy bills."
     }
   ];
 
@@ -32,17 +32,17 @@ export const BenefitsSection = () => {
             <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
               WHY CHOOSE US
             </p>
-            <h2 className="text-5xl font-bold text-gray-900">Benefits</h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900">Benefits</h2>
           </div>
           <div className="flex flex-1 items-start md:items-center w-full md:w-auto">
             <div className="flex flex-col flex-1">
               <p className="text-base text-gray-700 mb-1">
               By choosing us, you gain access to reliable, affordable, and sustainable energy solutions tailored to your needs. 
               Our commitment ensures a seamless experience from installation to ongoing support, empowering you to embrace a greener future with confidence. <br />
-             <span className="text-base text-gray-600 ">
+             <p className="text-base text-gray-600 ">
 
                Discover how our expertise and innovative approach make renewable energy accessible and beneficial for everyone.
-               </span>
+               </p>
               </p>
             </div>
             {/* <button className="flex items-center text-gray-900 font-semibold hover:text-green-600 transition-colors whitespace-nowrap ml-0 md:ml-auto">
@@ -51,24 +51,18 @@ export const BenefitsSection = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 md:grid-cols-4 md:gap-8">
           {benefits.map((benefit, index) => (
-            <div
-              key={index}
-              className="bg-white p-8 rounded-2xl shadow-sm border border-green-100 text-center hover:shadow-lg transition-all hover:-translate-y-1 group"
-            >
-              <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center group-hover:from-green-200 group-hover:to-emerald-200 transition-all">
-                  <benefit.icon className="w-8 h-8 text-green-600" />
+            <div key={index} className="bg-white p-4 md:p-8 rounded-2xl shadow-sm border border-green-100 text-center hover:shadow-lg transition-all hover:-translate-y-1 group">
+              <div className="flex justify-center mb-4 md:mb-6">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center group-hover:from-green-200 group-hover:to-emerald-200 transition-all">
+                  <benefit.icon className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">{benefit.title}</h3>
-              <p className="text-gray-600 mb-6">{benefit.description}</p>
-              <div className="flex justify-center space-x-1">
-                <div className="w-2 h-2 bg-green-300 rounded-full"></div>
-                <div className="w-2 h-2 bg-green-200 rounded-full"></div>
-                <div className="w-2 h-2 bg-green-100 rounded-full"></div>
-              </div>
+             <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-4">{benefit.title}</h3>
+              <p className="text-sm md:text-base text-gray-600">{benefit.description}</p>
+      
+              
             </div>
           ))}
         </div>
