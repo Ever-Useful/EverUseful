@@ -38,6 +38,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(0);
   const [sortBy, setSortBy] = useState("newest");
+  const [expandedReviews, setExpandedReviews] = useState<{ [key: number]: boolean }>({});
 
   const reviews: Review[] = [
     {
@@ -155,85 +156,93 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
     );
   };
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
+  const handleToggleReadMore = (id: number) => {
+    setExpandedReviews(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
   return (
     <div className="space-y-6">
-      {/* Review Summary */}
-      <Card className="border-gray-200 bg-white">
-        <CardHeader>
-          <CardTitle className="text-gray-900">Reviews & Ratings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Overall Rating */}
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gray-900 mb-2">{averageRating}</div>
-              <div className="flex justify-center mb-2">
-                {renderStars(averageRating)}
-              </div>
-              <p className="text-gray-600">{totalReviews} reviews</p>
-            </div>
-
-            {/* Rating Distribution */}
-            <div className="space-y-2">
-              {ratingDistribution.map((item) => (
-                <div key={item.stars} className="flex items-center space-x-3">
-                  <span className="text-sm font-medium text-gray-700 w-8">
-                    {item.stars}★
-                  </span>
-                  <Progress value={item.percentage} className="flex-1 h-2" />
-                  <span className="text-sm text-gray-500 w-8">
-                    {item.count}
-                  </span>
+      {/* Unified Review Summary & Write Review */}
+      <div className="bg-white rounded-lg flex flex-col md:flex-row gap-4 md:gap-6 px-2 py-3 sm:px-4 sm:py-6">
+        {/* Review Summary */}
+        <div className="flex-1 px-1 py-0">
+          <CardHeader className="pb-2 sm:pb-4 px-0 sm:px-2">
+            <CardTitle className="text-gray-900 text-lg sm:text-xl">Reviews & Ratings</CardTitle>
+          </CardHeader>
+          <CardContent className="px-0 sm:px-2">
+            <div>
+              <div className="text-center">
+                <div className="text-2xl sm:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">{averageRating}</div>
+                <div className="flex justify-center mb-1 sm:mb-2">
+                  {renderStars(averageRating, false, "w-4 h-4 sm:w-5 sm:h-5")}
                 </div>
-              ))}
+                <p className="text-gray-600 text-xs sm:text-base">{totalReviews} reviews</p>
+              </div>
+              {/* Rating Distribution */}
+              <div className="space-y-1 sm:space-y-2 mt-2 sm:mt-4">
+                {ratingDistribution.map((item) => (
+                  <div key={item.stars} className="flex items-center space-x-2 sm:space-x-3">
+                    <span className="text-xs sm:text-sm font-medium text-gray-700 w-7 sm:w-8">
+                      {item.stars}★
+                    </span>
+                    <Progress value={item.percentage} className="flex-1 h-2" />
+                    <span className="text-xs sm:text-sm text-gray-500 w-7 sm:w-8">
+                      {item.count}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </div>
 
-      {/* Write a Review */}
-      <Card className="border-gray-200 bg-white">
-        <CardHeader>
-          <CardTitle className="text-gray-900">Write a Review</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Rating
-            </label>
-            {renderStars(newRating, true, "w-6 h-6")}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Review
-            </label>
-            <Textarea
-              placeholder="Share your experience with this project..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="min-h-[120px] border-gray-300"
-            />
-          </div>
-          
-          <Button 
-            onClick={handleSubmitReview}
-            disabled={!newComment.trim() || newRating === 0}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Submit Review
-          </Button>
-        </CardContent>
-      </Card>
+        {/* Write a Review */}
+        <div className="flex-1 px-1 py-0">
+          <CardHeader className="pb-2 sm:pb-4 px-0 sm:px-2">
+            <CardTitle className="text-gray-900 text-lg sm:text-xl">Write a Review</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 sm:space-y-4 px-0 sm:px-2">
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                Your Rating
+              </label>
+              {renderStars(newRating, true, "w-5 h-5 sm:w-6 sm:h-6")}
+            </div>
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                Your Review
+              </label>
+              <Textarea
+                placeholder="Share your experience with this project..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="min-h-[80px] sm:min-h-[120px] border-gray-300 text-xs sm:text-sm"
+              />
+            </div>
+            <Button 
+              onClick={handleSubmitReview}
+              disabled={!newComment.trim() || newRating === 0}
+              className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm py-2 sm:py-3"
+            >
+              Submit Review
+            </Button>
+          </CardContent>
+        </div>
+      </div>
 
       {/* Reviews List */}
       <Card className="border-gray-200 bg-white">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-gray-900">Customer Reviews</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between px-2 py-2 sm:px-4 sm:py-4">
+          <CardTitle className="text-gray-900 text-base sm:text-lg">Customer Reviews</CardTitle>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+            className="px-2 py-1 border border-gray-300 rounded-md text-xs sm:text-sm"
           >
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
@@ -242,71 +251,88 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
             <option value="helpful">Most Helpful</option>
           </select>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
+        <CardContent className="px-2 py-2 sm:px-4 sm:py-4">
+          <div className="space-y-4 sm:space-y-6">
             {reviews.map((review, index) => (
               <div key={review.id}>
-                <div className="flex space-x-4">
-                  <Avatar className="w-12 h-12">
+                <div className="flex space-x-3 sm:space-x-4">
+                  <Avatar className="w-9 h-9 sm:w-12 sm:h-12">
                     <AvatarImage src={review.author.image} alt={review.author.name} />
                     <AvatarFallback className="bg-gray-200 text-gray-700">
                       {review.author.initials}
                     </AvatarFallback>
                   </Avatar>
-                  
                   <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="font-semibold text-gray-900">
+                    <div className="flex items-center space-x-1 sm:space-x-2 mb-1 sm:mb-2">
+                      <span className="font-semibold text-gray-900 text-xs sm:text-base">
                         {review.author.name}
                       </span>
                       {review.author.verified && (
-                        <CheckCircle className="w-4 h-4 text-blue-500" />
+                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />
                       )}
-                      <Badge variant="outline" className="text-xs">
+                      {/* <Badge variant="outline" className="text-[10px] sm:text-xs">
                         Verified Purchase
-                      </Badge>
+                      </Badge> */}
                     </div>
-                    
-                    <div className="flex items-center space-x-3 mb-2">
-                      {renderStars(review.rating, false, "w-4 h-4")}
-                      <span className="text-sm text-gray-500">
+                    <div className="flex items-center space-x-2 sm:space-x-3 mb-1 sm:mb-2">
+                      {renderStars(review.rating, false, "w-3 h-3 sm:w-4 sm:h-4")}
+                      <span className="text-[10px] sm:text-sm text-gray-500">
                         {formatDate(review.date)}
                       </span>
                     </div>
-                    
-                    <h4 className="font-medium text-gray-900 mb-2">
+                    <h4 className="font-medium text-gray-900 mb-1 sm:mb-2 text-xs sm:text-base">
                       {review.title}
                     </h4>
-                    
-                    <p className="text-gray-700 leading-relaxed mb-3">
-                      {review.comment}
+                    <p className="text-gray-700 leading-relaxed mb-2 sm:mb-3 text-xs sm:text-sm">
+                      {isMobile && review.comment.length > 50 && !expandedReviews[review.id] ? (
+                        <>
+                          {review.comment.slice(0, 50)}...
+                          <button
+                            className="ml-1 text-blue-600 underline text-xs"
+                            onClick={() => handleToggleReadMore(review.id)}
+                            type="button"
+                          >
+                            Read More
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {review.comment}
+                          {isMobile && review.comment.length > 50 && (
+                            <button
+                              className="ml-1 text-blue-600 underline text-xs"
+                              onClick={() => handleToggleReadMore(review.id)}
+                              type="button"
+                            >
+                              Show Less
+                            </button>
+                          )}
+                        </>
+                      )}
                     </p>
-                    
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2 sm:space-x-4">
                       <button
                         onClick={() => toggleHelpful(review.id)}
-                        className={`flex items-center space-x-1 text-sm transition-colors ${
+                        className={`flex items-center space-x-1 text-xs sm:text-sm transition-colors ${
                           review.isHelpful
                             ? 'text-blue-600'
                             : 'text-gray-500 hover:text-gray-700'
                         }`}
                       >
-                        <Heart className={`w-4 h-4 ${review.isHelpful ? 'fill-current' : ''}`} />
+                        <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${review.isHelpful ? 'fill-current' : ''}`} />
                         <span>Helpful ({review.helpful})</span>
                       </button>
                     </div>
                   </div>
                 </div>
-                
                 {index < reviews.length - 1 && (
-                  <Separator className="mt-6" />
+                  <Separator className="mt-4 sm:mt-6" />
                 )}
               </div>
             ))}
           </div>
-          
-          <div className="mt-6 text-center">
-            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+          <div className="mt-4 sm:mt-6 text-center">
+            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 text-xs sm:text-sm px-3 py-1 sm:px-4 sm:py-2">
               Load More Reviews
             </Button>
           </div>

@@ -26,7 +26,7 @@ import About from '@/pages/AboutUs';
 import Dashboard from "./pages/Dashboard";
 import AiAgents from "./pages/AiAgents";
 import FindExpert from "./pages/FindExpert";
-import SendFeedback from "./pages/SendFeedback";
+import SendFeedback from "./pages/Policy/SendFeedback";
 import Chat from "./pages/Chat";
 import BackUp from "./pages/Backup";
 import Sustainable from "./pages/Sustainable";
@@ -38,10 +38,11 @@ import TermsConditions from "./pages/Policy/TermsConditions";
 import CookiePolicy from "./pages/Policy/CookiePolicy";
 import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
+import BecomeAMentor from "./pages/BecomeAMentor";
 import Consultation from "./pages/Consultation";
 
 const queryClient = new QueryClient();
-
+//testing
 const App = () => (  
   <AuthProvider>
     <QueryClientProvider client={queryClient}>
@@ -88,6 +89,7 @@ const App = () => (
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/delivery-policy" element={<DeliveryPolicy />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/become-mentor" element={<BecomeAMentor/>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

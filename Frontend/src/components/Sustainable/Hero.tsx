@@ -22,7 +22,7 @@ export const Hero = () => {
             autoPlay
             muted
           >
-            <source src="Sustainable.mp4" type="video/mp4" />
+            <source src="main.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         ) : (

@@ -1,0 +1,39 @@
+name: Deploy Frontend to Hostinger
+
+on:
+  push:
+    branches: [ Demo ]
+    paths: [ 'Frontend/**' ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        working-directory: Frontend
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --force --legacy-peer-deps --no-audit
+
+      - name: Build project
+        working-directory: Frontend
+        run: npm run build
+
+      - name: Deploy to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          source: "Frontend/dist/*"
+          target: ${{ secrets.HOSTINGER_PATH }}
+          strip_components: 0 

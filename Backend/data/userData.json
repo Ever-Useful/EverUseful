@@ -579,7 +579,7 @@
         "experience": "2",
         "portfolio": "https://amitkumar.dev",
         "skills": "Python, React, Node.js, MongoDB",
-        "updatedAt": "2025-06-28T22:38:05.183Z",
+        "updatedAt": "2025-06-27T21:11:43.802Z",
         "location": "Jammu, Jammu & Kashmir",
         "hourlyRate": "20",
         "avgResponseTime": "5"
@@ -1414,7 +1414,7 @@
         "website": null,
         "title": null,
         "createdAt": "2025-06-28T06:04:35.519Z",
-        "updatedAt": "2025-06-29T06:54:03.411Z",
+        "updatedAt": "2025-06-28T18:59:49.031Z",
         "firstName": "",
         "lastName": "",
         "userType": "student",
@@ -1777,9 +1777,9 @@
         "course": "B.Tech/BE",
         "year": "",
         "specialization": "Computer Science and Engineering",
-        "startYear": "202023",
-        "endYear": "20278",
-        "updatedAt": "2025-06-29T06:54:01.347Z"
+        "startYear": "2020",
+        "endYear": "2024",
+        "updatedAt": "2025-06-28T18:59:52.727Z"
       },
       "professorData": {
         "department": "",
@@ -1796,11 +1796,121 @@
         "avgResponseTime": "5",
         "updatedAt": "2025-06-28T06:30:13.873Z"
       }
+    },
+    "USER_000014": {
+      "firebaseUid": "KgcUPgEahIbaMX0emLHBzoGplU52",
+      "customUserId": "USER_000014",
+      "profile": {
+        "avatar": null,
+        "bio": null,
+        "location": null,
+        "website": null,
+        "title": null,
+        "createdAt": "2025-07-28T19:44:57.505Z",
+        "updatedAt": "2025-07-28T19:44:57.505Z",
+        "firstName": "Amrit",
+        "lastName": "Lal Paswan",
+        "userType": "student",
+        "username": "",
+        "email": "amritemperor123@gmail.com",
+        "mobile": "",
+        "gender": "",
+        "domain": "",
+        "purpose": "",
+        "role": ""
+      },
+      "education": [],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-07-28T19:44:57.505Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-07-28T19:44:57.505Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-07-28T19:44:57.505Z"
+      },
+      "studentData": null,
+      "professorData": null,
+      "freelancerData": {
+        "experience": "",
+        "portfolio": "",
+        "location": "",
+        "skills": [],
+        "hourlyRate": "",
+        "avgResponseTime": "",
+        "updatedAt": "2025-07-28T19:44:57.505Z"
+      }
     }
   },
-  "userCounter": 12,
+  "userCounter": 14,
   "metadata": {
-    "lastUpdated": "2025-06-29T06:54:03.414Z",
+    "lastUpdated": "2025-07-28T19:44:57.505Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

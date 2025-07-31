@@ -180,7 +180,6 @@ export const RelatedProducts = () => {
   if (loading) {
     return (
       <div className={`container mx-auto ${isMobile ? 'px-4' : 'px-6'} py-8`}>
-        <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold mb-6`}>Related Products</h2>
         <div className="text-center py-8">Loading...</div>
       </div>
     );
@@ -189,7 +188,6 @@ export const RelatedProducts = () => {
   if (error) {
     return (
       <div className={`container mx-auto ${isMobile ? 'px-4' : 'px-6'} py-8`}>
-        <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold mb-6`}>Related Products</h2>
         <div className="text-center py-8 text-red-500">{error}</div>
       </div>
     );
@@ -197,7 +195,6 @@ export const RelatedProducts = () => {
 
   return (
     <div className={`container mx-auto ${isMobile ? 'px-4' : 'px-6'} py-8`}>
-      <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold mb-6`}>Related Products</h2>
       
       {/* Mobile Layout */}
       {isMobile ? (
@@ -212,49 +209,46 @@ export const RelatedProducts = () => {
           )}>
             {displayProjects.slice(startIndex, startIndex + 1).map((project) => (
               <Link to={`/product/${project.id}`} key={project.id} className="block">
-                <Card className="hover:shadow-lg transition-shadow duration-200 bg-white">
+                <Card className="hover:shadow-lg transition-shadow duration-200 bg-white rounded-lg">
                   <div className="relative">
                     <img
                       src={project.image}
                       alt={project.title}
-                      className="w-full h-48 object-cover rounded-t-lg"
+                      className="w-full h-32 xs:h-36 object-cover rounded-t-lg"
                     />
-                    <Badge className="absolute top-3 right-3 bg-blue-600 text-white text-xs px-2 py-1">
+                    <Badge className="absolute top-2 right-2 bg-blue-600 text-white text-[10px] px-2 py-0.5">
                       {project.category}
                     </Badge>
                   </div>
                   <CardContent className="p-4">
-                    <h3 className="font-bold text-lg mb-2 text-gray-900">
+                    <h3 className="font-bold text-base mb-1 text-gray-900 line-clamp-1">
                       {project.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    <p className="text-xs text-gray-600 mb-2 line-clamp-2">
                       {project.description}
                     </p>
-                    
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium text-gray-900">{project.rating ?? '--'}</span>
-                        <span className="text-sm text-gray-500">
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                        <span className="text-xs font-medium text-gray-900">{project.rating ?? '--'}</span>
+                        <span className="text-xs text-gray-500">
                           ({project.reviews ?? 0})
                         </span>
                       </div>
                       <div className="flex items-center space-x-1 text-gray-500">
-                        <Eye className="w-4 h-4" />
-                        <span className="text-sm">{project.views ?? 0}</span>
+                        <Eye className="w-3 h-3" />
+                        <span className="text-xs">{project.views ?? 0}</span>
                       </div>
                     </div>
-                    
                     <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-gray-900">
+                      <span className="text-base font-bold text-gray-900">
                         ${project.price?.toLocaleString?.() ?? '--'}
                       </span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1"
                       >
-                        View Details
                         <ArrowRight className="w-4 h-4 ml-1" />
                       </Button>
                     </div>
@@ -262,38 +256,6 @@ export const RelatedProducts = () => {
                 </Card>
               </Link>
             ))}
-          </div>
-          
-          {/* Mobile Navigation */}
-          <div className="flex justify-center items-center mt-6 space-x-4">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Previous"
-              className="rounded-full w-12 h-12 shadow-md"
-              onClick={handlePrev}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex space-x-2">
-              {Array.from({ length: Math.ceil(displayProjects.length / productsPerPage) }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    Math.floor(startIndex / productsPerPage) === i ? 'bg-blue-600' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Next"
-              className="rounded-full w-12 h-12 shadow-md"
-              onClick={handleNext}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </Button>
           </div>
         </div>
       ) : (
@@ -308,7 +270,6 @@ export const RelatedProducts = () => {
           >
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          
           <div className={classNames(
             "grid gap-6 flex-1 transition-all duration-300 ease-in-out",
             {
@@ -325,19 +286,19 @@ export const RelatedProducts = () => {
               const project = displayProjects[idx];
               return (
                 <Link to={`/product/${project.id}`} key={i + '-' + project.id}>
-                  <Card className="h-full hover:shadow-lg transition-shadow duration-200">
+                  <Card className="h-full hover:shadow-lg transition-shadow duration-200 rounded-lg">
                     <div className="relative">
                       <img
                         src={project.image}
                         alt={project.title}
-                        className="w-full h-40 object-cover rounded-t-lg"
+                        className="w-full h-28 md:h-32 lg:h-36 object-cover rounded-t-lg"
                       />
-                      <Badge className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-xs">
+                      <Badge className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5">
                         {project.category}
                       </Badge>
                     </div>
                     <CardContent className="p-4">
-                      <h3 className="font-semibold text-lg mb-1 line-clamp-1">
+                      <h3 className="font-semibold text-base mb-1 line-clamp-1">
                         {project.title}
                       </h3>
                       <p className="text-xs text-gray-600 mb-2 line-clamp-2">
@@ -345,29 +306,26 @@ export const RelatedProducts = () => {
                       </p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                           <span className="text-xs font-medium">{project.rating ?? '--'}</span>
                           <span className="text-xs text-gray-500">
                             ({project.reviews ?? 0})
                           </span>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="flex items-center space-x-1 text-gray-500">
-                            <Eye className="w-4 h-4" />
-                            <span className="text-xs">{project.views ?? 0}</span>
-                          </div>
+                        <div className="flex items-center space-x-1 text-gray-500">
+                          <Eye className="w-3 h-3" />
+                          <span className="text-xs">{project.views ?? 0}</span>
                         </div>
                       </div>
-                      <div className="mt-4 flex items-center justify-between">
-                        <span className="text-lg font-bold text-gray-900">
+                      <div className="mt-2 flex items-center justify-between">
+                        <span className="text-base font-bold text-gray-900">
                           ${project.price?.toLocaleString?.() ?? '--'}
                         </span>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-blue-600 hover:text-blue-700 text-lg"
+                          className="text-blue-600 hover:text-blue-700 text-base p-1"
                         >
-                          View Details
                           <ArrowRight className="w-4 h-4 ml-1" />
                         </Button>
                       </div>
@@ -377,7 +335,6 @@ export const RelatedProducts = () => {
               );
             })}
           </div>
-          
           <Button
             variant="outline"
             size="icon"
