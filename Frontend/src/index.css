@@ -20,8 +20,14 @@
 
   body {
     @apply bg-background text-foreground;
+     background: radial-gradient(ellipse at top, hsl(var(--eco-purple) / 0.15), transparent),
+                radial-gradient(ellipse at bottom, hsl(var(--eco-green) / 0.15), transparent),
+                radial-gradient(ellipse at left, hsl(var(--eco-blue) / 0.1), transparent),
+                hsl(var(--background));
+    min-height: 100vh;
     font-family: 'Inter', sans-serif;
      fontFamily: "'Dancing Script', 'Brush Script MT', cursive"
+     
             
   }
 
@@ -69,6 +75,12 @@
     --sidebar-border: 214 32% 85%;
     --sidebar-ring: 158 80% 60%;
 
+    /* Custom sustainability colors */
+    --eco-green: 142 76% 36%;
+    --eco-blue: 200 100% 50%;
+    --eco-purple: 260 100% 50%;
+    --eco-orange: 35 100% 50%;
+
         /* Custom color variables for consistent usage */
     --mint-light: #E2F4ED;
     --mint: #B8E6CC;
@@ -76,6 +88,15 @@
     --olive-light: #5A6B3F;
     --olive: #3A4325;
     --olive-dark: #2A311B;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(200 100% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(260 100% 50%), hsl(142 76% 36%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 15% 6% / 0.9), hsl(142 76% 36% / 0.1));
+    
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(142 76% 36% / 0.3);
+    --shadow-card: 0 10px 30px -10px hsl(220 15% 6% / 0.5); 
   
   }
 
@@ -117,6 +138,31 @@
     --sidebar-ring: 158 70% 55%;
   }
 }
+@layer components {
+  .galaxy-bg {
+  background: radial-gradient(ellipse at top, hsl(var(--eco-purple) / 0.2), transparent),
+     radial-gradient(ellipse at bottom, hsl(var(--eco-green) / 0.2), transparent),
+     radial-gradient(ellipse at left, hsl(var(--eco-blue) / 0.15), transparent),
+    hsl(var(--background));
+  }
+  
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+  
+  .eco-gradient {
+    background: var(--gradient-primary);
+  }
+  
+  .interactive-card {
+    @apply transform transition-all duration-300 hover:scale-105 hover:shadow-[var(--shadow-glow)] cursor-pointer;
+  }
+  
+  .glow-text {
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+}
+
 
 
 /* Smooth scrolling */
