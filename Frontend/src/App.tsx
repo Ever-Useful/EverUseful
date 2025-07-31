@@ -31,6 +31,8 @@ import Chat from "./pages/Chat";
 import BackUp from "./pages/Backup";
 import Sustainable from "./pages/Sustainable";
 import Connection from "./pages/Connections";
+import Consultation from "./pages/Consultation";
+
 import BussinessProfile from "./pages/bussinessprofile";
 // Import new policy pages
 import PrivacyPolicy from "./pages/Policy/PrivacyPolicy";
@@ -38,10 +40,9 @@ import TermsConditions from "./pages/Policy/TermsConditions";
 import CookiePolicy from "./pages/Policy/CookiePolicy";
 import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
-import BecomeAMentor from "./pages/BecomeAMentor";
 
 const queryClient = new QueryClient();
-//testing
+
 const App = () => (  
   <AuthProvider>
     <QueryClientProvider client={queryClient}>
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/freelancing" element={<Freelancing />} />
             <Route path="/product/:id" element={<ProductDisplay />} />
             <Route path="/connect" element={<Connect />} />
+            <Route path="/consultation" element={<Consultation />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
@@ -85,7 +87,6 @@ const App = () => (
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/delivery-policy" element={<DeliveryPolicy />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
-            <Route path="/become-mentor" element={<BecomeAMentor/>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

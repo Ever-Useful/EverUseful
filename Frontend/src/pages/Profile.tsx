@@ -18,7 +18,7 @@ import BackgroundUpload from '@/components/BackgroundUpload';
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
-import GlobeLoader from '@/components/GlobeLoader';
+// import GlobeLoader from '@/components/GlobeLoader';
 
 
 // Add dummy state for conversations and selectedConversation
@@ -68,35 +68,44 @@ const StudentProfessorProfileView = ({
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Header />
       {/* Hero Section */}
-      <div className="relative h-96 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${backgroundImage})` }}>
+      <div
+        className="relative h-64 md:h-96 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
         {/* Camera icon for background photo */}
         <button
-          className="absolute top-6 right-6 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors z-10"
+          className="absolute top-4 right-4 md:top-6 md:right-6 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors z-10"
           onClick={() => setShowEditProfile(true)}
           title="Change Background Photo"
         >
           <Camera className="text-slate-700 w-5 h-5" />
         </button>
-        <div className="absolute bottom-0 left-0 right-0 p-8 rounded-md bg-transparent my-[99px] py-[34px] px-[23px]">
+        <div className="absolute bottom-0 left-0 right-0 px-4 py-4 md:p-8 rounded-md bg-transparent">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-end gap-6">
-              <div className="relative">
+            <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
+              <div className="relative mb-4 md:mb-0">
                 {profileData.avatar ? (
-                  <img src={profileData.avatar} alt={`${profileData.firstName} ${profileData.lastName}`} className="w-36 h-36 border-4 border-white shadow-lg rounded-full object-cover" />
+                  <img
+                    src={profileData.avatar}
+                    alt={`${profileData.firstName} ${profileData.lastName}`}
+                    className="w-24 h-24 md:w-36 md:h-36 border-4 border-white shadow-lg rounded-full object-cover"
+                  />
                 ) : (
-                  <div className="w-36 h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-4xl font-bold text-gray-600">
+                  <div className="w-24 h-24 md:w-36 md:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-2xl md:text-4xl font-bold text-gray-600">
                     {profileData.firstName?.charAt(0)}{profileData.lastName?.charAt(0)}
                   </div>
                 )}
               </div>
-              <div className="flex-1 text-white">
-                <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5">{`${profileData.firstName} ${profileData.lastName}`}</h1>
-                <p className="text-xl text-slate-200 drop-shadow-md">{profileData.userType}</p>
+              <div className="flex-1 text-white text-center md:text-left">
+                <h1 className="text-3xl md:text-4xl font-bold drop-shadow-lg mb-1.5">
+                  {`${profileData.firstName} ${profileData.lastName}`}
+                </h1>
+                <p className="text-lg md:text-xl text-slate-200 drop-shadow-md">{profileData.userType}</p>
                 {/* Edit Profile Button */}
                 <button
                   onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
-                  className="mt-4 bg-transparent border-2 border-white text-white hover:bg-white/10 px-6 py-2 rounded-full font-semibold drop-shadow-md transition-all duration-200 flex items-center"
+                  className="mt-3 md:mt-4 bg-transparent border-2 border-white text-white hover:bg-white/10 px-4 md:px-6 py-2 rounded-full font-semibold drop-shadow-md transition-all duration-200 flex items-center justify-center mx-auto md:mx-0"
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Profile
@@ -649,14 +658,14 @@ const Profile = () => {
     }
   };
 
-  // Conditional rendering based on userType
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <GlobeLoader />
-      </div>
-    );
-  }
+  // // Conditional rendering based on userType
+  // if (loading) {
+  //   return (
+  //     <div className="flex items-center justify-center min-h-screen">
+  //       <GlobeLoader />
+  //     </div>
+  //   );
+  // }
 
   if (profileData.userType?.toLowerCase() === 'student' || profileData.userType?.toLowerCase() === 'professor') {
     return (
