@@ -1,7 +1,7 @@
+
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import upcomigImg from "@/assets/images/sustainable-hero.jpg";
 
 export const Hero = () => {
   const [showVideo, setShowVideo] = useState(false);
@@ -11,13 +11,13 @@ export const Hero = () => {
   };
 
   return (
-    <section className="min-h-[90vh] bg-gradient-to-br from-stone-100 via-yellow-50 to-green-100 relative overflow-hidden">
+    <section className="min-h-[90vh] bg-gradient-to-br from-stone-100 via-yellow-50 to-green-100 relative ">
       {/* Background sustainable energy image or video */}
-      <div className="absolute right-0 top-0 h-full w-1/2 opacity-90 hidden md:block">
+      <div className="absolute right-0 top-0 h-full w-full md:w-1/2 opacity-90">
         {showVideo ? (
           <video
             src="Sustainable.mp4"
-            className="h-full w-full object-cover"
+            className="h-full min-w-full object-cover"
             controls
             autoPlay
             muted
@@ -27,25 +27,25 @@ export const Hero = () => {
           </video>
         ) : (
           <img
-            src={upcomigImg}
+            src="image.png"
             alt="Sustainable development and green innovation"
-            className="h-full w-full object-cover rounded-bl-3xl"
+            className="h-full w-full object-cover"
           />
         )}
       </div>
 
       {/* Main content */}
       <div className="relative z-10 container mx-auto px-4 py-12 flex flex-col md:flex-row items-center min-h-[90vh]">
-        <div className="w-full md:w-1/2 space-y-6 text-center md:text-left">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+       <div className="w-full md:w-1/2 space-y-6 text-center md:text-left">
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
             Sustainable Project{" "}
-            <span className="inline-flex items-center bg-gradient-to-r from-green-400 to-emerald-500 text-white px-3 py-1 rounded-full text-sm font-medium mx-2">
+            <span className="hidden md:inline-flex items-center bg-gradient-to-r from-green-400 to-emerald-500 text-white px-3 py-1 rounded-full text-sm font-medium mx-2">
               🌱
             </span>
             Solutions
           </h1>
 
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-md mx-auto md:mx-0">
+          <p className="text-lg md:text-xl text-gray-600 max-w-md mx-auto md:mx-0">
             Join professors and students worldwide in building revolutionary eco-friendly solutions. Contribute your innovative project ideas for a sustainable future.
           </p>
 
@@ -73,9 +73,9 @@ export const Hero = () => {
             </video>
           ) : (
             <img
-              src={upcomigImg}
+              src="image.png"
               alt="Sustainable development and green innovation"
-              className="w-full h-48 object-cover rounded-lg rounded-bl-3xl"
+              className="w-full h-48 object-cover rounded-lg"
             />
           )}
         </div>
