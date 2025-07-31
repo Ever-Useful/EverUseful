@@ -31,6 +31,8 @@ import Chat from "./pages/Chat";
 import BackUp from "./pages/Backup";
 import Sustainable from "./pages/Sustainable";
 import Connection from "./pages/Connections";
+import Consultation from "./pages/Consultation";
+
 import BussinessProfile from "./pages/bussinessprofile";
 // Import new policy pages
 import PrivacyPolicy from "./pages/Policy/PrivacyPolicy";
@@ -55,6 +57,7 @@ const App = () => (
             <Route path="/freelancing" element={<Freelancing />} />
             <Route path="/product/:id" element={<ProductDisplay />} />
             <Route path="/connect" element={<Connect />} />
+            <Route path="/consultation" element={<Consultation />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
