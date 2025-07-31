@@ -23,7 +23,7 @@ import { doc, addDoc, getFirestore, collection, setDoc } from "firebase/firestor
 import { db } from "../lib/firebase"; // Make sure db is exported from your firebase config
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { userService } from '@/services/userService';
-import { firestoreService } from '@/services/firestoreService';
+// Removed Firestore import - using DynamoDB now
 import Logo from '../assets/Logo/Logo Side.png'
 
 const SignUp = () => {
@@ -306,14 +306,8 @@ const SignUp = () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
-      // Save backend customUserId in Firestore
-      await firestoreService.setCurrentUserData({
-        customUserId: backendUser.customUserId,
-        name: formData.firstName + ' ' + formData.lastName,
-        email: formData.email,
-        userType: formData.userType,
-        createdAt: new Date().toISOString(),
-      });
+      // User data is now saved in DynamoDB via backend
+      console.log('User created successfully in DynamoDB:', backendUser.customUserId);
 
       await fetch('http://localhost:3000/token', {
         method: 'POST',

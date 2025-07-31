@@ -1,53 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs').promises;
-const path = require('path');
 const authorize = require('../authorize');
 const admin = require('firebase-admin');
 const db = admin.firestore();
-
-// Helper function to read marketplace data
-const readMarketplaceData = async () => {
-  const data = await fs.readFile(path.join(__dirname, '../data/marketplace.json'), 'utf8');
-  return JSON.parse(data);
-};
-
-// Helper function to write marketplace data
-const writeMarketplaceData = async (data) => {
-  await fs.writeFile(
-    path.join(__dirname, '../data/marketplace.json'),
-    JSON.stringify(data, null, 2),
-    'utf8'
-  );
-};
-
-// Helper function to read user data
-const readUserData = async () => {
-  const data = await fs.readFile(path.join(__dirname, '../data/userData.json'), 'utf8');
-  return JSON.parse(data);
-};
-
-// Helper function to write user data
-const writeUserData = async (data) => {
-  await fs.writeFile(
-    path.join(__dirname, '../data/userData.json'),
-    JSON.stringify(data, null, 2),
-    'utf8'
-  );
-};
+const dynamoDBService = require('../services/dynamoDBService');
+const userService = require('../services/userService');
 
 // Get all projects with optional search and filters
 router.get('/projects', async (req, res) => {
   try {
     const { search, category, minPrice, maxPrice, minRating, skills, duration, sort, page = 1, limit = 6 } = req.query;
-    const data = await readMarketplaceData();
-    const userData = await readUserData();
-    let projects = [...data.projects];
+    const projects = await dynamoDBService.getAllMarketplaceItems();
+    let filteredProjects = [...projects];
 
     // Apply search filter
     if (search) {
       const searchLower = search.toLowerCase();
-      projects = projects.filter(project => 
+      filteredProjects = filteredProjects.filter(project => 
         project.title.toLowerCase().includes(searchLower) ||
         project.description.toLowerCase().includes(searchLower) ||
         project.tags.some(tag => tag.toLowerCase().includes(searchLower))
@@ -56,12 +25,12 @@ router.get('/projects', async (req, res) => {
 
     // Apply category filter
     if (category) {
-      projects = projects.filter(project => project.category === category);
+      filteredProjects = filteredProjects.filter(project => project.category === category);
     }
 
     // Apply price range filter
     if (minPrice || maxPrice) {
-      projects = projects.filter(project => {
+      filteredProjects = filteredProjects.filter(project => {
         if (minPrice && project.price < parseInt(minPrice)) return false;
         if (maxPrice && project.price > parseInt(maxPrice)) return false;
         return true;
@@ -70,54 +39,54 @@ router.get('/projects', async (req, res) => {
 
     // Apply rating filter
     if (minRating) {
-      projects = projects.filter(project => project.rating >= parseFloat(minRating));
+      filteredProjects = filteredProjects.filter(project => project.rating >= parseFloat(minRating));
     }
 
     // Apply skills filter
     if (skills) {
       const skillsList = skills.split(',');
-      projects = projects.filter(project =>
+      filteredProjects = filteredProjects.filter(project =>
         skillsList.some(skill => project.skills.includes(skill))
       );
     }
 
     // Apply duration filter
     if (duration) {
-      projects = projects.filter(project => project.duration === duration);
+      filteredProjects = filteredProjects.filter(project => project.duration === duration);
     }
 
     // Apply sorting
     if (sort) {
       switch (sort) {
         case 'recent':
-          projects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
+          filteredProjects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
           break;
         case 'rating':
-          projects.sort((a, b) => b.rating - a.rating);
+          filteredProjects.sort((a, b) => b.rating - a.rating);
           break;
         case 'price_asc':
-          projects.sort((a, b) => a.price - b.price);
+          filteredProjects.sort((a, b) => a.price - b.price);
           break;
         case 'price_desc':
-          projects.sort((a, b) => b.price - a.price);
+          filteredProjects.sort((a, b) => b.price - a.price);
           break;
         default:
           // Default to most recent if sort is invalid
-          projects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
+          filteredProjects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
       }
     } else {
       // Default to most recent if no sort specified
-      projects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
+      filteredProjects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
     }
 
     // Calculate pagination
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
-    const totalProjects = projects.length;
+    const totalProjects = filteredProjects.length;
     const totalPages = Math.ceil(totalProjects / limitNum);
     const startIndex = (pageNum - 1) * limitNum;
     const endIndex = startIndex + limitNum;
-    const paginatedProjects = projects.slice(startIndex, endIndex).map(project => {
+    const paginatedProjects = filteredProjects.slice(startIndex, endIndex).map(project => {
       // Only return author as customUserId
       return { ...project, author: project.author };
     });
@@ -141,18 +110,18 @@ router.get('/projects', async (req, res) => {
 router.post('/projects/:id/view', async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await readMarketplaceData();
-    const project = data.projects.find(p => p.id === parseInt(id));
+    const project = await dynamoDBService.getMarketplaceItem(id);
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
     }
 
     // Increment views
-    project.views += 1;
-    await writeMarketplaceData(data);
+    const updatedProject = await dynamoDBService.updateMarketplaceItem(id, {
+      views: (project.views || 0) + 1
+    });
 
-    res.json({ views: project.views });
+    res.json({ views: updatedProject.views });
   } catch (error) {
     console.error('Error incrementing view count:', error);
     res.status(500).json({ error: 'Internal server error' });

@@ -1,7 +1,7 @@
 import { auth } from '../lib/firebase';
 
-const API_BASE_URL = 'http://localhost:3000/api/users';
-const ADMIN_API_BASE_URL = 'http://localhost:3000/api/admin';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/users';
+const ADMIN_API_BASE_URL = import.meta.env.VITE_ADMIN_API_BASE_URL || 'http://localhost:3000/api/admin';
 
 interface UserProfile {
   avatar: string;
