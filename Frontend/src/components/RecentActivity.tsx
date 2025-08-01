@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trash2, Plus, Calendar, Users, Code, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { collection, query, where, orderBy, onSnapshot, deleteDoc, doc, getDocs } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 

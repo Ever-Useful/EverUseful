@@ -23,7 +23,6 @@ import { Footer } from "@/components/Footer";
 import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { useAuthState } from "@/hooks/useAuthState";
-import { firestoreService } from "@/services/firestoreService";
 import { userService } from "@/services/userService";
 import { toast } from "sonner";
 import NoUserProfile from "@/assets/images/no user profile.png";
@@ -50,7 +49,7 @@ const ProductDisplay = () => {
     const fetchCurrentUserData = async () => {
       if (user) {
         try {
-          const userData = await firestoreService.getCurrentUserData();
+          const userData = await userService.getUserProfile();
           if (userData && userData.customUserId) {
             setCurrentUserCustomId(userData.customUserId);
           }
@@ -108,14 +107,15 @@ const ProductDisplay = () => {
   // Helper to get author details
   const getAuthorDetails = (authorId: string) => {
     const user = authorCache[authorId];
-    if (!user) return { name: 'Unknown', image: NoUserProfile, userType: '', id: authorId };
+    if (!user) return { name: 'Unknown', image: NoUserProfile, userType: '', id: authorId, description: '' };
     const auth = user.auth || {};
     const profile = user.profile || {};
     return {
       name: `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User',
       image: profile.avatar || NoUserProfile,
       userType: auth.userType || '',
-      id: user.customUserId
+      id: user.customUserId,
+      description: profile.bio || ''
     };
   };
 
@@ -145,12 +145,12 @@ const ProductDisplay = () => {
       return;
     }
     try {
-      const firestoreData = await firestoreService.getCurrentUserData();
-      if (!firestoreData) {
+      const userData = await userService.getUserProfile();
+      if (!userData) {
         toast.error('User data not found');
         return;
       }
-      await userService.addToCart(firestoreData.customUserId, {
+      await userService.addToCart(userData.customUserId, {
         productId: projectId.toString(),
         addedAt: new Date().toISOString(),
         quantity: 1

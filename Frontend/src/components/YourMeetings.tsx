@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Copy, Calendar, Clock, Users, Trash2 } from 'lucide-react';
-import { db } from '@/lib/firebase';
 import { collection, query, where, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
 import { Badge } from '@/components/ui/badge';
+import { auth } from '@/lib/firebase';
 
 interface Meeting {
   id: string;

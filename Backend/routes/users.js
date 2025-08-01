@@ -427,6 +427,79 @@ router.get('/:customUserId', async (req, res) => {
   }
 });
 
+// Get all users (for collaborators page)
+router.get('/all', async (req, res) => {
+  try {
+    const users = await userService.getAllUsers();
+    res.json({ success: true, users });
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Follow/unfollow user
+router.post('/follow', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { targetUserId } = req.body;
+    
+    if (!targetUserId) {
+      return res.status(400).json({ success: false, message: 'Target user ID is required' });
+    }
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Add to following list
+    await userService.followUser(user.customUserId, targetUserId);
+    
+    res.json({ success: true, message: 'Connection request sent successfully' });
+  } catch (error) {
+    console.error('Error following user:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Schedule meeting
+router.post('/meetings', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const meetingData = req.body;
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Add meeting to user's meetings (you might want to create a separate meetings table)
+    const meetingId = Date.now().toString();
+    const meeting = {
+      id: meetingId,
+      ...meetingData,
+      createdBy: user.customUserId,
+      createdAt: new Date().toISOString()
+    };
+    
+    // For now, we'll store meetings in the user's data
+    // In a production app, you'd want a separate meetings table
+    await userService.addActivity(user.customUserId, {
+      type: 'meeting_scheduled',
+      title: meetingData.title,
+      description: meetingData.description,
+      date: meetingData.date,
+      participants: meetingData.participants
+    });
+    
+    res.json({ success: true, message: 'Meeting scheduled successfully', data: meeting });
+  } catch (error) {
+    console.error('Error scheduling meeting:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // Create user endpoint (for frontend compatibility)
 router.post('/create', authorize, async (req, res) => {
   try {

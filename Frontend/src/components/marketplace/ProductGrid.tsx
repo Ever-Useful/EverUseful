@@ -21,7 +21,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useAuthState } from "../../hooks/useAuthState";
-import { firestoreService } from "../../services/firestoreService";
 import { userService } from "../../services/userService";
 import { toast } from "sonner";
 import NoImageAvailable from "@/assets/images/no image available.png";
@@ -125,7 +124,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     const fetchCurrentUserData = async () => {
       if (user) {
         try {
-          const userData = await firestoreService.getCurrentUserData();
+          const userData = await userService.getUserProfile();
           if (userData && userData.customUserId) {
             setCurrentUserCustomId(userData.customUserId);
           }
@@ -429,14 +428,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
 
     try {
       // Get user data from Firestore to get customUserId
-      const firestoreData = await firestoreService.getCurrentUserData();
-      if (!firestoreData) {
+      const userData = await userService.getUserProfile();
+      if (!userData) {
         toast.error('User data not found');
         return;
       }
 
       // Add project to cart in userData.json (only productId, addedAt, quantity)
-      await userService.addToCart(firestoreData.customUserId, {
+      await userService.addToCart(userData.customUserId, {
         productId: projectId.toString(),
         addedAt: new Date().toISOString(),
         quantity: 1

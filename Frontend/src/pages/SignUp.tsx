@@ -15,12 +15,14 @@ import {
   GithubAuthProvider,
   FacebookAuthProvider,
   sendEmailVerification,
-  Auth 
+  Auth,
+  RecaptchaVerifier,
+  ConfirmationResult,
+  signInWithPhoneNumber
 } from "firebase/auth";
 import { auth, handleGoogleAuth, handleGithubAuth } from "../lib/firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, addDoc, getFirestore, collection, setDoc } from "firebase/firestore";
-import { db } from "../lib/firebase"; // Make sure db is exported from your firebase config
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { userService } from '@/services/userService';
 // Removed Firestore import - using DynamoDB now
@@ -295,14 +297,11 @@ const SignUp = () => {
 
       // Ensure user exists in backend and customUserId is saved
       const backendUser = await userService.ensureUserExists({
-        name: formData.firstName + ' ' + formData.lastName,
-        email: formData.email,
-        avatar: userCredential.user.photoURL || null,
-        bio: null,
-        location: null,
-        website: null,
-        userType: formData.userType,
-        title: null,
+        avatar: userCredential.user.photoURL || '',
+        bio: '',
+        location: '',
+        website: '',
+        title: formData.firstName + ' ' + formData.lastName,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });

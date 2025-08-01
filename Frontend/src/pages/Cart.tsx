@@ -15,7 +15,6 @@ import { getCategoryIcon, getLicenseColor } from '@/components/cart/utils';
 import { CartItem as CartItemType, SavedItem, FeaturedProject } from '@/components/cart/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthState } from '@/hooks/useAuthState';
-import { firestoreService } from '@/services/firestoreService';
 import { userService } from '@/services/userService';
 import { toast } from 'sonner';
 import { Header } from "@/components/Header";
@@ -127,7 +126,7 @@ const Cart = () => {
       }
       
       // Get user data from Firestore to get customUserId
-      const firestoreData = await firestoreService.getCurrentUserData();
+      const firestoreData = await userService.getUserProfile();
       console.log('Firestore data:', firestoreData);
       
       if (!firestoreData) {
@@ -202,7 +201,7 @@ const Cart = () => {
       if (error.message === 'User not found') {
         console.error('=== USER NOT FOUND DEBUGGING ===');
         console.error('Firebase UID:', user?.uid);
-        const firestoreData = await firestoreService.getCurrentUserData();
+        const firestoreData = await userService.getUserProfile();
         console.error('Custom User ID from Firestore:', firestoreData?.customUserId);
         console.error('=== END DEBUGGING ===');
       }
@@ -215,7 +214,7 @@ const Cart = () => {
 
   const removeItem = async (id: string) => {
     try {
-      const firestoreData = await firestoreService.getCurrentUserData();
+      const firestoreData = await userService.getUserProfile();
       if (!firestoreData) {
         toast.error('User data not found');
         return;
@@ -262,7 +261,7 @@ const Cart = () => {
 
   const clearCart = async () => {
     try {
-      const firestoreData = await firestoreService.getCurrentUserData();
+      const firestoreData = await userService.getUserProfile();
       if (!firestoreData) {
         toast.error('User data not found');
         return;
