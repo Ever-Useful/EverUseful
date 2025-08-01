@@ -28,17 +28,6 @@ jobs:
         working-directory: Frontend
         run: npm run build
 
-      - name: Clear server directory
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          script: |
-            # Clear the target directory before deployment
-            rm -rf /var/www/html/*
-            echo "Server directory cleared"
-
       - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -50,22 +39,7 @@ jobs:
           strip_components: 0
           overwrite: true
 
-      - name: Debug deployment
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          script: |
-            echo "=== Checking deployment ==="
-            ls -la /var/www/html/
-            echo "=== Checking if index.html exists ==="
-            cat /var/www/html/index.html | head -10
-            echo "=== File timestamps ==="
-            stat /var/www/html/index.html
-            stat /var/www/html/assets/*.js | head -3
-
-      - name: Configure nginx for SPA routing
+      - name: Configure nginx and clear cache
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
@@ -73,77 +47,38 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
             # Create nginx configuration for SPA routing
-            cat > /tmp/nginx-spa-config << 'EOF'
+            cat > /etc/nginx/sites-available/default << 'EOF'
             server {
-                listen 80;
-                server_name _;
+                listen 80 default_server;
+                listen [::]:80 default_server;
                 root /var/www/html;
-                index index.html;
-
-                # Handle all routes by serving index.html
+                index index.html index.htm;
+                server_name _;
+                
+                # Disable directory listing
+                autoindex off;
+                
                 location / {
                     try_files $uri $uri/ /index.html;
                 }
-
-                # Handle static assets with proper caching
+                
                 location /assets/ {
                     expires 1y;
                     add_header Cache-Control "public, immutable";
                 }
-
-                # Handle other static files
-                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+                
+                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|mp4)$ {
                     expires 1y;
                     add_header Cache-Control "public, immutable";
                 }
             }
             EOF
-
-            # Backup current config
-            sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup
-
-            # Replace with new config
-            sudo cp /tmp/nginx-spa-config /etc/nginx/sites-available/default
-
-            # Test nginx configuration
-            sudo nginx -t
-
-            # Reload nginx if test passes
-            if [ $? -eq 0 ]; then
-                sudo systemctl reload nginx
-                echo "Nginx configured successfully for SPA routing"
-            else
-                echo "Nginx configuration test failed, restoring backup"
-                sudo cp /etc/nginx/sites-available/default.backup /etc/nginx/sites-available/default
-                sudo systemctl reload nginx
-            fi
-
-      - name: Clear server cache
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          script: |
-            # Navigate to website directory
-            cd /var/www/html
             
-            # Clear LiteSpeed cache (if using LiteSpeed)
+            # Test and reload nginx
+            sudo nginx -t && sudo systemctl reload nginx
+            
+            # Clear cache
             rm -rf /tmp/lscache/* 2>/dev/null || true
             rm -rf .lscache/* 2>/dev/null || true
             
-            # Clear any PHP OPcache
-            echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); } ?>" > clear_cache.php
-            
-            # Restart web server if possible
-            sudo systemctl restart apache2 2>/dev/null || sudo systemctl restart nginx 2>/dev/null || true
-            
-            # Check file timestamps to verify deployment
-            echo "=== Checking if files were updated ==="
-            stat index.html
-            stat assets/*.js | head -5
-            
-            # Remove the cache clearing file
-            rm -f clear_cache.php
-            
-            echo "Cache cleared successfully" 
+            echo "Deployment completed successfully" 
