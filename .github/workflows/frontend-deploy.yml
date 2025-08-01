@@ -38,16 +38,16 @@ jobs:
           # Add meta tag for cache busting
           sed -i 's|<head>|<head>\n    <meta name="version" content="'$TIMESTAMP'" />|g' dist/index.html
 
-       - name: Deploy to server
-         uses: appleboy/scp-action@v0.1.7
-         with:
-           host: ${{ secrets.HOSTINGER_HOST }}
-           username: ${{ secrets.HOSTINGER_USER }}
-           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-           source: "Frontend/dist/*"
-           target: "/var/www/html"
-           strip_components: 0
-           overwrite: true
+      - name: Deploy to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          source: "Frontend/dist/*"
+          target: "/var/www/html"
+          strip_components: 0
+          overwrite: true
 
       - name: Configure nginx and clear cache
         uses: appleboy/ssh-action@v1.0.3
