@@ -35,7 +35,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           source: "Frontend/dist/*"
-          target: "/var/www/html"
+          target: "/var/www/html/Frontend/dist"
           strip_components: 0
           overwrite: true
 
@@ -51,7 +51,7 @@ jobs:
             server {
                 listen 80 default_server;
                 listen [::]:80 default_server;
-                root /var/www/html;
+                root /var/www/html/Frontend/dist;
                 index index.html index.htm;
                 server_name _;
                 
