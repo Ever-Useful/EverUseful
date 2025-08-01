@@ -26,7 +26,17 @@ jobs:
 
       - name: Build project
         working-directory: Frontend
-        run: npm run build
+        run: npm run build:clean
+
+      - name: Add cache busting to index.html
+        working-directory: Frontend
+        run: |
+          # Add timestamp to force cache refresh
+          TIMESTAMP=$(date +%s)
+          # Add version parameter to prevent caching
+          sed -i "s|<html|<html data-version=\"$TIMESTAMP\"|g" dist/index.html
+          # Add meta tag for cache busting
+          sed -i 's|<head>|<head>\n    <meta name="version" content="'$TIMESTAMP'" />|g' dist/index.html
 
       - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
@@ -46,7 +56,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
-            # Create nginx configuration for SPA routing
+            # Create nginx configuration for SPA routing with reduced caching
             cat > /etc/nginx/sites-available/default << 'EOF'
             server {
                 listen 80 default_server;
@@ -58,18 +68,36 @@ jobs:
                 # Disable directory listing
                 autoindex off;
                 
+                # Add cache control headers
+                add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+                add_header Pragma "no-cache" always;
+                add_header Expires "0" always;
+                
                 location / {
                     try_files $uri $uri/ /index.html;
+                    # Force no cache for HTML files
+                    add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+                    add_header Pragma "no-cache" always;
+                    add_header Expires "0" always;
                 }
                 
+                # Reduced cache for assets
                 location /assets/ {
-                    expires 1y;
-                    add_header Cache-Control "public, immutable";
+                    expires 1h;
+                    add_header Cache-Control "public, max-age=3600";
                 }
                 
+                # Reduced cache for static files
                 location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|mp4)$ {
-                    expires 1y;
-                    add_header Cache-Control "public, immutable";
+                    expires 1h;
+                    add_header Cache-Control "public, max-age=3600";
+                }
+                
+                # Force no cache for index.html
+                location = /index.html {
+                    add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+                    add_header Pragma "no-cache" always;
+                    add_header Expires "0" always;
                 }
             }
             EOF
@@ -77,8 +105,40 @@ jobs:
             # Test and reload nginx
             sudo nginx -t && sudo systemctl reload nginx
             
-            # Clear cache
+            # Clear all caches
             rm -rf /tmp/lscache/* 2>/dev/null || true
             rm -rf .lscache/* 2>/dev/null || true
+            rm -rf /var/cache/nginx/* 2>/dev/null || true
+            
+            # Force nginx to reload and clear cache
+            sudo nginx -s reload
+            sudo systemctl reload nginx
+            
+            # Add a small delay to ensure cache is cleared
+            sleep 2
+            
+            # Verify deployment
+            echo "Checking if files are deployed correctly..."
+            ls -la /var/www/html/Frontend/dist/
+            
+            # Check if index.html has the version meta tag
+            echo "Checking index.html for version meta tag..."
+            grep -q "data-version" /var/www/html/Frontend/dist/index.html && echo "✓ Version tag found" || echo "✗ Version tag not found"
+            
+            # Show file modification times
+            echo "File modification times:"
+            stat /var/www/html/Frontend/dist/index.html
+            
+            # Check nginx status
+            echo "Checking nginx status..."
+            sudo systemctl status nginx --no-pager
+            
+            # Check nginx configuration
+            echo "Testing nginx configuration..."
+            sudo nginx -t
+            
+            # Show recent nginx logs
+            echo "Recent nginx error logs:"
+            sudo tail -n 20 /var/log/nginx/error.log || echo "No error log found"
             
             echo "Deployment completed successfully" 
