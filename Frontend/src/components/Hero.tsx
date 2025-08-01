@@ -80,10 +80,10 @@ export const Hero = () => {
             {/* LEFT: Text + Button */}
             <div className="w-full lg:w-1/3 text-center lg:text-left">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-4 animate-fade-in">
-                                 Connect Innovation{" "}
+                Connect Innovation with Opportunity
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
                   Innovation
-                </span>{" "}
+                </span>
                 with{" "}
                 <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
                   Opportunity
