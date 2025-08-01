@@ -30,13 +30,6 @@ export default defineConfig(({ mode }) => ({
     },
     // Ensure source maps are generated for debugging
     sourcemap: true,
-    // Optimize build
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-      },
-    },
   },
   // Add cache busting for development
   define: {
