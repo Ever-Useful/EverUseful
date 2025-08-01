@@ -31,23 +31,33 @@ jobs:
       - name: Add cache busting to index.html
         working-directory: Frontend
         run: |
-          # Add timestamp to force cache refresh
-          TIMESTAMP=$(date +%s)
-          # Add version parameter to prevent caching
-          sed -i "s|<html|<html data-version=\"$TIMESTAMP\"|g" dist/index.html
-          # Add meta tag for cache busting
-          sed -i 's|<head>|<head>\n    <meta name="version" content="'$TIMESTAMP'" />|g' dist/index.html
+           # Add timestamp to force cache refresh
+           TIMESTAMP=$(date +%s)
+           # Add version parameter to prevent caching
+           sed -i "s|<html|<html data-version=\"$TIMESTAMP\"|g" dist/index.html
+           # Add meta tag for cache busting
+           sed -i 's|<head>|<head>\n    <meta name="version" content="'$TIMESTAMP'" />|g' dist/index.html
+
+      - name: Clear target directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+           host: ${{ secrets.HOSTINGER_HOST }}
+           username: ${{ secrets.HOSTINGER_USER }}
+           key: ${{ secrets.HOSTINGER_SSH_KEY }}
+           script: |
+             sudo rm -rf /var/www/html/*
+             sudo mkdir -p /var/www/html
 
       - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          source: "Frontend/dist/*"
-          target: "/var/www/html"
-          strip_components: 0
-          overwrite: true
+           host: ${{ secrets.HOSTINGER_HOST }}
+           username: ${{ secrets.HOSTINGER_USER }}
+           key: ${{ secrets.HOSTINGER_SSH_KEY }}
+           source: "Frontend/dist/"
+           target: "/var/www/html"
+           strip_components: 0
+           overwrite: true
 
       - name: Configure nginx and clear cache
         uses: appleboy/ssh-action@v1.0.3
@@ -61,7 +71,7 @@ jobs:
             server {
                 listen 80 default_server;
                 listen [::]:80 default_server;
-                root /var/www/html;
+                root /var/www/html/Frontend/dist;
                 index index.html index.htm;
                 server_name _;
                 
@@ -117,17 +127,17 @@ jobs:
             # Add a small delay to ensure cache is cleared
             sleep 2
             
-                         # Verify deployment
+             # Verify deployment
              echo "Checking if files are deployed correctly..."
-             ls -la /var/www/html/
+             ls -la /var/www/html/Frontend/dist/
              
              # Check if index.html has the version meta tag
              echo "Checking index.html for version meta tag..."
-             grep -q "data-version" /var/www/html/index.html && echo "✓ Version tag found" || echo "✗ Version tag not found"
+             grep -q "data-version" /var/www/html/Frontend/dist/index.html && echo "✓ Version tag found" || echo "✗ Version tag not found"
              
              # Show file modification times
              echo "File modification times:"
-             stat /var/www/html/index.html
+             stat /var/www/html/Frontend/dist/index.html
             
             # Check nginx status
             echo "Checking nginx status..."
