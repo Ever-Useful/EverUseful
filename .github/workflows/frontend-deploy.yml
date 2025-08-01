@@ -57,7 +57,7 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
             # Create nginx configuration for SPA routing with reduced caching
-            cat > /etc/nginx/sites-available/default << 'EOF'
+            sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
             server {
                 listen 80 default_server;
                 listen [::]:80 default_server;
