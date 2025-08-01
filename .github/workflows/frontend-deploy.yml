@@ -36,4 +36,26 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           source: "Frontend/dist/*"
           target: ${{ secrets.HOSTINGER_PATH }}
-          strip_components: 0 
+          strip_components: 0
+
+      - name: Clear server cache
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            # Clear LiteSpeed cache
+            rm -rf /tmp/lscache/* 2>/dev/null || true
+            rm -rf ${{ secrets.HOSTINGER_PATH }}/.lscache/* 2>/dev/null || true
+            
+            # Clear any PHP OPcache
+            echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); } ?>" > ${{ secrets.HOSTINGER_PATH }}/clear_cache.php
+            
+            # Restart web server if possible
+            sudo systemctl restart apache2 2>/dev/null || sudo systemctl restart nginx 2>/dev/null || true
+            
+            # Remove the cache clearing file
+            rm -f ${{ secrets.HOSTINGER_PATH }}/clear_cache.php
+            
+            echo "Cache cleared successfully" 
