@@ -7,11 +7,11 @@ import { useState, useEffect } from "react";
 import founderImage from "@/assets/images/Founder.jpg";
 import kritenshImage from "@/assets/images/Kritensh.jpg";
 import noImageAvailable from "@/assets/images/no image available.png";
-import pooja from "@/assets/images/Pooja.jpg";
-import techLead from "@/assets/images/Tech Lead.jpg";
+import pooja from "@/assets/images/pooja.jpg";
+import techLead from "@/assets/images/tech lead.jpg";
 import rishika from "@/assets/images/Rishika.jpg";
-import amrit from "@/assets/images/Amrit.jpg";
-import navya from "@/assets/images/Navya.jpg";
+import amrit from "@/assets/images/amrit.jpg";
+import navya from "@/assets/images/navya.jpg";
 
 const TeamSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);

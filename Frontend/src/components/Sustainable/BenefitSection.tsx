@@ -38,13 +38,11 @@ export const BenefitsSection = () => {
           <div className="flex flex-1 items-start md:items-center w-full md:w-auto">
             <div className="flex flex-col flex-1">
               <p className="text-sm sm:text-base text-gray-700 mb-1 leading-relaxed">
-              By choosing us, you gain access to reliable, affordable, and sustainable energy solutions tailored to your needs. 
-              Our commitment ensures a seamless experience from installation to ongoing support, empowering you to embrace a greener future with confidence. <br />
-
-             <span className="text-sm sm:text-base text-gray-600">
-
-               Discover how our expertise and innovative approach make renewable energy accessible and beneficial for everyone.
-               </p>
+                By choosing us, you gain access to reliable, affordable, and sustainable energy solutions tailored to your needs. 
+                Our commitment ensures a seamless experience from installation to ongoing support, empowering you to embrace a greener future with confidence. <br />
+                <span className="text-sm sm:text-base text-gray-600">
+                  Discover how our expertise and innovative approach make renewable energy accessible and beneficial for everyone.
+                </span>
               </p>
             </div>
             {/* <button className="flex items-center text-gray-900 font-semibold hover:text-green-600 transition-colors whitespace-nowrap ml-0 md:ml-auto">

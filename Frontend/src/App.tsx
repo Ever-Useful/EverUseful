@@ -29,7 +29,7 @@ import FindExpert from "./pages/FindExpert";
 import SendFeedback from "./pages/Policy/SendFeedback";
 import Chat from "./pages/Chat";
 import Sustainable from "./pages/Sustainable";
-import Connection from "./pages/Connections";
+import Connections from "./pages/Connections";
 import Consultation from "./pages/Consultation";
 import BussinessProfile from "./pages/bussinessprofile";
 // Import new policy pages
