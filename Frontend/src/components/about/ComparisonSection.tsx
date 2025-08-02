@@ -253,21 +253,6 @@ const ComparisonSection = () => {
 
             {/* Mobile Scrollable Layout */}
             <div className="lg:hidden relative">
-              {/* Scroll Navigation Buttons */}
-              <button
-                onClick={scrollLeft}
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg border border-gray-200 hover:bg-white transition-all duration-200"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              
-              <button
-                onClick={scrollRight}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg border border-gray-200 hover:bg-white transition-all duration-200"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
-              </button>
-
               {/* Scrollable Container */}
               <div 
                 ref={scrollContainerRef}
