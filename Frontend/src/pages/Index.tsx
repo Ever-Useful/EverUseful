@@ -1,4 +1,4 @@
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { ImpactMotive } from "@/components/ImpactMotive";
@@ -13,7 +13,6 @@ const LazyUpcomingPhase = lazy(() => import("@/components/UpcomingPhase").then(m
 const LazyFooter = lazy(() => import("@/components/Footer").then(module => ({ default: module.Footer })));
 const LazyChatbot = lazy(() => import("@/components/Chatbot").then(module => ({ default: module.Chatbot })));
 
-// import { FreelancingPreview } from "@/components/FreelancingPreview";
 
 const BackUp = () => {
   const MemoHeader = useMemo(() => <Header />, []);
@@ -25,7 +24,6 @@ const BackUp = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Optimized Background - Static gradient instead of animated */}
       <div
         className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
         style={{
@@ -33,7 +31,6 @@ const BackUp = () => {
         }}
       />
 
-      {/* Single overlay for scanline effect, reduced opacity */}
       <div
         className="fixed inset-0 -z-10 opacity-2"
         style={{
@@ -41,7 +38,6 @@ const BackUp = () => {
         }}
       />
 
-      {/* Main content */}
       {MemoHeader}
       {MemoHero}
       {MemoFeaturedProducts}

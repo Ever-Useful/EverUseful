@@ -98,18 +98,21 @@ export const ProjectsSection = () => {
   };
 
   return (
-    <section className="py-8 bg-gradient-to-br from-stone-50 via-yellow-50 to-green-50">
-      <div className="container mx-auto px-6">
-        <div className="flex justify-between items-start mb-12">
+
+    <section className="py-6 sm:py-8 md:py-10 lg:py-12 bg-gradient-to-br from-stone-50 via-yellow-50 to-green-50">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-16">
           <div>
             <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
               SOLUTION CATEGORIES
             </p>
-            <h2 className="text-5xl font-bold text-gray-900">Sustainable Project Types</h2>
+
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+              Sustainable Project Types
+            </h2>
           </div>
-          
-          <div className="max-w-md">
-            <p className="text-lg text-gray-600 mb-6">
+          <div className="max-w-full md:max-w-md">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-4 sm:mb-6 leading-relaxed">
               Explore the diverse range of sustainable project solutions across various communities. From water access to renewable energy, discover impactful innovations that communities can implement.
             </p>
           </div>
@@ -123,7 +126,8 @@ export const ProjectsSection = () => {
               onClick={() => scroll('left')}
               className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all hover:scale-110"
             >
-              <ChevronLeft className="w-6 h-6 text-gray-600" />
+
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-600" />
             </button>
           )}
           
@@ -132,7 +136,8 @@ export const ProjectsSection = () => {
               onClick={() => scroll('right')}
               className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all hover:scale-110"
             >
-              <ChevronRight className="w-6 h-6 text-gray-600" />
+
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-600" />
             </button>
           )}
           
@@ -140,36 +145,58 @@ export const ProjectsSection = () => {
           <div 
             ref={scrollContainerRef}
             onScroll={handleScroll}
-            className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4"
+
+            className="flex space-x-3 sm:space-x-4 lg:space-x-6 overflow-x-auto scrollbar-hide pb-3 sm:pb-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {projects.map((project) => (
-              <div key={project.id} className="flex-shrink-0 w-80 relative group">
-                <div className="relative w-full h-64 rounded-2xl overflow-hidden transform transition-transform duration-700 hover:scale-105" style={{ transformStyle: 'preserve-3d' }}>
-                  {/* Front of card - Image */}
-                  <div className="absolute inset-0 w-full h-full transition-opacity duration-700 group-hover:opacity-0">
-                    <img 
-                      src={project.image}
-                      alt={project.title}
-                      className="w-full h-full object-cover rounded-2xl"
-                    />
-                    {/* Category badge */}
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-800">
-                        {project.category}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Back of card - Information with gradient */}
-                  <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-emerald-500 via-teal-600 to-green-700 rounded-2xl flex items-center justify-center p-6 opacity-0 transition-opacity duration-700 group-hover:opacity-100">
-                    <div className="text-center text-white">
-                      <h3 className="text-xl font-bold mb-3">{project.title}</h3>
-                      <p className="text-sm mb-4 opacity-90">{project.description}</p>
-                      <div className="space-y-2 text-xs mb-4">
-                        <p><span className="font-semibold">Category:</span> {project.category}</p>
-                        <p><span className="font-semibold">Impact:</span> {project.impact}</p>
-                        <p><span className="font-semibold">Communities:</span> {project.communities}</p>
+              <div
+                key={project.id}
+                className="flex-shrink-0 w-56 sm:w-64 md:w-80 relative group transition-all duration-300"
+              >
+                <div className="relative overflow-hidden rounded-lg sm:rounded-xl lg:rounded-2xl">
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full aspect-[3/2] object-cover group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-500"
+                  />
+
+                  {/* Overlay on hover (always visible on mobile) */}
+                  <div className="absolute inset-0 bg-black/60 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="text-center text-white p-3 sm:p-4 lg:p-6">
+                      <h3 className="text-base sm:text-lg lg:text-xl font-bold mb-1 sm:mb-2">{project.title}</h3>
+                      <p className="text-xs sm:text-sm mb-2 sm:mb-3 leading-relaxed">{project.description}</p>
+                      <div className="space-y-0.5 sm:space-y-1 text-[10px] sm:text-xs">
+                        <p>
+                          <span className="font-semibold">Category:</span> {project.category}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Impact:</span> {project.impact}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Communities:</span> {project.communities}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-center space-x-2 sm:space-x-3 mt-2 sm:mt-3 lg:mt-4">
+                        <Button
+                          size="sm"
+                          className="bg-green-500 hover:bg-green-600 text-xs px-2 sm:px-3 py-1 sm:py-2"
+                        >
+                          Learn More
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-white border-white hover:bg-white hover:text-black text-xs px-2 sm:px-3 py-1 sm:py-2"
+                          onClick={() => toggleWishlist(project.id)}
+                        >
+                          {wishlist.includes(project.id) ? (
+                            <Heart className="w-3 h-3 fill-current" />
+                          ) : (
+                            <Plus className="w-3 h-3" />
+                          )}
+                          {wishlist.includes(project.id) ? "Saved" : "Save"}
+                        </Button>
                       </div>
                       <Button 
                         size="sm" 
@@ -187,16 +214,29 @@ export const ProjectsSection = () => {
                     </div>
                   </div>
                 </div>
+
+
+                {/* Category badge */}
+                <div className="absolute top-2 left-2 sm:top-3 sm:left-3 lg:top-4 lg:left-4">
+                  <span className="bg-white/90 backdrop-blur-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium text-gray-800">
+                    {project.category}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         </div>
         
         {/* Call to action */}
-        <div className="text-center mt-12">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Contribute Your Ideas?</h3>
-          <p className="text-gray-600 mb-6">Join professors and students worldwide in building sustainable solutions</p>
-          <Button className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-full">
+
+        <div className="text-center mt-8 sm:mt-10 md:mt-14 lg:mt-16">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2 sm:mb-4">
+            Ready to Contribute Your Ideas?
+          </h3>
+          <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 leading-relaxed">
+            Join professors and students worldwide in building sustainable solutions
+          </p>
+          <Button className="bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 rounded-full text-sm sm:text-base">
             Get Notified When Submissions Open
           </Button>
         </div>

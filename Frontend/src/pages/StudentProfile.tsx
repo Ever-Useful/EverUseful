@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { auth, db } from "../lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { auth } from "../lib/firebase";
+// Removed Firestore imports - using DynamoDB now
 import { onAuthStateChanged } from "firebase/auth";
 import toast from "react-hot-toast";
 
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Camera, DollarSign, Award, Clock, GraduationCap, UserPlus, BookOpen, Edit, Link, Briefcase, Trash2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";

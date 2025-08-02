@@ -1,7 +1,7 @@
 import { auth } from '../lib/firebase';
 
-const API_BASE_URL = 'http://localhost:3000/api/users';
-const ADMIN_API_BASE_URL = 'http://localhost:3000/api/admin';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/users';
+const ADMIN_API_BASE_URL = import.meta.env.VITE_ADMIN_API_BASE_URL || 'http://localhost:3000/api/admin';
 
 interface UserProfile {
   avatar: string;
@@ -15,6 +15,8 @@ interface UserProfile {
   domain?: string;
   purpose?: string;
   role?: string;
+  mobile?: string;
+  dateOfBirth?: string;
 }
 
 interface UserStats {
@@ -298,7 +300,7 @@ class UserService {
     }
   }
 
-  // Update user auth info (Firestore fields)
+  // Update user auth info (backend fields)
   async updateAuthInfo(authData: Partial<{ firstName: string; lastName: string; phoneNumber: string; userType: string }>): Promise<void> {
     await this.makeRequest('/auth', {
       method: 'PUT',

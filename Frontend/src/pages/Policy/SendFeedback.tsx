@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Send, Mail, Phone, Clock, MessageSquare, Bug, Star, Lightbulb, AlertCircle } from 'lucide-react';
-import { Header } from '@/components/Header';
+import Header from '@/components/Header';
 import { Footer } from '@/components/Footer';
 
 const SendFeedback = () => {
