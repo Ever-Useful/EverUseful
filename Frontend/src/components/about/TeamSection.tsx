@@ -39,7 +39,7 @@ const TeamSection = () => {
     {
       name: "Rishika Gupta",
       role: "Frontend Developer",
-      avatar: rishika,
+      avatar: rishika ,
       linkedin: "https://linkedin.com/in/dylan-de-heer",
       description: "Full-stack developer passionate about creating user-centered experiences and scalable solutions."
     },
