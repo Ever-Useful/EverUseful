@@ -64,8 +64,8 @@ export const Hero = () => {
         `}
       </style>
 
-      <section className="relative overflow-hidden py-20 sm:py-16 bg-[#0a0f24]">
-        {/* Simplified background layers - reduced complexity */}
+      <section className="relative overflow-hidden py-14 sm:py-16 bg-[#0a0f24]">
+        {/* Background */}
         <div
           className="absolute inset-0 opacity-20"
           style={{
@@ -74,13 +74,14 @@ export const Hero = () => {
           }}
         />
 
-        <div className="container relative mx-auto px-4 sm:px-6 lg:px-32 z-10">
-          {/* FLEX ROW for desktop, COLUMN for mobile */}
+        <div className="container relative mx-auto px-2 sm:px-6 lg:px-32 z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             {/* LEFT: Text + Button */}
-            <div className="w-full lg:w-1/3 text-center lg:text-left">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-4 animate-fade-in">
-                Connnect{" "}
+
+            <div className="w-full lg:w-1/3 text-center lg:text-left mb-10 lg:mb-0">
+              <h1 className="text-3xl xs:text-4xl sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight">
+                Connect{" "}
+
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
                   Innovation
                 </span>{" "}
@@ -89,7 +90,7 @@ export const Hero = () => {
                   Opportunity
                 </span>
               </h1>
-              <p className="text-base sm:text-lg text-gray-300 mb-16 max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200">
+              <p className="text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200">
                 A platform where students, PhD holders, professors, and
                 businesses collaborate to transform ideas into real‐world impact.
                 Join the future of collaborative innovation today.
@@ -97,10 +98,10 @@ export const Hero = () => {
               <div className="flex justify-center lg:justify-start animate-fade-in delay-300">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base transform transition-all duration-300 hover:scale-105 shadow-lg"
+                  className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font-bold transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
                   asChild
                 >
-                  <Link to="/signup">
+                  <Link to="/signup" className="font-bold flex items-center justify-center">
                     <Rocket className="mr-2 w-5 h-5" />
                     Get Started
                     <ArrowRight className="ml-2 w-5 h-5" />
@@ -111,10 +112,9 @@ export const Hero = () => {
 
             {/* RIGHT: Gallery */}
             <div className="w-full lg:w-2/3 flex items-center justify-center">
-              {/* Desktop: optimized animated cards */}
+              {/* Desktop: animated cards */}
               <div className="hidden lg:flex overflow-visible w-full h-[560px] py-[40px]">
                 {OPTIONS.map((opt) => {
-                  // Simplified animation logic
                   const isOdd = opt.id % 2 !== 0;
                   const animationName = isOdd ? "float-down" : "float-up";
                   return (
@@ -146,9 +146,7 @@ export const Hero = () => {
                         willChange: "transform",
                       }}
                     >
-                      {/* Use img tag for accessibility and lazy loading */}
                       <img src={opt.imageUrl} alt={opt.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-0" />
-                      {/* Simplified shadow overlay */}
                       <div
                         className="
                           absolute
@@ -166,7 +164,6 @@ export const Hero = () => {
                             "inset 0 -80px 80px -80px rgba(0,0,0,0.8)",
                         }}
                       />
-                      {/* Label & Icon */}
                       <div
                         className="
                           absolute
@@ -199,23 +196,25 @@ export const Hero = () => {
                 })}
               </div>
 
-              {/* Mobile: simplified static cards */}
-              <div className="lg:hidden grid grid-cols-2 gap-4 w-full">
-                {OPTIONS.map((opt) => (
-                  <div
-                    key={opt.id}
-                    className="relative h-48 rounded-2xl overflow-hidden bg-center bg-cover"
-                    style={{
-                      backgroundImage: `url(${opt.imageUrl})`,
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <div className="font-bold">{opt.label}</div>
-                      <div className="text-sm opacity-80">{opt.description}</div>
+              {/* Mobile: horizontal scroll cards */}
+              <div className="lg:hidden w-full">
+                <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory">
+                  {OPTIONS.map((opt) => (
+                    <div
+                      key={opt.id}
+                      className="relative min-w-[70vw] max-w-xs h-44 rounded-2xl overflow-hidden bg-center bg-cover snap-start flex-shrink-0"
+                      style={{
+                        backgroundImage: `url(${opt.imageUrl})`,
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-black/40" />
+                      <div className="absolute bottom-4 left-4 text-white">
+                        <div className="font-bold text-lg">{opt.label}</div>
+                        <div className="text-xs opacity-80">{opt.description}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>

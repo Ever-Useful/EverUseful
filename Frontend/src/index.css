@@ -489,3 +489,30 @@ html {
   .delay-500 { animation-delay: 500ms; }
   .delay-1000 { animation-delay: 1000ms; }
 }
+
+@media (max-width: 640px) {
+  .mobile-text-xs {
+    font-size: 8px !important;
+  }
+  .mobile-text-sm {
+    font-size: 10px !important;
+  }
+  .mobile-text-base {
+    font-size: 12px !important;
+  }
+  .mobile-text-lg {
+    font-size: 13px !important;
+  }
+  .mobile-text-xl {
+    font-size: 14px !important;
+  }
+  .mobile-text-2xl {
+    font-size: 15px !important;
+  }
+  .mobile-text-3xl {
+    font-size: 16px !important;
+  }
+  .mobile-text-4xl {
+    font-size: 17px !important;
+  }
+}

@@ -9,7 +9,7 @@ import StatsCard from "@/components/dashboard/StatsCards";
 import DetailedStatsSection from "@/components/dashboard/DetailedStatsSection";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell, Legend, LineChart, Line, Tooltip, CartesianGrid, Area, AreaChart } from "recharts";
 import { Link, useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { userService } from '@/services/userService';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import { TrendingUp, Star, Shield, LayoutGrid, UserPlus, Heart, BarChart2 } from 'lucide-react';

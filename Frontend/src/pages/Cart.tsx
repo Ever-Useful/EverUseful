@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuthState } from '@/hooks/useAuthState';
 import { userService } from '@/services/userService';
 import { toast } from 'sonner';
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 interface BackendCartItem {
   productId: string;
   addedAt: string;
