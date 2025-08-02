@@ -470,6 +470,7 @@ const Profile = () => {
         location: userProfileData.location || '',
         title: userProfileData.title || '',
         website: userProfileData.website || '',
+        mobile: authData.mobile || authData.phoneNumber || '',
       });
 
       setStudentData({
@@ -489,12 +490,19 @@ const Profile = () => {
         });
       }
 
-      // Set skills directly from userProfile
-      setSkills(
-        ((userProfile as any).skills && Array.isArray((userProfile as any).skills)) ? (userProfile as any).skills :
-        ((userProfile as any).freelancerData && Array.isArray((userProfile as any).freelancerData.skills)) ? (userProfile as any).freelancerData.skills :
-        []
-      );
+      // Set skills - handle both string arrays and object arrays
+      const skillsData = (userProfile as any).skills || (userProfile as any).freelancerData?.skills || [];
+      if (Array.isArray(skillsData)) {
+        // Convert skill objects to strings if needed
+        const skillStrings = skillsData.map(skill => {
+          if (typeof skill === 'string') return skill;
+          if (skill && typeof skill === 'object' && skill.name) return skill.name;
+          return String(skill);
+        });
+        setSkills(skillStrings);
+      } else {
+        setSkills([]);
+      }
 
       // Fetch projects robustly
       if ((userProfile as any).projects && Array.isArray((userProfile as any).projects.created)) {

@@ -22,7 +22,7 @@ import {
 } from "firebase/auth";
 import { auth, handleGoogleAuth, handleGithubAuth } from "../lib/firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, addDoc, getFirestore, collection, setDoc } from "firebase/firestore";
+// Removed Firestore imports - using DynamoDB now
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { userService } from '@/services/userService';
 // Removed Firestore import - using DynamoDB now
@@ -295,20 +295,8 @@ const SignUp = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const idToken = await userCredential.user.getIdToken();
 
-      // Ensure user exists in backend and customUserId is saved
-      const backendUser = await userService.ensureUserExists({
-        avatar: userCredential.user.photoURL || '',
-        bio: '',
-        location: '',
-        website: '',
-        title: formData.firstName + ' ' + formData.lastName,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-      // User data is now saved in DynamoDB via backend
-      console.log('User created successfully in DynamoDB:', backendUser.customUserId);
-
-      await fetch('http://localhost:3000/token', {
+      // Save user data to DynamoDB via backend
+      const response = await fetch('http://localhost:3000/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -317,10 +305,18 @@ const SignUp = () => {
         body: JSON.stringify({
           firstName: formData.firstName,
           lastName: formData.lastName,
-          phone: formData.phone,
+          phoneNumber: formData.phone,
           userType: formData.userType,
         }),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to save user data to backend');
+      }
+
+      const result = await response.json();
+      console.log('User data saved successfully:', result);
+      
       navigate('/signin');
     } catch (error: any) {
       console.error("Error creating account:", error);

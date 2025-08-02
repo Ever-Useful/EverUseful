@@ -382,12 +382,16 @@ const ProductDisplay = () => {
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="grid grid-cols-1 gap-1 xs:gap-2 sm:gap-3">
-                      {project.features.map((feature, index) => (
-                        <div key={index} className="flex items-start space-x-2 xs:space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                          <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700 text-xs xs:text-sm sm:text-base leading-relaxed">{feature}</span>
-                        </div>
-                      ))}
+                      {project.features && Array.isArray(project.features) ? (
+                        project.features.map((feature, index) => (
+                          <div key={index} className="flex items-start space-x-2 xs:space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                            <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-gray-700 text-xs xs:text-sm sm:text-base leading-relaxed">{feature}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm">No features listed</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -400,12 +404,16 @@ const ProductDisplay = () => {
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-1 xs:gap-2 sm:gap-3 lg:gap-4">
-                      {project.techStack.map((tech, index) => (
-                        <div key={index} className="flex items-center space-x-2 xs:space-x-3 p-2 xs:p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                          <Code className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" />
-                          <span className="text-gray-700 font-medium text-xs xs:text-sm sm:text-base">{tech}</span>
-                        </div>
-                      ))}
+                      {project.techStack && Array.isArray(project.techStack) ? (
+                        project.techStack.map((tech, index) => (
+                          <div key={index} className="flex items-center space-x-2 xs:space-x-3 p-2 xs:p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <Code className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" />
+                            <span className="text-gray-700 font-medium text-xs xs:text-sm sm:text-base">{tech}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm">No technology stack listed</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -418,12 +426,16 @@ const ProductDisplay = () => {
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="space-y-1 xs:space-y-2 sm:space-y-3">
-                      {project.deliverables.map((deliverable, index) => (
-                        <div key={index} className="flex items-start space-x-2 xs:space-x-3 p-2 xs:p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                          <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700 text-xs xs:text-sm sm:text-base leading-relaxed">{deliverable}</span>
-                        </div>
-                      ))}
+                      {project.deliverables && Array.isArray(project.deliverables) ? (
+                        project.deliverables.map((deliverable, index) => (
+                          <div key={index} className="flex items-start space-x-2 xs:space-x-3 p-2 xs:p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-gray-700 text-xs xs:text-sm sm:text-base leading-relaxed">{deliverable}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm">No deliverables listed</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -438,12 +450,16 @@ const ProductDisplay = () => {
                 </CardHeader>
                 <CardContent className="pt-0 px-3">
                   <div className="grid grid-cols-1 gap-1">
-                    {project.techStack.map((tech, index) => (
-                      <div key={index} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
-                        <Code className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                        <span className="text-gray-700 font-medium text-xs">{tech}</span>
-                      </div>
-                    ))}
+                    {project.techStack && Array.isArray(project.techStack) ? (
+                      project.techStack.map((tech, index) => (
+                        <div key={index} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
+                          <Code className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                          <span className="text-gray-700 font-medium text-xs">{tech}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm">No technology stack listed</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -454,12 +470,16 @@ const ProductDisplay = () => {
                 </CardHeader>
                 <CardContent className="pt-0 px-3">
                   <div className="space-y-1">
-                    {project.deliverables.map((deliverable, index) => (
-                      <div key={index} className="flex items-start space-x-2 p-2 bg-gray-50 rounded-lg">
-                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-xs leading-relaxed">{deliverable}</span>
-                      </div>
-                    ))}
+                    {project.deliverables && Array.isArray(project.deliverables) ? (
+                      project.deliverables.map((deliverable, index) => (
+                        <div key={index} className="flex items-start space-x-2 p-2 bg-gray-50 rounded-lg">
+                          <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-700 text-xs leading-relaxed">{deliverable}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm">No deliverables listed</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>

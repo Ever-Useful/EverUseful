@@ -148,11 +148,10 @@ const SignIn = () => {
         }
       }
 
-      // Save backend customUserId in Firestore
+      // User data is now saved in DynamoDB via backend
       const user = auth.currentUser;
       if (user && backendUser) {
-        // The firestoreService.setCurrentUserData call is removed as per the edit hint.
-        // The user profile is now directly saved in DynamoDB.
+        // User profile is now directly saved in DynamoDB via backend
       }
 
       // Set localStorage to indicate user is logged in

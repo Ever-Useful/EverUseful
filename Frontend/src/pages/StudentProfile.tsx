@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { auth } from "../lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+// Removed Firestore imports - using DynamoDB now
 import { onAuthStateChanged } from "firebase/auth";
 import toast from "react-hot-toast";
 

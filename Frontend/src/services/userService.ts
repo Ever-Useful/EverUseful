@@ -15,6 +15,8 @@ interface UserProfile {
   domain?: string;
   purpose?: string;
   role?: string;
+  mobile?: string;
+  dateOfBirth?: string;
 }
 
 interface UserStats {
@@ -298,7 +300,7 @@ class UserService {
     }
   }
 
-  // Update user auth info (Firestore fields)
+  // Update user auth info (backend fields)
   async updateAuthInfo(authData: Partial<{ firstName: string; lastName: string; phoneNumber: string; userType: string }>): Promise<void> {
     await this.makeRequest('/auth', {
       method: 'PUT',

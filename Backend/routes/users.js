@@ -257,7 +257,7 @@ router.post('/education', authorize, async (req, res) => {
     
     const education = await userService.addEducation(user.customUserId, req.body);
     res.status(201).json({ success: true, message: 'Education added successfully', data: education });
-        } catch (error) {
+  } catch (error) {
     console.error('Error adding education:', error);
     res.status(400).json({ success: false, message: error.message });
   }
@@ -276,7 +276,7 @@ router.put('/education/:educationId', authorize, async (req, res) => {
     const { educationId } = req.params;
     const updatedEducation = await userService.updateEducation(user.customUserId, educationId, req.body);
     res.json({ success: true, message: 'Education updated successfully', data: updatedEducation });
-    } catch (error) {
+  } catch (error) {
     console.error('Error updating education:', error);
     res.status(400).json({ success: false, message: error.message });
   }
@@ -295,7 +295,7 @@ router.delete('/education/:educationId', authorize, async (req, res) => {
     const { educationId } = req.params;
     await userService.deleteEducation(user.customUserId, educationId);
     res.json({ success: true, message: 'Education deleted successfully' });
-    } catch (error) {
+  } catch (error) {
     console.error('Error deleting education:', error);
     res.status(400).json({ success: false, message: error.message });
     }
@@ -405,7 +405,7 @@ router.get('/:customUserId', async (req, res) => {
     
     // Return only public information
     res.json({
-      success: true,
+      success: true, 
       data: {
         customUserId: user.customUserId,
         profile: {
@@ -440,8 +440,8 @@ router.get('/all', async (req, res) => {
 
 // Follow/unfollow user
 router.post('/follow', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
+    try {
+        const firebaseUid = req.user.uid;
     const { targetUserId } = req.body;
     
     if (!targetUserId) {
@@ -450,14 +450,14 @@ router.post('/follow', authorize, async (req, res) => {
     
     const user = await userService.findUserByFirebaseUid(firebaseUid);
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
     // Add to following list
     await userService.followUser(user.customUserId, targetUserId);
-    
+        
     res.json({ success: true, message: 'Connection request sent successfully' });
-  } catch (error) {
+    } catch (error) {
     console.error('Error following user:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
@@ -465,14 +465,14 @@ router.post('/follow', authorize, async (req, res) => {
 
 // Schedule meeting
 router.post('/meetings', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
+    try {
+        const firebaseUid = req.user.uid;
     const meetingData = req.body;
-    
+
     const user = await userService.findUserByFirebaseUid(firebaseUid);
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
     
     // Add meeting to user's meetings (you might want to create a separate meetings table)
     const meetingId = Date.now().toString();
@@ -543,6 +543,79 @@ router.post('/create', authorize, async (req, res) => {
   } catch (error) {
     console.error('Create endpoint - Error:', error);
     res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Update user auth info
+router.put('/auth', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { firstName, lastName, phoneNumber, userType } = req.body;
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    const updateData = {};
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if (userType !== undefined) updateData.userType = userType;
+    
+    await userService.updateUserProfile(user.customUserId, updateData);
+    
+    res.json({ success: true, message: 'Auth info updated successfully' });
+  } catch (error) {
+    console.error('Error updating auth info:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Get user by customUserId (for public profile viewing)
+router.get('/:customUserId', async (req, res) => {
+  try {
+    const { customUserId } = req.params;
+    
+    if (!customUserId) {
+      return res.status(400).json({ success: false, message: 'Custom user ID is required' });
+    }
+    
+    const user = await userService.findUserByCustomId(customUserId);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Return public profile data (excluding sensitive information)
+    res.json({
+      success: true,
+      data: {
+        customUserId: user.customUserId,
+        auth: {
+          firstName: user.profile.firstName || '',
+          lastName: user.profile.lastName || '',
+          email: user.profile.email || '',
+          userType: user.profile.userType || '',
+          mobile: user.profile.mobile || '',
+          gender: user.profile.gender || ''
+        },
+        profile: user.profile || {},
+        stats: user.stats || {},
+        studentData: user.studentData || null,
+        education: user.education || [],
+        workExperience: user.workExperience || [],
+        skills: user.skills || [],
+        freelancerData: user.freelancerData || null,
+        professorData: user.professorData || null,
+        personalDetails: user.personalDetails || {},
+        socialLinks: user.socialLinks || {},
+        projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user by customUserId:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 

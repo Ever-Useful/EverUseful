@@ -427,7 +427,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     }
 
     try {
-      // Get user data from Firestore to get customUserId
+      // Get user data from backend to get customUserId
       const userData = await userService.getUserProfile();
       if (!userData) {
         toast.error('User data not found');

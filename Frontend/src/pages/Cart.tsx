@@ -125,20 +125,20 @@ const Cart = () => {
         return;
       }
       
-      // Get user data from Firestore to get customUserId
-      const firestoreData = await userService.getUserProfile();
-      console.log('Firestore data:', firestoreData);
+      // Get user data from backend to get customUserId
+      const userData = await userService.getUserProfile();
+      console.log('User data:', userData);
       
-      if (!firestoreData) {
+      if (!userData) {
         toast.error('User data not found');
         return;
       }
 
-      console.log('Fetching cart for user:', firestoreData.customUserId);
+      console.log('Fetching cart for user:', userData.customUserId);
       console.log('Firebase UID:', user.uid);
       
       // Fetch cart data from backend
-      const cartData = await userService.getUserCartByCustomId(firestoreData.customUserId);
+      const cartData = await userService.getUserCartByCustomId(userData.customUserId);
       console.log('Cart data received:', cartData);
       
       // Fetch project details from marketplace for each cart item
@@ -201,8 +201,8 @@ const Cart = () => {
       if (error.message === 'User not found') {
         console.error('=== USER NOT FOUND DEBUGGING ===');
         console.error('Firebase UID:', user?.uid);
-        const firestoreData = await userService.getUserProfile();
-        console.error('Custom User ID from Firestore:', firestoreData?.customUserId);
+        const userData = await userService.getUserProfile();
+        console.error('Custom User ID from backend:', userData?.customUserId);
         console.error('=== END DEBUGGING ===');
       }
       
@@ -214,14 +214,14 @@ const Cart = () => {
 
   const removeItem = async (id: string) => {
     try {
-      const firestoreData = await userService.getUserProfile();
-      if (!firestoreData) {
+      const userData = await userService.getUserProfile();
+      if (!userData) {
         toast.error('User data not found');
         return;
       }
 
       // Remove item from cart in backend
-      await userService.removeFromCart(firestoreData.customUserId, id);
+      await userService.removeFromCart(userData.customUserId, id);
       
       // Update local state
       setCartItems(items => items.filter(item => item.id !== id));
@@ -261,14 +261,14 @@ const Cart = () => {
 
   const clearCart = async () => {
     try {
-      const firestoreData = await userService.getUserProfile();
-      if (!firestoreData) {
+      const userData = await userService.getUserProfile();
+      if (!userData) {
         toast.error('User data not found');
         return;
       }
 
       // Clear cart in backend
-      await userService.clearCart(firestoreData.customUserId);
+      await userService.clearCart(userData.customUserId);
       
       // Update local state
       setCartItems([]);

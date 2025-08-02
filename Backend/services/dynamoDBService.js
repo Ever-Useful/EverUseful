@@ -68,10 +68,12 @@ class DynamoDBService {
           username: userData.username ?? '',
           email: userData.email ?? '',
           mobile: userData.mobile ?? userData.phoneNumber ?? '',
+          phoneNumber: userData.phoneNumber ?? userData.mobile ?? '',
           gender: userData.gender ?? '',
           domain: userData.domain ?? '',
           purpose: userData.purpose ?? '',
           role: userData.role ?? '',
+          dateOfBirth: userData.dateOfBirth ?? '',
         },
         education: [],
         workExperience: [],
@@ -577,13 +579,30 @@ class DynamoDBService {
 
   async addUserProject(customUserId, projectData) {
     try {
+      // First, get the current user to check if projects object exists
+      const user = await this.findUserByCustomId(customUserId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Ensure projects object exists
+      if (!user.projects) {
+        user.projects = {
+          created: [],
+          collaborated: [],
+          favorites: [],
+          count: 0
+        };
+      }
+
+      // Create project object with the correct structure
       const project = {
-        projectId: Date.now().toString(),
+        projectId: projectData.id || Date.now().toString(),
         title: projectData.title,
         description: projectData.description,
         category: projectData.category,
-        tags: projectData.tags || [],
-        imageUrl: projectData.imageUrl || '',
+        tags: Array.isArray(projectData.tags) ? projectData.tags : (projectData.tags ? projectData.tags.split(',').map(tag => tag.trim()) : []),
+        imageUrl: projectData.image || projectData.imageUrl || '',
         projectLink: projectData.projectLink || '',
         githubLink: projectData.githubLink || '',
         createdAt: new Date().toISOString(),
@@ -598,11 +617,12 @@ class DynamoDBService {
         Key: {
           customUserId: customUserId
         },
-        UpdateExpression: 'SET projects.created = list_append(if_not_exists(projects.created, :empty_list), :project_item), projects.count = projects.count + :inc, stats.projectsCount = stats.projectsCount + :inc',
+        UpdateExpression: 'SET projects.created = list_append(if_not_exists(projects.created, :empty_list), :project_item), projects.count = if_not_exists(projects.count, :zero) + :inc, stats.projectsCount = if_not_exists(stats.projectsCount, :zero) + :inc',
         ExpressionAttributeValues: {
           ':project_item': [project],
           ':empty_list': [],
-          ':inc': 1
+          ':inc': 1,
+          ':zero': 0
         },
         ReturnValues: 'ALL_NEW'
       };
