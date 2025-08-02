@@ -18,7 +18,7 @@ import { useAuthState } from '@/hooks/useAuthState';
 import { firestoreService } from '@/services/firestoreService';
 import { userService } from '@/services/userService';
 import { toast } from 'sonner';
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 interface BackendCartItem {
   productId: string;
   addedAt: string;

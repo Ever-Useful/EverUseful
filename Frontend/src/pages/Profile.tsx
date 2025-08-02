@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera } from "lucide-react";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
@@ -1003,7 +1003,7 @@ const Profile = () => {
             </Card>
 
             {/* Portfolio Section */}
-            <Card className="bg-white shadow-lg rounded-xl">
+            <Card id="projects" className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-gray-900 flex items-center">

@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { useNavigate, useParams } from "react-router-dom";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { useAuthState } from "@/hooks/useAuthState";
 import { firestoreService } from "@/services/firestoreService";
 import { userService } from "@/services/userService";

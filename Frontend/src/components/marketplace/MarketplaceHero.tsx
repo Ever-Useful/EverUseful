@@ -28,8 +28,8 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
 
   return (
     <section
-      className={`relative flex items-center justify-center px-2 sm:px-4 overflow-hidden ${
-        isMobile ? "min-h-[32vh] py-4" : "min-h-[70vh]"
+      className={`relative flex items-center justify-center px-3 sm:px-4 lg:px-6 overflow-hidden ${
+        isMobile ? "min-h-[40vh] py-6" : "min-h-[70vh] py-8"
       }`}
     >
       {/* Blurred, semi-transparent image as background */}
@@ -42,6 +42,7 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
         }}
         aria-hidden="true"
       />
+      
       {/* Diagonal Grid SVG Overlay */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
@@ -72,46 +73,47 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
         </g>
       </svg>
 
-      {/* Floating Icons */}
-
-      <AcademicCapIcon className="floating-icon absolute top-8 left-8 w-11 h-11 text-blue-900 drop-shadow-xl" style={{ animationDelay: "0s", zIndex: 2 }} />
-      <BriefcaseIcon className="floating-icon absolute top-24 right-24 w-9 h-9 text-orange-800 drop-shadow-xl" style={{ animationDelay: "0.5s", zIndex: 2 }} />
-      <GlobeAltIcon className="floating-icon absolute bottom-16 left-20 w-12 h-12 text-red-900 drop-shadow-xl" style={{ animationDelay: "1.2s", zIndex: 2 }} />
-      <LightBulbIcon className="floating-icon absolute bottom-8 right-10 w-8 h-8 text-yellow-700 drop-shadow-xl" style={{ animationDelay: "0.8s", zIndex: 2 }} />
-      <SparklesIcon className="floating-icon absolute top-1/2 left-1/4 w-7 h-7 text-indigo-900 drop-shadow-xl" style={{ animationDelay: "1.5s", zIndex: 2 }} />
-      <UserGroupIcon className="floating-icon absolute top-12 right-1/4 w-9 h-9 text-purple-900 drop-shadow-xl" style={{ animationDelay: "0.3s", zIndex: 2 }} />
-      <RocketLaunchIcon className="floating-icon absolute bottom-24 left-1/2 w-10 h-10 text-purple-900 drop-shadow-xl" style={{ animationDelay: "1.1s", zIndex: 2 }} />
-      <StarIcon className="floating-icon absolute top-1/3 right-12 w-7 h-7 text-pink-900 drop-shadow-xl" style={{ animationDelay: "0.7s", zIndex: 2 }} />
+      {/* Floating Icons - Responsive positioning */}
+      <AcademicCapIcon className="floating-icon absolute top-4 sm:top-8 left-4 sm:left-8 w-8 h-8 sm:w-11 sm:h-11 text-blue-900 drop-shadow-xl" style={{ animationDelay: "0s", zIndex: 2 }} />
+      <BriefcaseIcon className="floating-icon absolute top-16 sm:top-24 right-12 sm:right-24 w-7 h-7 sm:w-9 sm:h-9 text-orange-800 drop-shadow-xl" style={{ animationDelay: "0.5s", zIndex: 2 }} />
+      <GlobeAltIcon className="floating-icon absolute bottom-8 sm:bottom-16 left-8 sm:left-20 w-10 h-10 sm:w-12 sm:h-12 text-red-900 drop-shadow-xl" style={{ animationDelay: "1.2s", zIndex: 2 }} />
+      <LightBulbIcon className="floating-icon absolute bottom-4 sm:bottom-8 right-6 sm:right-10 w-6 h-6 sm:w-8 sm:h-8 text-yellow-700 drop-shadow-xl" style={{ animationDelay: "0.8s", zIndex: 2 }} />
+      <SparklesIcon className="floating-icon absolute top-1/2 left-1/4 w-6 h-6 sm:w-7 sm:h-7 text-indigo-900 drop-shadow-xl" style={{ animationDelay: "1.5s", zIndex: 2 }} />
+      <UserGroupIcon className="floating-icon absolute top-8 sm:top-12 right-1/4 w-7 h-7 sm:w-9 sm:h-9 text-purple-900 drop-shadow-xl" style={{ animationDelay: "0.3s", zIndex: 2 }} />
+      <RocketLaunchIcon className="floating-icon absolute bottom-16 sm:bottom-24 left-1/2 w-8 h-8 sm:w-10 sm:h-10 text-purple-900 drop-shadow-xl" style={{ animationDelay: "1.1s", zIndex: 2 }} />
+      <StarIcon className="floating-icon absolute top-1/3 right-6 sm:right-12 w-6 h-6 sm:w-7 sm:h-7 text-pink-900 drop-shadow-xl" style={{ animationDelay: "0.7s", zIndex: 2 }} />
 
       {/* Main Content */}
       <div
-        className={`relative z-10 w-full max-w-2xl mx-auto text-center rounded-3xl shadow-2xl
-          ${isMobile ? "py-5 px-2" : "py-10 sm:py-16 px-4 sm:px-10"} backdrop-blur-md`}
+        className={`relative z-10 w-full max-w-2xl mx-auto text-center rounded-2xl sm:rounded-3xl shadow-2xl
+          ${isMobile ? "py-6 px-4" : "py-10 sm:py-16 px-6 sm:px-10"} backdrop-blur-md`}
         style={{
           background: "rgba(232,244,255,0.93)",
           border: "1px solid #b6d4fe",
         }}
       >
-        <h1 className={`font-extrabold mb-3 tracking-tight leading-tight drop-shadow-sm bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-400 bg-clip-text text-transparent
-          ${isMobile ? "text-2xl" : "text-3xl sm:text-3xl md:text-3xl"}`}>
+        <h1 className={`font-extrabold mb-4 sm:mb-6 tracking-tight leading-tight drop-shadow-sm bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-400 bg-clip-text text-transparent
+          ${isMobile ? "text-xl sm:text-2xl" : "text-3xl sm:text-4xl lg:text-5xl"}`}>
           Empowering Innovation, Globally
         </h1>
+        
         {!isMobile && (
-          <p className="text-base sm:text-lg md:text-xl mb-8 max-w-2xl mx-auto text-slate-700 font-medium">
+          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto text-slate-700 font-medium leading-relaxed">
             Join the world's brightest minds—explore, collaborate, and create in the next-generation global marketplace.
           </p>
         )}
+        
         {/* Search Bar */}
-        <form className={`w-full ${isMobile ? "max-w-xs" : "max-w-lg"} mx-auto`}>
+        <form className={`w-full ${isMobile ? "max-w-sm" : "max-w-lg"} mx-auto`}>
           <div className="flex items-center bg-white/90 border border-blue-100 rounded-full shadow-md overflow-hidden focus-within:ring-2 focus-within:ring-blue-300 transition">
-            <Search className="ml-4 w-5 h-5 text-black-200" />
+            <Search className="ml-3 sm:ml-4 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search for products, services, or talents..."
+              placeholder={isMobile ? "Search products, services..." : "Search for products, services, or talents..."}
               value={searchQuery}
               onChange={handleSearch}
-              className={`flex-1 bg-transparent text-blue-900 placeholder-black-600 focus:outline-none
-                ${isMobile ? "px-3 py-2 text-sm" : "px-4 py-3 sm:py-2 text-base sm:text-xs"}`}
+              className={`flex-1 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none
+                ${isMobile ? "px-3 py-3 text-sm" : "px-4 py-3 text-base"}`}
             />
           </div>
         </form>
@@ -137,15 +139,9 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
           }
         }
         @media (max-width: 640px) {
-          .floating-icon { width: 1.6rem !important; height: 1.6rem !important; }
-          .absolute.top-8.left-8 { top: 0.5rem !important; left: 0.5rem !important; }
-          .absolute.top-24.right-24 { top: 2.5rem !important; right: 1.5rem !important; }
-          .absolute.bottom-16.left-20 { bottom: 2rem !important; left: 1rem !important; }
-          .absolute.bottom-8.right-10 { bottom: 0.5rem !important; right: 0.5rem !important; }
-          .absolute.top-1/2.left-1/4 { top: 50% !important; left: 10% !important; }
-          .absolute.top-12.right-1/4 { top: 1rem !important; right: 10% !important; }
-          .absolute.bottom-24.left-1/2 { bottom: 2.5rem !important; left: 50% !important; }
-          .absolute.top-1/3.right-12 { top: 33% !important; right: 0.5rem !important; }
+          .floating-icon {
+            animation-duration: 4s;
+          }
         }
       `}</style>
     </section>

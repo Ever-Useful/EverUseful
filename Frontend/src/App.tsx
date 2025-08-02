@@ -28,9 +28,8 @@ import AiAgents from "./pages/AiAgents";
 import FindExpert from "./pages/FindExpert";
 import SendFeedback from "./pages/Policy/SendFeedback";
 import Chat from "./pages/Chat";
-import BackUp from "./pages/Backup";
 import Sustainable from "./pages/Sustainable";
-import Connection from "./pages/Connections";
+import Connections from "./pages/Connections";
 import BussinessProfile from "./pages/bussinessprofile";
 // Import new policy pages
 import PrivacyPolicy from "./pages/Policy/PrivacyPolicy";
@@ -39,6 +38,7 @@ import CookiePolicy from "./pages/Policy/CookiePolicy";
 import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
 import BecomeAMentor from "./pages/BecomeAMentor";
+// import Connections from "./components/Connections";
 
 const queryClient = new QueryClient();
 //testing
@@ -74,9 +74,8 @@ const App = () => (
             <Route path="/findexpert" element={<FindExpert />} />
             <Route path="/sendfeedback" element={<SendFeedback />} />
             <Route path="/chat" element={<Chat />} />
-            <Route path="/backup" element={<BackUp />} />
             <Route path="/sustainable" element={<Sustainable />} />
-            <Route path="/connection" element={<Connection />} />
+            <Route path="/connection" element={<Connections />} />
             <Route path="/studentprofile/:id" element={<StudentProfile />} />
             <Route path="/green" element={<Sustainable/>} />
             {/* Policy Routes */}

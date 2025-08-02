@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import StatsCard from "@/components/dashboard/StatsCards";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
