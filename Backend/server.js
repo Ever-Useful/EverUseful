@@ -1,7 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const authorize = require('./authorize');
-const admin = require('firebase-admin');
 const marketplaceRoutes = require('./routes/marketplace');
 const userRoutes = require('./routes/users');
 const userService = require('./services/userService');
@@ -9,10 +9,6 @@ const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
-
-// Initialize Firestore
-//this is server
-const db = admin.firestore();
 
 app.use(cors({
   origin: '*', // In production, replace with your frontend domain
@@ -42,11 +38,11 @@ app.get('/token', authorize, async (req, res) => {
   try {
     if (!uid) throw new Error("Missing UID from Firebase token");
 
-    const userRef = db.collection('users').doc(uid);
-    const userSnap = await userRef.get();
+    // Check if user exists in DynamoDB
+    let user = await userService.findUserByFirebaseUid(uid);
 
-    if (!userSnap.exists) {
-      // Create custom user ID and save to both Firestore and userData.json
+    if (!user) {
+      // Create new user in DynamoDB
       const customUserId = await userService.generateCustomUserId();
 
       // Parse firstName and lastName from name if available
@@ -58,17 +54,7 @@ app.get('/token', authorize, async (req, res) => {
         lastName = nameParts.slice(1).join(' ') || '';
       }
 
-      // Save to Firestore (minimal fields only)
-      await userRef.set({
-        customUserId: customUserId,
-        firstName: firstName ?? '',
-        lastName: lastName ?? '',
-        phoneNumber: phone_number ?? '',
-        email: email ?? 'no-email@example.com',
-        userType: 'student', // Default userType for GET requests
-      });
-
-      // Create user in userData.json with all the user data
+      // Create user in DynamoDB
       await userService.createUser(uid, {
         firstName: firstName ?? '',
         lastName: lastName ?? '',
@@ -97,11 +83,11 @@ app.post('/token', authorize, async (req, res) => {
   try {
     if (!uid) throw new Error("Missing UID from Firebase token");
 
-    const userRef = db.collection('users').doc(uid);
-    const userSnap = await userRef.get();
+    // Check if user exists in DynamoDB
+    let user = await userService.findUserByFirebaseUid(uid);
 
-    if (!userSnap.exists) {
-      // Create custom user ID
+    if (!user) {
+      // Create new user in DynamoDB
       const customUserId = await userService.generateCustomUserId();
 
       // Use provided firstName/lastName or parse from name
@@ -113,17 +99,7 @@ app.post('/token', authorize, async (req, res) => {
         resolvedLastName = resolvedLastName || nameParts.slice(1).join(' ') || '';
       }
 
-      // Save to Firestore (minimal fields only)
-      await userRef.set({
-        customUserId: customUserId,
-        firstName: resolvedFirstName ?? '',
-        lastName: resolvedLastName ?? '',
-        phoneNumber: phoneNumber ?? phone_number ?? '',
-        email: email ?? 'no-email@example.com',
-        userType: userType ?? 'student',
-      });
-
-      // Create user in userData.json with all the user data
+      // Create user in DynamoDB
       await userService.createUser(uid, {
         firstName: resolvedFirstName ?? '',
         lastName: resolvedLastName ?? '',
@@ -135,14 +111,15 @@ app.post('/token', authorize, async (req, res) => {
 
       console.log("New user created with custom ID:", customUserId, "userType:", userType, "firstName:", resolvedFirstName, "lastName:", resolvedLastName);
     } else {
-      // Update existing user's userType, firstName, lastName, phoneNumber if provided
+      // Update existing user's profile if provided
       const updateFields = {};
       if (userType) updateFields.userType = userType;
       if (firstName) updateFields.firstName = firstName;
       if (lastName) updateFields.lastName = lastName;
       if (phoneNumber) updateFields.phoneNumber = phoneNumber;
+      
       if (Object.keys(updateFields).length > 0) {
-        await userRef.update(updateFields);
+        await userService.updateUserProfile(user.customUserId, updateFields);
         console.log("Updated user fields for existing user:", email ?? uid, updateFields);
       } else {
         console.log("Existing user logged in:", email ?? uid);
@@ -156,11 +133,13 @@ app.post('/token', authorize, async (req, res) => {
   }
 });
 
-const port = 3000;
-app.listen(port, (error) => {
+const port = process.env.PORT || 3000;
+const host = process.env.HOST || 'localhost';
+
+app.listen(port, host, (error) => {
   if (error) {
     console.log(`App Failed at port :${port}`);
   } else {
-    console.log(`App running at http://localhost:${port}`);
+    console.log(`App running at http://${host}:${port}`);
   }
 });

@@ -20,7 +20,15 @@
 
   body {
     @apply bg-background text-foreground;
+     background: radial-gradient(ellipse at top, hsl(var(--eco-purple) / 0.15), transparent),
+                radial-gradient(ellipse at bottom, hsl(var(--eco-green) / 0.15), transparent),
+                radial-gradient(ellipse at left, hsl(var(--eco-blue) / 0.1), transparent),
+                hsl(var(--background));
+    min-height: 100vh;
     font-family: 'Inter', sans-serif;
+     fontFamily: "'Dancing Script', 'Brush Script MT', cursive"
+     
+            
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -67,6 +75,12 @@
     --sidebar-border: 214 32% 85%;
     --sidebar-ring: 158 80% 60%;
 
+    /* Custom sustainability colors */
+    --eco-green: 142 76% 36%;
+    --eco-blue: 200 100% 50%;
+    --eco-purple: 260 100% 50%;
+    --eco-orange: 35 100% 50%;
+
         /* Custom color variables for consistent usage */
     --mint-light: #E2F4ED;
     --mint: #B8E6CC;
@@ -74,6 +88,15 @@
     --olive-light: #5A6B3F;
     --olive: #3A4325;
     --olive-dark: #2A311B;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(200 100% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(260 100% 50%), hsl(142 76% 36%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 15% 6% / 0.9), hsl(142 76% 36% / 0.1));
+    
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(142 76% 36% / 0.3);
+    --shadow-card: 0 10px 30px -10px hsl(220 15% 6% / 0.5); 
   
   }
 
@@ -115,6 +138,31 @@
     --sidebar-ring: 158 70% 55%;
   }
 }
+@layer components {
+  .galaxy-bg {
+  background: radial-gradient(ellipse at top, hsl(var(--eco-purple) / 0.2), transparent),
+     radial-gradient(ellipse at bottom, hsl(var(--eco-green) / 0.2), transparent),
+     radial-gradient(ellipse at left, hsl(var(--eco-blue) / 0.15), transparent),
+    hsl(var(--background));
+  }
+  
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+  
+  .eco-gradient {
+    background: var(--gradient-primary);
+  }
+  
+  .interactive-card {
+    @apply transform transition-all duration-300 hover:scale-105 hover:shadow-[var(--shadow-glow)] cursor-pointer;
+  }
+  
+  .glow-text {
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+}
+
 
 
 /* Smooth scrolling */
@@ -204,6 +252,20 @@ html {
     }
   }
   
+ @keyframes typing {
+    from { width: 0 }
+    to { width: 65% }
+            }
+ .animate-typing {
+     width: 0;
+     animation: typing 2s steps(8) forwards, blink 0.75s step-end infinite;
+            }
+   @keyframes blink {
+              50% { border-color: transparent }
+            }
+          
+            
+  
   @keyframes gradient-shift {
     0%, 100% { 
       background-position: 0% 50%;
@@ -256,6 +318,31 @@ html {
       transform: rotate(180deg);
     }
   }
+  @keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.8,0,1,1);
+  }
+  50% {
+    transform: translateY(-20%);
+    animation-timing-function: cubic-bezier(0,0,0.2,1);
+  }
+}
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* Spin Slow Animation */
+@keyframes spin-slow {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+
 
   @keyframes orbit {
     0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
@@ -401,4 +488,31 @@ html {
   .delay-300 { animation-delay: 300ms; }
   .delay-500 { animation-delay: 500ms; }
   .delay-1000 { animation-delay: 1000ms; }
+}
+
+@media (max-width: 640px) {
+  .mobile-text-xs {
+    font-size: 8px !important;
+  }
+  .mobile-text-sm {
+    font-size: 10px !important;
+  }
+  .mobile-text-base {
+    font-size: 12px !important;
+  }
+  .mobile-text-lg {
+    font-size: 13px !important;
+  }
+  .mobile-text-xl {
+    font-size: 14px !important;
+  }
+  .mobile-text-2xl {
+    font-size: 15px !important;
+  }
+  .mobile-text-3xl {
+    font-size: 16px !important;
+  }
+  .mobile-text-4xl {
+    font-size: 17px !important;
+  }
 }

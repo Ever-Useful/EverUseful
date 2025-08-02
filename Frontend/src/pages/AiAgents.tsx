@@ -6,8 +6,8 @@ import { IoRocketSharp } from 'react-icons/io5';
 import { TbHexagon3D, TbBrandOpenai, TbRobot } from 'react-icons/tb';
 import { GiArtificialIntelligence, GiProcessor, GiCircuitry } from 'react-icons/gi';
 import { BsLightningCharge } from 'react-icons/bs';
-import { Header } from '@/components/Header';
-
+import Header from '@/components/Header';
+import { Footer } from '@/components/Footer';
 const Artificial = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -460,7 +460,7 @@ const Artificial = () => {
       </div>
 
       {/* Hero Section */}
-      <section ref={sections.intro} className="pt-32 pb-20 px-4 md:px-8 relative min-h-screen flex items-center">
+      <section ref={sections.intro} className="px-4 md:px-8 relative h-[90vh] flex items-center">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
         
@@ -476,7 +476,7 @@ const Artificial = () => {
                 <span className="text-sm">THE FUTURE OF AI AGENTS IS HERE</span>
               </div>
               
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              <h1 className="text-4xl font-bold mb-6 leading-tight">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">
                   Discover, Share & Monetize
                 </span>
@@ -502,7 +502,7 @@ const Artificial = () => {
                 </motion.span>
               </h1>
               
-              <p className="text-xl text-gray-300 max-w-2xl mb-10">
+              <p className="text-base text-gray-300 max-w-2xl mb-10">
                 Join the world's leading marketplace for AI solutions. Access cutting-edge agents, contribute your innovations, and transform how businesses operate.
               </p>
               
@@ -525,24 +525,6 @@ const Artificial = () => {
                   <span>Publish Agent</span>
                   <TbHexagon3D className="ml-2" />
                 </motion.button>
-              </div>
-              
-              <div className="flex flex-wrap gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <motion.div 
-                    key={i}
-                    whileHover={{ y: -5 }}
-                    className="flex items-center"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 flex items-center justify-center mr-3">
-                      <BsLightningCharge className="text-cyan-400" />
-                    </div>
-                    <div>
-                      <div className="text-xl font-bold text-cyan-400">42K+</div>
-                      <div className="text-gray-400">Active Agents</div>
-                    </div>
-                  </motion.div>
-                ))}
               </div>
             </motion.div>
             
@@ -658,7 +640,7 @@ const Artificial = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-gray-400 max-w-3xl mx-auto"
+              className="text-gray-400 max-w-3xl mx-auto text-base"
             >
               AI agents are autonomous systems that perceive their environment, make decisions, and take actions to achieve specific goals. 
               They combine machine learning, reasoning, and problem-solving capabilities to perform complex tasks.
@@ -679,41 +661,11 @@ const Artificial = () => {
                 <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 flex items-center justify-center mb-6 group-hover:bg-gradient-to-br group-hover:from-cyan-600/30 group-hover:to-indigo-600/30">
                   {app.icon}
                 </div>
-                <h3 className="text-xl font-bold mb-3 group-hover:text-cyan-300 transition-colors">{app.title}</h3>
-                <p className="text-gray-300">{app.description}</p>
+                <h4 className="text-xl font-bold mb-3 group-hover:text-cyan-300 transition-colors">{app.title}</h4>
+                <p className="text-gray-300 text-base">{app.description}</p>
               </motion.div>
             ))}
-          </div>
-          
-          <motion.div 
-            className="mt-16 bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-8"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="text-2xl font-bold mb-4">How AI Agents Transform Industries</h3>
-                <p className="text-gray-300 mb-6">
-                  AI agents are revolutionizing how businesses operate by automating complex decision-making processes, 
-                  providing real-time insights, and enabling new levels of efficiency and innovation across all sectors.
-                </p>
-                <div className="flex items-center text-cyan-400 font-medium">
-                  <span>Learn more about agent technology</span>
-                  <FiArrowRight className="ml-2" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="bg-gray-900/50 p-4 rounded-xl border border-gray-700">
-                    <div className="text-cyan-400 text-3xl font-bold mb-2">92%</div>
-                    <div className="text-sm text-gray-300">Adoption rate in Fortune 500 companies</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
+          </div>  
         </div>
       </section>
 
@@ -737,7 +689,7 @@ const Artificial = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-gray-400 max-w-2xl mx-auto"
+              className="text-gray-400 max-w-2xl mx-auto text-base"
             >
               Discover powerful AI solutions created by developers worldwide. Deploy in minutes to enhance your workflows.
             </motion.p>
@@ -755,7 +707,7 @@ const Artificial = () => {
               <button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
-                className={`px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-300 ${
+                className={`px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-300 text-base ${
                   activeCategory === category.id
                     ? 'bg-gradient-to-r from-cyan-700/30 to-indigo-700/30 border border-cyan-500/30'
                     : 'bg-gray-800/50 border border-gray-700 hover:bg-gray-700/50'
@@ -782,7 +734,7 @@ const Artificial = () => {
               <input
                 type="text"
                 placeholder="Search for agents, capabilities, or industries..."
-                className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                className="w-full pl-12 pr-4 py-4 text-base bg-gray-800/50 border border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -806,14 +758,14 @@ const Artificial = () => {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-xl font-bold">{agent.name}</h3>
-                      <p className="text-gray-400 text-sm">by {agent.creator}</p>
+                      <p className="text-gray-400 text-xs">by {agent.creator}</p>
                     </div>
-                    <div className="bg-indigo-500/10 px-3 py-1 rounded-full text-sm flex items-center">
+                    <div className="bg-indigo-500/10 px-3 py-1 rounded-full text-xs flex items-center">
                       <span>${agent.price}</span>
                     </div>
                   </div>
                   
-                  <p className="text-gray-300 mb-6 h-16">{agent.description}</p>
+                  <p className="text-gray-300 text-sm mb-6 h-16">{agent.description}</p>
                   
                   <div className="flex flex-wrap gap-2 mb-6">
                     {agent.tags.map((tag, i) => (
@@ -897,7 +849,7 @@ const Artificial = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-gray-400 max-w-2xl mx-auto"
+              className="text-gray-400 max-w-2xl mx-auto text-base"
             >
               Discover the tangible benefits of integrating AI agents into your operations
             </motion.p>
@@ -911,7 +863,7 @@ const Artificial = () => {
               className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-8"
             >
               <h3 className="text-2xl font-bold mb-4 text-cyan-400">Real-World Impact</h3>
-              <p className="text-gray-300 mb-6">
+              <p className="text-gray-300 mb-6 text-base">
                 AI agents are revolutionizing industries by automating complex processes, enhancing decision-making, 
                 and enabling innovation at unprecedented scales. From healthcare diagnostics to financial forecasting, 
                 AI agents are driving efficiency and creating new possibilities.
@@ -957,8 +909,8 @@ const Artificial = () => {
                   <div className="flex items-start mb-3">
                     <div className="text-cyan-400 text-2xl font-bold mr-3">0{i+1}</div>
                     <div>
-                      <h3 className="text-xl font-bold mb-2">{benefit.title}</h3>
-                      <p className="text-gray-300">{benefit.description}</p>
+                      <h3 className="text-2xl font-bold mb-2">{benefit.title}</h3>
+                      <p className="text-gray-300 text-base">{benefit.description}</p>
                     </div>
                   </div>
                   
@@ -980,7 +932,7 @@ const Artificial = () => {
             </motion.div>
           </div>
           
-          <motion.div 
+          {/* <motion.div 
             className="bg-gradient-to-br from-cyan-900/20 to-indigo-900/20 border border-cyan-500/30 rounded-2xl p-8"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1025,7 +977,7 @@ const Artificial = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </motion.div> */}
         </div>
       </section>
 
@@ -1211,56 +1163,7 @@ const Artificial = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-800/50 py-12 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-            <div className="lg:col-span-2">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center">
-                  <TbBrandOpenai className="text-xl" />
-                </div>
-                <h2 className="text-xl font-bold">NeuroMarket</h2>
-              </div>
-              <p className="text-gray-400 max-w-md mb-6">
-                The world's leading marketplace for AI agents, connecting developers with businesses worldwide.
-              </p>
-              <div className="flex space-x-4">
-                {['twitter', 'github', 'linkedin', 'discord'].map((social) => (
-                  <a 
-                    key={social} 
-                    href="#" 
-                    className="text-gray-400 hover:text-cyan-400 transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center">
-                      <div className="w-5 h-5 rounded-full bg-gray-400"></div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-            
-            {['Products', 'Solutions', 'Developers', 'Company', 'Resources'].map((category) => (
-              <div key={category}>
-                <h3 className="text-lg font-semibold mb-6">{category}</h3>
-                <ul className="space-y-3">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <li key={i}>
-                      <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
-                        {category} {i + 1}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          
-          <div className="border-t border-gray-800/50 mt-12 pt-8 text-center text-gray-500">
-            <p>© 2025 NeuroMarket. All rights reserved. The future of AI agent distribution.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer/>
     </div>
   );
 };

@@ -15,15 +15,17 @@ import {
   GithubAuthProvider,
   FacebookAuthProvider,
   sendEmailVerification,
-  Auth 
+  Auth,
+  RecaptchaVerifier,
+  ConfirmationResult,
+  signInWithPhoneNumber
 } from "firebase/auth";
 import { auth, handleGoogleAuth, handleGithubAuth } from "../lib/firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, addDoc, getFirestore, collection, setDoc } from "firebase/firestore";
-import { db } from "../lib/firebase"; // Make sure db is exported from your firebase config
+// Removed Firestore imports - using DynamoDB now
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { userService } from '@/services/userService';
-import { firestoreService } from '@/services/firestoreService';
+// Removed Firestore import - using DynamoDB now
 import Logo from '../assets/Logo/Logo Side.png'
 
 const SignUp = () => {
@@ -293,29 +295,8 @@ const SignUp = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const idToken = await userCredential.user.getIdToken();
 
-      // Ensure user exists in backend and customUserId is saved
-      const backendUser = await userService.ensureUserExists({
-        name: formData.firstName + ' ' + formData.lastName,
-        email: formData.email,
-        avatar: userCredential.user.photoURL || null,
-        bio: null,
-        location: null,
-        website: null,
-        userType: formData.userType,
-        title: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-      // Save backend customUserId in Firestore
-      await firestoreService.setCurrentUserData({
-        customUserId: backendUser.customUserId,
-        name: formData.firstName + ' ' + formData.lastName,
-        email: formData.email,
-        userType: formData.userType,
-        createdAt: new Date().toISOString(),
-      });
-
-      await fetch('http://localhost:3000/token', {
+      // Save user data to DynamoDB via backend
+      const response = await fetch('http://localhost:3000/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -324,10 +305,18 @@ const SignUp = () => {
         body: JSON.stringify({
           firstName: formData.firstName,
           lastName: formData.lastName,
-          phone: formData.phone,
+          phoneNumber: formData.phone,
           userType: formData.userType,
         }),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to save user data to backend');
+      }
+
+      const result = await response.json();
+      console.log('User data saved successfully:', result);
+      
       navigate('/signin');
     } catch (error: any) {
       console.error("Error creating account:", error);

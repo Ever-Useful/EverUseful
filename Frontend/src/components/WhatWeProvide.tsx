@@ -91,20 +91,20 @@ export const WhatWeProvide = () => {
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
   return (
-    <section className="relative py-16 sm:py-24 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+    <section className="relative py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
       {/* Background Blobs */}
-      <div className="absolute top-[-120px] left-[-120px] w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-purple-300 opacity-30 rounded-full blur-[90px] sm:blur-[120px] z-0" />
-      <div className="absolute bottom-[-100px] right-[-100px] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-pink-300 opacity-30 rounded-full blur-[70px] sm:blur-[100px] z-0" />
-      <div className="absolute top-[60%] left-[10%] w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-blue-200 opacity-20 rounded-full blur-[60px] sm:blur-[90px] z-0" />
+      <div className="absolute top-[-120px] left-[-120px] w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-purple-300 opacity-30 rounded-full blur-[70px] sm:blur-[120px] z-0" />
+      <div className="absolute bottom-[-80px] right-[-80px] w-[200px] sm:w-[500px] h-[200px] sm:h-[500px] bg-pink-300 opacity-30 rounded-full blur-[50px] sm:blur-[100px] z-0" />
+      <div className="absolute top-[60%] left-[10%] w-[120px] sm:w-[400px] h-[120px] sm:h-[400px] bg-blue-200 opacity-20 rounded-full blur-[40px] sm:blur-[90px] z-0" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-10 sm:mb-16">
-          <h2 className="mt-2 text-2xl sm:text-4xl md:text-5xl font-extrabold text-gray-800">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <h2 className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 leading-tight">
             Empowering Innovation with{" "}
             <span className="text-indigo-600">Creative Technology</span>
           </h2>
-          <p className="mt-2 sm:mt-3 text-base sm:text-lg text-gray-600 max-w-xl mx-auto">
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
             Tools and support to bring your ideas to life — securely, creatively, efficiently.
           </p>
         </div>
@@ -114,14 +114,16 @@ export const WhatWeProvide = () => {
           ref={containerRef}
           className="
             grid
-            grid-cols-2
+            grid-cols-1
             sm:grid-cols-2
             lg:grid-cols-3
-            gap-4
-            sm:gap-8
+            gap-6
+            sm:gap-6
+            lg:gap-8
             auto-rows-[120px]
-            sm:auto-rows-[160px]
-            lg:auto-rows-[180px]
+            sm:auto-rows-[140px]
+            lg:auto-rows-[160px]
+            xl:auto-rows-[180px]
           "
         >
           {services.map((item, idx) => {
@@ -133,14 +135,16 @@ export const WhatWeProvide = () => {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: stagger, ease: "easeOut" }}
                 whileHover={{
-                  scale: 1.03,
+                  scale: 1.02,
                   boxShadow: "0 20px 30px rgba(0,0,0,0.08)",
                 }}
                 className={`
                   ${item.rowSpan}
-                  rounded-2xl
-                  p-3
-                  sm:p-6
+                  rounded-xl
+                  sm:rounded-2xl
+                  p-5
+                  sm:p-5
+                  lg:p-6
                   ${item.color}
                   bg-opacity-90
                   border border-gray-200
@@ -150,41 +154,33 @@ export const WhatWeProvide = () => {
                   justify-between
                   relative
                   overflow-hidden
+                  min-h-[140px]
+                  sm:min-h-[160px]
+                  lg:min-h-[180px]
                 `}
               >
                 <div className="relative z-10 flex flex-col h-full">
-                  <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl mb-2 sm:mb-4 bg-white/60">
-                    <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14 flex items-center justify-center rounded-lg sm:rounded-xl mb-3 sm:mb-3 lg:mb-4 bg-white/60">
+                    <item.icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-700" />
                   </div>
-                  <h3 className="text-base sm:text-xl font-semibold text-white-800 mb-1">
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-black mb-2 sm:mb-2 leading-tight">
                     {item.title}
                   </h3>
                   <div
-                    className="text-xs sm:text-lg text-white-700"
+                    className="text-xs sm:text-sm lg:text-base text-black/90 [&_ul]:pl-3 sm:[&_ul]:pl-4 lg:[&_ul]:pl-5 [&_ul]:mt-1 sm:[&_ul]:mt-2 [&_li]:text-xs sm:[&_li]:text-sm lg:[&_li]:text-base [&_li]:mb-1 sm:[&_li]:mb-1 leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: item.description }}
                   />
-
                 </div>
               </motion.div>
             );
           })}
 
           {/* Bottom-right image filling the blank space */}
-          <div
-            // className="
-            //   row-span-2
-            //   rounded-2xl
-            //   overflow-hidden
-            //   flex items-center justify-center
-            //   border border-gray-200
-            //   shadow-sm
-            //   bg-white
-            // "
-          >
+          <div className="hidden sm:block">
             <img
               src={provideImg}
               alt="What We Provide"
-              className="w-full h-full object-cover object-bottom-right"
+              className="w-full h-full object-cover object-bottom-right rounded-xl sm:rounded-2xl"
             />
           </div>
         </div>

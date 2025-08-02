@@ -4,8 +4,6 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-// ... imports (same as your file)
-
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 rounded-full font-medium whitespace-nowrap select-none cursor-pointer " +
   "min-w-[44px] min-h-[44px] px-4 py-2 " +
@@ -17,18 +15,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // 💡 Define 3 clear variants for project-wide consistency
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-md shadow-primary/10",
-        outline: "border bg-background border-primary/30 text-primary hover:bg-primary/5 active:bg-primary/10",
-        ghost: "bg-transparent text-primary hover:bg-primary/5 active:bg-primary/10",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-md shadow-primary/10 font-bold",
+        outline: "border bg-background border-primary/30 text-primary hover:bg-primary/5 active:bg-primary/10 font-bold",
+        ghost: "bg-transparent text-primary hover:bg-primary/5 active:bg-primary/10 font-bold",
       },
       size: {
-        default: "text-base sm:text-base md:text-base lg:text-lg px-4 py-2", // 16-18px font, scales at lg
-        sm: "text-sm px-3 py-1.5", // Good for toolbar/small UIs
-        lg: "text-lg px-6 py-3",   // Hero/primary CTAs
-        icon: "p-0 w-[44px] h-[44px] text-base", // Touch target
+        default: "text-base sm:text-base md:text-base lg:text-lg px-4 py-2", 
+        xs: "text-xs px-2 py-1", 
+        sm: "text-sm px-3 py-1.5", 
+        lg: "text-lg px-6 py-3", 
+        icon: "p-0 w-[44px] h-[44px] text-base", 
       },
-      // Add block variant for full-width
       block: {
         true: "w-full justify-center",
         false: "",
@@ -47,7 +44,7 @@ export interface ButtonProps
   variant?: VariantProps<typeof buttonVariants>["variant"];
   size?: VariantProps<typeof buttonVariants>["size"];
   asChild?: boolean;
-  block?: boolean; // New: allow w-full
+  block?: boolean; 
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

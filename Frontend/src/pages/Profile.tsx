@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera } from "lucide-react";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
@@ -470,6 +470,7 @@ const Profile = () => {
         location: userProfileData.location || '',
         title: userProfileData.title || '',
         website: userProfileData.website || '',
+        mobile: authData.mobile || authData.phoneNumber || '',
       });
 
       setStudentData({
@@ -489,12 +490,19 @@ const Profile = () => {
         });
       }
 
-      // Set skills directly from userProfile
-      setSkills(
-        ((userProfile as any).skills && Array.isArray((userProfile as any).skills)) ? (userProfile as any).skills :
-        ((userProfile as any).freelancerData && Array.isArray((userProfile as any).freelancerData.skills)) ? (userProfile as any).freelancerData.skills :
-        []
-      );
+      // Set skills - handle both string arrays and object arrays
+      const skillsData = (userProfile as any).skills || (userProfile as any).freelancerData?.skills || [];
+      if (Array.isArray(skillsData)) {
+        // Convert skill objects to strings if needed
+        const skillStrings = skillsData.map(skill => {
+          if (typeof skill === 'string') return skill;
+          if (skill && typeof skill === 'object' && skill.name) return skill.name;
+          return String(skill);
+        });
+        setSkills(skillStrings);
+      } else {
+        setSkills([]);
+      }
 
       // Fetch projects robustly
       if ((userProfile as any).projects && Array.isArray((userProfile as any).projects.created)) {
@@ -1003,7 +1011,7 @@ const Profile = () => {
             </Card>
 
             {/* Portfolio Section */}
-            <Card className="bg-white shadow-lg rounded-xl">
+            <Card id="projects" className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-gray-900 flex items-center">
