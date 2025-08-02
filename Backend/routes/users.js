@@ -45,20 +45,25 @@ router.get('/profile', authorize, async (req, res) => {
       }
     }
     
+    // Ensure proper data structure
+    const profile = user.profile || {};
+    const auth = {
+      firstName: profile.firstName || '',
+      lastName: profile.lastName || '',
+      phoneNumber: profile.phoneNumber || '',
+      email: profile.email || '',
+      userType: profile.userType || '',
+      mobile: profile.mobile || '',
+      gender: profile.gender || '',
+      username: profile.username || profile.email?.split('@')[0] || ''
+    };
+    
     res.json({
       success: true,
       data: {
         customUserId: user.customUserId,
-        auth: {
-          firstName: user.profile.firstName || '',
-          lastName: user.profile.lastName || '',
-          phoneNumber: user.profile.phoneNumber || '',
-          email: user.profile.email || '',
-          userType: user.profile.userType || '',
-          mobile: user.profile.mobile || '',
-          gender: user.profile.gender || ''
-        },
-        profile: user.profile || {},
+        auth: auth,
+        profile: profile,
         stats: user.stats || {},
         studentData: user.studentData || null,
         education: user.education || [],
@@ -73,6 +78,52 @@ router.get('/profile', authorize, async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching user profile:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Get bulk users by custom user IDs (for marketplace author display)
+router.get('/bulk/:userIds', async (req, res) => {
+  try {
+    const { userIds } = req.params;
+    const userIdArray = userIds.split(',').filter(id => id.trim());
+    
+    if (userIdArray.length === 0) {
+      return res.json({ success: true, data: {} });
+    }
+    
+    const users = {};
+    for (const customUserId of userIdArray) {
+      try {
+        const user = await userService.findUserByCustomId(customUserId);
+        if (user) {
+          // Ensure proper data structure for frontend
+          const profile = user.profile || {};
+          const auth = {
+            firstName: profile.firstName || '',
+            lastName: profile.lastName || '',
+            phoneNumber: profile.phoneNumber || '',
+            email: profile.email || '',
+            userType: profile.userType || '',
+            mobile: profile.mobile || '',
+            gender: profile.gender || '',
+            username: profile.username || profile.email?.split('@')[0] || ''
+          };
+          
+          users[customUserId] = {
+            ...user,
+            auth: auth,
+            profile: profile
+          };
+        }
+      } catch (error) {
+        console.error(`Error fetching user ${customUserId}:`, error);
+      }
+    }
+    
+    res.json({ success: true, data: users });
+  } catch (error) {
+    console.error('Error fetching bulk users:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });

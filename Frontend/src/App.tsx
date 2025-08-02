@@ -30,7 +30,7 @@ import SendFeedback from "./pages/Policy/SendFeedback";
 import Chat from "./pages/Chat";
 import Sustainable from "./pages/Sustainable";
 import Connections from "./pages/Connections";
-import Consultation from "./pages/Consultation";
+import Consulting from "./pages/Consultation";
 import BussinessProfile from "./pages/bussinessprofile";
 // Import new policy pages
 import PrivacyPolicy from "./pages/Policy/PrivacyPolicy";
@@ -40,7 +40,7 @@ import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
 
 import BecomeAMentor from "./pages/BecomeAMentor";
-
+//test
 
 const queryClient = new QueryClient();
 
@@ -58,7 +58,7 @@ const App = () => (
             <Route path="/freelancing" element={<Freelancing />} />
             <Route path="/product/:id" element={<ProductDisplay />} />
             <Route path="/connect" element={<Connect />} />
-            <Route path="/consultation" element={<Consultation />} />
+            <Route path="/consulting" element={<Consulting />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />

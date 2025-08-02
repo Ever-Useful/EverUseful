@@ -193,7 +193,12 @@ class DynamoDBService {
       };
 
       const result = await dynamodb.query(params).promise();
-      return result.Items.length > 0 ? result.Items[0] : null;
+      const user = result.Items.length > 0 ? result.Items[0] : null;
+      
+      if (user) {
+        return this.reconstructUserData(user);
+      }
+      return null;
     } catch (error) {
       console.error('Error finding user by Firebase UID:', error);
       // Fallback to scan if index doesn't exist
@@ -206,7 +211,12 @@ class DynamoDBService {
           }
         };
         const scanResult = await dynamodb.scan(scanParams).promise();
-        return scanResult.Items.length > 0 ? scanResult.Items[0] : null;
+        const user = scanResult.Items.length > 0 ? scanResult.Items[0] : null;
+        
+        if (user) {
+          return this.reconstructUserData(user);
+        }
+        return null;
       } catch (scanError) {
         console.error('Error in fallback scan:', scanError);
         return null;
@@ -224,11 +234,93 @@ class DynamoDBService {
       };
 
       const result = await dynamodb.get(params).promise();
-      return result.Item || null;
+      const user = result.Item || null;
+      
+      if (user) {
+        return this.reconstructUserData(user);
+      }
+      return null;
     } catch (error) {
       console.error('Error finding user by custom ID:', error);
       return null;
     }
+  }
+
+  // Reconstruct user data from flattened DynamoDB structure
+  reconstructUserData(user) {
+    const reconstructed = {
+      customUserId: user.customUserId,
+      firebaseUid: user.firebaseUid,
+      profile: {},
+      stats: user.stats || {},
+      studentData: user.studentData || null,
+      professorData: user.professorData || null,
+      freelancerData: user.freelancerData || null,
+      education: user.education || [],
+      workExperience: user.workExperience || [],
+      skills: user.skills || [],
+      personalDetails: user.personalDetails || {},
+      socialLinks: user.socialLinks || {},
+      projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 },
+      activities: user.activities || {},
+      preferences: user.preferences || {},
+      marketplace: user.marketplace || {},
+      social: user.social || {}
+    };
+
+    // Reconstruct profile from flattened keys
+    Object.keys(user).forEach(key => {
+      if (key.startsWith('profile.')) {
+        const profileKey = key.replace('profile.', '');
+        reconstructed.profile[profileKey] = user[key];
+      }
+    });
+
+    // Reconstruct studentData from flattened keys
+    if (!reconstructed.studentData) {
+      reconstructed.studentData = {};
+      Object.keys(user).forEach(key => {
+        if (key.startsWith('studentData.')) {
+          const studentKey = key.replace('studentData.', '');
+          reconstructed.studentData[studentKey] = user[key];
+        }
+      });
+    }
+
+    // Reconstruct professorData from flattened keys
+    if (!reconstructed.professorData) {
+      reconstructed.professorData = {};
+      Object.keys(user).forEach(key => {
+        if (key.startsWith('professorData.')) {
+          const professorKey = key.replace('professorData.', '');
+          reconstructed.professorData[professorKey] = user[key];
+        }
+      });
+    }
+
+    // Reconstruct freelancerData from flattened keys
+    if (!reconstructed.freelancerData) {
+      reconstructed.freelancerData = {};
+      Object.keys(user).forEach(key => {
+        if (key.startsWith('freelancerData.')) {
+          const freelancerKey = key.replace('freelancerData.', '');
+          reconstructed.freelancerData[freelancerKey] = user[key];
+        }
+      });
+    }
+
+    // Reconstruct personalDetails from flattened keys
+    if (!reconstructed.personalDetails) {
+      reconstructed.personalDetails = {};
+      Object.keys(user).forEach(key => {
+        if (key.startsWith('personalDetails.')) {
+          const personalKey = key.replace('personalDetails.', '');
+          reconstructed.personalDetails[personalKey] = user[key];
+        }
+      });
+    }
+
+    return reconstructed;
   }
 
   async updateUser(customUserId, updateData) {
@@ -577,14 +669,14 @@ class DynamoDBService {
     }
   }
 
-  async addUserProject(customUserId, projectData) {
+    async addUserProject(customUserId, projectData) {
     try {
       // First, get the current user to check if projects object exists
       const user = await this.findUserByCustomId(customUserId);
       if (!user) {
         throw new Error('User not found');
       }
-
+  
       // Ensure projects object exists
       if (!user.projects) {
         user.projects = {
@@ -594,7 +686,7 @@ class DynamoDBService {
           count: 0
         };
       }
-
+  
       // Create project object with the correct structure
       const project = {
         projectId: projectData.id || Date.now().toString(),
@@ -611,22 +703,28 @@ class DynamoDBService {
         views: 0,
         downloads: 0
       };
-
+  
+      // Store only the project ID in the user's projects.created array
+      const projectId = project.projectId;
+  
       const params = {
         TableName: this.usersTable,
         Key: {
           customUserId: customUserId
         },
-        UpdateExpression: 'SET projects.created = list_append(if_not_exists(projects.created, :empty_list), :project_item), projects.count = if_not_exists(projects.count, :zero) + :inc, stats.projectsCount = if_not_exists(stats.projectsCount, :zero) + :inc',
+        UpdateExpression: 'SET projects.created = list_append(if_not_exists(projects.created, :empty_list), :project_id), projects.#count = if_not_exists(projects.#count, :zero) + :inc, stats.projectsCount = if_not_exists(stats.projectsCount, :zero) + :inc',
+        ExpressionAttributeNames: {
+          '#count': 'count'
+        },
         ExpressionAttributeValues: {
-          ':project_item': [project],
+          ':project_id': [projectId],
           ':empty_list': [],
           ':inc': 1,
           ':zero': 0
         },
         ReturnValues: 'ALL_NEW'
       };
-
+  
       const result = await dynamodb.update(params).promise();
       return project;
     } catch (error) {
