@@ -99,16 +99,6 @@ const handlers = useSwipeable({
         </div>
       
    <div className="relative">
-  {/* Optional Arrows */}
-  <button
-    onClick={() => {
-      document.getElementById("event-slider")?.scrollBy({ left: -300, behavior: "smooth" });
-    }}
-    className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-black rounded-2/5 shadow-lg"
-  >
-    ←
-  </button>
-
   <div
     id="event-slider"
     {...handlers}
@@ -185,15 +175,6 @@ const handlers = useSwipeable({
       </div>
     ))}
   </div>
-
-  <button
-    onClick={() => {
-      document.getElementById("event-slider")?.scrollBy({ left: 300, behavior: "smooth" });
-    }}
-    className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-black rounded-2/5 shadow-lg"
-  >
-    →
-  </button>
 </div>
 
       </div>
