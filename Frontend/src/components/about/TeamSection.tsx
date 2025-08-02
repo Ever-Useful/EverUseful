@@ -6,10 +6,10 @@ import { useState, useEffect } from "react";
 // Import team member images
 import founderImage from "@/assets/images/Founder.jpg";
 import kritenshImage from "@/assets/images/Kritensh.jpg";
-import noImageAvailable from "@/assets/images/no image available.png";
+
 import pooja from "@/assets/images/pooja.jpg";
-import techLead from "@/assets/images/tech lead.jpg";
-import rishika from "@/assets/images/Rishika.jpg";
+import techLead from "@/assets/images/Tech Lead.jpg";
+import rishika from "@/assets/images/rishika.jpg";
 import amrit from "@/assets/images/amrit.jpg";
 import navya from "@/assets/images/navya.jpg";
 

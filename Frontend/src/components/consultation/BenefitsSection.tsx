@@ -1,125 +1,194 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingDown, DollarSign, Shield, Award, Globe, Users } from "lucide-react";
-import benefitsImage from "@/assets/images/benefits-image.png"; 
+import { TrendingUp, DollarSign, Shield, Award, Globe, Users, Zap, Brain, FlaskConical, Leaf, ArrowRight, Sparkles } from "lucide-react";
+import { useState } from "react";
 
 const benefits = [
   {
-    icon: TrendingDown,
-    title: "Reduce Carbon Footprint",
-    description: "Cut emissions by up to 80% with our proven renewable energy strategies.",
-    percentage: "80%",
-    color: "eco-green"
+    icon: Brain,
+    title: "AI-Powered Efficiency",
+    description: "Leverage intelligent automation to streamline operations and boost productivity by up to 300%.",
+    percentage: "300%",
+    color: "from-blue-600 to-cyan-600",
+    bgColor: "from-blue-50 to-cyan-50",
+    borderColor: "border-blue-200",
+    hoverColor: "hover:border-blue-400"
   },
   {
     icon: DollarSign,
-    title: "Lower Energy Costs",
-    description: "Save thousands annually on electricity bills through efficient energy systems.",
+    title: "Cost Optimization",
+    description: "Reduce operational costs by up to 60% through smart resource management and automation.",
     percentage: "60%",
-    color: "eco-blue"
+    color: "from-emerald-600 to-green-600",
+    bgColor: "from-emerald-50 to-green-50",
+    borderColor: "border-emerald-200",
+    hoverColor: "hover:border-emerald-400"
   },
   {
     icon: Shield,
-    title: "Energy Independence",
-    description: "Reduce reliance on grid electricity and protect against rising energy costs.",
-    percentage: "95%",
-    color: "eco-purple"
+    title: "Risk Mitigation",
+    description: "Advanced AI systems provide 24/7 monitoring and proactive threat detection.",
+    percentage: "99.9%",
+    color: "from-purple-600 to-violet-600",
+    bgColor: "from-purple-50 to-violet-50",
+    borderColor: "border-purple-200",
+    hoverColor: "hover:border-purple-400"
   },
   {
     icon: Award,
-    title: "Sustainability Certification",
-    description: "Achieve green building certifications and sustainability recognition.",
+    title: "Innovation Leadership",
+    description: "Stay ahead of competition with cutting-edge R&D and sustainable development solutions.",
     percentage: "100%",
-    color: "eco-orange"
+    color: "from-orange-600 to-red-600",
+    bgColor: "from-orange-50 to-red-50",
+    borderColor: "border-orange-200",
+    hoverColor: "hover:border-orange-400"
   },
   {
     icon: Globe,
     title: "Environmental Impact",
-    description: "Contribute to global climate goals and environmental preservation.",
-    percentage: "∞",
-    color: "eco-green"
+    description: "Reduce carbon footprint by up to 80% with renewable energy and sustainable practices.",
+    percentage: "80%",
+    color: "from-teal-600 to-cyan-600",
+    bgColor: "from-teal-50 to-cyan-50",
+    borderColor: "border-teal-200",
+    hoverColor: "hover:border-teal-400"
   },
   {
     icon: Users,
-    title: "Community Leadership",
-    description: "Become a sustainability leader and inspire others in your community.",
-    percentage: "★★★★★",
-    color: "eco-blue"
+    title: "Expert Network",
+    description: "Access to PhD mentors and industry experts for comprehensive solution development.",
+    percentage: "500+",
+    color: "from-indigo-600 to-purple-600",
+    bgColor: "from-indigo-50 to-purple-50",
+    borderColor: "border-indigo-200",
+    hoverColor: "hover:border-indigo-400"
   }
 ];
 
 export const BenefitsSection = () => {
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
   return (
-    <section className="py-20 px-4 lg:px-8 galaxy-bg">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16 space-y-4">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
-            <span className="text-eco-green glow-text">Features & Benefits</span>
+    <section className="relative py-20 px-4 lg:px-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-10 left-10 w-32 h-32 bg-blue-200 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-40 h-40 bg-purple-200 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-36 h-36 bg-cyan-200 rounded-full blur-2xl animate-pulse delay-2000"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Header Section */}
+        <div className="text-center mb-16 space-y-6">
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full border border-blue-200 shadow-lg">
+            <Sparkles className="w-5 h-5 text-blue-600" />
+            <span className="text-slate-700 text-sm font-semibold">Why Choose Our Services</span>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold">
+            <span className="text-slate-800">Transform Your Business with</span>
+            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Intelligent Solutions
+            </span>
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-            Discover the transformative impact of sustainable energy solutions on your organization, 
-            community, and the environment.
+          
+          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+            Experience unprecedented growth and efficiency through our comprehensive suite of AI, R&D, 
+            sustainability, and renewable energy solutions designed for the modern enterprise.
           </p>
         </div>
 
-        {/* Full Width Image */}
-        <div className="relative mb-16 group">
-          <div className="relative overflow-hidden rounded-2xl">
-            <img 
-              src={benefitsImage} 
-              alt="Sustainability benefits visualization"
-              className="w-full h-[400px] lg:h-[500px] object-cover shadow-[var(--shadow-card)] transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent group-hover:from-background/80 group-hover:via-background/20 transition-all duration-500" />
-            
-            {/* Floating stats */}
-            <div className="absolute top-6 left-6 bg-eco-green/90 backdrop-blur-sm rounded-lg p-4 text-white">
-              <div className="text-2xl font-bold">500+</div>
-              <div className="text-sm opacity-90">Projects Completed</div>
-            </div>
-            
-            <div className="absolute bottom-6 right-6 bg-eco-blue/90 backdrop-blur-sm rounded-lg p-4 text-white">
-              <div className="text-2xl font-bold">98%</div>
-              <div className="text-sm opacity-90">Client Satisfaction</div>
-            </div>
-          </div>
-          
-          {/* Decorative elements */}
-          <div className="absolute -top-8 -right-8 w-32 h-32 bg-eco-green/20 rounded-full blur-xl animate-pulse" />
-          <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-eco-blue/20 rounded-full blur-xl animate-pulse" />
-        </div>
-
-        {/* Benefits Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Interactive Benefits Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {benefits.map((benefit, index) => {
             const IconComponent = benefit.icon;
+            const isHovered = hoveredCard === index;
+            
             return (
-              <Card 
-                key={index} 
-                className="interactive-card bg-card/80 backdrop-blur-sm border-primary/20 hover:border-primary/40 group"
+              <div
+                key={index}
+                className="relative group"
+                onMouseEnter={() => setHoveredCard(index)}
+                onMouseLeave={() => setHoveredCard(null)}
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-4 mb-2">
-                    <div className={`w-12 h-12 rounded-full bg-${benefit.color}/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className={`h-6 w-6 text-${benefit.color}`} />
-                    </div>
-                    <div className={`text-2xl font-bold text-${benefit.color} group-hover:scale-110 transition-transform duration-300`}>
-                      {benefit.percentage}
-                    </div>
+                <Card 
+                  className={`relative overflow-hidden bg-gradient-to-br ${benefit.bgColor} border-2 ${benefit.borderColor} ${benefit.hoverColor} transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer`}
+                  style={{
+                    animationDelay: `${index * 0.1}s`,
+                    animation: 'fadeInUp 0.6s ease-out forwards'
+                  }}
+                >
+                  {/* Animated Background Pattern */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-white/20 to-transparent rounded-full blur-xl"></div>
+                    <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-white/20 to-transparent rounded-full blur-xl"></div>
                   </div>
-                  <CardTitle className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {benefit.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <CardDescription className="text-muted-foreground leading-relaxed">
-                    {benefit.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
+
+                  <CardHeader className="relative z-10 pb-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${benefit.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                        <IconComponent className="w-8 h-8 text-white" />
+                      </div>
+                      <div className={`text-3xl font-bold bg-gradient-to-r ${benefit.color} bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300`}>
+                        {/* {benefit.percentage} */}
+                      </div>
+                    </div>
+                    <CardTitle className="text-xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
+                      {benefit.title}
+                    </CardTitle>
+                  </CardHeader>
+                  
+                  <CardContent className="relative z-10 pt-0">
+                    <CardDescription className="text-slate-600 leading-relaxed text-base group-hover:text-slate-700 transition-colors">
+                      {benefit.description}
+                    </CardDescription>
+                    
+                    {/* Interactive Arrow - REMOVED */}
+                    {/* <div className="mt-6 flex items-center gap-2 text-slate-500 group-hover:text-slate-700 transition-colors">
+                      <span className="text-sm font-medium">Learn More</span>
+                      <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${isHovered ? 'translate-x-2' : ''}`} />
+                    </div> */}
+                  </CardContent>
+                  
+                  {/* Hover Effect Border */}
+                  <div className={`absolute inset-0 rounded-lg bg-gradient-to-r ${benefit.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 -z-10`}></div>
+                </Card>
+
+                {/* Floating Elements on Hover */}
+                {isHovered && (
+                  <>
+                    <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-ping"></div>
+                    <div className="absolute -bottom-2 -left-2 w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full animate-ping delay-300"></div>
+                  </>
+                )}
+              </div>
             );
           })}
         </div>
+
+        {/* Interactive Call to Action - REMOVED */}
+        {/* <div className="text-center mt-16">
+          <div className="inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 cursor-pointer group shadow-lg hover:shadow-xl">
+            <span>Ready to Transform Your Business?</span>
+            <TrendingUp className="w-5 h-5 group-hover:translate-y-[-2px] transition-transform duration-300" />
+          </div>
+        </div> */}
       </div>
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `
+      }} />
     </section>
   );
 };
