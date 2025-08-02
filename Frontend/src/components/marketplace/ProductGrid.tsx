@@ -249,10 +249,29 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         isLoading: authorsLoading
       };
     }
+    
+    // Extract data from the proper structure
     const auth = user.auth || {};
     const profile = user.profile || {};
+    
+    // Try multiple sources for the name
+    let name = '';
+    if (auth.firstName || auth.lastName) {
+      name = `${auth.firstName || ''} ${auth.lastName || ''}`.trim();
+    } else if (profile.firstName || profile.lastName) {
+      name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
+    } else if (auth.username) {
+      name = auth.username;
+    } else if (profile.username) {
+      name = profile.username;
+    } else if (auth.email) {
+      name = auth.email.split('@')[0];
+    } else if (profile.email) {
+      name = profile.email.split('@')[0];
+    }
+    
     return {
-      name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Unnamed User',
+      name: name || 'Unnamed User',
       image: profile.avatar || NoUserProfile,
       userType: profile.userType || auth.userType || '',
       id: user.customUserId,

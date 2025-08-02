@@ -161,43 +161,50 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     const fetchProfile = async () => {
       try {
         const userProfile = await userService.getUserProfile();
-        console.log('Fetched user profile:', userProfile); // Debug log
+        console.log('EditProfile - Fetched user profile:', userProfile); // Debug log
+        
+        // Extract data from the response structure
+        const profileData = (userProfile as any).data || userProfile;
+        const { auth: authData, profile: userProfileData, studentData: studentInfo, professorData: professorInfo, freelancerData: freelancerInfo } = profileData;
+        
+        console.log('EditProfile - Extracted auth data:', authData);
+        console.log('EditProfile - Extracted profile data:', userProfileData);
         
         setProfileData({
-          firstName: userProfile.auth?.firstName || userProfile.profile?.firstName || '',
-          lastName: userProfile.auth?.lastName || userProfile.profile?.lastName || '',
-          bio: userProfile.profile?.bio || '',
-          college: userProfile.studentData?.college || '',
-          degree: userProfile.studentData?.degree || '',
-          course: userProfile.studentData?.course || '',
-          location: userProfile.profile?.location || '',
-          year: userProfile.studentData?.year || '',
-          userType: normalizeUserType(userProfile.auth?.userType || userProfile.profile?.userType),
-          username: userProfile.auth?.username || userProfile.profile?.username || '',
-          email: userProfile.auth?.email || userProfile.profile?.email || '',
-          mobile: userProfile.auth?.mobile || userProfile.auth?.phoneNumber || userProfile.profile?.mobile || userProfile.profile?.phoneNumber || '',
-          gender: userProfile.auth?.gender || userProfile.profile?.gender || '',
-          domain: userProfile.auth?.domain || userProfile.profile?.domain || '',
-          startYear: userProfile.studentData?.startYear || '',
-          endYear: userProfile.studentData?.endYear || '',
-          purpose: userProfile.auth?.purpose || userProfile.profile?.purpose || '',
-          role: userProfile.auth?.role || userProfile.profile?.role || '',
-          specialization: userProfile.studentData?.specialization || '',
-          department: userProfile.professorData?.department || '',
-          designation: userProfile.professorData?.designation || '',
-          researchInterests: userProfile.professorData?.researchInterests || '',
-          skills: (((userProfile as any).skills && Array.isArray((userProfile as any).skills)) ? (userProfile as any).skills : (userProfile.freelancerData?.skills && Array.isArray(userProfile.freelancerData.skills) ? userProfile.freelancerData.skills : [])).join(','),
-          experience: userProfile.freelancerData?.experience || '',
-          portfolio: userProfile.freelancerData?.portfolio || '',
-          hourlyRate: userProfile.freelancerData?.hourlyRate || '',
-          avgResponseTime: userProfile.freelancerData?.avgResponseTime || '',
-          dateOfBirth: userProfile.profile?.dateOfBirth || '',
+          firstName: authData?.firstName || userProfileData?.firstName || '',
+          lastName: authData?.lastName || userProfileData?.lastName || '',
+          bio: userProfileData?.bio || '',
+          college: studentInfo?.college || '',
+          degree: studentInfo?.degree || '',
+          course: studentInfo?.course || '',
+          location: userProfileData?.location || '',
+          year: studentInfo?.year || '',
+          userType: normalizeUserType(authData?.userType || userProfileData?.userType),
+          username: authData?.username || userProfileData?.username || authData?.email?.split('@')[0] || '',
+          email: authData?.email || userProfileData?.email || '',
+          mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || userProfileData?.phoneNumber || '',
+          gender: authData?.gender || userProfileData?.gender || '',
+          domain: authData?.domain || userProfileData?.domain || '',
+          startYear: studentInfo?.startYear || '',
+          endYear: studentInfo?.endYear || '',
+          purpose: authData?.purpose || userProfileData?.purpose || '',
+          role: authData?.role || userProfileData?.role || '',
+          specialization: studentInfo?.specialization || '',
+          department: professorInfo?.department || '',
+          designation: professorInfo?.designation || '',
+          researchInterests: professorInfo?.researchInterests || '',
+          skills: (((profileData as any).skills && Array.isArray((profileData as any).skills)) ? (profileData as any).skills : (freelancerInfo?.skills && Array.isArray(freelancerInfo.skills) ? freelancerInfo.skills : [])).join(','),
+          experience: freelancerInfo?.experience || '',
+          portfolio: freelancerInfo?.portfolio || '',
+          hourlyRate: freelancerInfo?.hourlyRate || '',
+          avgResponseTime: freelancerInfo?.avgResponseTime || '',
+          dateOfBirth: userProfileData?.dateOfBirth || '',
         });
-        setEducationList(userProfile.education || []);
-        setWorkList(userProfile.workExperience || []);
+        setEducationList(profileData.education || []);
+        setWorkList(profileData.workExperience || []);
         
         // Handle skills - convert objects to strings if needed
-        const skillsData = (userProfile as any).skills || (userProfile.freelancerData?.skills) || [];
+        const skillsData = (profileData as any).skills || (freelancerInfo?.skills) || [];
         if (Array.isArray(skillsData)) {
           const skillStrings = skillsData.map(skill => {
             if (typeof skill === 'string') return skill;
@@ -209,10 +216,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           setSkills([]);
         }
         
-        setPersonalDetails(userProfile.personalDetails || {
+        setPersonalDetails(profileData.personalDetails || {
           address1: '', address2: '', landmark: '', pincode: '', location: '', hobbies: '', copyCurrent: false
         });
-        setSocialLinks(userProfile.socialLinks || {
+        setSocialLinks(profileData.socialLinks || {
           linkedin: '', facebook: '', instagram: '', twitter: '', git: '', medium: '', reddit: '', slack: '', dribbble: '', behance: '', codepen: '', figma: '', custom: ''
         });
       } catch (error) {
@@ -581,11 +588,11 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Username</label>
-                      <Input name="username" value={profileData.username ?? ''} disabled className="mt-1 bg-gray-100" />
+                      <Input name="username" value={profileData.username ?? ''} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Email</label>
-                      <Input name="email" value={profileData.email ?? ''} disabled className="mt-1 bg-gray-100 cursor-not-allowed text-gray-500" />
+                      <Input name="email" value={profileData.email ?? ''} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Mobile <span className="text-red-500">*</span></label>
@@ -954,7 +961,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                             </div>
                             <div className="flex gap-2">
                               <Button variant="outline" size="sm" onClick={() => handleEditEducation(idx)}>Edit</Button>
-                              <Button variant="destructive" size="sm" onClick={() => handleDeleteEducation(idx)}>Delete</Button>
+                              <Button variant="outline" size="sm" onClick={() => handleDeleteEducation(idx)} className="text-red-600 border-red-600 hover:bg-red-50">Delete</Button>
                             </div>
                           </div>
                         ))
@@ -1051,7 +1058,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                             </div>
                             <div className="flex gap-2">
                               <Button variant="outline" size="sm" onClick={() => handleEditWork(idx)}>Edit</Button>
-                              <Button variant="destructive" size="sm" onClick={() => handleDeleteWork(idx)}>Delete</Button>
+                              <Button variant="outline" size="sm" onClick={() => handleDeleteWork(idx)} className="text-red-600 border-red-600 hover:bg-red-50">Delete</Button>
                             </div>
                           </div>
                         ))
