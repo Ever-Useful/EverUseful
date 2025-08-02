@@ -32,13 +32,16 @@ const HeroSection = () => {
               >
                 See Open Roles
               </Button>
-              <Button 
+                <Button 
+                asChild
                 variant="outline" 
                 size="lg"
                 className="border-olive text-olive hover:bg-olive hover:text-white px-8 py-4 text-lg rounded-lg transition-all duration-300"
-              >
-                Learn About Us
-              </Button>
+                >
+                <a href="/aboutus">
+                  Learn About Us
+                </a>
+                </Button>
             </div>
           </div>
 

@@ -5,22 +5,22 @@ export const BenefitsSection = () => {
     {
       icon: Wind,
       title: "Renewable Source",
-      description: "Sed do eiusm od tempor"
+      description: "Harness clean, sustainable energy from natural resources."
     },
     {
       icon: Zap,
       title: "Easy Installation",
-      description: "Sed do eiusm od tempor"
+      description: "Quick and hassle-free setup for immediate energy savings."
     },
     {
       icon: Plug,
       title: "Low Maintenance",
-      description: "Sed do eiusm od tempor"
+      description: "Minimal upkeep required, ensuring long-term reliability."
     },
     {
       icon: Wrench,
       title: "Affordable Power",
-      description: "Sed do eiusm od tempor"
+      description: "Cost-effective solutions that lower your energy bills."
     }
   ];
 
@@ -32,6 +32,7 @@ export const BenefitsSection = () => {
             <p className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
               WHY CHOOSE US
             </p>
+
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">Benefits</h2>
           </div>
           <div className="flex flex-1 items-start md:items-center w-full md:w-auto">
@@ -39,10 +40,11 @@ export const BenefitsSection = () => {
               <p className="text-sm sm:text-base text-gray-700 mb-1 leading-relaxed">
               By choosing us, you gain access to reliable, affordable, and sustainable energy solutions tailored to your needs. 
               Our commitment ensures a seamless experience from installation to ongoing support, empowering you to embrace a greener future with confidence. <br />
+
              <span className="text-sm sm:text-base text-gray-600">
 
                Discover how our expertise and innovative approach make renewable energy accessible and beneficial for everyone.
-               </span>
+               </p>
               </p>
             </div>
             {/* <button className="flex items-center text-gray-900 font-semibold hover:text-green-600 transition-colors whitespace-nowrap ml-0 md:ml-auto">
@@ -51,6 +53,7 @@ export const BenefitsSection = () => {
           </div>
         </div>
         
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {benefits.map((benefit, index) => (
             <div

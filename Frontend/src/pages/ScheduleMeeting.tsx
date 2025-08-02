@@ -5,8 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'react-hot-toast';
-import { auth, db } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { auth } from '@/lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -49,8 +48,17 @@ const ScheduleMeeting = () => {
         participants: formData.participants.split(',').map(email => email.trim()),
       };
 
-      const meetingRef = doc(db, 'meetings', Date.now().toString());
-      await setDoc(meetingRef, meetingData);
+      // Send meeting data to backend API (DynamoDB)
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/users'}/meetings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await user.getIdToken()}`
+        },
+        body: JSON.stringify(meetingData)
+      });
+
+      if (!response.ok) throw new Error('Failed to schedule meeting');
       
       toast.success('Meeting scheduled successfully!');
       navigate('/meetings');

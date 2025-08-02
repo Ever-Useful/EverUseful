@@ -14,7 +14,6 @@ import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Gi
 import { auth, handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "@/lib/firebase";
 import { sendEmailVerification, RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail } from "firebase/auth";
 import { userService } from '@/services/userService';
-import { firestoreService } from '@/services/firestoreService';
 import Logo from '../assets/Logo/Logo Side.png'
 
 // Extend the Window interface to include confirmationResult
@@ -149,16 +148,10 @@ const SignIn = () => {
         }
       }
 
-      // Save backend customUserId in Firestore
+      // User data is now saved in DynamoDB via backend
       const user = auth.currentUser;
       if (user && backendUser) {
-        await firestoreService.setCurrentUserData({
-          customUserId: backendUser.customUserId,
-          name: user.displayName || null,
-          email: user.email || null,
-          userType: backendUser.auth?.userType || userType, // Use the actual userType from backend
-          createdAt: user.metadata?.creationTime || new Date().toISOString(),
-        });
+        // User profile is now directly saved in DynamoDB via backend
       }
 
       // Set localStorage to indicate user is logged in

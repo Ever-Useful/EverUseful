@@ -1,3 +1,4 @@
+
 export const StatsSection = () => {
   return (
     <section className="relative overflow-hidden py-6 sm:py-8 lg:py-12 xl:py-20 bg-gradient-to-br from-emerald-900 via-teal-800 to-green-900">
@@ -7,6 +8,7 @@ export const StatsSection = () => {
         <div className="absolute bottom-6 right-4 w-20 h-20 sm:w-48 sm:h-48 bg-emerald-400 rounded-full blur-2xl"></div>
         <div className="absolute top-1/2 left-1/3 w-10 h-10 sm:w-24 sm:h-24 bg-teal-400 rounded-full blur-lg"></div>
       </div>
+
 
       {/* Sustainable landscape background image */}
       <div className="absolute left-0 top-0 w-full sm:w-1/2 h-40 sm:h-48 md:h-full">
@@ -18,6 +20,7 @@ export const StatsSection = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent to-emerald-900/70 rounded-none sm:rounded-r-3xl"></div>
       </div>
 
+
       {/* Overlay card - hidden on mobile, visible on sm and up */}
       <div className="hidden sm:block absolute left-1/2 -translate-x-1/2 bottom-3 sm:left-8 sm:translate-x-0 sm:bottom-8 bg-white/95 backdrop-blur-sm text-gray-900 p-3 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl w-11/12 max-w-xs sm:max-w-sm shadow-2xl">
         <h3 className="text-sm sm:text-lg lg:text-2xl font-bold mb-1 sm:mb-3 lg:mb-4 text-emerald-800 text-center sm:text-left">
@@ -27,6 +30,7 @@ export const StatsSection = () => {
           Worldwide communities embracing sustainability
         </p>
       </div>
+
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row justify-end">
@@ -42,6 +46,7 @@ export const StatsSection = () => {
                 Transforming communities across continents through innovative eco-friendly technologies. Our comprehensive sustainable project solutions are creating lasting environmental impact globally.
               </p>
             </div>
+
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
               <div className="bg-white/15 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 text-center sm:text-right border border-white/20">

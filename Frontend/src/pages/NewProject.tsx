@@ -5,8 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
-import { auth, db } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { auth } from '@/lib/firebase';
 import { useNavigate } from 'react-router-dom';
 
 const NewProject = () => {
@@ -39,8 +38,17 @@ const NewProject = () => {
         collaborators: [],
       };
 
-      const projectRef = doc(db, 'projects', Date.now().toString());
-      await setDoc(projectRef, projectData);
+      // Send project data to backend API (DynamoDB)
+      const response = await fetch(`${import.meta.env.VITE_MARKETPLACE_API_URL || 'http://localhost:3000/api/marketplace'}/projects`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await user.getIdToken()}`
+        },
+        body: JSON.stringify(projectData)
+      });
+
+      if (!response.ok) throw new Error('Failed to create project');
       
       toast.success('Project created successfully!');
       navigate('/projects');

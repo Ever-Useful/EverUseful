@@ -67,8 +67,8 @@ export const ProjectsSection = () => {
   const [canScrollRight, setCanScrollRight] = useState(true);
 
   const toggleWishlist = (projectId: number) => {
-    setWishlist(prev =>
-      prev.includes(projectId)
+    setWishlist(prev => 
+      prev.includes(projectId) 
         ? prev.filter(id => id !== projectId)
         : [...prev, projectId]
     );
@@ -76,15 +76,12 @@ export const ProjectsSection = () => {
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      // Scroll amount is smaller on mobile for better UX
-      const scrollAmount =
-        window.innerWidth < 640 ? 220 : window.innerWidth < 1024 ? 320 : 400;
+      const scrollAmount = 400;
       const currentScroll = scrollContainerRef.current.scrollLeft;
-      const newScroll =
-        direction === 'left'
-          ? currentScroll - scrollAmount
-          : currentScroll + scrollAmount;
-
+      const newScroll = direction === 'left' 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+      
       scrollContainerRef.current.scrollTo({
         left: newScroll,
         behavior: 'smooth'
@@ -100,17 +97,16 @@ export const ProjectsSection = () => {
     }
   };
 
-  // Hide scroll buttons on small screens (mobile)
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
-
   return (
+
     <section className="py-6 sm:py-8 md:py-10 lg:py-12 bg-gradient-to-br from-stone-50 via-yellow-50 to-green-50">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-16">
           <div>
-            <p className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 sm:mb-4">
+            <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
               SOLUTION CATEGORIES
             </p>
+
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
               Sustainable Project Types
             </h2>
@@ -121,32 +117,35 @@ export const ProjectsSection = () => {
             </p>
           </div>
         </div>
-
+        
         {/* Sliding Projects Container */}
         <div className="relative">
-          {/* Navigation Buttons (hide on mobile) */}
-          {!isMobile && canScrollLeft && (
+          {/* Navigation Buttons */}
+          {canScrollLeft && (
             <button
               onClick={() => scroll('left')}
-              className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 sm:p-3 transition-all hover:scale-110"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all hover:scale-110"
             >
+
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-600" />
             </button>
           )}
-
-          {!isMobile && canScrollRight && (
+          
+          {canScrollRight && (
             <button
               onClick={() => scroll('right')}
-              className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 sm:p-3 transition-all hover:scale-110"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all hover:scale-110"
             >
+
               <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-600" />
             </button>
           )}
-
+          
           {/* Projects Slider */}
-          <div
+          <div 
             ref={scrollContainerRef}
             onScroll={handleScroll}
+
             className="flex space-x-3 sm:space-x-4 lg:space-x-6 overflow-x-auto scrollbar-hide pb-3 sm:pb-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
@@ -199,9 +198,23 @@ export const ProjectsSection = () => {
                           {wishlist.includes(project.id) ? "Saved" : "Save"}
                         </Button>
                       </div>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="text-white border-white hover:bg-white hover:text-emerald-600 text-xs"
+                        onClick={() => toggleWishlist(project.id)}
+                      >
+                        {wishlist.includes(project.id) ? (
+                          <Heart className="w-3 h-3 fill-current mr-1" />
+                        ) : (
+                          <Plus className="w-3 h-3 mr-1" />
+                        )}
+                        {wishlist.includes(project.id) ? "Saved" : "Save"}
+                      </Button>
                     </div>
                   </div>
                 </div>
+
 
                 {/* Category badge */}
                 <div className="absolute top-2 left-2 sm:top-3 sm:left-3 lg:top-4 lg:left-4">
@@ -213,8 +226,9 @@ export const ProjectsSection = () => {
             ))}
           </div>
         </div>
-
+        
         {/* Call to action */}
+
         <div className="text-center mt-8 sm:mt-10 md:mt-14 lg:mt-16">
           <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2 sm:mb-4">
             Ready to Contribute Your Ideas?

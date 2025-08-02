@@ -1,7 +1,11 @@
+
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import upcomigImg from "@/assets/images/sustainable-hero.jpg";
+
+// Import assets correctly
+import sustainableVideo from "@/assets/videos/Sustainable.mp4";
+import sustainableHeroImage from "@/assets/images/sustainable-hero.jpg";
 
 export const Hero = () => {
   const [showVideo, setShowVideo] = useState(false);
@@ -11,30 +15,33 @@ export const Hero = () => {
   };
 
   return (
+
     <section className="min-h-[80vh] sm:min-h-[85vh] md:min-h-[90vh] bg-gradient-to-br from-stone-100 via-yellow-50 to-green-100 relative overflow-hidden">
       {/* Background sustainable energy image or video */}
-      <div className="absolute right-0 top-0 h-full w-1/2 opacity-90 hidden md:block">
+      <div className="absolute right-0 top-0 h-full w-full md:w-1/2 opacity-90">
         {showVideo ? (
           <video
-            src="main.mp4"
-            className="h-full w-full object-cover"
+            src={sustainableVideo}
+            className="h-full min-w-full object-cover"
             controls
             autoPlay
             muted
           >
+
             <source src="main.mp4" type="video/mp4" />
             Your browser does not support the video lala tag.
           </video>
         ) : (
           <img
-            src={upcomigImg}
+            src={sustainableHeroImage}
             alt="Sustainable development and green innovation"
-            className="h-full w-full object-cover rounded-bl-3xl"
+            className="h-full w-full object-cover"
           />
         )}
       </div>
 
       {/* Main content */}
+
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col md:flex-row items-center min-h-[80vh] sm:min-h-[85vh] md:min-h-[90vh]">
         <div className="w-full md:w-1/2 space-y-4 sm:space-y-6 text-center md:text-left">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight">
@@ -44,6 +51,7 @@ export const Hero = () => {
             </span>
             Solutions
           </h1>
+
 
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-md mx-auto md:mx-0 leading-relaxed">
             Join professors and students worldwide in building revolutionary eco-friendly solutions. Contribute your innovative project ideas for a sustainable future.
@@ -63,19 +71,21 @@ export const Hero = () => {
         <div className="w-full mt-6 sm:mt-8 md:hidden">
           {showVideo ? (
             <video
+
               src="Sustainable.mp4"
               className="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg shadow-lg"
               controls
               autoPlay
               muted
             >
-              <source src="Sustainable.mp4" type="video/mp4" />
+              <source src={sustainableVideo} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           ) : (
             <img
-              src={upcomigImg}
+              src={sustainableHeroImage}
               alt="Sustainable development and green innovation"
+
               className="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg shadow-lg"
             />
           )}

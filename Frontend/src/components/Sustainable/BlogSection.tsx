@@ -102,6 +102,7 @@ export const BlogSection = () => {
   };
 
   return (
+
     <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-stone-50 via-green-25 to-emerald-25">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 sm:mb-12 lg:mb-16 gap-4 md:gap-0">
@@ -119,6 +120,7 @@ export const BlogSection = () => {
           
           <button 
             onClick={handleViewMore}
+
             className="flex items-center text-gray-900 font-semibold hover:text-green-600 transition-colors group mt-4 md:mt-0"
           >
             View More 
@@ -155,6 +157,7 @@ export const BlogSection = () => {
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {articles.map((article) => (
+
               <div key={article.id} className="flex-shrink-0 w-72 sm:w-80 md:w-96 bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
                 <div className="relative overflow-hidden">
                   <img 

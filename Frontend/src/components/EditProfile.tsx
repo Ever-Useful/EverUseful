@@ -97,6 +97,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     portfolio: '',
     hourlyRate: '',
     avgResponseTime: '',
+    dateOfBirth: '',
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -174,7 +175,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           userType: normalizeUserType(userProfile.auth?.userType || userProfile.profile?.userType),
           username: userProfile.auth?.username || userProfile.profile?.username || '',
           email: userProfile.auth?.email || userProfile.profile?.email || '',
-          mobile: userProfile.auth?.mobile || userProfile.auth?.phoneNumber || userProfile.profile?.mobile || '',
+          mobile: userProfile.auth?.mobile || userProfile.auth?.phoneNumber || userProfile.profile?.mobile || userProfile.profile?.phoneNumber || '',
           gender: userProfile.auth?.gender || userProfile.profile?.gender || '',
           domain: userProfile.auth?.domain || userProfile.profile?.domain || '',
           startYear: userProfile.studentData?.startYear || '',
@@ -190,10 +191,24 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           portfolio: userProfile.freelancerData?.portfolio || '',
           hourlyRate: userProfile.freelancerData?.hourlyRate || '',
           avgResponseTime: userProfile.freelancerData?.avgResponseTime || '',
+          dateOfBirth: userProfile.profile?.dateOfBirth || '',
         });
         setEducationList(userProfile.education || []);
         setWorkList(userProfile.workExperience || []);
-        setSkills(((userProfile as any).skills && Array.isArray((userProfile as any).skills)) ? (userProfile as any).skills : (userProfile.freelancerData?.skills && Array.isArray(userProfile.freelancerData.skills) ? userProfile.freelancerData.skills : []));
+        
+        // Handle skills - convert objects to strings if needed
+        const skillsData = (userProfile as any).skills || (userProfile.freelancerData?.skills) || [];
+        if (Array.isArray(skillsData)) {
+          const skillStrings = skillsData.map(skill => {
+            if (typeof skill === 'string') return skill;
+            if (skill && typeof skill === 'object' && skill.name) return skill.name;
+            return String(skill);
+          });
+          setSkills(skillStrings);
+        } else {
+          setSkills([]);
+        }
+        
         setPersonalDetails(userProfile.personalDetails || {
           address1: '', address2: '', landmark: '', pincode: '', location: '', hobbies: '', copyCurrent: false
         });
@@ -216,12 +231,17 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     toast.loading('Saving...');
     try {
       if (activeSection === 'Basic Details') {
-        // Update auth info (Firestore fields)
+        // Update auth info (backend fields)
         await userService.updateAuthInfo({
           firstName: profileData.firstName,
           lastName: profileData.lastName,
           userType: denormalizeUserType(profileData.userType),
           phoneNumber: profileData.mobile,
+        });
+        
+        // Also update profile with mobile field
+        await userService.updateProfile({
+          mobile: profileData.mobile,
         });
         
         // Update profile info (userData.json fields)
@@ -231,6 +251,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           purpose: profileData.purpose,
           role: profileData.role,
           location: profileData.location,
+          dateOfBirth: profileData.dateOfBirth,
         });
         
         // Update student data if user is a student
@@ -592,6 +613,16 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         ))}
                       </div>
                     </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Date of Birth</label>
+                      <Input 
+                        name="dateOfBirth" 
+                        type="date" 
+                        value={profileData.dateOfBirth ?? ''} 
+                        onChange={handleInputChange} 
+                        className="mt-1" 
+                      />
+                    </div>
                   </div>
                   {/* User Type */}
                   <div>
@@ -768,8 +799,8 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                           <div className="text-gray-500 text-center py-4">No skills added yet. Add some skills to showcase your expertise!</div>
                         ) : (
                           <div className="flex flex-wrap gap-2">
-                              {skills.map(skill => (
-                                  <div key={skill} className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                              {skills.map((skill, index) => (
+                                  <div key={`${skill}-${index}`} className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
                                       <span>{skill}</span>
                                       <button onClick={() => handleRemoveSkill(skill)} className="ml-2 text-blue-600 hover:text-blue-800 transition-colors">
                                           <X className="w-4 h-4" />
