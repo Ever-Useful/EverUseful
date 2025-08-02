@@ -45,7 +45,7 @@ const About = () => {
       <ComparisonSection />
       <TeamSection />
       {/* <UpcomingPhaseSection /> */}
-      <EventsSection />
+      {/* <EventsSection /> */}
         <FAQSection /> 
       {/* <TestimonialsSection />  */}
        <CTASection />

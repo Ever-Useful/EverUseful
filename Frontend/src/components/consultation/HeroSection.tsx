@@ -3,12 +3,21 @@ import { ArrowRight, Leaf, Users, Zap } from "lucide-react";
 import heroImage from "@/assets/images/image.png";
 import studentsImage from "@/assets/images/students-renewable.jpeg";
 import professorsImage from "@/assets/images/professors-consulting.jpg";
+import { useNavigate } from "react-router-dom";
+
 interface HeroSectionProps {
   onBookConsultation: () => void;
 }
+
 export const HeroSection = ({
   onBookConsultation
 }: HeroSectionProps) => {
+  const navigate = useNavigate();
+
+  const handleLearnMore = () => {
+    navigate('/aboutus');
+  };
+
   return <section className="min-h-screen galaxy-bg py-20 px-4 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -48,7 +57,12 @@ export const HeroSection = ({
                 Book Free Consultation
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button variant="outline" size="lg" className="border-eco-green text-eco-green hover:bg-eco-green hover:text-background transition-all duration-300">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-eco-green text-eco-green hover:bg-eco-green hover:text-background transition-all duration-300"
+                onClick={handleLearnMore}
+              >
                 Learn More
               </Button>
             </div>
