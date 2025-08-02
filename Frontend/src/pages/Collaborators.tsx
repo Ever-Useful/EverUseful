@@ -4,9 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
-import { auth, db } from '@/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-
+import { auth } from '@/lib/firebase';
 
 interface User {
   id: string;
@@ -28,16 +26,23 @@ const Collaborators = () => {
 
   const fetchUsers = async () => {
     try {
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('type', 'in', ['student', 'professor']));
-      const querySnapshot = await getDocs(q);
+      // Fetch users from backend API (DynamoDB)
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/users'}/all`);
+      if (!response.ok) throw new Error('Failed to fetch users');
+      const data = await response.json();
       
-      const usersData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as User[];
+      // Filter users by type (student, professor) and transform data
+      const filteredUsers = data.users
+        .filter((user: any) => ['student', 'professor'].includes(user.profile?.userType))
+        .map((user: any) => ({
+          id: user.customUserId,
+          name: `${user.profile?.firstName || ''} ${user.profile?.lastName || ''}`.trim() || 'Anonymous',
+          title: user.profile?.title || 'Member',
+          avatar: user.profile?.avatar || '/default-avatar.png',
+          skills: user.profile?.skills || []
+        }));
 
-      setUsers(usersData);
+      setUsers(filteredUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to load users');
@@ -54,7 +59,18 @@ const Collaborators = () => {
     }
 
     try {
-      // await incrementFollowing(currentUser.uid);
+      // Send connection request to backend
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/users'}/follow`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await currentUser.getIdToken()}`
+        },
+        body: JSON.stringify({ targetUserId: userId })
+      });
+
+      if (!response.ok) throw new Error('Failed to send connection request');
+      
       toast.success('Connection request sent!');
     } catch (error) {
       console.error('Error connecting with user:', error);

@@ -299,7 +299,7 @@
         "website": "https://github.com/amitkumar",
         "title": "Full-Stack Developer",
         "createdAt": "2025-06-19T21:16:02.064Z",
-        "updatedAt": "2025-06-28T22:38:00.935Z",
+        "updatedAt": "2025-07-30T15:14:09.390Z",
         "firstName": "freelancer hai",
         "lastName": "sayad",
         "userType": "freelancer",
@@ -419,6 +419,61 @@
       },
       "activities": {
         "recent": [
+          {
+            "id": "1753888449394",
+            "type": "profile_updated",
+            "description": "Updated profile information",
+            "timestamp": "2025-07-30T15:14:09.394Z",
+            "metadata": {
+              "updatedFields": [
+                "gender",
+                "domain",
+                "purpose",
+                "role",
+                "location"
+              ],
+              "oldValues": {
+                "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+                "bio": "Full-stack developer with expertise in Python, frontend, and backend technologies. Passionate about building scalable applications and contributing to open-source projects. Always eager to take on new challenges.",
+                "location": "Jammu, Jammu & Kashmir",
+                "website": "https://github.com/amitkumar",
+                "title": "Full-Stack Developer",
+                "createdAt": "2025-06-19T21:16:02.064Z",
+                "updatedAt": "2025-06-28T22:38:00.935Z",
+                "firstName": "freelancer hai",
+                "lastName": "sayad",
+                "userType": "freelancer",
+                "username": "amitkumar",
+                "email": "amit@example.com",
+                "mobile": "9876543212",
+                "gender": "Male",
+                "domain": "Engineering",
+                "purpose": "To find a Job",
+                "role": "Full Stack Developer",
+                "phoneNumber": "9876543212"
+              },
+              "newValues": {
+                "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+                "bio": "Full-stack developer with expertise in Python, frontend, and backend technologies. Passionate about building scalable applications and contributing to open-source projects. Always eager to take on new challenges.",
+                "location": "Jammu, Jammu & Kashmir",
+                "website": "https://github.com/amitkumar",
+                "title": "Full-Stack Developer",
+                "createdAt": "2025-06-19T21:16:02.064Z",
+                "updatedAt": "2025-07-30T15:14:09.390Z",
+                "firstName": "freelancer hai",
+                "lastName": "sayad",
+                "userType": "freelancer",
+                "username": "amitkumar",
+                "email": "amit@example.com",
+                "mobile": "9876543212",
+                "gender": "Male",
+                "domain": "Engineering",
+                "purpose": "To find a Job",
+                "role": "Full Stack Developer",
+                "phoneNumber": "9876543212"
+              }
+            }
+          },
           {
             "id": "1751150280939",
             "type": "profile_updated",
@@ -579,7 +634,7 @@
         "experience": "2",
         "portfolio": "https://amitkumar.dev",
         "skills": "Python, React, Node.js, MongoDB",
-        "updatedAt": "2025-06-27T21:11:43.802Z",
+        "updatedAt": "2025-07-30T15:14:11.646Z",
         "location": "Jammu, Jammu & Kashmir",
         "hourlyRate": "20",
         "avgResponseTime": "5"
@@ -1906,11 +1961,121 @@
         "avgResponseTime": "",
         "updatedAt": "2025-07-28T19:44:57.505Z"
       }
+    },
+    "USER_000016": {
+      "firebaseUid": "GpVRSLFuL4gYSqcSaUfjgRTpMAm2",
+      "customUserId": "USER_000016",
+      "profile": {
+        "avatar": null,
+        "bio": null,
+        "location": null,
+        "website": null,
+        "title": null,
+        "createdAt": "2025-07-30T18:03:22.723Z",
+        "updatedAt": "2025-07-30T18:03:22.724Z",
+        "firstName": "Amrit",
+        "lastName": "Lal Paswan",
+        "userType": "student",
+        "username": "",
+        "email": "amritemperor123@gmail.com",
+        "mobile": "",
+        "gender": "",
+        "domain": "",
+        "purpose": "",
+        "role": ""
+      },
+      "education": [],
+      "workExperience": [],
+      "personalDetails": {
+        "address1": "",
+        "address2": "",
+        "landmark": "",
+        "pincode": "",
+        "location": "",
+        "hobbies": "",
+        "copyCurrent": false,
+        "updatedAt": "2025-07-30T18:03:22.724Z"
+      },
+      "socialLinks": {
+        "linkedin": "",
+        "facebook": "",
+        "instagram": "",
+        "twitter": "",
+        "git": "",
+        "medium": "",
+        "reddit": "",
+        "slack": "",
+        "dribbble": "",
+        "behance": "",
+        "codepen": "",
+        "figma": "",
+        "custom": "",
+        "updatedAt": "2025-07-30T18:03:22.724Z"
+      },
+      "projects": {
+        "created": [],
+        "collaborated": [],
+        "favorites": [],
+        "count": 0
+      },
+      "marketplace": {
+        "cart": [],
+        "orders": [],
+        "favorites": [],
+        "reviews": [],
+        "wishlist": []
+      },
+      "skills": [],
+      "social": {
+        "followers": [],
+        "following": [],
+        "connections": [],
+        "followersCount": 0,
+        "followingCount": 0
+      },
+      "activities": {
+        "recent": [],
+        "achievements": [],
+        "badges": [],
+        "points": 0
+      },
+      "preferences": {
+        "notifications": {
+          "email": null,
+          "push": null,
+          "sms": null
+        },
+        "privacy": {
+          "profileVisibility": null,
+          "showEmail": null,
+          "showLocation": null
+        },
+        "theme": null,
+        "language": null
+      },
+      "stats": {
+        "projectsCount": 0,
+        "totalLikes": 0,
+        "totalViews": 0,
+        "totalDownloads": 0,
+        "memberSince": "2025-07-30T18:03:22.724Z"
+      },
+      "studentData": null,
+      "professorData": null,
+      "freelancerData": {
+        "experience": "",
+        "portfolio": "",
+        "location": "",
+        "skills": [],
+        "hourlyRate": "",
+        "avgResponseTime": "",
+        "updatedAt": "2025-07-30T18:03:22.724Z"
+      }
     }
   },
-  "userCounter": 14,
+  "userCounter": 16,
   "metadata": {
-    "lastUpdated": "2025-07-28T19:44:57.505Z",
+    "lastUpdated": "2025-07-30T18:03:22.724Z",
     "version": "1.0.0",
     "description": "User data storage with custom user IDs"
   }

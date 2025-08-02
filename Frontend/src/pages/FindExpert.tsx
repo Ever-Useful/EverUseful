@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Footer } from '../components/Footer';
-import { Header } from '../components/Header';
+import Header from '../components/Header';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowUpDown } from 'lucide-react';
 import noUserProfile from '../assets/images/no user profile.png';
