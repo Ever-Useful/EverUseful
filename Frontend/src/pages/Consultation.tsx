@@ -5,7 +5,7 @@ import { ConsultationForm } from "@/components/consultation/ConsultationForm";
 import { BenefitsSection } from "@/components/consultation/BenefitsSection";
 import { NewsletterSection } from "@/components/consultation/NewsletterSection";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 
 const Consultation = () => {
   const [isConsultationFormOpen, setIsConsultationFormOpen] = useState(false);
