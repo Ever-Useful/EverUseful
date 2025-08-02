@@ -1,8 +1,13 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, X, Star, Zap } from "lucide-react";
+import { Check, X, Star, Zap, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useRef } from "react";
 
 const ComparisonSection = () => {
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [isAmoghExpanded, setIsAmoghExpanded] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const amoghFeatures = [
     "Unified platform for students, PhDs, professors, and businesses",
     "End-to-end innovation lifecycle management",
@@ -55,6 +60,18 @@ const ComparisonSection = () => {
     }
   ];
 
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="py-16 px-2 sm:px-4 lg:px-6 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
       {/* Animated background elements */}
@@ -74,7 +91,7 @@ const ComparisonSection = () => {
         </div>
         
         <div className="space-y-8 lg:space-y-0">
-          {/* Amogh Platform - Enhanced with animations */}
+          {/* Amogh Platform - Enhanced with mobile interactivity */}
           <div className="mb-8 lg:mb-12 group">
             <Card className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white shadow-2xl hover:shadow-3xl border-0 relative overflow-hidden mx-auto max-w-5xl transform hover:scale-105 transition-all duration-500">
               {/* Animated background effects */}
@@ -87,11 +104,11 @@ const ComparisonSection = () => {
                 </div>
               </div>
               
-              <CardContent className="p-8 md:p-12 relative z-10">
-                <div className="text-center mb-8 md:mb-12">
+              <CardContent className="p-6 md:p-8 lg:p-12 relative z-10">
+                <div className="text-center mb-6 md:mb-8 lg:mb-12">
                   <div className="flex justify-center items-center gap-3 mb-4">
                     <Star className="w-8 h-8 text-yellow-400 animate-pulse" />
-                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                    <h3 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                       AMOGH Platform
                     </h3>
                     <Star className="w-8 h-8 text-yellow-400 animate-pulse" />
@@ -99,20 +116,80 @@ const ComparisonSection = () => {
                   <div className="w-full h-3 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 rounded-full shadow-lg"></div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                  {amoghFeatures.map((feature, index) => (
+                {/* Mobile: Show first 2 features by default, rest in expandable section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
+                  {/* Always visible features (first 2) */}
+                  {amoghFeatures.slice(0, 2).map((feature, index) => (
                     <div 
                       key={index} 
-                      className="flex items-start gap-4 p-4 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transform hover:scale-105 transition-all duration-300 border border-white/20"
+                      className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transform hover:scale-105 transition-all duration-300 border border-white/20"
                       style={{ 
                         animationDelay: `${index * 0.1}s`,
                         animation: 'fadeInUp 0.6s ease-out forwards'
                       }}
                     >
-                      <div className="bg-green-400 rounded-full p-1 shadow-lg">
-                        <Check className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                      <div className="bg-green-400 rounded-full p-1 shadow-lg flex-shrink-0">
+                        <Check className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-white" />
                       </div>
-                      <span className="text-base md:text-lg font-semibold leading-relaxed">{feature}</span>
+                      <span className="text-sm md:text-base lg:text-lg font-semibold leading-relaxed">{feature}</span>
+                    </div>
+                  ))}
+                  
+                  {/* Expandable section for mobile */}
+                  <div className="md:hidden col-span-1">
+                    <button
+                      onClick={() => setIsAmoghExpanded(!isAmoghExpanded)}
+                      className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all duration-300 border border-white/20 text-white font-semibold"
+                    >
+                      {isAmoghExpanded ? (
+                        <>
+                          <ChevronUp className="w-4 h-4" />
+                          Show Less
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="w-4 h-4" />
+                          Show More Features ({amoghFeatures.length - 2})
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  
+                  {/* Expanded features for mobile */}
+                  {isAmoghExpanded && (
+                    <div className="md:hidden col-span-1 space-y-3">
+                      {amoghFeatures.slice(2).map((feature, index) => (
+                        <div 
+                          key={index + 2} 
+                          className="flex items-start gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transform hover:scale-105 transition-all duration-300 border border-white/20"
+                          style={{ 
+                            animationDelay: `${(index + 2) * 0.1}s`,
+                            animation: 'fadeInUp 0.6s ease-out forwards'
+                          }}
+                        >
+                          <div className="bg-green-400 rounded-full p-1 shadow-lg flex-shrink-0">
+                            <Check className="w-4 h-4 text-white" />
+                          </div>
+                          <span className="text-sm font-semibold leading-relaxed">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Desktop: Show all features */}
+                  {amoghFeatures.slice(2).map((feature, index) => (
+                    <div 
+                      key={index + 2} 
+                      className="hidden md:flex items-start gap-4 p-4 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transform hover:scale-105 transition-all duration-300 border border-white/20"
+                      style={{ 
+                        animationDelay: `${(index + 2) * 0.1}s`,
+                        animation: 'fadeInUp 0.6s ease-out forwards'
+                      }}
+                    >
+                      <div className="bg-green-400 rounded-full p-1 shadow-lg">
+                        <Check className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+                      </div>
+                      <span className="text-base lg:text-lg font-semibold leading-relaxed">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -120,50 +197,137 @@ const ComparisonSection = () => {
             </Card>
           </div>
 
-          {/* Competitors - Enhanced grid with staggered animations */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {competitors.map((competitor, index) => (
-              <Card 
-                key={index} 
-                className="bg-white/80 backdrop-blur-sm border-2 border-gray-200 shadow-lg hover:shadow-2xl hover:border-red-300 transition-all duration-500 transform hover:-translate-y-2 group"
-                style={{ 
-                  animationDelay: `${(index + 6) * 0.1}s`,
-                  animation: 'fadeInUp 0.6s ease-out forwards'
-                }}
-              >
-                <CardContent className="p-4 md:p-6">
-                  <div className="text-center mb-4">
-                    <div className="text-2xl md:text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">
-                      {competitor.icon}
-                    </div>
-                    <h3 className="font-bold text-gray-800 text-sm md:text-base mb-3 leading-tight">
-                      {competitor.name}
-                    </h3>
-                    <div className="w-full h-0.5 bg-gradient-to-r from-gray-300 to-red-300 rounded"></div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    {competitor.limitations.map((limitation, idx) => (
-                      <div 
-                        key={idx} 
-                        className="flex items-start gap-2 p-2 rounded-lg hover:bg-red-50 transition-colors duration-200"
-                        style={{ 
-                          animationDelay: `${(index * 4 + idx) * 0.05}s`,
-                          animation: 'slideInLeft 0.4s ease-out forwards'
-                        }}
-                      >
-                        <div className="bg-red-500 rounded-full p-0.5 mt-0.5">
-                          <X className="w-3 h-3 md:w-4 md:h-4 text-white" />
-                        </div>
-                        <span className="text-xs md:text-sm text-gray-700 font-medium leading-snug">
-                          {limitation}
-                        </span>
+          {/* Competitors Section - Mobile Responsive */}
+          <div className="space-y-6">
+            {/* Section Title for Mobile */}
+            <div className="text-center lg:hidden">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">Compare with Others</h3>
+              <p className="text-gray-600 text-sm">Swipe to see limitations of other platforms</p>
+            </div>
+
+            {/* Desktop Grid Layout */}
+            <div className="hidden lg:grid lg:grid-cols-4 gap-4 md:gap-6">
+              {competitors.map((competitor, index) => (
+                <Card 
+                  key={index} 
+                  className="bg-white/80 backdrop-blur-sm border-2 border-gray-200 shadow-lg hover:shadow-2xl hover:border-red-300 transition-all duration-500 transform hover:-translate-y-2 group"
+                  style={{ 
+                    animationDelay: `${(index + 6) * 0.1}s`,
+                    animation: 'fadeInUp 0.6s ease-out forwards'
+                  }}
+                >
+                  <CardContent className="p-4 md:p-6">
+                    <div className="text-center mb-4">
+                      <div className="text-2xl md:text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">
+                        {competitor.icon}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                      <h3 className="font-bold text-gray-800 text-sm md:text-base mb-3 leading-tight">
+                        {competitor.name}
+                      </h3>
+                      <div className="w-full h-0.5 bg-gradient-to-r from-gray-300 to-red-300 rounded"></div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {competitor.limitations.map((limitation, idx) => (
+                        <div 
+                          key={idx} 
+                          className="flex items-start gap-2 p-2 rounded-lg hover:bg-red-50 transition-colors duration-200"
+                          style={{ 
+                            animationDelay: `${(index * 4 + idx) * 0.05}s`,
+                            animation: 'slideInLeft 0.4s ease-out forwards'
+                          }}
+                        >
+                          <div className="bg-red-500 rounded-full p-0.5 mt-0.5">
+                            <X className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                          </div>
+                          <span className="text-xs md:text-sm text-gray-700 font-medium leading-snug">
+                            {limitation}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Mobile Scrollable Layout */}
+            <div className="lg:hidden relative">
+              {/* Scroll Navigation Buttons */}
+              <button
+                onClick={scrollLeft}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg border border-gray-200 hover:bg-white transition-all duration-200"
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              
+              <button
+                onClick={scrollRight}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg border border-gray-200 hover:bg-white transition-all duration-200"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-600" />
+              </button>
+
+              {/* Scrollable Container */}
+              <div 
+                ref={scrollContainerRef}
+                className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {competitors.map((competitor, index) => (
+                  <Card 
+                    key={index} 
+                    className="bg-white/90 backdrop-blur-sm border-2 border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 flex-shrink-0 w-72 min-w-72"
+                    style={{ 
+                      animationDelay: `${(index + 6) * 0.1}s`,
+                      animation: 'fadeInUp 0.6s ease-out forwards'
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl mb-3">
+                          {competitor.icon}
+                        </div>
+                        <h3 className="font-bold text-gray-800 text-base mb-3 leading-tight">
+                          {competitor.name}
+                        </h3>
+                        <div className="w-full h-0.5 bg-gradient-to-r from-gray-300 to-red-300 rounded"></div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {competitor.limitations.map((limitation, idx) => (
+                          <div 
+                            key={idx} 
+                            className="flex items-start gap-2 p-2 rounded-lg hover:bg-red-50 transition-colors duration-200"
+                            style={{ 
+                              animationDelay: `${(index * 4 + idx) * 0.05}s`,
+                              animation: 'slideInLeft 0.4s ease-out forwards'
+                            }}
+                          >
+                            <div className="bg-red-500 rounded-full p-0.5 mt-0.5 flex-shrink-0">
+                              <X className="w-3 h-3 text-white" />
+                            </div>
+                            <span className="text-sm text-gray-700 font-medium leading-snug">
+                              {limitation}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Scroll Indicators */}
+              <div className="flex justify-center mt-4 gap-2">
+                {competitors.map((_, index) => (
+                  <div
+                    key={index}
+                    className="w-2 h-2 rounded-full bg-gray-300 transition-all duration-200"
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -190,6 +354,15 @@ const ComparisonSection = () => {
               opacity: 1;
               transform: translateX(0);
             }
+          }
+
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
           }
         `
       }} />

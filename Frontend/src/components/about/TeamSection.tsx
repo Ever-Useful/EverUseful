@@ -3,65 +3,75 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Linkedin } from "lucide-react";
 import { useState, useEffect } from "react";
 
+// Import team member images
+import founderImage from "@/assets/images/Founder.jpg";
+import kritenshImage from "@/assets/images/Kritensh.jpg";
+import noImageAvailable from "@/assets/images/no image available.png";
+import pooja from "@/assets/images/Pooja.jpg";
+import techLead from "@/assets/images/Tech Lead.jpg";
+import rishika from "@/assets/images/Rishika.jpg";
+import amrit from "@/assets/images/Amrit.jpg";
+import navya from "@/assets/images/Navya.jpg";
+
 const TeamSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
   const founder = {
-    name: "Koos Tervooren",
-    role: "Founder & CEO",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
-    linkedin: "https://linkedin.com/in/harsh-founder",
+    name: "Harsh",
+    role: "Founder",
+    avatar: founderImage,
+    linkedin: "https://www.linkedin.com/in/harsh-parashar-0b8baa224?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BuUrPtS5UTfClY0yh1aPmvg%3D%3D",
     email: "koos@microphonemedia.nl",
     description: "Studied Journalism and History at the University of Groningen. Storytelling is his strength, podcasts are his medium. He leads Microphone Media together with Frank."
   };
 
   const teamLead = {
-    name: "Francis Garlich",
-    role: "Team Lead & CTO",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    linkedin: "https://linkedin.com/in/alex-rodriguez",
+    name: "Ankit",
+    role: "Team Lead",
+    avatar: techLead,
+    linkedin: "https://www.linkedin.com/in/ankit-kumar-451aba203?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
     email: "francis@microphonemedia.nl",
     description: "Podcast editor, studied Communication and Media at Erasmus University. Has an ear for beautiful stories and is interested in a wide range of subjects."
   };
 
   const techTeam = [
     {
-      name: "Dylan de Heer",
-      role: "Co-founder & Product Designer",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      name: "Rishika Gupta",
+      role: "Frontend Developer",
+      avatar: rishika,
       linkedin: "https://linkedin.com/in/dylan-de-heer",
       description: "Full-stack developer passionate about creating user-centered experiences and scalable solutions."
     },
     {
-      name: "Thierry Emmery",
-      role: "Co-founder & Product Designer",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80",
-      linkedin: "https://linkedin.com/in/thierry-emmery",
+      name: "Amrit Lal Paswan",
+      role: "Frontend Developer",
+      avatar: amrit,
+      linkedin: "https://www.linkedin.com/in/amrit-lal-paswan-a9363727b?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
       description: "Creative developer focused on building intuitive and beautiful user interfaces."
     },
     {
-      name: "Sasha Filipchyk",
-      role: "Product & Brand Designer",
-      avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80",
-      linkedin: "https://linkedin.com/in/sasha-filipchyk",
+      name: "Kritensh Kumar",
+      role: "Backend Developer",
+      avatar: kritenshImage,
+      linkedin: "https://www.linkedin.com/in/kritensh-kumar-79819b2a7/",
       description: "Backend specialist passionate about creating robust and scalable server solutions."
     }
   ];
 
   const managementTeam = [
     {
-      name: "Kaylee O'Brien",
+      name: "Pooja Kusum",
       role: "Marketing Director",
-      avatar: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      linkedin: "https://linkedin.com/in/kaylee-obrien",
+      avatar: pooja,
+      linkedin: "https://www.linkedin.com/in/poojakusum",
       description: "Strategic marketer connecting innovative solutions with the right audiences and driving growth."
     },
     {
-      name: "Manmay Kshirsagar",
+      name: "Navya",
       role: "Business Development",
-      avatar: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      linkedin: "https://linkedin.com/in/manmay-kshirsagar",
+      avatar: navya,
+      linkedin: "https://www.linkedin.com/in/navyaa-sambhar-b83751229?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app",
       description: "Business strategist focused on fostering partnerships and growth opportunities."
     }
   ];
@@ -122,7 +132,7 @@ const TeamSection = () => {
                   />
                 </a>
                 <div className="mt-3 flex flex-col items-center">
-                  <span className="block text-base font-semibold text-gray-200 tracking-wide">Team Lead & CTO</span>
+                  <span className="block text-base font-semibold text-gray-200 tracking-wide">Team Lead </span>
                   <a href={teamLead.linkedin} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition">
                     <Linkedin size={20} />
                     <span className="text-sm font-medium">LinkedIn</span>
