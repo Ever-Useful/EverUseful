@@ -40,7 +40,7 @@ import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
 
 import BecomeAMentor from "./pages/BecomeAMentor";
-
+//test
 
 const queryClient = new QueryClient();
 
