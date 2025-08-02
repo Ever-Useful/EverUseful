@@ -9,7 +9,7 @@ import kritenshImage from "@/assets/images/Kritensh.jpg";
 
 import pooja from "@/assets/images/pooja.jpg";
 import techLead from "@/assets/images/tech lead.jpg";
-import rishika from "@/assets/images/rishika.jpg";
+import rishika from "@/assets/images/Rishika.jpg";
 import amrit from "@/assets/images/amrit.jpg";
 import navya from "@/assets/images/navya.jpg";
 
