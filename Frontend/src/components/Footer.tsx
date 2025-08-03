@@ -118,7 +118,7 @@ export const Footer = () => {
               <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><GraduationCap className="mr-2 h-4 w-4 text-gray-500" /> Academic Partnerships</a></li>
               <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Certification Programs</a></li>
               <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><Globe className="mr-2 h-4 w-4 text-gray-500" /> Global Campus</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><MessageSquare className="mr-2 h-4 w-4 text-gray-500" /> API Integration</a></li>
+              <li><a href="/consulting/servicessection" className="hover:text-purple-400 transition-colors flex items-center"><MessageSquare className="mr-2 h-4 w-4 text-gray-500" /> API Integration</a></li>
             </ul>
           </div>
 
@@ -165,7 +165,8 @@ export const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* App Download */}
             <div className="space-y-4">
-              <h4 className="text-white font-medium text-sm">Mobile Experience</h4>
+              <h4 className="text-white font-medium text-lg">Coming Soon</h4>
+              <h3 className="text-white font-medium text-sm">Mobile Experience</h3>
               <p className="text-gray-400 text-xs max-w-xs">
                 Download our app for on-the-go learning with offline access and personalized recommendations.
               </p>

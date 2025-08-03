@@ -46,6 +46,7 @@ const services = [
 
 export const ServicesSection = () => {
   return (
+  
     <section className="py-20 px-4 lg:px-8 bg-secondary/50">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16 space-y-4">
@@ -59,25 +60,25 @@ export const ServicesSection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => {
             const IconComponent = service.icon;
             return (
               <div key={index} className="relative group">
                 <Card className="interactive-card bg-card/80 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300 h-full">
-                  <CardHeader className="text-center">
-                    <div className={`w-10 h-10 mx-auto rounded-full bg-${service.color}/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className={`h-8 w-8 text-${service.color}`} />
+                  <CardHeader className="text-center pb-4">
+                    <div className={`w-12 h-12 mx-auto rounded-full bg-${service.color}/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      <IconComponent className={`h-6 w-6 text-${service.color}`}  />
                     </div>
-                    <CardTitle className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
+                    <CardTitle className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                       {service.title}
                     </CardTitle>
                     <h3 className="text-lg font-bold text-foreground mt-2">
                       {service.heading}
                     </h3>
                   </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-muted-foreground text-center leading-relaxed">
+                 < CardContent className="pt-0">
+                    <CardDescription className="text-muted-foreground text-center leading-relaxed text-sm">
                       {service.description}
                     </CardDescription>
                   </CardContent>
@@ -86,16 +87,15 @@ export const ServicesSection = () => {
                 {/* Popup Content
                 <div className="absolute inset-0 bg-card/95 backdrop-blur-md border border-primary/40 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-105 group-hover:z-10 shadow-2xl p-6 flex flex-col justify-center">
                   <div className="text-center space-y-4">
-                    <div className={`w-20 h-20 mx-auto rounded-full bg-${service.color}/20 flex items-center justify-center`}>
-                      <IconComponent className={`h-10 w-10 text-${service.color}`} />
+                      <IconComponent className={`h-8 w-8 text-${service.color}`} />
+
                     </div>
                     <h3 className={`text-2xl font-bold text-${service.color}`}>{service.title}</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                       {service.description}
                     </p>
                     <div className="text-left">
-                      <h4 className="font-semibold text-foreground mb-2">What's Included:</h4>
-                      <div className="text-sm text-muted-foreground whitespace-pre-line">
+                     <h3 className={`text-xl font-bold text-${service.color}`}>{service.title}</h3>                      <div className="text-sm text-muted-foreground whitespace-pre-line">
                         {service.details}
                       </div>
                     </div>
