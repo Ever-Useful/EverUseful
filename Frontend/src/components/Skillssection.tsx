@@ -1,129 +1,228 @@
-import React from 'react';
-import { Code, Database, Globe, Smartphone, Palette, Wrench } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Code, Database, Globe, Smartphone, Palette, Wrench, Plus, X, Star } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
+import { auth } from '@/lib/firebase';
+// Removed Firestore imports - using DynamoDB now
+import { toast } from 'react-hot-toast';
+import { userService } from "@/services/userService";
 
 interface Skill {
   name: string;
-  level: number;
+  expertise: 'Beginner' | 'Intermediate' | 'Expert';
   category: string;
 }
-
 interface SkillCategory {
   title: string;
   icon: React.ReactNode;
-  skills: Skill[];
   color: string;
 }
 
 const SkillsSection = () => {
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState('');
+  const [showAddInput, setShowAddInput] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
   const skillCategories: SkillCategory[] = [
     {
       title: "Frontend",
-      icon: <Globe className="w-3 h-3" />,
+      icon: <Globe className="w-4 h-4" />,
       color: "from-blue-500 to-purple-600",
-      skills: [
-        { name: "React", level: 90, category: "frontend" },
-        { name: "TypeScript", level: 85, category: "frontend" },
-        { name: "Tailwind CSS", level: 95, category: "frontend" },
-        { name: "Next.js", level: 80, category: "frontend" }
-      ]
     },
     {
       title: "Backend",
-      icon: <Database className="w-3 h-3" />,
+      icon: <Database className="w-4 h-4" />,
       color: "from-green-500 to-emerald-600",
-      skills: [
-        { name: "Node.js", level: 85, category: "backend" },
-        { name: "Python", level: 80, category: "backend" },
-        { name: "PostgreSQL", level: 75, category: "backend" },
-        { name: "MongoDB", level: 70, category: "backend" }
-      ]
     },
     {
       title: "Mobile",
-      icon: <Smartphone className="w-3 h-3" />,
+      icon: <Smartphone className="w-4 h-4" />,
       color: "from-orange-500 to-red-600",
-      skills: [
-        { name: "React Native", level: 75, category: "mobile" },
-        { name: "Flutter", level: 65, category: "mobile" },
-        { name: "iOS", level: 60, category: "mobile" },
-        { name: "Android", level: 70, category: "mobile" }
-      ]
     },
     {
       title: "Tools",
-      icon: <Wrench className="w-3 h-3" />,
+      icon: <Wrench className="w-4 h-4" />,
       color: "from-purple-500 to-pink-600",
-      skills: [
-        { name: "Git", level: 90, category: "tools" },
-        { name: "Docker", level: 75, category: "tools" },
-        { name: "AWS", level: 70, category: "tools" },
-        { name: "Figma", level: 85, category: "tools" }
-      ]
+    },
+    {
+      title: "Design",
+      icon: <Palette className="w-4 h-4" />,
+      color: "from-pink-500 to-rose-600",
+    },
+    {
+      title: "Other",
+      icon: <Code className="w-4 h-4" />,
+      color: "from-gray-500 to-slate-600",
     }
   ];
 
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Check if user is authenticated first
+        const user = auth.currentUser;
+        if (!user) {
+          console.log('User not authenticated, skipping skills fetch');
+          setSkills([]);
+          return;
+        }
+        
+        // Load from backend using token-based authentication
+        const backendSkills = await userService.getUserSkills();
+        if (backendSkills && Array.isArray(backendSkills)) {
+          setSkills(backendSkills);
+        } else {
+          setSkills([]);
+        }
+      } catch (error) {
+        console.error('Failed to load skills:', error);
+        toast.error('Failed to load skills');
+        setSkills([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchSkills();
+  }, []);
+
+  const handleAddSkill = async (skillName: string) => {
+    if (!skillName.trim()) {
+      toast.error('Please enter a skill name');
+      return;
+    }
+    
+    // Check if user is authenticated
+    const user = auth.currentUser;
+    if (!user) {
+      toast.error('Please sign in to add skills');
+      return;
+    }
+    
+    try {
+      // Add to backend using token-based authentication
+      await userService.addSkill({ name: skillName });
+      
+      // Update local state
+      setSkills(prev => [...prev, skillName]);
+      toast.success('Skill added successfully!');
+    } catch (error) {
+      console.error('Failed to add skill:', error);
+      toast.error('Failed to add skill');
+    }
+  };
+
+  const handleRemoveSkill = async (skillName: string) => {
+    const user = auth.currentUser;
+    if (!user) {
+      toast.error('Please sign in to remove skills');
+      return;
+    }
+    
+    try {
+      // Remove from backend using token-based authentication
+      await userService.deleteSkill(skillName);
+      
+      // Update local state
+      setSkills(prev => prev.filter(skill => skill !== skillName));
+      toast.success('Skill removed successfully');
+    } catch (error) {
+      console.error('Failed to remove skill:', error);
+      toast.error('Failed to remove skill');
+    }
+  };
+
+  const getExpertiseColor = (expertise: string) => {
+    switch (expertise) {
+      case 'Expert':
+        return 'bg-green-100 text-green-700 border-green-200';
+      case 'Intermediate':
+        return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'Beginner':
+        return 'bg-purple-100 text-purple-700 border-purple-200';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getExpertiseIcon = (expertise: string) => {
+    switch (expertise) {
+      case 'Expert':
+        return <Star className="w-3 h-3 fill-green-500 text-green-500" />;
+      case 'Intermediate':
+        return <Star className="w-3 h-3 fill-blue-500 text-blue-500" />;
+      case 'Beginner':
+        return <Star className="w-3 h-3 fill-purple-500 text-purple-500" />;
+      default:
+        return null;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-lg border p-6 space-y-6 relative" style={{ minHeight: '180px', height: '300px' }}>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-card-foreground">Skills & Expertise</h2>
+          <Button variant="outline" size="sm" className="gap-2" disabled>
+            <Plus className="w-4 h-4" />
+            Add Skill
+          </Button>
+        </div>
+        <div className="flex items-center justify-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-card rounded-lg border p-6 space-y-6">
+    <div className="bg-card rounded-lg border p-6 space-y-6 relative" style={{ minHeight: '180px', height: '300px' }}>
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-card-foreground">Skills & Expertise</h2>
-        <Code className="w-5 h-5 text-muted-foreground" />
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAddInput((v) => !v)}>
+          <Plus className="w-4 h-4" />
+          Add Skill
+        </Button>
       </div>
-      
+      {showAddInput && (
+        <div className="flex gap-2 items-center mt-3 absolute left-0 right-0 px-6" style={{ top: 56, zIndex: 10 }}>
+          <Input
+            value={newSkill}
+            onChange={(e) => setNewSkill(e.target.value)}
+            placeholder="e.g., React, Python, UI/UX"
+            className="flex-1 min-w-[200px]"
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleAddSkill(newSkill);
+                setShowAddInput(false);
+                setNewSkill('');
+              }
+            }}
+          />
+          <Button style={{ minWidth: '70px' }} className="ml-auto" onClick={() => { handleAddSkill(newSkill); setShowAddInput(false); setNewSkill(''); }}>
+            Add
+          </Button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {skillCategories.map((category, categoryIndex) => (
-          <div 
-            key={category.title}
-            className="space-y-4 animate-fade-in"
-            style={{ animationDelay: `${categoryIndex * 100}ms` }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <div className={`p-2 rounded-lg bg-gradient-to-r ${category.color} text-white`}>
-                {category.icon}
-              </div>
-              <h3 className="font-medium text-card-foreground">{category.title}</h3>
-            </div>
-            
-            <div className="space-y-3">
-              {category.skills.map((skill, skillIndex) => (
-                <div 
-                  key={skill.name}
-                  className="group hover-scale cursor-pointer"
-                  style={{ animationDelay: `${(categoryIndex * 100) + (skillIndex * 50)}ms` }}
-                >
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium text-card-foreground group-hover:text-primary transition-colors">
-                      {skill.name}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {skill.level}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                    <div 
-                      className={`h-full bg-gradient-to-r ${category.color} rounded-full transition-all duration-700 ease-out`}
-                      style={{ 
-                        width: `${skill.level}%`,
-                        animationDelay: `${(categoryIndex * 200) + (skillIndex * 100)}ms`
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-      
-      <div className="pt-4 border-t border-border">
         <div className="flex flex-wrap gap-2">
-          <span className="text-sm text-muted-foreground">Also experienced with:</span>
-          {['GraphQL', 'Redux', 'Webpack', 'Jest', 'Cypress', 'Kubernetes'].map((tech, index) => (
-            <span 
-              key={tech}
-              className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-md hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer animate-fade-in"
-              style={{ animationDelay: `${800 + (index * 50)}ms` }}
-            >
-              {tech}
+          {skills.length === 0 && (
+            <div className="text-gray-400 text-center w-full">No skills added yet. Click "Add Skill" to get started!</div>
+          )}
+          {skills.map((skill, idx) => (
+            <span key={idx} className="inline-flex items-center bg-gray-100 text-gray-800 rounded-full px-3 py-1 text-sm font-medium">
+              {skill}
+              <button className="ml-2 text-gray-500 hover:text-red-500" onClick={() => handleRemoveSkill(skill)}>
+                <X className="w-3 h-3" />
+              </button>
             </span>
           ))}
         </div>

@@ -1,8 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, GithubAuthProvider, signInWithEmailAndPassword } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
+// Removed Firestore import - using DynamoDB now
+import { getStorage } from 'firebase/storage';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,8 +20,88 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app); // Initialize Firestore
-export const auth = getAuth(app);
-export { db }; 
+export const app = initializeApp(firebaseConfig);
+export const analytics = getAnalytics(app);
+// Removed Firestore initialization - using DynamoDB now
+export const auth =  getAuth(app);
+export const storage = getStorage(app);
+
+export const handleGoogleAuth = async (navigate: (url: string) => void, userType: string = 'student', redirectPath?: string) => {
+  try {
+    
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    const token = await userCredential.user.getIdToken();
+
+    const response = await fetch("http://localhost:3000/token", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        userType: userType // Only used for new users, existing users keep their current userType
+      })
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+    
+    // Set localStorage to indicate user is logged in
+    localStorage.setItem("isLoggedIn", "true");
+    window.dispatchEvent(new Event("storage"));
+    
+    // Use redirectPath if provided, otherwise use backend response
+    navigate(redirectPath || data.redirectUrl);
+  } catch (error) {
+    console.error("Error during Google auth:", error);
+  }
+};
+
+export const handleGithubAuth = async (navigate: (url: string) => void, userType: string = 'student', redirectPath?: string) => {
+  try {
+    
+    const provider = new GithubAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    const token = await userCredential.user.getIdToken();
+
+    const response = await fetch("http://localhost:3000/token", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        userType: userType // Only used for new users, existing users keep their current userType
+      })
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+    
+    // Set localStorage to indicate user is logged in
+    localStorage.setItem("isLoggedIn", "true");
+    window.dispatchEvent(new Event("storage"));
+    
+    // Use redirectPath if provided, otherwise use backend response
+    navigate(redirectPath || data.redirectUrl);
+  } catch (error) {
+    console.error("Error during Github auth:", error);
+  }
+};
+export const loginWithEmailPassword = async (email: string, password: string): Promise<string> => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const idTokenResult = await userCredential.user.getIdTokenResult();
+    return idTokenResult.token;
+  } catch (error: any) {
+    console.error("Error signing in with email and password:", error.code, error.message);
+    throw error;
+  }
+};
+
+export const logout = async () => {
+  return await auth.signOut();
+}

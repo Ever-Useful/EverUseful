@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import {
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import mainVideo from "@/assets/videos/promotion.mp4";
 import bgImage from "@/assets/images/howitworks.jpg";
+import { Link } from 'react-router-dom';
 
 type Step = {
   icon: LucideIcon;
@@ -26,7 +27,7 @@ const steps: Step[] = [
   {
     icon: UserPlus,
     title: "Create Profile",
-    subtitle: "Tell us who you are and what you’re looking for.",
+    subtitle: "Tell us who you are and what you're looking for.",
     iconColor: "text-blue-600",
     bgColor: "bg-blue-100",
   },
@@ -60,9 +61,27 @@ const steps: Step[] = [
   },
 ];
 
-export const HowItWorks: React.FC = () => {
+export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = false }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
+  const [playVideo, setPlayVideo] = useState(!deferVideo);
+
+  useEffect(() => {
+    if (!deferVideo) return;
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setPlayVideo(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
+    }
+    return () => observer.disconnect();
+  }, [deferVideo]);
 
   const handleMuteToggle = () => {
     setMuted((prev) => {
@@ -123,7 +142,7 @@ export const HowItWorks: React.FC = () => {
               <video
                 ref={videoRef}
                 src={mainVideo}
-                autoPlay
+                autoPlay={playVideo}
                 loop
                 muted={muted}
                 playsInline
@@ -143,22 +162,22 @@ export const HowItWorks: React.FC = () => {
               </button>
             </div>
             {/* Button below video */}
-            <div className="mt-6 sm:mt-8 flex justify-center w-full">
+            <Link to="/consulting" className="mt-6 sm:mt-8 flex justify-center w-full">
               <Button
                 size="lg"
-                className="px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg bg-white text-black hover:bg-blue-600 hover:text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out flex items-center font-semibold rounded-full"
+                className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg bg-white text-black hover:bg-blue-600 hover:text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out flex items-center font-semibold rounded-full mobile-text-base"
               >
                 consult... <ArrowRight className="ml-1 w-4 h-4" />
               </Button>
-            </div>
+            </Link>
           </div>
         </div>
 
         {/* Right: Steps/content with solid background */}
         <div className="md:w-1/2 w-full flex flex-col justify-center bg-slate-100 py-10 sm:py-16 px-4 sm:px-8">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-3 sm:mb-4 mt-0">
-            How you starts here...
-          </h2>
+          <h3 className="text-2xl md:text-4xl font-semibold text-gray-800 mb-3 sm:mb-4 mt-0 mobile-text-2xl md:mobile-text-4xl">
+            How you start here...
+          </h3>
           <ol className="space-y-5 sm:space-y-7">
             {steps.map((step, idx) => (
               <li key={idx} className="flex items-start group">
@@ -168,8 +187,8 @@ export const HowItWorks: React.FC = () => {
                   </span>
                 </span>
                 <span>
-                  <span className="text-base sm:text-lg font-semibold text-slate-800">{step.title}</span>
-                  <div className="text-sm sm:text-base text-slate-600">{step.subtitle}</div>
+                  <h5 className="text-lg font-semibold text-slate-800 mobile-text-lg">{step.title}</h5>
+                  <p className="text-base text-slate-600 mobile-text-base">{step.subtitle}</p>
                 </span>
               </li>
             ))}

@@ -1,4 +1,8 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
+import aspectRatio from "@tailwindcss/aspect-ratio";
+import lineClamp from "@tailwindcss/line-clamp";
+import scrollbarHide from "tailwind-scrollbar-hide";
 
 export default {
   darkMode: ["class"],
@@ -15,6 +19,11 @@ export default {
       padding: "2rem",
       screens: {
         "2xl": "1920px",
+        "xl": "1440px",
+        "lg": "1024px",
+        "md": "768px",
+        "sm": "640px",
+        "xs": "480px",
       },
     },
     extend: {
@@ -107,5 +116,10 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/aspect-ratio")],
+  plugins: [tailwindcssAnimate, aspectRatio, lineClamp],
+  plugins: [
+    tailwindcssAnimate,
+    aspectRatio,
+    scrollbarHide
+  ],
 } satisfies Config;

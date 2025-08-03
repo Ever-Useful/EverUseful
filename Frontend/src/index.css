@@ -1,15 +1,40 @@
-@import 'swiper/css';
-@import 'swiper/css/navigation';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-@import "slick-carousel/slick/slick.css";
-@import "slick-carousel/slick/slick-theme.css";
-
-
+/* Tailwind CSS directives - these are processed by PostCSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Custom styles using @apply */
+.btn-primary {
+  @apply bg-blue-500 text-white font-bold py-2 px-4 rounded;
+}
+
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+
 @layer base {
+   * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+     background: radial-gradient(ellipse at top, hsl(var(--eco-purple) / 0.15), transparent),
+                radial-gradient(ellipse at bottom, hsl(var(--eco-green) / 0.15), transparent),
+                radial-gradient(ellipse at left, hsl(var(--eco-blue) / 0.1), transparent),
+                hsl(var(--background));
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+     fontFamily: "'Dancing Script', 'Brush Script MT', cursive"
+     
+            
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+  }
   :root {
     --background: 240 10% 98%;
     --foreground: 220 20% 15%;
@@ -49,6 +74,30 @@
     --sidebar-accent-foreground: 220 20% 15%;
     --sidebar-border: 214 32% 85%;
     --sidebar-ring: 158 80% 60%;
+
+    /* Custom sustainability colors */
+    --eco-green: 142 76% 36%;
+    --eco-blue: 200 100% 50%;
+    --eco-purple: 260 100% 50%;
+    --eco-orange: 35 100% 50%;
+
+        /* Custom color variables for consistent usage */
+    --mint-light: #E2F4ED;
+    --mint: #B8E6CC;
+    --mint-dark: #95D5B2;
+    --olive-light: #5A6B3F;
+    --olive: #3A4325;
+    --olive-dark: #2A311B;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(200 100% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(260 100% 50%), hsl(142 76% 36%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 15% 6% / 0.9), hsl(142 76% 36% / 0.1));
+    
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(142 76% 36% / 0.3);
+    --shadow-card: 0 10px 30px -10px hsl(220 15% 6% / 0.5); 
+  
   }
 
   .dark {
@@ -89,16 +138,78 @@
     --sidebar-ring: 158 70% 55%;
   }
 }
-
-@layer base {
-  * {
-    @apply border-border;
+@layer components {
+  .galaxy-bg {
+  background: radial-gradient(ellipse at top, hsl(var(--eco-purple) / 0.2), transparent),
+     radial-gradient(ellipse at bottom, hsl(var(--eco-green) / 0.2), transparent),
+     radial-gradient(ellipse at left, hsl(var(--eco-blue) / 0.15), transparent),
+    hsl(var(--background));
   }
-
-  body {
-    @apply bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/30 text-foreground;
+  
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+  
+  .eco-gradient {
+    background: var(--gradient-primary);
+  }
+  
+  .interactive-card {
+    @apply transform transition-all duration-300 hover:scale-105 hover:shadow-[var(--shadow-glow)] cursor-pointer;
+  }
+  
+  .glow-text {
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
   }
 }
+
+
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+   background: var(--mint-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--olive);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--olive-dark);
+}
+
+/* Utility classes for consistent colors */
+.bg-mint-light { background-color: var(--mint-light); }
+.bg-mint { background-color: var(--mint); }
+.bg-mint-dark { background-color: var(--mint-dark); }
+.bg-olive-light { background-color: var(--olive-light); }
+.bg-olive { background-color: var(--olive); }
+.bg-olive-dark { background-color: var(--olive-dark); }
+
+.text-mint-light { color: var(--mint-light); }
+.text-mint { color: var(--mint); }
+.text-mint-dark { color: var(--mint-dark); }
+.text-olive-light { color: var(--olive-light); }
+.text-olive { color: var(--olive); }
+.text-olive-dark { color: var(--olive-dark); }
+
+.border-mint-light { border-color: var(--mint-light); }
+.border-mint { border-color: var(--mint); }
+.border-olive-light { border-color: var(--olive-light); }
+.border-olive {
+  border-color: var(--olive);
+}
+
+
 
 @layer utilities {
   /* Enhanced Creative Animations */
@@ -140,6 +251,20 @@
       transform: scale(1);
     }
   }
+  
+ @keyframes typing {
+    from { width: 0 }
+    to { width: 65% }
+            }
+ .animate-typing {
+     width: 0;
+     animation: typing 2s steps(8) forwards, blink 0.75s step-end infinite;
+            }
+   @keyframes blink {
+              50% { border-color: transparent }
+            }
+          
+            
   
   @keyframes gradient-shift {
     0%, 100% { 
@@ -193,6 +318,31 @@
       transform: rotate(180deg);
     }
   }
+  @keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.8,0,1,1);
+  }
+  50% {
+    transform: translateY(-20%);
+    animation-timing-function: cubic-bezier(0,0,0.2,1);
+  }
+}
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* Spin Slow Animation */
+@keyframes spin-slow {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+
 
   @keyframes orbit {
     0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
@@ -338,7 +488,36 @@
   .delay-300 { animation-delay: 300ms; }
   .delay-500 { animation-delay: 500ms; }
   .delay-1000 { animation-delay: 1000ms; }
+  
+  /* Header spacing utility */
+  .header-spacer {
+    padding-top: 3.5rem; /* 56px - matches header height h-14 */
+  }
 }
 
-@keyframes bounce-slow { 0% { transform: translateY(0); } 100% { transform: translateY(-12px); } }
-.animate-bounce-slow { animation: bounce-slow 3s infinite alternate; }
+@media (max-width: 640px) {
+  .mobile-text-xs {
+    font-size: 8px !important;
+  }
+  .mobile-text-sm {
+    font-size: 10px !important;
+  }
+  .mobile-text-base {
+    font-size: 12px !important;
+  }
+  .mobile-text-lg {
+    font-size: 13px !important;
+  }
+  .mobile-text-xl {
+    font-size: 14px !important;
+  }
+  .mobile-text-2xl {
+    font-size: 15px !important;
+  }
+  .mobile-text-3xl {
+    font-size: 16px !important;
+  }
+  .mobile-text-4xl {
+    font-size: 17px !important;
+  }
+}

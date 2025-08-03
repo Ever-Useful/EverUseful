@@ -1,0 +1,458 @@
+import { auth } from '../lib/firebase';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/users';
+const ADMIN_API_BASE_URL = import.meta.env.VITE_ADMIN_API_BASE_URL || 'http://localhost:3000/api/admin';
+
+interface UserProfile {
+  avatar: string;
+  bio: string;
+  location: string;
+  website: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  gender?: string;
+  domain?: string;
+  purpose?: string;
+  role?: string;
+  mobile?: string;
+  dateOfBirth?: string;
+}
+
+interface UserStats {
+  projectsCount: number;
+  totalLikes: number;
+  totalViews: number;
+  totalDownloads: number;
+  memberSince: string;
+  points: number;
+}
+
+interface UserData {
+  customUserId: string;
+  profile: UserProfile;
+  stats: UserStats;
+  studentData?: {
+    college: string | null;
+    degree: string | null;
+    course: string | null;
+    year: string | null;
+    updatedAt: string;
+  } | null;
+}
+
+interface Project {
+  projectId: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  imageUrl: string;
+  projectLink: string;
+  githubLink: string;
+  createdAt: string;
+  updatedAt: string;
+  likes: number;
+  views: number;
+  downloads: number;
+}
+
+interface Skill {
+  name: string;
+  category: string;
+  expertise: string;
+  addedAt: string;
+}
+
+interface CartItem {
+  productId: string;
+  addedAt: string;
+  quantity: number;
+}
+
+interface Activity {
+  id: string;
+  type: string;
+  description: string;
+  timestamp: string;
+  metadata: any;
+}
+
+class UserService {
+  private async getAuthToken(): Promise<string> {
+    const user = auth.currentUser;
+    console.log('Getting auth token, current user:', user);
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    const token = await user.getIdToken();
+    console.log('Auth token retrieved successfully');
+    return token;
+  }
+
+  private async makeRequest(endpoint: string, options: RequestInit = {}) {
+    console.log('Making request to:', endpoint);
+    const token = await this.getAuthToken();
+    console.log('Token retrieved, making fetch request');
+    
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options.headers,
+      },
+    });
+
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Request failed:', error);
+      throw new Error(error.message || 'Request failed');
+    }
+
+    return response.json();
+  }
+
+  // Create new user
+  async createUser(userData: Partial<UserProfile>): Promise<UserData> {
+    const response = await this.makeRequest('/create', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+    return response.data;
+  }
+
+  // Get user profile (returns both auth and profile info)
+  async getUserProfile(): Promise<{
+    customUserId: string;
+    auth: any;
+    profile: any;
+    stats: any;
+    studentData?: any;
+    professorData?: any;
+    freelancerData?: any;
+    education?: any[];
+    workExperience?: any[];
+    personalDetails?: any;
+    socialLinks?: any;
+  }> {
+    const response = await this.makeRequest('/profile');
+    return response.data;
+  }
+
+  // Get user by custom ID (public profile)
+  async getUserByCustomId(customUserId: string): Promise<any> {
+    const response = await this.makeRequest(`/${customUserId}`);
+    return response.data;
+  }
+
+  // Update user profile (extended info in userData.json)
+  async updateProfile(profileData: Partial<UserProfile>): Promise<UserProfile> {
+    const response = await this.makeRequest('/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+    return response.data;
+  }
+
+  // Add project
+  async addProject(projectData: Partial<Project>): Promise<Project> {
+    const response = await this.makeRequest('/projects', {
+      method: 'POST',
+      body: JSON.stringify(projectData),
+    });
+    return response.data;
+  }
+
+  // Get user projects
+  async getUserProjects(): Promise<{
+    created: Project[];
+    collaborated: Project[];
+    favorites: Project[];
+    count: number;
+  }> {
+    const response = await this.makeRequest('/projects');
+    return response.data;
+  }
+
+  // Add skill
+  async addSkill(skillData: Partial<Skill> & { customUserId?: string }): Promise<Skill> {
+    const response = await this.makeRequest('/skills', {
+      method: 'POST',
+      body: JSON.stringify(skillData),
+    });
+    return response.data;
+  }
+
+  // Remove skill
+  async deleteSkill(skillName: string): Promise<void> {
+    const response = await this.makeRequest(`/skills/${encodeURIComponent(skillName)}`, {
+      method: 'DELETE'
+    });
+    return response.skills;
+  }
+
+  // Get user skills
+  async getUserSkills(): Promise<string[]> {
+    const response = await this.makeRequest('/skills');
+    return response.skills || [];
+  }
+
+  // Debug method to check current user status
+  async debugCurrentUser(): Promise<any> {
+    const response = await this.makeRequest('/debug/current-user');
+    return response.data;
+  }
+
+  // Add to cart
+  async addToCart(customUserId: string, productData: Partial<CartItem>): Promise<CartItem[]> {
+    const response = await this.makeRequest(`/${customUserId}/cart`, {
+      method: 'POST',
+      body: JSON.stringify(productData),
+    });
+    return response.data;
+  }
+
+  // Get user cart
+  async getUserCart(): Promise<CartItem[]> {
+    const response = await this.makeRequest('/cart');
+    return response.data;
+  }
+
+  // Get user cart (by customUserId)
+  async getUserCartByCustomId(customUserId: string): Promise<CartItem[]> {
+    const response = await this.makeRequest(`/${customUserId}/cart`);
+    return response.data;
+  }
+
+  // Remove from cart
+  async removeFromCart(customUserId: string, productId: string): Promise<CartItem[]> {
+    const response = await this.makeRequest(`/${customUserId}/cart/${productId}`, {
+      method: 'DELETE',
+    });
+    return response.data;
+  }
+
+  // Clear cart
+  async clearCart(customUserId: string): Promise<void> {
+    await this.makeRequest(`/${customUserId}/cart`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Add activity
+  async addActivity(activityData: Partial<Activity>): Promise<Activity> {
+    const response = await this.makeRequest('/activities', {
+      method: 'POST',
+      body: JSON.stringify(activityData),
+    });
+    return response.data;
+  }
+
+  // Get user activities
+  async getUserActivities(): Promise<{
+    recent: Activity[];
+    achievements: any[];
+    badges: any[];
+    points: number;
+  }> {
+    const response = await this.makeRequest('/activities');
+    return response.data;
+  }
+
+  // Follow user
+  async followUser(targetUserId: string): Promise<{
+    followersCount: number;
+    followingCount: number;
+  }> {
+    const response = await this.makeRequest(`/follow/${targetUserId}`, {
+      method: 'POST',
+    });
+    return response.data;
+  }
+
+  // Get user statistics
+  async getUserStats(): Promise<UserStats> {
+    const response = await this.makeRequest('/stats');
+    return response.data;
+  }
+
+  // Get user followers/following
+  async getSocialData(type: 'followers' | 'following'): Promise<{
+    users: any[];
+    count: number;
+  }> {
+    const response = await this.makeRequest(`/social/${type}`);
+    return response.data;
+  }
+
+  // Check if user exists and create if not
+  async ensureUserExists(userData: Partial<UserProfile>): Promise<UserData> {
+    try {
+      // Try to get existing user
+      return await this.getUserProfile();
+    } catch (error) {
+      // User doesn't exist, create new user
+      return await this.createUser(userData);
+    }
+  }
+
+  // Update user auth info (backend fields)
+  async updateAuthInfo(authData: Partial<{ firstName: string; lastName: string; phoneNumber: string; userType: string }>): Promise<void> {
+    await this.makeRequest('/auth', {
+      method: 'PUT',
+      body: JSON.stringify(authData),
+    });
+  }
+
+  // Update user student data
+  async updateStudentData(studentData: Partial<{ 
+    college: string; 
+    degree: string; 
+    course: string; 
+    year: string; 
+    specialization: string;
+    startYear: string;
+    endYear: string;
+  }>): Promise<any> {
+    const response = await this.makeRequest('/student-data', {
+        method: 'PUT',
+        body: JSON.stringify(studentData),
+    });
+    return response.data;
+  }
+
+  // Education
+  async addEducation(educationData: any): Promise<any> {
+    const response = await this.makeRequest('/education', {
+      method: 'POST',
+      body: JSON.stringify(educationData),
+    });
+    return response.data;
+  }
+  async updateEducation(educationId: string, educationData: any): Promise<any> {
+    const response = await this.makeRequest(`/education/${educationId}`, {
+      method: 'PUT',
+      body: JSON.stringify(educationData),
+    });
+    return response.data;
+  }
+  async deleteEducation(educationId: string): Promise<any> {
+    const response = await this.makeRequest(`/education/${educationId}`, {
+      method: 'DELETE',
+    });
+    return response.data;
+  }
+
+  // Work Experience
+  async addWorkExperience(workData: any): Promise<any> {
+    const response = await this.makeRequest('/work-experience', {
+      method: 'POST',
+      body: JSON.stringify(workData),
+    });
+    return response.data;
+  }
+  async updateWorkExperience(workId: string, workData: any): Promise<any> {
+    const response = await this.makeRequest(`/work-experience/${workId}`, {
+      method: 'PUT',
+      body: JSON.stringify(workData),
+    });
+    return response.data;
+  }
+  async deleteWorkExperience(workId: string): Promise<any> {
+    const response = await this.makeRequest(`/work-experience/${workId}`, {
+      method: 'DELETE',
+    });
+    return response.data;
+  }
+
+  // Personal Details
+  async updatePersonalDetails(personalDetails: any): Promise<any> {
+    const response = await this.makeRequest('/personal-details', {
+      method: 'PUT',
+      body: JSON.stringify(personalDetails),
+    });
+    return response.data;
+  }
+
+  // Social Links
+  async updateSocialLinks(socialLinks: any): Promise<any> {
+    const response = await this.makeRequest('/social-links', {
+      method: 'PUT',
+      body: JSON.stringify(socialLinks),
+    });
+    return response.data;
+  }
+
+  // Professor Data
+  async updateProfessorData(professorData: any): Promise<any> {
+    const response = await this.makeRequest('/professor-data', {
+      method: 'PUT',
+      body: JSON.stringify(professorData),
+    });
+    return response.data;
+  }
+
+  // Freelancer Data
+  async updateFreelancerData(freelancerData: any): Promise<any> {
+    const response = await this.makeRequest('/freelancer-data', {
+      method: 'PUT',
+      body: JSON.stringify(freelancerData),
+    });
+    return response.data;
+  }
+
+  // Track project view
+  async trackProjectView(projectId: string): Promise<{ views: number }> {
+    const response = await this.makeRequest(`/projects/${projectId}/view`, {
+      method: 'POST'
+    });
+    return response.data;
+  }
+
+  // Get dashboard data (aggregated stats)
+  async getDashboardData(): Promise<{
+    totalViews: number;
+    totalEarnings: number;
+    projectCount: number;
+    activities: any[];
+    connections: number;
+    favourites: number;
+  }> {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    
+    const token = await user.getIdToken();
+    const response = await fetch(`http://localhost:3000/api/dashboarddata?userId=${user.uid}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch dashboard data');
+    }
+
+    return response.json();
+  }
+
+  // Admin API call to fetch admin overview stats
+  async getAdminOverview() {
+    const response = await fetch(`${ADMIN_API_BASE_URL}/overview`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch admin overview');
+    }
+    return response.json();
+  }
+}
+
+export const userService = new UserService();
+export const getAdminOverview = userService.getAdminOverview.bind(userService);
+export default userService; 

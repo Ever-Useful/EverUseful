@@ -1,0 +1,145 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const authorize = require('./authorize');
+const marketplaceRoutes = require('./routes/marketplace');
+const userRoutes = require('./routes/users');
+const userService = require('./services/userService');
+const dashboardRoutes = require('./routes/dashboard');
+const adminRoutes = require('./routes/admin');
+
+const app = express();
+
+app.use(cors({
+  origin: '*', // In production, replace with your frontend domain
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.use(express.json());
+
+// Test endpoint to check if server is running
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Backend server is running!', timestamp: new Date().toISOString() });
+});
+
+// Marketplace routes
+app.use('/api/marketplace', marketplaceRoutes);
+
+// User routes
+app.use('/api/users', userRoutes);
+
+app.use('/api', dashboardRoutes);
+app.use('/api/admin', adminRoutes);
+
+app.get('/token', authorize, async (req, res) => {
+  const { uid, name, email, phone_number, firebase } = req.user;
+
+  try {
+    if (!uid) throw new Error("Missing UID from Firebase token");
+
+    // Check if user exists in DynamoDB
+    let user = await userService.findUserByFirebaseUid(uid);
+
+    if (!user) {
+      // Create new user in DynamoDB
+      const customUserId = await userService.generateCustomUserId();
+
+      // Parse firstName and lastName from name if available
+      let firstName = null;
+      let lastName = null;
+      if (name) {
+        const nameParts = name.split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
+      }
+
+      // Create user in DynamoDB
+      await userService.createUser(uid, {
+        firstName: firstName ?? '',
+        lastName: lastName ?? '',
+        email: email ?? 'no-email@example.com',
+        userType: 'student',
+        mobile: phone_number ?? '',
+        phoneNumber: phone_number ?? '',
+      });
+
+      console.log("New user created with custom ID:", customUserId);
+    } else {
+      console.log("Existing user logged in:", email ?? uid);
+    }
+
+    return res.json({ redirectUrl: '/profile' });
+  } catch (err) {
+    console.error("Error saving user:", err.message);
+    return res.status(500).json({ error: 'Failed to save user info' });
+  }
+});
+
+app.post('/token', authorize, async (req, res) => {
+  const { uid, name, email, phone_number, firebase } = req.user;
+  const { userType, firstName, lastName, phoneNumber } = req.body;
+
+  try {
+    if (!uid) throw new Error("Missing UID from Firebase token");
+
+    // Check if user exists in DynamoDB
+    let user = await userService.findUserByFirebaseUid(uid);
+
+    if (!user) {
+      // Create new user in DynamoDB
+      const customUserId = await userService.generateCustomUserId();
+
+      // Use provided firstName/lastName or parse from name
+      let resolvedFirstName = firstName;
+      let resolvedLastName = lastName;
+      if ((!firstName || !lastName) && name) {
+        const nameParts = name.split(' ');
+        resolvedFirstName = resolvedFirstName || nameParts[0] || '';
+        resolvedLastName = resolvedLastName || nameParts.slice(1).join(' ') || '';
+      }
+
+      // Create user in DynamoDB
+      await userService.createUser(uid, {
+        firstName: resolvedFirstName ?? '',
+        lastName: resolvedLastName ?? '',
+        email: email ?? 'no-email@example.com',
+        userType: userType ?? 'student',
+        mobile: phoneNumber ?? phone_number ?? '',
+        phoneNumber: phoneNumber ?? phone_number ?? '',
+      });
+
+      console.log("New user created with custom ID:", customUserId, "userType:", userType, "firstName:", resolvedFirstName, "lastName:", resolvedLastName);
+    } else {
+      // Update existing user's profile if provided
+      const updateFields = {};
+      if (userType) updateFields.userType = userType;
+      if (firstName) updateFields.firstName = firstName;
+      if (lastName) updateFields.lastName = lastName;
+      if (phoneNumber) updateFields.phoneNumber = phoneNumber;
+      
+      if (Object.keys(updateFields).length > 0) {
+        await userService.updateUserProfile(user.customUserId, updateFields);
+        console.log("Updated user fields for existing user:", email ?? uid, updateFields);
+      } else {
+        console.log("Existing user logged in:", email ?? uid);
+      }
+    }
+
+    return res.json({ redirectUrl: '/profile' });
+  } catch (err) {
+    console.error("Error saving user:", err.message);
+    return res.status(500).json({ error: 'Failed to save user info' });
+  }
+});
+
+const port = process.env.PORT || 3000;
+const host = process.env.HOST || 'localhost';
+
+app.listen(port, host, (error) => {
+  if (error) {
+    console.log(`App Failed at port :${port}`);
+  } else {
+    console.log(`App running at http://${host}:${port}`);
+  }
+});
