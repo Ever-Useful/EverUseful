@@ -200,10 +200,10 @@ const FindExpert = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <h1 className="text-4xl font-bold mb-4 xs:mb-6 leading-tight">
+                <h1 className="text-4xl font-bold mb-4 xs:mb-6 leading-tight mobile-text-4xl">
                   Connect with <span className="text-amber-400">PhD Experts</span> for Research & Mentorship
                 </h1>
-                <p className="text-base text-indigo-100 mb-5 xs:mb-8 max-w-xl">
+                <p className="text-base text-indigo-100 mb-5 xs:mb-8 max-w-xl mobile-text-base">
                   Access specialized knowledge from verified PhD researchers and academics. Collaborate on research projects, receive expert mentorship, and accelerate your R&D initiatives with qualified doctoral experts.
                 </p>
               </motion.div>
@@ -314,8 +314,8 @@ const FindExpert = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 xs:mb-6 text-center"
         >
-                          <h2 className="text-3xl font-bold text-gray-900 mb-1 xs:mb-2">Browse Research Domains</h2>
-          <p className="text-xs xs:text-base text-gray-600">Find experts in specific academic disciplines</p>
+                                          <h2 className="text-3xl font-bold text-gray-900 mb-1 xs:mb-2 mobile-text-3xl">Browse Research Domains</h2>
+                <p className="text-xs xs:text-base text-gray-600 mobile-text-base">Find experts in specific academic disciplines</p>
         </motion.div>
         <motion.div
           className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 xs:gap-3"

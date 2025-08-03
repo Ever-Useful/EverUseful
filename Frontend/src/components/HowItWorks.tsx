@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import mainVideo from "@/assets/videos/promotion.mp4";
 import bgImage from "@/assets/images/howitworks.jpg";
+import { Link } from 'react-router-dom';
 
 type Step = {
   icon: LucideIcon;
@@ -161,14 +162,14 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
               </button>
             </div>
             {/* Button below video */}
-            <div className="mt-6 sm:mt-8 flex justify-center w-full">
+            <Link to="/consulting" className="mt-6 sm:mt-8 flex justify-center w-full">
               <Button
                 size="lg"
                 className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg bg-white text-black hover:bg-blue-600 hover:text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out flex items-center font-semibold rounded-full mobile-text-base"
               >
                 consult... <ArrowRight className="ml-1 w-4 h-4" />
               </Button>
-            </div>
+            </Link>
           </div>
         </div>
 

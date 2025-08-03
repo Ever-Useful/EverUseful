@@ -488,6 +488,11 @@ html {
   .delay-300 { animation-delay: 300ms; }
   .delay-500 { animation-delay: 500ms; }
   .delay-1000 { animation-delay: 1000ms; }
+  
+  /* Header spacing utility */
+  .header-spacer {
+    padding-top: 3.5rem; /* 56px - matches header height h-14 */
+  }
 }
 
 @media (max-width: 640px) {

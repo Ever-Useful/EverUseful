@@ -405,10 +405,10 @@ const Profile = () => {
               
               {/* Profile Info */}
               <div className="flex-1 text-white text-center md:text-left">
-                <h1 className="text-3xl md:text-4xl font-bold drop-shadow-lg mb-1.5">
+                <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5 mobile-text-4xl">
                   {getDisplayName()}
                 </h1>
-                <p className="text-lg md:text-xl text-slate-200 drop-shadow-md mb-2">
+                <p className="text-base text-slate-200 drop-shadow-md mb-2 mobile-text-base">
                   {profileData.userType}
                 </p>
                 
@@ -474,7 +474,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                     <span className="bg-purple-100 p-2 rounded-lg mr-3">
                       <GraduationCap className="w-5 h-5 text-purple-600" />
                     </span>
@@ -499,7 +499,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                     <span className="bg-blue-100 p-2 rounded-lg mr-3">
                       <BookOpen className="w-5 h-5 text-blue-600" />
                     </span>
@@ -533,7 +533,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                     <span className="bg-green-100 p-2 rounded-lg mr-3">
                       <Briefcase className="w-5 h-5 text-green-600" />
                     </span>
@@ -567,7 +567,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                     <span className="bg-green-100 p-2 rounded-lg mr-3">
                       <Briefcase className="w-5 h-5 text-green-600" />
                     </span>

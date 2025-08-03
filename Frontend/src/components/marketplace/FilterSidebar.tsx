@@ -154,7 +154,6 @@ export const FilterSidebar = ({ onFiltersChange, disableMobileDropdown = false }
       {/* Budget Range */}
       <section>
         <h3 className="flex items-center gap-2 font-semibold text-gray-400 text-sm mb-3">
-          <DollarSign className="w-4 h-4 text-gray-400" />
           Budget
         </h3>
         <Slider
@@ -167,8 +166,8 @@ export const FilterSidebar = ({ onFiltersChange, disableMobileDropdown = false }
           className="w-full"
         />
         <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>${priceRange[0]}</span>
-          <span>${priceRange[1]}</span>
+          <span>{priceRange[0]}</span>
+          <span>{priceRange[1]}</span>
         </div>
       </section>
       {/* Duration */}
@@ -327,7 +326,6 @@ export const FilterSidebar = ({ onFiltersChange, disableMobileDropdown = false }
               {/* Budget Range */}
               <section>
                 <h3 className="flex items-center gap-2 font-semibold text-gray-700 text-sm mb-3">
-                  <DollarSign className="w-4 h-4 text-blue-600" />
                   Budget
                 </h3>
                 <Slider

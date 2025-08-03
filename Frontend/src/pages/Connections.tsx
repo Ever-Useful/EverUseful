@@ -195,7 +195,7 @@ const Connections = () => {
           <div className="bg-white rounded-lg border border-gray-200">
             <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">Manage invitations</h2>
+                <h2 className="text-3xl font-semibold text-gray-900 mobile-text-3xl">Manage invitations</h2>
                 <Button variant="ghost" size="sm" className="p-1 sm:p-2">
                   <Settings className="h-4 w-4" />
                 </Button>
@@ -220,7 +220,7 @@ const Connections = () => {
         return (
           <div className="bg-white rounded-lg border border-gray-200">
             <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200">
-              <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">Find People</h2>
+              <h2 className="text-3xl font-semibold text-gray-900 mobile-text-3xl">Find People</h2>
               <div className="relative mt-3 sm:mt-4">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
