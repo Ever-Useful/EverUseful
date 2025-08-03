@@ -55,12 +55,12 @@ const CultureGallery = () => {
               />
               <div 
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ background: 'linear-gradient(to top, rgba(42, 49, 27, 0.9) 0%, rgba(58, 67, 37, 0.6) 50%, transparent 100%)' }}
+                style={{ background: 'linear-gradient(to top, rgba(42, 49, 27, 0.95) 0%, rgba(58, 67, 37, 0.7) 40%, rgba(58, 67, 37, 0.3) 70%, transparent 100%)' }}
               ></div>              
-              {/* Hover content */}
-              <div className="absolute inset-0 flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-                <h3 className="text-white text-xl font-bold mb-2">{image.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: '#E2F4ED' }}>{image.description}</p>
+              {/* Hover content - Fixed positioning */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                <h3 className="text-white text-xl font-bold mb-3 leading-tight">{image.title}</h3>
+                <p className="text-sm leading-relaxed text-white/90" style={{ color: '#E2F4ED' }}>{image.description}</p>
               </div>
             </div>
           ))}

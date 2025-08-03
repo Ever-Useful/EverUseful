@@ -565,14 +565,14 @@ const Work: React.FC = () => {
         className="relative z-10 max-w-4xl mx-auto px-4 xs:px-4 sm:px-8 py-16 xs:py-20 sm:py-24 text-center flex flex-col items-center"
       >
         <motion.h1
-          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 drop-shadow-[0_0_8px_rgba(250,89,84,0.7)] mb-4 xs:mb-6 leading-tight"
+          className="text-4xl font-bold text-gray-900 drop-shadow-[0_0_8px_rgba(250,89,84,0.7)] mb-4 xs:mb-6 leading-tight"
           variants={fadeUp}
           custom={1}
         >
           Connect with World-Class <span className="text-[#fa5954]">PhD Experts</span> for R&D and Mentorship
         </motion.h1>
         <motion.p
-          className="text-base xs:text-lg sm:text-xl text-gray-700 mb-6 xs:mb-10 max-w-xl font-medium"
+          className="text-base text-gray-700 mb-6 xs:mb-10 max-w-xl font-medium"
           variants={fadeUp}
           custom={2}
         >
@@ -616,7 +616,7 @@ const Work: React.FC = () => {
 
     {/* HIRE THE BEST SECTION */}
     <section className="w-full bg-white py-10 xs:py-16 px-2 xs:px-4 border-b border-gray-100 flex flex-col items-center justify-center text-center">
-      <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 xs:mb-6">Hire the Best Professionals</h2>
+      <h2 className="text-4xl font-extrabold text-gray-900 mb-4 xs:mb-6">Hire the Best Professionals</h2>
       <p className="text-base xs:text-lg text-gray-600 mb-6 xs:mb-8 max-w-2xl mx-auto">
         Check out professionals on <span className="font-bold text-[#fa5954]">AMOGH</span>, with the skills you need for your next job.
       </p>
@@ -633,7 +633,7 @@ const Work: React.FC = () => {
       {/* Filter Bar */}
       <div className="bg-white rounded-xl shadow-sm p-3 xs:p-4 mb-6 xs:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 xs:gap-4 w-full max-w-5xl">
         <div>
-          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+          <h2 className="text-3xl font-bold text-gray-900 mb-1">
             Freelance Research Experts
           </h2>
           <p className="text-sm xs:text-lg text-gray-600 font-medium">
@@ -742,7 +742,7 @@ const Work: React.FC = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 xs:mb-12 text-center"
         >
-          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
             Popular Skills & Expertise
           </h2>
           <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
@@ -778,7 +778,7 @@ const Work: React.FC = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 xs:mb-12 text-center"
         >
-          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
             Featured Categories
           </h2>
           <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
@@ -822,7 +822,7 @@ const Work: React.FC = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 xs:mb-12 text-center"
         >
-          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
             What Our Clients Say
           </h2>
           <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">

@@ -79,7 +79,7 @@ export const Hero = () => {
             {/* LEFT: Text + Button */}
 
             <div className="w-full lg:w-1/3 text-center lg:text-left mb-10 lg:mb-0">
-              <h1 className="text-3xl xs:text-4xl sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight">
+              <h1 className="text-4xl font-bold text-white mb-4 animate-fade-in leading-tight">
                 Connnect{" "}
 
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
@@ -185,7 +185,7 @@ export const Hero = () => {
                           </div>
                           <div>
                             <div className="font-bold text-sm">{opt.label}</div>
-                            <div className="text-xs opacity-80 max-w-0 group-hover:max-w-[200px] transition-all duration-500 ease-out overflow-hidden">
+                            <div className="text-xs opacity-80 max-w-0 group-hover:max-w-[200px] ml-0 transition-all duration-500 ease-out overflow-hidden">
                               {opt.description}
                             </div>
                           </div>
