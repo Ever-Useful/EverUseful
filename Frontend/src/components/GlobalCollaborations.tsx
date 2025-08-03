@@ -157,7 +157,7 @@ export const GlobalCollaborations: React.FC = () => {
         {/* Header with image */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-8">
           <div className="flex-1 text-left">
-            <h2 className="text-3xl font-extrabold text-slate-800 mb-2 md:mb-3 tracking-tight">
+            <h2 className="text-4xl font-extrabold text-slate-800 mb-2 md:mb-3 tracking-tight">
               Our <span className="text-cyan-500">Trusted Partners</span>
             </h2>
             <p className="text-base text-slate-600 max-w-xl">
@@ -176,48 +176,7 @@ export const GlobalCollaborations: React.FC = () => {
 
       {/* Marquee Rows */}
       <div className="space-y-6 sm:space-y-8 w-full">
-        {/* Top Row - left to right */}
-        <div className="overflow-x-auto w-full" ref={topMarqueeRef} style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
-          <div
-            className="flex w-[200vw] gap-4 sm:gap-6"
-            style={{
-              animation: 'marqueeLeft 90s linear infinite'
-            }}
-          >
-            {partnersRow.map((partner, idx) => (
-              <div
-                key={`top-${idx}-${partner.id}`}
-                className="bg-white rounded-2xl shadow-xl border border-slate-100 min-w-[170px] max-w-[170px] sm:min-w-[220px] sm:max-w-[220px] mx-1 flex flex-col items-center p-0 transition hover:shadow-2xl hover:border-cyan-400"
-                style={{
-                  boxShadow:
-                    '0 2px 16px 0 rgba(55, 151, 255, 0.07), 0 1.5px 6px 0 rgba(0,0,0,0.04)'
-                }}
-              >
-                <div className="w-full h-24 sm:h-36 rounded-t-2xl overflow-hidden">
-                  <img
-                    src={partner.imageUrl}
-                    alt={partner.name}
-                    className="w-full h-full object-cover transition-transform duration-300 scale-105 group-hover:scale-110"
-                  />
-                </div>
-                <div className="px-3 sm:px-4 py-2 sm:py-3 w-full">
-                  <h5 className="text-lg font-bold text-gray-900 mb-0.5 text-center">{partner.name}</h5>
-                  <p className="text-sm text-cyan-600 font-medium mb-0.5 text-center">{partner.tagline}</p>
-                  <p className="text-sm text-gray-500 mb-2 text-center line-clamp-2">{partner.description}</p>
-                  <div className="flex justify-center">
-                    <a
-                      href="#"
-                      className="text-cyan-700 text-base font-semibold underline hover:text-red-600 transition"
-                      tabIndex={0}
-                    >
-                      Learn More &rarr;
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        
         {/* Bottom Row - right to left */}
         <div className="overflow-x-auto w-full" ref={bottomMarqueeRef} style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
           <div
@@ -265,14 +224,14 @@ export const GlobalCollaborations: React.FC = () => {
       {/* CTA Container */}
       <div className="mt-10 sm:mt-16 w-full flex justify-center">
         <div
-          className="rounded-2xl shadow-xl px-4 sm:px-8 py-6 sm:py-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-6 sm:gap-8 w-full max-w-7xl cta-mobile-center cta-mobile-py"
+          className="rounded-2xl shadow-xl px-4 sm:px-8 py-6 sm:py-10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 w-full max-w-7xl cta-mobile-center cta-mobile-py"
           style={{
             background: 'linear-gradient(90deg, #ef4444 0%, #2563eb 80%, #0f172a 100%)'
           }}
         >
           {/* Hide this on mobile */}
           <div className="flex-1 cta-mobile-hide">
-            <h2 className="text-3xl font-bold text-white mb-2 mobile-text-3xl">Ready to Collaborate?</h2>
+            <h2 className="text-4xl font-bold text-white mb-2 mobile-text-3xl">Ready to Collaborate?</h2>
             <ul className="space-y-1 text-cyan-100 text-base mb-2 mobile-text-base">
               <li>• Access global expertise and innovation</li>
               <li>• Work with industry leaders</li>

@@ -382,8 +382,8 @@ const SignUp = () => {
               </Link>
             </div>
           </div>
-          <h1 className="text-xl xs:text-2xl lg:text-4xl font-bold text-gray-900 mb-2 lg:mb-4">Join the Innovation Network</h1>
-          <p className="text-base xs:text-lg lg:text-xl text-gray-600 mb-2 xs:mb-3 lg:mb-4">Create your account and start building the future</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2 lg:mb-4">Join the Innovation Network</h1>
+          <p className="text-base text-gray-600 mb-2 xs:mb-3 lg:mb-4">Create your account and start building the future</p>
           <div className="flex items-center justify-center space-x-2 flex-wrap gap-2">
             <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:scale-105 transition-transform text-xs lg:text-sm">
               <Star className="w-3 h-3 mr-1" />
@@ -483,7 +483,7 @@ const SignUp = () => {
               {/* Sign Up Form */}
               <Card className="backdrop-blur-xl bg-white/90 border-0 shadow-2xl animate-scale-in delay-500">
                 <CardHeader className="text-center pb-4 lg:pb-6">
-                  <CardTitle className="text-xl lg:text-2xl font-bold text-gray-900">Create Account</CardTitle>
+                  <CardTitle className="text-3xl font-bold text-gray-900">Create Account</CardTitle>
                   <CardDescription className="text-gray-600 text-sm lg:text-base">
                     Fill in your information to get started
                   </CardDescription>
@@ -786,7 +786,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Mail className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl font-bold text-gray-900">Verify Your Email</CardTitle>
+                <CardTitle className="text-3xl font-bold text-gray-900">Verify Your Email</CardTitle>
                 <CardDescription className="text-gray-600">
                   We've sent a verification code to {formData.email}
                 </CardDescription>
@@ -835,7 +835,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl font-bold text-gray-900">Setup Multi-Factor Authentication</CardTitle>
+                <CardTitle className="text-3xl font-bold text-gray-900">Setup Multi-Factor Authentication</CardTitle>
                 <CardDescription className="text-gray-600">
                   Choose your preferred authentication method for enhanced security
                 </CardDescription>
@@ -885,7 +885,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl font-bold text-gray-900">Welcome to ProjectBridge!</CardTitle>
+                <CardTitle className="text-3xl font-bold text-gray-900">Welcome to ProjectBridge!</CardTitle>
                 <CardDescription className="text-gray-600">
                   Your account has been created successfully
                 </CardDescription>

@@ -7,6 +7,25 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
+    // Handle clicking outside to close mega menu
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Element;
+            if (!target.closest('.mega-menu-container') && !target.closest('nav')) {
+                setActiveDropdown(null);
+                setActiveCategory(null);
+            }
+        };
+
+        if (activeDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [activeDropdown]);
+
     const megaMenuData = {
         Marketplace: {
             categories: [
@@ -479,7 +498,7 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
         );
     }
 
-    // DESKTOP NAVIGATION (unchanged)
+    // DESKTOP NAVIGATION
     return (
         <nav className="hidden md:flex items-center space-x-1 text-sm">
             {Object.keys(megaMenuData).map((menuKey) => {
@@ -488,20 +507,43 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
                     <div
                         key={menuKey}
                         className="relative"
-                        onMouseEnter={() => setActiveDropdown(menuKey)}
-                        onMouseLeave={() => setActiveDropdown(null)}
                     >
                         <Button
                             variant="ghost"
                             size='sm'
                             className={`relative px-6 py-2 font-medium transition-all duration-200 hover:bg-transparent hover:text-gray-900 text-gray-700 ${isOpen ? 'text-blue-700' : ''}`}
-                            onMouseEnter={() => setActiveCategory('explore')}
+                            onClick={() => {
+                                // Toggle dropdown
+                                if (activeDropdown === menuKey) {
+                                    setActiveDropdown(null);
+                                    setActiveCategory(null);
+                                } else {
+                                    setActiveDropdown(menuKey);
+                                    // Set default active category for each menu
+                                    switch (menuKey) {
+                                        case 'Marketplace':
+                                            setActiveCategory('explore');
+                                            break;
+                                        case 'Work':
+                                            setActiveCategory('freelance');
+                                            break;
+                                        case 'Services':
+                                            setActiveCategory('greenprojects');
+                                            break;
+                                        case 'Community':
+                                            setActiveCategory('aboutus');
+                                            break;
+                                        default:
+                                            setActiveCategory('explore');
+                                    }
+                                }
+                            }}
                         >
                             {menuKey}
                         </Button>
                         {isOpen && (
                             <div
-                                className="fixed left-1/2 top-14 z-50 w-[90vw] max-w-6xl p-0 border-0 shadow-none bg-transparent -translate-x-1/2 rounded-lg"
+                                className="mega-menu-container fixed left-1/2 top-14 z-50 w-[90vw] max-w-6xl p-0 border-0 shadow-none bg-transparent -translate-x-1/2 rounded-lg"
                                 style={{ pointerEvents: 'auto' }}
                             >
                                 {renderMegaMenu(menuKey as keyof typeof megaMenuData)}
