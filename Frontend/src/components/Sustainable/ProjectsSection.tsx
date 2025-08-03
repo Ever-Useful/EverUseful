@@ -216,9 +216,13 @@ export const ProjectsSection = () => {
                         </Button>
                         <Button 
                           size="sm" 
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] sm:text-xs h-6 sm:h-8 px-2 sm:px-3"
-                        >
-                          <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] sm:text-xs h-6 sm:h-8 px-2 sm:px-3"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBrowseAllProjects();
+                        }}
+                      >
+                        <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         </Button>
                       </div>
                       
