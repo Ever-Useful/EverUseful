@@ -21,6 +21,11 @@ class UserService {
     return await this.dbService.findUserByFirebaseUid(firebaseUid);
   }
 
+  // Alias for findUserByFirebaseUid (for dashboard compatibility)
+  async getUserByFirebaseUid(firebaseUid) {
+    return await this.dbService.findUserByFirebaseUid(firebaseUid);
+  }
+
   // Find user by custom user ID
   async findUserByCustomId(customUserId) {
     return await this.dbService.findUserByCustomId(customUserId);
@@ -110,6 +115,11 @@ class UserService {
   // Add to cart
   async addToCart(customUserId, productData) {
     return await this.dbService.addToCart(customUserId, productData);
+  }
+
+  // Get user cart
+  async getUserCart(customUserId) {
+    return await this.dbService.getUserCart(customUserId);
   }
 
   // Remove from cart
