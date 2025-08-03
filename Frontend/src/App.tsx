@@ -42,6 +42,7 @@ import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
 
 import BecomeAMentor from "./pages/BecomeAMentor";
+import BecomeMentor from "./pages/BecomeAMentor";
 //test
 
 const queryClient = new QueryClient();
@@ -99,6 +100,7 @@ const App = () => (
             <Route path="/sustainable" element={<Sustainable />} />
             <Route path="/connection" element={<Connections />} />
             <Route path="/studentprofile/:id" element={<StudentProfile />} />
+            <Route path="/become-mentor" element={<BecomeMentor />} />
             <Route path="/green" element={<Sustainable/>} />
             {/* Policy Routes */}
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />

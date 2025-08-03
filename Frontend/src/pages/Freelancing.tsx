@@ -565,14 +565,14 @@ const Work: React.FC = () => {
         className="relative z-10 max-w-4xl mx-auto px-4 xs:px-4 sm:px-8 py-16 xs:py-20 sm:py-24 text-center flex flex-col items-center"
       >
         <motion.h1
-          className="text-4xl font-bold text-gray-900 drop-shadow-[0_0_8px_rgba(250,89,84,0.7)] mb-4 xs:mb-6 leading-tight"
+                          className="text-4xl font-bold text-gray-900 drop-shadow-[0_0_8px_rgba(250,89,84,0.7)] mb-4 xs:mb-6 leading-tight mobile-text-4xl"
           variants={fadeUp}
           custom={1}
         >
           Connect with World-Class <span className="text-[#fa5954]">PhD Experts</span> for R&D and Mentorship
         </motion.h1>
         <motion.p
-          className="text-base text-gray-700 mb-6 xs:mb-10 max-w-xl font-medium"
+                          className="text-base text-gray-700 mb-6 xs:mb-10 max-w-xl font-medium mobile-text-base"
           variants={fadeUp}
           custom={2}
         >
@@ -616,8 +616,8 @@ const Work: React.FC = () => {
 
     {/* HIRE THE BEST SECTION */}
     <section className="w-full bg-white py-10 xs:py-16 px-2 xs:px-4 border-b border-gray-100 flex flex-col items-center justify-center text-center">
-      <h2 className="text-4xl font-extrabold text-gray-900 mb-4 xs:mb-6">Hire the Best Professionals</h2>
-      <p className="text-base xs:text-lg text-gray-600 mb-6 xs:mb-8 max-w-2xl mx-auto">
+                  <h2 className="text-4xl font-extrabold text-gray-900 mb-4 xs:mb-6 mobile-text-4xl">Hire the Best Professionals</h2>
+            <p className="text-base xs:text-lg text-gray-600 mb-6 xs:mb-8 max-w-2xl mx-auto mobile-text-base">
         Check out professionals on <span className="font-bold text-[#fa5954]">AMOGH</span>, with the skills you need for your next job.
       </p>
       <a

@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import partnersImage from '@/assets/images/team.png'; // Adjust path as needed
+import { Link } from 'react-router-dom';
 
 type Partner = {
   id: number;
@@ -157,10 +158,10 @@ export const GlobalCollaborations: React.FC = () => {
         {/* Header with image */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-8">
           <div className="flex-1 text-left">
-            <h2 className="text-4xl font-extrabold text-slate-800 mb-2 md:mb-3 tracking-tight">
+            <h2 className="text-4xl font-extrabold text-slate-800 mb-2 md:mb-3 tracking-tight mobile-text-4xl">
               Our <span className="text-cyan-500">Trusted Partners</span>
             </h2>
-            <p className="text-base text-slate-600 max-w-xl">
+            <p className="text-base text-slate-600 max-w-xl mobile-text-base">
               Partnering with global innovators to shape the future of technology and business.
             </p>
           </div>
@@ -202,9 +203,9 @@ export const GlobalCollaborations: React.FC = () => {
                   />
                 </div>
                 <div className="px-3 sm:px-4 py-2 sm:py-3 w-full">
-                  <h5 className="text-lg font-bold text-gray-900 mb-0.5 text-center">{partner.name}</h5>
-                  <p className="text-sm text-cyan-600 font-medium mb-0.5 text-center">{partner.tagline}</p>
-                  <p className="text-sm text-gray-500 mb-2 text-center line-clamp-2">{partner.description}</p>
+                  <h5 className="text-lg font-bold text-gray-900 mb-0.5 text-center mobile-text-lg">{partner.name}</h5>
+                  <p className="text-sm text-cyan-600 font-medium mb-0.5 text-center mobile-text-sm">{partner.tagline}</p>
+                  <p className="text-sm text-gray-500 mb-2 text-center line-clamp-2 mobile-text-sm">{partner.description}</p>
                   <div className="flex justify-center">
                     <a
                       href="#"
@@ -240,9 +241,9 @@ export const GlobalCollaborations: React.FC = () => {
           </div>
           {/* On mobile, only show button and one line */}
           <div className="flex-1 flex flex-col items-center">
-            <button className="px-6 sm:px-8 py-2.5 sm:py-3 bg-white text-cyan-700 font-bold text-base rounded-full shadow hover:bg-cyan-50 transition mb-2 mobile-text-base">
+            <Link to="/connect" className="px-6 sm:px-8 py-2.5 sm:py-3 bg-white text-cyan-700 font-bold text-base rounded-full shadow hover:bg-cyan-50 transition mb-2 mobile-text-base">
               Let's Collaborate
-            </button>
+            </Link>
             <p className="text-base text-cyan-50 text-center max-w-xs mobile-text-base">
               Join our network and make a global impact.
             </p>

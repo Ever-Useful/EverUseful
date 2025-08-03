@@ -24,13 +24,13 @@ export const HeroSection = ({
           {/* Left Content */}
           <div className="space-y-8 text-center lg:text-left">
             <div className="space-y-6">
-              <h1 className="text-4xl font-bold leading-tight">
+              <h1 className="text-4xl font-bold leading-tight mobile-text-4xl">
                 <span className="text-eco-green glow-text">Expert</span>{" "}
                 <span className="text-foreground">Consultation</span>{" "}
                 <span className="text-eco-blue glow-text">Services</span>
               </h1>
               
-              <p className="text-base text-muted-foreground leading-relaxed">
+              <p className="text-base text-muted-foreground leading-relaxed mobile-text-base">
                 Expert consultation for universities, students, and organizations 
                 transitioning to sustainable energy solutions. Build a greener tomorrow 
                 with our proven strategies.

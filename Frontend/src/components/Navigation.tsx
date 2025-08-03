@@ -235,7 +235,7 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
         Services: {
             categories: [
                 { id: 'greenprojects', label: 'Sustainable', href: '/sustainable' },
-                { id: 'consulting', label: 'Consulting', href: '/services/consulting' },
+                { id: 'consulting', label: 'Consulting', href: '/consulting' },
                 { id: 'review', label: 'Project Review', href: '/services/review' },
                 { id: 'impact', label: 'Impact Metrics', href: '/sustainable/impact' },
                 { id: 'agents', label: 'AI Agents', href: '/aiagents' },

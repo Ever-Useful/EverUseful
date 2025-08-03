@@ -600,8 +600,8 @@ const Dashboard = () => {
             <div className="max-w-7xl mx-auto space-y-10 pt-8">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h1 className="text-4xl font-extrabold text-gradient-emerald mb-2">Dashboard</h1>
-                  <p className="text-base text-gray-600 dark:text-gray-300">Plan, prioritize, and accomplish your tasks with ease.</p>
+                          <h1 className="text-4xl font-extrabold text-gradient-emerald mb-2 mobile-text-4xl">Dashboard</h1>
+        <p className="text-base text-gray-600 dark:text-gray-300 mobile-text-base">Plan, prioritize, and accomplish your tasks with ease.</p>
                 </div>
                 <div className="flex items-center gap-3">
                   {/* <DarkModeToggle /> */}

@@ -26,7 +26,7 @@ const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left side - Content */}
           <div>
-           <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent animate-pulse">
+           <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent animate-pulse mobile-text-4xl">
               <span
                 className="inline-block py-4 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-clip-text text-transparent font-[Dancing Script] font-extrabold"
               >
@@ -36,10 +36,10 @@ const HeroSection = () => {
             </h1>
             
 
-            <p className="text-xl text-blue-600 font-semibold mb-6 transform transition-all duration-700 hover:scale-105">
+            <p className="text-xl text-blue-600 font-semibold mb-6 transform transition-all duration-700 hover:scale-105 mobile-text-xl">
               Amogh is a curated platform where innovation meets opportunity.
             </p>
-            <p className="text-base text-gray-700 leading-relaxed">
+            <p className="text-base text-gray-700 leading-relaxed mobile-text-base">
               Amogh is a unique platform that brings together talented student innovators, passionate researchers, 
               experienced developers, and visionary investors — creating a collaborative ecosystem where bold ideas become real-world solutions.
             </p>
