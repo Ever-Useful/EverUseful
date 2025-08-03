@@ -224,8 +224,8 @@ const Profile = () => {
                 </Avatar>
               </div>
               <div className="flex-1 text-white mt-4 md:mt-0 w-full">
-                <h1 className="text-2xl sm:text-4xl font-bold drop-shadow-lg mb-1.5 text-center md:text-left">{profile.name}</h1>
-                <p className="text-lg sm:text-xl text-slate-200 drop-shadow-md text-center md:text-left">{profile.title}</p>
+                        <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5 text-center md:text-left mobile-text-4xl">{profile.name}</h1>
+        <p className="text-base text-slate-200 drop-shadow-md text-center md:text-left mobile-text-base">{profile.title}</p>
                 {/* Connect Button */}
                 <div className="flex flex-row items-center justify-center md:justify-start mt-4">
                   <div className="flex flex-col w-full max-w-xs h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
@@ -246,14 +246,14 @@ const Profile = () => {
           <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
             <CardContent className="p-3 sm:p-4 text-center">
               <Award className="w-6 h-6 mx-auto mb-2" />
-              <div className="text-lg sm:text-2xl font-bold">{profile.stats.projects}+</div>
+                                <div className="text-2xl font-bold">{profile.stats.projects}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
             <CardContent className="p-3 sm:p-4 text-center">
               <UserPlus className="w-6 h-6 mx-auto mb-2" />
-              <div className="text-lg sm:text-2xl font-bold">{profile.stats.connections}+</div>
+                                <div className="text-2xl font-bold">{profile.stats.connections}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
             </CardContent>
           </Card>
@@ -268,7 +268,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                     <span className="bg-purple-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <GraduationCap className="w-5 h-5 text-purple-600" />
                     </span>
@@ -290,7 +290,7 @@ const Profile = () => {
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                       <span className="bg-blue-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <BookOpen className="w-5 h-5 text-blue-600" />
                       </span>
@@ -318,7 +318,7 @@ const Profile = () => {
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                       <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <Briefcase className="w-5 h-5 text-green-600" />
                       </span>
@@ -344,14 +344,14 @@ const Profile = () => {
             {/* Portfolio Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
-                    <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
-                      <Briefcase className="w-5 h-5 text-green-600" />
-                    </span>
-                    Research Projects & Commercial Work
-                  </h2>
-                </div>
+                                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+                      <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
+                        <Briefcase className="w-5 h-5 text-green-600" />
+                      </span>
+                      Research Projects & Commercial Work
+                    </h2>
+                  </div>
                 <div className="space-y-3 sm:space-y-4">
                   {safePortfolioProjects.length > 0 ? (
                     safePortfolioProjects.map((project, index) => (
