@@ -100,11 +100,11 @@ export const WhatWeProvide = () => {
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 leading-tight">
+          <h2 className="mt-2 text-4xl font-bold text-gray-800 leading-tight">
             Empowering Innovation with{" "}
             <span className="text-indigo-600">Creative Technology</span>
           </h2>
-          <p className="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
+          <p className="mt-3 sm:mt-4 text-base text-gray-600 max-w-xl mx-auto leading-relaxed">
             Tools and support to bring your ideas to life — securely, creatively, efficiently.
           </p>
         </div>
@@ -163,11 +163,11 @@ export const WhatWeProvide = () => {
                   <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14 flex items-center justify-center rounded-lg sm:rounded-xl mb-3 sm:mb-3 lg:mb-4 bg-white/60">
                     <item.icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-700" />
                   </div>
-                  <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-black mb-2 sm:mb-2 leading-tight">
+                  <h3 className="text-2xl font-semibold text-white mb-2 sm:mb-2 leading-tight">
                     {item.title}
                   </h3>
                   <div
-                    className="text-xs sm:text-sm lg:text-base text-black/90 [&_ul]:pl-3 sm:[&_ul]:pl-4 lg:[&_ul]:pl-5 [&_ul]:mt-1 sm:[&_ul]:mt-2 [&_li]:text-xs sm:[&_li]:text-sm lg:[&_li]:text-base [&_li]:mb-1 sm:[&_li]:mb-1 leading-relaxed"
+                    className="text-xs sm:text-sm lg:text-base text-white/90 [&_ul]:pl-3 sm:[&_ul]:pl-4 lg:[&_ul]:pl-5 [&_ul]:mt-1 sm:[&_ul]:mt-2 [&_li]:text-xs sm:[&_li]:text-sm lg:[&_li]:text-base [&_li]:mb-1 sm:[&_li]:mb-1 leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: item.description }}
                   />
                 </div>
