@@ -874,6 +874,20 @@ class DynamoDBService {
     }
   }
 
+  async getUserCart(customUserId) {
+    try {
+      const user = await this.findUserByCustomId(customUserId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return user.marketplace.cart || [];
+    } catch (error) {
+      console.error('Error getting user cart:', error);
+      throw error;
+    }
+  }
+
   async removeFromCart(customUserId, productId) {
     try {
       const user = await this.findUserByCustomId(customUserId);
@@ -1034,16 +1048,11 @@ class DynamoDBService {
   async getAllUsers() {
     try {
       const params = {
-        TableName: this.usersTable,
-        ProjectionExpression: 'customUserId, profile, stats'
+        TableName: this.usersTable
       };
 
       const result = await dynamodb.scan(params).promise();
-      return result.Items.map(user => ({
-        customUserId: user.customUserId,
-        profile: user.profile,
-        stats: user.stats
-      }));
+      return result.Items.map(user => this.reconstructUserData(user));
     } catch (error) {
       console.error('Error getting all users:', error);
       throw error;
@@ -1122,17 +1131,42 @@ class DynamoDBService {
     }
   }
 
-  // Marketplace Operations
+    // Marketplace Operations
   async getAllMarketplaceItems() {
     try {
       const params = {
         TableName: this.marketplaceTable
       };
-
+      
       const result = await dynamodb.scan(params).promise();
       return result.Items || [];
     } catch (error) {
       console.error('Error getting marketplace items:', error);
+      throw error;
+    }
+  }
+
+  async getMarketplaceData() {
+    try {
+      const params = {
+        TableName: this.marketplaceTable
+      };
+      
+      const result = await dynamodb.scan(params).promise();
+      const items = result.Items || [];
+      
+      console.log('Raw marketplace items:', items.length);
+      console.log('Sample item:', items[0]);
+      
+      // Since most items don't have a type field, treat all items as projects for now
+      // In the future, we can add proper type classification
+      return {
+        projects: items, // Return all items as projects since they're all marketplace items
+        products: items.filter(item => item.type === 'product'),
+        services: items.filter(item => item.type === 'service')
+      };
+    } catch (error) {
+      console.error('Error getting marketplace data:', error);
       throw error;
     }
   }

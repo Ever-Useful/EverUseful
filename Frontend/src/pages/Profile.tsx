@@ -149,7 +149,7 @@ const Profile = () => {
       }
 
       // Set skills - handle both string arrays and object arrays
-      const skillsData = userProfile.skills || userProfile.freelancerData?.skills || [];
+      const skillsData = (userProfile as any).skills || userProfile.freelancerData?.skills || [];
       if (Array.isArray(skillsData)) {
         // Convert skill objects to strings if needed
         const skillStrings = skillsData.map(skill => {
@@ -165,7 +165,7 @@ const Profile = () => {
       }
 
       // Fetch projects robustly
-      const projectsData = userProfile.projects;
+      const projectsData = (userProfile as any).projects;
       if (projectsData && Array.isArray(projectsData.created)) {
         const projectIds = projectsData.created;
         console.log('Profile - Project IDs found:', projectIds);
@@ -385,41 +385,43 @@ const Profile = () => {
           <Camera className="text-slate-700 w-5 h-5" />
         </button>
         
-        <div className="absolute bottom-0 left-0 right-0 px-4 py-4 md:p-8">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-12 sm:my-[99px] py-6 sm:py-[34px] px-3 sm:px-[23px]">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
+            <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 w-full">
               {/* Profile Photo */}
-              <div className="relative mb-4 md:mb-0">
+              <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0">
                 {profileData.avatar ? (
                   <img
                     src={profileData.avatar}
                     alt={getDisplayName()}
-                    className="w-24 h-24 md:w-36 md:h-36 border-4 border-white shadow-lg rounded-full object-cover"
+                    className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full object-cover mx-auto md:mx-0"
                   />
                 ) : (
-                  <div className="w-24 h-24 md:w-36 md:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-2xl md:text-4xl font-bold text-gray-600">
+                  <div className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-2xl sm:text-3xl font-bold text-gray-600 mx-auto md:mx-0">
                     {getAvatarInitials()}
                   </div>
                 )}
               </div>
               
               {/* Profile Info */}
-              <div className="flex-1 text-white text-center md:text-left">
-                <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5 mobile-text-4xl">
+              <div className="flex-1 text-white mt-4 md:mt-0 w-full">
+                <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5 text-center md:text-left mobile-text-4xl">
                   {getDisplayName()}
                 </h1>
-                <p className="text-base text-slate-200 drop-shadow-md mb-2 mobile-text-base">
+                <p className="text-base text-slate-200 drop-shadow-md text-center md:text-left mobile-text-base">
                   {profileData.userType}
                 </p>
                 
                 {/* Edit Profile Button */}
-                <button
-                  onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
-                  className="mt-3 md:mt-4 bg-transparent border-2 border-white text-white hover:bg-white/10 px-4 md:px-6 py-2 rounded-full font-semibold drop-shadow-md transition-all duration-200 flex items-center justify-center mx-auto md:mx-0"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </button>
+                <div className="flex flex-row items-center justify-center md:justify-start mt-4">
+                  <button
+                    onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
+                    className="flex items-center gap-2 text-white drop-shadow-md text-base sm:text-lg bg-transparent border-2 border-white hover:bg-white/10 px-4 md:px-6 py-2 rounded-full font-semibold transition-all duration-200"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit Profile
+                  </button>
+                </div>
               </div>
             </div>
           </div>

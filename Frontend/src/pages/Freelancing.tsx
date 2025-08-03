@@ -535,7 +535,7 @@ const Work: React.FC = () => {
       result = result.filter((f) =>
         (f.profile?.firstName + " " + f.profile?.lastName).toLowerCase().includes(search.toLowerCase()) ||
         (f.profile?.title || "").toLowerCase().includes(search.toLowerCase()) ||
-        (f.skills || []).some((s: string) => s.toLowerCase().includes(search.toLowerCase()))
+        (f.skills || []).some((s: any) => (typeof s === 'string' ? s : s.name).toLowerCase().includes(search.toLowerCase()))
       );
     }
     // Sort
@@ -683,9 +683,9 @@ const Work: React.FC = () => {
                   <p className="text-black text-xs mt-1">{f.profile?.location}</p>
                 </div>
                 <div className="flex flex-wrap justify-center gap-1 mb-2 xs:mb-3">
-                  {(f.skills || []).slice(0, 3).map((skill: string, i: number) => (
+                  {(f.skills || []).slice(0, 3).map((skill: any, i: number) => (
                     <span key={i} className="bg-indigo-100 text-indigo-700 text-[10px] xs:text-xs font-medium px-2 py-1 rounded-full">
-                      {skill}
+                      {typeof skill === 'string' ? skill : skill.name}
                     </span>
                   ))}
                   {(f.skills || []).length > 3 && (
