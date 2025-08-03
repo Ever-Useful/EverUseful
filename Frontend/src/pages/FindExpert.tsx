@@ -200,10 +200,10 @@ const FindExpert = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold mb-4 xs:mb-6 leading-tight">
+                <h1 className="text-4xl font-bold mb-4 xs:mb-6 leading-tight">
                   Connect with <span className="text-amber-400">PhD Experts</span> for Research & Mentorship
                 </h1>
-                <p className="text-base xs:text-lg sm:text-xl text-indigo-100 mb-5 xs:mb-8 max-w-xl">
+                <p className="text-base text-indigo-100 mb-5 xs:mb-8 max-w-xl">
                   Access specialized knowledge from verified PhD researchers and academics. Collaborate on research projects, receive expert mentorship, and accelerate your R&D initiatives with qualified doctoral experts.
                 </p>
               </motion.div>
@@ -314,7 +314,7 @@ const FindExpert = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 xs:mb-6 text-center"
         >
-          <h2 className="text-lg xs:text-2xl font-bold text-gray-900 mb-1 xs:mb-2">Browse Research Domains</h2>
+                          <h2 className="text-3xl font-bold text-gray-900 mb-1 xs:mb-2">Browse Research Domains</h2>
           <p className="text-xs xs:text-base text-gray-600">Find experts in specific academic disciplines</p>
         </motion.div>
         <motion.div
@@ -502,7 +502,7 @@ const FindExpert = () => {
       <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 xs:mb-12">
           <motion.h2 
-            className="text-lg xs:text-3xl font-bold text-gray-900 mb-2 xs:mb-4"
+                            className="text-2xl font-bold text-gray-900 mb-2 xs:mb-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
