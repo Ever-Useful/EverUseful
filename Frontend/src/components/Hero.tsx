@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import Students from "../assets/images/Students.jpeg";
 import PhD from "../assets/images/phdscholars.jpeg";
 import Professors from "../assets/images/professors.jpeg";
-import Business from "../assets/images/Business.jpg";
+import Business from "../assets/images/Business.jpeg";
 
 type Option = {
   id: number;
@@ -98,7 +98,7 @@ export const Hero = () => {
               <div className="flex justify-center lg:justify-start animate-fade-in delay-300">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font-bold transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
+                  className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
                   asChild
                 >
                   <Link to="/signup" className="font-bold flex items-center justify-center">
