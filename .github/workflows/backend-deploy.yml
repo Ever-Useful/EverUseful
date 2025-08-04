@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.AWS_USER }}
           key: ${{ secrets.AWS_SSH_KEY }}
           source: "Backend/*"
-          target: ${{ secrets.AWS_PATH }}
+          target: "/home/ubuntu/backend"
           strip_components: 1
           
       - name: Deploy to EC2
