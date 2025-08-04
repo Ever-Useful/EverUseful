@@ -184,8 +184,11 @@ const Profile = () => {
          const projectsData = await userService.getUserProjects();
          console.log('Profile - Projects data from getUserProjects:', projectsData);
          
-         if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
-           console.log('Profile - Projects found:', projectsData.created.length);
+         if (projectsData && Array.isArray(projectsData)) {
+           console.log('Profile - Projects found:', projectsData.length);
+           setProjects(projectsData);
+         } else if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
+           console.log('Profile - Projects found in created array:', projectsData.created.length);
            setProjects(projectsData.created);
          } else {
            console.log('Profile - No projects found in getUserProjects');
