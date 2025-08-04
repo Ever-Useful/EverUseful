@@ -38,7 +38,6 @@ import CookiePolicy from "./pages/Policy/CookiePolicy";
 import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
 import BecomeMentor from "./pages/BecomeAMentor";
-//test
 
 const queryClient = new QueryClient();
 
