@@ -95,6 +95,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
+            echo "Configuring Nginx for HTTP only..."
             sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
             # Block direct IP access
             server {
@@ -103,7 +104,7 @@ jobs:
                 server_name _;
                 return 444;
             }
-            # Main HTTP server
+            # Main HTTP server for your domain
             server {
                 listen 80;
                 listen [::]:80;
@@ -129,6 +130,24 @@ jobs:
             }
             EOF
             sudo nginx -t && sudo systemctl reload nginx
+            echo "✓ Nginx configured for HTTP successfully"
+
+      - name: Verify HTTP configuration
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            echo "Verifying HTTP configuration..."
+            # Test that the website is serving HTTP (not HTTPS)
+            HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://amoghconnect.com)
+            if [ "$HTTP_RESPONSE" = "200" ]; then
+              echo "✓ Website is serving HTTP successfully (Status: $HTTP_RESPONSE)"
+            else
+              echo "✗ Website HTTP test failed (Status: $HTTP_RESPONSE)"
+              exit 1
+            fi
 
       - name: Test API connectivity
         uses: appleboy/ssh-action@v1.0.3
