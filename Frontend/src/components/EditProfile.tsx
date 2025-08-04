@@ -159,18 +159,18 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         console.log('EditProfile - Extracted freelancer data:', freelancerInfo);
         
         setProfileData({
-          firstName: authData?.firstName || userProfileData?.firstName || '',
-          lastName: authData?.lastName || userProfileData?.lastName || '',
+          firstName: authData?.firstName || '',
+          lastName: authData?.lastName || '',
           bio: userProfileData?.bio || '',
           college: studentInfo?.college || '',
           degree: studentInfo?.degree || '',
           course: studentInfo?.course || '',
           location: userProfileData?.location || '',
           year: studentInfo?.year || '',
-          userType: normalizeUserType(authData?.userType || userProfileData?.userType) || (authData?.userType || userProfileData?.userType),
-          username: authData?.username || userProfileData?.username || authData?.email?.split('@')[0] || '',
-          email: authData?.email || userProfileData?.email || '',
-          mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || userProfileData?.phoneNumber || '',
+          userType: authData?.userType || '',
+          username: authData?.username || '',
+          email: authData?.email || '',
+          mobile: authData?.mobile || authData?.phoneNumber || '',
           gender: authData?.gender || userProfileData?.gender || '',
           domain: authData?.domain || userProfileData?.domain || '',
           startYear: studentInfo?.startYear || '',
@@ -383,7 +383,11 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     }
     
     try {
-      await userService.addSkill({ name: trimmedSkill });
+      await userService.addSkill({ 
+        name: trimmedSkill,
+        level: 'intermediate',
+        category: 'general'
+      });
       setSkills(prev => [...prev, trimmedSkill]);
       toast.success('Skill added successfully!');
     } catch (error) {

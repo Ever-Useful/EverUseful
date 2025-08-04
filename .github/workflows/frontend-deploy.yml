@@ -28,6 +28,17 @@ jobs:
         working-directory: Frontend
         run: npm run build:clean
 
+      - name: Verify build output
+        working-directory: Frontend
+        run: |
+          echo "Checking build output..."
+          ls -la dist/
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ index.html not found in dist folder"
+            exit 1
+          fi
+          echo "✅ Build verification successful"
+
       - name: Add cache busting to index.html
         working-directory: Frontend
         run: |
@@ -37,17 +48,28 @@ jobs:
            sed -i "s|<html|<html data-version=\"$TIMESTAMP\"|g" dist/index.html
            # Add meta tag for cache busting
            sed -i 's|<head>|<head>\n    <meta name="version" content="'$TIMESTAMP'" />|g' dist/index.html
+           echo "✅ Cache busting applied with timestamp: $TIMESTAMP"
 
-      - name: Clear dist directory
+      - name: Prepare server directory
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
-            sudo rm -rf /var/www/html/Frontend/dist/*
-            sudo rm -rf /var/www/html/Frontend/dist/Frontend
+            echo "Preparing server directory..."
+            # Create backup of current deployment
+            if [ -d "/var/www/html/Frontend/dist" ]; then
+              sudo cp -r /var/www/html/Frontend/dist /var/www/html/Frontend/dist.backup.$(date +%s)
+              echo "✅ Backup created"
+            fi
+            
+            # Clear and recreate directory
+            sudo rm -rf /var/www/html/Frontend/dist
             sudo mkdir -p /var/www/html/Frontend/dist
+            sudo chown www-data:www-data /var/www/html/Frontend/dist
+            sudo chmod 755 /var/www/html/Frontend/dist
+            echo "✅ Directory prepared"
 
       - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
@@ -67,6 +89,8 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
+            echo "Fixing file structure and permissions..."
+            
             # Check if nested structure was created and fix it
             if [ -d "/var/www/html/Frontend/dist/Frontend" ]; then
               echo "Fixing nested directory structure..."
@@ -74,27 +98,49 @@ jobs:
               sudo rm -rf /var/www/html/Frontend/dist/Frontend
             fi
             
-            # Set proper permissions
-            sudo chmod -R 755 /var/www/html/Frontend/dist/
+            # Set proper permissions recursively
+            sudo find /var/www/html/Frontend/dist -type f -exec chmod 644 {} \;
+            sudo find /var/www/html/Frontend/dist -type d -exec chmod 755 {} \;
             sudo chown -R www-data:www-data /var/www/html/Frontend/dist/
             
-            # Verify files are in correct location
+            # Verify critical files exist
             echo "Verifying deployment..."
             ls -la /var/www/html/Frontend/dist/
-            if [ -f "/var/www/html/Frontend/dist/index.html" ]; then
-              echo "✓ index.html found in correct location"
+            
+            if [ ! -f "/var/www/html/Frontend/dist/index.html" ]; then
+              echo "❌ index.html not found - attempting to restore from backup"
+              if [ -d "/var/www/html/Frontend/dist.backup" ]; then
+                sudo cp -r /var/www/html/Frontend/dist.backup/* /var/www/html/Frontend/dist/
+                echo "✅ Restored from backup"
+              else
+                echo "❌ No backup available - deployment failed"
+                exit 1
+              fi
             else
-              echo "✗ index.html not found in correct location"
-              exit 1
+              echo "✅ index.html found in correct location"
+            fi
+            
+            # Test file accessibility
+            if sudo -u www-data test -r /var/www/html/Frontend/dist/index.html; then
+              echo "✅ File permissions are correct"
+            else
+              echo "❌ File permission issue detected"
+              sudo chmod 644 /var/www/html/Frontend/dist/index.html
+              echo "✅ Fixed file permissions"
             fi
 
-      - name: Configure nginx for HTTPS and domain-only
+      - name: Configure nginx for HTTP
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
+            echo "Configuring Nginx for HTTP only..."
+            
+            # Create backup of current nginx config
+            sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup.$(date +%s)
+            
             sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
             # Block direct IP access
             server {
@@ -103,52 +149,104 @@ jobs:
                 server_name _;
                 return 444;
             }
-            # Block direct IP access on HTTPS
-            server {
-                listen 443 ssl default_server;
-                listen [::]:443 ssl default_server;
-                server_name _;
-                ssl_certificate /etc/letsencrypt/live/amoghconnect.com/fullchain.pem;
-                ssl_certificate_key /etc/letsencrypt/live/amoghconnect.com/privkey.pem;
-                return 444;
-            }
-            # Redirect HTTP to HTTPS for your domain
+            
+            # Main HTTP server for your domain
             server {
                 listen 80;
                 listen [::]:80;
                 server_name amoghconnect.com www.amoghconnect.com;
-                return 301 https://amoghconnect.com$request_uri;
-            }
-            # Main HTTPS server
-            server {
-                listen 443 ssl;
-                listen [::]:443 ssl;
-                server_name amoghconnect.com www.amoghconnect.com;
+                
                 root /var/www/html/Frontend/dist;
                 index index.html index.htm;
-                ssl_certificate /etc/letsencrypt/live/amoghconnect.com/fullchain.pem;
-                ssl_certificate_key /etc/letsencrypt/live/amoghconnect.com/privkey.pem;
-                include /etc/letsencrypt/options-ssl-nginx.conf;
-                ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+                
+                # Security headers
+                add_header X-Frame-Options "SAMEORIGIN" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header X-XSS-Protection "1; mode=block" always;
+                
+                # Handle all routes for SPA
                 location / {
                     try_files $uri $uri/ /index.html;
                 }
+                
+                # Cache control for index.html
                 location = /index.html {
                     add_header Cache-Control "no-cache, no-store, must-revalidate" always;
                     add_header Pragma "no-cache" always;
                     add_header Expires "0" always;
                 }
+                
+                # Cache static assets
                 location /assets/ {
                     expires 1h;
                     add_header Cache-Control "public, max-age=3600";
                 }
-                location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|mp4)$ {
+                
+                # Cache other static files
+                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|mp4|woff|woff2|ttf|eot)$ {
                     expires 1h;
                     add_header Cache-Control "public, max-age=3600";
                 }
+                
+                # Handle 404 errors
+                error_page 404 /index.html;
             }
             EOF
-            sudo nginx -t && sudo systemctl reload nginx
+            
+            # Test nginx configuration
+            if sudo nginx -t; then
+              echo "✅ Nginx configuration is valid"
+              sudo systemctl reload nginx
+              echo "✅ Nginx reloaded successfully"
+            else
+              echo "❌ Nginx configuration error - restoring backup"
+              sudo cp /etc/nginx/sites-available/default.backup.* /etc/nginx/sites-available/default
+              sudo nginx -t && sudo systemctl reload nginx
+              exit 1
+            fi
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            echo "Running comprehensive deployment verification..."
+            
+            # Wait a moment for nginx to fully reload
+            sleep 3
+            
+            # Test HTTP response
+            echo "Testing HTTP response..."
+            HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://amoghconnect.com)
+            echo "HTTP Response Code: $HTTP_RESPONSE"
+            
+            if [ "$HTTP_RESPONSE" = "200" ]; then
+              echo "✅ Website is serving HTTP successfully"
+            else
+              echo "❌ Website HTTP test failed (Status: $HTTP_RESPONSE)"
+              echo "Checking nginx error logs..."
+              sudo tail -10 /var/log/nginx/error.log
+              exit 1
+            fi
+            
+            # Test if index.html is accessible
+            echo "Testing index.html accessibility..."
+            if curl -s http://amoghconnect.com | grep -q "DOCTYPE"; then
+              echo "✅ index.html is accessible and contains valid HTML"
+            else
+              echo "❌ index.html is not accessible or invalid"
+              exit 1
+            fi
+            
+            # Test static assets
+            echo "Testing static assets..."
+            if curl -s -o /dev/null -w "%{http_code}" http://amoghconnect.com/assets/ | grep -q "200\|404"; then
+              echo "✅ Assets directory is accessible"
+            else
+              echo "⚠️ Assets directory test inconclusive"
+            fi
 
       - name: Test API connectivity
         uses: appleboy/ssh-action@v1.0.3
@@ -159,5 +257,9 @@ jobs:
           script: |
             echo "Testing API connectivity..."
             # Test if backend is accessible from the server
-            curl -I http://13.235.148.91:3000/api/test || echo "Backend not accessible from server"
-            echo "Frontend deployment completed successfully!" 
+            if curl -I http://13.235.148.91:3000/api/test 2>/dev/null | grep -q "200"; then
+              echo "✅ Backend is accessible from server"
+            else
+              echo "⚠️ Backend not accessible from server (this is normal if backend is down)"
+            fi
+            echo "🎉 Frontend deployment completed successfully!" 

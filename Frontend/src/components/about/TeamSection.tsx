@@ -18,21 +18,21 @@ const TeamSection = () => {
   const [isPaused, setIsPaused] = useState(false);
 
   const founder = {
-    name: "Harsh",
+    name: "Harsh Parashar",
     role: "Founder",
     avatar: founderImage,
     linkedin: "https://www.linkedin.com/in/harsh-parashar-0b8baa224?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BuUrPtS5UTfClY0yh1aPmvg%3D%3D",
-    email: "koos@microphonemedia.nl",
+    email: "amogheveruseful@gmail.com",
     description: "Studied Journalism and History at the University of Groningen. Storytelling is his strength, podcasts are his medium. He leads Microphone Media together with Frank."
   };
 
   const teamLead = {
-    name: "Ankit",
+    name: "Ankit Kumar",
     role: "Team Lead",
     avatar: techLead,
     linkedin: "https://www.linkedin.com/in/ankit-kumar-451aba203?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
-    email: "francis@microphonemedia.nl",
-    description: "Podcast editor, studied Communication and Media at Erasmus University. Has an ear for beautiful stories and is interested in a wide range of subjects."
+    // email: "francis@microphonemedia.nl",
+    description: "Passion for building scalable digital solutions. lead product development and also serve as a technical consultant to support the company’s growth. Driven by innovation, I align tech with business goals to deliver real impact."
   };
 
   const techTeam = [
@@ -40,7 +40,7 @@ const TeamSection = () => {
       name: "Rishika Gupta",
       role: "Frontend Developer",
       avatar: rishika ,
-      linkedin: "https://linkedin.com/in/dylan-de-heer",
+      linkedin: "https://www.linkedin.com/in/rishika-gupta0306/",
       description: "Full-stack developer passionate about creating user-centered experiences and scalable solutions."
     },
     {
