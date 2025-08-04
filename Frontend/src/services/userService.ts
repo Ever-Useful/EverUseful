@@ -425,6 +425,20 @@ class UserService {
       method: 'DELETE',
     });
   }
+
+  // Get dashboard data
+  async getDashboardData() {
+    // Replace with your actual API endpoint
+    const response = await fetch('/api/dashboard', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add authorization header if needed
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch dashboard data');
+    return await response.json();
+  }
 }
 
-export default new UserService(); 
+export default new UserService();
