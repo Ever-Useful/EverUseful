@@ -346,7 +346,7 @@ export const UpcomingPhase: React.FC = () => (
         <Features />
         <div className="flex justify-center mt-4 md:mt-10">
           <span className="inline-block px-3 py-2 md:px-8 md:py-3 rounded-full bg-gradient-to-r from-teal-100 via-green-100 to-white text-teal-900 font-semibold text-xs md:text-base shadow animate-pulse mobile-text-xs">
-            🚀 Launching Summer 2025 — Secure Your Place Now!
+            🚀 Launching August 2025 — Secure Your Place Now!
           </span>
         </div>
       </div>

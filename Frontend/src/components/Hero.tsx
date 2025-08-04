@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
 
+
 type Option = {
   id: number;
   imageUrl: string;
@@ -146,7 +147,7 @@ export const Hero = () => {
                         willChange: "transform",
                       }}
                     >
-                      <img src={opt.imageUrl} alt={opt.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-0" />
+                      <img src={opt.imageUrl} alt={opt.label} className="absolute inset-0 w-full h-full object-cover opacity-0" />
                       <div
                         className="
                           absolute
@@ -180,12 +181,12 @@ export const Hero = () => {
                         "
                       >
                         <div className="flex items-center text-white">
-                          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">
+                          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3 group-hover:mr-3 -translate-y-5">
                             <i className={`${opt.iconClass} text-sm`}></i>
                           </div>
-                          <div>
-                            <div className="font-bold text-sm -translate-x-[25px] -translate-y-[25px]">{opt.label}</div>
-                            <div className="text-xs opacity-80 group-hover:max-w-[200px] ml-5 group-hover:ml-0 transition-all duration-500 ease-out overflow-hidden -translate-y-[15px]">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out">
+                            <div className="font-bold text-sm">{opt.label}</div>
+                            <div className="text-xs opacity-80 max-w-[200px] transition-all duration-500 ease-out overflow-hidden">
                               {opt.description}
                             </div>
                           </div>
@@ -196,21 +197,29 @@ export const Hero = () => {
                 })}
               </div>
 
-              {/* Mobile: horizontal scroll cards */}
+              {/* Mobile: disoriented flexbox focusing on labels */}
               <div className="lg:hidden w-full">
-                <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory">
-                  {OPTIONS.map((opt) => (
+                <div className="grid grid-cols-2 gap-3 p-4">
+                  {OPTIONS.map((opt, index) => (
                     <div
                       key={opt.id}
-                      className="relative min-w-[70vw] max-w-xs h-44 rounded-2xl overflow-hidden bg-center bg-cover snap-start flex-shrink-0"
-                      style={{
-                        backgroundImage: `url(${opt.imageUrl})`,
-                      }}
+                      className={`
+                        relative h-32 rounded-xl overflow-hidden
+                      `}
                     >
-                      <div className="absolute inset-0 bg-black/40" />
-                      <div className="absolute bottom-4 left-4 text-white">
-                        <div className="font-bold text-lg">{opt.label}</div>
-                        <div className="text-xs opacity-80">{opt.description}</div>
+                      <img
+                        src={opt.imageUrl}
+                        alt={opt.label}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/50" />
+                      <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white p-3">
+                        <div className="font-bold text-lg sm:text-xl mb-1 leading-tight">
+                          {opt.label}
+                        </div>
+                        <div className="text-xs sm:text-sm opacity-90 text-center leading-tight">
+                          {opt.description}
+                        </div>
                       </div>
                     </div>
                   ))}

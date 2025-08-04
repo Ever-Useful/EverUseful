@@ -4,6 +4,7 @@ import React, { useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 import {
   Star,
   TrendingUp,
@@ -118,7 +119,6 @@ export const FeaturedProducts: React.FC = () => {
             alt={project.title}
             className="w-full h-full object-cover object-center"
             style={{ aspectRatio: "4/3" }}
-            loading="lazy"
           />
           <div
             className={`absolute inset-0 bg-gradient-to-t ${project.gradient} opacity-20`}
@@ -162,7 +162,10 @@ export const FeaturedProducts: React.FC = () => {
               </div>
             </div>
           </div>
-          <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-base font-bold rounded-lg transition-all duration-300">
+          <Button 
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-base font-bold rounded-lg transition-all duration-300"
+            onClick={() => window.open('https://www.chainfly.co/')}
+          >
             Connect
             <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
           </Button>
@@ -236,7 +239,6 @@ export const FeaturedProducts: React.FC = () => {
                     width: "100%",
                     height: "100%",
                   }}
-                  loading="lazy"
                 />
                 <div
                   className={`absolute inset-0 bg-gradient-to-t ${p.gradient} opacity-20`}
@@ -248,7 +250,7 @@ export const FeaturedProducts: React.FC = () => {
               {/* Content */}
               <UICardContent className="flex flex-col flex-1 px-5 py-4">
                 <UICardHeader className="px-0 pb-1">
-                  <UICardTitle className="text-lg md:text-xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                  <UICardTitle className="text-lg md:text-lg font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                     {p.title}
                   </UICardTitle>
                   <p className="text-xs text-gray-500 mb-1">{p.subtitle}</p>
@@ -331,7 +333,6 @@ export const FeaturedProducts: React.FC = () => {
                     src={p.image}
                     alt={p.title}
                     className="w-full h-full object-cover"
-                    loading="lazy"
                   />
                   <div
                     className={`absolute inset-0 bg-gradient-to-t ${p.gradient} opacity-20`}
