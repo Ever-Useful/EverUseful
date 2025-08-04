@@ -26,18 +26,14 @@ jobs:
 
       - name: Build project
         working-directory: Frontend
-        run: npm run build:clean
+        run: npm run build:verify
 
       - name: Verify build output
         working-directory: Frontend
         run: |
           echo "Checking build output..."
           ls -la dist/
-          if [ ! -f "dist/index.html" ]; then
-            echo "❌ index.html not found in dist folder"
-            exit 1
-          fi
-          echo "✅ Build verification successful"
+          echo "✅ Build verification completed by build:verify script"
 
       - name: Add cache busting to index.html
         working-directory: Frontend

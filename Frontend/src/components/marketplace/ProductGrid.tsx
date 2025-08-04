@@ -269,9 +269,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       };
     }
     
+    console.log('Processing author data for ID:', authorId, 'Data:', user);
+    
     // Extract data from the proper structure - handle multiple response formats
     const auth = user.auth || user.data?.auth || {};
     const profile = user.profile || user.data?.profile || {};
+    
+    console.log('Profile structure:', profile);
+    console.log('Auth structure:', auth);
     
     // Try multiple sources for the name with better priority
     let name = '';
@@ -334,6 +339,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       isLoading: false
     };
     
+    console.log('Author details result:', result);
     return result;
   }, [authorCache, authorsLoading]);
 

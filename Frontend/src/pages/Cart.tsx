@@ -168,6 +168,13 @@ const Cart = () => {
               throw new Error(`No project data returned for ${item.productId}`);
             }
             
+            console.log(`Project details for ${item.productId}:`, {
+              title: project.title,
+              price: project.price,
+              description: project.description,
+              category: project.category
+            });
+            
             return {
               id: item.productId,
               name: project.title || `Project ${item.productId}`,
