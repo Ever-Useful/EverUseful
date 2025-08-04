@@ -46,7 +46,7 @@ export const SustainabilitySection = () => {
 
           {/* Content */}
           <div className="space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
+            <h2 className="text-[17px] sm:text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
               Empowering <span className="text-green-600">Green Innovation</span> Through Collaboration
             </h2>
             <p className="text-lg text-gray-600 leading-relaxed">
