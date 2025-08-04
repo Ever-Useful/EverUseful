@@ -117,31 +117,32 @@ const Cart = () => {
     try {
       setLoading(true);
       
-      // Debug: Check if user is authenticated
-      console.log('Current user:', user);
-      console.log('Auth loading:', authLoading);
-      
-      if (!user) {
-        console.error('No user found, redirecting to signin');
-        navigate('/signin');
-        return;
-      }
-      
-      // Get user data from backend to get customUserId
       const userData = await userService.getUserProfile();
-      console.log('User data:', userData);
-      
-      if (!userData) {
+      if (!userData || !userData.customUserId) {
+        console.error('User data or customUserId not found');
         toast.error('User data not found');
         return;
       }
 
-      console.log('Fetching cart for user:', userData.customUserId);
       console.log('Firebase UID:', user.uid);
       
       // Fetch cart data from backend
-      const cartData = await userService.getUserCartByCustomId(userData.customUserId);
-      console.log('Cart data received:', cartData);
+      const response = await userService.getUserCartByCustomId(userData.customUserId);
+      console.log('Cart data received:', response);
+      
+      // Handle different response structures
+      let cartData: any[] = [];
+      if (Array.isArray(response)) {
+        cartData = response;
+      } else if (response && typeof response === 'object' && 'data' in response && Array.isArray((response as any).data)) {
+        cartData = (response as any).data;
+      } else if (response && typeof response === 'object' && 'cart' in response && Array.isArray((response as any).cart)) {
+        cartData = (response as any).cart;
+      } else {
+        console.log('No cart data found or invalid structure:', response);
+        setCartItems([]);
+        return;
+      }
       
       // Fetch project details from marketplace for each cart item
       const transformedCartItems: CartItemType[] = await Promise.all(
@@ -223,7 +224,7 @@ const Cart = () => {
       }
 
       // Remove item from cart in backend
-      await userService.removeFromCart(userData.customUserId, id);
+      await userService.removeFromCart(id);
       
       // Update local state
       setCartItems(items => items.filter(item => item.id !== id));
@@ -270,7 +271,7 @@ const Cart = () => {
       }
 
       // Clear cart in backend
-      await userService.clearCart(userData.customUserId);
+      await userService.clearCart();
       
       // Update local state
       setCartItems([]);

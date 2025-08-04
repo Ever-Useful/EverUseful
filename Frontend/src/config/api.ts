@@ -4,15 +4,15 @@ const isProduction = import.meta.env.PROD;
 
 // Base API URL - automatically switches between localhost and production
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (isDevelopment ? 'http://localhost:3000' : 'https://amoghconnect.com');
+  (isDevelopment ? 'http://localhost:3000' : 'http://13.235.148.91:3000');
 
 // For production, we need to ensure the API calls go through the proxy
 export const getApiUrl = (endpoint: string) => {
   if (isDevelopment) {
     return `${API_BASE_URL}${endpoint}`;
   } else {
-    // In production, ensure all API calls go through HTTPS
-    return `https://amoghconnect.com${endpoint}`;
+    // In production, use the backend directly with HTTP
+    return `http://13.235.148.91:3000${endpoint}`;
   }
 };
 

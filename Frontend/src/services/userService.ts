@@ -237,6 +237,11 @@ class UserService {
     return await this.makeRequest(API_ENDPOINTS.USER_CART);
   }
 
+  // Get user cart by custom ID
+  async getUserCartByCustomId(customUserId: string): Promise<CartItem[]> {
+    return await this.makeRequest(`${API_ENDPOINTS.USERS}/${customUserId}/cart`);
+  }
+
   // Add item to cart
   async addToCart(item: Omit<CartItem, 'id'>): Promise<CartItem[]> {
     const response = await this.makeRequest(API_ENDPOINTS.USER_CART, {

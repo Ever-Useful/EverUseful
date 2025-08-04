@@ -510,10 +510,26 @@ const Work: React.FC = () => {
         throw new Error('Failed to fetch freelancers');
       }
       const data = await response.json();
-      setFreelancers(data);
+      console.log('Freelancing - Fetched users data:', data);
+      
+      // Handle different response structures
+      let users = [];
+      if (Array.isArray(data)) {
+        users = data;
+      } else if (data && Array.isArray(data.users)) {
+        users = data.users;
+      } else if (data && Array.isArray(data.data)) {
+        users = data.data;
+      } else {
+        console.warn('Unexpected response structure:', data);
+        users = [];
+      }
+      
+      setFreelancers(users);
     } catch (error) {
       console.error('Error fetching freelancers:', error);
       setError('Failed to load freelancers');
+      setFreelancers([]);
     } finally {
       setLoading(false);
     }
@@ -537,8 +553,24 @@ const Work: React.FC = () => {
   // Filtering and sorting
   useEffect(() => {
     let result = freelancers || [];
+    
+    // Ensure result is always an array
+    if (!Array.isArray(result)) {
+      console.warn('Freelancers data is not an array:', result);
+      result = [];
+    }
+    
+    // Filter for freelancers only
+    result = result.filter((f) => {
+      const userType = f.auth?.userType || f.profile?.userType || '';
+      return userType.toLowerCase().includes('freelancer');
+    });
+    
     if (skillFilter) {
-      result = result.filter((f) => (f.skills || []).some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase())));
+      result = result.filter((f) => {
+        const skills = f.skills || [];
+        return Array.isArray(skills) && skills.some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase()));
+      });
     }
     if (locationFilter) {
       result = result.filter((f) => (f.profile?.location || "").toLowerCase().includes(locationFilter.toLowerCase()));
@@ -552,9 +584,9 @@ const Work: React.FC = () => {
     }
     // Sort
     if (sortBy === "rating") {
-      result = Array.isArray(result) ? result.slice().sort((a, b) => (b.stats?.rating || 4.5) - (a.stats?.rating || 4.5)) : [];
+      result = result.slice().sort((a, b) => (b.stats?.rating || 4.5) - (a.stats?.rating || 4.5));
     } else if (sortBy === "projects") {
-      result = Array.isArray(result) ? result.slice().sort((a, b) => (b.stats?.projectsCount || 0) - (a.stats?.projectsCount || 0)) : [];
+      result = result.slice().sort((a, b) => (b.stats?.projectsCount || 0) - (a.stats?.projectsCount || 0));
     }
     setFiltered(result);
   }, [freelancers, skillFilter, locationFilter, search, sortBy]);
