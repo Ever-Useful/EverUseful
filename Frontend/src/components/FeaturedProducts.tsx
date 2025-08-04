@@ -193,10 +193,10 @@ export const FeaturedProducts: React.FC = () => {
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-[92vw] relative z-10">
         {/* Header */}
         <div className="text-center mb-14">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+          <h1 className="text-[17px] sm:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight mobile-text-4xl">
             Discover <span className="text-blue-600">Game-Changing</span> Projects
-          </h2>
-          <p className="text-base text-gray-600 max-w-2xl mx-auto">
+          </h1>
+          <p className="text-[12px] sm:text-base text-gray-600 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
             Explore innovative solutions from our talented community.
           </p>
         </div>
@@ -343,13 +343,13 @@ export const FeaturedProducts: React.FC = () => {
                 {/* Content */}
                 <UICardContent className="flex flex-col flex-1 px-3 py-3">
                   <UICardHeader className="px-0 pb-1">
-                    <UICardTitle className="mobile-text-lg font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                    <UICardTitle className="mobile-text-2xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                       {p.title}
                     </UICardTitle>
-                    <p className="mobile-text-xs text-gray-500 mb-1">{p.subtitle}</p>
+                    <p className="mobile-text-base text-gray-500 mb-1">{p.subtitle}</p>
                   </UICardHeader>
                   <UICardDescription
-                    className="text-gray-600 mobile-text-sm mb-2 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]"
+                    className="text-gray-600 mobile-text-base mb-2 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]"
                   >
                     {p.description}
                   </UICardDescription>
@@ -358,14 +358,14 @@ export const FeaturedProducts: React.FC = () => {
                       <Badge
                         key={t}
                         variant="outline"
-                        className="mobile-text-xs rounded-full px-1 py-0.5 border-blue-100 bg-blue-50 text-blue-700"
+                        className="mobile-text-base rounded-full px-1 py-0.5 border-blue-100 bg-blue-50 text-blue-700"
                       >
                         {t}
                       </Badge>
                     ))}
                   </div>
                   {/* Footer */}
-                  <div className="flex items-center justify-between mobile-text-xs text-gray-500 mb-2">
+                  <div className="flex items-center justify-between mobile-text-sm text-gray-500 mb-2">
                     <span className="font-medium truncate">{p.author}</span>
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1">
@@ -379,7 +379,7 @@ export const FeaturedProducts: React.FC = () => {
                     </div>
                   </div>
                   <Button
-                    className="mt-auto w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md mobile-text-sm font-bold rounded-lg transition-all duration-300 py-2"
+                    className="mt-auto w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md mobile-text-base font-bold rounded-lg transition-all duration-300 py-2"
                     onClick={() => setExpanded(p.id)}
                   >
                     View Details
@@ -397,7 +397,7 @@ export const FeaturedProducts: React.FC = () => {
             onClick={() => navigate("/marketplace")}
             size="lg"
             variant="outline"
-            className="hover:scale-105 transition-all duration-300 border-blue-200 text-blue-700 font-bold rounded-lg mobile-text-base"
+            className="hover:scale-105 transition-all duration-300 border-blue-200 text-blue-700 font-bold rounded-lg mobile-text-2xl"
           >
             <TrendingUp className="mr-2 w-5 h-5" />
             View All Projects

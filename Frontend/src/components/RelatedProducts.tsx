@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import classNames from "classnames";
 import React, { useRef, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { API_ENDPOINTS } from '../config/api';
 
 // Define Project type if not imported from elsewhere
 interface Project {
@@ -49,22 +50,24 @@ export const RelatedProducts = () => {
   }, [isMobile]);
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchRelatedProjects = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:3000/api/marketplace/projects');
+        const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECTS);
         if (!response.ok) {
           throw new Error('Failed to fetch projects');
         }
         const data = await response.json();
-        setProjects(data.projects);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setProjects(data);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setError('Failed to load projects');
       } finally {
         setLoading(false);
       }
     };
-    fetchProjects();
+
+    fetchRelatedProjects();
   }, []);
 
   const featuredProjects = [

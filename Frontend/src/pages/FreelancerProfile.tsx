@@ -7,9 +7,10 @@ import { ChatBox } from "@/components/ChatBox";
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect } from "react";
-import { userService } from "@/services/userService";
+import userService from "@/services/userService";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
+import { API_ENDPOINTS } from '../config/api';
 
 const VisitingProfile = () => {
   const { id } = useParams();
@@ -29,7 +30,7 @@ const VisitingProfile = () => {
     const fetchFreelancer = async () => {
       if (id) {
         try {
-          const response = await fetch(`http://localhost:3000/api/users/${id}`);
+          const response = await fetch(API_ENDPOINTS.USER_BY_ID(id));
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.data) {
@@ -40,7 +41,7 @@ const VisitingProfile = () => {
               const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
               if (projectIds.length > 0) {
                 const projectPromises = projectIds.map((pid) =>
-                  fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
+                  fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid))
                     .then(res => res.ok ? res.json() : null)
                     .then(res => res && res.project ? res.project : null)
                     .catch(() => null)
@@ -197,7 +198,9 @@ const VisitingProfile = () => {
               <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <DollarSign className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancer.hourlyRate || '$50'}</div>
+                  <div className="text-2xl font-bold">
+                    {freelancer.freelancerData?.hourlyRate ? `$${freelancer.freelancerData.hourlyRate}` : 'N/A'}
+                  </div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
                 </CardContent>
               </Card>
@@ -205,7 +208,9 @@ const VisitingProfile = () => {
               <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <Award className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancer.completedProjects || 25}+</div>
+                  <div className="text-2xl font-bold">
+                    {safePortfolioProjects.length > 0 ? safePortfolioProjects.length : 0}
+                  </div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
                 </CardContent>
               </Card>
@@ -213,16 +218,20 @@ const VisitingProfile = () => {
               <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <Clock className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancer.responseTime || 5}</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time</div>
+                  <div className="text-2xl font-bold">
+                    {freelancer.freelancerData?.avgResponseTime ? freelancer.freelancerData.avgResponseTime : 'N/A'}
+                  </div>
+                  <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time (hrs)</div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-br from-amber-600 to-orange-500 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <Users className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancer.reviews || 12}</div>
-                  <div className="text-xs opacity-90 uppercase tracking-wider">Reviews</div>
+                  <div className="text-2xl font-bold">
+                    {freelancer.stats?.connectionsCount || 0}
+                  </div>
+                  <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
                 </CardContent>
               </Card>
             </div>

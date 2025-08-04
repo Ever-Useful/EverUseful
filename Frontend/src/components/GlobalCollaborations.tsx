@@ -158,7 +158,7 @@ export const GlobalCollaborations: React.FC = () => {
         {/* Header with image */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-8">
           <div className="flex-1 text-left">
-            <h2 className="text-4xl font-extrabold text-slate-800 mb-2 md:mb-3 tracking-tight mobile-text-4xl">
+            <h2 className="text-[17px] sm:text-4xl font-extrabold text-slate-800 mb-2 md:mb-3 tracking-tight mobile-text-4xl">
               Our <span className="text-cyan-500">Trusted Partners</span>
             </h2>
             <p className="text-base text-slate-600 max-w-xl mobile-text-base">
@@ -206,14 +206,13 @@ export const GlobalCollaborations: React.FC = () => {
                   <h5 className="text-lg font-bold text-gray-900 mb-0.5 text-center mobile-text-lg">{partner.name}</h5>
                   <p className="text-sm text-cyan-600 font-medium mb-0.5 text-center mobile-text-sm">{partner.tagline}</p>
                   <p className="text-sm text-gray-500 mb-2 text-center line-clamp-2 mobile-text-sm">{partner.description}</p>
-                  <div className="flex justify-center">
-                    <a
-                      href="#"
-                      className="text-cyan-700 text-base font-semibold underline hover:text-red-600 transition"
+                  <div className="flex justify-center text-cyan-700 text-xs sm:text-base font-semibold underline hover:text-red-600 transition">
+                    <Link
+                      to="#"
                       tabIndex={0}
                     >
                       Learn More &rarr;
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>

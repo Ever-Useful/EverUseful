@@ -9,13 +9,10 @@ router.get('/dashboarddata', async (req, res) => {
     const userId = req.query.userId;
     if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
-    console.log('Dashboard request for userId:', userId);
-
     // Get user data from DynamoDB
     const user = await userService.getUserByFirebaseUid(userId);
     
     if (!user) {
-      console.log('User not found for UID:', userId);
       // Return default values if user not found
       return res.json({
         totalViews: 0,
@@ -27,21 +24,14 @@ router.get('/dashboarddata', async (req, res) => {
       });
     }
 
-    console.log('User found:', user.customUserId);
-
     // Get user's projects from marketplace
     const customUserId = user.customUserId;
     const marketplace = await dynamoDBService.getMarketplaceData();
-    
-    console.log('Marketplace data retrieved, projects count:', marketplace.projects.length);
     
     // Find projects created by this user
     const userProjects = marketplace.projects.filter(p => 
       p.author === customUserId || p.customUserId === customUserId
     );
-
-    console.log('User projects found:', userProjects.length);
-    console.log('User projects:', userProjects.map(p => ({ title: p.title, author: p.author, customUserId: p.customUserId, views: p.views, price: p.price })));
 
     let totalViews = 0;
     let totalEarnings = 0;
@@ -50,8 +40,6 @@ router.get('/dashboarddata', async (req, res) => {
       totalViews += project.views || 0;
       totalEarnings += project.price || 0; // Use price as earnings for now
     });
-
-    console.log('Calculated totals - Views:', totalViews, 'Earnings:', totalEarnings);
 
     // Get optimized recent activities (only necessary fields for display)
     const activities = (user.activities && user.activities.recent) || [];
@@ -75,8 +63,6 @@ router.get('/dashboarddata', async (req, res) => {
       connections,
       favourites
     };
-
-    console.log('Dashboard response:', response);
 
     res.json(response);
   } catch (error) {

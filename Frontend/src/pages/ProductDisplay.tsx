@@ -23,11 +23,12 @@ import { Footer } from "@/components/Footer";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import { useAuthState } from "@/hooks/useAuthState";
-import { userService } from "@/services/userService";
+import userService from "@/services/userService";
 import { toast } from "sonner";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { Skeleton } from "@/components/ui/skeleton";
 import NoImageAvailable from "@/assets/images/no image available.png";
+import { API_ENDPOINTS } from '../config/api';
 
 const ProductDisplay = () => {
   const { id } = useParams();
@@ -63,21 +64,35 @@ const ProductDisplay = () => {
   }, [user]);
   
   useEffect(() => {
-    const fetchProject = async () => {
-      setLoading(true);
-      setError(null);
+    const fetchProjectData = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/marketplace/projects/${id}`);
-        if (!response.ok) throw new Error('Failed to fetch project');
+        setLoading(true);
+        const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(id));
+        if (!response.ok) {
+          throw new Error('Failed to fetch project data');
+        }
         const data = await response.json();
-        setProject(data.project);
-      } catch (err: any) {
-        setError(err.message || 'An error occurred');
+        setProject(data);
+        
+        // Fetch author data
+        if (data.author) {
+          const res = await fetch(API_ENDPOINTS.USER_BY_ID(data.author));
+          if (res.ok) {
+            const authorData = await res.json();
+            setAuthorCache(prev => ({
+              ...prev,
+              [data.author]: authorData.data
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching project:', error);
+        setError('Failed to load project');
       } finally {
         setLoading(false);
       }
     };
-    if (id) fetchProject();
+    if (id) fetchProjectData();
   }, [id]);
 
   // Fetch author details for the project
@@ -85,7 +100,7 @@ const ProductDisplay = () => {
     const fetchAuthor = async () => {
       if (project && project.author && !authorCache[project.author]) {
         try {
-          const res = await fetch(`http://localhost:3000/api/users/${project.author}`);
+          const res = await fetch(API_ENDPOINTS.USER_BY_ID(project.author));
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.data) {
@@ -150,9 +165,9 @@ const ProductDisplay = () => {
         toast.error('User data not found');
         return;
       }
-      await userService.addToCart(userData.customUserId, {
-        productId: projectId.toString(),
-        addedAt: new Date().toISOString(),
+      await userService.addToCart({
+        name: project.title,
+        price: project.price || 0,
         quantity: 1
       });
       toast.success('Project added to cart successfully');

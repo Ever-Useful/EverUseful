@@ -6,6 +6,7 @@ import Header from "../components/Header";
 import { Footer } from "../components/Footer";
 import { ArrowUpDown } from "lucide-react";
 import noUserProfile from "../assets/images/no user profile.png";
+import { API_ENDPOINTS } from '../config/api';
 
 // HERO SECTION DATA
 const heroFeatures = [
@@ -498,6 +499,41 @@ const Work: React.FC = () => {
   const [skillFilter, setSkillFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [showCount, setShowCount] = useState(4);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchFreelancers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(API_ENDPOINTS.USERS + "/all");
+      if (!response.ok) {
+        throw new Error('Failed to fetch freelancers');
+      }
+      const data = await response.json();
+      console.log('Freelancing - Fetched users data:', data);
+      
+      // Handle different response structures
+      let users = [];
+      if (Array.isArray(data)) {
+        users = data;
+      } else if (data && Array.isArray(data.users)) {
+        users = data.users;
+      } else if (data && Array.isArray(data.data)) {
+        users = data.data;
+      } else {
+        console.warn('Unexpected response structure:', data);
+        users = [];
+      }
+      
+      setFreelancers(users);
+    } catch (error) {
+      console.error('Error fetching freelancers:', error);
+      setError('Failed to load freelancers');
+      setFreelancers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Update visible indexes on slide change
   const handleBeforeChange = (_: number, next: number) => {
@@ -511,22 +547,30 @@ const Work: React.FC = () => {
 
   // Fetch all users and filter for freelancers
   useEffect(() => {
-    fetch("http://localhost:3000/api/users/all")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.users) {
-          const all = Object.values(data.users);
-          const onlyFreelancers = all.filter((u: any) => u.profile?.userType?.toLowerCase() === "freelancer");
-          setFreelancers(onlyFreelancers);
-        }
-      });
+    fetchFreelancers();
   }, []);
 
   // Filtering and sorting
   useEffect(() => {
-    let result = freelancers;
+    let result = freelancers || [];
+    
+    // Ensure result is always an array
+    if (!Array.isArray(result)) {
+      console.warn('Freelancers data is not an array:', result);
+      result = [];
+    }
+    
+    // Filter for freelancers only
+    result = result.filter((f) => {
+      const userType = f.auth?.userType || f.profile?.userType || '';
+      return userType.toLowerCase().includes('freelancer');
+    });
+    
     if (skillFilter) {
-      result = result.filter((f) => (f.skills || []).some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase())));
+      result = result.filter((f) => {
+        const skills = f.skills || [];
+        return Array.isArray(skills) && skills.some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase()));
+      });
     }
     if (locationFilter) {
       result = result.filter((f) => (f.profile?.location || "").toLowerCase().includes(locationFilter.toLowerCase()));
@@ -678,9 +722,18 @@ const Work: React.FC = () => {
                   />
                 </div>
                 <div className="text-center mb-2 xs:mb-3">
-                  <h3 className="text-base xs:text-lg font-bold text-black">{f.profile?.firstName} {f.profile?.lastName}</h3>
-                  <p className="text-black font-medium text-xs xs:text-sm">{f.profile?.title}</p>
-                  <p className="text-black text-xs mt-1">{f.profile?.location}</p>
+                  <h3 className="text-base xs:text-lg font-bold text-black">{f.auth?.firstName || f.profile?.firstName} {f.auth?.lastName || f.profile?.lastName}</h3>
+                  <p className="text-black font-medium text-xs xs:text-sm">{f.profile?.title || 'Freelancer'}</p>
+                  <p className="text-black text-xs mt-1">{f.profile?.location || 'N/A'}</p>
+                  <div className="flex justify-center items-center gap-2 mt-1">
+                    <span className="text-green-600 text-xs font-medium">
+                      ${f.freelancerData?.hourlyRate || 'N/A'}/hr
+                    </span>
+                    <span className="text-gray-500 text-xs">•</span>
+                    <span className="text-blue-600 text-xs font-medium">
+                      {f.freelancerData?.avgResponseTime || 'N/A'}h response
+                    </span>
+                  </div>
                 </div>
                 <div className="flex flex-wrap justify-center gap-1 mb-2 xs:mb-3">
                   {(f.skills || []).slice(0, 3).map((skill: any, i: number) => (
@@ -707,7 +760,7 @@ const Work: React.FC = () => {
                       </svg>
                     ))}
                   </div>
-                  <span className="ml-2 text-gray-700 text-xs xs:text-sm font-medium">{(f.stats?.rating || 4.5).toFixed(1)}</span>
+                  <span className="ml-2 text-gray-700 text-xs xs:text-sm font-medium">{(f.rating || 0).toFixed(1)}</span>
                 </div>
                 <button
                   className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mt-auto transition text-xs xs:text-sm"
