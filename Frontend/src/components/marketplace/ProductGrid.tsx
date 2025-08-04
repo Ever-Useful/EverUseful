@@ -320,10 +320,12 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
 
     return (
       <div className="w-full flex items-center justify-center mt-8">
-        <div className="flex items-center justify-center space-x-2 p-2">
+        <div
+          className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 px-1 sm:px-2 py-1 sm:py-2 w-full max-w-full"
+        >
           <Button
             variant="outline"
-            className="w-8 h-8 p-0"
+            className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={!pagination.hasPrevPage}
           >
@@ -333,7 +335,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
             <>
               <Button
                 variant="outline"
-                className="w-8 h-8 p-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
                 onClick={() => handlePageChange(1)}
               >
                 1
@@ -347,7 +349,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               {endPage < pagination.totalPages - 1 && <span className="text-gray-500">...</span>}
               <Button
                 variant="outline"
-                className="w-8 h-8 p-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
                 onClick={() => handlePageChange(pagination.totalPages)}
               >
                 {pagination.totalPages}
@@ -356,7 +358,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
           )}
           <Button
             variant="outline"
-            className="w-8 h-8 p-0"
+            className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={!pagination.hasNextPage}
           >

@@ -183,7 +183,7 @@ const PreJoinForm: React.FC = () => {
             Limited Early Access
           </span>
         </div>
-        <h3 className="text-gray-900 text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
+        <h3 className="text-gray-900 text-[17px] sm:text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
           Register for Early Notifications.
         </h3>
         <p className="text-center text-gray-700 text-base mb-1 md:mb-2">
@@ -298,7 +298,7 @@ export const UpcomingPhase: React.FC = () => (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-24 items-center">
         {/* Left: Info, Form */}
         <div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight mobile-text-4xl">
+          <h2 className="text-[17px] sm:text-4xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight mobile-text-4xl">
             Sustainable Projects
             <br />
             for a Brighter Future
