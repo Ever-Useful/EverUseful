@@ -23,6 +23,35 @@ interface UserStats {
 }
 
 interface UserData {
+  success: boolean;
+  data: {
+    customUserId: string;
+    auth: {
+      firstName: string;
+      lastName: string;
+      phoneNumber: string;
+      email: string;
+      userType: string;
+      mobile: string;
+      gender: string;
+      username: string;
+    };
+    profile: UserProfile;
+    stats?: UserStats;
+    studentData?: any;
+    education?: any[];
+    workExperience?: any[];
+    skills?: any[];
+    freelancerData?: any;
+    professorData?: any;
+    personalDetails?: any;
+    socialLinks?: any;
+    projects?: any;
+  };
+}
+
+// For backward compatibility with other methods
+interface SimpleUserData {
   customUserId: string;
   profile: UserProfile;
   stats?: UserStats;
@@ -111,7 +140,7 @@ class UserService {
   }
 
   // Create new user
-  async createUser(userData: Partial<UserProfile>): Promise<UserData> {
+  async createUser(userData: Partial<UserProfile>): Promise<SimpleUserData> {
     const response = await this.makeRequest(API_ENDPOINTS.USERS, {
       method: 'POST',
       body: JSON.stringify(userData),
@@ -125,7 +154,7 @@ class UserService {
   }
 
   // Update user profile
-  async updateUserProfile(profileData: Partial<UserProfile>): Promise<UserData> {
+  async updateUserProfile(profileData: Partial<UserProfile>): Promise<SimpleUserData> {
     const response = await this.makeRequest(API_ENDPOINTS.USER_PROFILE, {
       method: 'PUT',
       body: JSON.stringify(profileData),
@@ -234,12 +263,12 @@ class UserService {
   }
 
   // Get all users (admin)
-  async getAllUsers(): Promise<UserData[]> {
+  async getAllUsers(): Promise<SimpleUserData[]> {
     return await this.makeRequest(`${API_ENDPOINTS.USERS}/all`);
   }
 
   // Get user by custom ID
-  async getUserByCustomId(customUserId: string): Promise<UserData> {
+  async getUserByCustomId(customUserId: string): Promise<SimpleUserData> {
     return await this.makeRequest(`${API_ENDPOINTS.USERS}/custom/${customUserId}`);
   }
 

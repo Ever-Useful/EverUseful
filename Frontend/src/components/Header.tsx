@@ -323,11 +323,16 @@ const Header = () => {
             if (user) {
                 setIsLoggedIn(true);
                 localStorage.setItem("isLoggedIn", "true");
-                const userProfile = await userService.getUserProfile();
-                setProfileData({
-                    firstName: userProfile.data?.auth?.firstName || '',
-                    lastName: userProfile.data?.auth?.lastName || '',
-                });
+                try {
+                    const userProfile = await userService.getUserProfile();
+                    setProfileData({
+                        firstName: userProfile.data?.auth?.firstName || '',
+                        lastName: userProfile.data?.auth?.lastName || '',
+                    });
+                } catch (error) {
+                    console.error('Error fetching user profile:', error);
+                    setProfileData({ firstName: '', lastName: '' });
+                }
             } else {
                 setIsLoggedIn(false);
                 localStorage.removeItem("isLoggedIn");
