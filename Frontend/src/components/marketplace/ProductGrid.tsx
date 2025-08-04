@@ -383,12 +383,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       };
 
       // Increment the view count
-      const viewResponse = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}/view`, {
+      const viewResponse = await fetch(API_ENDPOINTS.MARKETPLACE_VIEW(projectId.toString()), {
         method: 'POST',
         headers
       });
       
-      if (!viewResponse.ok) throw new Error('Failed to increment view count');
+      if (viewResponse.ok) {
+        console.log('View recorded successfully');
+      }
       
       // Update the project views in the local state
       setProjects(prevProjects =>
@@ -406,14 +408,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     }
   };
 
-  const handleFavorite = async (projectId: number) => {
+  const handleFavorite = async (projectId: string) => {
     if (!user || !token) {
       setShowPopupMenu(true);
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}/favorite`, {
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_FAVORITE(projectId.toString()), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -428,7 +430,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       
       setProjects(prevProjects =>
         prevProjects.map(project =>
-          project.id === projectId
+          project.id === parseInt(projectId, 10) // Ensure projectId is number for comparison
             ? {
                 ...project,
                 isFavorited: data.isFavorited
@@ -655,7 +657,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                       className="w-7 h-7 p-0 bg-white/70 hover:bg-white/90 shadow"
                       onClick={e => {
                         e.stopPropagation();
-                        handleFavorite(project.id);
+                        handleFavorite(project.id.toString());
                       }}
                     >
                       <Heart className={`w-4 h-4 ${project.isFavorited ? 'fill-pink-500 text-pink-500' : 'text-pink-500'}`} />

@@ -4,42 +4,52 @@ const isProduction = import.meta.env.PROD;
 
 // Base API URL - automatically switches between localhost and production
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (isDevelopment ? 'http://localhost:3000' : 'http://13.235.148.91:3000');
+  (isDevelopment ? 'http://localhost:3000' : 'https://amoghconnect.com');
+
+// For production, we need to ensure the API calls go through the proxy
+export const getApiUrl = (endpoint: string) => {
+  if (isDevelopment) {
+    return `${API_BASE_URL}${endpoint}`;
+  } else {
+    // In production, ensure all API calls go through HTTPS
+    return `https://amoghconnect.com${endpoint}`;
+  }
+};
 
 // API Endpoints
 export const API_ENDPOINTS = {
   // Auth endpoints
-  TOKEN: `${API_BASE_URL}/token`,
+  TOKEN: getApiUrl('/token'),
   
   // User endpoints
-  USERS: `${API_BASE_URL}/api/users`,
-  USER_PROFILE: `${API_BASE_URL}/api/users/profile`,
-  USER_SKILLS: `${API_BASE_URL}/api/users/skills`,
-  USER_PROJECTS: `${API_BASE_URL}/api/users/projects`,
-  USER_CART: `${API_BASE_URL}/api/users/cart`,
-  USER_MEETINGS: `${API_BASE_URL}/api/users/meetings`,
-  USER_CONNECTIONS: `${API_BASE_URL}/api/users/connections`,
-  USER_BY_ID: (id: string) => `${API_BASE_URL}/api/users/${id}`,
-  USER_BULK: (ids: string) => `${API_BASE_URL}/api/users/bulk/${ids}`,
-  USER_FOLLOW: `${API_BASE_URL}/api/users/follow`,
+  USERS: getApiUrl('/api/users'),
+  USER_PROFILE: getApiUrl('/api/users/profile'),
+  USER_SKILLS: getApiUrl('/api/users/skills'),
+  USER_PROJECTS: getApiUrl('/api/users/projects'),
+  USER_CART: getApiUrl('/api/users/cart'),
+  USER_MEETINGS: getApiUrl('/api/users/meetings'),
+  USER_CONNECTIONS: getApiUrl('/api/users/connections'),
+  USER_BY_ID: (id: string) => getApiUrl(`/api/users/${id}`),
+  USER_BULK: (ids: string) => getApiUrl(`/api/users/bulk/${ids}`),
+  USER_FOLLOW: getApiUrl('/api/users/follow'),
   
   // Marketplace endpoints
-  MARKETPLACE: `${API_BASE_URL}/api/marketplace`,
-  MARKETPLACE_PROJECTS: `${API_BASE_URL}/api/marketplace/projects`,
-  MARKETPLACE_PROJECT: (id: string) => `${API_BASE_URL}/api/marketplace/projects/${id}`,
-  MARKETPLACE_VIEWS: (id: string) => `${API_BASE_URL}/api/marketplace/projects/${id}/views`,
-  MARKETPLACE_FAVORITE: (id: string) => `${API_BASE_URL}/api/marketplace/projects/${id}/favorite`,
-  MARKETPLACE_VIEW: (id: string) => `${API_BASE_URL}/api/marketplace/projects/${id}/view`,
+  MARKETPLACE: getApiUrl('/api/marketplace'),
+  MARKETPLACE_PROJECTS: getApiUrl('/api/marketplace/projects'),
+  MARKETPLACE_PROJECT: (id: string) => getApiUrl(`/api/marketplace/projects/${id}`),
+  MARKETPLACE_VIEWS: (id: string) => getApiUrl(`/api/marketplace/projects/${id}/views`),
+  MARKETPLACE_FAVORITE: (id: string) => getApiUrl(`/api/marketplace/projects/${id}/favorite`),
+  MARKETPLACE_VIEW: (id: string) => getApiUrl(`/api/marketplace/projects/${id}/view`),
   
   // Dashboard endpoints
-  DASHBOARD: `${API_BASE_URL}/api/dashboarddata`,
+  DASHBOARD: getApiUrl('/api/dashboarddata'),
   
   // Admin endpoints
-  ADMIN: `${API_BASE_URL}/api/admin`,
-  ADMIN_OVERVIEW: `${API_BASE_URL}/api/admin/overview`,
+  ADMIN: getApiUrl('/api/admin'),
+  ADMIN_OVERVIEW: getApiUrl('/api/admin/overview'),
   
   // Health check
-  HEALTH: `${API_BASE_URL}/api/test`,
+  HEALTH: getApiUrl('/api/test'),
 };
 
 // Helper function to get auth headers

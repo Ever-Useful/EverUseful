@@ -48,6 +48,18 @@ interface UserData {
     socialLinks?: any;
     projects?: any;
   };
+  // Direct properties for backward compatibility
+  auth?: any;
+  profile?: UserProfile;
+  studentData?: any;
+  education?: any[];
+  workExperience?: any[];
+  skills?: any[];
+  freelancerData?: any;
+  professorData?: any;
+  personalDetails?: any;
+  socialLinks?: any;
+  customUserId?: string;
 }
 
 // For backward compatibility with other methods
@@ -150,7 +162,30 @@ class UserService {
 
   // Get user profile
   async getUserProfile(): Promise<UserData> {
-    return await this.makeRequest(API_ENDPOINTS.USER_PROFILE);
+    const response = await this.makeRequest(API_ENDPOINTS.USER_PROFILE);
+    
+    // Handle both response formats
+    if (response.success && response.data) {
+      // New format with nested data
+      return {
+        ...response,
+        // Add direct properties for backward compatibility
+        auth: response.data.auth,
+        profile: response.data.profile,
+        studentData: response.data.studentData,
+        education: response.data.education,
+        workExperience: response.data.workExperience,
+        skills: response.data.skills,
+        freelancerData: response.data.freelancerData,
+        professorData: response.data.professorData,
+        personalDetails: response.data.personalDetails,
+        socialLinks: response.data.socialLinks,
+        customUserId: response.data.customUserId,
+      };
+    } else {
+      // Old format or direct response
+      return response;
+    }
   }
 
   // Update user profile
@@ -283,6 +318,107 @@ class UserService {
   // Get admin overview data
   async getAdminOverview(): Promise<any> {
     return await this.makeRequest(API_ENDPOINTS.ADMIN_OVERVIEW);
+  }
+
+  // Update profile (alias for updateUserProfile)
+  async updateProfile(profileData: Partial<UserProfile>): Promise<SimpleUserData> {
+    return await this.updateUserProfile(profileData);
+  }
+
+  // Update student data
+  async updateStudentData(studentData: any): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/student-data`, {
+      method: 'PUT',
+      body: JSON.stringify(studentData),
+    });
+  }
+
+  // Update freelancer data
+  async updateFreelancerData(freelancerData: any): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/freelancer-data`, {
+      method: 'PUT',
+      body: JSON.stringify(freelancerData),
+    });
+  }
+
+  // Update professor data
+  async updateProfessorData(professorData: any): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/professor-data`, {
+      method: 'PUT',
+      body: JSON.stringify(professorData),
+    });
+  }
+
+  // Update personal details
+  async updatePersonalDetails(personalDetails: any): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/personal-details`, {
+      method: 'PUT',
+      body: JSON.stringify(personalDetails),
+    });
+  }
+
+  // Update social links
+  async updateSocialLinks(socialLinks: any): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/social-links`, {
+      method: 'PUT',
+      body: JSON.stringify(socialLinks),
+    });
+  }
+
+  // Add skill (alias for addUserSkill)
+  async addSkill(skill: Omit<Skill, 'id'>): Promise<Skill> {
+    return await this.addUserSkill(skill);
+  }
+
+  // Delete skill (alias for removeUserSkill)
+  async deleteSkill(skillName: string): Promise<void> {
+    return await this.removeUserSkill(skillName);
+  }
+
+  // Add education
+  async addEducation(education: any): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/education`, {
+      method: 'POST',
+      body: JSON.stringify(education),
+    });
+  }
+
+  // Update education
+  async updateEducation(educationId: string, education: any): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/education/${educationId}`, {
+      method: 'PUT',
+      body: JSON.stringify(education),
+    });
+  }
+
+  // Delete education
+  async deleteEducation(educationId: string): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/education/${educationId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Add work experience
+  async addWorkExperience(work: any): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/work-experience`, {
+      method: 'POST',
+      body: JSON.stringify(work),
+    });
+  }
+
+  // Update work experience
+  async updateWorkExperience(workId: string, work: any): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/work-experience/${workId}`, {
+      method: 'PUT',
+      body: JSON.stringify(work),
+    });
+  }
+
+  // Delete work experience
+  async deleteWorkExperience(workId: string): Promise<void> {
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/work-experience/${workId}`, {
+      method: 'DELETE',
+    });
   }
 }
 

@@ -100,7 +100,7 @@ const ProductDisplay = () => {
     const fetchAuthor = async () => {
       if (project && project.author && !authorCache[project.author]) {
         try {
-          const res = await fetch(`http://localhost:3000/api/users/${project.author}`);
+          const res = await fetch(API_ENDPOINTS.USER_BY_ID(project.author));
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.data) {

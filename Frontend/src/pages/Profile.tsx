@@ -249,7 +249,7 @@ const Profile = () => {
       }
       const token = await user.getIdToken();
 
-      const response = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}`, {
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectId), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

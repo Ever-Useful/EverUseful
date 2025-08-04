@@ -536,7 +536,7 @@ const Work: React.FC = () => {
 
   // Filtering and sorting
   useEffect(() => {
-    let result = freelancers;
+    let result = freelancers || [];
     if (skillFilter) {
       result = result.filter((f) => (f.skills || []).some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase())));
     }
@@ -552,9 +552,9 @@ const Work: React.FC = () => {
     }
     // Sort
     if (sortBy === "rating") {
-      result = result.slice().sort((a, b) => (b.stats?.rating || 4.5) - (a.stats?.rating || 4.5));
+      result = Array.isArray(result) ? result.slice().sort((a, b) => (b.stats?.rating || 4.5) - (a.stats?.rating || 4.5)) : [];
     } else if (sortBy === "projects") {
-      result = result.slice().sort((a, b) => (b.stats?.projectsCount || 0) - (a.stats?.projectsCount || 0));
+      result = Array.isArray(result) ? result.slice().sort((a, b) => (b.stats?.projectsCount || 0) - (a.stats?.projectsCount || 0)) : [];
     }
     setFiltered(result);
   }, [freelancers, skillFilter, locationFilter, search, sortBy]);
