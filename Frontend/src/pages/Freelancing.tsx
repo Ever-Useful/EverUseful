@@ -6,6 +6,7 @@ import Header from "../components/Header";
 import { Footer } from "../components/Footer";
 import { ArrowUpDown } from "lucide-react";
 import noUserProfile from "../assets/images/no user profile.png";
+import { API_ENDPOINTS } from '../config/api';
 
 // HERO SECTION DATA
 const heroFeatures = [
@@ -498,6 +499,25 @@ const Work: React.FC = () => {
   const [skillFilter, setSkillFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [showCount, setShowCount] = useState(4);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchFreelancers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(API_ENDPOINTS.USERS + "/all");
+      if (!response.ok) {
+        throw new Error('Failed to fetch freelancers');
+      }
+      const data = await response.json();
+      setFreelancers(data);
+    } catch (error) {
+      console.error('Error fetching freelancers:', error);
+      setError('Failed to load freelancers');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Update visible indexes on slide change
   const handleBeforeChange = (_: number, next: number) => {
@@ -511,15 +531,7 @@ const Work: React.FC = () => {
 
   // Fetch all users and filter for freelancers
   useEffect(() => {
-    fetch("http://localhost:3000/api/users/all")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.users) {
-          const all = Object.values(data.users);
-          const onlyFreelancers = all.filter((u: any) => u.profile?.userType?.toLowerCase() === "freelancer");
-          setFreelancers(onlyFreelancers);
-        }
-      });
+    fetchFreelancers();
   }, []);
 
   // Filtering and sorting

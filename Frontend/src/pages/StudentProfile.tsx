@@ -1,24 +1,19 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { auth } from "../lib/firebase";
-// Removed Firestore imports - using DynamoDB now
-import { onAuthStateChanged } from "firebase/auth";
-import toast from "react-hot-toast";
-
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, MapPin, Globe, Mail, Phone, GraduationCap, Briefcase, Award, Users, Eye, Heart, Download, Share2, MessageCircle, Send, Linkedin, Github, Twitter, Instagram, Facebook, Youtube, Globe as GlobeIcon, UserPlus, BookOpen, Star } from 'lucide-react';
+import userService from '@/services/userService';
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Camera, DollarSign, Award, Clock, GraduationCap, UserPlus, BookOpen, Edit, Link, Briefcase, Trash2, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-import RecentActivity from "@/components/RecentActivity";
-import SkillsSection from "@/components/Skillssection";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ChatBox } from "@/components/ChatBox";
-import { userService } from "@/services/userService";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
+import { API_ENDPOINTS } from '../config/api';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -34,64 +29,62 @@ const Profile = () => {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
+  const [error, setError] = useState<string | null>(null);
 
 
   // Fetch user data by customUserId from userData.json
   const fetchUserData = async () => {
-    if (id) {
-      try {
-        console.log('Fetching student with ID:', id);
-        // Make direct fetch call to backend without authentication for public profile
-        const response = await fetch(`http://localhost:3000/api/users/${id}`);
-        console.log('Response status:', response.status);
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Student data received:', data);
-          console.log('Full data structure:', JSON.stringify(data, null, 2));
-          if (data.success && data.data) {
-            setUserData(data.data);
-            setEducation(data.data.education || []);
-            setWorkExperience(data.data.workExperience || []);
-            console.log('User data set:', data.data);
-            console.log('Projects object:', data.data.projects);
-            console.log('Projects.created:', data.data.projects?.created);
-            console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
-            // Fetch full project details for each project ID
-            const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-            console.log('Project IDs found:', projectIds);
-            console.log('Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
-            if (projectIds.length > 0) {
-              const projectPromises = projectIds.map((pid) =>
-                fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
-                  .then(res => res.ok ? res.json() : null)
-                  .then(res => res && res.project ? res.project : null)
-                  .catch(() => null)
-              );
-              const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-              console.log('Full projects fetched:', fullProjects);
-              setPortfolioProjects(fullProjects);
-            } else {
-              console.log('No project IDs found');
-              setPortfolioProjects([]);
-            }
-          } else {
-            console.error('Invalid response format:', data);
-            setUserData({});
-            setPortfolioProjects([]);
-          }
-        } else {
-          console.error('Failed to fetch student:', response.status);
-          setUserData({});
-          setPortfolioProjects([]);
-        }
-      } catch (err) {
-        console.error('Error fetching student:', err);
-        setUserData({});
+    try {
+      setLoading(true);
+      const response = await fetch(API_ENDPOINTS.USER_BY_ID(id));
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const data = await response.json();
+      setUserData(data);
+      setEducation(data.education || []);
+      setWorkExperience(data.workExperience || []);
+      console.log('User data set:', data.data);
+      console.log('Projects object:', data.data.projects);
+      console.log('Projects.created:', data.data.projects?.created);
+      console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
+      // Fetch full project details for each project ID
+      const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
+      console.log('Project IDs found:', projectIds);
+      console.log('Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
+      if (projectIds.length > 0) {
+        const projectPromises = projectIds.map((pid) =>
+          fetchProjectData(pid)
+        );
+        const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
+        console.log('Full projects fetched:', fullProjects);
+        setPortfolioProjects(fullProjects);
+      } else {
+        console.log('No project IDs found');
         setPortfolioProjects([]);
       }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setError('Failed to load user profile');
+      setUserData({});
+      setPortfolioProjects([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const fetchProjectData = async (pid: string) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
+      if (!response.ok) {
+        throw new Error('Failed to fetch project data');
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching project data:', error);
+      return null;
+    }
   };
 
   useEffect(() => {

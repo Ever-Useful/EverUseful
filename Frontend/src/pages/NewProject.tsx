@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
 import { auth } from '@/lib/firebase';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 
 const NewProject = () => {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ const NewProject = () => {
       };
 
       // Send project data to backend API (DynamoDB)
-      const response = await fetch(`${import.meta.env.VITE_MARKETPLACE_API_URL || 'http://localhost:3000/api/marketplace'}/projects`, {
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECTS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,10 +72,10 @@ const NewProject = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="max-w-2xl mx-auto p-6">
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">Create New Project</h1>
+        <h1 className="text-2xl font-bold mb-6">Create New Project</h1>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
             <Label htmlFor="title">Project Title</Label>
             <Input
               id="title"
@@ -85,8 +86,8 @@ const NewProject = () => {
               required
             />
           </div>
-
-          <div className="space-y-2">
+          
+          <div>
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
@@ -95,50 +96,35 @@ const NewProject = () => {
               onChange={handleChange}
               placeholder="Describe your project"
               required
-              className="min-h-[100px]"
             />
           </div>
-
-          <div className="space-y-2">
+          
+          <div>
             <Label htmlFor="category">Category</Label>
             <Input
               id="category"
               name="category"
               value={formData.category}
               onChange={handleChange}
-              placeholder="e.g., Web Development, AI, Design"
+              placeholder="e.g., Web Development, Mobile App"
               required
             />
           </div>
-
-          <div className="space-y-2">
+          
+          <div>
             <Label htmlFor="tags">Tags (comma-separated)</Label>
             <Input
               id="tags"
               name="tags"
               value={formData.tags}
               onChange={handleChange}
-              placeholder="e.g., react, typescript, ui-design"
-              required
+              placeholder="e.g., React, Node.js, MongoDB"
             />
           </div>
-
-          <div className="flex justify-end space-x-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate(-1)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              {loading ? 'Creating...' : 'Create Project'}
-            </Button>
-          </div>
+          
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? 'Creating...' : 'Create Project'}
+          </Button>
         </form>
       </Card>
     </div>

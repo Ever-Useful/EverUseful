@@ -7,9 +7,10 @@ import { ChatBox } from "@/components/ChatBox";
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect } from "react";
-import { userService } from "@/services/userService";
+import userService from "@/services/userService";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
+import { API_ENDPOINTS } from '../config/api';
 
 const VisitingProfile = () => {
   const { id } = useParams();
@@ -29,7 +30,7 @@ const VisitingProfile = () => {
     const fetchFreelancer = async () => {
       if (id) {
         try {
-          const response = await fetch(`http://localhost:3000/api/users/${id}`);
+          const response = await fetch(API_ENDPOINTS.USER_BY_ID(id));
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.data) {
@@ -40,7 +41,7 @@ const VisitingProfile = () => {
               const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
               if (projectIds.length > 0) {
                 const projectPromises = projectIds.map((pid) =>
-                  fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
+                  fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid))
                     .then(res => res.ok ? res.json() : null)
                     .then(res => res && res.project ? res.project : null)
                     .catch(() => null)

@@ -5,7 +5,7 @@ import { ArrowLeft, X } from 'lucide-react';
 import InitialsAvatar from './InitialsAvatar';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import toast from 'react-hot-toast';
 
 interface EditProfileSidebarProps {

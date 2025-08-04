@@ -8,6 +8,7 @@ import { auth } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 import SuccessAnimation from './SuccessAnimation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { API_ENDPOINTS } from '../config/api';
 
 interface MyProjectsSidebarProps {
   onClose: () => void;
@@ -111,30 +112,25 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
     setLoading(true);
     try {
       const token = await user.getIdToken();
-      if (!token) {
-        toast.error('Authentication failed. Please refresh and try again.');
-        setLoading(false);
-        return;
-      }
-
-      const profileRes = await fetch('http://localhost:3000/api/users/profile', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (!profileRes.ok) throw new Error('Failed to get user profile');
-      const profileData = await profileRes.json();
-      const customUserId = profileData.data.customUserId;
+      const customUserId = user.uid;
 
       const payload = {
-        ...projectData,
-        price: Number(projectData.price),
-        teamSize: projectData.teamSize ? Number(projectData.teamSize) : null,
-        tags: projectData.tags.split(',').map(t => t.trim()).filter(Boolean),
-        skills: projectData.skills.split(',').map(s => s.trim()).filter(Boolean),
-        features: projectData.features.split(',').map(f => f.trim()).filter(Boolean),
-        techStack: projectData.techStack.split(',').map(t => t.trim()).filter(Boolean),
-        deliverables: projectData.deliverables.split(',').map(d => d.trim()).filter(Boolean),
-        images: projectData.images.split(',').map(i => i.trim()).filter(Boolean),
+        title: projectData.title,
+        description: projectData.description,
+        category: projectData.category,
+        tags: projectData.tags.split(',').map(tag => tag.trim()),
+        price: parseFloat(projectData.price) || 0,
+        duration: projectData.duration,
+        teamSize: parseInt(projectData.teamSize) || 1,
+        skills: projectData.skills.split(',').map(skill => skill.trim()),
+        features: projectData.features.split(',').map(feature => feature.trim()),
+        techStack: projectData.techStack.split(',').map(tech => tech.trim()),
+        deliverables: projectData.deliverables.split(',').map(deliverable => deliverable.trim()),
+        author: customUserId,
+        status: 'Active',
+        posted: new Date().toISOString().split('T')[0],
+        views: 0,
+        favoritedBy: [],
         customUserId,
       };
 
@@ -143,7 +139,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         console.log('Editing project:', projectToEdit);
         console.log('Editing project id:', projectToEdit.id);
         // Edit mode: update project
-        res = await fetch(`http://localhost:3000/api/marketplace/projects/${projectToEdit.id}`, {
+        res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectToEdit.id), {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -153,7 +149,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         });
       } else {
         // Add mode: create new project
-        res = await fetch('http://localhost:3000/api/marketplace/projects', {
+        res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECTS, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

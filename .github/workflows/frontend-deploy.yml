@@ -31,8 +31,11 @@ jobs:
       - name: Add cache busting to index.html
         working-directory: Frontend
         run: |
+           # Add timestamp to force cache refresh
            TIMESTAMP=$(date +%s)
+           # Add version parameter to prevent caching
            sed -i "s|<html|<html data-version=\"$TIMESTAMP\"|g" dist/index.html
+           # Add meta tag for cache busting
            sed -i 's|<head>|<head>\n    <meta name="version" content="'$TIMESTAMP'" />|g' dist/index.html
 
       - name: Clear dist directory
@@ -145,4 +148,16 @@ jobs:
                 }
             }
             EOF
-            sudo nginx -t && sudo systemctl reload nginx 
+            sudo nginx -t && sudo systemctl reload nginx
+
+      - name: Test API connectivity
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            echo "Testing API connectivity..."
+            # Test if backend is accessible from the server
+            curl -I http://13.235.148.91:3000/api/test || echo "Backend not accessible from server"
+            echo "Frontend deployment completed successfully!" 

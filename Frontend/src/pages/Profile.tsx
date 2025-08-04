@@ -8,7 +8,7 @@ import { Footer } from "@/components/Footer";
 import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import { EditProfile } from '@/components/EditProfile';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import toast from "react-hot-toast";
@@ -18,6 +18,7 @@ import BackgroundUpload from '@/components/BackgroundUpload';
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
+import { API_ENDPOINTS } from '../config/api';
 // import GlobeLoader from '@/components/GlobeLoader';
 
 

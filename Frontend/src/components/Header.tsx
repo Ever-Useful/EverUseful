@@ -42,7 +42,7 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Connections from '@/components/Connections';
 import { EditProfile } from '../components/EditProfile';
@@ -325,8 +325,8 @@ const Header = () => {
                 localStorage.setItem("isLoggedIn", "true");
                 const userProfile = await userService.getUserProfile();
                 setProfileData({
-                    firstName: userProfile.auth.firstName || '',
-                    lastName: userProfile.auth.lastName || '',
+                    firstName: userProfile.data?.auth?.firstName || '',
+                    lastName: userProfile.data?.auth?.lastName || '',
                 });
             } else {
                 setIsLoggedIn(false);

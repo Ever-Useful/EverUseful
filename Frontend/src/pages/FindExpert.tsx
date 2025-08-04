@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowUpDown } from 'lucide-react';
 import noUserProfile from '../assets/images/no user profile.png';
+import { API_ENDPOINTS } from '../config/api';
 
 // Define types for freelancer data
 type Freelancer = {
@@ -56,11 +57,16 @@ const FindExpert = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/users/all')
-      .then(res => res.json())
-      .then(data => {
+    const fetchExperts = async () => {
+      try {
+        const response = await fetch(API_ENDPOINTS.USERS + "/all");
+        if (!response.ok) {
+          throw new Error('Failed to fetch experts');
+        }
+        const data = await response.json();
         if (data && data.users) {
-          const phdUsers = Object.values(data.users).filter((user: any) => {
+          const all = Object.values(data.users);
+          const onlyPhdUsers = all.filter((user: any) => {
             // Check if user has education data
             if (!user.education || !Array.isArray(user.education)) {
               return false;
@@ -80,13 +86,15 @@ const FindExpert = () => {
             return hasPhd;
           });
           
-          console.log('PhD Users found:', phdUsers.length);
-          setPhdExperts(phdUsers);
+          console.log('PhD Users found:', onlyPhdUsers.length);
+          setPhdExperts(onlyPhdUsers);
         }
-      })
-      .catch(error => {
-        console.error('Error fetching users:', error);
-      });
+      } catch (error) {
+        console.error('Error fetching experts:', error);
+      }
+    };
+
+    fetchExperts();
   }, []);
 
   // Filter experts based on category and search query
