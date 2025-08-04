@@ -15,9 +15,11 @@ import { getCategoryIcon, getLicenseColor } from '@/components/cart/utils';
 import { CartItem as CartItemType, SavedItem, FeaturedProject } from '@/components/cart/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthState } from '@/hooks/useAuthState';
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import { toast } from 'sonner';
 import Header from "@/components/Header";
+import { API_ENDPOINTS } from '../config/api';
+
 interface BackendCartItem {
   productId: string;
   addedAt: string;
@@ -146,7 +148,7 @@ const Cart = () => {
         cartData.map(async (item: BackendCartItem) => {
           try {
             // Fetch project details from marketplace
-            const response = await fetch(`http://localhost:3000/api/marketplace/projects/${item.productId}`);
+            const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(item.productId));
             if (!response.ok) {
               throw new Error(`Failed to fetch project ${item.productId}`);
             }

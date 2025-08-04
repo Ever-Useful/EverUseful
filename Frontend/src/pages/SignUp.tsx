@@ -24,8 +24,9 @@ import { auth, handleGoogleAuth, handleGithubAuth } from "../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 // Removed Firestore imports - using DynamoDB now
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 // Removed Firestore import - using DynamoDB now
+import { API_ENDPOINTS } from '../config/api';
 import Logo from '../assets/Logo/Logo Side.png'
 
 const SignUp = () => {
@@ -296,17 +297,14 @@ const SignUp = () => {
       const idToken = await userCredential.user.getIdToken();
 
       // Save user data to DynamoDB via backend
-      const response = await fetch('http://localhost:3000/token', {
+      const response = await fetch(API_ENDPOINTS.TOKEN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phoneNumber: formData.phone,
-          userType: formData.userType,
+          idToken: idToken,
+          customUserId: userCredential.user.uid,
         }),
       });
 

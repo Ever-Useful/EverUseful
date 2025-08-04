@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { auth } from '@/lib/firebase';
 // Removed Firestore imports - using DynamoDB now
 import { toast } from 'react-hot-toast';
-import { userService } from "@/services/userService";
+import userService from "@/services/userService";
 
 interface Skill {
   name: string;

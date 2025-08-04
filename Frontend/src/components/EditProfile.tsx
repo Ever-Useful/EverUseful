@@ -5,7 +5,7 @@ import { ArrowLeft, X } from 'lucide-react';
 import InitialsAvatar from './InitialsAvatar';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import toast from 'react-hot-toast';
 
 interface EditProfileSidebarProps {
@@ -146,29 +146,17 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
   });
 
   useEffect(() => {
-    const normalizeUserType = (dbType: string) => {
-      switch ((dbType || '').toLowerCase()) {
-        case 'student':
-          return 'Students';
-        case 'professor':
-          return 'Professors';
-        case 'freelancer':
-          return 'Freelancers';
-        default:
-          return '';
-      }
-    };
     const fetchProfile = async () => {
       try {
         const userProfile = await userService.getUserProfile();
         console.log('EditProfile - Fetched user profile:', userProfile); // Debug log
         
-        // Extract data from the response structure
-        const profileData = (userProfile as any).data || userProfile;
-        const { auth: authData, profile: userProfileData, studentData: studentInfo, professorData: professorInfo, freelancerData: freelancerInfo } = profileData;
+        // Extract data from the response structure - backend returns data directly
+        const { auth: authData, profile: userProfileData, studentData: studentInfo, professorData: professorInfo, freelancerData: freelancerInfo } = userProfile;
         
         console.log('EditProfile - Extracted auth data:', authData);
         console.log('EditProfile - Extracted profile data:', userProfileData);
+        console.log('EditProfile - Extracted freelancer data:', freelancerInfo);
         
         setProfileData({
           firstName: authData?.firstName || userProfileData?.firstName || '',
@@ -179,7 +167,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           course: studentInfo?.course || '',
           location: userProfileData?.location || '',
           year: studentInfo?.year || '',
-          userType: normalizeUserType(authData?.userType || userProfileData?.userType),
+          userType: normalizeUserType(authData?.userType || userProfileData?.userType) || (authData?.userType || userProfileData?.userType),
           username: authData?.username || userProfileData?.username || authData?.email?.split('@')[0] || '',
           email: authData?.email || userProfileData?.email || '',
           mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || userProfileData?.phoneNumber || '',
@@ -193,18 +181,25 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           department: professorInfo?.department || '',
           designation: professorInfo?.designation || '',
           researchInterests: professorInfo?.researchInterests || '',
-          skills: (((profileData as any).skills && Array.isArray((profileData as any).skills)) ? (profileData as any).skills : (freelancerInfo?.skills && Array.isArray(freelancerInfo.skills) ? freelancerInfo.skills : [])).join(','),
+          skills: (freelancerInfo?.skills && Array.isArray(freelancerInfo.skills) ? freelancerInfo.skills : []).join(','),
           experience: freelancerInfo?.experience || '',
           portfolio: freelancerInfo?.portfolio || '',
           hourlyRate: freelancerInfo?.hourlyRate || '',
           avgResponseTime: freelancerInfo?.avgResponseTime || '',
           dateOfBirth: userProfileData?.dateOfBirth || '',
         });
-        setEducationList(profileData.education || []);
-        setWorkList(profileData.workExperience || []);
+        
+        console.log('EditProfile - Set profile data with freelancer fields:', {
+          experience: freelancerInfo?.experience || '',
+          portfolio: freelancerInfo?.portfolio || '',
+          hourlyRate: freelancerInfo?.hourlyRate || '',
+          avgResponseTime: freelancerInfo?.avgResponseTime || ''
+        });
+        setEducationList(userProfile.education || []);
+        setWorkList(userProfile.workExperience || []);
         
         // Handle skills - convert objects to strings if needed
-        const skillsData = (profileData as any).skills || (freelancerInfo?.skills) || [];
+        const skillsData = (userProfile as any).skills || freelancerInfo?.skills || [];
         if (Array.isArray(skillsData)) {
           const skillStrings = skillsData.map(skill => {
             if (typeof skill === 'string') return skill;
@@ -216,10 +211,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           setSkills([]);
         }
         
-        setPersonalDetails(profileData.personalDetails || {
+        setPersonalDetails(userProfile.personalDetails || {
           address1: '', address2: '', landmark: '', pincode: '', location: '', hobbies: '', copyCurrent: false
         });
-        setSocialLinks(profileData.socialLinks || {
+        setSocialLinks(userProfile.socialLinks || {
           linkedin: '', facebook: '', instagram: '', twitter: '', git: '', medium: '', reddit: '', slack: '', dribbble: '', behance: '', codepen: '', figma: '', custom: ''
         });
       } catch (error) {
@@ -239,6 +234,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     try {
       if (activeSection === 'Basic Details') {
         // Update auth info (backend fields)
+        console.log('EditProfile - Updating auth info with userType:', denormalizeUserType(profileData.userType));
         await userService.updateAuthInfo({
           firstName: profileData.firstName,
           lastName: profileData.lastName,
@@ -275,7 +271,15 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         }
         
         // Update freelancer data if user is a freelancer
-        if (profileData.userType === 'Freelancers') {
+        console.log('EditProfile - Current userType:', profileData.userType);
+        if (profileData.userType === 'Freelancers' || profileData.userType === 'freelancer') {
+          console.log('EditProfile - Saving freelancer data:', {
+            experience: profileData.experience,
+            portfolio: profileData.portfolio,
+            location: profileData.location,
+            hourlyRate: profileData.hourlyRate,
+            avgResponseTime: profileData.avgResponseTime,
+          });
           await userService.updateFreelancerData({
             experience: profileData.experience,
             portfolio: profileData.portfolio,
@@ -283,7 +287,20 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
             hourlyRate: profileData.hourlyRate,
             avgResponseTime: profileData.avgResponseTime,
           });
+        } else {
+          console.log('EditProfile - User is not a freelancer, userType:', profileData.userType);
         }
+        
+        // Debug: Check if data was saved by fetching it again
+        setTimeout(async () => {
+          try {
+            const refreshedProfile = await userService.getUserProfile();
+            console.log('EditProfile - Refreshed profile after save:', refreshedProfile);
+            console.log('EditProfile - Refreshed freelancer data:', refreshedProfile.freelancerData);
+          } catch (error) {
+            console.error('EditProfile - Error fetching refreshed profile:', error);
+          }
+        }, 1000);
         
         // Update professor data if user is a professor
         if (profileData.userType === 'Professors') {
@@ -639,12 +656,15 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         <button
                           key={type}
                           type="button"
-                          className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${profileData.userType === type ? 'bg-blue-50 border-blue-600 text-blue-900' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+                          className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${(profileData.userType === type || (type === 'Freelancers' && profileData.userType === 'freelancer')) ? 'bg-blue-50 border-blue-600 text-blue-900' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}
                           onClick={() => setProfileData(prev => ({ ...prev, userType: type }))}
                         >
                           {type}
                         </button>
                       ))}
+                    </div>
+                    <div className="mt-2 text-xs text-gray-500">
+                      Current userType: {profileData.userType || 'Not set'} (Normalized: {normalizeUserType(profileData.userType) || profileData.userType})
                     </div>
                   </div>
                   
@@ -739,7 +759,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                     </div>
                   )}
-                  {profileData.userType === 'Freelancers' && (
+                  {(profileData.userType === 'Freelancers' || profileData.userType === 'freelancer') && (
                     <div className="space-y-6">
                       <div>
                         <label className="text-sm font-medium text-gray-700">Experience (years)</label>
@@ -757,6 +777,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         <label className="text-sm font-medium text-gray-700">Avg Response Time (hrs)</label>
                         <Input name="avgResponseTime" value={profileData.avgResponseTime ?? ''} onChange={handleInputChange} className="mt-1" placeholder="e.g. 5" />
                       </div>
+
                       <div>
                         <label className="text-sm font-medium text-gray-700">Location <span className="text-red-500">*</span></label>
                         <div className="flex items-center gap-2 mt-1">
