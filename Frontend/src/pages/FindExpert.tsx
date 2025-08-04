@@ -91,24 +91,24 @@ const FindExpert = () => {
 
   // Filter experts based on category and search query
   useEffect(() => {
-    // Transform backend data to match Freelancer type with fallback values
+    // Transform backend data to match Freelancer type with real data
     let result = phdExperts.map((user, index) => ({
       id: user.customUserId || `user-${index}`,
-      name: `${user.profile?.firstName || 'Dr.'} ${user.profile?.lastName || 'Researcher'}`,
+      name: `${user.auth?.firstName || user.profile?.firstName || 'Dr.'} ${user.auth?.lastName || user.profile?.lastName || 'Researcher'}`,
       title: user.profile?.title || 'Research Expert',
       skills: user.skills || [],
-      rate: '$50/hr',
-      experience: '5+ years',
+      rate: user.freelancerData?.hourlyRate ? `$${user.freelancerData.hourlyRate}/hr` : 'N/A',
+      experience: user.freelancerData?.experience ? `${user.freelancerData.experience} years` : 'N/A',
       image: user.profile?.avatar || noUserProfile,
-      rating: 4.5,
-      completedProjects: 10,
+      rating: user.rating || 0,
+      completedProjects: user.stats?.projectsCount || 0,
       isAvailable: true,
-      location: user.profile?.location || 'University',
-      responseTime: '2 hours',
-      portfolio: '',
-      university: user.profile?.university || 'Research University',
-      researchFocus: user.profile?.researchFocus || 'Academic Research',
-      publications: 5,
+      location: user.profile?.location || 'N/A',
+      responseTime: user.freelancerData?.avgResponseTime ? `${user.freelancerData.avgResponseTime} hours` : 'N/A',
+      portfolio: user.freelancerData?.portfolio || '',
+      university: user.studentData?.college || user.profile?.college || 'N/A',
+      researchFocus: user.professorData?.researchInterests || 'Academic Research',
+      publications: user.stats?.publicationsCount || 0,
       // Keep original user properties for profile navigation
       profile: user.profile,
       customUserId: user.customUserId

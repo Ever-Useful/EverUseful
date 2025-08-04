@@ -398,10 +398,12 @@ class UserService {
 
   // Freelancer Data
   async updateFreelancerData(freelancerData: any): Promise<any> {
+    console.log('userService - updateFreelancerData called with:', freelancerData);
     const response = await this.makeRequest('/freelancer-data', {
       method: 'PUT',
       body: JSON.stringify(freelancerData),
     });
+    console.log('userService - updateFreelancerData response:', response);
     return response.data;
   }
 

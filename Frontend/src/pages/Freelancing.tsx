@@ -678,9 +678,18 @@ const Work: React.FC = () => {
                   />
                 </div>
                 <div className="text-center mb-2 xs:mb-3">
-                  <h3 className="text-base xs:text-lg font-bold text-black">{f.profile?.firstName} {f.profile?.lastName}</h3>
-                  <p className="text-black font-medium text-xs xs:text-sm">{f.profile?.title}</p>
-                  <p className="text-black text-xs mt-1">{f.profile?.location}</p>
+                  <h3 className="text-base xs:text-lg font-bold text-black">{f.auth?.firstName || f.profile?.firstName} {f.auth?.lastName || f.profile?.lastName}</h3>
+                  <p className="text-black font-medium text-xs xs:text-sm">{f.profile?.title || 'Freelancer'}</p>
+                  <p className="text-black text-xs mt-1">{f.profile?.location || 'N/A'}</p>
+                  <div className="flex justify-center items-center gap-2 mt-1">
+                    <span className="text-green-600 text-xs font-medium">
+                      ${f.freelancerData?.hourlyRate || 'N/A'}/hr
+                    </span>
+                    <span className="text-gray-500 text-xs">•</span>
+                    <span className="text-blue-600 text-xs font-medium">
+                      {f.freelancerData?.avgResponseTime || 'N/A'}h response
+                    </span>
+                  </div>
                 </div>
                 <div className="flex flex-wrap justify-center gap-1 mb-2 xs:mb-3">
                   {(f.skills || []).slice(0, 3).map((skill: any, i: number) => (
@@ -707,7 +716,7 @@ const Work: React.FC = () => {
                       </svg>
                     ))}
                   </div>
-                  <span className="ml-2 text-gray-700 text-xs xs:text-sm font-medium">{(f.stats?.rating || 4.5).toFixed(1)}</span>
+                  <span className="ml-2 text-gray-700 text-xs xs:text-sm font-medium">{(f.rating || 0).toFixed(1)}</span>
                 </div>
                 <button
                   className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mt-auto transition text-xs xs:text-sm"

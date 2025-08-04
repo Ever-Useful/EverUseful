@@ -123,34 +123,47 @@ const Dashboard = () => {
         setUserStats(stats);
         setRecentActivity(dashboardData.activities || []);
         
-        const totalEarnings = dashboardData.totalEarnings || 0;
-        let realEarningsData;
-        if (totalEarnings > 0) {
-          realEarningsData = [
-            { name: 'Jan', value: Math.round(totalEarnings * 0.2) },
-            { name: 'Feb', value: Math.round(totalEarnings * 0.3) },
-            { name: 'Mar', value: Math.round(totalEarnings * 0.15) },
-            { name: 'Apr', value: Math.round(totalEarnings * 0.25) },
-            { name: 'May', value: Math.round(totalEarnings * 0.1) },
-            { name: 'Jun', value: Math.round(totalEarnings * 0.1) },
-          ];
-        } else {
-          realEarningsData = [
-            { name: 'Jan', value: 0 },
-            { name: 'Feb', value: 0 },
-            { name: 'Mar', value: 0 },
-            { name: 'Apr', value: 0 },
-            { name: 'May', value: 0 },
-            { name: 'Jun', value: 0 },
-          ];
-        }
-        setHasEarnings(realEarningsData.some(e => e.value > 0));
-        setEarningsData(realEarningsData);
+        // Initialize earnings data - will be updated after projects are fetched
+        setEarningsData([]);
+        setHasEarnings(false);
 
         const projectsData = await userService.getUserProjects();
-        setUserProjects(projectsData.created || []);
+        const userProjects = projectsData.created || [];
+        setUserProjects(userProjects);
 
-        const statusCounts = userProjects.reduce((acc, project) => {
+        // Calculate earnings based on actual project data
+        const now = new Date();
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          months.push({
+            name: d.toLocaleString('default', { month: 'short' }),
+            value: 0
+          });
+        }
+        
+        // Distribute earnings based on project creation dates
+        if (userProjects && userProjects.length > 0) {
+          userProjects.forEach((project: any) => {
+            if (project.createdAt) {
+              const projectDate = new Date(project.createdAt);
+              const monthIndex = months.findIndex(m => {
+                const monthDate = new Date(projectDate.getFullYear(), projectDate.getMonth(), 1);
+                return monthDate.getMonth() === projectDate.getMonth() && 
+                       monthDate.getFullYear() === projectDate.getFullYear();
+              });
+              if (monthIndex !== -1) {
+                // Add project price to that month's earnings
+                months[monthIndex].value += project.price || 0;
+              }
+            }
+          });
+        }
+        
+        setEarningsData(months);
+        setHasEarnings(months.some(e => e.value > 0));
+
+        const statusCounts = userProjects.reduce((acc: any, project: any) => {
           const status = (project.status || 'Unknown').toLowerCase();
           acc[status] = (acc[status] || 0) + 1;
           return acc;
@@ -183,9 +196,9 @@ const Dashboard = () => {
   useEffect(() => {
     const aggregateLineGraphData = async () => {
       try {
-        // Use the real dashboard data instead of marketplace.json
-        const dashboardData = await userService.getDashboardData();
-        const userProfile = await userService.getUserProfile();
+        // Get real project data to create accurate graphs
+        const projectsData = await userService.getUserProjects();
+        const userProjects = projectsData.created || [];
         
         // Prepare months (last 6 months)
         const now = new Date();
@@ -198,45 +211,55 @@ const Dashboard = () => {
           });
         }
 
-        // Use real data from dashboard
-        const totalProjects = dashboardData.projectCount || 0;
-        const totalViews = dashboardData.totalViews || 0;
-        const totalFavourites = dashboardData.favourites || 0;
-        const totalConnections = dashboardData.connections || 0;
-
-        // Distribute projects across months (simple distribution)
+        // Initialize monthly data
         const projectsByMonth = Array(6).fill(0);
-        if (totalProjects > 0) {
-          const projectsPerMonth = Math.ceil(totalProjects / 6);
-          for (let i = 0; i < totalProjects; i++) {
-            projectsByMonth[i % 6]++;
+        const viewsByMonth = Array(6).fill(0);
+        const favouritesByMonth = Array(6).fill(0);
+        const connectionsByMonth = Array(6).fill(0);
+
+        // Distribute projects based on actual creation dates
+        if (userProjects && userProjects.length > 0) {
+          userProjects.forEach((project: any) => {
+            if (project.createdAt) {
+              const projectDate = new Date(project.createdAt);
+              const monthIndex = months.findIndex(m => {
+                const monthDate = new Date(projectDate.getFullYear(), projectDate.getMonth(), 1);
+                return monthDate.getMonth() === projectDate.getMonth() && 
+                       monthDate.getFullYear() === projectDate.getFullYear();
+              });
+              if (monthIndex !== -1) {
+                projectsByMonth[monthIndex]++;
+                // Distribute views and other metrics for this project
+                const projectViews = project.views || 0;
+                const projectFavourites = project.favourites || 0;
+                viewsByMonth[monthIndex] += projectViews;
+                favouritesByMonth[monthIndex] += projectFavourites;
+              }
+            }
+          });
+        }
+
+        // For connections, use a simple distribution since we don't have connection dates
+        const totalConnections = userStats.connections || 0;
+        if (totalConnections > 0) {
+          const connectionsPerMonth = Math.floor(totalConnections / 6);
+          for (let i = 0; i < 6; i++) {
+            connectionsByMonth[i] = connectionsPerMonth;
+          }
+          // Distribute remainder
+          const remainder = totalConnections % 6;
+          for (let i = 0; i < remainder; i++) {
+            connectionsByMonth[i]++;
           }
         }
 
-        // Views: progressive curve
-        const viewsCurve = Array(6).fill(0);
-        if (totalViews > 0) {
-          let sum = 0;
-          for (let i = 0; i < 5; i++) {
-            const remaining = totalViews - sum;
-            const increment = i === 4 ? remaining : Math.floor(remaining / (6 - i));
-            sum += increment;
-            viewsCurve[i] = sum;
-          }
-          viewsCurve[5] = totalViews;
-        }
-
-        // Favourites and connections: distribute evenly
-        const favouritesByMonth = Array(6).fill(Math.floor(totalFavourites / 6));
-        const connectionsByMonth = Array(6).fill(Math.floor(totalConnections / 6));
-
-        // Build final data array
+        // Build final data array with real data
         const newLineGraphData = months.map((m, i) => ({
           month: m.label,
           projects: projectsByMonth[i],
           favourites: favouritesByMonth[i],
           connections: connectionsByMonth[i],
-          views: viewsCurve[i],
+          views: viewsByMonth[i],
         }));
         setLineGraphData(newLineGraphData);
       } catch (e) {
@@ -257,24 +280,30 @@ const Dashboard = () => {
 
   // Generate hover data for stats cards
   const generateHoverData = (baseValue: number) => {
-    return [
-      { name: 'Mon', value: baseValue * 0.8 },
-      { name: 'Tue', value: baseValue * 1.2 },
-      { name: 'Wed', value: baseValue * 0.9 },
-      { name: 'Thu', value: baseValue * 1.4 },
-      { name: 'Fri', value: baseValue * 1.1 },
-      { name: 'Sat', value: baseValue * 0.7 },
-      { name: 'Sun', value: baseValue * 0.6 },
-    ];
+    // Generate more realistic weekly data based on the base value
+    if (baseValue === 0) {
+      return [
+        { name: 'Mon', value: 0 },
+        { name: 'Tue', value: 0 },
+        { name: 'Wed', value: 0 },
+        { name: 'Thu', value: 0 },
+        { name: 'Fri', value: 0 },
+        { name: 'Sat', value: 0 },
+        { name: 'Sun', value: 0 },
+      ];
+    }
+    
+    // For non-zero values, create a realistic weekly pattern
+    const weeklyPattern = [0.9, 1.1, 1.0, 1.2, 1.0, 0.8, 0.7]; // Weekday vs weekend pattern
+    return weeklyPattern.map((multiplier, index) => ({
+      name: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index],
+      value: Math.round(baseValue * multiplier)
+    }));
   };
 
   const getActionButtonText = (userType: UserType) => {
-    switch (userType) {
-      case 'academic': return 'New Project';
-      case 'freelancer': return 'New Service';
-      case 'business': return 'New Deal';
-      default: return 'New Item';
-    }
+    // Since this is a project-based website, all user types should create projects
+    return 'New Project';
   };
 
   const DarkModeToggle = () => {
@@ -335,13 +364,6 @@ const Dashboard = () => {
         icon: <UserPlus className="w-5 h-5" />,
         color: 'text-purple-600',
         bgColor: 'bg-purple-100',
-      },
-      {
-        title: 'Total Likes',
-        value: userStats.likes,
-        icon: <Star className="w-5 h-5" />,
-        color: 'text-yellow-600',
-        bgColor: 'bg-yellow-100',
       },
     ];
   };
@@ -591,8 +613,8 @@ const Dashboard = () => {
             <div className="max-w-7xl mx-auto space-y-10 pt-8 px-6"> {/* Add horizontal padding */}
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h1 className="text-4xl font-extrabold text-gradient-emerald mb-2 mobile-text-4xl">Dashboard</h1>
-                  <p className="text-base text-gray-600 dark:text-gray-300 mobile-text-base">Plan, prioritize, and accomplish your tasks with ease.</p>
+                          <h1 className="text-4xl font-extrabold text-gradient-emerald mb-2 mobile-text-4xl">Dashboard</h1>
+        <p className="text-base text-gray-600 dark:text-gray-300 mobile-text-base">Plan, prioritize, and accomplish your tasks with ease.</p>
                 </div>
                 <div className="flex items-center gap-3">
                   {/* Mobile menu button */}
@@ -769,8 +791,8 @@ const Dashboard = () => {
                         dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
                         activeDot={{ r: 6 }}
                       />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  </LineChart>
+                </ResponsiveContainer>
                 </CardContent>
               </Card>
             </div>

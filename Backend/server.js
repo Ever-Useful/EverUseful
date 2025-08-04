@@ -63,10 +63,6 @@ app.get('/token', authorize, async (req, res) => {
         mobile: phone_number ?? '',
         phoneNumber: phone_number ?? '',
       });
-
-      console.log("New user created with custom ID:", customUserId);
-    } else {
-      console.log("Existing user logged in:", email ?? uid);
     }
 
     return res.json({ redirectUrl: '/profile' });
@@ -109,7 +105,7 @@ app.post('/token', authorize, async (req, res) => {
         phoneNumber: phoneNumber ?? phone_number ?? '',
       });
 
-      console.log("New user created with custom ID:", customUserId, "userType:", userType, "firstName:", resolvedFirstName, "lastName:", resolvedLastName);
+
     } else {
       // Update existing user's profile if provided
       const updateFields = {};
@@ -120,9 +116,6 @@ app.post('/token', authorize, async (req, res) => {
       
       if (Object.keys(updateFields).length > 0) {
         await userService.updateUserProfile(user.customUserId, updateFields);
-        console.log("Updated user fields for existing user:", email ?? uid, updateFields);
-      } else {
-        console.log("Existing user logged in:", email ?? uid);
       }
     }
 

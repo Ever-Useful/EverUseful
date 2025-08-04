@@ -138,13 +138,27 @@ const Profile = () => {
         year: studentInfo?.year || '',
       });
 
+      // Get dashboard data to ensure consistent project count with Dashboard page
+      let dashboardStats = null;
+      try {
+        const dashboardData = await userService.getDashboardData();
+        dashboardStats = {
+          projects: dashboardData.projectCount || 0,
+          connections: dashboardData.connections || 0,
+        };
+      } catch (error) {
+        console.log('Failed to fetch dashboard data, using profile stats:', error);
+      }
+
       if (userStats) {
         setStats({
           followers: userStats.followersCount || 0,
           following: userStats.followingCount || 0,
-          projects: userStats.projectsCount || 0,
+          // Use dashboard project count if available, otherwise fall back to profile stats
+          projects: (dashboardStats?.projects ?? userStats.projectsCount) || 0,
           likes: userStats.totalLikes || 0,
-          connections: userStats.connectionsCount || 0,
+          // Use dashboard connections count if available, otherwise fall back to profile stats
+          connections: (dashboardStats?.connections ?? userStats.connectionsCount) || 0,
         });
       }
 
@@ -164,56 +178,34 @@ const Profile = () => {
         setSkills([]);
       }
 
-      // Fetch projects robustly
-      const projectsData = (userProfile as any).projects;
-      if (projectsData && Array.isArray(projectsData.created)) {
-        const projectIds = projectsData.created;
-        console.log('Profile - Project IDs found:', projectIds);
-        console.log('Profile - Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
-        if (projectIds.length > 0) {
-          try {
-            const projectPromises = projectIds.map(async (pid: string | number) => {
-              console.log(`Profile - Fetching project with ID: ${pid} (type: ${typeof pid})`);
-              try {
-                const response = await fetch(`http://localhost:3000/api/marketplace/projects/${pid}`);
-                console.log(`Profile - Response for project ${pid}:`, response.status, response.ok);
-                
-                if (response.ok) {
-                  const data = await response.json();
-                  console.log(`Profile - Project data for ${pid}:`, data);
-                  return data && data.project ? data.project : null;
-                } else {
-                  console.log(`Profile - Failed to fetch project ${pid}: ${response.status}`);
-                  return null;
-                }
-              } catch (error) {
-                console.error(`Profile - Error fetching project ${pid}:`, error);
-                return null;
-              }
-            });
-            
-            const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-            console.log('Profile - Full projects fetched:', fullProjects);
-            setProjects(fullProjects);
-          } catch (error) {
-            console.error('Profile - Error fetching projects:', error);
-            setProjects([]);
-          }
-        } else {
-          console.log('Profile - No project IDs found');
-          setProjects([]);
-        }
-      } else {
-        console.log('Profile - No projects object or created array');
-        setProjects([]);
-      }
+             // Fetch projects using the same method as Dashboard to ensure consistency
+       try {
+         const projectsData = await userService.getUserProjects();
+         console.log('Profile - Projects data from getUserProjects:', projectsData);
+         
+         if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
+           console.log('Profile - Projects found:', projectsData.created.length);
+           setProjects(projectsData.created);
+         } else {
+           console.log('Profile - No projects found in getUserProjects');
+           setProjects([]);
+         }
+       } catch (error) {
+         console.error('Profile - Error fetching projects from getUserProjects:', error);
+         setProjects([]);
+       }
 
       setEducation(educationArr || []);
       setWorkExperience(workArr || []);
 
       // Fetch freelancerData
       const freelancerData = userProfile.freelancerData;
+      console.log('Profile - Freelancer data from API:', freelancerData);
       setFreelancerData({
+        hourlyRate: freelancerData?.hourlyRate || '',
+        avgResponseTime: freelancerData?.avgResponseTime || '',
+      });
+      console.log('Profile - Set freelancer data:', {
         hourlyRate: freelancerData?.hourlyRate || '',
         avgResponseTime: freelancerData?.avgResponseTime || '',
       });
@@ -248,10 +240,6 @@ const Profile = () => {
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    if (!window.confirm("Are you sure you want to delete this project?")) {
-      return;
-    }
-
     try {
       const user = auth.currentUser;
       if (!user) {
@@ -273,7 +261,16 @@ const Profile = () => {
       }
 
       toast.success("Project deleted successfully!");
-      fetchUserData(); // Refresh the project list
+      
+      // Immediately update the UI by removing the project from state
+      setProjects(prevProjects => prevProjects.filter(project => project.id !== projectId));
+      
+      // Also update the stats
+      setStats(prevStats => ({
+        ...prevStats,
+        projects: Math.max(0, prevStats.projects - 1)
+      }));
+      
     } catch (error) {
       toast.error(error.message);
       console.error("Error deleting project:", error);
@@ -432,19 +429,19 @@ const Profile = () => {
       <div className="max-w-7xl mx-auto px-8 -mt-8 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Only show Hourly Rate and Avg Response Time for freelancers */}
-          {profileData.userType?.toLowerCase() === 'freelancer' && (
+          {(profileData.userType?.toLowerCase() === 'freelancer' || profileData.userType === 'Freelancers') && (
             <>
               <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <DollarSign className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : 'N/A'}</div>
+                  <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : '$0'}</div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
                 </CardContent>
               </Card>
               <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <Clock className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : 'N/A'}</div>
+                  <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : '0'}</div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time (hrs)</div>
                 </CardContent>
               </Card>
@@ -609,15 +606,16 @@ const Profile = () => {
                                   <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">{tech}</Badge>
                                 ))}
                               </div>
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
-                                <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
-                                <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
-                                <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
-                                <div><span className="font-medium text-gray-700">Date Added:</span> {
-                                  project.dateAdded ? new Date(project.dateAdded).toLocaleDateString() : 
-                                  project.posted ? new Date(project.posted).toLocaleDateString() : 'N/A'
-                                }</div>
-                              </div>
+                                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
+                                 <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
+                                 <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
+                                 <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
+                                 <div><span className="font-medium text-gray-700">Date Added:</span> {
+                                   project.dateAdded ? new Date(project.dateAdded).toLocaleDateString() : 
+                                   project.posted ? new Date(project.posted).toLocaleDateString() :
+                                   project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'
+                                 }</div>
+                               </div>
                             </div>
                             <div className="flex flex-col gap-2 items-end ml-2">
                               <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700" onClick={() => { setEditingProject(project); setShowEditProjectSidebar(true); }}>
