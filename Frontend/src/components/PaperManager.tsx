@@ -155,7 +155,7 @@ const PaperManager = () => {
                   <Button variant="outline" size="sm" onClick={() => handleEdit(paper)}>
                     Edit
                   </Button>
-                  <Button variant="destructive" size="sm" onClick={() => handleDelete(paper.id)}>
+                  <Button variant="outline" size="sm" onClick={() => handleDelete(paper.id)}>
                     Delete
                   </Button>
                 </div>

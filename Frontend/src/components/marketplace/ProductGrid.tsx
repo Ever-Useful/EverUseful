@@ -131,6 +131,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
           }
         } catch (error) {
           console.error('Error fetching current user data:', error);
+          // Don't throw error if user is not authenticated - this is expected for non-logged in users
         }
       }
     };
@@ -252,31 +253,52 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       };
     }
     
-    // Extract data from the proper structure
-    const auth = user.auth || {};
-    const profile = user.profile || {};
+    // Extract data from the proper structure - handle both response formats
+    const auth = user.auth || user.data?.auth || {};
+    const profile = user.profile || user.data?.profile || {};
     
-    // Try multiple sources for the name
+    // Try multiple sources for the name with better priority
     let name = '';
+    
+    // First priority: firstName + lastName from auth
     if (auth.firstName || auth.lastName) {
       name = `${auth.firstName || ''} ${auth.lastName || ''}`.trim();
-    } else if (profile.firstName || profile.lastName) {
+    }
+    // Second priority: firstName + lastName from profile
+    else if (profile.firstName || profile.lastName) {
       name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
-    } else if (auth.username) {
+    }
+    // Third priority: username from auth
+    else if (auth.username) {
       name = auth.username;
-    } else if (profile.username) {
+    }
+    // Fourth priority: username from profile
+    else if (profile.username) {
       name = profile.username;
-    } else if (auth.email) {
+    }
+    // Fifth priority: email username from auth
+    else if (auth.email) {
       name = auth.email.split('@')[0];
-    } else if (profile.email) {
+    }
+    // Sixth priority: email username from profile
+    else if (profile.email) {
       name = profile.email.split('@')[0];
     }
     
+    // Get userType with fallbacks
+    const userType = profile.userType || auth.userType || '';
+    
+    // Get avatar with fallback
+    const avatar = profile.avatar || auth.avatar || NoUserProfile;
+    
+    // Get customUserId with fallback
+    const customUserId = user.customUserId || user.data?.customUserId || authorId;
+    
     return {
       name: name || 'Unnamed User',
-      image: profile.avatar || NoUserProfile,
-      userType: profile.userType || auth.userType || '',
-      id: user.customUserId,
+      image: avatar,
+      userType: userType,
+      id: customUserId,
       isLoading: false
     };
   };
@@ -385,12 +407,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       };
 
       // Increment the view count
-      const viewResponse = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}/view`, {
+      const viewResponse = await fetch(API_ENDPOINTS.MARKETPLACE_VIEW(projectId.toString()), {
         method: 'POST',
         headers
       });
       
-      if (!viewResponse.ok) throw new Error('Failed to increment view count');
+      if (viewResponse.ok) {
+        console.log('View recorded successfully');
+      }
       
       // Update the project views in the local state
       setProjects(prevProjects =>
@@ -408,14 +432,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     }
   };
 
-  const handleFavorite = async (projectId: number) => {
+  const handleFavorite = async (projectId: string) => {
     if (!user || !token) {
       setShowPopupMenu(true);
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}/favorite`, {
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_FAVORITE(projectId.toString()), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -430,7 +454,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       
       setProjects(prevProjects =>
         prevProjects.map(project =>
-          project.id === projectId
+          project.id === parseInt(projectId, 10) // Ensure projectId is number for comparison
             ? {
                 ...project,
                 isFavorited: data.isFavorited
@@ -657,7 +681,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                       className="w-7 h-7 p-0 bg-white/70 hover:bg-white/90 shadow"
                       onClick={e => {
                         e.stopPropagation();
-                        handleFavorite(project.id);
+                        handleFavorite(project.id.toString());
                       }}
                     >
                       <Heart className={`w-4 h-4 ${project.isFavorited ? 'fill-pink-500 text-pink-500' : 'text-pink-500'}`} />
@@ -867,7 +891,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
 
             <h3 className="text-lg font-bold text-gray-900 mb-2">{selected.title}</h3>
             <div className="flex flex-wrap gap-1 mb-3">
-              {selected.skills.map((skill, idx) => (
+              {selected.skills && selected.skills.map((skill, idx) => (
                 <Badge
                   key={idx}
                   variant="outline"
@@ -878,7 +902,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               ))}
             </div>
             <div className="flex flex-wrap gap-1 mb-3">
-              {selected.tags.map((tag, idx) => (
+              {selected.tags && selected.tags.map((tag, idx) => (
                 <Badge key={idx} className="bg-blue-50 text-blue-700 text-[10px] font-medium rounded">
                   #{tag}
                 </Badge>

@@ -100,7 +100,7 @@ const ProductDisplay = () => {
     const fetchAuthor = async () => {
       if (project && project.author && !authorCache[project.author]) {
         try {
-          const res = await fetch(`http://localhost:3000/api/users/${project.author}`);
+          const res = await fetch(API_ENDPOINTS.USER_BY_ID(project.author));
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.data) {
@@ -184,10 +184,10 @@ const ProductDisplay = () => {
     return <div className="min-h-screen flex items-center justify-center text-red-500">{error || 'Project not found'}</div>;
   }
 
-  const shouldTruncate = project.description.length > MAX_LENGTH
+  const shouldTruncate = project.description && project.description.length > MAX_LENGTH
   const displayedText = isExpanded
   ? project.description
-  : project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "")
+  : project.description ? project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "") : ""
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-100">
@@ -300,7 +300,7 @@ const ProductDisplay = () => {
               </div>
 
               <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6">
-                {project.skills.map((skill, index) => (
+                {project.skills && project.skills.map((skill, index) => (
                   <Badge key={index} variant="outline" className="border-gray-300 text-gray-700 text-xs hover:bg-gray-50">
                     {skill}
                   </Badge>

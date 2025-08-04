@@ -27,6 +27,18 @@ import Logo from '../assets/Logo/Logo Main.png'
 import { Link } from 'react-router-dom';
 
 export const Footer = () => {
+   // Function to scroll to top immediately
+   const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant'
+    });
+    // Additional fallbacks
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
+
   return (
     <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-gray-300 border-t border-gray-700">
       {/* Decorative top border */}
@@ -36,7 +48,7 @@ export const Footer = () => {
           {/* Brand Column */}
           <div className="lg:col-span-3 space-y-2">
             <div className="flex items-center space-x-3">
-              <Link to="/" className="flex items-center space-x-2 group">
+              <Link to="#" onClick={scrollToTop} className="flex items-center space-x-2 group">
                 <img src={Logo} alt="AMOGH" className="h-20 w-auto" />
               </Link>
             </div>
@@ -52,35 +64,35 @@ export const Footer = () => {
             <div className="space-y-2 text-xs">
               <div className="flex items-start">
                 <Mail className="h-4 w-4 text-blue-400 mt-0.5 mr-2 flex-shrink-0" />
-                <span>support@amoghedu.com</span>
+                <span>amogheveruseful@gmail.com</span>
               </div>
               <div className="flex items-start">
                 <Globe className="h-4 w-4 text-green-400 mt-0.5 mr-2 flex-shrink-0" />
-                <span>Bengaluru, India • San Francisco, USA • London, UK</span>
+                <span>Connaught Palace Delhi-110001</span>
               </div>
-              <div className="flex items-start">
+              {/* <div className="flex items-start">
                 <Award className="h-4 w-4 text-yellow-400 mt-0.5 mr-2 flex-shrink-0" />
                 <span>ISO 27001 Certified • GDPR Compliant</span>
-              </div>
+              </div> */}
             </div>
 
             {/* Social Links */}
             <div className="pt-2">
               <h4 className="text-white font-medium mb-3 text-sm">Connect With Us</h4>
               <div className="flex space-x-3">
-                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-blue-500 transition-all transform hover:-translate-y-0.5 shadow-md">
+                {/* <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-blue-500 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Twitter className="h-5 w-5 text-blue-300" />
-                </a>
-                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-blue-700 transition-all transform hover:-translate-y-0.5 shadow-md">
+                </a> */}
+                <a href="https://www.linkedin.com/company/amogh-ever-useful/" className="bg-gray-700 p-2.5 rounded-full hover:bg-blue-700 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Linkedin className="h-5 w-5 text-blue-300" />
                 </a>
-                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-gray-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                <a href="https://github.com/HARSH6309" className="bg-gray-700 p-2.5 rounded-full hover:bg-gray-600 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Github className="h-5 w-5 text-gray-300" />
                 </a>
-                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-gradient-to-r from-purple-600 to-pink-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                <a href="https://www.instagram.com/amoghever/" className="bg-gray-700 p-2.5 rounded-full hover:bg-gradient-to-r from-purple-600 to-pink-600 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Instagram className="h-5 w-5 text-purple-300" />
                 </a>
-                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-red-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                <a href="amogheveruseful@gmail.com" className="bg-gray-700 p-2.5 rounded-full hover:bg-red-600 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Mail className="h-5 w-5 text-red-300" />
                 </a>
               </div>
@@ -94,12 +106,12 @@ export const Footer = () => {
               Learning Hub
             </h4>
             <ul className="space-y-2.5 text-xs">
-              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><BookMarked className="mr-2 h-4 w-4 text-gray-500" /> Interactive Courses</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><Lightbulb className="mr-2 h-4 w-4 text-gray-500" /> Skill Labs</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><HelpCircle className="mr-2 h-4 w-4 text-gray-500" /> Q&A Forums</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><Calendar className="mr-2 h-4 w-4 text-gray-500" /> Live Workshops</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><Users className="mr-2 h-4 w-4 text-gray-500" /> Study Groups</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Certifications</a></li>
+            <li><Link to="/marketplace" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><BookMarked className="mr-2 h-4 w-4 text-gray-500" /> Course Marketplace</Link></li>
+              <li><Link to="/aiagents" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Lightbulb className="mr-2 h-4 w-4 text-gray-500" /> AI Learning Agents</Link></li>
+              <li><Link to="/findexpert" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><HelpCircle className="mr-2 h-4 w-4 text-gray-500" /> Find Expert Mentors</Link></li>
+              <li><Link to="/meetings/schedule" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Calendar className="mr-2 h-4 w-4 text-gray-500" /> Schedule Sessions</Link></li>
+              <li><Link to="/collaborators" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Users className="mr-2 h-4 w-4 text-gray-500" /> Study Groups</Link></li>
+              <li><Link to="/dashboard" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Progress Dashboard</Link></li>
             </ul>
           </div>
 
@@ -110,12 +122,12 @@ export const Footer = () => {
               Enterprise
             </h4>
             <ul className="space-y-2.5 text-xs">
-              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><Users className="mr-2 h-4 w-4 text-gray-500" /> Team Training</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><BookOpen className="mr-2 h-4 w-4 text-gray-500" /> Custom Content</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><GraduationCap className="mr-2 h-4 w-4 text-gray-500" /> Academic Partnerships</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Certification Programs</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><Globe className="mr-2 h-4 w-4 text-gray-500" /> Global Campus</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors flex items-center"><MessageSquare className="mr-2 h-4 w-4 text-gray-500" /> API Integration</a></li>
+            <li><Link to="/consultation" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><Users className="mr-2 h-4 w-4 text-gray-500" /> Expert Consultation</Link></li>
+              <li><Link to="/freelancing" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><BookOpen className="mr-2 h-4 w-4 text-gray-500" /> Research Freelancing</Link></li>
+              <li><Link to="/connect" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><GraduationCap className="mr-2 h-4 w-4 text-gray-500" /> Career Opportunities</Link></li>
+              <li><Link to="/projects/new" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Start New Project</Link></li>
+              <li><Link to="/connection" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><Globe className="mr-2 h-4 w-4 text-gray-500" /> Network & Connect</Link></li>
+              <li><Link to="/sustainable" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><MessageSquare className="mr-2 h-4 w-4 text-gray-500" /> Sustainable Projects</Link></li>
             </ul>
           </div>
 
@@ -162,7 +174,8 @@ export const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* App Download */}
             <div className="space-y-4">
-              <h4 className="text-white font-medium text-sm">Mobile Experience</h4>
+              <h4 className="text-white font-medium text-lg">Coming Soon</h4>
+              <h3 className="text-white font-medium text-sm">Mobile Experience</h3>
               <p className="text-gray-400 text-xs max-w-xs">
                 Download our app for on-the-go learning with offline access and personalized recommendations.
               </p>
@@ -186,38 +199,38 @@ export const Footer = () => {
             <div className="space-y-4">
               <h4 className="text-white font-medium text-sm">Legal</h4>
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <Link to="/privacy-policy" className="hover:text-blue-400 transition-colors flex items-center">
-                  <Shield className="mr-2 h-4 w-4 text-gray-500" />
+              <Link to="/privacy-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">                  <Shield className="mr-2 h-4 w-4 text-gray-500" />
                   Privacy Policy
                 </Link>
-                <Link to="/terms-conditions" className="hover:text-blue-400 transition-colors flex items-center">
-                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
-                  Terms of Service
-                </Link>
-                <Link to="/cookie-policy" className="hover:text-blue-400 transition-colors flex items-center">
+                <Link to="/cookie-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Cookie Policy
                 </Link>
-                <Link to="/delivery-policy" className="hover:text-blue-400 transition-colors flex items-center">
+                {/* <Link to="/terms-conditions" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  Terms of Service
+                </Link> */}
+                
+                {/* <Link to="/delivery-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Delivery Policy
-                </Link>
-                <Link to="/refund-policy" className="hover:text-blue-400 transition-colors flex items-center">
+                </Link> */}
+                {/* <Link to="/refund-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Refund Policy
-                </Link>
-                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                </Link> */}
+                {/* <a href="#" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   GDPR Compliance
-                </a>
-                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                </a> */}
+                <a href="/delivery-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Accessibility
                 </a>
-                <a href="#" className="hover:text-blue-400 transition-colors flex items-center">
+                {/* <a href="#" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Security Practices
-                </a>
+                </a> */}
               </div>
             </div>
             

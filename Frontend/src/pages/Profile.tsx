@@ -112,24 +112,25 @@ const Profile = () => {
       console.log('Profile - Raw user profile data:', userProfile);
       
       // Extract data from the response structure - backend now returns reconstructed data directly
-      const { auth: authData, profile: userProfileData, stats: userStats, studentData: studentInfo, education: educationArr, workExperience: workArr } = userProfile;
+      const { auth: authData, profile: userProfileData, studentData: studentInfo, education: educationArr, workExperience: workArr } = userProfile;
+      const userStats = (userProfile as any).stats;
       
       console.log('Profile - Extracted auth data:', authData);
       console.log('Profile - Extracted profile data:', userProfileData);
       
       setProfileData({
-        firstName: authData?.firstName || userProfileData?.firstName || '',
-        lastName: authData?.lastName || userProfileData?.lastName || '',
-        userType: (authData?.userType || userProfileData?.userType) ? 
-          (authData.userType || userProfileData.userType).charAt(0).toUpperCase() + 
-          (authData.userType || userProfileData.userType).slice(1) : '',
+        firstName: authData?.firstName || '',
+        lastName: authData?.lastName || '',
+        userType: (authData?.userType) ? 
+          (authData.userType).charAt(0).toUpperCase() + 
+          (authData.userType).slice(1) : '',
         bio: userProfileData?.bio || 'No bio available',
         avatar: userProfileData?.avatar || '',
         location: userProfileData?.location || '',
         title: userProfileData?.title || '',
         website: userProfileData?.website || '',
-        mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || userProfileData?.phoneNumber || '',
-        username: authData?.email?.split('@')[0] || userProfileData?.username || '',
+        mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || '',
+        username: authData?.email?.split('@')[0] || '',
       });
 
       setStudentData({
@@ -184,8 +185,11 @@ const Profile = () => {
          const projectsData = await userService.getUserProjects();
          console.log('Profile - Projects data from getUserProjects:', projectsData);
          
-         if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
-           console.log('Profile - Projects found:', projectsData.created.length);
+         if (projectsData && Array.isArray(projectsData)) {
+           console.log('Profile - Projects found:', projectsData.length);
+           setProjects(projectsData);
+         } else if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
+           console.log('Profile - Projects found in created array:', projectsData.created.length);
            setProjects(projectsData.created);
          } else {
            console.log('Profile - No projects found in getUserProjects');
@@ -249,7 +253,7 @@ const Profile = () => {
       }
       const token = await user.getIdToken();
 
-      const response = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}`, {
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectId), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

@@ -26,7 +26,7 @@ const PrivacyPolicy = () => {
             </p>
             <div className="flex items-center justify-center text-sm text-gray-500">
               <Calendar className="w-4 h-4 mr-2" />
-              Last Updated: February 4, 2025
+              Last Updated: June, 2025
             </div>
           </div>
         </div>
@@ -212,23 +212,23 @@ const PrivacyPolicy = () => {
                   <Mail className="w-5 h-5 text-blue-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-gray-900">Email</h4>
-                    <p className="text-gray-700">privacy@amoghedu.com</p>
+                    <p className="text-gray-700">amogheveruseful@gmail.com</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start">
+                {/* <div className="flex items-start">
                   <Phone className="w-5 h-5 text-green-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-gray-900">Phone</h4>
                     <p className="text-gray-700">+1 (555) 123-4567</p>
                   </div>
-                </div>
+                </div> */}
                 
                 <div className="flex items-start">
                   <MapPin className="w-5 h-5 text-red-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-gray-900">Address</h4>
-                    <p className="text-gray-700">123 Business Street, City, State 12345</p>
+                    <p className="text-gray-700">Connaught Place Delhi-110001 , India</p>
                   </div>
                 </div>
               </div>
@@ -236,7 +236,7 @@ const PrivacyPolicy = () => {
           </section>
 
           {/* Additional Rights for Specific States */}
-          <section className="mb-12">
+          {/* <section className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Additional Rights for Specific States</h2>
             
             <div className="space-y-6">
@@ -261,7 +261,7 @@ const PrivacyPolicy = () => {
                 </p>
               </div>
             </div>
-          </section>
+          </section> */}
 
           {/* Notification of Changes */}
           <section className="mb-12">
