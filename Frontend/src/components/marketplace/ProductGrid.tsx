@@ -269,14 +269,9 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       };
     }
     
-    console.log('Processing author data for ID:', authorId, 'Data:', user);
-    
     // Extract data from the proper structure - handle multiple response formats
     const auth = user.auth || user.data?.auth || {};
     const profile = user.profile || user.data?.profile || {};
-    
-    console.log('Profile structure:', profile);
-    console.log('Auth structure:', auth);
     
     // Try multiple sources for the name with better priority
     let name = '';
@@ -339,9 +334,8 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       isLoading: false
     };
     
-    console.log('Author details result:', result);
     return result;
-  }, [authorCache, authorsLoading]);
+  }, [authorsLoading]); // Removed authorCache from dependencies to prevent constant re-renders
 
   // Skeleton loader for author details
   const AuthorSkeleton = () => (
@@ -767,7 +761,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                   </h3>
 
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {project.skills && project.skills.slice(0, 3).map((skill, index) => (
+                      {Array.isArray(project.skills) && project.skills.slice(0, 3).map((skill, index) => (
                         <Badge
                           key={index}
                           variant="outline"
@@ -776,7 +770,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                           {skill}
                         </Badge>
                       ))}
-                      {project.skills && project.skills.length > 3 && (
+                      {Array.isArray(project.skills) && project.skills.length > 3 && (
                       <Badge
                         variant="outline"
                         className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
