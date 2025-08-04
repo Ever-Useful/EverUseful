@@ -189,8 +189,7 @@ const Profile = () => {
            console.log('Profile - Projects found:', projectsData.length);
            setProjects(projectsData);
          } else if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
-           // Fallback for older API response structure
-           console.log('Profile - Projects found (created):', projectsData.created.length);
+           console.log('Profile - Projects found in created array:', projectsData.created.length);
            setProjects(projectsData.created);
          } else {
            console.log('Profile - No projects found in getUserProjects');
