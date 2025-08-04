@@ -41,7 +41,7 @@ import RefundPolicy from "./pages/Policy/RefundPolicy";
 
 import BecomeAMentor from "./pages/BecomeAMentor";
 import BecomeMentor from "./pages/BecomeAMentor";
-//test
+
 
 const queryClient = new QueryClient();
 
