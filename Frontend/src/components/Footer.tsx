@@ -51,9 +51,7 @@ export const Footer = () => {
               <Link to="#" onClick={scrollToTop} className="flex items-center space-x-2 group">
                 <img src={Logo} alt="AMOGH" className="h-20 w-auto" />
               </Link>
-              <div className="py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-gray-300">
-                  Beta
-              </div>
+              
             </div>
             <p className="text-xs text-gray-400 mt-1">Future-Ready Education Solutions</p>
             
@@ -67,35 +65,35 @@ export const Footer = () => {
             <div className="space-y-2 text-xs">
               <div className="flex items-start">
                 <Mail className="h-4 w-4 text-blue-400 mt-0.5 mr-2 flex-shrink-0" />
-                <span>support@amoghedu.com</span>
+                <span>amogheveruseful@gmail.com</span>
               </div>
               <div className="flex items-start">
                 <Globe className="h-4 w-4 text-green-400 mt-0.5 mr-2 flex-shrink-0" />
-                <span>Bengaluru, India • San Francisco, USA • London, UK</span>
+                <span>Connaught Palace Delhi-110001</span>
               </div>
-              <div className="flex items-start">
+              {/* <div className="flex items-start">
                 <Award className="h-4 w-4 text-yellow-400 mt-0.5 mr-2 flex-shrink-0" />
                 <span>ISO 27001 Certified • GDPR Compliant</span>
-              </div>
+              </div> */}
             </div>
 
             {/* Social Links */}
             <div className="pt-2">
               <h4 className="text-white font-medium mb-3 text-sm">Connect With Us</h4>
               <div className="flex space-x-3">
-                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-blue-500 transition-all transform hover:-translate-y-0.5 shadow-md">
+                {/* <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-blue-500 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Twitter className="h-5 w-5 text-blue-300" />
-                </a>
-                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-blue-700 transition-all transform hover:-translate-y-0.5 shadow-md">
+                </a> */}
+                <a href="https://www.linkedin.com/company/amogh-ever-useful/" className="bg-gray-700 p-2.5 rounded-full hover:bg-blue-700 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Linkedin className="h-5 w-5 text-blue-300" />
                 </a>
-                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-gray-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                <a href="https://github.com/HARSH6309" className="bg-gray-700 p-2.5 rounded-full hover:bg-gray-600 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Github className="h-5 w-5 text-gray-300" />
                 </a>
-                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-gradient-to-r from-purple-600 to-pink-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                <a href="https://www.instagram.com/amoghever/" className="bg-gray-700 p-2.5 rounded-full hover:bg-gradient-to-r from-purple-600 to-pink-600 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Instagram className="h-5 w-5 text-purple-300" />
                 </a>
-                <a href="#" className="bg-gray-700 p-2.5 rounded-full hover:bg-red-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                <a href="amogheveruseful@gmail.com" className="bg-gray-700 p-2.5 rounded-full hover:bg-red-600 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Mail className="h-5 w-5 text-red-300" />
                 </a>
               </div>
@@ -205,34 +203,35 @@ export const Footer = () => {
               <Link to="/privacy-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">                  <Shield className="mr-2 h-4 w-4 text-gray-500" />
                   Privacy Policy
                 </Link>
-                <Link to="/terms-conditions" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
-                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
-                  Terms of Service
-                </Link>
                 <Link to="/cookie-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Cookie Policy
                 </Link>
-                <Link to="/delivery-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
+                {/* <Link to="/terms-conditions" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-gray-500" />
+                  Terms of Service
+                </Link> */}
+                
+                {/* <Link to="/delivery-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Delivery Policy
-                </Link>
-                <Link to="/refund-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
+                </Link> */}
+                {/* <Link to="/refund-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Refund Policy
-                </Link>
-                <a href="#" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
+                </Link> */}
+                {/* <a href="#" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   GDPR Compliance
-                </a>
-                <a href="#" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
+                </a> */}
+                <a href="/delivery-policy" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Accessibility
                 </a>
-                <a href="#" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
+                {/* <a href="#" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-gray-500" />
                   Security Practices
-                </a>
+                </a> */}
               </div>
             </div>
             

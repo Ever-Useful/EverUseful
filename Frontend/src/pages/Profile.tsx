@@ -149,7 +149,7 @@ const Profile = () => {
       }
 
       // Set skills - handle both string arrays and object arrays
-      const skillsData = userProfile.skills || userProfile.freelancerData?.skills || [];
+      const skillsData = userProfile.profile?.skills || userProfile.freelancerData?.skills || [];
       if (Array.isArray(skillsData)) {
         // Convert skill objects to strings if needed
         const skillStrings = skillsData.map(skill => {
@@ -165,7 +165,7 @@ const Profile = () => {
       }
 
       // Fetch projects robustly
-      const projectsData = userProfile.projects;
+      const projectsData = userProfile && 'projects' in userProfile ? (userProfile as any).projects : undefined;
       if (projectsData && Array.isArray(projectsData.created)) {
         const projectIds = projectsData.created;
         console.log('Profile - Project IDs found:', projectIds);

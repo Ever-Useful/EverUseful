@@ -31,8 +31,8 @@ export const HeroSection = ({
               </h1>
               
               <p className="text-base text-muted-foreground leading-relaxed">
-                Expert consultation for universities, students, and organizations 
-                transitioning to sustainable energy solutions. Build a greener tomorrow 
+                Expert consultation for universities, and organizations 
+                transitioning to grow the buisness. Build a successful tomorrow 
                 with our proven strategies.
               </p>
             </div>
@@ -40,7 +40,7 @@ export const HeroSection = ({
             <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
               <div className="flex items-center gap-2 text-eco-green">
                 <Leaf className="h-5 w-5" />
-                <span>Carbon Neutral Solutions</span>
+                <span>Sustainable Projects</span>
               </div>
               <div className="flex items-center gap-2 text-eco-blue">
                 <Zap className="h-5 w-5" />
@@ -54,15 +54,16 @@ export const HeroSection = ({
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button size="lg" className="eco-gradient hover:shadow-[var(--shadow-glow)] transition-all duration-300 group" onClick={onBookConsultation}>
-                Book Free Consultation
+                Free Buisness Consultation
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
                 className="border-eco-green text-eco-green hover:bg-eco-green hover:text-background transition-all duration-300"
-                onClick={handleLearnMore}
-              >
+                onClick={handleLearnMore} 
+                >
+              
                 Learn More
               </Button>
             </div>
