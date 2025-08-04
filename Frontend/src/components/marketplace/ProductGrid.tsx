@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -220,15 +220,30 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       
       try {
         setAuthorsLoading(true);
+        
         const response = await fetch(API_ENDPOINTS.USER_BULK(uncachedAuthorIds.join(',')));
+        
         if (response.ok) {
           const data = await response.json();
+          
           if (data.success && data.data) {
             setAuthorCache(prevCache => ({
               ...prevCache,
               ...data.data
             }));
+          } else if (Array.isArray(data)) {
+            // Handle case where API returns array directly
+            const authorMap = data.reduce((acc, user) => {
+              acc[user.customUserId || user.id] = user;
+              return acc;
+            }, {});
+            setAuthorCache(prevCache => ({
+              ...prevCache,
+              ...authorMap
+            }));
           }
+        } else {
+          console.error('Failed to fetch authors:', response.status, response.statusText);
         }
       } catch (error) {
         console.error('Error fetching authors in bulk:', error);
@@ -240,12 +255,13 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     fetchAuthors();
   }, [uncachedAuthorIds]);
 
-  // Helper to get author details with loading state
-  const getAuthorDetails = (authorId: string) => {
+  // Helper to get author details with loading state - memoized to prevent unnecessary recalculations
+  const getAuthorDetails = useCallback((authorId: string) => {
     const user = authorCache[authorId as keyof typeof authorCache];
+    
     if (!user) {
       return { 
-        name: authorsLoading ? 'Loading...' : 'Unknown', 
+        name: authorsLoading ? 'Loading...' : 'username', 
         image: NoUserProfile, 
         userType: '', 
         id: authorId,
@@ -253,7 +269,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       };
     }
     
-    // Extract data from the proper structure - handle both response formats
+    // Extract data from the proper structure - handle multiple response formats
     const auth = user.auth || user.data?.auth || {};
     const profile = user.profile || user.data?.profile || {};
     
@@ -284,24 +300,42 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     else if (profile.email) {
       name = profile.email.split('@')[0];
     }
+    // Seventh priority: direct name field
+    else if (user.name) {
+      name = user.name;
+    }
+    // Eighth priority: direct username field
+    else if (user.username) {
+      name = user.username;
+    }
+    // Ninth priority: check if profile has a different structure
+    else if (profile.name) {
+      name = profile.name;
+    }
+    // Tenth priority: check if profile has displayName
+    else if (profile.displayName) {
+      name = profile.displayName;
+    }
     
     // Get userType with fallbacks
-    const userType = profile.userType || auth.userType || '';
+    const userType = profile.userType || auth.userType || user.userType || '';
     
     // Get avatar with fallback
-    const avatar = profile.avatar || auth.avatar || NoUserProfile;
+    const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
     
     // Get customUserId with fallback
     const customUserId = user.customUserId || user.data?.customUserId || authorId;
     
-    return {
-      name: name || 'Unnamed User',
+    const result = {
+      name: name || 'username',
       image: avatar,
       userType: userType,
       id: customUserId,
       isLoading: false
     };
-  };
+    
+    return result;
+  }, [authorCache, authorsLoading]);
 
   // Skeleton loader for author details
   const AuthorSkeleton = () => (
@@ -489,11 +523,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       }
 
       // Add project to cart
-      await userService.addToCart({
-        name: project.title,
-        price: project.price || 0,
-        quantity: 1
-      });
+      await userService.addItemToCart(project.id.toString());
       
       toast.success('Project added to cart successfully');
     } catch (error) {
@@ -617,7 +647,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1 mb-1">
-                    {project.skills.slice(0, 2).map((skill, index) => (
+                    {project.skills && project.skills.slice(0, 2).map((skill, index) => (
                       <Badge
                         key={index}
                         variant="outline"
@@ -626,7 +656,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                         {skill}
                       </Badge>
                     ))}
-                    {project.skills.length > 2 && (
+                    {project.skills && project.skills.length > 2 && (
                       <span className="text-[10px] text-gray-400">+{project.skills.length - 2} more</span>
                     )}
                   </div>
@@ -731,7 +761,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                   </h3>
 
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {project.skills.slice(0, 3).map((skill, index) => (
+                      {project.skills && project.skills.slice(0, 3).map((skill, index) => (
                         <Badge
                           key={index}
                           variant="outline"
@@ -740,7 +770,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                           {skill}
                         </Badge>
                       ))}
-                      {project.skills.length > 3 && (
+                      {project.skills && project.skills.length > 3 && (
                       <Badge
                         variant="outline"
                         className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"

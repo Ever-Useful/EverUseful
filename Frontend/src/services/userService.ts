@@ -219,7 +219,7 @@ class UserService {
   }
 
   // Get user projects
-  async getUserProjects(): Promise<Project[]> {
+  async getUserProjects(): Promise<{ success: boolean; data: { created: Project[]; collaborated: Project[]; favorites: Project[]; count: number } }> {
     return await this.makeRequest(API_ENDPOINTS.USER_PROJECTS);
   }
 
