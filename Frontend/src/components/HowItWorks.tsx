@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+
 import {
   UserPlus,
   Search,
