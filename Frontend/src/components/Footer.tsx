@@ -39,9 +39,6 @@ export const Footer = () => {
               <Link to="/" className="flex items-center space-x-2 group">
                 <img src={Logo} alt="AMOGH" className="h-20 w-auto" />
               </Link>
-              <div className="py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-gray-300">
-                  Beta
-              </div>
             </div>
             <p className="text-xs text-gray-400 mt-1">Future-Ready Education Solutions</p>
             
