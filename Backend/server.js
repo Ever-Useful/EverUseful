@@ -127,12 +127,11 @@ app.post('/token', authorize, async (req, res) => {
 });
 
 const port = process.env.PORT || 3000;
-const host = process.env.HOST || 'localhost';
 
-app.listen(port, host, (error) => {
+app.listen(port, '0.0.0.0', (error) => {
   if (error) {
     console.log(`App Failed at port :${port}`);
   } else {
-    console.log(`App running at http://${host}:${port}`);
+    console.log(`App running at http://0.0.0.0:${port}`);
   }
 });

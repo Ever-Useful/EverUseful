@@ -32,14 +32,11 @@ import Sustainable from "./pages/Sustainable";
 import Connections from "./pages/Connections";
 import Consulting from "./pages/Consultation";
 import BussinessProfile from "./pages/bussinessprofile";
-// Import new policy pages
 import PrivacyPolicy from "./pages/Policy/PrivacyPolicy";
 import TermsConditions from "./pages/Policy/TermsConditions";
 import CookiePolicy from "./pages/Policy/CookiePolicy";
 import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
-
-import BecomeAMentor from "./pages/BecomeAMentor";
 import BecomeMentor from "./pages/BecomeAMentor";
 
 

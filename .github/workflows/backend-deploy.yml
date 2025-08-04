@@ -34,4 +34,9 @@ jobs:
             npm install --production
             pm2 restart backend --update-env || pm2 start server.js --name backend
             pm2 save
-            pm2 startup 
+            pm2 startup || true
+            # Print PM2 status and listening ports
+            pm2 status
+            sudo netstat -tulnp | grep node || true
+            # Try to curl the backend health endpoint (adjust port if needed)
+            curl -I http://localhost:3000/api/test || true 

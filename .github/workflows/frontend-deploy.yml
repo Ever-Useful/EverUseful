@@ -85,7 +85,7 @@ jobs:
                 listen 80;
                 listen [::]:80;
                 server_name amoghconnect.com www.amoghconnect.com;
-                return 301 https://$server_name$request_uri;
+                return 301 https://amoghconnect.com$request_uri;
             }
             # Main HTTPS server
             server {
@@ -100,6 +100,19 @@ jobs:
                 ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
                 location / {
                     try_files $uri $uri/ /index.html;
+                }
+                location = /index.html {
+                    add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+                    add_header Pragma "no-cache" always;
+                    add_header Expires "0" always;
+                }
+                location /assets/ {
+                    expires 1h;
+                    add_header Cache-Control "public, max-age=3600";
+                }
+                location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|mp4)$ {
+                    expires 1h;
+                    add_header Cache-Control "public, max-age=3600";
                 }
             }
             EOF
