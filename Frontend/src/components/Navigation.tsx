@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 export default function Navigation({ mobile = false }: { mobile?: boolean }) {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
+    const location = useLocation();
+    const isHomePage = location.pathname === '/';
 
     // Handle clicking outside to close mega menu
     useEffect(() => {
@@ -419,6 +421,15 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
     if (mobile) {
         return (
             <nav className="flex flex-col w-full space-y-2">
+                {/* Home Button - Only show when not on home page */}
+                {!isHomePage && (
+                    <Link
+                        to="/"
+                        className="flex items-center w-full px-4 py-3 rounded-lg bg-blue-50 text-blue-700 font-semibold text-base hover:bg-blue-100 transition"
+                    >
+                        Home
+                    </Link>
+                )}
                 {Object.keys(megaMenuData).map((menuKey) => {
                     const menuData = megaMenuData[menuKey];
                     const isNavOpen = activeDropdown === menuKey;
@@ -501,6 +512,18 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
     // DESKTOP NAVIGATION
     return (
         <nav className="hidden md:flex items-center space-x-1 text-sm">
+            {/* Home Button - Only show when not on home page */}
+            {!isHomePage && (
+                <Link to="/">
+                    <Button
+                        variant="ghost"
+                        size='sm'
+                        className="px-6 py-2 font-medium transition-all duration-200 hover:bg-transparent hover:text-gray-900 text-gray-700"
+                    >
+                        Home
+                    </Button>
+                </Link>
+            )}
             {Object.keys(megaMenuData).map((menuKey) => {
                 const isOpen = activeDropdown === menuKey;
                 return (
