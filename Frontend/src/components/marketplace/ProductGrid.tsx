@@ -253,31 +253,52 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       };
     }
     
-    // Extract data from the proper structure
-    const auth = user.auth || {};
-    const profile = user.profile || {};
+    // Extract data from the proper structure - handle both response formats
+    const auth = user.auth || user.data?.auth || {};
+    const profile = user.profile || user.data?.profile || {};
     
-    // Try multiple sources for the name
+    // Try multiple sources for the name with better priority
     let name = '';
+    
+    // First priority: firstName + lastName from auth
     if (auth.firstName || auth.lastName) {
       name = `${auth.firstName || ''} ${auth.lastName || ''}`.trim();
-    } else if (profile.firstName || profile.lastName) {
+    }
+    // Second priority: firstName + lastName from profile
+    else if (profile.firstName || profile.lastName) {
       name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
-    } else if (auth.username) {
+    }
+    // Third priority: username from auth
+    else if (auth.username) {
       name = auth.username;
-    } else if (profile.username) {
+    }
+    // Fourth priority: username from profile
+    else if (profile.username) {
       name = profile.username;
-    } else if (auth.email) {
+    }
+    // Fifth priority: email username from auth
+    else if (auth.email) {
       name = auth.email.split('@')[0];
-    } else if (profile.email) {
+    }
+    // Sixth priority: email username from profile
+    else if (profile.email) {
       name = profile.email.split('@')[0];
     }
     
+    // Get userType with fallbacks
+    const userType = profile.userType || auth.userType || '';
+    
+    // Get avatar with fallback
+    const avatar = profile.avatar || auth.avatar || NoUserProfile;
+    
+    // Get customUserId with fallback
+    const customUserId = user.customUserId || user.data?.customUserId || authorId;
+    
     return {
       name: name || 'Unnamed User',
-      image: profile.avatar || NoUserProfile,
-      userType: profile.userType || auth.userType || '',
-      id: user.customUserId,
+      image: avatar,
+      userType: userType,
+      id: customUserId,
       isLoading: false
     };
   };
@@ -870,7 +891,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
 
             <h3 className="text-lg font-bold text-gray-900 mb-2">{selected.title}</h3>
             <div className="flex flex-wrap gap-1 mb-3">
-              {selected.skills.map((skill, idx) => (
+              {selected.skills && selected.skills.map((skill, idx) => (
                 <Badge
                   key={idx}
                   variant="outline"
@@ -881,7 +902,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               ))}
             </div>
             <div className="flex flex-wrap gap-1 mb-3">
-              {selected.tags.map((tag, idx) => (
+              {selected.tags && selected.tags.map((tag, idx) => (
                 <Badge key={idx} className="bg-blue-50 text-blue-700 text-[10px] font-medium rounded">
                   #{tag}
                 </Badge>
