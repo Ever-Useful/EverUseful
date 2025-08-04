@@ -19,8 +19,8 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 // Table names
 const TABLES = {
-  USERS: process.env.DYNAMODB_USERS_TABLE || 'everuseful-users',
-  MARKETPLACE: process.env.DYNAMODB_MARKETPLACE_TABLE || 'everuseful-marketplace'
+  USERS: process.env.DYNAMODB_USERS_TABLE || 'Users',
+  MARKETPLACE: process.env.DYNAMODB_MARKETPLACE_TABLE || 'MarketplaceProjects'
 };
 
 module.exports = {

@@ -34,8 +34,8 @@ jobs:
             npm install --production
             # Set environment variables for the backend
             export AWS_REGION=us-east-1
-            export DYNAMODB_USERS_TABLE=everuseful-users
-            export DYNAMODB_MARKETPLACE_TABLE=everuseful-marketplace
+            export DYNAMODB_USERS_TABLE=Users
+            export DYNAMODB_MARKETPLACE_TABLE=MarketplaceProjects
             export NODE_ENV=production
             pm2 restart backend --update-env || pm2 start server.js --name backend
             pm2 save
