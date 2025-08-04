@@ -131,6 +131,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
           }
         } catch (error) {
           console.error('Error fetching current user data:', error);
+          // Don't throw error if user is not authenticated - this is expected for non-logged in users
         }
       }
     };

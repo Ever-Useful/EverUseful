@@ -184,10 +184,10 @@ const ProductDisplay = () => {
     return <div className="min-h-screen flex items-center justify-center text-red-500">{error || 'Project not found'}</div>;
   }
 
-  const shouldTruncate = project.description.length > MAX_LENGTH
+  const shouldTruncate = project.description && project.description.length > MAX_LENGTH
   const displayedText = isExpanded
   ? project.description
-  : project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "")
+  : project.description ? project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "") : ""
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-100">
