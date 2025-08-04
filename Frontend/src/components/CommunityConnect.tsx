@@ -4,6 +4,16 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 export const CommunityConnect: React.FC = () => {
+   const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant'
+    });
+    // Additional fallbacks
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
 
   return (
     <section id="community" className="relative overflow-hidden py-16 sm:py-20">
@@ -36,7 +46,7 @@ export const CommunityConnect: React.FC = () => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.6 }}
         >
-          <Link to="/connect">
+          <Link to="/connect"  onClick={scrollToTop} >
             <Button
               size="lg"
               className="w-full max-w-xs sm:max-w-fit px-6 py-3 bg-white text-black hover:bg-gray-100 shadow-lg hover:shadow-xl transition-transform hover:scale-105 mobile-text-base"
