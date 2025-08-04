@@ -219,7 +219,7 @@ class UserService {
   }
 
   // Get user projects
-  async getUserProjects(): Promise<Project[]> {
+  async getUserProjects(): Promise<{ success: boolean; data: { created: Project[]; collaborated: Project[]; favorites: Project[]; count: number } }> {
     return await this.makeRequest(API_ENDPOINTS.USER_PROJECTS);
   }
 
@@ -314,8 +314,15 @@ class UserService {
 
   // Add item to cart (alternative method)
   async addItemToCart(productId: string): Promise<any> {
-    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/cart/${productId}`, {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart`, {
       method: 'POST',
+      body: JSON.stringify({ productId, quantity: 1 }),
     });
     return response;
   }

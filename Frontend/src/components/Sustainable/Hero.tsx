@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
+
 // Import assets correctly
 import sustainableVideo from "@/assets/videos/Sustainable.mp4";
 import sustainableHeroImage from "@/assets/images/sustainable-hero.jpg";
@@ -17,20 +18,16 @@ export const Hero = () => {
   return (
 
     <section className="min-h-[80vh] sm:min-h-[85vh] md:min-h-[90vh] bg-gradient-to-br from-stone-100 via-yellow-50 to-green-100 relative overflow-hidden">
-      {/* Background sustainable energy image or video */}
-      <div className="absolute right-0 top-0 h-full w-full md:w-1/2 opacity-90">
+      {/* Background sustainable energy image or video - hidden on mobile */}
+      <div className="absolute right-0 top-0 h-full w-full md:w-1/2 opacity-90 hidden md:block">
         {showVideo ? (
           <video
             src={sustainableVideo}
             className="h-full min-w-full object-cover"
-            controls
             autoPlay
             muted
-          >
-
-            <source src="main.mp4" type="video/mp4" />
-            Your browser does not support the video lala tag.
-          </video>
+            loop
+          />
         ) : (
           <img
             src={sustainableHeroImage}
@@ -71,21 +68,17 @@ export const Hero = () => {
         <div className="w-full mt-6 sm:mt-8 md:hidden">
           {showVideo ? (
             <video
-
-              src="Sustainable.mp4"
+              src={sustainableVideo}
               className="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg shadow-lg"
               controls
               autoPlay
               muted
-            >
-              <source src={sustainableVideo} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+              loop
+            />
           ) : (
             <img
               src={sustainableHeroImage}
               alt="Sustainable development and green innovation"
-
               className="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg shadow-lg"
             />
           )}

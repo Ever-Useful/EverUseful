@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "build:prod": "vite build --mode production",
     "build:clean": "rm -rf dist && npm run build",
+    "build:verify": "npm run build && node verify-build.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

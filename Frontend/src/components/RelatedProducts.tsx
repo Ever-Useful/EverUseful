@@ -7,6 +7,7 @@ import classNames from "classnames";
 import React, { useRef, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { API_ENDPOINTS } from '../config/api';
+import NoImageAvailable from '@/assets/images/no image available.png';
 
 // Define Project type if not imported from elsewhere
 interface Project {
@@ -215,9 +216,10 @@ export const RelatedProducts = () => {
                 <Card className="hover:shadow-lg transition-shadow duration-200 bg-white rounded-lg">
                   <div className="relative">
                     <img
-                      src={project.image}
+                      src={project.image || NoImageAvailable}
                       alt={project.title}
                       className="w-full h-32 xs:h-36 object-cover rounded-t-lg"
+                      onError={e => { e.currentTarget.src = NoImageAvailable; }}
                     />
                     <Badge className="absolute top-2 right-2 bg-blue-600 text-white text-[10px] px-2 py-0.5">
                       {project.category}
@@ -292,9 +294,10 @@ export const RelatedProducts = () => {
                   <Card className="h-full hover:shadow-lg transition-shadow duration-200 rounded-lg">
                     <div className="relative">
                       <img
-                        src={project.image}
+                        src={project.image || NoImageAvailable}
                         alt={project.title}
                         className="w-full h-28 md:h-32 lg:h-36 object-cover rounded-t-lg"
+                        onError={e => { e.currentTarget.src = NoImageAvailable; }}
                       />
                       <Badge className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5">
                         {project.category}
