@@ -34,15 +34,12 @@ import Sustainable from "./pages/Sustainable";
 import Connections from "./pages/Connections";
 import Consulting from "./pages/Consultation";
 import BussinessProfile from "./pages/bussinessprofile";
-// Import new policy pages
 import PrivacyPolicy from "./pages/Policy/PrivacyPolicy";
 import TermsConditions from "./pages/Policy/TermsConditions";
 import CookiePolicy from "./pages/Policy/CookiePolicy";
 import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
 import RefundPolicy from "./pages/Policy/RefundPolicy";
-
-import BecomeAMentor from "./pages/BecomeAMentor";
-//test
+import BecomeMentor from "./pages/BecomeAMentor";
 
 const queryClient = new QueryClient();
 // Global scroll restoration component
@@ -99,6 +96,7 @@ const App = () => (
             <Route path="/sustainable" element={<Sustainable />} />
             <Route path="/connection" element={<Connections />} />
             <Route path="/studentprofile/:id" element={<StudentProfile />} />
+            <Route path="/become-mentor" element={<BecomeMentor />} />
             <Route path="/green" element={<Sustainable/>} />
             {/* Policy Routes */}
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />

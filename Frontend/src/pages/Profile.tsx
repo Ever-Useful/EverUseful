@@ -8,7 +8,7 @@ import { Footer } from "@/components/Footer";
 import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import { EditProfile } from '@/components/EditProfile';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import toast from "react-hot-toast";
@@ -18,6 +18,7 @@ import BackgroundUpload from '@/components/BackgroundUpload';
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
+import { API_ENDPOINTS } from '../config/api';
 // import GlobeLoader from '@/components/GlobeLoader';
 
 
@@ -111,24 +112,25 @@ const Profile = () => {
       console.log('Profile - Raw user profile data:', userProfile);
       
       // Extract data from the response structure - backend now returns reconstructed data directly
-      const { auth: authData, profile: userProfileData, stats: userStats, studentData: studentInfo, education: educationArr, workExperience: workArr } = userProfile;
+      const { auth: authData, profile: userProfileData, studentData: studentInfo, education: educationArr, workExperience: workArr } = userProfile;
+      const userStats = (userProfile as any).stats;
       
       console.log('Profile - Extracted auth data:', authData);
       console.log('Profile - Extracted profile data:', userProfileData);
       
       setProfileData({
-        firstName: authData?.firstName || userProfileData?.firstName || '',
-        lastName: authData?.lastName || userProfileData?.lastName || '',
-        userType: (authData?.userType || userProfileData?.userType) ? 
-          (authData.userType || userProfileData.userType).charAt(0).toUpperCase() + 
-          (authData.userType || userProfileData.userType).slice(1) : '',
+        firstName: authData?.firstName || '',
+        lastName: authData?.lastName || '',
+        userType: (authData?.userType) ? 
+          (authData.userType).charAt(0).toUpperCase() + 
+          (authData.userType).slice(1) : '',
         bio: userProfileData?.bio || 'No bio available',
         avatar: userProfileData?.avatar || '',
         location: userProfileData?.location || '',
         title: userProfileData?.title || '',
         website: userProfileData?.website || '',
-        mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || userProfileData?.phoneNumber || '',
-        username: authData?.email?.split('@')[0] || userProfileData?.username || '',
+        mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || '',
+        username: authData?.email?.split('@')[0] || '',
       });
 
       setStudentData({
@@ -138,18 +140,32 @@ const Profile = () => {
         year: studentInfo?.year || '',
       });
 
+      // Get dashboard data to ensure consistent project count with Dashboard page
+      let dashboardStats = null;
+      try {
+        const dashboardData = await userService.getDashboardData();
+        dashboardStats = {
+          projects: dashboardData.projectCount || 0,
+          connections: dashboardData.connections || 0,
+        };
+      } catch (error) {
+        console.log('Failed to fetch dashboard data, using profile stats:', error);
+      }
+
       if (userStats) {
         setStats({
           followers: userStats.followersCount || 0,
           following: userStats.followingCount || 0,
-          projects: userStats.projectsCount || 0,
+          // Use dashboard project count if available, otherwise fall back to profile stats
+          projects: (dashboardStats?.projects ?? userStats.projectsCount) || 0,
           likes: userStats.totalLikes || 0,
-          connections: userStats.connectionsCount || 0,
+          // Use dashboard connections count if available, otherwise fall back to profile stats
+          connections: (dashboardStats?.connections ?? userStats.connectionsCount) || 0,
         });
       }
 
       // Set skills - handle both string arrays and object arrays
-      const skillsData = userProfile.profile?.skills || userProfile.freelancerData?.skills || [];
+      const skillsData = (userProfile as any).skills || userProfile.freelancerData?.skills || [];
       if (Array.isArray(skillsData)) {
         // Convert skill objects to strings if needed
         const skillStrings = skillsData.map(skill => {
@@ -164,56 +180,38 @@ const Profile = () => {
         setSkills([]);
       }
 
-      // Fetch projects robustly
-      const projectsData = userProfile && 'projects' in userProfile ? (userProfile as any).projects : undefined;
-      if (projectsData && Array.isArray(projectsData.created)) {
-        const projectIds = projectsData.created;
-        console.log('Profile - Project IDs found:', projectIds);
-        console.log('Profile - Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
-        if (projectIds.length > 0) {
-          try {
-            const projectPromises = projectIds.map(async (pid: string | number) => {
-              console.log(`Profile - Fetching project with ID: ${pid} (type: ${typeof pid})`);
-              try {
-                const response = await fetch(`http://localhost:3000/api/marketplace/projects/${pid}`);
-                console.log(`Profile - Response for project ${pid}:`, response.status, response.ok);
-                
-                if (response.ok) {
-                  const data = await response.json();
-                  console.log(`Profile - Project data for ${pid}:`, data);
-                  return data && data.project ? data.project : null;
-                } else {
-                  console.log(`Profile - Failed to fetch project ${pid}: ${response.status}`);
-                  return null;
-                }
-              } catch (error) {
-                console.error(`Profile - Error fetching project ${pid}:`, error);
-                return null;
-              }
-            });
-            
-            const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-            console.log('Profile - Full projects fetched:', fullProjects);
-            setProjects(fullProjects);
-          } catch (error) {
-            console.error('Profile - Error fetching projects:', error);
-            setProjects([]);
-          }
-        } else {
-          console.log('Profile - No project IDs found');
-          setProjects([]);
-        }
-      } else {
-        console.log('Profile - No projects object or created array');
-        setProjects([]);
-      }
+             // Fetch projects using the same method as Dashboard to ensure consistency
+       try {
+         const projectsData = await userService.getUserProjects();
+         console.log('Profile - Projects data from getUserProjects:', projectsData);
+         
+         if (projectsData && Array.isArray(projectsData)) {
+           console.log('Profile - Projects found:', projectsData.length);
+           setProjects(projectsData);
+         } else if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
+           // Fallback for older API response structure
+           console.log('Profile - Projects found (created):', projectsData.created.length);
+           setProjects(projectsData.created);
+         } else {
+           console.log('Profile - No projects found in getUserProjects');
+           setProjects([]);
+         }
+       } catch (error) {
+         console.error('Profile - Error fetching projects from getUserProjects:', error);
+         setProjects([]);
+       }
 
       setEducation(educationArr || []);
       setWorkExperience(workArr || []);
 
       // Fetch freelancerData
       const freelancerData = userProfile.freelancerData;
+      console.log('Profile - Freelancer data from API:', freelancerData);
       setFreelancerData({
+        hourlyRate: freelancerData?.hourlyRate || '',
+        avgResponseTime: freelancerData?.avgResponseTime || '',
+      });
+      console.log('Profile - Set freelancer data:', {
         hourlyRate: freelancerData?.hourlyRate || '',
         avgResponseTime: freelancerData?.avgResponseTime || '',
       });
@@ -248,10 +246,6 @@ const Profile = () => {
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    if (!window.confirm("Are you sure you want to delete this project?")) {
-      return;
-    }
-
     try {
       const user = auth.currentUser;
       if (!user) {
@@ -260,7 +254,7 @@ const Profile = () => {
       }
       const token = await user.getIdToken();
 
-      const response = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}`, {
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectId), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -273,7 +267,16 @@ const Profile = () => {
       }
 
       toast.success("Project deleted successfully!");
-      fetchUserData(); // Refresh the project list
+      
+      // Immediately update the UI by removing the project from state
+      setProjects(prevProjects => prevProjects.filter(project => project.id !== projectId));
+      
+      // Also update the stats
+      setStats(prevStats => ({
+        ...prevStats,
+        projects: Math.max(0, prevStats.projects - 1)
+      }));
+      
     } catch (error) {
       toast.error(error.message);
       console.error("Error deleting project:", error);
@@ -385,41 +388,43 @@ const Profile = () => {
           <Camera className="text-slate-700 w-5 h-5" />
         </button>
         
-        <div className="absolute bottom-0 left-0 right-0 px-4 py-4 md:p-8">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-12 sm:my-[99px] py-6 sm:py-[34px] px-3 sm:px-[23px]">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
+            <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 w-full">
               {/* Profile Photo */}
-              <div className="relative mb-4 md:mb-0">
+              <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0">
                 {profileData.avatar ? (
                   <img
                     src={profileData.avatar}
                     alt={getDisplayName()}
-                    className="w-24 h-24 md:w-36 md:h-36 border-4 border-white shadow-lg rounded-full object-cover"
+                    className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full object-cover mx-auto md:mx-0"
                   />
                 ) : (
-                  <div className="w-24 h-24 md:w-36 md:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-2xl md:text-4xl font-bold text-gray-600">
+                  <div className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-2xl sm:text-3xl font-bold text-gray-600 mx-auto md:mx-0">
                     {getAvatarInitials()}
                   </div>
                 )}
               </div>
               
               {/* Profile Info */}
-              <div className="flex-1 text-white text-center md:text-left">
-                <h1 className="text-3xl md:text-4xl font-bold drop-shadow-lg mb-1.5">
+              <div className="flex-1 text-white mt-4 md:mt-0 w-full">
+                <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5 text-center md:text-left mobile-text-4xl">
                   {getDisplayName()}
                 </h1>
-                <p className="text-lg md:text-xl text-slate-200 drop-shadow-md mb-2">
+                <p className="text-base text-slate-200 drop-shadow-md text-center md:text-left mobile-text-base">
                   {profileData.userType}
                 </p>
                 
                 {/* Edit Profile Button */}
-                <button
-                  onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
-                  className="mt-3 md:mt-4 bg-transparent border-2 border-white text-white hover:bg-white/10 px-4 md:px-6 py-2 rounded-full font-semibold drop-shadow-md transition-all duration-200 flex items-center justify-center mx-auto md:mx-0"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </button>
+                <div className="flex flex-row items-center justify-center md:justify-start mt-4">
+                  <button
+                    onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
+                    className="flex items-center gap-2 text-white drop-shadow-md text-base sm:text-lg bg-transparent border-2 border-white hover:bg-white/10 px-4 md:px-6 py-2 rounded-full font-semibold transition-all duration-200"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit Profile
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -430,19 +435,19 @@ const Profile = () => {
       <div className="max-w-7xl mx-auto px-8 -mt-8 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Only show Hourly Rate and Avg Response Time for freelancers */}
-          {profileData.userType?.toLowerCase() === 'freelancer' && (
+          {(profileData.userType?.toLowerCase() === 'freelancer' || profileData.userType === 'Freelancers') && (
             <>
               <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <DollarSign className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : 'N/A'}</div>
+                  <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : '$0'}</div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
                 </CardContent>
               </Card>
               <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <Clock className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : 'N/A'}</div>
+                  <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : '0'}</div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time (hrs)</div>
                 </CardContent>
               </Card>
@@ -474,7 +479,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                     <span className="bg-purple-100 p-2 rounded-lg mr-3">
                       <GraduationCap className="w-5 h-5 text-purple-600" />
                     </span>
@@ -499,7 +504,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                     <span className="bg-blue-100 p-2 rounded-lg mr-3">
                       <BookOpen className="w-5 h-5 text-blue-600" />
                     </span>
@@ -533,7 +538,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                     <span className="bg-green-100 p-2 rounded-lg mr-3">
                       <Briefcase className="w-5 h-5 text-green-600" />
                     </span>
@@ -567,7 +572,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                     <span className="bg-green-100 p-2 rounded-lg mr-3">
                       <Briefcase className="w-5 h-5 text-green-600" />
                     </span>
@@ -607,15 +612,16 @@ const Profile = () => {
                                   <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">{tech}</Badge>
                                 ))}
                               </div>
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
-                                <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
-                                <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
-                                <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
-                                <div><span className="font-medium text-gray-700">Date Added:</span> {
-                                  project.dateAdded ? new Date(project.dateAdded).toLocaleDateString() : 
-                                  project.posted ? new Date(project.posted).toLocaleDateString() : 'N/A'
-                                }</div>
-                              </div>
+                                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
+                                 <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
+                                 <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
+                                 <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
+                                 <div><span className="font-medium text-gray-700">Date Added:</span> {
+                                   project.dateAdded ? new Date(project.dateAdded).toLocaleDateString() : 
+                                   project.posted ? new Date(project.posted).toLocaleDateString() :
+                                   project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'
+                                 }</div>
+                               </div>
                             </div>
                             <div className="flex flex-col gap-2 items-end ml-2">
                               <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700" onClick={() => { setEditingProject(project); setShowEditProjectSidebar(true); }}>

@@ -79,8 +79,8 @@ export const Hero = () => {
             {/* LEFT: Text + Button */}
 
             <div className="w-full lg:w-1/3 text-center lg:text-left mb-10 lg:mb-0">
-              <h1 className="text-4xl font-bold text-white mb-4 animate-fade-in leading-tight">
-                Connnect{" "}
+              <h1 className="text-[17px] sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight mobile-text-4xl">
+                Connect{" "}
 
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
                   Innovation
@@ -90,7 +90,7 @@ export const Hero = () => {
                   Opportunity
                 </span>
               </h1>
-              <p className="text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200">
+              <p className="text-[12px] sm:text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
                 A platform where students, PhD holders, professors, and
                 businesses collaborate to transform ideas into real‐world impact.
                 Join the future of collaborative innovation today.
@@ -184,8 +184,8 @@ export const Hero = () => {
                             <i className={`${opt.iconClass} text-sm`}></i>
                           </div>
                           <div>
-                            <div className="font-bold text-sm">{opt.label}</div>
-                            <div className="text-xs opacity-80 max-w-0 group-hover:max-w-[200px] ml-0 transition-all duration-500 ease-out overflow-hidden">
+                            <div className="font-bold text-sm -translate-x-[25px] -translate-y-[25px]">{opt.label}</div>
+                            <div className="text-xs opacity-80 group-hover:max-w-[200px] ml-5 group-hover:ml-0 transition-all duration-500 ease-out overflow-hidden -translate-y-[15px]">
                               {opt.description}
                             </div>
                           </div>

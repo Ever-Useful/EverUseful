@@ -23,11 +23,12 @@ import { Footer } from "@/components/Footer";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import { useAuthState } from "@/hooks/useAuthState";
-import { userService } from "@/services/userService";
+import userService from "@/services/userService";
 import { toast } from "sonner";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { Skeleton } from "@/components/ui/skeleton";
 import NoImageAvailable from "@/assets/images/no image available.png";
+import { API_ENDPOINTS } from '../config/api';
 
 const ProductDisplay = () => {
   const { id } = useParams();
@@ -63,21 +64,35 @@ const ProductDisplay = () => {
   }, [user]);
   
   useEffect(() => {
-    const fetchProject = async () => {
-      setLoading(true);
-      setError(null);
+    const fetchProjectData = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/marketplace/projects/${id}`);
-        if (!response.ok) throw new Error('Failed to fetch project');
+        setLoading(true);
+        const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(id));
+        if (!response.ok) {
+          throw new Error('Failed to fetch project data');
+        }
         const data = await response.json();
-        setProject(data.project);
-      } catch (err: any) {
-        setError(err.message || 'An error occurred');
+        setProject(data);
+        
+        // Fetch author data
+        if (data.author) {
+          const res = await fetch(API_ENDPOINTS.USER_BY_ID(data.author));
+          if (res.ok) {
+            const authorData = await res.json();
+            setAuthorCache(prev => ({
+              ...prev,
+              [data.author]: authorData.data
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching project:', error);
+        setError('Failed to load project');
       } finally {
         setLoading(false);
       }
     };
-    if (id) fetchProject();
+    if (id) fetchProjectData();
   }, [id]);
 
   // Fetch author details for the project
@@ -85,7 +100,7 @@ const ProductDisplay = () => {
     const fetchAuthor = async () => {
       if (project && project.author && !authorCache[project.author]) {
         try {
-          const res = await fetch(`http://localhost:3000/api/users/${project.author}`);
+          const res = await fetch(API_ENDPOINTS.USER_BY_ID(project.author));
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.data) {
@@ -150,9 +165,9 @@ const ProductDisplay = () => {
         toast.error('User data not found');
         return;
       }
-      await userService.addToCart(userData.customUserId, {
-        productId: projectId.toString(),
-        addedAt: new Date().toISOString(),
+      await userService.addToCart({
+        name: project.title,
+        price: project.price || 0,
         quantity: 1
       });
       toast.success('Project added to cart successfully');
@@ -219,11 +234,11 @@ const ProductDisplay = () => {
                 {project.category}
               </Badge>
               
-              <h1 className="text-lg xs:text-xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight mobile-text-4xl">
                 {project.title}
               </h1>
               
-              <p className="text-xs xs:text-sm sm:text-base lg:text-lg text-gray-600 mb-3 sm:mb-4 leading-relaxed">
+              <p className="text-base text-gray-600 mb-3 sm:mb-4 leading-relaxed mobile-text-base">
                 {project.subtitle}
               </p>
 
@@ -360,7 +375,7 @@ const ProductDisplay = () => {
               <TabsContent value="overview" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-base xs:text-base sm:text-xl lg:text-2xl">Project Overview</CardTitle>
+                    <CardTitle className="text-gray-900 text-3xl">Project Overview</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <p className="text-gray-700 leading-relaxed text-xs xs:text-sm sm:text-base lg:text-lg">
@@ -378,7 +393,7 @@ const ProductDisplay = () => {
               <TabsContent value="features" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-base xs:text-base sm:text-xl lg:text-2xl">Key Features</CardTitle>
+                    <CardTitle className="text-gray-900 text-3xl">Key Features</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="grid grid-cols-1 gap-1 xs:gap-2 sm:gap-3">
@@ -400,7 +415,7 @@ const ProductDisplay = () => {
               <TabsContent value="tech" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-base xs:text-base sm:text-xl lg:text-2xl">Technology Stack</CardTitle>
+                    <CardTitle className="text-gray-900 text-3xl">Technology Stack</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-1 xs:gap-2 sm:gap-3 lg:gap-4">
@@ -422,7 +437,7 @@ const ProductDisplay = () => {
               <TabsContent value="deliverables" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-base xs:text-base sm:text-xl lg:text-2xl">What You'll Get</CardTitle>
+                    <CardTitle className="text-gray-900 text-3xl">What You'll Get</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="space-y-1 xs:space-y-2 sm:space-y-3">

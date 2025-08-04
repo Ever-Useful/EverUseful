@@ -21,11 +21,12 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useAuthState } from "../../hooks/useAuthState";
-import { userService } from "../../services/userService";
+import userService from "../../services/userService";
 import { toast } from "sonner";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Project {
   id: number;
@@ -184,14 +185,15 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         
         queryParams.append('limit', optimalLimit.toString());
 
-        const response = await fetch(`http://localhost:3000/api/marketplace/projects?${queryParams}`);
+        const response = await fetch(`${API_ENDPOINTS.MARKETPLACE_PROJECTS}?${queryParams}`);
         if (!response.ok) throw new Error('Failed to fetch projects');
         
         const data = await response.json();
         setProjects(data.projects);
         setPagination(data.pagination);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setError('Failed to load projects');
       } finally {
         setLoading(false);
       }
@@ -217,7 +219,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       
       try {
         setAuthorsLoading(true);
-        const response = await fetch(`http://localhost:3000/api/users/bulk/${uncachedAuthorIds.join(',')}`);
+        const response = await fetch(API_ENDPOINTS.USER_BULK(uncachedAuthorIds.join(',')));
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data) {
@@ -320,10 +322,12 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
 
     return (
       <div className="w-full flex items-center justify-center mt-8">
-        <div className="flex items-center justify-center space-x-2 p-2">
+        <div
+          className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 px-1 sm:px-2 py-1 sm:py-2 w-full max-w-full"
+        >
           <Button
             variant="outline"
-            className="w-8 h-8 p-0"
+            className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={!pagination.hasPrevPage}
           >
@@ -333,7 +337,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
             <>
               <Button
                 variant="outline"
-                className="w-8 h-8 p-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
                 onClick={() => handlePageChange(1)}
               >
                 1
@@ -347,7 +351,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               {endPage < pagination.totalPages - 1 && <span className="text-gray-500">...</span>}
               <Button
                 variant="outline"
-                className="w-8 h-8 p-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
                 onClick={() => handlePageChange(pagination.totalPages)}
               >
                 {pagination.totalPages}
@@ -356,7 +360,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
           )}
           <Button
             variant="outline"
-            className="w-8 h-8 p-0"
+            className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={!pagination.hasNextPage}
           >
@@ -381,12 +385,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       };
 
       // Increment the view count
-      const viewResponse = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}/view`, {
+      const viewResponse = await fetch(API_ENDPOINTS.MARKETPLACE_VIEW(projectId.toString()), {
         method: 'POST',
         headers
       });
       
-      if (!viewResponse.ok) throw new Error('Failed to increment view count');
+      if (viewResponse.ok) {
+        console.log('View recorded successfully');
+      }
       
       // Update the project views in the local state
       setProjects(prevProjects =>
@@ -404,14 +410,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     }
   };
 
-  const handleFavorite = async (projectId: number) => {
+  const handleFavorite = async (projectId: string) => {
     if (!user || !token) {
       setShowPopupMenu(true);
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}/favorite`, {
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_FAVORITE(projectId.toString()), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -426,7 +432,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       
       setProjects(prevProjects =>
         prevProjects.map(project =>
-          project.id === projectId
+          project.id === parseInt(projectId, 10) // Ensure projectId is number for comparison
             ? {
                 ...project,
                 isFavorited: data.isFavorited
@@ -453,10 +459,17 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         return;
       }
 
-      // Add project to cart in userData.json (only productId, addedAt, quantity)
-      await userService.addToCart(userData.customUserId, {
-        productId: projectId.toString(),
-        addedAt: new Date().toISOString(),
+      // Find the project data
+      const project = projects.find(p => p.id === projectId);
+      if (!project) {
+        toast.error('Project not found');
+        return;
+      }
+
+      // Add project to cart
+      await userService.addToCart({
+        name: project.title,
+        price: project.price || 0,
         quantity: 1
       });
       
@@ -646,7 +659,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                       className="w-7 h-7 p-0 bg-white/70 hover:bg-white/90 shadow"
                       onClick={e => {
                         e.stopPropagation();
-                        handleFavorite(project.id);
+                        handleFavorite(project.id.toString());
                       }}
                     >
                       <Heart className={`w-4 h-4 ${project.isFavorited ? 'fill-pink-500 text-pink-500' : 'text-pink-500'}`} />

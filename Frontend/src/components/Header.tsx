@@ -42,7 +42,7 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Connections from '@/components/Connections';
 import { EditProfile } from '../components/EditProfile';
@@ -323,11 +323,16 @@ const Header = () => {
             if (user) {
                 setIsLoggedIn(true);
                 localStorage.setItem("isLoggedIn", "true");
-                const userProfile = await userService.getUserProfile();
-                setProfileData({
-                    firstName: userProfile.auth.firstName || '',
-                    lastName: userProfile.auth.lastName || '',
-                });
+                try {
+                    const userProfile = await userService.getUserProfile();
+                    setProfileData({
+                        firstName: userProfile.data?.auth?.firstName || '',
+                        lastName: userProfile.data?.auth?.lastName || '',
+                    });
+                } catch (error) {
+                    console.error('Error fetching user profile:', error);
+                    setProfileData({ firstName: '', lastName: '' });
+                }
             } else {
                 setIsLoggedIn(false);
                 localStorage.removeItem("isLoggedIn");
@@ -429,16 +434,13 @@ const Header = () => {
 
     return (
         <>
-            <header className="sticky top-0 z-50 w-full border-b bg-white backdrop-blur supports-[backdrop-filter]:bg-white/80">
+            <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-white shadow-sm">
                 <div className="container max-w-full md:w-[1320px] mx-auto px-2 sm:px-4">
                     <div className="flex h-14 items-center justify-between">
                         {/* Logo */}
                         <div className="flex items-center space-x-1 flex-shrink-0">
                             <Link to="/" className="flex items-center space-x-2 group">
                                 <img src={Logo} alt="AMOGH" className="h-10 w-auto md:h-8" />
-                                <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
-                                    beta
-                                </div>
                             </Link>
                         </div>
 
@@ -459,161 +461,204 @@ const Header = () => {
 
                         {/* Right Section */}
                         <div className="flex items-center space-x-2 sm:space-x-3">
-                            {/* Mobile: Hamburger and Profile */}
-                            <div className="flex md:hidden items-center space-x-2">
-                                {/* Profile Button */}
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => setShowProfileSidebar(true)}
-                                    className="hover:bg-white/10 hover:text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 py-2 rounded-lg flex items-center"
-                                >
-                                    <User className="h-5 w-5 text-gray-600" />
-                                </Button>
-                                {/* Hamburger Menu */}
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="p-2"
-                                    aria-label="Open menu"
-                                    onClick={() => setShowMobileMenu(true)}
-                                >
-                                    <Menu className="h-6 w-6 text-gray-700" />
-                                </Button>
-                            </div>
-                            {/* Desktop: All header actions */}
-                            <div className="hidden md:flex items-center space-x-2 sm:space-x-3">
-                                {/* Cart Button */}
-                                <Button variant="ghost" size="icon" className="hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300" asChild>
-                                    <Link to="/cart">
-                                        <ShoppingCart className="h-5 w-5 text-gray-600" />
-                                    </Link>
-                                </Button>
-                                {/* Messages Button */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
-                                            <MessageSquare className="h-5 w-5 text-gray-600" />
-                                            {unreadMessageCount > 0 && (
-                                                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
-                                                    {unreadMessageCount}
-                                                </Badge>
+                            {isLoggedIn ? (
+                                <>
+                                    {/* Mobile: Hamburger and Profile */}
+                                    <div className="flex md:hidden items-center space-x-2">
+                                        {/* Profile Button */}
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => setShowProfileSidebar(true)}
+                                            className="hover:bg-white/10 hover:text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 py-2 rounded-lg flex items-center"
+                                        >
+                                            <User className="h-5 w-5 text-gray-600" />
+                                        </Button>
+                                        {/* Hamburger Menu */}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="p-2"
+                                            aria-label="Open menu"
+                                            onClick={() => setShowMobileMenu(true)}
+                                        >
+                                            <Menu className="h-6 w-6 text-gray-700" />
+                                        </Button>
+                                    </div>
+                                    {/* Desktop: All header actions */}
+                                    <div className="hidden md:flex items-center space-x-2 sm:space-x-3">
+                                        {/* Cart Button */}
+                                        <Button variant="ghost" size="icon" className="hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300" asChild>
+                                            <Link to="/cart">
+                                                <ShoppingCart className="h-5 w-5 text-gray-600" />
+                                            </Link>
+                                        </Button>
+                                        {/* Messages Button */}
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
+                                                    <MessageSquare className="h-5 w-5 text-gray-600" />
+                                                    {unreadMessageCount > 0 && (
+                                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
+                                                            {unreadMessageCount}
+                                                        </Badge>
+                                                    )}
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
+                                                <div className="p-3 border-b border-gray-200">
+                                                    <h3 className="font-semibold text-slate-800">Recent Messages</h3>
+                                                </div>
+                                                <div className="max-h-64 overflow-y-auto">
+                                                    {messages.slice(0, 3).map((message) => (
+                                                        <DropdownMenuItem
+                                                            key={message.id}
+                                                            className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
+                                                            onClick={() => handleMessageClick(message.id)}
+                                                        >
+                                                            <div className="flex items-start justify-between w-full">
+                                                                <div className="flex items-start gap-3 flex-1">
+                                                                    <span className="text-2xl">{message.avatar}</span>
+                                                                    <div className="flex-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <p className="font-medium text-sm text-slate-800">
+                                                                                {message.sender}
+                                                                            </p>
+                                                                            {message.unread && (
+                                                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                                            )}
+                                                                        </div>
+                                                                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                                                                            {message.message}
+                                                                        </p>
+                                                                        <p className="text-xs text-slate-400 mt-1">
+                                                                            {message.time}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                    {messages.length === 0 && (
+                                                        <div className="p-4 text-center text-slate-500">
+                                                            No messages yet
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem onClick={() => setShowMessagesSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-green-600 font-medium hover:bg-green-50">
+                                                    See All Messages
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                        {/* Notifications Button */}
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
+                                                    <Bell className="h-5 w-5 text-gray-600" />
+                                                    {unreadNotificationCount > 0 && (
+                                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
+                                                            {unreadNotificationCount}
+                                                        </Badge>
+                                                    )}
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
+                                                <div className="p-3 border-b border-gray-200">
+                                                    <h3 className="font-semibold text-slate-800">Recent Notifications</h3>
+                                                </div>
+                                                <div className="max-h-64 overflow-y-auto">
+                                                    {notifications.slice(0, 3).map((notification) => (
+                                                        <DropdownMenuItem
+                                                            key={notification.id}
+                                                            className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
+                                                            onClick={() => handleNotificationClick(notification.id)}
+                                                        >
+                                                            <div className="flex items-start justify-between w-full">
+                                                                <div className="flex items-start gap-3 flex-1">
+                                                                    <span className="text-lg">{getNotificationIcon(notification.type)}</span>
+                                                                    <div className="flex-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <p className="font-medium text-sm text-slate-800">
+                                                                                {notification.title}
+                                                                            </p>
+                                                                            {notification.unread && (
+                                                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                                            )}
+                                                                        </div>
+                                                                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                                                                            {notification.message}
+                                                                        </p>
+                                                                        <p className="text-xs text-slate-400 mt-1">
+                                                                            {notification.time}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                    {notifications.length === 0 && (
+                                                        <div className="p-4 text-center text-slate-500">
+                                                            No notifications yet
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem onClick={() => setShowNotificationsSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-blue-600 font-medium hover:bg-blue-50">
+                                                    See All Notifications
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                        {/* Profile Button with User Name */}
+                                        <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
+                                            <User className="h-5 w-5 text-gray-600" />
+                                            {profileData.firstName && (
+                                                <span className="hidden sm:inline text-sm font-medium">
+                                                    Hi, {profileData.firstName}
+                                                </span>
                                             )}
                                         </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
-                                        <div className="p-3 border-b border-gray-200">
-                                            <h3 className="font-semibold text-slate-800">Recent Messages</h3>
-                                        </div>
-                                        <div className="max-h-64 overflow-y-auto">
-                                            {messages.slice(0, 3).map((message) => (
-                                                <DropdownMenuItem
-                                                    key={message.id}
-                                                    className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
-                                                    onClick={() => handleMessageClick(message.id)}
-                                                >
-                                                    <div className="flex items-start justify-between w-full">
-                                                        <div className="flex items-start gap-3 flex-1">
-                                                            <span className="text-2xl">{message.avatar}</span>
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2">
-                                                                    <p className="font-medium text-sm text-slate-800">
-                                                                        {message.sender}
-                                                                    </p>
-                                                                    {message.unread && (
-                                                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                                    )}
-                                                                </div>
-                                                                <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                                                    {message.message}
-                                                                </p>
-                                                                <p className="text-xs text-slate-400 mt-1">
-                                                                    {message.time}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </DropdownMenuItem>
-                                            ))}
-                                            {messages.length === 0 && (
-                                                <div className="p-4 text-center text-slate-500">
-                                                    No messages yet
-                                                </div>
-                                            )}
-                                        </div>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={() => setShowMessagesSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-green-600 font-medium hover:bg-green-50">
-                                            See All Messages
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                                {/* Notifications Button */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
-                                            <Bell className="h-5 w-5 text-gray-600" />
-                                            {unreadNotificationCount > 0 && (
-                                                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
-                                                    {unreadNotificationCount}
-                                                </Badge>
-                                            )}
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    {/* Mobile: Join and Sign In buttons */}
+                                    <div className="flex md:hidden items-center space-x-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            asChild
+                                            className="text-sm px-3 py-1"
+                                        >
+                                            <Link to="/signin">Sign In</Link>
                                         </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
-                                        <div className="p-3 border-b border-gray-200">
-                                            <h3 className="font-semibold text-slate-800">Recent Notifications</h3>
-                                        </div>
-                                        <div className="max-h-64 overflow-y-auto">
-                                            {notifications.slice(0, 3).map((notification) => (
-                                                <DropdownMenuItem
-                                                    key={notification.id}
-                                                    className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
-                                                    onClick={() => handleNotificationClick(notification.id)}
-                                                >
-                                                    <div className="flex items-start justify-between w-full">
-                                                        <div className="flex items-start gap-3 flex-1">
-                                                            <span className="text-lg">{getNotificationIcon(notification.type)}</span>
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2">
-                                                                    <p className="font-medium text-sm text-slate-800">
-                                                                        {notification.title}
-                                                                    </p>
-                                                                    {notification.unread && (
-                                                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                                    )}
-                                                                </div>
-                                                                <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                                                    {notification.message}
-                                                                </p>
-                                                                <p className="text-xs text-slate-400 mt-1">
-                                                                    {notification.time}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </DropdownMenuItem>
-                                            ))}
-                                            {notifications.length === 0 && (
-                                                <div className="p-4 text-center text-slate-500">
-                                                    No notifications yet
-                                                </div>
-                                            )}
-                                        </div>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={() => setShowNotificationsSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-blue-600 font-medium hover:bg-blue-50">
-                                            See All Notifications
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                                {/* Profile Button with User Name */}
-                                <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
-                                    <User className="h-5 w-5 text-gray-600" />
-                                    {profileData.firstName && (
-                                        <span className="hidden sm:inline text-sm font-medium">
-                                            Hi, {profileData.firstName}
-                                        </span>
-                                    )}
-                                </Button>
-                            </div>
+                                        <Button
+                                            variant="default"
+                                            size="sm"
+                                            asChild
+                                            className="text-sm px-3 py-1"
+                                        >
+                                            <Link to="/signup">Join</Link>
+                                        </Button>
+                                    </div>
+                                    {/* Desktop: Join and Sign In buttons */}
+                                    <div className="hidden md:flex items-center space-x-3">
+                                        <Button
+                                            variant="outline"
+                                            asChild
+                                            className="text-sm px-4 py-2"
+                                        >
+                                            <Link to="/signin">Sign In</Link>
+                                        </Button>
+                                        <Button
+                                            variant="default"
+                                            asChild
+                                            className="text-sm px-4 py-2"
+                                        >
+                                            <Link to="/signup">Join</Link>
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

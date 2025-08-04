@@ -235,7 +235,7 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
         Services: {
             categories: [
                 { id: 'greenprojects', label: 'Sustainable', href: '/sustainable' },
-                { id: 'consulting', label: 'Consulting', href: '/services/consulting' },
+                { id: 'consulting', label: 'Consulting', href: '/consulting' },
                 { id: 'review', label: 'Project Review', href: '/services/review' },
                 { id: 'impact', label: 'Impact Metrics', href: '/sustainable/impact' },
                 { id: 'agents', label: 'AI Agents', href: '/aiagents' },
@@ -504,51 +504,89 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
             {Object.keys(megaMenuData).map((menuKey) => {
                 const isOpen = activeDropdown === menuKey;
                 return (
-                    <div
-                        key={menuKey}
-                        className="relative"
-                    >
-                        <Button
-                            variant="ghost"
-                            size='sm'
-                            className={`relative px-6 py-2 font-medium transition-all duration-200 hover:bg-transparent hover:text-gray-900 text-gray-700 ${isOpen ? 'text-blue-700' : ''}`}
-                            onClick={() => {
-                                // Toggle dropdown
-                                if (activeDropdown === menuKey) {
-                                    setActiveDropdown(null);
-                                    setActiveCategory(null);
-                                } else {
-                                    setActiveDropdown(menuKey);
-                                    // Set default active category for each menu
-                                    switch (menuKey) {
-                                        case 'Marketplace':
-                                            setActiveCategory('explore');
-                                            break;
-                                        case 'Work':
-                                            setActiveCategory('freelance');
-                                            break;
-                                        case 'Services':
-                                            setActiveCategory('greenprojects');
-                                            break;
-                                        case 'Community':
-                                            setActiveCategory('aboutus');
-                                            break;
-                                        default:
-                                            setActiveCategory('explore');
-                                    }
-                                }
-                            }}
-                        >
-                            {menuKey}
-                        </Button>
-                        {isOpen && (
-                            <div
-                                className="mega-menu-container fixed left-1/2 top-14 z-50 w-[90vw] max-w-6xl p-0 border-0 shadow-none bg-transparent -translate-x-1/2 rounded-lg"
-                                style={{ pointerEvents: 'auto' }}
-                            >
-                                {renderMegaMenu(menuKey as keyof typeof megaMenuData)}
-                            </div>
-                        )}
+                                         <div
+                         key={menuKey}
+                         className="relative"
+                         onMouseLeave={() => {
+                             // Only close if we're not hovering over the mega menu content
+                             // This prevents closing when moving from button to mega menu
+                             setTimeout(() => {
+                                 if (!document.querySelector('.mega-menu-container:hover')) {
+                                     setActiveDropdown(null);
+                                     setActiveCategory(null);
+                                 }
+                             }, 100);
+                         }}
+                     >
+                                                 <Button
+                             variant="ghost"
+                             size='sm'
+                             className={`relative px-6 py-2 font-medium transition-all duration-200 hover:bg-transparent hover:text-gray-900 text-gray-700 ${isOpen ? 'text-blue-700' : ''}`}
+                             onMouseEnter={() => {
+                                 setActiveDropdown(menuKey);
+                                 // Set default active category for each menu
+                                 switch (menuKey) {
+                                     case 'Marketplace':
+                                         setActiveCategory('explore');
+                                         break;
+                                     case 'Work':
+                                         setActiveCategory('freelance');
+                                         break;
+                                     case 'Services':
+                                         setActiveCategory('greenprojects');
+                                         break;
+                                     case 'Community':
+                                         setActiveCategory('aboutus');
+                                         break;
+                                     default:
+                                         setActiveCategory('explore');
+                                 }
+                             }}
+                             onClick={() => {
+                                 // Toggle dropdown on click
+                                 if (activeDropdown === menuKey) {
+                                     setActiveDropdown(null);
+                                     setActiveCategory(null);
+                                 } else {
+                                     setActiveDropdown(menuKey);
+                                     // Set default active category for each menu
+                                     switch (menuKey) {
+                                         case 'Marketplace':
+                                             setActiveCategory('explore');
+                                             break;
+                                         case 'Work':
+                                             setActiveCategory('freelance');
+                                             break;
+                                         case 'Services':
+                                             setActiveCategory('greenprojects');
+                                             break;
+                                         case 'Community':
+                                             setActiveCategory('aboutus');
+                                             break;
+                                         default:
+                                             setActiveCategory('explore');
+                                     }
+                                 }
+                             }}
+                         >
+                             {menuKey}
+                         </Button>
+                                                 {isOpen && (
+                             <div
+                                 className="mega-menu-container fixed left-1/2 top-14 z-[100] w-[90vw] max-w-6xl p-0 border-0 shadow-none bg-transparent -translate-x-1/2 rounded-lg"
+                                 style={{ pointerEvents: 'auto' }}
+                                 onMouseEnter={() => {
+                                     // Keep menu open when hovering over the mega menu content
+                                 }}
+                                 onMouseLeave={() => {
+                                     // Close menu when mouse leaves the mega menu area
+                                     setActiveDropdown(null);
+                                     setActiveCategory(null);
+                                 }}
+                             >
+                                 {renderMegaMenu(menuKey as keyof typeof megaMenuData)}
+                             </div>
+                         )}
                     </div>
                 );
             })}
@@ -566,7 +604,7 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
             };
         }
         return (
-            <div className="w-screen max-w-6xl mx-auto bg-white border border-gray-200 shadow-2xl text-sm">
+            <div className="w-screen max-w-6xl mx-auto bg-white border border-gray-200 shadow-2xl text-sm relative z-[101]">
                 <div className="grid grid-cols-12 min-h-[400px]">
                     {/* Left Column - Categories */}
                     <div className="col-span-3 bg-gray-50 border-r border-gray-200">

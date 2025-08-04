@@ -8,6 +8,8 @@ import { GiArtificialIntelligence, GiProcessor, GiCircuitry } from 'react-icons/
 import { BsLightningCharge } from 'react-icons/bs';
 import Header from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { Link } from 'react-router-dom';
+
 const Artificial = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -334,7 +336,7 @@ const Artificial = () => {
       </div>
 
       {/* Floating particles */}
-      <div className="fixed inset-0 pointer-events-none">
+      <div className="fixed inset-0 pointer-events-none hidden sm:block">
         {[...Array(30)].map((_, i) => (
           <motion.div
             key={i}
@@ -360,7 +362,7 @@ const Artificial = () => {
       </div>
 
       {/* AI Neural Network Animation */}
-      <div className="fixed inset-0 pointer-events-none">
+      <div className="fixed inset-0 pointer-events-none hidden md:block">
         {[...Array(50)].map((_, i) => {
           const startX = Math.random() * 100;
           const startY = Math.random() * 100;
@@ -460,12 +462,12 @@ const Artificial = () => {
       </div>
 
       {/* Hero Section */}
-      <section ref={sections.intro} className="px-4 md:px-8 relative h-[90vh] flex items-center">
+      <section ref={sections.intro} className="px-4 md:px-8 relative min-h-[90vh] flex items-center py-8 sm:py-0">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
         
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
@@ -476,7 +478,7 @@ const Artificial = () => {
                 <span className="text-sm">THE FUTURE OF AI AGENTS IS HERE</span>
               </div>
               
-              <h1 className="text-4xl font-bold mb-6 leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">
                   Discover, Share & Monetize
                 </span>
@@ -502,29 +504,30 @@ const Artificial = () => {
                 </motion.span>
               </h1>
               
-              <p className="text-base text-gray-300 max-w-2xl mb-10">
+              <p className="text-sm sm:text-base text-gray-300 max-w-2xl mb-6 sm:mb-10">
                 Join the world's leading marketplace for AI solutions. Access cutting-edge agents, contribute your innovations, and transform how businesses operate.
               </p>
               
-              <div className="flex flex-wrap gap-4 mb-16">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-12 sm:mb-16">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => scrollToSection(sections.marketplace)}
-                  className="px-8 py-4 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20 flex items-center"
+                  className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20 flex items-center justify-center text-sm sm:text-base"
                 >
                   <span>Explore Agents</span>
                   <IoRocketSharp className="ml-2" />
                 </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gray-800/70 border border-gray-700 rounded-xl font-medium hover:bg-gray-700/50 transition-all duration-300 flex items-center"
-                >
-                  <span>Publish Agent</span>
-                  <TbHexagon3D className="ml-2" />
-                </motion.button>
+                <Link to="/notfound">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gray-800/70 border border-gray-700 rounded-xl font-medium hover:bg-gray-700/50 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
+                  >
+                    <span>Publish Agent</span>
+                    <TbHexagon3D className="ml-2" />
+                  </motion.button>
+                </Link>
               </div>
             </motion.div>
             
@@ -621,17 +624,17 @@ const Artificial = () => {
       </section>
 
       {/* What are AI Agents? Section */}
-      <section ref={sections.whatIs} className="py-20 px-4 md:px-8 relative">
+      <section ref={sections.whatIs} className="py-12 sm:py-16 md:py-20 px-4 md:px-8 relative">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
         
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12 sm:mb-16">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
             >
               What are <span className="text-cyan-400">AI Agents</span>?
             </motion.h2>
@@ -640,14 +643,14 @@ const Artificial = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-gray-400 max-w-3xl mx-auto text-base"
+              className="text-gray-400 max-w-3xl mx-auto text-sm sm:text-base"
             >
               AI agents are autonomous systems that perceive their environment, make decisions, and take actions to achieve specific goals. 
               They combine machine learning, reasoning, and problem-solving capabilities to perform complex tasks.
             </motion.p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {aiApplications.map((app, index) => (
               <motion.div
                 key={index}
@@ -656,7 +659,7 @@ const Artificial = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -10 }}
-                className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 hover:border-cyan-500/30 transition-all duration-500 group"
+                className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6 hover:border-cyan-500/30 transition-all duration-500 group"
               >
                 <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 flex items-center justify-center mb-6 group-hover:bg-gradient-to-br group-hover:from-cyan-600/30 group-hover:to-indigo-600/30">
                   {app.icon}
@@ -670,177 +673,258 @@ const Artificial = () => {
       </section>
 
       {/* Marketplace Section */}
-      <section ref={sections.marketplace} className="py-20 px-4 md:px-8 relative">
+      <section ref={sections.marketplace} className="py-12 sm:py-16 md:py-20 px-4 md:px-8 relative">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
         
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold mb-4"
-            >
-              Explore <span className="text-cyan-400">AI Agents</span>
-            </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-gray-400 max-w-2xl mx-auto text-base"
-            >
-              Discover powerful AI solutions created by developers worldwide. Deploy in minutes to enhance your workflows.
-            </motion.p>
+        <div className="max-w-7xl mx-auto relative">
+          {/* Blur overlay for the entire marketplace section */}
+          <div className="absolute inset-0 backdrop-blur-md bg-gray-900/20 rounded-3xl z-10"></div>
+          
+          {/* Coming Soon Poster */}
+          <div className="absolute inset-0 z-20 flex items-center justify-center">
+                          <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 border-2 border-cyan-500/30 rounded-3xl p-6 sm:p-8 md:p-12 backdrop-blur-sm shadow-2xl shadow-cyan-500/20 max-w-2xl mx-auto text-center"
+              >
+                {/* Animated icon */}
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 10, -10, 0],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="mb-6 sm:mb-8"
+                >
+                  <TbRobot className="text-4xl sm:text-5xl md:text-6xl text-cyan-400 mx-auto" />
+                </motion.div>
+                
+                {/* Coming Soon Badge */}
+                <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 mb-4 sm:mb-6">
+                  <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></div>
+                  <span className="text-xs sm:text-sm font-medium text-cyan-300">COMING SOON</span>
+                </div>
+                
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">
+                  AI Agents Marketplace
+                </h2>
+                
+                <p className="text-gray-300 text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed">
+                  We're building the most advanced marketplace for AI agents. Get ready to discover, 
+                  deploy, and monetize cutting-edge AI solutions that will transform your business.
+                </p>
+              
+              {/* Features preview */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
+                  <div className="text-cyan-400 text-xl sm:text-2xl mb-2">🚀</div>
+                  <h3 className="text-base sm:text-lg font-bold mb-1">Deploy Instantly</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">One-click deployment to your infrastructure</p>
+                </div>
+                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
+                  <div className="text-emerald-400 text-xl sm:text-2xl mb-2">💰</div>
+                  <h3 className="text-base sm:text-lg font-bold mb-1">Monetize</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">Earn revenue from your AI creations</p>
+                </div>
+                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
+                  <div className="text-purple-400 text-xl sm:text-2xl mb-2">🔗</div>
+                  <h3 className="text-base sm:text-lg font-bold mb-1">Integrate</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">Seamless API integration</p>
+                </div>
+              </div>
+              
+              {/* Notification signup */}
+              <div className="bg-gray-800/30 rounded-2xl p-4 sm:p-6 border border-gray-700">
+                <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">Get Early Access</h3>
+                <p className="text-gray-400 text-xs sm:text-sm mb-3 sm:mb-4">
+                  Be the first to know when our marketplace launches
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-white placeholder-gray-400 text-sm"
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20 flex items-center justify-center text-sm"
+                  >
+                    <span>Notify Me</span>
+                    <IoRocketSharp className="ml-2" />
+                  </motion.button>
+                </div>
+              </div>
+              
+              {/* Progress indicator */}
+              <div className="mt-6 sm:mt-8">
+                <div className="flex justify-between text-xs sm:text-sm text-gray-400 mb-2">
+                  <span>Development Progress</span>
+                  <span>85%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-1.5 sm:h-2 overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-cyan-500 to-indigo-600 rounded-full"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: "85%" }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 2, ease: "easeOut" }}
+                  />
+                </div>
+              </div>
+            </motion.div>
           </div>
           
-          {/* Category Filter */}
-          <motion.div 
-            className="flex flex-wrap justify-center gap-4 mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setActiveCategory(category.id)}
-                className={`px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-300 text-base ${
-                  activeCategory === category.id
-                    ? 'bg-gradient-to-r from-cyan-700/30 to-indigo-700/30 border border-cyan-500/30'
-                    : 'bg-gray-800/50 border border-gray-700 hover:bg-gray-700/50'
-                }`}
-              >
-                {category.icon && <span>{category.icon}</span>}
-                <span>{category.name}</span>
-              </button>
-            ))}
-          </motion.div>
-          
-          {/* Search */}
-          <motion.div 
-            className="max-w-2xl mx-auto mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-          >
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500">
-                <FiSearch />
-              </div>
-              <input
-                type="text"
-                placeholder="Search for agents, capabilities, or industries..."
-                className="w-full pl-12 pr-4 py-4 text-base bg-gray-800/50 border border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </motion.div>
-          
-          {/* Agents Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredAgents.map((agent) => (
-              <motion.div
-                key={agent.id}
-                initial={{ opacity: 0, y: 30 }}
+          {/* Blurred content underneath */}
+          <div className="opacity-30 pointer-events-none">
+            <div className="text-center mb-16">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-                onHoverStart={() => setHoveredAgent(agent.id)}
-                onHoverEnd={() => setHoveredAgent(null)}
-                className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-cyan-500/10 relative"
+                className="text-3xl md:text-4xl font-bold mb-4"
               >
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold">{agent.name}</h3>
-                      <p className="text-gray-400 text-xs">by {agent.creator}</p>
-                    </div>
-                    <div className="bg-indigo-500/10 px-3 py-1 rounded-full text-xs flex items-center">
-                      <span>${agent.price}</span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-gray-300 text-sm mb-6 h-16">{agent.description}</p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {agent.tags.map((tag, i) => (
-                      <span 
-                        key={i} 
-                        className="px-3 py-1 bg-gray-800/50 text-xs rounded-full"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <FiStar 
-                            key={i} 
-                            className={`${i < Math.floor(agent.rating) ? 'fill-current' : ''}`}
-                          />
-                        ))}
-                      </div>
-                      <span className="ml-2 text-sm">{agent.rating}</span>
-                    </div>
-                    <div className="text-sm text-gray-400 flex items-center">
-                      <FiTrendingUp className="mr-1" />
-                      <span>{agent.sales} sales</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="px-6 py-4 bg-gray-800/50 border-t border-gray-700 flex justify-between">
-                  <button className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors">
-                    View Details
-                  </button>
-                  <button className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-sm flex items-center hover:opacity-90 transition-opacity">
-                    <FiShoppingCart className="mr-2" />
-                    <span>Add to Cart</span>
-                  </button>
-                </div>
-                
-                <AnimatePresence>
-                  {hoveredAgent === agent.id && (
-                    <motion.div 
-                      className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 pointer-events-none"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    />
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
-          
-          {filteredAgents.length === 0 && (
-            <div className="text-center py-16 text-gray-500">
-              No agents found matching your criteria
+                Explore <span className="text-cyan-400">AI Agents</span>
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="text-gray-400 max-w-2xl mx-auto text-base"
+              >
+                Discover powerful AI solutions created by developers worldwide. Deploy in minutes to enhance your workflows.
+              </motion.p>
             </div>
-          )}
+            
+            {/* Category Filter */}
+            <motion.div 
+              className="flex flex-wrap justify-center gap-4 mb-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  className="px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-300 text-base bg-gray-800/50 border border-gray-700"
+                >
+                  {category.icon && <span>{category.icon}</span>}
+                  <span>{category.name}</span>
+                </button>
+              ))}
+            </motion.div>
+            
+            {/* Search */}
+            <motion.div 
+              className="max-w-2xl mx-auto mb-16"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500">
+                  <FiSearch />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search for agents, capabilities, or industries..."
+                  className="w-full pl-12 pr-4 py-4 text-base bg-gray-800/50 border border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                  disabled
+                />
+              </div>
+            </motion.div>
+            
+            {/* Agents Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredAgents.map((agent) => (
+                <motion.div
+                  key={agent.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl overflow-hidden"
+                >
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-xl font-bold">{agent.name}</h3>
+                        <p className="text-gray-400 text-xs">by {agent.creator}</p>
+                      </div>
+                      <div className="bg-indigo-500/10 px-3 py-1 rounded-full text-xs flex items-center">
+                        <span>${agent.price}</span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-gray-300 text-sm mb-6 h-16">{agent.description}</p>
+                    
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {agent.tags.map((tag, i) => (
+                        <span 
+                          key={i} 
+                          className="px-3 py-1 bg-gray-800/50 text-xs rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="flex text-yellow-400">
+                          {[...Array(5)].map((_, i) => (
+                            <FiStar 
+                              key={i} 
+                              className={`${i < Math.floor(agent.rating) ? 'fill-current' : ''}`}
+                            />
+                          ))}
+                        </div>
+                        <span className="ml-2 text-sm">{agent.rating}</span>
+                      </div>
+                      <div className="text-sm text-gray-400 flex items-center">
+                        <FiTrendingUp className="mr-1" />
+                        <span>{agent.sales} sales</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="px-6 py-4 bg-gray-800/50 border-t border-gray-700 flex justify-between">
+                    <button className="text-sm text-cyan-400">
+                      View Details
+                    </button>
+                    <button className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-sm flex items-center">
+                      <FiShoppingCart className="mr-2" />
+                      <span>Add to Cart</span>
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section ref={sections.benefits} className="py-20 px-4 md:px-8 relative">
+      <section ref={sections.benefits} className="py-12 sm:py-16 md:py-20 px-4 md:px-8 relative">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
         
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12 sm:mb-16">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
             >
               How <span className="text-emerald-400">AI Agents</span> Transform Industries
             </motion.h2>
@@ -849,18 +933,18 @@ const Artificial = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-gray-400 max-w-2xl mx-auto text-base"
+              className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base"
             >
               Discover the tangible benefits of integrating AI agents into your operations
             </motion.p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-12 sm:mb-16">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-8"
+              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 sm:p-8"
             >
               <h3 className="text-2xl font-bold mb-4 text-cyan-400">Real-World Impact</h3>
               <p className="text-gray-300 mb-6 text-base">
@@ -895,7 +979,7 @@ const Artificial = () => {
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="grid grid-cols-2 gap-4"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
             >
               {benefits.map((benefit, i) => (
                 <motion.div
@@ -904,7 +988,7 @@ const Artificial = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6"
+                  className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6"
                 >
                   <div className="flex items-start mb-3">
                     <div className="text-cyan-400 text-2xl font-bold mr-3">0{i+1}</div>
@@ -982,17 +1066,17 @@ const Artificial = () => {
       </section>
 
       {/* Research & News Section */}
-      <section ref={sections.research} className="py-20 px-4 md:px-8 relative">
+      <section ref={sections.research} className="py-12 sm:py-16 md:py-20 px-4 md:px-8 relative">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
         
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12 sm:mb-16">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
             >
               AI <span className="text-emerald-400">Research</span> & Innovation
             </motion.h2>
@@ -1001,18 +1085,18 @@ const Artificial = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-gray-400 max-w-2xl mx-auto"
+              className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base"
             >
               Stay at the forefront of artificial intelligence advancements
             </motion.p>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-12 sm:mb-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-8"
+              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 sm:p-8"
             >
               <h3 className="text-2xl font-bold mb-6">Latest Research</h3>
               <div className="space-y-6">
@@ -1106,18 +1190,20 @@ const Artificial = () => {
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
           >
-            <button className="px-8 py-4 border border-gray-700 rounded-xl font-medium hover:bg-gray-800/50 transition-all duration-300 inline-flex items-center">
-              <span>View Research Portal</span>
-              <FiArrowRight className="ml-2" />
-            </button>
+            <Link to="/notfound">
+              <button className="px-8 py-4 border border-gray-700 rounded-xl font-medium hover:bg-gray-800/50 transition-all duration-300 inline-flex items-center">
+                <span>View Research Portal</span>
+                <FiArrowRight className="ml-2" />
+              </button>
+            </Link>
           </motion.div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section ref={sections.cta} className="py-20 px-4 md:px-8">
+      <section ref={sections.cta} className="py-12 sm:py-16 md:py-20 px-4 md:px-8">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/70 border border-gray-700 rounded-3xl p-12 backdrop-blur-sm relative overflow-hidden">
+          <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/70 border border-gray-700 rounded-3xl p-6 sm:p-8 md:p-12 backdrop-blur-sm relative overflow-hidden">
             {/* Tube light effect */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
             
@@ -1130,33 +1216,37 @@ const Artificial = () => {
                 initial={{ scale: 0.8, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true }}
-                className="inline-block mb-6"
+                className="inline-block mb-4 sm:mb-6"
               >
-                <TbRobot className="text-5xl text-cyan-400 mx-auto" />
+                <TbRobot className="text-4xl sm:text-5xl text-cyan-400 mx-auto" />
               </motion.div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
                 Ready to <span className="text-cyan-400">Transform</span> Your Business?
               </h2>
-              <p className="text-gray-300 max-w-2xl mx-auto mb-10">
+              <p className="text-gray-300 max-w-2xl mx-auto mb-6 sm:mb-10 text-sm sm:text-base">
                 Join thousands of developers and businesses leveraging AI agents to automate complex tasks and drive innovation.
               </p>
               
-              <div className="flex flex-wrap justify-center gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20"
-                >
-                  Get Started Today
-                </motion.button>
+              <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+                <Link to="/signup">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20 text-sm sm:text-base"
+                  >
+                    Get Started Today
+                  </motion.button>
+                </Link>
                 
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gray-800/70 border border-gray-700 rounded-xl font-medium hover:bg-gray-700/50 transition-all duration-300"
-                >
-                  Schedule a Demo
-                </motion.button>
+                <Link to="/notfound">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gray-800/70 border border-gray-700 rounded-xl font-medium hover:bg-gray-700/50 transition-all duration-300 text-sm sm:text-base"
+                  >
+                    Schedule a Demo
+                  </motion.button>
+                </Link>
               </div>
             </div>
           </div>

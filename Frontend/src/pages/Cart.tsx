@@ -15,9 +15,11 @@ import { getCategoryIcon, getLicenseColor } from '@/components/cart/utils';
 import { CartItem as CartItemType, SavedItem, FeaturedProject } from '@/components/cart/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthState } from '@/hooks/useAuthState';
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import { toast } from 'sonner';
 import Header from "@/components/Header";
+import { API_ENDPOINTS } from '../config/api';
+
 interface BackendCartItem {
   productId: string;
   addedAt: string;
@@ -115,38 +117,39 @@ const Cart = () => {
     try {
       setLoading(true);
       
-      // Debug: Check if user is authenticated
-      console.log('Current user:', user);
-      console.log('Auth loading:', authLoading);
-      
-      if (!user) {
-        console.error('No user found, redirecting to signin');
-        navigate('/signin');
-        return;
-      }
-      
-      // Get user data from backend to get customUserId
       const userData = await userService.getUserProfile();
-      console.log('User data:', userData);
-      
-      if (!userData) {
+      if (!userData || !userData.customUserId) {
+        console.error('User data or customUserId not found');
         toast.error('User data not found');
         return;
       }
 
-      console.log('Fetching cart for user:', userData.customUserId);
       console.log('Firebase UID:', user.uid);
       
       // Fetch cart data from backend
-      const cartData = await userService.getUserCartByCustomId(userData.customUserId);
-      console.log('Cart data received:', cartData);
+      const response = await userService.getUserCartByCustomId(userData.customUserId);
+      console.log('Cart data received:', response);
+      
+      // Handle different response structures
+      let cartData: any[] = [];
+      if (Array.isArray(response)) {
+        cartData = response;
+      } else if (response && typeof response === 'object' && 'data' in response && Array.isArray((response as any).data)) {
+        cartData = (response as any).data;
+      } else if (response && typeof response === 'object' && 'cart' in response && Array.isArray((response as any).cart)) {
+        cartData = (response as any).cart;
+      } else {
+        console.log('No cart data found or invalid structure:', response);
+        setCartItems([]);
+        return;
+      }
       
       // Fetch project details from marketplace for each cart item
       const transformedCartItems: CartItemType[] = await Promise.all(
         cartData.map(async (item: BackendCartItem) => {
           try {
             // Fetch project details from marketplace
-            const response = await fetch(`http://localhost:3000/api/marketplace/projects/${item.productId}`);
+            const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(item.productId));
             if (!response.ok) {
               throw new Error(`Failed to fetch project ${item.productId}`);
             }
@@ -221,7 +224,7 @@ const Cart = () => {
       }
 
       // Remove item from cart in backend
-      await userService.removeFromCart(userData.customUserId, id);
+      await userService.removeFromCart(id);
       
       // Update local state
       setCartItems(items => items.filter(item => item.id !== id));
@@ -268,7 +271,7 @@ const Cart = () => {
       }
 
       // Clear cart in backend
-      await userService.clearCart(userData.customUserId);
+      await userService.clearCart();
       
       // Update local state
       setCartItems([]);
@@ -345,7 +348,7 @@ const Cart = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-2">
           <div className="flex items-center gap-2">
             <ShoppingCart className="h-7 w-7 text-blue-600" />
-            <h2 className="text-xl xs:text-2xl font-bold text-gray-900">
+            <h2 className="text-4xl font-bold text-gray-900 mobile-text-4xl">
               Your Cart
             </h2>
             <span className="ml-2 bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded-full">

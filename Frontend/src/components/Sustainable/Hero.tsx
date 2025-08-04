@@ -44,7 +44,7 @@ export const Hero = () => {
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col md:flex-row items-center min-h-[80vh] sm:min-h-[85vh] md:min-h-[90vh]">
         <div className="w-full md:w-1/2 space-y-4 sm:space-y-6 text-center md:text-left">
-          <h1 className="text-4xl font-bold text-gray-900 leading-tight">
+          <h1 className="text-[17px] sm:text-4xl font-bold text-gray-900 leading-tight mobile-text-4xl">
             Sustainable Project{" "}
             <span className="inline-flex items-center bg-gradient-to-r from-green-400 to-emerald-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium mx-1 sm:mx-2">
               🌱
@@ -53,7 +53,7 @@ export const Hero = () => {
           </h1>
 
 
-          <p className="text-base text-gray-600 max-w-md mx-auto md:mx-0 leading-relaxed">
+          <p className="text-base text-gray-600 max-w-md mx-auto md:mx-0 leading-relaxed mobile-text-base">
             Join professors and students worldwide in building revolutionary eco-friendly solutions. Contribute your innovative project ideas for a sustainable future.
           </p>
 

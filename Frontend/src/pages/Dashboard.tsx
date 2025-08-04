@@ -3,18 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, CheckSquare, Calendar, BarChart3, User, Settings, HelpCircle, LogOut, BookOpen, GraduationCap, Building, Sparkles, Moon, Sun, Search, Plus, Clock, Minus, Briefcase, List, Users, Bell } from "lucide-react";
+import { LayoutDashboard, CheckSquare, Calendar, BarChart3, User, Settings, HelpCircle, LogOut, BookOpen, GraduationCap, Building, Sparkles, Moon, Sun, Search, Plus, Clock, Minus, Briefcase, List, Users, Bell, Menu } from "lucide-react";
 import { ThemeProvider, useTheme } from "@/components/dashboard/ThemeProvider";
 import StatsCard from "@/components/dashboard/StatsCards";
 import DetailedStatsSection from "@/components/dashboard/DetailedStatsSection";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell, Legend, LineChart, Line, Tooltip, CartesianGrid, Area, AreaChart } from "recharts";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import { TrendingUp, Star, Shield, LayoutGrid, UserPlus, Heart, BarChart2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import marketplaceData from '../../../Backend/data/marketplace.json';
 
 type UserType = 'academic' | 'freelancer' | 'business';
 
@@ -26,6 +25,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasEarnings, setHasEarnings] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Real backend data states
   const [userStats, setUserStats] = useState({
@@ -99,7 +99,6 @@ const Dashboard = () => {
     fetchProfile();
   }, [navigate]);
 
-  // Fetch real user stats and data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -124,34 +123,47 @@ const Dashboard = () => {
         setUserStats(stats);
         setRecentActivity(dashboardData.activities || []);
         
-        const totalEarnings = dashboardData.totalEarnings || 0;
-        let realEarningsData;
-        if (totalEarnings > 0) {
-          realEarningsData = [
-            { name: 'Jan', value: Math.round(totalEarnings * 0.2) },
-            { name: 'Feb', value: Math.round(totalEarnings * 0.3) },
-            { name: 'Mar', value: Math.round(totalEarnings * 0.15) },
-            { name: 'Apr', value: Math.round(totalEarnings * 0.25) },
-            { name: 'May', value: Math.round(totalEarnings * 0.1) },
-            { name: 'Jun', value: Math.round(totalEarnings * 0.1) },
-          ];
-        } else {
-          realEarningsData = [
-            { name: 'Jan', value: 0 },
-            { name: 'Feb', value: 0 },
-            { name: 'Mar', value: 0 },
-            { name: 'Apr', value: 0 },
-            { name: 'May', value: 0 },
-            { name: 'Jun', value: 0 },
-          ];
-        }
-        setHasEarnings(realEarningsData.some(e => e.value > 0));
-        setEarningsData(realEarningsData);
+        // Initialize earnings data - will be updated after projects are fetched
+        setEarningsData([]);
+        setHasEarnings(false);
 
         const projectsData = await userService.getUserProjects();
-        setUserProjects(projectsData.created || []);
+        const userProjects = projectsData.created || [];
+        setUserProjects(userProjects);
 
-        const statusCounts = userProjects.reduce((acc, project) => {
+        // Calculate earnings based on actual project data
+        const now = new Date();
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          months.push({
+            name: d.toLocaleString('default', { month: 'short' }),
+            value: 0
+          });
+        }
+        
+        // Distribute earnings based on project creation dates
+        if (userProjects && userProjects.length > 0) {
+          userProjects.forEach((project: any) => {
+            if (project.createdAt) {
+              const projectDate = new Date(project.createdAt);
+              const monthIndex = months.findIndex(m => {
+                const monthDate = new Date(projectDate.getFullYear(), projectDate.getMonth(), 1);
+                return monthDate.getMonth() === projectDate.getMonth() && 
+                       monthDate.getFullYear() === projectDate.getFullYear();
+              });
+              if (monthIndex !== -1) {
+                // Add project price to that month's earnings
+                months[monthIndex].value += project.price || 0;
+              }
+            }
+          });
+        }
+        
+        setEarningsData(months);
+        setHasEarnings(months.some(e => e.value > 0));
+
+        const statusCounts = userProjects.reduce((acc: any, project: any) => {
           const status = (project.status || 'Unknown').toLowerCase();
           acc[status] = (acc[status] || 0) + 1;
           return acc;
@@ -184,14 +196,10 @@ const Dashboard = () => {
   useEffect(() => {
     const aggregateLineGraphData = async () => {
       try {
-        const userProfile = await userService.getUserProfile();
-        const customUserId = userProfile.customUserId;
-        // Get all projects from marketplace.json
-        const allProjects = marketplaceData.projects || [];
-        // Filter projects by current user
-        const userProjects = allProjects.filter(
-          (p) => p.author === customUserId || p.customUserId === customUserId
-        );
+        // Get real project data to create accurate graphs
+        const projectsData = await userService.getUserProjects();
+        const userProjects = projectsData.created || [];
+        
         // Prepare months (last 6 months)
         const now = new Date();
         const months = [];
@@ -202,72 +210,67 @@ const Dashboard = () => {
             label: d.toLocaleString('default', { month: 'short' }),
           });
         }
-        // Aggregate projects posted per month
-        const projectsByMonth = {};
-        months.forEach((m) => (projectsByMonth[m.key] = []));
-        userProjects.forEach((project) => {
-          const posted = new Date(project.posted);
-          const key = `${posted.getFullYear()}-${posted.getMonth() + 1}`;
-          if (projectsByMonth[key]) {
-            projectsByMonth[key].push(project);
-          }
-        });
-        // Count projects per month
-        let projectsCount = months.map((m) => projectsByMonth[m.key].length);
-        // If all zero, show a faint line for demo
-        if (projectsCount.every((v) => v === 0)) {
-          projectsCount = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
+
+        // Initialize monthly data
+        const projectsByMonth = Array(6).fill(0);
+        const viewsByMonth = Array(6).fill(0);
+        const favouritesByMonth = Array(6).fill(0);
+        const connectionsByMonth = Array(6).fill(0);
+
+        // Distribute projects based on actual creation dates
+        if (userProjects && userProjects.length > 0) {
+          userProjects.forEach((project: any) => {
+            if (project.createdAt) {
+              const projectDate = new Date(project.createdAt);
+              const monthIndex = months.findIndex(m => {
+                const monthDate = new Date(projectDate.getFullYear(), projectDate.getMonth(), 1);
+                return monthDate.getMonth() === projectDate.getMonth() && 
+                       monthDate.getFullYear() === projectDate.getFullYear();
+              });
+              if (monthIndex !== -1) {
+                projectsByMonth[monthIndex]++;
+                // Distribute views and other metrics for this project
+                const projectViews = project.views || 0;
+                const projectFavourites = project.favourites || 0;
+                viewsByMonth[monthIndex] += projectViews;
+                favouritesByMonth[monthIndex] += projectFavourites;
+              }
+            }
+          });
         }
-        // Views: progressive curve from 0 to totalViews
-        const totalViews = userProjects.reduce((sum, p) => sum + (p.views || 0), 0);
-        let viewsCurve = Array(6).fill(0);
-        if (totalViews > 0) {
-          let sum = 0;
-          for (let i = 0; i < 5; i++) {
-            // Randomly increment, but always increasing
-            const remaining = totalViews - sum;
-            const increment = i === 4 ? remaining : Math.floor(Math.random() * (remaining / (6 - i)));
-            sum += increment;
-            viewsCurve[i] = sum;
-          }
-          viewsCurve[5] = totalViews;
-        }
-        // Favourites and connections: random distribution as before
-        const totalFavourites = userStats.projectFavourites || 0;
+
+        // For connections, use a simple distribution since we don't have connection dates
         const totalConnections = userStats.connections || 0;
-        function randomDistribute(total, n) {
-          if (total === 0) return Array(n).fill(0);
-          let arr = Array(n).fill(0);
-          let sum = 0;
-          for (let i = 0; i < n - 1; i++) {
-            arr[i] = Math.floor(Math.random() * (total - sum));
-            sum += arr[i];
+        if (totalConnections > 0) {
+          const connectionsPerMonth = Math.floor(totalConnections / 6);
+          for (let i = 0; i < 6; i++) {
+            connectionsByMonth[i] = connectionsPerMonth;
           }
-          arr[n - 1] = total - sum;
-          // Shuffle for randomness
-          for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [arr[i], arr[j]] = [arr[j], arr[i]];
+          // Distribute remainder
+          const remainder = totalConnections % 6;
+          for (let i = 0; i < remainder; i++) {
+            connectionsByMonth[i]++;
           }
-          return arr;
         }
-        const favouritesByMonth = randomDistribute(totalFavourites, 6);
-        const connectionsByMonth = randomDistribute(totalConnections, 6);
-        // Build final data array
+
+        // Build final data array with real data
         const newLineGraphData = months.map((m, i) => ({
           month: m.label,
-          projects: projectsCount[i],
+          projects: projectsByMonth[i],
           favourites: favouritesByMonth[i],
           connections: connectionsByMonth[i],
-          views: viewsCurve[i],
+          views: viewsByMonth[i],
         }));
         setLineGraphData(newLineGraphData);
       } catch (e) {
+        console.error('Error aggregating line graph data:', e);
         // fallback: keep zeros
       }
     };
-    aggregateLineGraphData();
-    // eslint-disable-next-line
+    
+    if (userStats.projectsPosted > 0 || userStats.projectViews > 0) {
+      aggregateLineGraphData();
+    }
   }, [userStats]);
 
   const onUserTypeChange = (type: UserType) => {
@@ -277,38 +280,43 @@ const Dashboard = () => {
 
   // Generate hover data for stats cards
   const generateHoverData = (baseValue: number) => {
-    return [
-      { name: 'Mon', value: baseValue * 0.8 },
-      { name: 'Tue', value: baseValue * 1.2 },
-      { name: 'Wed', value: baseValue * 0.9 },
-      { name: 'Thu', value: baseValue * 1.4 },
-      { name: 'Fri', value: baseValue * 1.1 },
-      { name: 'Sat', value: baseValue * 0.7 },
-      { name: 'Sun', value: baseValue },
-    ];
+    // Generate more realistic weekly data based on the base value
+    if (baseValue === 0) {
+      return [
+        { name: 'Mon', value: 0 },
+        { name: 'Tue', value: 0 },
+        { name: 'Wed', value: 0 },
+        { name: 'Thu', value: 0 },
+        { name: 'Fri', value: 0 },
+        { name: 'Sat', value: 0 },
+        { name: 'Sun', value: 0 },
+      ];
+    }
+    
+    // For non-zero values, create a realistic weekly pattern
+    const weeklyPattern = [0.9, 1.1, 1.0, 1.2, 1.0, 0.8, 0.7]; // Weekday vs weekend pattern
+    return weeklyPattern.map((multiplier, index) => ({
+      name: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index],
+      value: Math.round(baseValue * multiplier)
+    }));
   };
 
   const getActionButtonText = (userType: UserType) => {
-    switch (userType) {
-      case 'academic': return "Add Project";
-      case 'freelancer': return "Host Session";
-      case 'business': return "Find Deals";
-      default: return "Add Project";
-    }
+    // Since this is a project-based website, all user types should create projects
+    return 'New Project';
   };
 
   const DarkModeToggle = () => {
     const { theme, setTheme } = useTheme();
-
     return (
       <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-        className="h-8 w-8 px-0"
+        variant="outline"
+        size="icon"
+        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+        className="rounded-full w-10 h-10"
       >
-        <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         <span className="sr-only">Toggle theme</span>
       </Button>
     );
@@ -316,93 +324,87 @@ const Dashboard = () => {
 
   const getUserIcon = () => {
     switch (userType) {
-      case 'academic': return BookOpen;
-      case 'freelancer': return GraduationCap;
-      case 'business': return Building;
-      default: return LayoutDashboard;
+      case 'academic':
+        return <GraduationCap className="w-5 h-5" />;
+      case 'freelancer':
+        return <Building className="w-5 h-5" />;
+      case 'business':
+        return <Briefcase className="w-5 h-5" />;
+      default:
+        return <User className="w-5 h-5" />;
     }
   };
-  
-  const UserIcon = getUserIcon();
-  const menuItems = [
-    { icon: LayoutDashboard, label: "Dashboard", active: true },
-    { icon: CheckSquare, label: userType === 'academic' ? "Projects" : userType === 'freelancer' ? "Courses" : "Tasks", badge: "24" },
-    { icon: Calendar, label: "Calendar" },
-    { icon: BarChart3, label: "Analytics" },
-  ];
-  
-  const generalItems = [
-    { icon: Settings, label: "Settings" },
-    { icon: HelpCircle, label: "Help" },
-    { icon: LogOut, label: "Logout" },
-  ];
 
-  // Build stats array based on userType
   const getStatsData = () => {
-    // Only show stats for the current authenticated user
     return [
-      { title: 'Projects Posted', value: userStats.projectsPosted },
-      { title: 'Favourites', value: userStats.projectFavourites },
-      { title: 'Connections', value: userStats.connections },
-      { title: 'Views', value: userStats.projectViews },
+      {
+        title: 'Projects Posted',
+        value: userStats.projectsPosted,
+        icon: <BookOpen className="w-5 h-5" />,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-100',
+      },
+      {
+        title: 'Total Views',
+        value: userStats.projectViews,
+        icon: <TrendingUp className="w-5 h-5" />,
+        color: 'text-green-600',
+        bgColor: 'bg-green-100',
+      },
+      {
+        title: 'Favourites',
+        value: userStats.projectFavourites,
+        icon: <Heart className="w-5 h-5" />,
+        color: 'text-red-600',
+        bgColor: 'bg-red-100',
+      },
+      {
+        title: 'Connections',
+        value: userStats.connections,
+        icon: <UserPlus className="w-5 h-5" />,
+        color: 'text-purple-600',
+        bgColor: 'bg-purple-100',
+      },
     ];
   };
 
   const stats = getStatsData();
 
-  // Generate project analytics data from real projects
   const getProjectAnalyticsData = () => {
-    if (recentActivity.length === 0) {
+    if (userStats.projectsPosted === 0) {
       return [
-        { name: 'M', value: 0 },
-        { name: 'T', value: 0 },
-        { name: 'W', value: 0 },
-        { name: 'Th', value: 0 },
-        { name: 'F', value: 0 },
-        { name: 'S', value: 0 },
+        { name: 'No Projects', value: 1, color: '#e5e7eb' }
       ];
     }
 
-    // Group projects by creation day and count views
-    const dayViews = { M: 0, T: 0, W: 0, Th: 0, F: 0, S: 0 };
-    recentActivity.forEach(activity => {
-      if (activity.createdAt) {
-        const day = new Date(activity.createdAt).getDay();
-        const dayNames = ['S', 'M', 'T', 'W', 'Th', 'F', 'S'];
-        const dayName = dayNames[day];
-        if (dayViews[dayName] !== undefined) {
-          dayViews[dayName] += activity.views || 0;
-        }
-      }
-    });
-
-    return Object.entries(dayViews).map(([name, value]) => ({ name, value }));
+    return [
+      { name: 'Active', value: Math.ceil(userStats.projectsPosted * 0.7), color: '#10b981' },
+      { name: 'Completed', value: Math.ceil(userStats.projectsPosted * 0.2), color: '#3b82f6' },
+      { name: 'Pending', value: Math.ceil(userStats.projectsPosted * 0.1), color: '#f59e0b' },
+    ];
   };
 
   const dataForProjectAnalytics = getProjectAnalyticsData();
 
   const getTitleForProjectAnalytics = () => {
     switch (userType) {
-      case 'academic': return "Project Contributions";
-      case 'freelancer': return "Course Analytics";
-      case 'business': return "Project Analytics";
+      case 'academic': return "Project Analytics";
+      case 'freelancer': return "Service Analytics";
+      case 'business': return "Deal Analytics";
       default: return "Project Analytics";
     }
   };
 
-  // Generate project progress data from real projects
   const getProjectProgressData = () => {
     if (userStats.projectsPosted === 0) {
       return [
-        { name: 'Completed', value: 0, color: '#16a34a' },
-        { name: 'In Progress', value: 0, color: '#3b82f6' },
-        { name: 'Pending', value: 0, color: '#f59e0b' },
+        { name: 'No Projects', value: 1, color: '#e5e7eb' }
       ];
     }
 
-    const completed = recentActivity.filter(a => a.status === 'completed' || a.status === 'Completed').length;
-    const inProgress = recentActivity.filter(a => a.status === 'in-progress' || a.status === 'In Progress').length;
-    const pending = recentActivity.filter(a => a.status === 'pending' || a.status === 'Pending').length;
+    const completed = Math.ceil(userStats.projectsPosted * 0.3);
+    const inProgress = Math.ceil(userStats.projectsPosted * 0.5);
+    const pending = userStats.projectsPosted - completed - inProgress;
 
     return [
       { name: 'Completed', value: completed, color: '#16a34a' },
@@ -538,12 +540,14 @@ const Dashboard = () => {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="amogh-ui-theme">
+      {/* Header always on top */}
+      <Header />
+
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-300">
-        {/* Header always on top */}
-        <Header />
-        <div className="flex flex-1">
-          {/* Fixed sidebar */}
-          <div className="w-72 h-[90vh] bg-white/70 dark:bg-gray-900/80 glass-effect shadow-2xl rounded-2xl m-6 flex flex-col border border-mint/30 backdrop-blur-lg fixed top-6 left-6 z-30" style={{ position: 'fixed', top: 24, left: 24, height: '90vh' }}>
+        {/* Main content with proper spacing for fixed sidebar */}
+        <div className="flex flex-1 pt-24"> {/* Add top padding to avoid header overlap */}
+          {/* Fixed sidebar - hidden on mobile */}
+          <div className={`${mobileMenuOpen ? 'block' : 'hidden'} lg:block w-72 h-[calc(100vh-6rem)] bg-white/70 dark:bg-gray-900/80 glass-effect shadow-2xl rounded-2xl m-6 flex flex-col border border-mint/30 backdrop-blur-lg fixed top-24 left-6 z-30`}>
             <div className="flex flex-col items-center py-8 px-4">
               <div className="w-full">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 pl-2">MENU</p>
@@ -596,14 +600,31 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          <div className="flex-1 flex flex-col">
-            <div className="max-w-7xl mx-auto space-y-10 pt-8">
+          
+          {/* Mobile menu overlay */}
+          {mobileMenuOpen && (
+            <div 
+              className="lg:hidden fixed inset-0 bg-black/50 z-20"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+          )}
+          
+          <div className="flex-1 flex flex-col lg:ml-80"> {/* Add left margin to avoid sidebar overlap on desktop */}
+            <div className="max-w-7xl mx-auto space-y-10 pt-8 px-6"> {/* Add horizontal padding */}
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h1 className="text-4xl font-extrabold text-gradient-emerald mb-2">Dashboard</h1>
-                  <p className="text-base text-gray-600 dark:text-gray-300">Plan, prioritize, and accomplish your tasks with ease.</p>
+                          <h1 className="text-4xl font-extrabold text-gradient-emerald mb-2 mobile-text-4xl">Dashboard</h1>
+        <p className="text-base text-gray-600 dark:text-gray-300 mobile-text-base">Plan, prioritize, and accomplish your tasks with ease.</p>
                 </div>
                 <div className="flex items-center gap-3">
+                  {/* Mobile menu button */}
+                  <Button 
+                    className="lg:hidden text-md bg-mint hover:bg-mint-dark dark:bg-mint-dark dark:hover:bg-mint text-olive font-bold gap-2 shadow-lg hover-lift rounded-xl"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  >
+                    <Menu className="w-4 h-4" />
+                    Menu
+                  </Button>
                   {/* <DarkModeToggle /> */}
                   <Button className="text-md bg-mint hover:bg-mint-dark dark:bg-mint-dark dark:hover:bg-mint text-olive font-bold gap-2 shadow-lg hover-lift rounded-xl">
                     <Plus className="w-4 h-4" />
@@ -688,19 +709,19 @@ const Dashboard = () => {
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold text-olive-dark">Recent Activity</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="bg-mint-light dark:bg-olive-dark p-4 rounded-lg">
+                  <CardContent className="h-48 overflow-hidden"> {/* Fixed height container */}
+                    <div className="bg-mint-light dark:bg-olive-dark p-4 rounded-lg h-full overflow-y-auto"> {/* Scrollable content */}
                       {displayRecentActivity.length === 0 ? (
                         <p className="text-gray-500">No recent activity.</p>
                       ) : (
-                        <ul className="space-y-3">
+                        <ul className="space-y-2">
                           {displayRecentActivity.map((activity, idx) => (
                             <li key={idx} className="flex items-center justify-between bg-white/80 dark:bg-olive rounded-lg px-3 py-2 shadow-sm hover-lift transition-all duration-200">
-                              <div className="flex items-center">
+                              <div className="flex items-center flex-1 min-w-0"> {/* Allow text to truncate */}
                                 {getActivityIcon(activity.type)}
-                                <span className="font-medium text-gray-800 dark:text-gray-100">{activity.text}</span>
+                                <span className="font-medium text-gray-800 dark:text-gray-100 truncate">{activity.text}</span>
                               </div>
-                              <span className="text-xs bg-mint dark:bg-olive-dark text-olive px-2 py-1 rounded-full ml-2 min-w-[60px] text-center">{activity.time}</span>
+                              <span className="text-xs bg-mint dark:bg-olive-dark text-olive px-2 py-1 rounded-full ml-2 min-w-[60px] text-center flex-shrink-0">{activity.time}</span>
                             </li>
                           ))}
                         </ul>
@@ -709,42 +730,71 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               </div>
-              {/* Line graph for stats (moved below cards) */}
-              <div className="glass-effect bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow-2xl p-8 mt-8 border border-mint/20 backdrop-blur-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">Stats Trend (Last 6 Months)</h2>
-                </div>
-                <ResponsiveContainer width="100%" height={320}>
-                  <LineChart data={lineGraphData} margin={{ top: 20, right: 40, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorProjects" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 13 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: '#64748b', fontSize: 13 }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', boxShadow: '0 2px 8px rgba(16,185,129,0.08)' }} labelStyle={{ color: '#10b981', fontWeight: 600 }} cursor={{ stroke: '#10b981', strokeWidth: 0.5, opacity: 0.1 }} />
-                    <Legend verticalAlign="top" height={36} iconType="circle" />
-                    {(selectedStat === 'all' || selectedStat === 'Projects Posted') && (
-                      <>
-                        <Area type="monotone" dataKey="projects" stroke="#10b981" fill="url(#colorProjects)" fillOpacity={0.2} dot={{ r: 5, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 7 }} isAnimationActive={true} />
-                        <Line type="monotone" dataKey="projects" stroke="#10b981" strokeWidth={3} dot={{ r: 5, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 7 }} name="Projects Posted" isAnimationActive={true} />
-                      </>
-                    )}
-                    {(selectedStat === 'all' || selectedStat === 'Favourites') && (
-                      <Line type="monotone" dataKey="favourites" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4, fill: '#3b82f6', stroke: '#fff', strokeWidth: 1.5 }} activeDot={{ r: 6 }} name="Favourites" isAnimationActive={true} />
-                    )}
-                    {(selectedStat === 'all' || selectedStat === 'Connections') && (
-                      <Line type="monotone" dataKey="connections" stroke="#f59e42" strokeWidth={2} dot={{ r: 4, fill: '#f59e42', stroke: '#fff', strokeWidth: 1.5 }} activeDot={{ r: 6 }} name="Connections" isAnimationActive={true} />
-                    )}
-                    {(selectedStat === 'all' || selectedStat === 'Views') && (
-                      <Line type="monotone" dataKey="views" stroke="#6366f1" strokeWidth={2} dot={{ r: 4, fill: '#6366f1', stroke: '#fff', strokeWidth: 1.5 }} activeDot={{ r: 6 }} name="Views" isAnimationActive={true} />
-                    )}
+              {/* Line Graph */}
+              <Card className="glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold text-olive-dark">Performance Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <LineChart data={lineGraphData}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis
+                        dataKey="month"
+                        axisLine={false}
+                        tickLine={false}
+                        className="text-gray-500 dark:text-gray-400"
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        className="text-gray-500 dark:text-gray-400"
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          border: 'none',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        }}
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="projects"
+                        stroke="#10b981"
+                        strokeWidth={3}
+                        dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="views"
+                        stroke="#3b82f6"
+                        strokeWidth={3}
+                        dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="favourites"
+                        stroke="#f59e0b"
+                        strokeWidth={3}
+                        dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="connections"
+                        stroke="#8b5cf6"
+                        strokeWidth={3}
+                        dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
                   </LineChart>
                 </ResponsiveContainer>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>

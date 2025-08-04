@@ -183,8 +183,8 @@ const PreJoinForm: React.FC = () => {
             Limited Early Access
           </span>
         </div>
-        <h3 className="text-gray-900 text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
-          Reserve Your Spot for the Next Big Leap
+        <h3 className="text-gray-900 text-[17px] sm:text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
+          Register for Early Notifications.
         </h3>
         <p className="text-center text-gray-700 text-base mb-1 md:mb-2">
           Be among the first to unlock our next-generation sustainable solutions.
@@ -217,7 +217,7 @@ const PreJoinForm: React.FC = () => {
           className="bg-gradient-to-r from-teal-400 to-green-400 hover:from-green-400 hover:to-teal-400 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-xl transition shadow-lg text-base md:text-lg tracking-wide"
           disabled={submitted}
         >
-          {submitted ? "Pre-Booked!" : "Reserve My Spot"}
+          {submitted ? "Registered!" : "Register"}
         </button>
         {submitted && (
           <div className="text-green-700 text-center font-semibold mt-2 animate-fade-in text-base">
@@ -298,7 +298,7 @@ export const UpcomingPhase: React.FC = () => (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-24 items-center">
         {/* Left: Info, Form */}
         <div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight mobile-text-4xl">
+          <h2 className="text-[17px] sm:text-4xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight mobile-text-4xl">
             Sustainable Projects
             <br />
             for a Brighter Future

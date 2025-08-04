@@ -1,24 +1,19 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { auth } from "../lib/firebase";
-// Removed Firestore imports - using DynamoDB now
-import { onAuthStateChanged } from "firebase/auth";
-import toast from "react-hot-toast";
-
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, MapPin, Globe, Mail, Phone, GraduationCap, Briefcase, Award, Users, Eye, Heart, Download, Share2, MessageCircle, Send, Linkedin, Github, Twitter, Instagram, Facebook, Youtube, Globe as GlobeIcon, UserPlus, BookOpen, Star } from 'lucide-react';
+import userService from '@/services/userService';
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Camera, DollarSign, Award, Clock, GraduationCap, UserPlus, BookOpen, Edit, Link, Briefcase, Trash2, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-import RecentActivity from "@/components/RecentActivity";
-import SkillsSection from "@/components/Skillssection";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ChatBox } from "@/components/ChatBox";
-import { userService } from "@/services/userService";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
+import { API_ENDPOINTS } from '../config/api';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -34,64 +29,62 @@ const Profile = () => {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
+  const [error, setError] = useState<string | null>(null);
 
 
   // Fetch user data by customUserId from userData.json
   const fetchUserData = async () => {
-    if (id) {
-      try {
-        console.log('Fetching student with ID:', id);
-        // Make direct fetch call to backend without authentication for public profile
-        const response = await fetch(`http://localhost:3000/api/users/${id}`);
-        console.log('Response status:', response.status);
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Student data received:', data);
-          console.log('Full data structure:', JSON.stringify(data, null, 2));
-          if (data.success && data.data) {
-            setUserData(data.data);
-            setEducation(data.data.education || []);
-            setWorkExperience(data.data.workExperience || []);
-            console.log('User data set:', data.data);
-            console.log('Projects object:', data.data.projects);
-            console.log('Projects.created:', data.data.projects?.created);
-            console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
-            // Fetch full project details for each project ID
-            const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-            console.log('Project IDs found:', projectIds);
-            console.log('Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
-            if (projectIds.length > 0) {
-              const projectPromises = projectIds.map((pid) =>
-                fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
-                  .then(res => res.ok ? res.json() : null)
-                  .then(res => res && res.project ? res.project : null)
-                  .catch(() => null)
-              );
-              const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-              console.log('Full projects fetched:', fullProjects);
-              setPortfolioProjects(fullProjects);
-            } else {
-              console.log('No project IDs found');
-              setPortfolioProjects([]);
-            }
-          } else {
-            console.error('Invalid response format:', data);
-            setUserData({});
-            setPortfolioProjects([]);
-          }
-        } else {
-          console.error('Failed to fetch student:', response.status);
-          setUserData({});
-          setPortfolioProjects([]);
-        }
-      } catch (err) {
-        console.error('Error fetching student:', err);
-        setUserData({});
+    try {
+      setLoading(true);
+      const response = await fetch(API_ENDPOINTS.USER_BY_ID(id));
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const data = await response.json();
+      setUserData(data);
+      setEducation(data.education || []);
+      setWorkExperience(data.workExperience || []);
+      console.log('User data set:', data.data);
+      console.log('Projects object:', data.data.projects);
+      console.log('Projects.created:', data.data.projects?.created);
+      console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
+      // Fetch full project details for each project ID
+      const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
+      console.log('Project IDs found:', projectIds);
+      console.log('Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
+      if (projectIds.length > 0) {
+        const projectPromises = projectIds.map((pid) =>
+          fetchProjectData(pid)
+        );
+        const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
+        console.log('Full projects fetched:', fullProjects);
+        setPortfolioProjects(fullProjects);
+      } else {
+        console.log('No project IDs found');
         setPortfolioProjects([]);
       }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setError('Failed to load user profile');
+      setUserData({});
+      setPortfolioProjects([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const fetchProjectData = async (pid: string) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
+      if (!response.ok) {
+        throw new Error('Failed to fetch project data');
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching project data:', error);
+      return null;
+    }
   };
 
   useEffect(() => {
@@ -224,8 +217,8 @@ const Profile = () => {
                 </Avatar>
               </div>
               <div className="flex-1 text-white mt-4 md:mt-0 w-full">
-                <h1 className="text-2xl sm:text-4xl font-bold drop-shadow-lg mb-1.5 text-center md:text-left">{profile.name}</h1>
-                <p className="text-lg sm:text-xl text-slate-200 drop-shadow-md text-center md:text-left">{profile.title}</p>
+                        <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5 text-center md:text-left mobile-text-4xl">{profile.name}</h1>
+        <p className="text-base text-slate-200 drop-shadow-md text-center md:text-left mobile-text-base">{profile.title}</p>
                 {/* Connect Button */}
                 <div className="flex flex-row items-center justify-center md:justify-start mt-4">
                   <div className="flex flex-col w-full max-w-xs h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
@@ -246,14 +239,14 @@ const Profile = () => {
           <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
             <CardContent className="p-3 sm:p-4 text-center">
               <Award className="w-6 h-6 mx-auto mb-2" />
-              <div className="text-lg sm:text-2xl font-bold">{profile.stats.projects}+</div>
+                                <div className="text-2xl font-bold">{profile.stats.projects}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
             <CardContent className="p-3 sm:p-4 text-center">
               <UserPlus className="w-6 h-6 mx-auto mb-2" />
-              <div className="text-lg sm:text-2xl font-bold">{profile.stats.connections}+</div>
+                                <div className="text-2xl font-bold">{profile.stats.connections}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
             </CardContent>
           </Card>
@@ -268,7 +261,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                     <span className="bg-purple-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <GraduationCap className="w-5 h-5 text-purple-600" />
                     </span>
@@ -290,7 +283,7 @@ const Profile = () => {
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                       <span className="bg-blue-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <BookOpen className="w-5 h-5 text-blue-600" />
                       </span>
@@ -318,7 +311,7 @@ const Profile = () => {
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
                       <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <Briefcase className="w-5 h-5 text-green-600" />
                       </span>
@@ -344,14 +337,14 @@ const Profile = () => {
             {/* Portfolio Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
-                    <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
-                      <Briefcase className="w-5 h-5 text-green-600" />
-                    </span>
-                    Research Projects & Commercial Work
-                  </h2>
-                </div>
+                                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+                      <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
+                        <Briefcase className="w-5 h-5 text-green-600" />
+                      </span>
+                      Research Projects & Commercial Work
+                    </h2>
+                  </div>
                 <div className="space-y-3 sm:space-y-4">
                   {safePortfolioProjects.length > 0 ? (
                     safePortfolioProjects.map((project, index) => (

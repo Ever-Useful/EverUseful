@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.AWS_USER }}
           key: ${{ secrets.AWS_SSH_KEY }}
           source: "Backend/*"
-          target: ${{ secrets.AWS_PATH }}
+          target: "/home/ubuntu/backend"
           strip_components: 1
           
       - name: Deploy to EC2
@@ -32,7 +32,16 @@ jobs:
           script: |
             cd /home/ubuntu/backend
             npm install --production
-            pm2 delete backend || true
-            pm2 start server.js --name backend
+            # Set environment variables for the backend
+            export AWS_REGION=ap-south-1
+            export DYNAMODB_USERS_TABLE=Users
+            export DYNAMODB_MARKETPLACE_TABLE=MarketplaceProjects
+            export NODE_ENV=production
+            pm2 restart backend --update-env || pm2 start server.js --name backend
             pm2 save
-            pm2 startup 
+            pm2 startup || true
+            # Print PM2 status and listening ports
+            pm2 status
+            sudo netstat -tulnp | grep node || true
+            # Try to curl the backend health endpoint (adjust port if needed)
+            curl -I http://localhost:3000/api/test || true 

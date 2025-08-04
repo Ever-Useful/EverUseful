@@ -51,7 +51,6 @@ export const Footer = () => {
               <Link to="#" onClick={scrollToTop} className="flex items-center space-x-2 group">
                 <img src={Logo} alt="AMOGH" className="h-20 w-auto" />
               </Link>
-              
             </div>
             <p className="text-xs text-gray-400 mt-1">Future-Ready Education Solutions</p>
             
