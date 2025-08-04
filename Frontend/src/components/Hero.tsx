@@ -3,6 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
+import Students from "../assets/images/Students.jpeg";
+import PhD from "../assets/images/phdscholars.jpeg";
+import Professors from "../assets/images/professors.jpeg";
+import Business from "../assets/images/Business.jpeg";
 
 type Option = {
   id: number;
@@ -15,32 +19,28 @@ type Option = {
 const OPTIONS: Option[] = [
   {
     id: 1,
-    imageUrl:
-      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80", // student studying
-    label: "Students",
+    imageUrl: Students,
     description: "Join peer communities & showcase projects",
     iconClass: "fas fa-user-graduate",
+    label: ""
   },
   {
     id: 2,
-    imageUrl:
-      "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?auto=format&fit=crop&w=800&q=80", // scientist in lab
-    label: "PhD Holders",
+    imageUrl: PhD,
     description: "Collaborate on research & funding",
     iconClass: "fas fa-flask",
+    label: ""
   },
   {
     id: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80", // professor lecturing
+    imageUrl: Professors,
     label: "Professors",
     description: "Share knowledge & mentor next gen",
     iconClass: "fas fa-chalkboard-teacher",
   },
   {
     id: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80", // business meeting
+    imageUrl: Business,
     label: "Business",
     description: "Discover solutions & partnerships",
     iconClass: "fas fa-briefcase",
@@ -98,7 +98,7 @@ export const Hero = () => {
               <div className="flex justify-center lg:justify-start animate-fade-in delay-300">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font-bold transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
+                  className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
                   asChild
                 >
                   <Link to="/signup" className="font-bold flex items-center justify-center">

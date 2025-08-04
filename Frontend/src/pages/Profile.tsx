@@ -112,24 +112,25 @@ const Profile = () => {
       console.log('Profile - Raw user profile data:', userProfile);
       
       // Extract data from the response structure - backend now returns reconstructed data directly
-      const { auth: authData, profile: userProfileData, stats: userStats, studentData: studentInfo, education: educationArr, workExperience: workArr } = userProfile;
+      const { auth: authData, profile: userProfileData, studentData: studentInfo, education: educationArr, workExperience: workArr } = userProfile;
+      const userStats = (userProfile as any).stats;
       
       console.log('Profile - Extracted auth data:', authData);
       console.log('Profile - Extracted profile data:', userProfileData);
       
       setProfileData({
-        firstName: authData?.firstName || userProfileData?.firstName || '',
-        lastName: authData?.lastName || userProfileData?.lastName || '',
-        userType: (authData?.userType || userProfileData?.userType) ? 
-          (authData.userType || userProfileData.userType).charAt(0).toUpperCase() + 
-          (authData.userType || userProfileData.userType).slice(1) : '',
+        firstName: authData?.firstName || '',
+        lastName: authData?.lastName || '',
+        userType: (authData?.userType) ? 
+          (authData.userType).charAt(0).toUpperCase() + 
+          (authData.userType).slice(1) : '',
         bio: userProfileData?.bio || 'No bio available',
         avatar: userProfileData?.avatar || '',
         location: userProfileData?.location || '',
         title: userProfileData?.title || '',
         website: userProfileData?.website || '',
-        mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || userProfileData?.phoneNumber || '',
-        username: authData?.email?.split('@')[0] || userProfileData?.username || '',
+        mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || '',
+        username: authData?.email?.split('@')[0] || '',
       });
 
       setStudentData({
