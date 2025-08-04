@@ -300,7 +300,7 @@ const ProductDisplay = () => {
               </div>
 
               <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6">
-                {project.skills.map((skill, index) => (
+                {project.skills && project.skills.map((skill, index) => (
                   <Badge key={index} variant="outline" className="border-gray-300 text-gray-700 text-xs hover:bg-gray-50">
                     {skill}
                   </Badge>
