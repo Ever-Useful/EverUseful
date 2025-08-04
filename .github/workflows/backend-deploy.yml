@@ -33,7 +33,7 @@ jobs:
             cd /home/ubuntu/backend
             npm install --production
             # Set environment variables for the backend
-            export AWS_REGION=us-east-1
+            export AWS_REGION=ap-south-1
             export DYNAMODB_USERS_TABLE=Users
             export DYNAMODB_MARKETPLACE_TABLE=MarketplaceProjects
             export NODE_ENV=production

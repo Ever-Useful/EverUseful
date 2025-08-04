@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 
 // Configure AWS with conditional credentials
 const awsConfig = {
-  region: process.env.AWS_REGION || 'us-east-1'
+  region: process.env.AWS_REGION || 'ap-south-1'
 };
 
 // Only add access keys if they are provided (for localhost development)
