@@ -12,7 +12,8 @@ export const getApiUrl = (endpoint: string) => {
     return `${API_BASE_URL}${endpoint}`;
   } else {
     // In production, use the backend directly with HTTP
-    // Users will need to allow mixed content in their browser
+    // This will work if users allow mixed content in their browser
+    // For now, this is the quickest solution to get the site working
     return `http://13.235.148.91:3000${endpoint}`;
   }
 };
