@@ -26,115 +26,57 @@ jobs:
 
       - name: Build project
         working-directory: Frontend
-        run: npm run build:verify
+        run: npm run build
 
       - name: Verify build output
         working-directory: Frontend
         run: |
           echo "Checking build output..."
           ls -la dist/
-          echo "✅ Build verification completed by build:verify script"
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ index.html not found in build output"
+            exit 1
+          fi
+          echo "✅ Build verification completed"
 
-      - name: Add cache busting to index.html
-        working-directory: Frontend
-        run: |
-           # Add timestamp to force cache refresh
-           TIMESTAMP=$(date +%s)
-           # Add version parameter to prevent caching
-           sed -i "s|<html|<html data-version=\"$TIMESTAMP\"|g" dist/index.html
-           # Add meta tag for cache busting
-           sed -i 's|<head>|<head>\n    <meta name="version" content="'$TIMESTAMP'" />|g' dist/index.html
-           echo "✅ Cache busting applied with timestamp: $TIMESTAMP"
-
-      - name: Prepare server directory safely
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          script: |
-            echo "Preparing server directory safely..."
-            
-            # Check if current site is working before making changes
-            CURRENT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://amoghconnect.com || echo "000")
-            echo "Current site status: $CURRENT_STATUS"
-            
-            # Create backup of current deployment with timestamp
-            BACKUP_DIR="/var/www/html/Frontend/dist.backup.$(date +%s)"
-            if [ -d "/var/www/html/Frontend/dist" ]; then
-              sudo cp -r /var/www/html/Frontend/dist "$BACKUP_DIR"
-              echo "✅ Backup created at: $BACKUP_DIR"
-            fi
-            
-            # Create new deployment directory
-            sudo mkdir -p /var/www/html/Frontend/dist.new
-            sudo chown www-data:www-data /var/www/html/Frontend/dist.new
-            sudo chmod 755 /var/www/html/Frontend/dist.new
-            echo "✅ New directory prepared"
-
-      - name: Deploy to temporary directory
+      - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          source: "Frontend/dist/*"
-          target: "/var/www/html/Frontend/dist.new"
-          strip_components: 0
+          source: "Frontend/dist"
+          target: "/var/www/html/Frontend/"
+          strip_components: 1
           overwrite: true
 
-      - name: Verify and activate deployment
+      - name: Configure server and verify deployment
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
-            echo "Verifying and activating deployment..."
+            echo "Configuring server and verifying deployment..."
             
-            # Check if new deployment has required files
-            if [ ! -f "/var/www/html/Frontend/dist.new/index.html" ]; then
-              echo "❌ New deployment missing index.html - keeping old deployment"
-              sudo rm -rf /var/www/html/Frontend/dist.new
+            # Check if deployment files exist
+            if [ ! -f "/var/www/html/Frontend/dist/index.html" ]; then
+              echo "❌ Deployment failed - index.html not found"
+              echo "📁 Contents of /var/www/html/Frontend/dist:"
+              ls -la /var/www/html/Frontend/dist/ || echo "Directory not found"
               exit 1
             fi
             
-            # Set proper permissions for new deployment
-            sudo find /var/www/html/Frontend/dist.new -type f -exec chmod 644 {} \;
-            sudo find /var/www/html/Frontend/dist.new -type d -exec chmod 755 {} \;
-            sudo chown -R www-data:www-data /var/www/html/Frontend/dist.new/
+            echo "✅ Deployment files found"
             
-            # Test new deployment with nginx
-            sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.test
-            sudo sed -i 's|/var/www/html/Frontend/dist|/var/www/html/Frontend/dist.new|g' /etc/nginx/sites-available/default.test
+            # Set proper permissions
+            sudo find /var/www/html/Frontend/dist -type f -exec chmod 644 {} \;
+            sudo find /var/www/html/Frontend/dist -type d -exec chmod 755 {} \;
+            sudo chown -R www-data:www-data /var/www/html/Frontend/dist/
+            echo "✅ Permissions set"
             
-            if sudo nginx -t -c /etc/nginx/sites-available/default.test; then
-              echo "✅ New deployment verified"
-              
-              # Activate new deployment
-              sudo rm -rf /var/www/html/Frontend/dist
-              sudo mv /var/www/html/Frontend/dist.new /var/www/html/Frontend/dist
-              echo "✅ New deployment activated"
-            else
-              echo "❌ New deployment verification failed - keeping old deployment"
-              sudo rm -rf /var/www/html/Frontend/dist.new
-              exit 1
-            fi
-
-      - name: Configure nginx safely
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          script: |
-            echo "Configuring Nginx safely..."
-            
-            # Create backup of current nginx config
-            sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup.$(date +%s)
-            
-            # Create new nginx config
-            sudo tee /etc/nginx/sites-available/default.new > /dev/null << 'EOF'
+            # Configure nginx for HTTP only
+            sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
             # Block direct IP access
             server {
                 listen 80 default_server;
@@ -151,11 +93,6 @@ jobs:
                 
                 root /var/www/html/Frontend/dist;
                 index index.html index.htm;
-                
-                # Security headers
-                add_header X-Frame-Options "SAMEORIGIN" always;
-                add_header X-Content-Type-Options "nosniff" always;
-                add_header X-XSS-Protection "1; mode=block" always;
                 
                 # Handle all routes for SPA
                 location / {
@@ -186,75 +123,32 @@ jobs:
             }
             EOF
             
-            # Test new nginx configuration
-            if sudo nginx -t -c /etc/nginx/sites-available/default.new; then
-              echo "✅ New nginx configuration is valid"
-              sudo cp /etc/nginx/sites-available/default.new /etc/nginx/sites-available/default
+            # Test nginx configuration
+            if sudo nginx -t; then
+              echo "✅ Nginx configuration is valid"
               sudo systemctl reload nginx
-              echo "✅ Nginx configuration updated and reloaded"
+              echo "✅ Nginx reloaded"
             else
-              echo "❌ New nginx configuration failed - keeping old config"
-              sudo rm /etc/nginx/sites-available/default.new
+              echo "❌ Nginx configuration failed"
+              sudo nginx -t
               exit 1
             fi
-
-      - name: Final verification
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          script: |
-            echo "Running final verification..."
             
             # Wait for nginx to fully reload
-            sleep 5
+            sleep 3
             
-            # Test HTTP response
-            echo "Testing HTTP response..."
+            # Test the website
+            echo "Testing website..."
             HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://amoghconnect.com)
             echo "HTTP Response Code: $HTTP_RESPONSE"
             
             if [ "$HTTP_RESPONSE" = "200" ]; then
-              echo "✅ Website is serving HTTP successfully"
-              
-              # Test if index.html is accessible
-              if curl -s http://amoghconnect.com | grep -q "DOCTYPE"; then
-                echo "✅ index.html is accessible and contains valid HTML"
-              else
-                echo "❌ index.html is not accessible or invalid"
-                exit 1
-              fi
+              echo "✅ Website is working correctly"
             else
-              echo "❌ Website HTTP test failed (Status: $HTTP_RESPONSE)"
+              echo "❌ Website test failed (Status: $HTTP_RESPONSE)"
               echo "Checking nginx error logs..."
               sudo tail -10 /var/log/nginx/error.log
-              
-              # Attempt to restore from backup
-              echo "Attempting to restore from backup..."
-              if [ -d "/var/www/html/Frontend/dist.backup" ]; then
-                sudo rm -rf /var/www/html/Frontend/dist
-                sudo cp -r /var/www/html/Frontend/dist.backup.* /var/www/html/Frontend/dist
-                sudo systemctl reload nginx
-                echo "✅ Restored from backup"
-              else
-                echo "❌ No backup available"
-                exit 1
-              fi
+              exit 1
             fi
-
-      - name: Test API connectivity
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          script: |
-            echo "Testing API connectivity..."
-            # Test if backend is accessible from the server
-            if curl -I http://13.235.148.91:3000/api/test 2>/dev/null | grep -q "200"; then
-              echo "✅ Backend is accessible from server"
-            else
-              echo "⚠️ Backend not accessible from server (this is normal if backend is down)"
-            fi
+            
             echo "🎉 Frontend deployment completed successfully!" 
