@@ -240,7 +240,7 @@ export const GlobalCollaborations: React.FC = () => {
           </div>
           {/* On mobile, only show button and one line */}
           <div className="flex-1 flex flex-col items-center">
-            <Link to="/consulting" className="px-6 sm:px-8 py-2.5 sm:py-3 bg-white text-cyan-700 font-bold text-base rounded-full shadow hover:bg-cyan-50 transition mb-2 mobile-text-base">
+            <Link to="/consultation" className="px-6 sm:px-8 py-2.5 sm:py-3 bg-white text-cyan-700 font-bold text-base rounded-full shadow hover:bg-cyan-50 transition mb-2 mobile-text-base">
               Let's Collaborate
             </Link>
             <p className="text-base text-cyan-50 text-center max-w-xs mobile-text-base">
