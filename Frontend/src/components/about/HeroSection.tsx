@@ -28,7 +28,8 @@ const HeroSection = () => {
           <div>
            <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent animate-pulse mobile-text-4xl">
               <span
-                className="inline-block py-4 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-clip-text text-transparent font-[Dancing Script] font-extrabold"
+                className="inline-block py-4 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-clip-text text-transparent font-extrabold"
+                style={{ fontFamily: "'Dancing Script', 'Brush Script MT', cursive" }}
               >
                 {displayedText}
                 <span className="animate-pulse">|</span>
