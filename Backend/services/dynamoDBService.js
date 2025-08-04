@@ -298,8 +298,8 @@ class DynamoDBService {
       });
     }
 
-    // Reconstruct freelancerData from flattened keys
-    if (!reconstructed.freelancerData) {
+    // Reconstruct freelancerData from flattened keys or use existing nested object
+    if (!reconstructed.freelancerData || Object.keys(reconstructed.freelancerData).length === 0) {
       reconstructed.freelancerData = {};
       Object.keys(user).forEach(key => {
         if (key.startsWith('freelancerData.')) {
@@ -412,15 +412,24 @@ class DynamoDBService {
 
   async updateFreelancerData(customUserId, freelancerData) {
     try {
+      // Prepare the complete freelancerData object
+      const completeFreelancerData = {
+        experience: freelancerData.experience || '',
+        portfolio: freelancerData.portfolio || '',
+        location: freelancerData.location || '',
+        skills: freelancerData.skills || [],
+        hourlyRate: freelancerData.hourlyRate || '',
+        avgResponseTime: freelancerData.avgResponseTime || '',
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Save the entire freelancerData object as a nested object
       const updateData = {
-        'freelancerData.updatedAt': new Date().toISOString()
+        'freelancerData': completeFreelancerData
       };
 
-      Object.keys(freelancerData).forEach(key => {
-        updateData[`freelancerData.${key}`] = freelancerData[key];
-      });
-
-      return await this.updateUser(customUserId, updateData);
+      const result = await this.updateUser(customUserId, updateData);
+      return result;
     } catch (error) {
       console.error('Error updating freelancer data:', error);
       throw error;
@@ -740,11 +749,18 @@ class DynamoDBService {
         throw new Error('User not found');
       }
 
-      const projectIndex = user.projects.created.findIndex(p => p.projectId === projectId);
-      if (projectIndex === -1) {
-        throw new Error('Project not found');
+      // Check if projects.created exists and is an array
+      if (!user.projects || !user.projects.created || !Array.isArray(user.projects.created)) {
+        return { success: true, message: 'No projects to remove' };
       }
 
+      // Find the project ID in the array (projects.created contains strings, not objects)
+      const projectIndex = user.projects.created.findIndex(p => p === projectId);
+      if (projectIndex === -1) {
+        return { success: true, message: 'Project not found in user projects' };
+      }
+
+      // Remove the project ID from the array
       const updatedProjects = user.projects.created.filter((_, index) => index !== projectIndex);
 
       const params = {
@@ -870,6 +886,20 @@ class DynamoDBService {
       return updatedCart;
     } catch (error) {
       console.error('Error adding to cart:', error);
+      throw error;
+    }
+  }
+
+  async getUserCart(customUserId) {
+    try {
+      const user = await this.findUserByCustomId(customUserId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return user.marketplace.cart || [];
+    } catch (error) {
+      console.error('Error getting user cart:', error);
       throw error;
     }
   }
@@ -1034,16 +1064,11 @@ class DynamoDBService {
   async getAllUsers() {
     try {
       const params = {
-        TableName: this.usersTable,
-        ProjectionExpression: 'customUserId, profile, stats'
+        TableName: this.usersTable
       };
 
       const result = await dynamodb.scan(params).promise();
-      return result.Items.map(user => ({
-        customUserId: user.customUserId,
-        profile: user.profile,
-        stats: user.stats
-      }));
+      return result.Items.map(user => this.reconstructUserData(user));
     } catch (error) {
       console.error('Error getting all users:', error);
       throw error;
@@ -1122,17 +1147,41 @@ class DynamoDBService {
     }
   }
 
-  // Marketplace Operations
+    // Marketplace Operations
   async getAllMarketplaceItems() {
     try {
       const params = {
         TableName: this.marketplaceTable
       };
-
+      
       const result = await dynamodb.scan(params).promise();
       return result.Items || [];
     } catch (error) {
       console.error('Error getting marketplace items:', error);
+      throw error;
+    }
+  }
+
+  async getMarketplaceData() {
+    try {
+      const params = {
+        TableName: this.marketplaceTable
+      };
+      
+      const result = await dynamodb.scan(params).promise();
+      const items = result.Items || [];
+      
+
+      
+      // Since most items don't have a type field, treat all items as projects for now
+      // In the future, we can add proper type classification
+      return {
+        projects: items, // Return all items as projects since they're all marketplace items
+        products: items.filter(item => item.type === 'product'),
+        services: items.filter(item => item.type === 'service')
+      };
+    } catch (error) {
+      console.error('Error getting marketplace data:', error);
       throw error;
     }
   }

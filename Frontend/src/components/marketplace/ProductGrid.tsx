@@ -21,11 +21,12 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useAuthState } from "../../hooks/useAuthState";
-import { userService } from "../../services/userService";
+import userService from "../../services/userService";
 import { toast } from "sonner";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Project {
   id: number;
@@ -184,14 +185,15 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         
         queryParams.append('limit', optimalLimit.toString());
 
-        const response = await fetch(`http://localhost:3000/api/marketplace/projects?${queryParams}`);
+        const response = await fetch(`${API_ENDPOINTS.MARKETPLACE_PROJECTS}?${queryParams}`);
         if (!response.ok) throw new Error('Failed to fetch projects');
         
         const data = await response.json();
         setProjects(data.projects);
         setPagination(data.pagination);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setError('Failed to load projects');
       } finally {
         setLoading(false);
       }
@@ -217,7 +219,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       
       try {
         setAuthorsLoading(true);
-        const response = await fetch(`http://localhost:3000/api/users/bulk/${uncachedAuthorIds.join(',')}`);
+        const response = await fetch(API_ENDPOINTS.USER_BULK(uncachedAuthorIds.join(',')));
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data) {
@@ -453,10 +455,17 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         return;
       }
 
-      // Add project to cart in userData.json (only productId, addedAt, quantity)
-      await userService.addToCart(userData.customUserId, {
-        productId: projectId.toString(),
-        addedAt: new Date().toISOString(),
+      // Find the project data
+      const project = projects.find(p => p.id === projectId);
+      if (!project) {
+        toast.error('Project not found');
+        return;
+      }
+
+      // Add project to cart
+      await userService.addToCart({
+        name: project.title,
+        price: project.price || 0,
         quantity: 1
       });
       

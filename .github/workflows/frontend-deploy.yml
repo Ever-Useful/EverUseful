@@ -38,117 +38,126 @@ jobs:
            # Add meta tag for cache busting
            sed -i 's|<head>|<head>\n    <meta name="version" content="'$TIMESTAMP'" />|g' dist/index.html
 
-      - name: Clear target directory
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-           host: ${{ secrets.HOSTINGER_HOST }}
-           username: ${{ secrets.HOSTINGER_USER }}
-           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-           script: |
-             sudo rm -rf /var/www/html/*
-             sudo mkdir -p /var/www/html
-
-      - name: Deploy to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-           host: ${{ secrets.HOSTINGER_HOST }}
-           username: ${{ secrets.HOSTINGER_USER }}
-           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-           source: "Frontend/dist/"
-           target: "/var/www/html"
-           strip_components: 0
-           overwrite: true
-
-      - name: Configure nginx and clear cache
+      - name: Clear dist directory
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
-            # Create nginx configuration for SPA routing with reduced caching
+            sudo rm -rf /var/www/html/Frontend/dist/*
+            sudo rm -rf /var/www/html/Frontend/dist/Frontend
+            sudo mkdir -p /var/www/html/Frontend/dist
+
+      - name: Deploy to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          source: "Frontend/dist/*"
+          target: "/var/www/html/Frontend/dist"
+          strip_components: 0
+          overwrite: true
+
+      - name: Fix file structure and permissions
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            # Check if nested structure was created and fix it
+            if [ -d "/var/www/html/Frontend/dist/Frontend" ]; then
+              echo "Fixing nested directory structure..."
+              sudo cp -r /var/www/html/Frontend/dist/Frontend/dist/* /var/www/html/Frontend/dist/ 2>/dev/null || true
+              sudo rm -rf /var/www/html/Frontend/dist/Frontend
+            fi
+            
+            # Set proper permissions
+            sudo chmod -R 755 /var/www/html/Frontend/dist/
+            sudo chown -R www-data:www-data /var/www/html/Frontend/dist/
+            
+            # Verify files are in correct location
+            echo "Verifying deployment..."
+            ls -la /var/www/html/Frontend/dist/
+            if [ -f "/var/www/html/Frontend/dist/index.html" ]; then
+              echo "✓ index.html found in correct location"
+            else
+              echo "✗ index.html not found in correct location"
+              exit 1
+            fi
+
+      - name: Configure nginx for HTTPS and domain-only
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
             sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
+            # Block direct IP access
             server {
                 listen 80 default_server;
                 listen [::]:80 default_server;
+                server_name _;
+                return 444;
+            }
+            # Block direct IP access on HTTPS
+            server {
+                listen 443 ssl default_server;
+                listen [::]:443 ssl default_server;
+                server_name _;
+                ssl_certificate /etc/letsencrypt/live/amoghconnect.com/fullchain.pem;
+                ssl_certificate_key /etc/letsencrypt/live/amoghconnect.com/privkey.pem;
+                return 444;
+            }
+            # Redirect HTTP to HTTPS for your domain
+            server {
+                listen 80;
+                listen [::]:80;
+                server_name amoghconnect.com www.amoghconnect.com;
+                return 301 https://amoghconnect.com$request_uri;
+            }
+            # Main HTTPS server
+            server {
+                listen 443 ssl;
+                listen [::]:443 ssl;
+                server_name amoghconnect.com www.amoghconnect.com;
                 root /var/www/html/Frontend/dist;
                 index index.html index.htm;
-                server_name _;
-                
-                # Disable directory listing
-                autoindex off;
-                
-                # Add cache control headers
-                add_header Cache-Control "no-cache, no-store, must-revalidate" always;
-                add_header Pragma "no-cache" always;
-                add_header Expires "0" always;
-                
+                ssl_certificate /etc/letsencrypt/live/amoghconnect.com/fullchain.pem;
+                ssl_certificate_key /etc/letsencrypt/live/amoghconnect.com/privkey.pem;
+                include /etc/letsencrypt/options-ssl-nginx.conf;
+                ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
                 location / {
                     try_files $uri $uri/ /index.html;
-                    # Force no cache for HTML files
-                    add_header Cache-Control "no-cache, no-store, must-revalidate" always;
-                    add_header Pragma "no-cache" always;
-                    add_header Expires "0" always;
                 }
-                
-                # Reduced cache for assets
-                location /assets/ {
-                    expires 1h;
-                    add_header Cache-Control "public, max-age=3600";
-                }
-                
-                # Reduced cache for static files
-                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|mp4)$ {
-                    expires 1h;
-                    add_header Cache-Control "public, max-age=3600";
-                }
-                
-                # Force no cache for index.html
                 location = /index.html {
                     add_header Cache-Control "no-cache, no-store, must-revalidate" always;
                     add_header Pragma "no-cache" always;
                     add_header Expires "0" always;
                 }
+                location /assets/ {
+                    expires 1h;
+                    add_header Cache-Control "public, max-age=3600";
+                }
+                location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|mp4)$ {
+                    expires 1h;
+                    add_header Cache-Control "public, max-age=3600";
+                }
             }
             EOF
-            
-            # Test and reload nginx
             sudo nginx -t && sudo systemctl reload nginx
-            
-            # Clear all caches
-            rm -rf /tmp/lscache/* 2>/dev/null || true
-            rm -rf .lscache/* 2>/dev/null || true
-            rm -rf /var/cache/nginx/* 2>/dev/null || true
-            
-            # Force nginx to reload and clear cache
-            sudo nginx -s reload
-            sudo systemctl reload nginx
-            
-            # Add a small delay to ensure cache is cleared
-            sleep 2
-            
-             # Verify deployment
-             echo "Checking if files are deployed correctly..."
-             ls -la /var/www/html/Frontend/dist/
-             
-             # Check if index.html has the version meta tag
-             echo "Checking index.html for version meta tag..."
-             grep -q "data-version" /var/www/html/Frontend/dist/index.html && echo "✓ Version tag found" || echo "✗ Version tag not found"
-             
-             # Show file modification times
-             echo "File modification times:"
-             stat /var/www/html/Frontend/dist/index.html
-            
-            # Check nginx status
-            echo "Checking nginx status..."
-            sudo systemctl status nginx --no-pager
-            
-            # Check nginx configuration
-            echo "Testing nginx configuration..."
-            sudo nginx -t
-            
-            # Show recent nginx logs
-            echo "Recent nginx error logs:"
-            sudo tail -n 20 /var/log/nginx/error.log || echo "No error log found"
-            
-            echo "Deployment completed successfully" 
+
+      - name: Test API connectivity
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            echo "Testing API connectivity..."
+            # Test if backend is accessible from the server
+            curl -I http://13.235.148.91:3000/api/test || echo "Backend not accessible from server"
+            echo "Frontend deployment completed successfully!" 

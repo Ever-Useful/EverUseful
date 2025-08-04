@@ -15,66 +15,78 @@ router.get('/projects', async (req, res) => {
     if (search) {
       const searchLower = search.toLowerCase();
       filteredProjects = filteredProjects.filter(project => 
-        project.title.toLowerCase().includes(searchLower) ||
-        project.description.toLowerCase().includes(searchLower) ||
-        project.tags.some(tag => tag.toLowerCase().includes(searchLower))
+        project.title?.toLowerCase().includes(searchLower) ||
+        project.description?.toLowerCase().includes(searchLower) ||
+        (Array.isArray(project.tags) && project.tags.some(tag => tag.toLowerCase().includes(searchLower)))
       );
     }
 
     // Apply category filter
     if (category) {
-      filteredProjects = filteredProjects.filter(project => project.category === category);
+      filteredProjects = filteredProjects.filter(project => project.category && project.category === category);
     }
 
     // Apply price range filter
     if (minPrice || maxPrice) {
       filteredProjects = filteredProjects.filter(project => {
-        if (minPrice && project.price < parseInt(minPrice)) return false;
-        if (maxPrice && project.price > parseInt(maxPrice)) return false;
+        if (minPrice && (!project.price || project.price < parseInt(minPrice))) return false;
+        if (maxPrice && (!project.price || project.price > parseInt(maxPrice))) return false;
         return true;
       });
     }
 
     // Apply rating filter
     if (minRating) {
-      filteredProjects = filteredProjects.filter(project => project.rating >= parseFloat(minRating));
+      filteredProjects = filteredProjects.filter(project => project.rating && project.rating >= parseFloat(minRating));
     }
 
     // Apply skills filter
     if (skills) {
       const skillsList = skills.split(',');
       filteredProjects = filteredProjects.filter(project =>
-        skillsList.some(skill => project.skills.includes(skill))
+        Array.isArray(project.skills) && skillsList.some(skill => project.skills.includes(skill))
       );
     }
 
     // Apply duration filter
     if (duration) {
-      filteredProjects = filteredProjects.filter(project => project.duration === duration);
+      filteredProjects = filteredProjects.filter(project => project.duration && project.duration === duration);
     }
 
     // Apply sorting
     if (sort) {
       switch (sort) {
         case 'recent':
-          filteredProjects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
+          filteredProjects.sort((a, b) => {
+            const dateA = a.posted ? new Date(a.posted).getTime() : 0;
+            const dateB = b.posted ? new Date(b.posted).getTime() : 0;
+            return dateB - dateA;
+          });
           break;
         case 'rating':
-          filteredProjects.sort((a, b) => b.rating - a.rating);
+          filteredProjects.sort((a, b) => (b.rating || 0) - (a.rating || 0));
           break;
         case 'price_asc':
-          filteredProjects.sort((a, b) => a.price - b.price);
+          filteredProjects.sort((a, b) => (a.price || 0) - (b.price || 0));
           break;
         case 'price_desc':
-          filteredProjects.sort((a, b) => b.price - a.price);
+          filteredProjects.sort((a, b) => (b.price || 0) - (a.price || 0));
           break;
         default:
           // Default to most recent if sort is invalid
-          filteredProjects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
+          filteredProjects.sort((a, b) => {
+            const dateA = a.posted ? new Date(a.posted).getTime() : 0;
+            const dateB = b.posted ? new Date(b.posted).getTime() : 0;
+            return dateB - dateA;
+          });
       }
     } else {
       // Default to most recent if no sort specified
-      filteredProjects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
+      filteredProjects.sort((a, b) => {
+        const dateA = a.posted ? new Date(a.posted).getTime() : 0;
+        const dateB = b.posted ? new Date(b.posted).getTime() : 0;
+        return dateB - dateA;
+      });
     }
 
     // Calculate pagination
@@ -85,8 +97,8 @@ router.get('/projects', async (req, res) => {
     const startIndex = (pageNum - 1) * limitNum;
     const endIndex = startIndex + limitNum;
     const paginatedProjects = filteredProjects.slice(startIndex, endIndex).map(project => {
-      // Only return author as customUserId
-      return { ...project, author: project.author };
+      // Only return author as customUserId, ensure author exists
+      return { ...project, author: project.author || '' };
     });
     res.json({ 
       projects: paginatedProjects,
