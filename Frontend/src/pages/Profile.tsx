@@ -108,6 +108,7 @@ const Profile = () => {
   const fetchUserData = async () => {
     try {
       setLoading(true);
+      console.log('Profile - Fetching user data...');
       const userProfile = await userService.getUserProfile();
       console.log('Profile - Raw user profile data:', userProfile);
       
@@ -118,12 +119,17 @@ const Profile = () => {
       console.log('Profile - Extracted auth data:', authData);
       console.log('Profile - Extracted profile data:', userProfileData);
       
+      // Use localStorage as fallback for immediate display after signup
+      const storedName = localStorage.getItem("userName");
+      const storedUserType = localStorage.getItem("userType");
+      
       setProfileData({
-        firstName: authData?.firstName || '',
-        lastName: authData?.lastName || '',
+        firstName: authData?.firstName || (storedName ? storedName.split(' ')[0] : ''),
+        lastName: authData?.lastName || (storedName ? storedName.split(' ').slice(1).join(' ') : ''),
         userType: (authData?.userType) ? 
           (authData.userType).charAt(0).toUpperCase() + 
-          (authData.userType).slice(1) : '',
+          (authData.userType).slice(1) : 
+          (storedUserType ? storedUserType.charAt(0).toUpperCase() + storedUserType.slice(1) : ''),
         bio: userProfileData?.bio || 'No bio available',
         avatar: userProfileData?.avatar || '',
         location: userProfileData?.location || '',
@@ -227,6 +233,11 @@ const Profile = () => {
       toast.error('Failed to load profile data');
     } finally {
       setLoading(false);
+      // Clean up localStorage after successful load if we have real data
+      if (profileData.firstName && profileData.lastName) {
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userType");
+      }
     }
   };
 
@@ -239,7 +250,12 @@ const Profile = () => {
         navigate('/signin');
       }
     });
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      // Clean up localStorage when component unmounts
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userType");
+    };
   }, []);
 //test
   const handleEditSection = (section: string) => {
@@ -348,6 +364,13 @@ const Profile = () => {
 
   // Get display name for profile
   const getDisplayName = () => {
+    // First try to get from localStorage (for immediate display after signup)
+    const storedName = localStorage.getItem("userName");
+    if (storedName && storedName !== 'undefined undefined') {
+      return storedName;
+    }
+    
+    // Then try from profile data
     if (profileData.firstName && profileData.lastName) {
       return `${profileData.firstName} ${profileData.lastName}`;
     } else if (profileData.firstName) {
@@ -418,7 +441,7 @@ const Profile = () => {
                   {getDisplayName()}
                 </h1>
                 <p className="text-base text-slate-200 drop-shadow-md text-center md:text-left mobile-text-base">
-                  {profileData.userType}
+                  {profileData.userType || localStorage.getItem("userType") || "User"}
                 </p>
                 
                 {/* Edit Profile Button */}
