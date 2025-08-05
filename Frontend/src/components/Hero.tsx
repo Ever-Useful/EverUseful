@@ -23,14 +23,14 @@ const OPTIONS: Option[] = [
     imageUrl: Students,
     description: "Join peer communities & showcase projects",
     iconClass: "fas fa-user-graduate",
-    label: ""
+    label: "Students"
   },
   {
     id: 2,
     imageUrl: PhD,
     description: "Collaborate on research & funding",
     iconClass: "fas fa-flask",
-    label: ""
+    label: "PhD"
   },
   {
     id: 3,

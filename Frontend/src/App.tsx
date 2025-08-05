@@ -110,7 +110,7 @@ const App = () => (
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/delivery-policy" element={<DeliveryPolicy />} />
-            <Route path="/send-feedback" element={<SendFeedback />} />
+            <Route path="/sendfeedback" element={<SendFeedback />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
