@@ -260,9 +260,9 @@ export const Footer = () => {
           {/* Copyright */}
           <div className="mt-12 pt-6 border-t border-gray-800 text-center">
             <div className="text-xs text-gray-500">
-              © {new Date().getFullYear()} AMOGH - ever useful EdTech Platform. All rights reserved.<br />
-              AMOGH® is a registered trademark of Future Learning Solutions Inc. | GSTIN: 29ABCDE1234F1GH<br />
-              Patent Pending: US20210765432 | All course materials are protected by copyright laws.
+              © {new Date().getFullYear()} AMOGH - ever useful Marketplace Website. All rights reserved.<br />
+              {/* AMOGH® is a registered trademark of Future Learning Solutions Inc. | GSTIN: 29ABCDE1234F1GH<br /> */}
+              {/* Patent Pending: US20210765432 | All course materials are protected by copyright laws. */}
             </div>
           </div>
         </div>

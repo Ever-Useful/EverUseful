@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -98,6 +98,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
   const [authorCache, setAuthorCache] = useState<Record<string, any>>({});
   const [currentUserCustomId, setCurrentUserCustomId] = useState<string | null>(null);
   const [authorsLoading, setAuthorsLoading] = useState(false);
+  const isFetchingAuthors = useRef(false);
 
   // Mobile specific states
   const [showSortTab, setShowSortTab] = useState(false);
@@ -213,135 +214,141 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     return uniqueAuthorIds.filter(id => id && !authorCache[id]);
   }, [uniqueAuthorIds, authorCache]);
 
-  // Fetch author details for all projects using bulk endpoint
+  // Fetch author details for each project individually (like ProductDisplay.tsx)
   useEffect(() => {
     const fetchAuthors = async () => {
       if (uncachedAuthorIds.length === 0) return;
+      if (isFetchingAuthors.current) return; // Prevent multiple simultaneous calls
       
+      // Add a small delay to prevent rapid API calls
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      isFetchingAuthors.current = true;
       try {
         setAuthorsLoading(true);
         
-        const response = await fetch(API_ENDPOINTS.USER_BULK(uncachedAuthorIds.join(',')));
-        
-        if (response.ok) {
-          const data = await response.json();
-          
-          if (data.success && data.data) {
-            setAuthorCache(prevCache => ({
-              ...prevCache,
-              ...data.data
-            }));
-          } else if (Array.isArray(data)) {
-            // Handle case where API returns array directly
-            const authorMap = data.reduce((acc, user) => {
-              acc[user.customUserId || user.id] = user;
-              return acc;
-            }, {});
-            setAuthorCache(prevCache => ({
-              ...prevCache,
-              ...authorMap
-            }));
+        // Fetch each author individually like ProductDisplay.tsx does
+        for (const authorId of uncachedAuthorIds) {
+          try {
+            const response = await fetch(API_ENDPOINTS.USER_BY_ID(authorId));
+            if (response.ok) {
+              const authorData = await response.json();
+              if (authorData.data) {
+                setAuthorCache(prevCache => ({
+                  ...prevCache,
+                  [authorId]: authorData.data
+                }));
+              }
+            }
+          } catch (error) {
+            console.error(`Error fetching author ${authorId}:`, error);
           }
-        } else {
-          console.error('Failed to fetch authors:', response.status, response.statusText);
         }
       } catch (error) {
-        console.error('Error fetching authors in bulk:', error);
+        console.error('Error fetching authors:', error);
       } finally {
         setAuthorsLoading(false);
+        isFetchingAuthors.current = false;
       }
     };
     
     fetchAuthors();
   }, [uncachedAuthorIds]);
 
-  // Helper to get author details with loading state - memoized to prevent unnecessary recalculations
-  const getAuthorDetails = useCallback((authorId: string) => {
-    const user = authorCache[authorId as keyof typeof authorCache];
+
+
+  // Stable author details - only recalculate when authorCache actually changes
+  const authorDetailsMap = useMemo(() => {
+    const detailsMap: Record<string, { name: string; image: string; userType: string; id: string; isLoading: boolean }> = {};
     
-    if (!user) {
-      return { 
-        name: authorsLoading ? 'Loading...' : 'username', 
-        image: NoUserProfile, 
-        userType: '', 
-        id: authorId,
-        isLoading: authorsLoading
+    // Get all unique author IDs from projects
+    const allAuthorIds = [...new Set(projects.map(project => project.author))];
+    
+    allAuthorIds.forEach(authorId => {
+      const user = authorCache[authorId as keyof typeof authorCache];
+      
+      if (!user) {
+        detailsMap[authorId] = { 
+          name: 'username', 
+          image: NoUserProfile, 
+          userType: '', 
+          id: authorId,
+          isLoading: false
+        };
+        return;
+      }
+      
+      // Extract data from the proper structure - handle multiple response formats
+      const auth = user.auth || user.data?.auth || {};
+      const profile = user.profile || user.data?.profile || {};
+      
+      // Try multiple sources for the name with better priority
+      let name = '';
+      
+      // First priority: firstName + lastName from auth
+      if (auth.firstName || auth.lastName) {
+        name = `${auth.firstName || ''} ${auth.lastName || ''}`.trim();
+      }
+      // Second priority: firstName + lastName from profile
+      else if (profile.firstName || profile.lastName) {
+        name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
+      }
+      // Third priority: username from auth
+      else if (auth.username) {
+        name = auth.username;
+      }
+      // Fourth priority: username from profile
+      else if (profile.username) {
+        name = profile.username;
+      }
+      // Fifth priority: email username from auth
+      else if (auth.email) {
+        name = auth.email.split('@')[0];
+      }
+      // Sixth priority: email username from profile
+      else if (profile.email) {
+        name = profile.email.split('@')[0];
+      }
+      // Seventh priority: direct name field
+      else if (user.name) {
+        name = user.name;
+      }
+      // Eighth priority: direct username field
+      else if (user.username) {
+        name = user.username;
+      }
+      
+      // Get userType with fallbacks
+      const userType = profile.userType || auth.userType || user.userType || '';
+      
+      // Get avatar with fallback
+      const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
+      
+      // Get customUserId with fallback
+      const customUserId = user.customUserId || user.data?.customUserId || authorId;
+      
+      detailsMap[authorId] = {
+        name: name || 'username',
+        image: avatar,
+        userType: userType,
+        id: customUserId,
+        isLoading: false
       };
-    }
+    });
     
-    console.log('Processing author data for ID:', authorId, 'Data:', user);
-    
-    // Extract data from the proper structure - handle multiple response formats
-    const auth = user.auth || user.data?.auth || {};
-    const profile = user.profile || user.data?.profile || {};
-    
-    console.log('Profile structure:', profile);
-    console.log('Auth structure:', auth);
-    
-    // Try multiple sources for the name with better priority
-    let name = '';
-    
-    // First priority: firstName + lastName from auth
-    if (auth.firstName || auth.lastName) {
-      name = `${auth.firstName || ''} ${auth.lastName || ''}`.trim();
-    }
-    // Second priority: firstName + lastName from profile
-    else if (profile.firstName || profile.lastName) {
-      name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
-    }
-    // Third priority: username from auth
-    else if (auth.username) {
-      name = auth.username;
-    }
-    // Fourth priority: username from profile
-    else if (profile.username) {
-      name = profile.username;
-    }
-    // Fifth priority: email username from auth
-    else if (auth.email) {
-      name = auth.email.split('@')[0];
-    }
-    // Sixth priority: email username from profile
-    else if (profile.email) {
-      name = profile.email.split('@')[0];
-    }
-    // Seventh priority: direct name field
-    else if (user.name) {
-      name = user.name;
-    }
-    // Eighth priority: direct username field
-    else if (user.username) {
-      name = user.username;
-    }
-    // Ninth priority: check if profile has a different structure
-    else if (profile.name) {
-      name = profile.name;
-    }
-    // Tenth priority: check if profile has displayName
-    else if (profile.displayName) {
-      name = profile.displayName;
-    }
-    
-    // Get userType with fallbacks
-    const userType = profile.userType || auth.userType || user.userType || '';
-    
-    // Get avatar with fallback
-    const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
-    
-    // Get customUserId with fallback
-    const customUserId = user.customUserId || user.data?.customUserId || authorId;
-    
-    const result = {
-      name: name || 'username',
-      image: avatar,
-      userType: userType,
-      id: customUserId,
+    return detailsMap;
+  }, [authorCache]); // Only depend on authorCache, not projects
+
+  // Stable getAuthorDetails function
+  const getAuthorDetails = useCallback((authorId: string) => {
+    return authorDetailsMap[authorId] || { 
+      name: 'username', 
+      image: NoUserProfile, 
+      userType: '', 
+      id: authorId,
       isLoading: false
     };
-    
-    console.log('Author details result:', result);
-    return result;
-  }, [authorCache, authorsLoading]);
+  }, [authorDetailsMap]);
 
   // Skeleton loader for author details
   const AuthorSkeleton = () => (
@@ -767,7 +774,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                   </h3>
 
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {project.skills && project.skills.slice(0, 3).map((skill, index) => (
+                      {Array.isArray(project.skills) && project.skills.slice(0, 3).map((skill, index) => (
                         <Badge
                           key={index}
                           variant="outline"
@@ -776,7 +783,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                           {skill}
                         </Badge>
                       ))}
-                      {project.skills && project.skills.length > 3 && (
+                      {Array.isArray(project.skills) && project.skills.length > 3 && (
                       <Badge
                         variant="outline"
                         className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
