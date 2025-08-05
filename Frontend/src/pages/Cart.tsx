@@ -19,6 +19,7 @@ import userService from '@/services/userService';
 import { toast } from 'sonner';
 import Header from "@/components/Header";
 import { API_ENDPOINTS } from '../config/api';
+import NoImageAvailable from '@/assets/images/no image available.png';
 
 interface BackendCartItem {
   productId: string;
@@ -145,54 +146,86 @@ const Cart = () => {
       }
       
       // Fetch project details from marketplace for each cart item
-      const transformedCartItems: CartItemType[] = await Promise.all(
+      const transformedCartItems: CartItemType[] = (await Promise.all(
         cartData.map(async (item: BackendCartItem) => {
           try {
             // Fetch project details from marketplace
             const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(item.productId));
+            console.log(`Fetching project ${item.productId}, status: ${response.status}`);
+            
             if (!response.ok) {
-              throw new Error(`Failed to fetch project ${item.productId}`);
+              if (response.status === 404) {
+                console.warn(`Project ${item.productId} not found in marketplace - will be removed from cart`);
+                // Automatically remove invalid item from cart
+                try {
+                  await userService.removeFromCart(item.productId);
+                  console.log(`Removed invalid project ${item.productId} from cart`);
+                } catch (removeError) {
+                  console.error(`Failed to remove invalid project ${item.productId} from cart:`, removeError);
+                }
+                return null; // Skip this item
+              }
+              throw new Error(`Failed to fetch project ${item.productId} - Status: ${response.status}`);
             }
             const projectData = await response.json();
+            console.log(`Project data for ${item.productId}:`, projectData);
             const project = projectData.project;
+            
+            if (!project) {
+              throw new Error(`No project data returned for ${item.productId}`);
+            }
+            
+            console.log(`Project details for ${item.productId}:`, {
+              title: project.title,
+              price: project.price,
+              description: project.description,
+              category: project.category
+            });
             
             return {
               id: item.productId,
-              name: project.title,
-              description: project.description,
-              price: project.price,
-              category: project.category.toLowerCase(),
-              studentName: project.author.name,
+              name: project.title || `Project ${item.productId}`,
+              description: project.description || 'No description available',
+              price: project.price || 0,
+              category: (project.category || 'software').toLowerCase() as 'software' | 'idea' | 'design' | 'algorithm',
+              studentName: typeof project.author === 'string' ? 'Unknown' : (project.author?.name || 'Unknown'),
               university: 'University', // You can add university field to marketplace if needed
-              rating: project.rating,
+              rating: project.rating || 0,
               downloadable: true,
-              licenseType: 'commercial',
-              tags: project.tags,
+              licenseType: 'commercial' as const,
+              tags: project.tags || ['Unknown'],
               quantity: item.quantity,
-              image: project.image // Add the project image
+              image: project.image || NoImageAvailable
             };
           } catch (error) {
             console.error(`Error fetching project ${item.productId}:`, error);
-            // Fallback to basic data if project fetch fails
+            // For non-404 errors, still show the item but with fallback data
             return {
               id: item.productId,
               name: `Project ${item.productId}`,
-              description: 'Project details not available',
+              description: 'Project details not available - this project may have been removed from the marketplace',
               price: 0,
-              category: 'software',
+              category: 'software' as const,
               studentName: 'Unknown',
               university: 'Unknown University',
               rating: 0,
               downloadable: true,
-              licenseType: 'commercial',
+              licenseType: 'commercial' as const,
               tags: ['Unknown'],
-              quantity: item.quantity
+              quantity: item.quantity,
+              image: NoImageAvailable
             };
           }
-        })
-      );
+        }))
+      ).filter((item) => item !== null) as CartItemType[];
 
       setCartItems(transformedCartItems);
+      
+      // Notify user if any invalid items were removed
+      const removedCount = cartData.length - transformedCartItems.length;
+      if (removedCount > 0) {
+        toast.info(`${removedCount} invalid item${removedCount > 1 ? 's' : ''} removed from cart automatically`);
+      }
     } catch (error) {
       console.error('Error loading cart data:', error);
       console.error('Error details:', {
@@ -255,7 +288,8 @@ const Cart = () => {
       rating: 4.5,
       downloadable: true,
       licenseType: 'commercial',
-      tags: ['Engineering', 'Innovation']
+      tags: ['Engineering', 'Innovation'],
+      quantity: 1
     };
     setCartItems(prev => [...prev, newCartItem]);
     setSavedItems(prev => prev.filter(item => item.id !== savedItem.id));
@@ -310,7 +344,8 @@ const Cart = () => {
       ...project,
       university: project.university,
       downloadable: true,
-      licenseType: 'commercial'
+      licenseType: 'commercial',
+      quantity: 1
     };
     setCartItems(prev => [...prev, newCartItem]);
     toast.success(`${project.name} has been added to your cart`);
@@ -392,9 +427,10 @@ const Cart = () => {
                   <div key={item.id} className="rounded-xl bg-white shadow-md hover:shadow-lg transition-all border border-gray-100 p-3 xs:p-4 flex flex-col sm:flex-row gap-4">
                     <div className="flex-shrink-0 flex items-center justify-center w-full sm:w-32">
                       <img
-                        src={item.image || "/project-placeholder.png"}
+                        src={item.image || NoImageAvailable}
                         alt={item.name}
                         className="w-24 h-24 object-cover rounded-lg border border-gray-200 bg-gray-50"
+                        onError={e => { e.currentTarget.src = NoImageAvailable; }}
                       />
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
@@ -418,6 +454,15 @@ const Cart = () => {
                           <span>By <span className="font-semibold text-gray-700">{item.studentName}</span></span>
                           <span className="hidden xs:inline">|</span>
                           <span>{item.university}</span>
+                        </div>
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-bold text-green-600">₹{item.price}</span>
+                            <span className="text-xs text-gray-500">per item</span>
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            Qty: {item.quantity}
+                          </div>
                         </div>
                       </div>
                       <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between mt-2 gap-2">

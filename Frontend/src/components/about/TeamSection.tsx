@@ -115,8 +115,8 @@ const TeamSection = () => {
               </div>
               {/* Name and description */}
               <div className="flex-1 flex flex-col items-start justify-center text-left">
-                <h4 className="text-3xl md:text-4xl font-bold mb-1 text-white leading-tight tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>{founder.name}</h4>
-                <p className="text-gray-300 leading-relaxed max-w-xl text-lg" style={{fontFamily: 'Inter, sans-serif'}}>{founder.description}</p>
+                <h4 className="text-3xl md:text-4xl font-bold mb-1 text-white leading-tight tracking-tight">{founder.name}</h4>
+                <p className="text-gray-300 leading-relaxed max-w-xl text-lg">{founder.description}</p>
               </div>
             </div>
             {/* Team Lead */}
@@ -141,8 +141,8 @@ const TeamSection = () => {
               </div>
               {/* Name and description */}
               <div className="flex-1 flex flex-col items-start justify-center text-left">
-                <h4 className="text-3xl md:text-4xl font-bold mb-1 text-white leading-tight tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>{teamLead.name}</h4>
-                <p className="text-gray-300 leading-relaxed max-w-xl text-lg" style={{fontFamily: 'Inter, sans-serif'}}>{teamLead.description}</p>
+                <h4 className="text-3xl md:text-4xl font-bold mb-1 text-white leading-tight tracking-tight">{teamLead.name}</h4>
+                <p className="text-gray-300 leading-relaxed max-w-xl text-lg">{teamLead.description}</p>
               </div>
             </div>
           </div>
@@ -150,7 +150,7 @@ const TeamSection = () => {
 
         {/* Mobile Horizontal Scroll Section */}
         <div className="lg:hidden mb-10">
-          <h3 className="text-2xl font-bold text-white mb-6 text-center tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>Our Team</h3>
+                          <h3 className="text-2xl font-bold text-white mb-6 text-center tracking-tight">Our Team</h3>
           <div className="overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             <div className="flex space-x-5 pb-3" style={{ minWidth: 'max-content' }}>
               {allMobileMembers.map((member, index) => (
@@ -162,8 +162,8 @@ const TeamSection = () => {
                       className="w-20 h-20 object-cover rounded-full mx-auto grayscale group-hover:grayscale-0 group-hover:scale-105 transition duration-300"
                     />
                   </a>
-                  <h4 className="text-base font-semibold mt-3 mb-1 text-white tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>{member.name}</h4>
-                  <p className="text-gray-400 text-xs mb-2" style={{fontFamily: 'Inter, sans-serif'}}>{member.role}</p>
+                                  <h4 className="text-base font-semibold mt-3 mb-1 text-white tracking-tight">{member.name}</h4>
+                <p className="text-gray-400 text-xs mb-2">{member.role}</p>
                   <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition">
                     <Linkedin size={16} />
                     <span className="text-xs font-medium">LinkedIn</span>
@@ -194,8 +194,8 @@ const TeamSection = () => {
                         style={{ cursor: 'pointer' }}
                       />
                     </a>
-                    <h4 className="text-lg font-semibold mt-3 mb-1 text-white tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>{member.name}</h4>
-                    <p className="text-gray-400 text-sm mb-2" style={{fontFamily: 'Inter, sans-serif'}}>{member.role}</p>
+                    <h4 className="text-lg font-semibold mt-3 mb-1 text-white tracking-tight">{member.name}</h4>
+                    <p className="text-gray-400 text-sm mb-2">{member.role}</p>
                     <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition">
                       <Linkedin size={16} />
                       <span className="text-xs font-medium">LinkedIn</span>
@@ -227,8 +227,8 @@ const TeamSection = () => {
                         style={{ cursor: 'pointer' }}
                       />
                     </a>
-                    <h4 className="text-lg font-semibold mt-3 mb-1 text-white tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>{member.name}</h4>
-                    <p className="text-gray-400 text-sm mb-2" style={{fontFamily: 'Inter, sans-serif'}}>{member.role}</p>
+                    <h4 className="text-lg font-semibold mt-3 mb-1 text-white tracking-tight">{member.name}</h4>
+                    <p className="text-gray-400 text-sm mb-2">{member.role}</p>
                     <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition">
                       <Linkedin size={16} />
                       <span className="text-xs font-medium">LinkedIn</span>

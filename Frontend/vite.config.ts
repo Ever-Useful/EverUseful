@@ -20,6 +20,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    // Ensure output directory is properly configured
+    outDir: 'dist',
     // Add cache busting
     rollupOptions: {
       output: {
@@ -30,6 +32,8 @@ export default defineConfig(({ mode }) => ({
     },
     // Ensure source maps are generated for debugging
     sourcemap: true,
+    // Ensure index.html is generated
+    emptyOutDir: true,
   },
   // Add cache busting for development
   define: {

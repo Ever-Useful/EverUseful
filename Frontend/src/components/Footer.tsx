@@ -92,9 +92,9 @@ export const Footer = () => {
                 <a href="https://www.instagram.com/amoghever/" className="bg-gray-700 p-2.5 rounded-full hover:bg-gradient-to-r from-purple-600 to-pink-600 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Instagram className="h-5 w-5 text-purple-300" />
                 </a>
-                <a href="amogheveruseful@gmail.com" className="bg-gray-700 p-2.5 rounded-full hover:bg-red-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                {/* <a href="amogheveruseful@gmail.com" className="bg-gray-700 p-2.5 rounded-full hover:bg-red-600 transition-all transform hover:-translate-y-0.5 shadow-md">
                   <Mail className="h-5 w-5 text-red-300" />
-                </a>
+                </a> */}
               </div>
             </div>
           </div>
@@ -109,9 +109,9 @@ export const Footer = () => {
             <li><Link to="/marketplace" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><BookMarked className="mr-2 h-4 w-4 text-gray-500" /> Course Marketplace</Link></li>
               <li><Link to="/aiagents" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Lightbulb className="mr-2 h-4 w-4 text-gray-500" /> AI Learning Agents</Link></li>
               <li><Link to="/findexpert" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><HelpCircle className="mr-2 h-4 w-4 text-gray-500" /> Find Expert Mentors</Link></li>
-              <li><Link to="/meetings/schedule" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Calendar className="mr-2 h-4 w-4 text-gray-500" /> Schedule Sessions</Link></li>
-              <li><Link to="/collaborators" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Users className="mr-2 h-4 w-4 text-gray-500" /> Study Groups</Link></li>
-              <li><Link to="/dashboard" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Progress Dashboard</Link></li>
+              <li><Link to="/consulting" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Calendar className="mr-2 h-4 w-4 text-gray-500" /> Schedule Sessions</Link></li>
+              {/* <li><Link to="/collaborators" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Users className="mr-2 h-4 w-4 text-gray-500" /> Study Groups</Link></li> */}
+              {/* <li><Link to="/dashboard" onClick={scrollToTop} className="hover:text-blue-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Progress Dashboard</Link></li> */}
             </ul>
           </div>
 
@@ -122,11 +122,11 @@ export const Footer = () => {
               Enterprise
             </h4>
             <ul className="space-y-2.5 text-xs">
-            <li><Link to="/consultation" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><Users className="mr-2 h-4 w-4 text-gray-500" /> Expert Consultation</Link></li>
+            <li><Link to="/consulting" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><Users className="mr-2 h-4 w-4 text-gray-500" /> Expert Consultation</Link></li>
               <li><Link to="/freelancing" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><BookOpen className="mr-2 h-4 w-4 text-gray-500" /> Research Freelancing</Link></li>
               <li><Link to="/connect" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><GraduationCap className="mr-2 h-4 w-4 text-gray-500" /> Career Opportunities</Link></li>
-              <li><Link to="/projects/new" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Start New Project</Link></li>
-              <li><Link to="/connection" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><Globe className="mr-2 h-4 w-4 text-gray-500" /> Network & Connect</Link></li>
+              {/* <li><Link to="/projects/new" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><Award className="mr-2 h-4 w-4 text-gray-500" /> Start New Project</Link></li> */}
+              <li><Link to="/connections" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><Globe className="mr-2 h-4 w-4 text-gray-500" /> Network & Connect</Link></li>
               <li><Link to="/sustainable" onClick={scrollToTop} className="hover:text-purple-400 transition-colors flex items-center"><MessageSquare className="mr-2 h-4 w-4 text-gray-500" /> Sustainable Projects</Link></li>
             </ul>
           </div>
@@ -260,9 +260,9 @@ export const Footer = () => {
           {/* Copyright */}
           <div className="mt-12 pt-6 border-t border-gray-800 text-center">
             <div className="text-xs text-gray-500">
-              © {new Date().getFullYear()} AMOGH - ever useful EdTech Platform. All rights reserved.<br />
-              AMOGH® is a registered trademark of Future Learning Solutions Inc. | GSTIN: 29ABCDE1234F1GH<br />
-              Patent Pending: US20210765432 | All course materials are protected by copyright laws.
+              © {new Date().getFullYear()} AMOGH - ever useful Marketplace Website. All rights reserved.<br />
+              {/* AMOGH® is a registered trademark of Future Learning Solutions Inc. | GSTIN: 29ABCDE1234F1GH<br /> */}
+              {/* Patent Pending: US20210765432 | All course materials are protected by copyright laws. */}
             </div>
           </div>
         </div>
