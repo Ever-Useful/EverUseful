@@ -100,9 +100,9 @@ const App = () => (
             <Route path="/new-project" element={<NewProject />} />
             <Route path="/schedule-meeting" element={<ScheduleMeeting />} />
             {/* <Route path="/your-meetings" element={<YourMeetings />} /> */}
-            <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/sustainable" element={<Sustainable />} />
-            <Route path="/ai-agents" element={<AiAgents />} />
+            <Route path="/aiagents" element={<AiAgents />} />
             <Route path="/admin" element={<Admin />} />
             
             {/* Policy Routes */}
