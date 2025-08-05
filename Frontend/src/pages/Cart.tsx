@@ -146,7 +146,7 @@ const Cart = () => {
       }
       
       // Fetch project details from marketplace for each cart item
-      const transformedCartItems: CartItemType[] = await Promise.all(
+      const transformedCartItems: CartItemType[] = (await Promise.all(
         cartData.map(async (item: BackendCartItem) => {
           try {
             // Fetch project details from marketplace
@@ -155,8 +155,15 @@ const Cart = () => {
             
             if (!response.ok) {
               if (response.status === 404) {
-                console.warn(`Project ${item.productId} not found in marketplace`);
-                throw new Error(`Project ${item.productId} not found`);
+                console.warn(`Project ${item.productId} not found in marketplace - will be removed from cart`);
+                // Automatically remove invalid item from cart
+                try {
+                  await userService.removeFromCart(item.productId);
+                  console.log(`Removed invalid project ${item.productId} from cart`);
+                } catch (removeError) {
+                  console.error(`Failed to remove invalid project ${item.productId} from cart:`, removeError);
+                }
+                return null; // Skip this item
               }
               throw new Error(`Failed to fetch project ${item.productId} - Status: ${response.status}`);
             }
@@ -180,39 +187,45 @@ const Cart = () => {
               name: project.title || `Project ${item.productId}`,
               description: project.description || 'No description available',
               price: project.price || 0,
-              category: (project.category || 'software').toLowerCase(),
+              category: (project.category || 'software').toLowerCase() as 'software' | 'idea' | 'design' | 'algorithm',
               studentName: typeof project.author === 'string' ? 'Unknown' : (project.author?.name || 'Unknown'),
               university: 'University', // You can add university field to marketplace if needed
               rating: project.rating || 0,
               downloadable: true,
-              licenseType: 'commercial',
+              licenseType: 'commercial' as const,
               tags: project.tags || ['Unknown'],
               quantity: item.quantity,
               image: project.image || NoImageAvailable
             };
           } catch (error) {
             console.error(`Error fetching project ${item.productId}:`, error);
-            // Fallback to basic data if project fetch fails
+            // For non-404 errors, still show the item but with fallback data
             return {
               id: item.productId,
               name: `Project ${item.productId}`,
               description: 'Project details not available - this project may have been removed from the marketplace',
               price: 0,
-              category: 'software',
+              category: 'software' as const,
               studentName: 'Unknown',
               university: 'Unknown University',
               rating: 0,
               downloadable: true,
-              licenseType: 'commercial',
+              licenseType: 'commercial' as const,
               tags: ['Unknown'],
               quantity: item.quantity,
               image: NoImageAvailable
             };
           }
-        })
-      );
+        }))
+      ).filter((item) => item !== null) as CartItemType[];
 
       setCartItems(transformedCartItems);
+      
+      // Notify user if any invalid items were removed
+      const removedCount = cartData.length - transformedCartItems.length;
+      if (removedCount > 0) {
+        toast.info(`${removedCount} invalid item${removedCount > 1 ? 's' : ''} removed from cart automatically`);
+      }
     } catch (error) {
       console.error('Error loading cart data:', error);
       console.error('Error details:', {

@@ -126,12 +126,10 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         features: projectData.features.split(',').map(feature => feature.trim()),
         techStack: projectData.techStack.split(',').map(tech => tech.trim()),
         deliverables: projectData.deliverables.split(',').map(deliverable => deliverable.trim()),
-        author: customUserId,
         status: 'Active',
         posted: new Date().toISOString().split('T')[0],
         views: 0,
         favoritedBy: [],
-        customUserId,
       };
 
       let res;
