@@ -182,13 +182,20 @@ const Profile = () => {
 
              // Fetch projects using the same method as Dashboard to ensure consistency
        try {
-         const projectsData = await userService.getUserProjects();
+         const projectsData: any = await userService.getUserProjects();
          console.log('Profile - Projects data from getUserProjects:', projectsData);
          
-         if (projectsData && Array.isArray(projectsData)) {
-           console.log('Profile - Projects found:', projectsData.length);
+         if (projectsData && projectsData.success && projectsData.data) {
+           // Handle the correct backend response structure
+           const projects = projectsData.data.created || projectsData.data || [];
+           console.log('Profile - Projects found:', projects.length);
+           setProjects(projects);
+         } else if (projectsData && Array.isArray(projectsData)) {
+           // Handle direct array response (backward compatibility)
+           console.log('Profile - Projects found in direct array:', projectsData.length);
            setProjects(projectsData);
          } else if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
+           // Handle nested created array
            console.log('Profile - Projects found in created array:', projectsData.created.length);
            setProjects(projectsData.created);
          } else {
@@ -234,7 +241,7 @@ const Profile = () => {
     });
     return () => unsubscribe();
   }, []);
-
+//test
   const handleEditSection = (section: string) => {
     setEditSection(section);
     setShowEditProfile(true);

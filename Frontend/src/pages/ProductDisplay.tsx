@@ -44,6 +44,7 @@ const ProductDisplay = () => {
   const [showPopupMenu, setShowPopupMenu] = useState(false);
   const [authorCache, setAuthorCache] = useState<Record<string, any>>({});
   const [currentUserCustomId, setCurrentUserCustomId] = useState<string | null>(null);
+  const [authorsLoading, setAuthorsLoading] = useState(false);
 
   // Fetch current user's customUserId
   useEffect(() => {
@@ -72,10 +73,11 @@ const ProductDisplay = () => {
           throw new Error('Failed to fetch project data');
         }
         const data = await response.json();
-        setProject(data);
+        setProject(data.project);
         
         // Fetch author data
         if (data.author) {
+          setAuthorsLoading(true);
           const res = await fetch(API_ENDPOINTS.USER_BY_ID(data.author));
           if (res.ok) {
             const authorData = await res.json();
@@ -84,6 +86,7 @@ const ProductDisplay = () => {
               [data.author]: authorData.data
             }));
           }
+          setAuthorsLoading(false);
         }
       } catch (error) {
         console.error('Error fetching project:', error);
@@ -99,6 +102,7 @@ const ProductDisplay = () => {
   useEffect(() => {
     const fetchAuthor = async () => {
       if (project && project.author && !authorCache[project.author]) {
+        setAuthorsLoading(true);
         try {
           const res = await fetch(API_ENDPOINTS.USER_BY_ID(project.author));
           if (res.ok) {
@@ -112,6 +116,8 @@ const ProductDisplay = () => {
           }
         } catch (error) {
           console.error('Error fetching author details:', error);
+        } finally {
+          setAuthorsLoading(false);
         }
       }
     };
@@ -119,19 +125,96 @@ const ProductDisplay = () => {
     if (project) fetchAuthor();
   }, [project, authorCache]);
 
-  // Helper to get author details
+  // Helper to get author details with loading state
   const getAuthorDetails = (authorId: string) => {
-    const user = authorCache[authorId];
-    if (!user) return { name: 'Unknown', image: NoUserProfile, userType: '', id: authorId, description: '' };
-    const auth = user.auth || {};
-    const profile = user.profile || {};
-    return {
-      name: `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User',
-      image: profile.avatar || NoUserProfile,
-      userType: auth.userType || '',
-      id: user.customUserId,
-      description: profile.bio || ''
+    const user = authorCache[authorId as keyof typeof authorCache];
+    
+    if (!user) {
+      return { 
+        name: authorsLoading ? 'Loading...' : 'username', 
+        image: NoUserProfile, 
+        userType: '', 
+        id: authorId,
+        isLoading: authorsLoading,
+        verified: false,
+        rating: 0,
+        description: ''
+      };
+    }
+    
+    console.log('Processing author data for ID:', authorId, 'Data:', user);
+    
+    // Extract data from the proper structure - handle multiple response formats
+    const auth = user.auth || user.data?.auth || {};
+    const profile = user.profile || user.data?.profile || {};
+    
+    // Try multiple sources for the name with better priority
+    let name = '';
+    
+    // First priority: firstName + lastName from auth
+    if (auth.firstName || auth.lastName) {
+      name = `${auth.firstName || ''} ${auth.lastName || ''}`.trim();
+    }
+    // Second priority: firstName + lastName from profile
+    else if (profile.firstName || profile.lastName) {
+      name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
+    }
+    // Third priority: username from auth
+    else if (auth.username) {
+      name = auth.username;
+    }
+    // Fourth priority: username from profile
+    else if (profile.username) {
+      name = profile.username;
+    }
+    // Fifth priority: email username from auth
+    else if (auth.email) {
+      name = auth.email.split('@')[0];
+    }
+    // Sixth priority: email username from profile
+    else if (profile.email) {
+      name = profile.email.split('@')[0];
+    }
+    // Seventh priority: direct name field
+    else if (user.name) {
+      name = user.name;
+    }
+    // Eighth priority: direct username field
+    else if (user.username) {
+      name = user.username;
+    }
+    
+    // Get userType with fallbacks
+    const userType = profile.userType || auth.userType || user.userType || '';
+    
+    // Get avatar with fallback
+    const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
+    
+    // Get customUserId with fallback
+    const customUserId = user.customUserId || user.data?.customUserId || authorId;
+    
+    // Get verified status with fallback
+    const verified = profile.verified || auth.verified || user.verified || false;
+    
+    // Get rating with fallback
+    const rating = profile.rating || auth.rating || user.rating || 0;
+    
+    // Get description with fallback
+    const description = profile.description || auth.description || user.description || profile.bio || auth.bio || user.bio || '';
+    
+    const result = {
+      name: name || 'username',
+      image: avatar,
+      userType: userType,
+      id: customUserId,
+      isLoading: false,
+      verified: verified,
+      rating: rating,
+      description: description
     };
+    
+    console.log('Author details result:', result);
+    return result;
   };
 
   const goToAuthorProfile = (userType: string, id: string) => {
@@ -543,13 +626,13 @@ const ProductDisplay = () => {
                         >
                           {getAuthorDetails(project.author).name}
                         </h3>
-                        {project.author.verified && (
+                        {getAuthorDetails(project.author).verified && (
                           <CheckCircle className="w-4 h-4 text-blue-500" />
                         )}
                       </div>
                       <div className="flex items-center space-x-1">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm text-gray-600">{project.author.rating}</span>
+                        <span className="text-sm text-gray-600">{getAuthorDetails(project.author).rating}</span>
                       </div>
                     </div>
                   </div>
@@ -557,7 +640,11 @@ const ProductDisplay = () => {
                 {(!authorCache[project.author]) ? (
                   <Skeleton className="w-full h-4 mb-4 rounded" />
                 ) : (
-                  <p className="text-sm text-gray-600 mb-4">{project.author.bio}</p>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {(typeof project.author === 'object' && project.author?.bio) || 
+                     getAuthorDetails(project.author).description || 
+                     "No description available."}
+                  </p>
                 )}
                 <Button 
                   variant="outline" 
@@ -593,20 +680,22 @@ const ProductDisplay = () => {
                       >
                         {getAuthorDetails(project.author).name}
                       </h3>
-                      {project.author.verified && (
+                      {getAuthorDetails(project.author).verified && (
                         <CheckCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
                       )}
                     </div>
                     <div className="flex items-center space-x-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-xs text-gray-600">{project.author.rating}</span>
+                      <span className="text-xs text-gray-600">{getAuthorDetails(project.author).rating}</span>
                     </div>
                   </div>
                 </div>
                 {/* Author Description */}
                 <div className="mb-3">
                   <p className="text-xs text-gray-600 leading-relaxed">
-                    {getAuthorDetails(project.author).description || project.author.bio || "No description available."}
+                    {getAuthorDetails(project.author).description || 
+                     (typeof project.author === 'object' && project.author?.bio) || 
+                     "No description available."}
                   </p>
                 </div>
                 <Button 

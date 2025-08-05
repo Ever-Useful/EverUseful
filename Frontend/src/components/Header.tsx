@@ -622,7 +622,7 @@ const Header = () => {
                             ) : (
                                 <>
                                     {/* Mobile: Join and Sign In buttons */}
-                                    <div className="flex md:hidden items-center space-x-2">
+                                    <div className="flex md:hidden items-center space-x-2 ">
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -634,6 +634,7 @@ const Header = () => {
                                         <Button
                                             variant="default"
                                             size="sm"
+                                            bg-background="emerald-600"
                                             asChild
                                             className="text-sm px-3 py-1"
                                         >
@@ -641,10 +642,11 @@ const Header = () => {
                                         </Button>
                                     </div>
                                     {/* Desktop: Join and Sign In buttons */}
-                                    <div className="hidden md:flex items-center space-x-3">
+                                    <div className="hidden md:flex items-center space-x-3 ">
                                         <Button
                                             variant="outline"
                                             asChild
+                                            bg-border="emerald-600"
                                             className="text-sm px-4 py-2"
                                         >
                                             <Link to="/signin">Sign In</Link>
@@ -652,6 +654,7 @@ const Header = () => {
                                         <Button
                                             variant="default"
                                             asChild
+                                            bg-background="emerald-600"
                                             className="text-sm px-4 py-2"
                                         >
                                             <Link to="/signup">Join</Link>

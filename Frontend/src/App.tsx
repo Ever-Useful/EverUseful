@@ -26,7 +26,7 @@ import Connect from "@/pages/Connect";
 import Freelancing from "@/pages/Freelancing";
 import FreelancerProfile from "@/pages/FreelancerProfile";
 import StudentProfile from "@/pages/StudentProfile";
-import bussinessprofile from "@/pages/bussinessprofile";
+import BussinessProfile from "@/pages/bussinessprofile";
 import BecomeAMentor from "@/pages/BecomeAMentor";
 import FindExpert from "@/pages/FindExpert";
 import NewProject from "@/pages/NewProject";
@@ -45,7 +45,6 @@ import CookiePolicy from "@/pages/Policy/CookiePolicy";
 import RefundPolicy from "@/pages/Policy/RefundPolicy";
 import DeliveryPolicy from "@/pages/Policy/DeliveryPolicy";
 import SendFeedback from "@/pages/Policy/SendFeedback";
-import BussinessProfile from "@/pages/bussinessprofile";
 
 const queryClient = new QueryClient();
 
@@ -89,7 +88,7 @@ const App = () => (
             <Route path="/chat" element={<Chat />} />
             <Route path="/connections" element={<Connections />} />
             <Route path="/collaborators" element={<Collaborators />} />
-            <Route path="/consultation" element={<Consultation />} />
+            <Route path="/consulting" element={<Consultation />} />
             <Route path="/connect" element={<Connect />} />
             <Route path="/freelancing" element={<Freelancing />} />
             <Route path="/freelancer-profile" element={<FreelancerProfile />} />
