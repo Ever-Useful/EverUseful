@@ -151,8 +151,9 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         const userProfile = await userService.getUserProfile();
         console.log('EditProfile - Fetched user profile:', userProfile); // Debug log
         
-        // Extract data from the response structure - backend returns data directly
-        const { auth: authData, profile: userProfileData, studentData: studentInfo, professorData: professorInfo, freelancerData: freelancerInfo } = userProfile;
+        // Extract data from the response structure - backend returns data in nested structure
+        const { data } = userProfile;
+        const { auth: authData, profile: userProfileData, studentData: studentInfo, professorData: professorInfo, freelancerData: freelancerInfo } = data;
         
         console.log('EditProfile - Extracted auth data:', authData);
         console.log('EditProfile - Extracted profile data:', userProfileData);
@@ -195,11 +196,11 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           hourlyRate: freelancerInfo?.hourlyRate || '',
           avgResponseTime: freelancerInfo?.avgResponseTime || ''
         });
-        setEducationList(userProfile.education || []);
-        setWorkList(userProfile.workExperience || []);
+        setEducationList(data.education || []);
+        setWorkList(data.workExperience || []);
         
         // Handle skills - convert objects to strings if needed
-        const skillsData = (userProfile as any).skills || freelancerInfo?.skills || [];
+        const skillsData = data.skills || freelancerInfo?.skills || [];
         if (Array.isArray(skillsData)) {
           const skillStrings = skillsData.map(skill => {
             if (typeof skill === 'string') return skill;
@@ -211,10 +212,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           setSkills([]);
         }
         
-        setPersonalDetails(userProfile.personalDetails || {
+        setPersonalDetails(data.personalDetails || {
           address1: '', address2: '', landmark: '', pincode: '', location: '', hobbies: '', copyCurrent: false
         });
-        setSocialLinks(userProfile.socialLinks || {
+        setSocialLinks(data.socialLinks || {
           linkedin: '', facebook: '', instagram: '', twitter: '', git: '', medium: '', reddit: '', slack: '', dribbble: '', behance: '', codepen: '', figma: '', custom: ''
         });
       } catch (error) {

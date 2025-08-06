@@ -112,9 +112,10 @@ const Profile = () => {
       const userProfile = await userService.getUserProfile();
       console.log('Profile - Raw user profile data:', userProfile);
       
-      // Extract data from the response structure - backend now returns reconstructed data directly
-      const { auth: authData, profile: userProfileData, studentData: studentInfo, education: educationArr, workExperience: workArr } = userProfile;
-      const userStats = (userProfile as any).stats;
+      // Extract data from the response structure - backend returns data in nested structure
+      const { data } = userProfile;
+      const { auth: authData, profile: userProfileData, studentData: studentInfo, education: educationArr, workExperience: workArr } = data;
+      const userStats = data.stats;
       
       console.log('Profile - Extracted auth data:', authData);
       console.log('Profile - Extracted profile data:', userProfileData);
@@ -171,7 +172,7 @@ const Profile = () => {
       }
 
       // Set skills - handle both string arrays and object arrays
-      const skillsData = (userProfile as any).skills || userProfile.freelancerData?.skills || [];
+      const skillsData = data.skills || data.freelancerData?.skills || [];
       if (Array.isArray(skillsData)) {
         // Convert skill objects to strings if needed
         const skillStrings = skillsData.map(skill => {
@@ -217,7 +218,7 @@ const Profile = () => {
       setWorkExperience(workArr || []);
 
       // Fetch freelancerData
-      const freelancerData = userProfile.freelancerData;
+      const freelancerData = data.freelancerData;
       console.log('Profile - Freelancer data from API:', freelancerData);
       setFreelancerData({
         hourlyRate: freelancerData?.hourlyRate || '',
