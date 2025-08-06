@@ -123,10 +123,14 @@ const Profile = () => {
       // Use localStorage as fallback for immediate display after signup
       const storedName = localStorage.getItem("userName");
       const storedUserType = localStorage.getItem("userType");
+      const storedFirstName = localStorage.getItem("userFirstName");
+      const storedLastName = localStorage.getItem("userLastName");
+      const storedEmail = localStorage.getItem("userEmail");
+      const storedPhone = localStorage.getItem("userPhone");
       
       setProfileData({
-        firstName: authData?.firstName || (storedName ? storedName.split(' ')[0] : ''),
-        lastName: authData?.lastName || (storedName ? storedName.split(' ').slice(1).join(' ') : ''),
+        firstName: authData?.firstName || storedFirstName || (storedName ? storedName.split(' ')[0] : ''),
+        lastName: authData?.lastName || storedLastName || (storedName ? storedName.split(' ').slice(1).join(' ') : ''),
         userType: (authData?.userType) ? 
           (authData.userType).charAt(0).toUpperCase() + 
           (authData.userType).slice(1) : 
@@ -136,8 +140,8 @@ const Profile = () => {
         location: userProfileData?.location || '',
         title: userProfileData?.title || '',
         website: userProfileData?.website || '',
-        mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || '',
-        username: authData?.email?.split('@')[0] || '',
+        mobile: authData?.mobile || authData?.phoneNumber || storedPhone || userProfileData?.mobile || '',
+        username: authData?.email?.split('@')[0] || storedEmail?.split('@')[0] || '',
       });
 
       setStudentData({
@@ -234,10 +238,14 @@ const Profile = () => {
       toast.error('Failed to load profile data');
     } finally {
       setLoading(false);
-      // Clean up localStorage after successful load if we have real data
-      if (profileData.firstName && profileData.lastName) {
+      // Only clean up localStorage after successful load if we have real data from backend
+      if (profileData.firstName && profileData.lastName && !localStorage.getItem("userDataSaved")) {
         localStorage.removeItem("userName");
         localStorage.removeItem("userType");
+        localStorage.removeItem("userFirstName");
+        localStorage.removeItem("userLastName");
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("userPhone");
       }
     }
   };
@@ -253,9 +261,16 @@ const Profile = () => {
     });
     return () => {
       unsubscribe();
-      // Clean up localStorage when component unmounts
-      localStorage.removeItem("userName");
-      localStorage.removeItem("userType");
+      // Clean up localStorage when component unmounts only if data was successfully loaded
+      if (!loading && profileData.firstName && profileData.lastName) {
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userType");
+        localStorage.removeItem("userFirstName");
+        localStorage.removeItem("userLastName");
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("userPhone");
+        localStorage.removeItem("userDataSaved");
+      }
     };
   }, []);
 //test
@@ -367,7 +382,10 @@ const Profile = () => {
   const getDisplayName = () => {
     // First try to get from localStorage (for immediate display after signup)
     const storedName = localStorage.getItem("userName");
-    if (storedName && storedName !== 'undefined undefined') {
+    const storedFirstName = localStorage.getItem("userFirstName");
+    const storedLastName = localStorage.getItem("userLastName");
+    
+    if (storedName && storedName !== 'undefined undefined' && storedName !== 'null null') {
       return storedName;
     }
     
@@ -379,6 +397,14 @@ const Profile = () => {
     } else if (profileData.username) {
       return profileData.username;
     }
+    
+    // Fallback to localStorage individual fields
+    if (storedFirstName && storedLastName) {
+      return `${storedFirstName} ${storedLastName}`;
+    } else if (storedFirstName) {
+      return storedFirstName;
+    }
+    
     return 'User';
   };
 
@@ -465,7 +491,7 @@ const Profile = () => {
       <div className="max-w-7xl mx-auto px-8 -mt-8 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Only show Hourly Rate and Avg Response Time for freelancers */}
-          {(profileData.userType?.toLowerCase() === 'freelancer' || profileData.userType === 'Freelancers') && (
+          {(profileData.userType?.toLowerCase() === 'freelancer' || profileData.userType === 'Freelancers' || profileData.userType === 'Business') && (
             <>
               <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
@@ -701,7 +727,9 @@ const Profile = () => {
                 <div className="flex flex-wrap gap-3">
                   {skills && skills.length > 0 ? (
                     skills.map((skill, index) => (
-                      <Badge key={index} className="px-3 py-1 text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">{skill}</Badge>
+                      <Badge key={index} className="px-3 py-1 text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                      </Badge>
                     ))
                   ) : (
                     <p className="text-gray-500 text-sm">No skills added yet. Click edit to add your skills.</p>

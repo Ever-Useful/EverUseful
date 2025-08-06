@@ -159,19 +159,30 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         console.log('EditProfile - Extracted profile data:', userProfileData);
         console.log('EditProfile - Extracted freelancer data:', freelancerInfo);
         
+        // Get localStorage data as fallback for immediate display after signup
+        const storedFirstName = localStorage.getItem("userFirstName");
+        const storedLastName = localStorage.getItem("userLastName");
+        const storedEmail = localStorage.getItem("userEmail");
+        const storedPhone = localStorage.getItem("userPhone");
+        const storedUserType = localStorage.getItem("userType");
+        
+        console.log('EditProfile - Raw userType from auth:', authData?.userType);
+        console.log('EditProfile - Stored userType from localStorage:', storedUserType);
+        console.log('EditProfile - Normalized userType:', normalizeUserType(authData?.userType || storedUserType || ''));
+        
         setProfileData({
-          firstName: authData?.firstName || '',
-          lastName: authData?.lastName || '',
+          firstName: authData?.firstName || storedFirstName || '',
+          lastName: authData?.lastName || storedLastName || '',
           bio: userProfileData?.bio || '',
           college: studentInfo?.college || '',
           degree: studentInfo?.degree || '',
           course: studentInfo?.course || '',
           location: userProfileData?.location || '',
           year: studentInfo?.year || '',
-          userType: authData?.userType || '',
+          userType: normalizeUserType(authData?.userType || storedUserType || ''),
           username: authData?.username || '',
-          email: authData?.email || '',
-          mobile: authData?.mobile || authData?.phoneNumber || '',
+          email: authData?.email || storedEmail || '',
+          mobile: authData?.mobile || authData?.phoneNumber || storedPhone || '',
           gender: authData?.gender || userProfileData?.gender || '',
           domain: authData?.domain || userProfileData?.domain || '',
           startYear: studentInfo?.startYear || '',
@@ -273,7 +284,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         
         // Update freelancer data if user is a freelancer
         console.log('EditProfile - Current userType:', profileData.userType);
-        if (profileData.userType === 'Freelancers' || profileData.userType === 'freelancer') {
+        if (profileData.userType === 'Freelancers' || profileData.userType === 'Business') {
           console.log('EditProfile - Saving freelancer data:', {
             experience: profileData.experience,
             portfolio: profileData.portfolio,
@@ -292,6 +303,18 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           console.log('EditProfile - User is not a freelancer, userType:', profileData.userType);
         }
         
+        // Update professor data if user is a professor
+        if (profileData.userType === 'Professors') {
+          await userService.updateProfessorData({
+            department: profileData.department,
+            designation: profileData.designation,
+            researchInterests: profileData.researchInterests,
+          });
+        }
+        
+        // Clean up localStorage after successful save
+        localStorage.removeItem("userDataSaved");
+        
         // Debug: Check if data was saved by fetching it again
         setTimeout(async () => {
           try {
@@ -303,14 +326,6 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           }
         }, 1000);
         
-        // Update professor data if user is a professor
-        if (profileData.userType === 'Professors') {
-          await userService.updateProfessorData({
-            department: profileData.department,
-            designation: profileData.designation,
-            researchInterests: profileData.researchInterests,
-          });
-        }
       } else if (activeSection === 'About') {
         await userService.updateProfile({ bio: profileData.bio });
       } else if (activeSection === 'Education') {
@@ -546,8 +561,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         return 'Professors';
       case 'freelancer':
         return 'Freelancers';
+      case 'business':
+        return 'Business';
       default:
-        return '';
+        return dbType || '';
     }
   };
 
@@ -559,8 +576,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         return 'professor';
       case 'Freelancers':
         return 'freelancer';
+      case 'Business':
+        return 'business';
       default:
-        return '';
+        return uiType.toLowerCase();
     }
   };
 
@@ -657,11 +676,11 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   <div>
                     <label className="text-sm font-medium text-gray-700">User Type <span className="text-red-500">*</span></label>
                     <div className="flex flex-wrap gap-2 mt-1">
-                      {['Students', 'Professors', 'Freelancers'].map(type => (
+                      {['Students', 'Professors', 'Freelancers', 'Business'].map(type => (
                         <button
                           key={type}
                           type="button"
-                          className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${(profileData.userType === type || (type === 'Freelancers' && profileData.userType === 'freelancer')) ? 'bg-blue-50 border-blue-600 text-blue-900' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+                          className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${profileData.userType === type ? 'bg-blue-50 border-blue-600 text-blue-900' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}
                           onClick={() => setProfileData(prev => ({ ...prev, userType: type }))}
                         >
                           {type}
@@ -764,7 +783,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                     </div>
                   )}
-                  {(profileData.userType === 'Freelancers' || profileData.userType === 'freelancer') && (
+                  {(profileData.userType === 'Freelancers' || profileData.userType === 'Business') && (
                     <div className="space-y-6">
                       <div>
                         <label className="text-sm font-medium text-gray-700">Experience (years)</label>
@@ -833,8 +852,8 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         ) : (
                           <div className="flex flex-wrap gap-2">
                               {skills.map((skill, index) => (
-                                  <div key={`${skill}-${index}`} className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                                      <span>{skill}</span>
+                                  <div key={`${typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'skill'}-${index}`} className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                                      <span>{typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}</span>
                                       <button onClick={() => handleRemoveSkill(skill)} className="ml-2 text-blue-600 hover:text-blue-800 transition-colors">
                                           <X className="w-4 h-4" />
                                       </button>

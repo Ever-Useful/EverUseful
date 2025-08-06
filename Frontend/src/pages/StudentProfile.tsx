@@ -41,30 +41,47 @@ const Profile = () => {
         throw new Error('Failed to fetch user data');
       }
       const data = await response.json();
-      setUserData(data);
-      setEducation(data.education || []);
-      setWorkExperience(data.workExperience || []);
-      console.log('User data set:', data.data);
-      console.log('Projects object:', data.data.projects);
-      console.log('Projects.created:', data.data.projects?.created);
-      console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
-      // Fetch full project details for each project ID
-      const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-      console.log('Project IDs found:', projectIds);
-      console.log('Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
-      if (projectIds.length > 0) {
-        const projectPromises = projectIds.map((pid) =>
-          fetchProjectData(pid)
-        );
-        const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-        console.log('Full projects fetched:', fullProjects);
-        setPortfolioProjects(fullProjects);
+      console.log('StudentProfile - Raw API response:', data);
+      
+      if (data.success && data.data) {
+        setUserData(data.data);
+        setEducation(data.data.education || []);
+        setWorkExperience(data.data.workExperience || []);
+        console.log('StudentProfile - User data set:', data.data);
+        console.log('StudentProfile - Projects object:', data.data.projects);
+        console.log('StudentProfile - Projects.created:', data.data.projects?.created);
+        console.log('StudentProfile - Is projects.created an array?', Array.isArray(data.data.projects?.created));
+        
+        // Fetch full project details for each project ID
+        const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
+        console.log('StudentProfile - Project IDs found:', projectIds);
+        console.log('StudentProfile - Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
+        
+        if (projectIds.length > 0) {
+          console.log('StudentProfile - Attempting to fetch projects:', projectIds);
+          const projectPromises = projectIds.map((pid) =>
+            fetchProjectData(pid)
+          );
+          const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
+          console.log('StudentProfile - Full projects fetched:', fullProjects);
+          console.log('StudentProfile - Project details:', fullProjects.map(p => ({
+            id: p.id,
+            title: p.title,
+            image: p.image,
+            hasImage: !!p.image
+          })));
+          setPortfolioProjects(fullProjects);
+        } else {
+          console.log('StudentProfile - No project IDs found');
+          setPortfolioProjects([]);
+        }
       } else {
-        console.log('No project IDs found');
+        console.log('StudentProfile - No user data found or API error');
+        setUserData({});
         setPortfolioProjects([]);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('StudentProfile - Error fetching user data:', error);
       setError('Failed to load user profile');
       setUserData({});
       setPortfolioProjects([]);
@@ -75,14 +92,16 @@ const Profile = () => {
 
   const fetchProjectData = async (pid: string) => {
     try {
+      console.log(`StudentProfile - Fetching project ${pid}...`);
       const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
       if (!response.ok) {
-        throw new Error('Failed to fetch project data');
+        console.log(`StudentProfile - Project ${pid} not found (${response.status})`);
+        return null;
       }
       const data = await response.json();
-      return data;
+      return data && data.project ? data.project : null;
     } catch (error) {
-      console.error('Error fetching project data:', error);
+      console.error(`StudentProfile - Error fetching project ${pid}:`, error);
       return null;
     }
   };
@@ -106,16 +125,16 @@ const Profile = () => {
 
   const profile = {
     name: fullName,
-    title: userData.profile?.title || "New Member",
-    bio: userData.profile?.bio || "This is a new profile. Update your bio!",
-    avatar: userData.profile?.avatar || NoUserProfile,
+    title: userData?.profile?.title || "New Member",
+    bio: userData?.profile?.bio || "This is a new profile. Update your bio!",
+    avatar: userData?.profile?.avatar || NoUserProfile,
     stats: {
-      followers: userData.social?.followersCount || 0,
-      following: userData.social?.followingCount || 0,
-      projects: userData.stats?.projectsCount || 0,
-      likes: userData.stats?.totalLikes || 0,
-      connections: userData.social?.connections?.length || 0,
-      skills: userData.skills || [],  
+      followers: userData?.social?.followersCount || 0,
+      following: userData?.social?.followingCount || 0,
+      projects: userData?.stats?.projectsCount || 0,
+      likes: userData?.stats?.totalLikes || 0,
+      connections: userData?.social?.connections?.length || 0,
+      skills: userData?.skills || [],  
     },
   };
 
@@ -350,11 +369,12 @@ const Profile = () => {
                     safePortfolioProjects.map((project, index) => (
                       <Card
                         key={project.id || index}
-                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[120px] sm:min-h-[140px]"
+                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[120px] sm:min-h-[140px] cursor-pointer"
+                        onClick={() => navigate(`/product/${project.id}`)}
                       >
                         <div className="w-full md:w-40 lg:w-48 flex-shrink-0 h-28 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
-                            src={project.image}
+                            src={project.image || NoImageAvailable}
                             alt={project.title}
                             className="object-cover w-full h-full rounded-l-lg"
                             onError={e => { e.currentTarget.src = NoImageAvailable; }}
@@ -367,7 +387,9 @@ const Profile = () => {
                               <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{project.description}</p>
                               <div className="flex flex-wrap gap-2 mb-2">
                                 {(project.skills || []).map((skill, skillIndex) => (
-                                  <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">{skill}</Badge>
+                                  <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">
+                                    {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                                  </Badge>
                                 ))}
                               </div>
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
@@ -409,8 +431,10 @@ const Profile = () => {
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   {profile.stats.skills && profile.stats.skills.length > 0 ? (
-                    profile.stats.skills.map((skill: string, index: number) => (
-                      <Badge key={index} className="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">{skill}</Badge>
+                    profile.stats.skills.map((skill: any, index: number) => (
+                      <Badge key={index} className="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                      </Badge>
                     ))
                   ) : (
                     <p className="text-gray-500 text-xs sm:text-sm">No skills added yet. Click edit to add your skills.</p>

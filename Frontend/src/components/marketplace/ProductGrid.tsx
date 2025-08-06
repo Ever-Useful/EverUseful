@@ -324,14 +324,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       // Get avatar with fallback
       const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
       
-      // Get customUserId with fallback
-      const customUserId = user.customUserId || user.data?.customUserId || authorId;
+      // Get customUserId with fallback - this is the ID we'll use for navigation
+      const customUserId = user.customUserId || user.data?.customUserId || user.id || authorId;
       
       detailsMap[authorId] = {
         name: name || 'username',
         image: avatar,
         userType: userType,
-        id: customUserId,
+        id: customUserId, // Use customUserId for navigation
         isLoading: false
       };
     });
@@ -567,10 +567,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     else if (type === 'freelancer') {
       navigate(`/freelancerprofile/${id}`);
     } 
+    // Check if user type is business
+    else if (type === 'business') {
+      navigate(`/businessprofile/${id}`);
+    }
     // Default fallback to student profile for unknown user types
     else {
       console.warn(`Unknown user type: ${userType}, redirecting to student profile`);
-      // navigate(`/studentprofile/${id}`);
+      navigate(`/studentprofile/${id}`);
     }
   };
 
@@ -649,10 +653,22 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     <img
                       src={getAuthorDetails(project.author).image || NoUserProfile}
                       alt={getAuthorDetails(project.author).name}
-                      className="w-5 h-5 rounded-full border border-gray-200"
+                      className="w-5 h-5 rounded-full border border-gray-200 cursor-pointer"
                       onError={e => { e.currentTarget.src = NoUserProfile; }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
+                      }}
                     />
-                    <span className="text-[10px] text-gray-700 truncate">{getAuthorDetails(project.author).name}</span>
+                    <span 
+                      className="text-[10px] text-gray-700 truncate cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
+                      }}
+                    >
+                      {getAuthorDetails(project.author).name}
+                    </span>
                     <span className="flex items-center gap-0.5 text-[10px] text-yellow-500">
                       <Star className="w-3 h-3 fill-yellow-400" />
                       {project.rating}
@@ -666,7 +682,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                         variant="outline"
                         className="text-[8px] border-gray-200 text-gray-600 bg-gray-100 font-medium px-1 py-1 "
                       >
-                        {skill}
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                       </Badge>
                     ))}
                     {project.skills && project.skills.length > 2 && (
@@ -746,14 +762,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                         alt={getAuthorDetails(project.author).name}
                         className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
                         onError={e => { e.currentTarget.src = NoUserProfile; }}
-                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id)}
                       />
                       <span
                         className="text-gray-700 text-xs cursor-pointer"
                         style={{ transition: 'color 0.2s' }}
                         onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
                         onMouseOut={e => e.currentTarget.style.color = ''}
-                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id)}
                       >
                         {getAuthorDetails(project.author).name}
                       </span>
@@ -780,7 +796,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                           variant="outline"
                           className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
                         >
-                          {skill}
+                          {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                         </Badge>
                       ))}
                       {Array.isArray(project.skills) && project.skills.length > 3 && (
@@ -899,7 +915,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     alt={getAuthorDetails(selected.author).name}
                     className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
                     onError={e => { e.currentTarget.src = NoUserProfile; }}
-                    onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
+                    onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, getAuthorDetails(selected.author).id)}
                   />
                   <div>
                     <div
@@ -907,7 +923,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                       style={{ transition: 'color 0.2s' }}
                       onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
                       onMouseOut={e => e.currentTarget.style.color = ''}
-                      onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
+                      onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, getAuthorDetails(selected.author).id)}
                     >
                       {getAuthorDetails(selected.author).name}
                     </div>
@@ -940,7 +956,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                   variant="outline"
                   className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
                 >
-                  {skill}
+                  {typeof skill === 'string' ? skill : skill.name || skill.expertise || 'Unknown Skill'}
                 </Badge>
               ))}
             </div>

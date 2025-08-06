@@ -20,7 +20,7 @@ export const WhatWeProvide = () => {
         `Enterprise-grade encryption keeps all your work and IP protected.
         <ul style="list-style-type: disc; padding-left: 1rem; margin-top: 0.5rem;">
           <li>End to End data protection</li>
-          <li>regular Security Alerts</li>
+          <li>Regular Security Alerts</li>
           <li>Secure Cloud Infrastructure</li>
           <li>Role Base Access Control</li>
           <li>Encrypted File Storage</li>
@@ -70,10 +70,10 @@ export const WhatWeProvide = () => {
         <ul style="list-style-type: disc; padding-left: 1rem; margin-top: 0.5rem;">
           <li>Skill specific learning paths</li>
           <li>Expert-led masterclasses</li>
-          <li>Recognised Certifications</li>
+          <li>Recognized Certifications</li>
           <li>Regularly updated content</li>
-          <li>Weekly webinars & live QnA</li>
-          <li>Hands on project exaples</li>
+          <li>Weekly webinars & live Q&A</li>
+          <li>Hands on project examples</li>
         </ul>`,
       color: "bg-pink-500",
       rowSpan: "row-span-2",
