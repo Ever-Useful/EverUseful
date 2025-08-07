@@ -7,6 +7,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import userService from '@/services/userService';
 import toast from 'react-hot-toast';
+import { DropdownWithOther } from './ui/dropdown-with-other';
+import { getDropdownOptions, getCountryCodeOptions, getDesignationOptions } from '../utils/dropdownUtils';
 
 interface EditProfileSidebarProps {
   onClose: () => void;
@@ -82,6 +84,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     username: '',
     email: '',
     mobile: '',
+    countryCode: '+91',
     gender: '',
     domain: '',
     startYear: '',
@@ -183,6 +186,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           username: authData?.username || '',
           email: authData?.email || storedEmail || '',
           mobile: authData?.mobile || authData?.phoneNumber || storedPhone || '',
+          countryCode: '+91',
           gender: authData?.gender || userProfileData?.gender || '',
           domain: authData?.domain || userProfileData?.domain || '',
           startYear: studentInfo?.startYear || '',
@@ -638,28 +642,29 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                     <div>
                       <label className="text-sm font-medium text-gray-700">Mobile <span className="text-red-500">*</span></label>
                       <div className="flex gap-2 mt-1">
-                        <select className="border rounded-md px-2 py-1 text-sm bg-white">
-                          <option value="+91">+91</option>
-                          <option value="+1">+1</option>
-                          <option value="+44">+44</option>
+                        <select 
+                          className="border rounded-md px-2 py-1 text-sm bg-white w-32"
+                          value={profileData.countryCode ?? '+91'}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, countryCode: e.target.value }))}
+                        >
+                          {getCountryCodeOptions().map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
                         </select>
-                        <Input name="mobile" value={profileData.mobile ?? ''} onChange={handleInputChange} className="flex-1" />
+                        <Input name="mobile" value={profileData.mobile ?? ''} onChange={handleInputChange} className="flex-1" placeholder="Enter mobile number" />
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Gender <span className="text-red-500">*</span></label>
-                      <div className="flex gap-3 mt-1">
-                        {['Male', 'Female', 'Others'].map(gender => (
-                          <button
-                            key={gender}
-                            type="button"
-                            className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${profileData.gender === gender ? 'bg-blue-50 border-blue-600 text-blue-900' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}
-                            onClick={() => setProfileData(prev => ({ ...prev, gender }))}
-                          >
-                            {gender}
-                          </button>
-                        ))}
-                      </div>
+                      <DropdownWithOther
+                        label="Gender"
+                        options={getDropdownOptions('genders')}
+                        value={profileData.gender ?? ''}
+                        onChange={(value) => setProfileData(prev => ({ ...prev, gender: value }))}
+                        placeholder="Select Gender"
+                        required={true}
+                      />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Date of Birth</label>
@@ -696,24 +701,24 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   {profileData.userType === 'Students' && (
                     <div className="space-y-6">
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Course <span className="text-red-500">*</span></label>
-                        <select name="course" value={profileData.course ?? ''} onChange={handleSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Course</option>
-                          <option value="B.Tech/BE">B.Tech/BE (Bachelor of Technology / Bachelor of Engineering)</option>
-                          <option value="B.Sc">B.Sc</option>
-                          <option value="MBA">MBA</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Course"
+                          options={getDropdownOptions('courses')}
+                          value={profileData.course ?? ''}
+                          onChange={(value) => setProfileData(prev => ({ ...prev, course: value }))}
+                          placeholder="Select Course"
+                          required={true}
+                        />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Course Specialization <span className="text-red-500">*</span></label>
-                        <select name="specialization" value={profileData.specialization ?? ''} onChange={handleSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Specialization</option>
-                          <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                          <option value="Electronics">Electronics</option>
-                          <option value="Mechanical">Mechanical</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Course Specialization"
+                          options={getDropdownOptions('courseSpecializations')}
+                          value={profileData.specialization ?? ''}
+                          onChange={(value) => setProfileData(prev => ({ ...prev, specialization: value }))}
+                          placeholder="Select Specialization"
+                          required={true}
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -729,19 +734,14 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         <Input name="college" value={profileData.college ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Purpose <span className="text-red-500">*</span></label>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {['To find a Job', 'Compete & Upskill', 'To Host an Event', 'To be a Mentor'].map(purpose => (
-                            <button
-                              key={purpose}
-                              type="button"
-                              className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${profileData.purpose === purpose ? 'bg-blue-50 border-blue-600 text-blue-900' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}
-                              onClick={() => setProfileData(prev => ({ ...prev, purpose }))}
-                            >
-                              {purpose}
-                            </button>
-                          ))}
-                        </div>
+                        <DropdownWithOther
+                          label="Purpose"
+                          options={getDropdownOptions('purposes')}
+                          value={profileData.purpose ?? ''}
+                          onChange={(value) => setProfileData(prev => ({ ...prev, purpose: value }))}
+                          placeholder="Select Purpose"
+                          required={true}
+                        />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Select Role</label>
@@ -759,20 +759,37 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   {profileData.userType === 'Professors' && (
                     <div className="space-y-6">
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Department <span className="text-red-500">*</span></label>
-                        <Input name="department" value={profileData.department ?? ''} onChange={handleInputChange} className="mt-1" />
+                        <DropdownWithOther
+                          label="Department"
+                          options={getDropdownOptions('departments')}
+                          value={profileData.department ?? ''}
+                          onChange={(value) => setProfileData(prev => ({ ...prev, department: value }))}
+                          placeholder="Select Department"
+                          required={true}
+                        />
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Designation <span className="text-red-500">*</span></label>
-                        <Input name="designation" value={profileData.designation ?? ''} onChange={handleInputChange} className="mt-1" />
-                      </div>
+                                              <div>
+                          <DropdownWithOther
+                            label="Designation"
+                            options={getDesignationOptions(profileData.userType)}
+                            value={profileData.designation ?? ''}
+                            onChange={(value) => setProfileData(prev => ({ ...prev, designation: value }))}
+                            placeholder="Select Designation"
+                            required={true}
+                          />
+                        </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">College/University <span className="text-red-500">*</span></label>
                         <Input name="college" value={profileData.college ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Research Interests</label>
-                        <Input name="researchInterests" value={profileData.researchInterests ?? ''} onChange={handleInputChange} className="mt-1" />
+                        <DropdownWithOther
+                          label="Research Interests"
+                          options={getDropdownOptions('researchInterests')}
+                          value={profileData.researchInterests ?? ''}
+                          onChange={(value) => setProfileData(prev => ({ ...prev, researchInterests: value }))}
+                          placeholder="Select Research Interests"
+                        />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Location <span className="text-red-500">*</span></label>
@@ -898,35 +915,34 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   {showEducationForm ? (
                     <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSaveEducation(); }}>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Qualification <span className="text-red-500">*</span></label>
-                        <select name="qualification" value={educationForm.qualification ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Qualification</option>
-                          <option value="PhD">PhD</option>
-                          <option value="Post Graduation">Post Graduation</option>
-                          <option value="Graduation">Graduation</option>
-                          <option value="Intermediate (12th)">Intermediate (12th)</option>
-                          <option value="High School (10th)">High School (10th)</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Qualification"
+                          options={getDropdownOptions('qualifications')}
+                          value={educationForm.qualification ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, qualification: value }))}
+                          placeholder="Select Qualification"
+                          required={true}
+                        />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Course <span className="text-red-500">*</span></label>
-                        <select name="course" value={educationForm.course ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Course</option>
-                          <option value="B.Tech/BE">B.Tech/BE (Bachelor of Technology / Bachelor of Engineering)</option>
-                          <option value="B.Sc">B.Sc</option>
-                          <option value="MBA">MBA</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Course"
+                          options={getDropdownOptions('courses')}
+                          value={educationForm.course ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, course: value }))}
+                          placeholder="Select Course"
+                          required={true}
+                        />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Specialization <span className="text-red-500">*</span></label>
-                        <select name="specialization" value={educationForm.specialization ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Specialization</option>
-                          <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                          <option value="Electronics">Electronics</option>
-                          <option value="Mechanical">Mechanical</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Specialization"
+                          options={getDropdownOptions('courseSpecializations')}
+                          value={educationForm.specialization ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, specialization: value }))}
+                          placeholder="Select Specialization"
+                          required={true}
+                        />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">College <span className="text-red-500">*</span></label>
@@ -943,13 +959,13 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Course Type</label>
-                        <select name="courseType" value={educationForm.courseType ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Course Type</option>
-                          <option value="Full Time">Full Time</option>
-                          <option value="Part Time">Part Time</option>
-                          <option value="Distance">Distance</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Course Type"
+                          options={getDropdownOptions('courseTypes')}
+                          value={educationForm.courseType ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, courseType: value }))}
+                          placeholder="Select Course Type"
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -967,12 +983,13 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                           <Input name="rollNumber" value={educationForm.rollNumber ?? ''} onChange={handleEducationInputChange} className="mt-1" placeholder="Roll number" />
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-700">Are you a Lateral Entry Student?</label>
-                          <select name="lateralEntry" value={educationForm.lateralEntry ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                            <option value="">Lateral entry</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                          </select>
+                          <DropdownWithOther
+                            label="Are you a Lateral Entry Student?"
+                            options={getDropdownOptions('lateralEntryOptions')}
+                            value={educationForm.lateralEntry ?? ''}
+                            onChange={(value) => setEducationForm(prev => ({ ...prev, lateralEntry: value }))}
+                            placeholder="Select Lateral Entry Status"
+                          />
                         </div>
                       </div>
                       <div>
@@ -1027,30 +1044,28 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   {showWorkForm ? (
                     <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSaveWork(); }}>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Designation <span className="text-red-500">*</span></label>
-                        <select name="designation" value={workForm.designation ?? ''} onChange={handleWorkSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Designation</option>
-                          <option value="Software Engineer">Software Engineer</option>
-                          <option value="Research Intern">Research Intern</option>
-                          <option value="Product Manager">Product Manager</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Designation"
+                          options={getDesignationOptions(profileData.userType)}
+                          value={workForm.designation ?? ''}
+                          onChange={(value) => setWorkForm(prev => ({ ...prev, designation: value }))}
+                          placeholder="Select Designation"
+                          required={true}
+                        />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Organisation <span className="text-red-500">*</span></label>
                         <Input name="organization" value={workForm.organization ?? ''} onChange={handleWorkInputChange} className="mt-1" placeholder="Select Organisation" />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Employment Type <span className="text-red-500">*</span></label>
-                        <select name="employmentType" value={workForm.employmentType ?? ''} onChange={handleWorkSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Employment Type</option>
-                          <option value="Full Time">Full Time</option>
-                          <option value="Part Time">Part Time</option>
-                          <option value="Internship">Internship</option>
-                          <option value="Contract">Contract</option>
-                          <option value="Freelance">Freelance</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Employment Type"
+                          options={getDropdownOptions('employmentTypes')}
+                          value={workForm.employmentType ?? ''}
+                          onChange={(value) => setWorkForm(prev => ({ ...prev, employmentType: value }))}
+                          placeholder="Select Employment Type"
+                          required={true}
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-4 items-end">
                         <div>
