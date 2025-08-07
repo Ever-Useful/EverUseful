@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -13,8 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Github, Linkedin, Shield, Smartphone, Mail, Check, Phone } from "lucide-react";
 import { auth, handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "@/lib/firebase";
 import { sendEmailVerification, RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail } from "firebase/auth";
-import { userService } from '@/services/userService';
-import { firestoreService } from '@/services/firestoreService';
+import userService from '@/services/userService';
 import Logo from '../assets/Logo/Logo Side.png'
 
 // Extend the Window interface to include confirmationResult
@@ -149,16 +148,10 @@ const SignIn = () => {
         }
       }
 
-      // Save backend customUserId in Firestore
+      // User data is now saved in DynamoDB via backend
       const user = auth.currentUser;
       if (user && backendUser) {
-        await firestoreService.setCurrentUserData({
-          customUserId: backendUser.customUserId,
-          name: user.displayName || null,
-          email: user.email || null,
-          userType: backendUser.auth?.userType || userType, // Use the actual userType from backend
-          createdAt: user.metadata?.creationTime || new Date().toISOString(),
-        });
+        // User profile is now directly saved in DynamoDB via backend
       }
 
       // Set localStorage to indicate user is logged in
@@ -835,19 +828,16 @@ const SignIn = () => {
               <div className="flex items-center space-x-1 flex-shrink-0">
                 <Link to="/" className="flex items-center space-x-2 group">
                   <img src={Logo} alt="AMOGH" className="h-10 xs:h-14 w-auto md:h-8" />
-                  <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
-                    beta
-                  </div>
                 </Link>
               </div>
               <div className="text-center">
-                <h1 className="text-xl xs:text-2xl lg:text-5xl font-bold text-gray-900 mb-2 xs:mb-4 lg:mb-4 leading-tight">
+                <h1 className="text-4xl font-bold text-gray-900 mb-2 xs:mb-4 lg:mb-4 leading-tight mobile-text-4xl">
                   Welcome Back to
                   <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Innovation
                   </span>
                 </h1>
-                <p className="text-xs xs:text-sm lg:text-xl text-gray-600 leading-relaxed mb-2 xs:mb-4 lg:mb-4">
+                <p className="text-base text-gray-600 leading-relaxed mb-2 xs:mb-4 lg:mb-4 mobile-text-base">
                   Continue your journey of building the future with cutting-edge projects and collaborations.
                 </p>
                 <div className="flex items-center justify-center space-x-2">

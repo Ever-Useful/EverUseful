@@ -3,6 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
+import Students from "../assets/images/Students.jpeg";
+import PhD from "../assets/images/phdscholars.jpeg";
+import Professors from "../assets/images/professors.jpeg";
+import Business from "../assets/images/Business.jpeg";
+
 
 type Option = {
   id: number;
@@ -15,32 +20,28 @@ type Option = {
 const OPTIONS: Option[] = [
   {
     id: 1,
-    imageUrl:
-      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80", // student studying
-    label: "Students",
+    imageUrl: Students,
     description: "Join peer communities & showcase projects",
     iconClass: "fas fa-user-graduate",
+    label: "Students"
   },
   {
     id: 2,
-    imageUrl:
-      "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?auto=format&fit=crop&w=800&q=80", // scientist in lab
-    label: "PhD Holders",
+    imageUrl: PhD,
     description: "Collaborate on research & funding",
     iconClass: "fas fa-flask",
+    label: "PhD"
   },
   {
     id: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80", // professor lecturing
+    imageUrl: Professors,
     label: "Professors",
     description: "Share knowledge & mentor next gen",
     iconClass: "fas fa-chalkboard-teacher",
   },
   {
     id: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80", // business meeting
+    imageUrl: Business,
     label: "Business",
     description: "Discover solutions & partnerships",
     iconClass: "fas fa-briefcase",
@@ -64,8 +65,8 @@ export const Hero = () => {
         `}
       </style>
 
-      <section className="relative overflow-hidden py-20 sm:py-16 bg-[#0a0f24]">
-        {/* Simplified background layers - reduced complexity */}
+      <section className="relative overflow-hidden py-14 sm:py-16 bg-[#0a0f24]">
+        {/* Background */}
         <div
           className="absolute inset-0 opacity-20"
           style={{
@@ -74,13 +75,14 @@ export const Hero = () => {
           }}
         />
 
-        <div className="container relative mx-auto px-4 sm:px-6 lg:px-32 z-10">
-          {/* FLEX ROW for desktop, COLUMN for mobile */}
+        <div className="container relative mx-auto px-2 sm:px-6 lg:px-32 z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             {/* LEFT: Text + Button */}
-            <div className="w-full lg:w-1/3 text-center lg:text-left">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-4 animate-fade-in">
+
+            <div className="w-full lg:w-1/3 text-center lg:text-left mb-10 lg:mb-0">
+              <h1 className="text-[17px] sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight mobile-text-4xl">
                 Connect{" "}
+
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
                   Innovation
                 </span>{" "}
@@ -89,18 +91,18 @@ export const Hero = () => {
                   Opportunity
                 </span>
               </h1>
-              <p className="text-base sm:text-lg text-gray-300 mb-16 max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200">
+              <p className="text-[12px] sm:text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
                 A platform where students, PhD holders, professors, and
-                businesses collaborate to transform ideas into real‐world impact.
+                businesses collaborate to transform ideas into real-world impact.
                 Join the future of collaborative innovation today.
               </p>
               <div className="flex justify-center lg:justify-start animate-fade-in delay-300">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base transform transition-all duration-300 hover:scale-105 shadow-lg"
+                  className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
                   asChild
                 >
-                  <Link to="/signup">
+                  <Link to="/signup" className="font-bold flex items-center justify-center">
                     <Rocket className="mr-2 w-5 h-5" />
                     Get Started
                     <ArrowRight className="ml-2 w-5 h-5" />
@@ -111,10 +113,9 @@ export const Hero = () => {
 
             {/* RIGHT: Gallery */}
             <div className="w-full lg:w-2/3 flex items-center justify-center">
-              {/* Desktop: optimized animated cards */}
+              {/* Desktop: animated cards */}
               <div className="hidden lg:flex overflow-visible w-full h-[560px] py-[40px]">
                 {OPTIONS.map((opt) => {
-                  // Simplified animation logic
                   const isOdd = opt.id % 2 !== 0;
                   const animationName = isOdd ? "float-down" : "float-up";
                   return (
@@ -146,9 +147,7 @@ export const Hero = () => {
                         willChange: "transform",
                       }}
                     >
-                      {/* Use img tag for accessibility and lazy loading */}
-                      <img src={opt.imageUrl} alt={opt.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-0" />
-                      {/* Simplified shadow overlay */}
+                      <img src={opt.imageUrl} alt={opt.label} className="absolute inset-0 w-full h-full object-cover opacity-0" />
                       <div
                         className="
                           absolute
@@ -166,7 +165,6 @@ export const Hero = () => {
                             "inset 0 -80px 80px -80px rgba(0,0,0,0.8)",
                         }}
                       />
-                      {/* Label & Icon */}
                       <div
                         className="
                           absolute
@@ -183,12 +181,12 @@ export const Hero = () => {
                         "
                       >
                         <div className="flex items-center text-white">
-                          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">
+                          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3 group-hover:mr-3 -translate-y-5">
                             <i className={`${opt.iconClass} text-sm`}></i>
                           </div>
-                          <div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out">
                             <div className="font-bold text-sm">{opt.label}</div>
-                            <div className="text-xs opacity-80 max-w-0 group-hover:max-w-[200px] transition-all duration-500 ease-out overflow-hidden">
+                            <div className="text-xs opacity-80 max-w-[200px] transition-all duration-500 ease-out overflow-hidden">
                               {opt.description}
                             </div>
                           </div>
@@ -199,23 +197,33 @@ export const Hero = () => {
                 })}
               </div>
 
-              {/* Mobile: simplified static cards */}
-              <div className="lg:hidden grid grid-cols-2 gap-4 w-full">
-                {OPTIONS.map((opt) => (
-                  <div
-                    key={opt.id}
-                    className="relative h-48 rounded-2xl overflow-hidden bg-center bg-cover"
-                    style={{
-                      backgroundImage: `url(${opt.imageUrl})`,
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <div className="font-bold">{opt.label}</div>
-                      <div className="text-sm opacity-80">{opt.description}</div>
+              {/* Mobile: disoriented flexbox focusing on labels */}
+              <div className="lg:hidden w-full">
+                <div className="grid grid-cols-2 gap-3 p-4">
+                  {OPTIONS.map((opt, index) => (
+                    <div
+                      key={opt.id}
+                      className={`
+                        relative h-32 rounded-xl overflow-hidden
+                      `}
+                    >
+                      <img
+                        src={opt.imageUrl}
+                        alt={opt.label}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/50" />
+                      <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white p-3">
+                        <div className="font-bold text-lg sm:text-xl mb-1 leading-tight">
+                          {opt.label}
+                        </div>
+                        <div className="text-xs sm:text-sm opacity-90 text-center leading-tight">
+                          {opt.description}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>

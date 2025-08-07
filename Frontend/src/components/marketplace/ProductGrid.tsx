@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,12 +21,12 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useAuthState } from "../../hooks/useAuthState";
-import { firestoreService } from "../../services/firestoreService";
-import { userService } from "../../services/userService";
+import userService from "../../services/userService";
 import { toast } from "sonner";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Project {
   id: number;
@@ -98,6 +98,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
   const [authorCache, setAuthorCache] = useState<Record<string, any>>({});
   const [currentUserCustomId, setCurrentUserCustomId] = useState<string | null>(null);
   const [authorsLoading, setAuthorsLoading] = useState(false);
+  const isFetchingAuthors = useRef(false);
 
   // Mobile specific states
   const [showSortTab, setShowSortTab] = useState(false);
@@ -125,12 +126,13 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     const fetchCurrentUserData = async () => {
       if (user) {
         try {
-          const userData = await firestoreService.getCurrentUserData();
+          const userData = await userService.getUserProfile();
           if (userData && userData.customUserId) {
             setCurrentUserCustomId(userData.customUserId);
           }
         } catch (error) {
           console.error('Error fetching current user data:', error);
+          // Don't throw error if user is not authenticated - this is expected for non-logged in users
         }
       }
     };
@@ -185,14 +187,15 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         
         queryParams.append('limit', optimalLimit.toString());
 
-        const response = await fetch(`http://localhost:3000/api/marketplace/projects?${queryParams}`);
+        const response = await fetch(`${API_ENDPOINTS.MARKETPLACE_PROJECTS}?${queryParams}`);
         if (!response.ok) throw new Error('Failed to fetch projects');
         
         const data = await response.json();
         setProjects(data.projects);
         setPagination(data.pagination);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setError('Failed to load projects');
       } finally {
         setLoading(false);
       }
@@ -211,55 +214,141 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     return uniqueAuthorIds.filter(id => id && !authorCache[id]);
   }, [uniqueAuthorIds, authorCache]);
 
-  // Fetch author details for all projects using bulk endpoint
+  // Fetch author details for each project individually (like ProductDisplay.tsx)
   useEffect(() => {
     const fetchAuthors = async () => {
       if (uncachedAuthorIds.length === 0) return;
+      if (isFetchingAuthors.current) return; // Prevent multiple simultaneous calls
       
+      // Add a small delay to prevent rapid API calls
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      isFetchingAuthors.current = true;
       try {
         setAuthorsLoading(true);
-        const response = await fetch(`http://localhost:3000/api/users/bulk/${uncachedAuthorIds.join(',')}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data) {
-            setAuthorCache(prevCache => ({
-              ...prevCache,
-              ...data.data
-            }));
+        
+        // Fetch each author individually like ProductDisplay.tsx does
+        for (const authorId of uncachedAuthorIds) {
+          try {
+            const response = await fetch(API_ENDPOINTS.USER_BY_ID(authorId));
+            if (response.ok) {
+              const authorData = await response.json();
+              if (authorData.data) {
+                setAuthorCache(prevCache => ({
+                  ...prevCache,
+                  [authorId]: authorData.data
+                }));
+              }
+            }
+          } catch (error) {
+            console.error(`Error fetching author ${authorId}:`, error);
           }
         }
       } catch (error) {
-        console.error('Error fetching authors in bulk:', error);
+        console.error('Error fetching authors:', error);
       } finally {
         setAuthorsLoading(false);
+        isFetchingAuthors.current = false;
       }
     };
     
     fetchAuthors();
   }, [uncachedAuthorIds]);
 
-  // Helper to get author details with loading state
-  const getAuthorDetails = (authorId: string) => {
-    const user = authorCache[authorId as keyof typeof authorCache];
-    if (!user) {
-      return { 
-        name: authorsLoading ? 'Loading...' : 'Unknown', 
-        image: NoUserProfile, 
-        userType: '', 
-        id: authorId,
-        isLoading: authorsLoading
+
+
+  // Stable author details - only recalculate when authorCache actually changes
+  const authorDetailsMap = useMemo(() => {
+    const detailsMap: Record<string, { name: string; image: string; userType: string; id: string; isLoading: boolean }> = {};
+    
+    // Get all unique author IDs from projects
+    const allAuthorIds = [...new Set(projects.map(project => project.author))];
+    
+    allAuthorIds.forEach(authorId => {
+      const user = authorCache[authorId as keyof typeof authorCache];
+      
+      if (!user) {
+        detailsMap[authorId] = { 
+          name: 'username', 
+          image: NoUserProfile, 
+          userType: '', 
+          id: authorId,
+          isLoading: false
+        };
+        return;
+      }
+      
+      // Extract data from the proper structure - handle multiple response formats
+      const auth = user.auth || user.data?.auth || {};
+      const profile = user.profile || user.data?.profile || {};
+      
+      // Try multiple sources for the name with better priority
+      let name = '';
+      
+      // First priority: firstName + lastName from auth
+      if (auth.firstName || auth.lastName) {
+        name = `${auth.firstName || ''} ${auth.lastName || ''}`.trim();
+      }
+      // Second priority: firstName + lastName from profile
+      else if (profile.firstName || profile.lastName) {
+        name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
+      }
+      // Third priority: username from auth
+      else if (auth.username) {
+        name = auth.username;
+      }
+      // Fourth priority: username from profile
+      else if (profile.username) {
+        name = profile.username;
+      }
+      // Fifth priority: email username from auth
+      else if (auth.email) {
+        name = auth.email.split('@')[0];
+      }
+      // Sixth priority: email username from profile
+      else if (profile.email) {
+        name = profile.email.split('@')[0];
+      }
+      // Seventh priority: direct name field
+      else if (user.name) {
+        name = user.name;
+      }
+      // Eighth priority: direct username field
+      else if (user.username) {
+        name = user.username;
+      }
+      
+      // Get userType with fallbacks
+      const userType = profile.userType || auth.userType || user.userType || '';
+      
+      // Get avatar with fallback
+      const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
+      
+      // Get customUserId with fallback - this is the ID we'll use for navigation
+      const customUserId = user.customUserId || user.data?.customUserId || user.id || authorId;
+      
+      detailsMap[authorId] = {
+        name: name || 'username',
+        image: avatar,
+        userType: userType,
+        id: customUserId, // Use customUserId for navigation
+        isLoading: false
       };
-    }
-    const auth = user.auth || {};
-    const profile = user.profile || {};
-    return {
-      name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Unnamed User',
-      image: profile.avatar || NoUserProfile,
-      userType: profile.userType || auth.userType || '',
-      id: user.customUserId,
+    });
+    
+    return detailsMap;
+  }, [authorCache]); // Only depend on authorCache, not projects
+
+  // Stable getAuthorDetails function
+  const getAuthorDetails = useCallback((authorId: string) => {
+    return authorDetailsMap[authorId] || { 
+      name: 'username', 
+      image: NoUserProfile, 
+      userType: '', 
+      id: authorId,
       isLoading: false
     };
-  };
+  }, [authorDetailsMap]);
 
   // Skeleton loader for author details
   const AuthorSkeleton = () => (
@@ -302,10 +391,12 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
 
     return (
       <div className="w-full flex items-center justify-center mt-8">
-        <div className="flex items-center justify-center space-x-2 p-2">
+        <div
+          className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 px-1 sm:px-2 py-1 sm:py-2 w-full max-w-full"
+        >
           <Button
             variant="outline"
-            className="w-8 h-8 p-0"
+            className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={!pagination.hasPrevPage}
           >
@@ -315,7 +406,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
             <>
               <Button
                 variant="outline"
-                className="w-8 h-8 p-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
                 onClick={() => handlePageChange(1)}
               >
                 1
@@ -329,7 +420,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               {endPage < pagination.totalPages - 1 && <span className="text-gray-500">...</span>}
               <Button
                 variant="outline"
-                className="w-8 h-8 p-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
                 onClick={() => handlePageChange(pagination.totalPages)}
               >
                 {pagination.totalPages}
@@ -338,7 +429,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
           )}
           <Button
             variant="outline"
-            className="w-8 h-8 p-0"
+            className="w-7 h-7 sm:w-8 sm:h-8 p-0 min-w-0"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={!pagination.hasNextPage}
           >
@@ -363,12 +454,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       };
 
       // Increment the view count
-      const viewResponse = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}/view`, {
+      const viewResponse = await fetch(API_ENDPOINTS.MARKETPLACE_VIEW(projectId.toString()), {
         method: 'POST',
         headers
       });
       
-      if (!viewResponse.ok) throw new Error('Failed to increment view count');
+      if (viewResponse.ok) {
+        console.log('View recorded successfully');
+      }
       
       // Update the project views in the local state
       setProjects(prevProjects =>
@@ -386,14 +479,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     }
   };
 
-  const handleFavorite = async (projectId: number) => {
+  const handleFavorite = async (projectId: string) => {
     if (!user || !token) {
       setShowPopupMenu(true);
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}/favorite`, {
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_FAVORITE(projectId.toString()), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -408,7 +501,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       
       setProjects(prevProjects =>
         prevProjects.map(project =>
-          project.id === projectId
+          project.id === parseInt(projectId, 10) // Ensure projectId is number for comparison
             ? {
                 ...project,
                 isFavorited: data.isFavorited
@@ -428,19 +521,22 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     }
 
     try {
-      // Get user data from Firestore to get customUserId
-      const firestoreData = await firestoreService.getCurrentUserData();
-      if (!firestoreData) {
+      // Get user data from backend to get customUserId
+      const userData = await userService.getUserProfile();
+      if (!userData) {
         toast.error('User data not found');
         return;
       }
 
-      // Add project to cart in userData.json (only productId, addedAt, quantity)
-      await userService.addToCart(firestoreData.customUserId, {
-        productId: projectId.toString(),
-        addedAt: new Date().toISOString(),
-        quantity: 1
-      });
+      // Find the project data
+      const project = projects.find(p => p.id === projectId);
+      if (!project) {
+        toast.error('Project not found');
+        return;
+      }
+
+      // Add project to cart
+      await userService.addItemToCart(project.id.toString());
       
       toast.success('Project added to cart successfully');
     } catch (error) {
@@ -471,10 +567,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     else if (type === 'freelancer') {
       navigate(`/freelancerprofile/${id}`);
     } 
+    // Check if user type is business
+    else if (type === 'business') {
+      navigate(`/businessprofile/${id}`);
+    }
     // Default fallback to student profile for unknown user types
     else {
       console.warn(`Unknown user type: ${userType}, redirecting to student profile`);
-      // navigate(`/studentprofile/${id}`);
+      navigate(`/studentprofile/${id}`);
     }
   };
 
@@ -543,17 +643,32 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                       <span className="text-gray-700 text-[6px]">{project.views}</span>
                     </div>
                   </div>
-                  <h3 className="font-semibold text-xs text-gray-900 break-words whitespace-normal mb-1">
+                  <h3
+                    className="font-semibold text-xs text-gray-900 break-words whitespace-normal line-clamp-2"
+                    style={{ wordBreak: "break-word" }}
+                  >
                     {project.title}
                   </h3>
                   <div className="flex items-center gap-2 mb-1">
                     <img
                       src={getAuthorDetails(project.author).image || NoUserProfile}
                       alt={getAuthorDetails(project.author).name}
-                      className="w-5 h-5 rounded-full border border-gray-200"
+                      className="w-5 h-5 rounded-full border border-gray-200 cursor-pointer"
                       onError={e => { e.currentTarget.src = NoUserProfile; }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
+                      }}
                     />
-                    <span className="text-[10px] text-gray-700 truncate">{getAuthorDetails(project.author).name}</span>
+                    <span 
+                      className="text-[10px] text-gray-700 truncate cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
+                      }}
+                    >
+                      {getAuthorDetails(project.author).name}
+                    </span>
                     <span className="flex items-center gap-0.5 text-[10px] text-yellow-500">
                       <Star className="w-3 h-3 fill-yellow-400" />
                       {project.rating}
@@ -561,16 +676,16 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1 mb-1">
-                    {project.skills.slice(0, 2).map((skill, index) => (
+                    {project.skills && project.skills.slice(0, 2).map((skill, index) => (
                       <Badge
                         key={index}
                         variant="outline"
                         className="text-[8px] border-gray-200 text-gray-600 bg-gray-100 font-medium px-1 py-1 "
                       >
-                        {skill}
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                       </Badge>
                     ))}
-                    {project.skills.length > 2 && (
+                    {project.skills && project.skills.length > 2 && (
                       <span className="text-[10px] text-gray-400">+{project.skills.length - 2} more</span>
                     )}
                   </div>
@@ -625,7 +740,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                       className="w-7 h-7 p-0 bg-white/70 hover:bg-white/90 shadow"
                       onClick={e => {
                         e.stopPropagation();
-                        handleFavorite(project.id);
+                        handleFavorite(project.id.toString());
                       }}
                     >
                       <Heart className={`w-4 h-4 ${project.isFavorited ? 'fill-pink-500 text-pink-500' : 'text-pink-500'}`} />
@@ -647,14 +762,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                         alt={getAuthorDetails(project.author).name}
                         className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
                         onError={e => { e.currentTarget.src = NoUserProfile; }}
-                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id)}
                       />
                       <span
                         className="text-gray-700 text-xs cursor-pointer"
                         style={{ transition: 'color 0.2s' }}
                         onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
                         onMouseOut={e => e.currentTarget.style.color = ''}
-                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id)}
                       >
                         {getAuthorDetails(project.author).name}
                       </span>
@@ -667,23 +782,24 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                   )}
 
                   <h3
-                    className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors cursor-pointer"
+                    className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors cursor-pointer break-words whitespace-normal line-clamp-2"
+                    style={{ wordBreak: "break-word" }}
                     onClick={() => setSelected(project)}
                   >
                     {project.title}
                   </h3>
 
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {project.skills.slice(0, 3).map((skill, index) => (
+                      {Array.isArray(project.skills) && project.skills.slice(0, 3).map((skill, index) => (
                         <Badge
                           key={index}
                           variant="outline"
                           className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
                         >
-                          {skill}
+                          {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                         </Badge>
                       ))}
-                      {project.skills.length > 3 && (
+                      {Array.isArray(project.skills) && project.skills.length > 3 && (
                       <Badge
                         variant="outline"
                         className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
@@ -799,7 +915,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     alt={getAuthorDetails(selected.author).name}
                     className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
                     onError={e => { e.currentTarget.src = NoUserProfile; }}
-                    onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
+                    onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, getAuthorDetails(selected.author).id)}
                   />
                   <div>
                     <div
@@ -807,7 +923,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                       style={{ transition: 'color 0.2s' }}
                       onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
                       onMouseOut={e => e.currentTarget.style.color = ''}
-                      onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
+                      onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, getAuthorDetails(selected.author).id)}
                     >
                       {getAuthorDetails(selected.author).name}
                     </div>
@@ -834,18 +950,18 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
 
             <h3 className="text-lg font-bold text-gray-900 mb-2">{selected.title}</h3>
             <div className="flex flex-wrap gap-1 mb-3">
-              {selected.skills.map((skill, idx) => (
+              {selected.skills && selected.skills.map((skill, idx) => (
                 <Badge
                   key={idx}
                   variant="outline"
                   className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
                 >
-                  {skill}
+                  {typeof skill === 'string' ? skill : skill.name || skill.expertise || 'Unknown Skill'}
                 </Badge>
               ))}
             </div>
             <div className="flex flex-wrap gap-1 mb-3">
-              {selected.tags.map((tag, idx) => (
+              {selected.tags && selected.tags.map((tag, idx) => (
                 <Badge key={idx} className="bg-blue-50 text-blue-700 text-[10px] font-medium rounded">
                   #{tag}
                 </Badge>

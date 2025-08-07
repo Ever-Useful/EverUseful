@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import StatsCard from "@/components/dashboard/StatsCards";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Users, TrendingUp, DollarSign, Settings, LogOut, BarChart2, Megaphone, Shield, FileWarning, FolderKanban, CheckCircle2, AlertTriangle, UserPlus, UserX, Server, Activity } from "lucide-react";
-import { getAdminOverview } from "@/services/userService";
+import userService from "@/services/userService";
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Area } from "recharts";
 
 const Admin = () => {
@@ -52,7 +52,7 @@ const Admin = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getAdminOverview();
+        const data = await userService.getAdminOverview();
         setStats([
           { title: "Total Users", value: data.totalUsers, change: "+12%", icon: Users },
           { title: "Total Projects", value: data.totalProjects, change: "+8%", icon: TrendingUp },

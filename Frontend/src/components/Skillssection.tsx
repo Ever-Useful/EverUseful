@@ -6,10 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { auth } from '@/lib/firebase';
+// Removed Firestore imports - using DynamoDB now
 import { toast } from 'react-hot-toast';
-import { userService } from "@/services/userService";
+import userService from "@/services/userService";
 
 interface Skill {
   name: string;
@@ -75,30 +75,11 @@ const SkillsSection = () => {
         }
         
         // Load from backend using token-based authentication
-        try {
-          const backendSkills = await userService.getUserSkills();
-          if (backendSkills && Array.isArray(backendSkills)) {
-            setSkills(backendSkills);
-          } else {
-            setSkills([]);
-          }
-        } catch (backendError) {
-          console.error('Failed to load backend skills:', backendError);
-          
-          // Fallback to Firestore if backend fails
-          try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              const firestoreSkills = userData.skills || [];
-              setSkills(firestoreSkills);
-            } else {
-              setSkills([]);
-            }
-          } catch (firestoreError) {
-            console.error('Failed to load Firestore skills:', firestoreError);
-            setSkills([]);
-          }
+        const backendSkills = await userService.getUserSkills();
+        if (backendSkills && Array.isArray(backendSkills)) {
+          setSkills(backendSkills);
+        } else {
+          setSkills([]);
         }
       } catch (error) {
         console.error('Failed to load skills:', error);
@@ -127,38 +108,11 @@ const SkillsSection = () => {
     
     try {
       // Add to backend using token-based authentication
-      try {
-        await userService.addSkill({ name: skillName });
-        
-        // Update local state
-        setSkills(prev => [...prev, skillName]);
-        toast.success('Skill added successfully!');
-      } catch (backendError) {
-        console.error('Failed to add skill to backend:', backendError);
-        
-        // Fallback to Firestore if backend fails
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        let currentSkills: string[] = [];
-        
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          currentSkills = userData.skills || [];
-        }
-        
-        // Add skill if not already present
-        if (!currentSkills.includes(skillName)) {
-          const updatedSkills = [...currentSkills, skillName];
-          await updateDoc(doc(db, "users", user.uid), {
-            skills: updatedSkills,
-            updatedAt: new Date().toISOString()
-          });
-          
-          setSkills(updatedSkills);
-          toast.success('Skill added successfully!');
-        } else {
-          toast.error('Skill already exists');
-        }
-      }
+      await userService.addSkill({ name: skillName });
+      
+      // Update local state
+      setSkills(prev => [...prev, skillName]);
+      toast.success('Skill added successfully!');
     } catch (error) {
       console.error('Failed to add skill:', error);
       toast.error('Failed to add skill');
@@ -174,31 +128,11 @@ const SkillsSection = () => {
     
     try {
       // Remove from backend using token-based authentication
-      try {
-        await userService.deleteSkill(skillName);
-        
-        // Update local state
-        setSkills(prev => prev.filter(skill => skill !== skillName));
-        toast.success('Skill removed successfully');
-      } catch (backendError) {
-        console.error('Failed to remove skill from backend:', backendError);
-        
-        // Fallback to Firestore if backend fails
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const currentSkills = userData.skills || [];
-          const updatedSkills = currentSkills.filter(skill => skill !== skillName);
-          
-          await updateDoc(doc(db, "users", user.uid), {
-            skills: updatedSkills,
-            updatedAt: new Date().toISOString()
-          });
-          
-          setSkills(updatedSkills);
-          toast.success('Skill removed successfully');
-        }
-      }
+      await userService.deleteSkill(skillName);
+      
+      // Update local state
+      setSkills(prev => prev.filter(skill => skill !== skillName));
+      toast.success('Skill removed successfully');
     } catch (error) {
       console.error('Failed to remove skill:', error);
       toast.error('Failed to remove skill');

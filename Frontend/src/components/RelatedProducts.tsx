@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import classNames from "classnames";
 import React, { useRef, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { API_ENDPOINTS } from '../config/api';
+import NoImageAvailable from '@/assets/images/no image available.png';
 
 // Define Project type if not imported from elsewhere
 interface Project {
@@ -49,22 +51,24 @@ export const RelatedProducts = () => {
   }, [isMobile]);
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchRelatedProjects = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:3000/api/marketplace/projects');
+        const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECTS);
         if (!response.ok) {
           throw new Error('Failed to fetch projects');
         }
         const data = await response.json();
-        setProjects(data.projects);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setProjects(data);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setError('Failed to load projects');
       } finally {
         setLoading(false);
       }
     };
-    fetchProjects();
+
+    fetchRelatedProjects();
   }, []);
 
   const featuredProjects = [
@@ -194,7 +198,6 @@ export const RelatedProducts = () => {
   }
 
   return (
-
     <div className={`container mx-auto ${isMobile ? 'px-4' : 'px-6'} py-8`}>
       
       {/* Mobile Layout */}
@@ -211,41 +214,12 @@ export const RelatedProducts = () => {
             {displayProjects.slice(startIndex, startIndex + 1).map((project) => (
               <Link to={`/product/${project.id}`} key={project.id} className="block">
                 <Card className="hover:shadow-lg transition-shadow duration-200 bg-white rounded-lg">
-
-    <div className="container mx-auto px-6 py-8">
-      <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Previous"
-          className="rounded-full"
-          onClick={handlePrev}
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </Button>
-        <div className={classNames(
-          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 flex-1 transition-transform duration-300",
-          {
-            "-translate-x-10 opacity-0": slideDirection === 'right',
-            "translate-x-10 opacity-0": slideDirection === 'left',
-            "opacity-100": !slideDirection
-          }
-        )}>
-          {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => {
-            if (projects.length === 0) return null;
-            const idx = (startIndex + i) % projects.length;
-            const project = projects[idx];
-            if (!project) return null;
-            return (
-              <Link to={`/product/${project.id}`} key={i + '-' + project.id}>
-                <Card className="h-full hover:shadow-lg transition-shadow duration-200">
-
                   <div className="relative">
                     <img
-                      src={project.image}
+                      src={project.image || NoImageAvailable}
                       alt={project.title}
                       className="w-full h-32 xs:h-36 object-cover rounded-t-lg"
+                      onError={e => { e.currentTarget.src = NoImageAvailable; }}
                     />
                     <Badge className="absolute top-2 right-2 bg-blue-600 text-white text-[10px] px-2 py-0.5">
                       {project.category}
@@ -288,38 +262,6 @@ export const RelatedProducts = () => {
               </Link>
             ))}
           </div>
-          
-          {/* Mobile Navigation */}
-          <div className="flex justify-center items-center mt-6 space-x-4">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Previous"
-              className="rounded-full w-12 h-12 shadow-md"
-              onClick={handlePrev}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex space-x-2">
-              {Array.from({ length: Math.ceil(displayProjects.length / productsPerPage) }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    Math.floor(startIndex / productsPerPage) === i ? 'bg-blue-600' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Next"
-              className="rounded-full w-12 h-12 shadow-md"
-              onClick={handleNext}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </Button>
-          </div>
         </div>
       ) : (
         /* Desktop Layout */
@@ -333,7 +275,6 @@ export const RelatedProducts = () => {
           >
             <ChevronLeft className="w-6 h-6" />
           </Button>
-          
           <div className={classNames(
             "grid gap-6 flex-1 transition-all duration-300 ease-in-out",
             {
@@ -353,9 +294,10 @@ export const RelatedProducts = () => {
                   <Card className="h-full hover:shadow-lg transition-shadow duration-200 rounded-lg">
                     <div className="relative">
                       <img
-                        src={project.image}
+                        src={project.image || NoImageAvailable}
                         alt={project.title}
                         className="w-full h-28 md:h-32 lg:h-36 object-cover rounded-t-lg"
+                        onError={e => { e.currentTarget.src = NoImageAvailable; }}
                       />
                       <Badge className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5">
                         {project.category}
@@ -399,7 +341,6 @@ export const RelatedProducts = () => {
               );
             })}
           </div>
-          
           <Button
             variant="outline"
             size="icon"

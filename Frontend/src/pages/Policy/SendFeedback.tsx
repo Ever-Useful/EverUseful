@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Send, Mail, Phone, Clock, MessageSquare, Bug, Star, Lightbulb, AlertCircle } from 'lucide-react';
-import { Header } from '@/components/Header';
+import Header from '@/components/Header';
 import { Footer } from '@/components/Footer';
 
 const SendFeedback = () => {
@@ -57,7 +57,7 @@ const SendFeedback = () => {
             </p>
             <div className="flex items-center justify-center text-sm text-gray-500">
               <Clock className="w-4 h-4 mr-2" />
-              Last Updated: February 4, 2025
+              Last Updated: June, 2025
             </div>
           </div>
         </div>

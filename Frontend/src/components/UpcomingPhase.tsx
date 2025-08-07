@@ -49,75 +49,7 @@ const features = [
   },
 ];
 
-// --- Timeline (mobile: vertical, slightly stretched, compact) ---
-// const Timeline: React.FC = () => (
-//   <div className="w-full flex flex-col items-center mt-2 mb-6 md:mb-10">
-//     <div className="flex md:flex-row flex-col md:items-end items-center justify-center w-full max-w-xs sm:max-w-md md:max-w-2xl mx-auto relative gap-0">
-//       {timelineSteps.map((step, idx) => (
-//         <React.Fragment key={step.label}>
-//           <motion.div
-//             initial={{ scale: 0, opacity: 0 }}
-//             animate={{ scale: 1, opacity: 1 }}
-//             transition={{ delay: idx * 0.2, type: "spring" }}
-//             className="flex flex-row md:flex-col items-center md:items-center relative z-10"
-//           >
-//             <div
-//               className={`
-//                 w-7 h-7 md:w-14 md:h-14 flex items-center justify-center rounded-full border-4 shadow-lg transition-all duration-300 mb-0 md:mb-1 mr-2 md:mr-0
-//                 ${idx === currentStep
-//                   ? `${step.dot} scale-110 ring-2 md:ring-4 ring-teal-200 animate-pulse`
-//                   : idx < currentStep
-//                   ? `${step.dot} opacity-90`
-//                   : "bg-gray-100 border-gray-200 opacity-70"}
-//               `}
-//             >
-//               {step.icon}
-//             </div>
-//             <div className="flex flex-col items-start md:items-center">
-//               <span
-//                 className={`
-//                   text-[10px] md:mt-2 md:text-xs font-bold text-center uppercase tracking-wide
-//                   ${idx === currentStep ? "text-teal-600" : "text-gray-600"}`}
-//               >
-//                 {step.label}
-//               </span>
-//               <span className="text-[9px] md:hidden text-gray-500 font-semibold text-left">
-//                 {step.desc}
-//               </span>
-//             </div>
-//           </motion.div>
-//           {/* Connector: vertical on mobile, horizontal on desktop */}
-//           {idx < timelineSteps.length - 1 && (
-//             <motion.div
-//               initial={{ scaleY: 0 }}
-//               animate={{ scaleY: 1 }}
-//               transition={{ delay: idx * 0.2 + 0.2, type: "spring" }}
-//               className={`
-//                 md:h-2 md:w-12 h-8 w-1
-//                 ${idx < currentStep ? "bg-teal-200" : "bg-gray-200"}
-//                 rounded transition-all duration-300 z-0 mx-0 md:mx-1 my-1 md:my-0
-//                 ${"md:origin-left origin-top"}
-//               `}
-//             />
-//           )}
-//         </React.Fragment>
-//       ))}
-//     </div>
-//     {/* Desktop: show descriptions in a row below */}
-//     <div className="hidden md:flex mt-4 w-full max-w-2xl mx-auto justify-between text-xs text-gray-500 font-semibold">
-//       {timelineSteps.map((step, idx) => (
-//         <span
-//           key={step.label}
-//           className={`w-1/4 text-center ${idx === currentStep ? "text-teal-600 font-bold" : ""}`}
-//         >
-//           {step.desc}
-//         </span>
-//       ))}
-//     </div>
-//   </div>
-// );
 
-// --- ProjectCards: Mobile stacked, Desktop zig-zag (original untouched for desktop) ---
 const ProjectCards: React.FC = () => (
   <>
     {/* Mobile: stacked cards */}
@@ -251,10 +183,10 @@ const PreJoinForm: React.FC = () => {
             Limited Early Access
           </span>
         </div>
-        <h3 className="text-gray-900 text-base md:text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
-          Reserve Your Spot for the Next Big Leap
+        <h3 className="text-gray-900 text-[17px] sm:text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
+          Register for Early Notifications.
         </h3>
-        <p className="text-center text-gray-700 text-xs md:text-sm mb-1 md:mb-2">
+        <p className="text-center text-gray-700 text-base mb-1 md:mb-2">
           Be among the first to unlock our next-generation sustainable solutions.
           <span className="block text-teal-600 font-semibold mt-1">
             No payment required—just your curiosity and passion!
@@ -285,10 +217,10 @@ const PreJoinForm: React.FC = () => {
           className="bg-gradient-to-r from-teal-400 to-green-400 hover:from-green-400 hover:to-teal-400 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-xl transition shadow-lg text-base md:text-lg tracking-wide"
           disabled={submitted}
         >
-          {submitted ? "Pre-Booked!" : "Reserve My Spot"}
+          {submitted ? "Registered!" : "Register"}
         </button>
         {submitted && (
-          <div className="text-green-700 text-center font-semibold mt-2 animate-fade-in text-xs md:text-base">
+          <div className="text-green-700 text-center font-semibold mt-2 animate-fade-in text-base">
             🎉 Thank you! You’re now on the priority list.
           </div>
         )}
@@ -354,24 +286,24 @@ export const UpcomingPhase: React.FC = () => (
       />
     </motion.div>
 
-    <div className="relative z-10 max-w-[340px] sm:max-w-2xl md:max-w-6xl mx-auto px-1 sm:px-4 py-4 md:py-12">
+    <div className="relative z-10 max-w-[340px] sm:max-w-2xl md:max-w-6xl mx-auto px-2 sm:px-4 py-4 md:py-12">
       {/* Header + Timeline */}
       <div className="flex flex-col items-center mb-2 md:mb-4">
         <Badge className="mb-2 md:mb-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white animate-pulse text-xs md:text-base">
-            <Leaf className="w-3 h-3 mr-1 animate-bounce" />
-            Upcoming Phase
-          </Badge>
+          <Leaf className="w-3 h-3 mr-1 animate-bounce" />
+          Upcoming Phase
+        </Badge>
       </div>
       {/* Main content grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-24 items-center">
         {/* Left: Info, Form */}
         <div>
-          <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight">
+          <h2 className="text-[17px] sm:text-4xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight mobile-text-4xl">
             Sustainable Projects
             <br />
             for a Brighter Future
           </h2>
-          <p className="text-sm sm:text-lg text-gray-800 mb-3 md:mb-6 max-w-xl drop-shadow">
+          <p className="text-base text-gray-800 mb-3 md:mb-6 max-w-xl drop-shadow mobile-text-base">
             <span className="block mb-1">
               Ready to be part of something bigger?
             </span>
@@ -383,9 +315,9 @@ export const UpcomingPhase: React.FC = () => (
           <PreJoinForm />
         </div>
         {/* Right: Zig-Zag Collage Cards */}
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center w-full">
           <ProjectCards />
-          <div className="mt-4 md:mt-24 text-center text-gray-800 font-semibold text-xs md:text-base bg-white rounded-xl px-2 py-2 md:px-6 md:py-3 shadow">
+          <div className="mt-4 md:mt-24 text-center text-gray-800 font-semibold text-base bg-white rounded-xl px-2 py-2 md:px-6 md:py-3 shadow mobile-text-base">
             <span className="text-teal-700 font-extrabold">
               Why these projects?
             </span>
@@ -410,11 +342,11 @@ export const UpcomingPhase: React.FC = () => (
         }}
       />
       {/* Centralized content container */}
-      <div className="max-w-[340px] sm:max-w-2xl md:max-w-6xl mx-auto py-2 md:py-4">
+      <div className="max-w-[340px] sm:max-w-2xl md:max-w-6xl mx-auto py-2 md:py-4 px-2 sm:px-4">
         <Features />
         <div className="flex justify-center mt-4 md:mt-10">
-          <span className="inline-block px-3 py-2 md:px-8 md:py-3 rounded-full bg-gradient-to-r from-teal-100 via-green-100 to-white text-teal-900 font-semibold text-xs md:text-base shadow animate-pulse">
-            🚀 Launching Summer 2025 — Secure Your Place Now!
+          <span className="inline-block px-3 py-2 md:px-8 md:py-3 rounded-full bg-gradient-to-r from-teal-100 via-green-100 to-white text-teal-900 font-semibold text-xs md:text-base shadow animate-pulse mobile-text-xs">
+            🚀 Launching August 2025 — Secure Your Place Now!
           </span>
         </div>
       </div>

@@ -1,22 +1,13 @@
 
-import { MessageCircle, Users, Github, Youtube, BookOpen, Coffee } from "lucide-react";
+import { Users, Github, BookOpen } from "lucide-react";
 
 const CommunityLinks = () => {
   const communityLinks = [
     {
-      title: "Discord Community",
-      description: "Join 10k+ developers in our active Discord server",
-      icon: MessageCircle,
-      link: "https://discord.gg/techforward",
-      color: "bg-purple-500",
-      hoverColor: "hover:bg-purple-600",
-      members: "10.2k members"
-    },
-    {
       title: "GitHub Organization",
       description: "Contribute to our open source projects",
       icon: Github,
-      link: "https://github.com/techforward",
+      link: "https://github.com/HARSH6309",
       color: "bg-gray-800",
       hoverColor: "hover:bg-gray-900",
       members: "500+ contributors"
@@ -31,15 +22,6 @@ const CommunityLinks = () => {
       members: "25 cities"
     },
     {
-      title: "YouTube Channel",
-      description: "Tech talks, tutorials, and behind-the-scenes",
-      icon: Youtube,
-      link: "https://youtube.com/@techforward",
-      color: "bg-red-500",
-      hoverColor: "hover:bg-red-600",
-      members: "50k subscribers"
-    },
-    {
       title: "Tech Blog",
       description: "Latest insights and technical deep-dives",
       icon: BookOpen,
@@ -47,15 +29,6 @@ const CommunityLinks = () => {
       color: "bg-green-500",
       hoverColor: "hover:bg-green-600",
       members: "Weekly posts"
-    },
-    {
-      title: "Coffee Chats",
-      description: "Virtual coffee sessions with team leads",
-      icon: Coffee,
-      link: "https://calendly.com/techforward/coffee-chat",
-      color: "bg-amber-500",
-      hoverColor: "hover:bg-amber-600",
-      members: "Book a slot"
     }
   ];
 

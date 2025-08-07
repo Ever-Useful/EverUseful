@@ -5,13 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'react-hot-toast';
-import { auth, db } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { auth } from '@/lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 const ScheduleMeeting = () => {
   const navigate = useNavigate();
@@ -49,8 +49,17 @@ const ScheduleMeeting = () => {
         participants: formData.participants.split(',').map(email => email.trim()),
       };
 
-      const meetingRef = doc(db, 'meetings', Date.now().toString());
-      await setDoc(meetingRef, meetingData);
+      // Send meeting data to backend API (DynamoDB)
+      const response = await fetch(API_ENDPOINTS.USER_MEETINGS, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await user.getIdToken()}`
+        },
+        body: JSON.stringify(meetingData)
+      });
+
+      if (!response.ok) throw new Error('Failed to schedule meeting');
       
       toast.success('Meeting scheduled successfully!');
       navigate('/meetings');
@@ -73,7 +82,7 @@ const ScheduleMeeting = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="max-w-2xl mx-auto p-6">
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">Schedule Meeting</h1>
+        <h1 className="text-4xl font-bold text-slate-800 mb-6 mobile-text-4xl">Schedule Meeting</h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">

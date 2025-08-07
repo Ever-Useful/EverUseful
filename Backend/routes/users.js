@@ -1,94 +1,75 @@
 const express = require('express');
 const router = express.Router();
-const userService = require('../services/userService');
 const authorize = require('../authorize');
-const admin = require('firebase-admin');
-const db = admin.firestore();
+const userService = require('../services/userService');
 
-// Create new user (called after Firebase authentication)
-router.post('/create', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const userData = req.body;
-
-    const newUser = await userService.createUser(firebaseUid, userData);
-    
-    res.status(201).json({
-      success: true,
-      message: 'User created successfully',
-      data: newUser
-    });
-  } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
-  }
-});
-
-// Get user profile by Firebase UID
+// Get user profile
 router.get('/profile', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    // Fetch auth info from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const firestoreUser = userSnap.data();
-    const customUserId = firestoreUser.customUserId;
     
-    // Fetch extended info from userData.json
-    await userService.loadUserData();
-    let user = userService.findUserByCustomId(customUserId);
+    // Fetch user from DynamoDB using Firebase UID
+    let user = await userService.findUserByFirebaseUid(firebaseUid);
     
-    // If user doesn't exist in userData.json, create them
     if (!user) {
-      console.log('Profile endpoint - User not found in userData.json, creating user...');
+      // Create new user in DynamoDB
+      const { name, email } = req.user;
+      
+      // Parse firstName and lastName from name if available
+      let firstName = '';
+      let lastName = '';
+      if (name) {
+        const nameParts = name.split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
+      }
+      
       try {
         const newUser = await userService.createUser(firebaseUid, {
-          firstName: firestoreUser.firstName || '',
-          lastName: firestoreUser.lastName || '',
-          email: firestoreUser.email || '',
-          userType: firestoreUser.userType || 'student',
-          phoneNumber: firestoreUser.phoneNumber || '',
-          mobile: firestoreUser.mobile || '',
-          gender: firestoreUser.gender || ''
+          firstName: firstName,
+          lastName: lastName,
+          email: email || 'no-email@example.com',
+          userType: 'student',
+          mobile: '',
+          phoneNumber: ''
         });
-        user = userService.findUserByCustomId(customUserId);
-        console.log('Profile endpoint - User created successfully');
+        
+        user = await userService.findUserByFirebaseUid(firebaseUid);
       } catch (createError) {
         console.error('Profile endpoint - Error creating user:', createError);
         return res.status(500).json({ success: false, message: 'Failed to create user' });
       }
     }
     
+    // Ensure proper data structure
+    const profile = user.profile || {};
+    const auth = {
+      firstName: profile.firstName || '',
+      lastName: profile.lastName || '',
+      phoneNumber: profile.phoneNumber || '',
+      email: profile.email || '',
+      userType: profile.userType || '',
+      mobile: profile.mobile || '',
+      gender: profile.gender || '',
+      username: profile.username || profile.email?.split('@')[0] || ''
+    };
+    
     res.json({
       success: true,
       data: {
-        customUserId,
-        auth: {
-          firstName: firestoreUser.firstName || user.firstName || user.profile?.firstName || '',
-          lastName: firestoreUser.lastName || user.lastName || user.profile?.lastName || '',
-          phoneNumber: firestoreUser.phoneNumber || user.phoneNumber || '',
-          email: firestoreUser.email || user.email || '',
-          userType: firestoreUser.userType || user.userType || '',
-          mobile: firestoreUser.mobile || user.profile?.mobile || '',
-          gender: firestoreUser.gender || user.profile?.gender || ''
-        },
-        profile: user ? user.profile : {},
-        stats: user ? user.stats : {},
-        studentData: user && user.studentData ? user.studentData : null,
-        education: user && user.education ? user.education : [],
-        workExperience: user && user.workExperience ? user.workExperience : [],
-        skills: user && user.skills ? user.skills : [],
-        freelancerData: user && user.freelancerData ? user.freelancerData : null,
-        professorData: user && user.professorData ? user.professorData : null,
-        personalDetails: user && user.personalDetails ? user.personalDetails : {},
-        socialLinks: user && user.socialLinks ? user.socialLinks : {},
-        projects: user && user.projects ? user.projects : { created: [], collaborated: [], favorites: [], count: 0 }
+        customUserId: user.customUserId,
+        auth: auth,
+        profile: profile,
+        stats: user.stats || {},
+        studentData: user.studentData || null,
+        education: user.education || [],
+        workExperience: user.workExperience || [],
+        skills: user.skills || [],
+        freelancerData: user.freelancerData || null,
+        professorData: user.professorData || null,
+        personalDetails: user.personalDetails || {},
+        socialLinks: user.socialLinks || {},
+        projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 }
       }
     });
   } catch (error) {
@@ -97,24 +78,62 @@ router.get('/profile', authorize, async (req, res) => {
   }
 });
 
-// Get user skills (flat array)
+// Get bulk users by custom user IDs (for marketplace author display)
+router.get('/bulk/:userIds', async (req, res) => {
+  try {
+    const { userIds } = req.params;
+    const userIdArray = userIds.split(',').filter(id => id.trim());
+    
+    if (userIdArray.length === 0) {
+      return res.json({ success: true, data: {} });
+    }
+    
+    const users = {};
+    for (const customUserId of userIdArray) {
+      try {
+        const user = await userService.findUserByCustomId(customUserId);
+        if (user) {
+          // Ensure proper data structure for frontend
+          const profile = user.profile || {};
+          const auth = {
+            firstName: profile.firstName || '',
+            lastName: profile.lastName || '',
+            phoneNumber: profile.phoneNumber || '',
+            email: profile.email || '',
+            userType: profile.userType || '',
+            mobile: profile.mobile || '',
+            gender: profile.gender || '',
+            username: profile.username || profile.email?.split('@')[0] || ''
+          };
+          
+          users[customUserId] = {
+            ...user,
+            auth: auth,
+            profile: profile
+          };
+        }
+      } catch (error) {
+        console.error(`Error fetching user ${customUserId}:`, error);
+      }
+    }
+    
+    res.json({ success: true, data: users });
+  } catch (error) {
+    console.error('Error fetching bulk users:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Get user skills
 router.get('/skills', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      console.log('[GET /skills] Firestore user not found for firebaseUid:', firebaseUid);
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    await userService.loadUserData();
-    const user = userService.findUserByCustomId(customUserId);
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
     
     if (!user) {
-      return res.status(404).json({ success: false, message: `User not found in userData.json for customUserId: ${customUserId}. Available user keys: ${Object.keys(userService.userData.users).join(', ')}` });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
+    
     res.json({ success: true, data: Array.isArray(user.skills) ? user.skills : [] });
   } catch (error) {
     console.error('Skills endpoint - Error:', error);
@@ -122,51 +141,44 @@ router.get('/skills', authorize, async (req, res) => {
   }
 });
 
-// Add a skill (flat array)
+// Add a skill
 router.post('/skills', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      console.log('[POST /skills] Firestore user not found for firebaseUid:', firebaseUid);
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    await userService.loadUserData();
-    const user = userService.findUserByCustomId(customUserId);
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
     
     if (!user) {
-      return res.status(404).json({ success: false, message: `User not found in userData.json for customUserId: ${customUserId}. Available user keys: ${Object.keys(userService.userData.users).join(', ')}` });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
+    
     const { name } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, message: 'Skill name required' });
     }
-    await userService.addUserSkill(customUserId, { name });
+    
+    await userService.addUserSkill(user.customUserId, { name });
     res.status(201).json({ success: true, message: 'Skill added successfully' });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
 });
 
-// Remove a skill (flat array)
+// Remove a skill
 router.delete('/skills/:skillName', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
+    
     const { skillName } = req.params;
     if (!skillName) {
       return res.status(400).json({ success: false, message: 'Skill name required' });
     }
-    await userService.removeUserSkill(customUserId, skillName);
+    
+    await userService.removeUserSkill(user.customUserId, skillName);
     res.json({ success: true, message: 'Skill removed successfully' });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -177,14 +189,13 @@ router.delete('/skills/:skillName', authorize, async (req, res) => {
 router.post('/projects', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
-    const project = await userService.addUserProject(customUserId, req.body);
+    
+    const project = await userService.addUserProject(user.customUserId, req.body);
     res.status(201).json({ success: true, message: 'Project added successfully', data: project });
   } catch (error) {
     console.error('Error adding project:', error);
@@ -195,337 +206,52 @@ router.post('/projects', authorize, async (req, res) => {
 // Get user projects
 router.get('/projects', authorize, async (req, res) => {
   try {
-    console.log('=== GET /api/users/projects DEBUGGING ===');
     const firebaseUid = req.user.uid;
-    console.log('Firebase UID:', firebaseUid);
-    
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      console.log('User not found in Firestore');
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const firestoreUser = userSnap.data();
-    const customUserId = firestoreUser.customUserId;
-    console.log('Custom User ID:', customUserId);
-    
-    try {
-      await userService.loadUserData();
-      console.log('User data loaded successfully');
-    } catch (error) {
-      console.error('Error loading user data:', error);
-      return res.status(500).json({ success: false, message: 'Failed to load user data' });
-    }
-    
-    let user = userService.findUserByCustomId(customUserId);
-    
-    // If user doesn't exist in userData.json, create them
-    if (!user) {
-      console.log('Projects endpoint - User not found in userData.json, creating user...');
-      try {
-        const newUser = await userService.createUser(firebaseUid, {
-          firstName: firestoreUser.firstName || '',
-          lastName: firestoreUser.lastName || '',
-          email: firestoreUser.email || '',
-          userType: firestoreUser.userType || 'student',
-          phoneNumber: firestoreUser.phoneNumber || '',
-          mobile: firestoreUser.mobile || '',
-          gender: firestoreUser.gender || ''
-        });
-        user = userService.findUserByCustomId(customUserId);
-        console.log('Projects endpoint - User created successfully');
-      } catch (createError) {
-        console.error('Projects endpoint - Error creating user:', createError);
-        return res.status(500).json({ success: false, message: 'Failed to create user' });
-      }
-    }
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
     
     if (!user) {
-      console.log('User not found in userData.json');
       return res.status(404).json({ success: false, message: 'User not found' });
     }
     
-    console.log('User projects:', user.projects);
-    console.log('=== END GET /api/users/projects DEBUGGING ===');
+    // Get marketplace data to fetch actual project details
+    const dynamoDBService = require('../services/dynamoDBService');
+    const marketplace = await dynamoDBService.getMarketplaceData();
     
-    res.json({
-      success: true,
-      data: {
-        created: user.projects.created,
-        collaborated: user.projects.collaborated,
-        favorites: user.projects.favorites,
-        count: user.projects.count
-      }
+    // Find projects created by this user (same logic as dashboard)
+    const customUserId = user.customUserId;
+    const userProjects = marketplace.projects.filter(p => 
+      p.author === customUserId || p.customUserId === customUserId
+    );
+    
+
+    
+    // Return the actual project data, not just IDs
+    res.json({ 
+      success: true, 
+      data: { 
+        created: userProjects,
+        collaborated: [], // Can be implemented later
+        favorites: [], // Can be implemented later
+        count: userProjects.length 
+      } 
     });
   } catch (error) {
-    console.error('Error fetching projects:', error);
+    console.error('Error fetching user projects:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
-// Get all users (for freelancing page)
-router.get('/all', async (req, res) => {
-  try {
-    await userService.loadUserData();
-    
-    // Transform the data to match the expected format
-    const users = {};
-    Object.keys(userService.userData.users).forEach(customUserId => {
-      const user = userService.userData.users[customUserId];
-      users[customUserId] = {
-        customUserId: customUserId,
-        profile: user.profile,
-        stats: user.stats,
-        skills: user.skills || [],
-        education: user.education || []
-      };
-    });
-    
-    res.json({
-      success: true,
-      users: users
-    });
-  } catch (error) {
-    console.error('Error fetching all users:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Get user by custom ID
-router.get('/:id', async (req, res) => {
-  try {
-    const customUserId = req.params.id;
-    await userService.loadUserData();
-    const user = userService.findUserByCustomId(customUserId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    // Fetch auth info from Firestore if available
-    let auth = {};
-    try {
-      const userSnap = await db.collection('users').where('customUserId', '==', customUserId).get();
-      if (!userSnap.empty) {
-        const firestoreUser = userSnap.docs[0].data();
-        auth = {
-          firstName: firestoreUser.firstName || user.firstName || user.profile?.firstName || '',
-          lastName: firestoreUser.lastName || user.lastName || user.profile?.lastName || '',
-          phoneNumber: firestoreUser.phoneNumber || user.phoneNumber || '',
-          email: firestoreUser.email || user.email || '',
-          userType: firestoreUser.userType || user.userType || '',
-          mobile: firestoreUser.mobile || user.profile?.mobile || '',
-          gender: firestoreUser.gender || user.profile?.gender || ''
-        };
-      } else {
-        // Firestore user not found, fallback to userData.json
-        auth = {
-          firstName: user.firstName || user.profile?.firstName || '',
-          lastName: user.lastName || user.profile?.lastName || '',
-          phoneNumber: user.phoneNumber || '',
-          email: user.email || '',
-          userType: user.userType || '',
-          mobile: user.profile?.mobile || '',
-          gender: user.profile?.gender || ''
-        };
-      }
-    } catch {
-      // On error, fallback to userData.json
-      auth = {
-        firstName: user.firstName || user.profile?.firstName || '',
-        lastName: user.lastName || user.profile?.lastName || '',
-        phoneNumber: user.phoneNumber || '',
-        email: user.email || '',
-        userType: user.userType || '',
-        mobile: user.profile?.mobile || '',
-        gender: user.profile?.gender || ''
-      };
-    }
-    res.json({
-      success: true,
-      data: {
-        customUserId,
-        auth,
-        profile: user.profile || {},
-        stats: user.stats || {},
-        studentData: user.studentData || null,
-        education: user.education || [],
-        workExperience: user.workExperience || [],
-        skills: user.skills || [],
-        freelancerData: user.freelancerData || null,
-        professorData: user.professorData || null,
-        personalDetails: user.personalDetails || {},
-        socialLinks: user.socialLinks || {},
-        projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 },
-        social: user.social || {},
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching user by custom ID:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Get multiple users by custom IDs (bulk endpoint)
-router.get('/bulk/:ids', async (req, res) => {
-  try {
-    const customUserIds = req.params.ids.split(',');
-    if (customUserIds.length === 0) {
-      return res.status(400).json({ success: false, message: 'No user IDs provided' });
-    }
-    
-    await userService.loadUserData();
-    const users = {};
-    
-    // Fetch all users from userData.json
-    for (const customUserId of customUserIds) {
-      const user = userService.findUserByCustomId(customUserId);
-      if (user) {
-        users[customUserId] = user;
-      }
-    }
-    
-    // Fetch auth info from Firestore for all users in parallel
-    try {
-      const userSnaps = await db.collection('users').where('customUserId', 'in', customUserIds).get();
-      const firestoreUsers = {};
-      userSnaps.docs.forEach(doc => {
-        const data = doc.data();
-        firestoreUsers[data.customUserId] = data;
-      });
-      
-      // Combine data from both sources
-      const result = {};
-      for (const customUserId of customUserIds) {
-        const user = users[customUserId];
-        const firestoreUser = firestoreUsers[customUserId];
-        
-        if (user) {
-          let auth = {};
-          if (firestoreUser) {
-            auth = {
-              firstName: firestoreUser.firstName || user.firstName || user.profile?.firstName || '',
-              lastName: firestoreUser.lastName || user.lastName || user.profile?.lastName || '',
-              phoneNumber: firestoreUser.phoneNumber || user.phoneNumber || '',
-              email: firestoreUser.email || user.email || '',
-              userType: firestoreUser.userType || user.userType || '',
-              mobile: firestoreUser.mobile || user.profile?.mobile || '',
-              gender: firestoreUser.gender || user.profile?.gender || ''
-            };
-          } else {
-            auth = {
-              firstName: user.firstName || user.profile?.firstName || '',
-              lastName: user.lastName || user.profile?.lastName || '',
-              phoneNumber: user.phoneNumber || '',
-              email: user.email || '',
-              userType: user.userType || '',
-              mobile: user.profile?.mobile || '',
-              gender: user.profile?.gender || ''
-            };
-          }
-          
-          result[customUserId] = {
-            customUserId,
-            auth,
-            profile: user.profile || {},
-            stats: user.stats || {},
-            studentData: user.studentData || null,
-            education: user.education || [],
-            workExperience: user.workExperience || [],
-            skills: user.skills || [],
-            freelancerData: user.freelancerData || null,
-            professorData: user.professorData || null,
-            personalDetails: user.personalDetails || {},
-            socialLinks: user.socialLinks || {},
-            projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 },
-            social: user.social || {},
-          };
-        }
-      }
-      
-      res.json({
-        success: true,
-        data: result
-      });
-    } catch (firestoreError) {
-      // Fallback to userData.json only if Firestore fails
-      const result = {};
-      for (const customUserId of customUserIds) {
-        const user = users[customUserId];
-        if (user) {
-          const auth = {
-            firstName: user.firstName || user.profile?.firstName || '',
-            lastName: user.lastName || user.profile?.lastName || '',
-            phoneNumber: user.phoneNumber || '',
-            email: user.email || '',
-            userType: user.userType || '',
-            mobile: user.profile?.mobile || '',
-            gender: user.profile?.gender || ''
-          };
-          
-          result[customUserId] = {
-            customUserId,
-            auth,
-            profile: user.profile || {},
-            stats: user.stats || {},
-            studentData: user.studentData || null,
-            education: user.education || [],
-            workExperience: user.workExperience || [],
-            skills: user.skills || [],
-            freelancerData: user.freelancerData || null,
-            professorData: user.professorData || null,
-            personalDetails: user.personalDetails || {},
-            socialLinks: user.socialLinks || {},
-            projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 },
-            social: user.social || {},
-          };
-        }
-      }
-      
-      res.json({
-        success: true,
-        data: result
-      });
-    }
-  } catch (error) {
-    console.error('Error fetching users in bulk:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Update user auth info (firstName, lastName, phoneNumber, userType)
-router.put('/auth', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const updateFields = {};
-    const allowedFields = ['firstName', 'lastName', 'phoneNumber', 'userType'];
-    for (const field of allowedFields) {
-      if (req.body[field] !== undefined) updateFields[field] = req.body[field];
-    }
-    await userRef.update(updateFields);
-    res.json({ success: true, message: 'Auth info updated successfully' });
-  } catch (error) {
-    console.error('Error updating auth info:', error);
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// Update user profile (extended info)
+// Update user profile
 router.put('/profile', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
-    const updatedProfile = await userService.updateUserProfile(customUserId, req.body);
+    
+    const updatedProfile = await userService.updateUserProfile(user.customUserId, req.body);
     res.json({ success: true, message: 'Profile updated successfully', data: updatedProfile });
   } catch (error) {
     console.error('Error updating profile:', error);
@@ -533,519 +259,114 @@ router.put('/profile', authorize, async (req, res) => {
   }
 });
 
-// Debug endpoint to get current user info
-router.get('/debug/current-user', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.json({ firebaseUid, userExists: false, user: null });
-    }
-    const customUserId = userSnap.data().customUserId;
-    const user = userService.findUserByCustomId(customUserId);
-    res.json({
-      firebaseUid,
-      userExists: !!user,
-      user: user ? {
-        customUserId: user.customUserId,
-        skills: user.skills
-      } : null
-    });
-  } catch (error) {
-    console.error('Debug endpoint error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Add to cart (by customUserId)
-router.post('/:customUserId/cart', authorize, async (req, res) => {
-  try {
-    const { customUserId } = req.params;
-    const productData = req.body;
-    
-    // Load user data from JSON file
-    await userService.loadUserData();
-    
-    const user = userService.findUserByCustomId(customUserId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-    const cart = await userService.addToCart(customUserId, productData);
-    res.json({
-      success: true,
-      message: 'Item added to cart',
-      data: cart
-    });
-  } catch (error) {
-    console.error('Error adding to cart:', error);
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
-  }
-});
-
-// Get user cart (by customUserId)
-router.get('/:customUserId/cart', authorize, async (req, res) => {
-  try {
-    const { customUserId } = req.params;
-    console.log('=== CART DEBUGGING ===');
-    console.log('Requested customUserId:', customUserId);
-    
-    // Load user data from JSON file
-    await userService.loadUserData();
-    console.log('Available users in userData.json:', Object.keys(userService.userData?.users || {}));
-    
-    const user = userService.findUserByCustomId(customUserId);
-    console.log('User found:', !!user);
-    console.log('=== END CART DEBUGGING ===');
-    
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-    res.json({
-      success: true,
-      data: user.marketplace.cart
-    });
-  } catch (error) {
-    console.error('Error fetching cart:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-});
-
-// Remove item from cart
-router.delete('/:customUserId/cart/:productId', authorize, async (req, res) => {
-  try {
-    const { customUserId, productId } = req.params;
-    
-    // Load user data from JSON file
-    await userService.loadUserData();
-    
-    const user = userService.findUserByCustomId(customUserId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-    const cart = await userService.removeFromCart(customUserId, productId);
-    res.json({
-      success: true,
-      message: 'Item removed from cart',
-      data: cart
-    });
-  } catch (error) {
-    console.error('Error removing from cart:', error);
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
-  }
-});
-
-// Clear cart
-router.delete('/:customUserId/cart', authorize, async (req, res) => {
-  try {
-    const { customUserId } = req.params;
-    
-    // Load user data from JSON file
-    await userService.loadUserData();
-    
-    const user = userService.findUserByCustomId(customUserId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-    await userService.clearCart(customUserId);
-    res.json({
-      success: true,
-      message: 'Cart cleared successfully'
-    });
-  } catch (error) {
-    console.error('Error clearing cart:', error);
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
-  }
-});
-
-// Add activity
-router.post('/activities', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    const activity = await userService.addActivity(customUserId, req.body);
-    res.status(201).json({ success: true, message: 'Activity added successfully', data: activity });
-  } catch (error) {
-    console.error('Error adding activity:', error);
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// Get user activities
-router.get('/activities', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    console.log('Activities endpoint - Firebase UID:', firebaseUid);
-    
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      console.log('Activities endpoint - Firestore user not found for firebaseUid:', firebaseUid);
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const firestoreUser = userSnap.data();
-    const customUserId = firestoreUser.customUserId;
-    console.log('Activities endpoint - Custom User ID:', customUserId);
-    
-    // Load user data before finding user
-    await userService.loadUserData();
-    let user = userService.findUserByCustomId(customUserId);
-    
-    // If user doesn't exist in userData.json, create them
-    if (!user) {
-      console.log('Activities endpoint - User not found in userData.json, creating user...');
-      try {
-        const newUser = await userService.createUser(firebaseUid, {
-          firstName: firestoreUser.firstName || '',
-          lastName: firestoreUser.lastName || '',
-          email: firestoreUser.email || '',
-          userType: firestoreUser.userType || 'student',
-          phoneNumber: firestoreUser.phoneNumber || '',
-          mobile: firestoreUser.mobile || '',
-          gender: firestoreUser.gender || ''
-        });
-        user = userService.findUserByCustomId(customUserId);
-        console.log('Activities endpoint - User created successfully');
-      } catch (createError) {
-        console.error('Activities endpoint - Error creating user:', createError);
-        return res.status(500).json({ success: false, message: 'Failed to create user' });
-      }
-    }
-    
-    if (!user) {
-      console.log('Activities endpoint - User still not found after creation attempt');
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    console.log('Activities endpoint - User found, activities count:', user.activities.recent.length);
-    res.json({
-      success: true,
-      data: {
-        recent: user.activities.recent,
-        achievements: user.activities.achievements,
-        badges: user.activities.badges,
-        points: user.activities.points
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching activities:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Follow user
-router.post('/follow/:targetUserId', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    const { targetUserId } = req.params;
-    const result = await userService.followUser(customUserId, targetUserId);
-    res.json({ success: true, message: 'User followed successfully', data: result });
-  } catch (error) {
-    console.error('Error following user:', error);
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// Get user statistics
-router.get('/stats', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    const stats = await userService.getUserStats(customUserId);
-    res.json({ success: true, data: stats });
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Get user followers/following
-router.get('/social/:type', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    const { type } = req.params; // 'followers' or 'following'
-    const user = userService.findUserByCustomId(customUserId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    if (type !== 'followers' && type !== 'following') {
-      return res.status(400).json({ success: false, message: 'Invalid type. Use "followers" or "following"' });
-    }
-    const userIds = user.social[type];
-    const users = userIds.map(id => {
-      const userData = userService.findUserByCustomId(id);
-      return userData ? {
-        customUserId: userData.customUserId,
-        avatar: userData.profile.avatar,
-        title: userData.profile.title
-      } : null;
-    }).filter(Boolean);
-    res.json({ success: true, data: { users, count: user.social[`${type}Count`] } });
-  } catch (error) {
-    console.error('Error fetching social data:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Admin route - Get all users (protected)
-router.get('/admin/all', authorize, async (req, res) => {
-  try {
-    // Add admin check here if needed
-    const users = await userService.getAllUsers();
-    
-    res.json({
-      success: true,
-      data: users
-    });
-  } catch (error) {
-    console.error('Error fetching all users:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-});
-
-// Delete user (admin only)
-router.delete('/admin/:customUserId', authorize, async (req, res) => {
-  try {
-    const { customUserId } = req.params;
-    
-    // Add admin check here if needed
-    const result = await userService.deleteUser(customUserId);
-    
-    res.json({
-      success: true,
-      message: 'User deleted successfully',
-      data: result
-    });
-  } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
-  }
-});
-
-// Add projectId to user's created projects (public endpoint for backend integration)
-router.post('/:customUserId/projects', async (req, res) => {
-  try {
-    const { customUserId } = req.params;
-    const { projectId, projectData } = req.body;
-    
-    if (!projectId) {
-      return res.status(400).json({ success: false, message: 'projectId is required' });
-    }
-    
-    await userService.loadUserData();
-    const user = userService.findUserByCustomId(customUserId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    // Check if project ID is already in the created array
-    if (!user.projects.created.includes(projectId)) {
-      // Add projectId to created array
-      user.projects.created.push(projectId);
-      user.projects.count += 1;
-      user.stats.projectsCount += 1;
-      
-      // If full project data is provided, also add it using addUserProject
-      if (projectData) {
-        try {
-          await userService.addUserProject(customUserId, {
-            projectId: projectId,
-            ...projectData
-          });
-        } catch (error) {
-          console.warn('Failed to add full project data:', error);
-          // Continue with just the project ID
-        }
-      }
-      
-      await userService.saveUserData();
-      console.log(`Project ID ${projectId} added to user ${customUserId}`);
-    } else {
-      console.log(`Project ID ${projectId} already exists for user ${customUserId}`);
-    }
-    
-    res.status(201).json({ 
-      success: true, 
-      message: 'Project ID added to user', 
-      data: { projectId } 
-    });
-  } catch (error) {
-    console.error('Error adding projectId to user:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Remove projectId from user's created projects
-router.delete('/:customUserId/projects/:projectId', async (req, res) => {
-  try {
-    const { customUserId, projectId } = req.params;
-    
-    console.log(`=== REMOVE PROJECT ID DEBUGGING ===`);
-    console.log(`Removing project ID ${projectId} from user ${customUserId}`);
-    
-    const removed = await userService.removeUserProject(customUserId, projectId);
-    
-    if (removed) {
-      console.log(`Project ID ${projectId} successfully removed from user ${customUserId}`);
-      res.json({ 
-        success: true, 
-        message: 'Project ID removed from user',
-        data: { projectId: parseInt(projectId) }
-      });
-    } else {
-      console.log(`Project ID ${projectId} not found for user ${customUserId}`);
-      res.status(404).json({ 
-        success: false, 
-        message: 'Project ID not found in user\'s created projects' 
-      });
-    }
-    
-    console.log(`=== END REMOVE PROJECT ID DEBUGGING ===`);
-  } catch (error) {
-    console.error('Error removing projectId from user:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Update user student data
+// Update student data
 router.put('/student-data', authorize, async (req, res) => {
-    try {
-        const firebaseUid = req.user.uid;
-        const studentData = req.body;
-
-        const userRef = db.collection('users').doc(firebaseUid);
-        const userSnap = await userRef.get();
-        if (!userSnap.exists) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-        const customUserId = userSnap.data().customUserId;
-
-        await userService.updateStudentData(customUserId, studentData);
-        
-        res.json({
-            success: true,
-            message: 'Student data updated successfully'
-        });
-    } catch (error) {
-        console.error('Error updating student data:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
+  try {
+    const firebaseUid = req.user.uid;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
+    
+    const updatedData = await userService.updateStudentData(user.customUserId, req.body);
+    res.json({ success: true, message: 'Student data updated successfully', data: updatedData });
+  } catch (error) {
+    console.error('Error updating student data:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
-// Update user freelancer data
-router.put('/freelancer-data', authorize, async (req, res) => {
-    try {
-        const firebaseUid = req.user.uid;
-        const freelancerData = req.body;
-
-        const userRef = db.collection('users').doc(firebaseUid);
-        const userSnap = await userRef.get();
-        if (!userSnap.exists) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-        const customUserId = userSnap.data().customUserId;
-
-        await userService.updateFreelancerData(customUserId, freelancerData);
-        
-        res.json({
-            success: true,
-            message: 'Freelancer data updated successfully'
-        });
-    } catch (error) {
-        console.error('Error updating freelancer data:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
-
-// Update user professor data
+// Update professor data
 router.put('/professor-data', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    const updatedData = await userService.updateProfessorData(user.customUserId, req.body);
+    res.json({ success: true, message: 'Professor data updated successfully', data: updatedData });
+  } catch (error) {
+    console.error('Error updating professor data:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Update freelancer data
+router.put('/freelancer-data', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    const updatedData = await userService.updateFreelancerData(user.customUserId, req.body);
+    res.json({ success: true, message: 'Freelancer data updated successfully', data: updatedData });
+  } catch (error) {
+    console.error('Error updating freelancer data:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Add education
+router.post('/education', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    const education = await userService.addEducation(user.customUserId, req.body);
+    res.status(201).json({ success: true, message: 'Education added successfully', data: education });
+  } catch (error) {
+    console.error('Error adding education:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Update education
+router.put('/education/:educationId', authorize, async (req, res) => {
     try {
         const firebaseUid = req.user.uid;
-        const professorData = req.body;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
 
-        const userRef = db.collection('users').doc(firebaseUid);
-        const userSnap = await userRef.get();
-        if (!userSnap.exists) {
+    if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-        const customUserId = userSnap.data().customUserId;
+    
+    const { educationId } = req.params;
+    const updatedEducation = await userService.updateEducation(user.customUserId, educationId, req.body);
+    res.json({ success: true, message: 'Education updated successfully', data: updatedEducation });
+  } catch (error) {
+    console.error('Error updating education:', error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
 
-        await userService.updateProfessorData(customUserId, professorData);
-        
-        res.json({
-            success: true,
-            message: 'Professor data updated successfully'
-        });
-    } catch (error) {
-        console.error('Error updating professor data:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
+// Delete education
+router.delete('/education/:educationId', authorize, async (req, res) => {
+    try {
+        const firebaseUid = req.user.uid;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+
+    if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+    
+    const { educationId } = req.params;
+    await userService.deleteEducation(user.customUserId, educationId);
+    res.json({ success: true, message: 'Education deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting education:', error);
+    res.status(400).json({ success: false, message: error.message });
     }
 });
 
@@ -1053,17 +374,14 @@ router.put('/professor-data', authorize, async (req, res) => {
 router.post('/work-experience', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    const workData = req.body;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
     
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
     
-    const newWork = await userService.addWorkExperience(customUserId, workData);
-    res.status(201).json({ success: true, message: 'Work experience added successfully', data: newWork });
+    const workExperience = await userService.addWorkExperience(user.customUserId, req.body);
+    res.status(201).json({ success: true, message: 'Work experience added successfully', data: workExperience });
   } catch (error) {
     console.error('Error adding work experience:', error);
     res.status(400).json({ success: false, message: error.message });
@@ -1074,17 +392,14 @@ router.post('/work-experience', authorize, async (req, res) => {
 router.put('/work-experience/:workId', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    const { workId } = req.params;
-    const workData = req.body;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
     
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
     
-    const updatedWork = await userService.updateWorkExperience(customUserId, workId, workData);
+    const { workId } = req.params;
+    const updatedWork = await userService.updateWorkExperience(user.customUserId, workId, req.body);
     res.json({ success: true, message: 'Work experience updated successfully', data: updatedWork });
   } catch (error) {
     console.error('Error updating work experience:', error);
@@ -1096,83 +411,17 @@ router.put('/work-experience/:workId', authorize, async (req, res) => {
 router.delete('/work-experience/:workId', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    const { workId } = req.params;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
     
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
     
-    await userService.deleteWorkExperience(customUserId, workId);
+    const { workId } = req.params;
+    await userService.deleteWorkExperience(user.customUserId, workId);
     res.json({ success: true, message: 'Work experience deleted successfully' });
   } catch (error) {
     console.error('Error deleting work experience:', error);
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// Add education
-router.post('/education', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const educationData = req.body;
-    
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    
-    const newEducation = await userService.addEducation(customUserId, educationData);
-    res.status(201).json({ success: true, message: 'Education added successfully', data: newEducation });
-  } catch (error) {
-    console.error('Error adding education:', error);
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// Update education
-router.put('/education/:educationId', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const { educationId } = req.params;
-    const educationData = req.body;
-    
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    
-    const updatedEducation = await userService.updateEducation(customUserId, educationId, educationData);
-    res.json({ success: true, message: 'Education updated successfully', data: updatedEducation });
-  } catch (error) {
-    console.error('Error updating education:', error);
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// Delete education
-router.delete('/education/:educationId', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const { educationId } = req.params;
-    
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const customUserId = userSnap.data().customUserId;
-    
-    await userService.deleteEducation(customUserId, educationId);
-    res.json({ success: true, message: 'Education deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting education:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 });
@@ -1181,16 +430,13 @@ router.delete('/education/:educationId', authorize, async (req, res) => {
 router.put('/personal-details', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    const personalDetails = req.body;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
     
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
     
-    const updatedDetails = await userService.updatePersonalDetails(customUserId, personalDetails);
+    const updatedDetails = await userService.updatePersonalDetails(user.customUserId, req.body);
     res.json({ success: true, message: 'Personal details updated successfully', data: updatedDetails });
   } catch (error) {
     console.error('Error updating personal details:', error);
@@ -1202,16 +448,13 @@ router.put('/personal-details', authorize, async (req, res) => {
 router.put('/social-links', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    const socialLinks = req.body;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
     
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
     
-    const updatedLinks = await userService.updateSocialLinks(customUserId, socialLinks);
+    const updatedLinks = await userService.updateSocialLinks(user.customUserId, req.body);
     res.json({ success: true, message: 'Social links updated successfully', data: updatedLinks });
   } catch (error) {
     console.error('Error updating social links:', error);
@@ -1219,25 +462,288 @@ router.put('/social-links', authorize, async (req, res) => {
   }
 });
 
-// Track project view
-router.post('/projects/:projectId/view', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const { projectId } = req.params;
+// Follow/unfollow user
+router.post('/follow', authorize, async (req, res) => {
+    try {
+        const firebaseUid = req.user.uid;
+    const { targetUserId } = req.body;
     
-    // Fetch customUserId from Firestore
-    const userRef = db.collection('users').doc(firebaseUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
+    if (!targetUserId) {
+      return res.status(400).json({ success: false, message: 'Target user ID is required' });
+    }
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const customUserId = userSnap.data().customUserId;
     
-    const result = await userService.trackProjectView(customUserId, projectId);
-    res.json({ success: true, data: result });
+    // Add to following list
+    await userService.followUser(user.customUserId, targetUserId);
+        
+    res.json({ success: true, message: 'Connection request sent successfully' });
+        } catch (error) {
+    console.error('Error following user:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Schedule meeting
+router.post('/meetings', authorize, async (req, res) => {
+    try {
+        const firebaseUid = req.user.uid;
+    const meetingData = req.body;
+
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+    
+    // Add meeting to user's meetings (you might want to create a separate meetings table)
+    const meetingId = Date.now().toString();
+    const meeting = {
+      id: meetingId,
+      ...meetingData,
+      createdBy: user.customUserId,
+      createdAt: new Date().toISOString()
+    };
+    
+    // For now, we'll store meetings in the user's data
+    // In a production app, you'd want a separate meetings table
+    await userService.addActivity(user.customUserId, {
+      type: 'meeting_scheduled',
+      description: `Scheduled meeting: ${meetingData.title}`,
+      // Only save necessary fields for dashboard display
+    });
+    
+    res.json({ success: true, message: 'Meeting scheduled successfully', data: meeting });
   } catch (error) {
-    console.error('Error tracking project view:', error);
-    res.status(400).json({ success: false, message: error.message });
+    console.error('Error scheduling meeting:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Create user endpoint (for frontend compatibility)
+router.post('/create', authorize, async (req, res) => {
+    try {
+        const firebaseUid = req.user.uid;
+    const { firstName, lastName, email, userType, phoneNumber } = req.body;
+    
+    // Check if user already exists
+    let user = await userService.findUserByFirebaseUid(firebaseUid);
+    
+    if (user) {
+      return res.status(200).json({ 
+            success: true,
+        message: 'User already exists',
+        data: {
+          customUserId: user.customUserId,
+          profile: user.profile
+        }
+      });
+    }
+    
+    // Create new user
+    const newUser = await userService.createUser(firebaseUid, {
+      firstName: firstName || '',
+      lastName: lastName || '',
+      email: email || req.user.email || 'no-email@example.com',
+      userType: userType || 'student',
+      mobile: phoneNumber || '',
+      phoneNumber: phoneNumber || ''
+    });
+    
+
+    
+    res.status(201).json({ 
+            success: true,
+      message: 'User created successfully',
+      data: {
+        customUserId: newUser.customUserId,
+        profile: newUser.profile
+      }
+        });
+    } catch (error) {
+    console.error('Create endpoint - Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Update user auth info
+router.put('/auth', authorize, async (req, res) => {
+    try {
+        const firebaseUid = req.user.uid;
+    const { firstName, lastName, phoneNumber, userType } = req.body;
+
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+    
+    const updateData = {};
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if (userType !== undefined) updateData.userType = userType;
+    await userService.updateUserProfile(user.customUserId, updateData);
+    
+    res.json({ success: true, message: 'Auth info updated successfully' });
+    } catch (error) {
+    console.error('Error updating auth info:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Get all users (for collaborators page) - must be before parameterized routes
+router.get('/all', async (req, res) => {
+  try {
+    const users = await userService.getAllUsers();
+    res.json({ success: true, users });
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Get user by customUserId (for public profile viewing)
+router.get('/:customUserId', async (req, res) => {
+  try {
+    const { customUserId } = req.params;
+    
+    if (!customUserId) {
+      return res.status(400).json({ success: false, message: 'Custom user ID is required' });
+    }
+    
+    const user = await userService.findUserByCustomId(customUserId);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Return public profile data (excluding sensitive information)
+    res.json({
+      success: true,
+      data: {
+        customUserId: user.customUserId,
+        auth: {
+          firstName: user.profile.firstName || '',
+          lastName: user.profile.lastName || '',
+          email: user.profile.email || '',
+          userType: user.profile.userType || '',
+          mobile: user.profile.mobile || '',
+          gender: user.profile.gender || ''
+        },
+        profile: user.profile || {},
+        stats: user.stats || {},
+        studentData: user.studentData || null,
+        education: user.education || [],
+        workExperience: user.workExperience || [],
+        skills: user.skills || [],
+        freelancerData: user.freelancerData || null,
+        professorData: user.professorData || null,
+        personalDetails: user.personalDetails || {},
+        socialLinks: user.socialLinks || {},
+        projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user by customUserId:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Cart endpoints
+// Add item to cart
+router.post('/:customUserId/cart', authorize, async (req, res) => {
+  try {
+    const { customUserId } = req.params;
+    const { productId, quantity = 1 } = req.body;
+    
+    if (!productId) {
+      return res.status(400).json({ success: false, message: 'Product ID is required' });
+    }
+    
+    // Verify the user exists
+    const user = await userService.findUserByCustomId(customUserId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Add item to cart
+    await userService.addToCart(customUserId, { productId, quantity });
+    
+    // Get updated cart
+    const updatedCart = await userService.getUserCart(customUserId);
+    
+    res.status(201).json({ success: true, message: 'Item added to cart successfully', data: updatedCart });
+  } catch (error) {
+    console.error('Error adding item to cart:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Get user cart
+router.get('/:customUserId/cart', authorize, async (req, res) => {
+  try {
+    const { customUserId } = req.params;
+    
+    // Verify the user exists
+    const user = await userService.findUserByCustomId(customUserId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Get user cart
+    const cart = await userService.getUserCart(customUserId);
+    
+    res.json({ success: true, data: cart });
+  } catch (error) {
+    console.error('Error getting user cart:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Remove item from cart
+router.delete('/:customUserId/cart/:productId', authorize, async (req, res) => {
+  try {
+    const { customUserId, productId } = req.params;
+    
+    // Verify the user exists
+    const user = await userService.findUserByCustomId(customUserId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Remove item from cart
+    await userService.removeFromCart(customUserId, productId);
+    
+    // Get updated cart
+    const updatedCart = await userService.getUserCart(customUserId);
+    
+    res.json({ success: true, message: 'Item removed from cart successfully', data: updatedCart });
+  } catch (error) {
+    console.error('Error removing item from cart:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Clear cart
+router.delete('/:customUserId/cart', authorize, async (req, res) => {
+  try {
+    const { customUserId } = req.params;
+    
+    // Verify the user exists
+    const user = await userService.findUserByCustomId(customUserId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Clear cart
+    await userService.clearCart(customUserId);
+    
+    res.json({ success: true, message: 'Cart cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing cart:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ArrowLeft, RefreshCw, Mail, Phone, MapPin, Calendar, CheckCircle, XCircle, Clock, Package } from "lucide-react";
 
@@ -26,7 +26,7 @@ const RefundPolicy = () => {
             </p>
             <div className="flex items-center justify-center text-sm text-gray-500">
               <Calendar className="w-4 h-4 mr-2" />
-              Last Updated: February 4, 2025
+              Last Updated: June, 2025
             </div>
           </div>
         </div>

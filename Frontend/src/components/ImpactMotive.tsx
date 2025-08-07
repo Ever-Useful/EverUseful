@@ -66,10 +66,10 @@ export const ImpactMotive = () => {
         <div className="absolute inset-0 bg-white/60 backdrop-blur-xs"></div>
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 max-w-[85vw]">
           <div className="text-center mb-8 sm:mb-16">
-            <h2 className="text-lg sm:text-3xl font-semibold text-gray-800 mb-2 sm:mb-4">
+            <h2 className="text-[17px] sm:text-4xl font-bold text-gray-800 mb-2 sm:mb-4 mobile-text-3xl">
               Transforming Ideas into Reality
             </h2>
-            <p className="text-xs sm:text-lg text-gray-600 max-w-5xl mx-auto">
+            <p className="text-base text-gray-600 max-w-5xl mx-auto mobile-text-base">
               Measuring our success through the positive change we create in the innovation ecosystem
             </p>
           </div>
@@ -94,17 +94,15 @@ export const ImpactMotive = () => {
                   h-full flex flex-col bg-white shadow-md hover:shadow-xl transition-transform transform hover:-translate-y-1 rounded-xl border border-gray-200
                   px-1 py-1 sm:p-0
                 ">
-                  <CardContent className="p-2 sm:p-6 flex flex-col flex-grow justify-between">
+                  <CardContent className="p-2 sm:p-6 flex flex-col flex-grow">
                     <div className={`w-7 h-7 sm:w-14 sm:h-14 ${impact.iconBg} rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-4`}>
                       <impact.icon className={`w-4 h-4 sm:w-6 sm:h-6 ${impact.iconColor}`} />
                     </div>
-                    <div>
-                      <div className="text-base sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2 text-center">
-                        {impactInView ? <CountUp end={impact.value} duration={2} suffix={impact.suffix} /> : "0"}
-                      </div>
-                      <h3 className="text-[11px] sm:text-lg font-semibold text-gray-800 text-center">{impact.title}</h3>
-                      <p className="text-[9px] sm:text-sm text-gray-600 text-center mt-1">{impact.description}</p>
+                    <div className="text-base sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2 text-center mobile-text-base sm:mobile-text-2xl">
+                      {impactInView ? <CountUp end={impact.value} duration={2} suffix={impact.suffix} /> : "0"}
                     </div>
+                    <h3 className="text-2xl sm:text-lg font-bold text-gray-800 text-center mobile-text-2xl sm:mobile-text-lg">{impact.title}</h3>
+                    <p className="text-base sm:text-sm text-gray-600 text-center mt-1 mobile-text-base sm:mobile-text-sm">{impact.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -117,10 +115,10 @@ export const ImpactMotive = () => {
       <section id="mission" className="py-8 sm:py-12 bg-gradient-to-r from-gray-700/5 via-gray-800/10 to-gray-700/5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[85vw]">
           <div className="text-center mb-8 sm:mb-16">
-            <h2 className="text-lg sm:text-3xl font-semibold text-gray-100 mb-2 sm:mb-4">
-              Why <span className="text-indigo-400 text-xl sm:text-4xl font-extrabold">AMOGH</span> Exists
+            <h2 className="text-[17px] sm:text-3xl font-bold text-gray-100 mb-2 sm:mb-4 mobile-text-3xl">
+              Why <span className="text-indigo-400 font-extrabold mobile-text-3xl">AMOGH</span> Exists
             </h2>
-            <p className="text-xs sm:text-lg text-gray-200 max-w-5xl mx-auto">
+            <p className="text-base text-gray-200 max-w-5xl mx-auto mobile-text-base">
               Driven by the belief that innovation should know no boundaries, we're building a world where every idea has the potential to create positive impact
             </p>
           </div>
@@ -138,8 +136,8 @@ export const ImpactMotive = () => {
                       <motive.icon className="text-indigo-600 w-4 h-4 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <h3 className="text-xs sm:text-lg font-bold text-gray-900 mb-1 ml-2 sm:ml-4">{motive.title}</h3>
-                      <p className="text-[10px] sm:text-sm text-gray-600 ml-2 sm:ml-4">{motive.description}</p>
+                      <h3 className="text-2xl sm:text-lg font-bold text-gray-900 mb-1 ml-2 sm:ml-4 mobile-text-2xl sm:mobile-text-lg">{motive.title}</h3>
+                      <p className="text-base sm:text-sm text-gray-600 ml-2 sm:ml-4 mobile-text-base sm:mobile-text-sm">{motive.description}</p>
                     </div>
                   </CardContent>
                 </Card>

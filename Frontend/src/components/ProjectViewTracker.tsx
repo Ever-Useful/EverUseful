@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 
 interface ProjectViewTrackerProps {
   projectId: string;

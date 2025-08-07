@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Footer } from '../components/Footer';
-import { Header } from '../components/Header';
+import Header from '../components/Header';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowUpDown } from 'lucide-react';
 import noUserProfile from '../assets/images/no user profile.png';
+import { API_ENDPOINTS } from '../config/api';
 
 // Define types for freelancer data
 type Freelancer = {
@@ -56,11 +57,16 @@ const FindExpert = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/users/all')
-      .then(res => res.json())
-      .then(data => {
+    const fetchExperts = async () => {
+      try {
+        const response = await fetch(API_ENDPOINTS.USERS + "/all");
+        if (!response.ok) {
+          throw new Error('Failed to fetch experts');
+        }
+        const data = await response.json();
         if (data && data.users) {
-          const phdUsers = Object.values(data.users).filter((user: any) => {
+          const all = Object.values(data.users);
+          const onlyPhdUsers = all.filter((user: any) => {
             // Check if user has education data
             if (!user.education || !Array.isArray(user.education)) {
               return false;
@@ -80,35 +86,37 @@ const FindExpert = () => {
             return hasPhd;
           });
           
-          console.log('PhD Users found:', phdUsers.length);
-          setPhdExperts(phdUsers);
+          console.log('PhD Users found:', onlyPhdUsers.length);
+          setPhdExperts(onlyPhdUsers);
         }
-      })
-      .catch(error => {
-        console.error('Error fetching users:', error);
-      });
+      } catch (error) {
+        console.error('Error fetching experts:', error);
+      }
+    };
+
+    fetchExperts();
   }, []);
 
   // Filter experts based on category and search query
   useEffect(() => {
-    // Transform backend data to match Freelancer type with fallback values
+    // Transform backend data to match Freelancer type with real data
     let result = phdExperts.map((user, index) => ({
       id: user.customUserId || `user-${index}`,
-      name: `${user.profile?.firstName || 'Dr.'} ${user.profile?.lastName || 'Researcher'}`,
+      name: `${user.auth?.firstName || user.profile?.firstName || 'Dr.'} ${user.auth?.lastName || user.profile?.lastName || 'Researcher'}`,
       title: user.profile?.title || 'Research Expert',
       skills: user.skills || [],
-      rate: '$50/hr',
-      experience: '5+ years',
+      rate: user.freelancerData?.hourlyRate ? `$${user.freelancerData.hourlyRate}/hr` : 'N/A',
+      experience: user.freelancerData?.experience ? `${user.freelancerData.experience} years` : 'N/A',
       image: user.profile?.avatar || noUserProfile,
-      rating: 4.5,
-      completedProjects: 10,
+      rating: user.rating || 0,
+      completedProjects: user.stats?.projectsCount || 0,
       isAvailable: true,
-      location: user.profile?.location || 'University',
-      responseTime: '2 hours',
-      portfolio: '',
-      university: user.profile?.university || 'Research University',
-      researchFocus: user.profile?.researchFocus || 'Academic Research',
-      publications: 5,
+      location: user.profile?.location || 'N/A',
+      responseTime: user.freelancerData?.avgResponseTime ? `${user.freelancerData.avgResponseTime} hours` : 'N/A',
+      portfolio: user.freelancerData?.portfolio || '',
+      university: user.studentData?.college || user.profile?.college || 'N/A',
+      researchFocus: user.professorData?.researchInterests || 'Academic Research',
+      publications: user.stats?.publicationsCount || 0,
       // Keep original user properties for profile navigation
       profile: user.profile,
       customUserId: user.customUserId
@@ -200,10 +208,10 @@ const FindExpert = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold mb-4 xs:mb-6 leading-tight">
+                <h1 className="text-4xl font-bold mb-4 xs:mb-6 leading-tight mobile-text-4xl">
                   Connect with <span className="text-amber-400">PhD Experts</span> for Research & Mentorship
                 </h1>
-                <p className="text-base xs:text-lg sm:text-xl text-indigo-100 mb-5 xs:mb-8 max-w-xl">
+                <p className="text-base text-indigo-100 mb-5 xs:mb-8 max-w-xl mobile-text-base">
                   Access specialized knowledge from verified PhD researchers and academics. Collaborate on research projects, receive expert mentorship, and accelerate your R&D initiatives with qualified doctoral experts.
                 </p>
               </motion.div>
@@ -314,8 +322,8 @@ const FindExpert = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 xs:mb-6 text-center"
         >
-          <h2 className="text-lg xs:text-2xl font-bold text-gray-900 mb-1 xs:mb-2">Browse Research Domains</h2>
-          <p className="text-xs xs:text-base text-gray-600">Find experts in specific academic disciplines</p>
+                                          <h2 className="text-3xl font-bold text-gray-900 mb-1 xs:mb-2 mobile-text-3xl">Browse Research Domains</h2>
+                <p className="text-xs xs:text-base text-gray-600 mobile-text-base">Find experts in specific academic disciplines</p>
         </motion.div>
         <motion.div
           className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 xs:gap-3"
@@ -502,7 +510,7 @@ const FindExpert = () => {
       <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 xs:mb-12">
           <motion.h2 
-            className="text-lg xs:text-3xl font-bold text-gray-900 mb-2 xs:mb-4"
+                            className="text-2xl font-bold text-gray-900 mb-2 xs:mb-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}

@@ -2,15 +2,9 @@
 
 import React, { useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 import {
   Star,
   TrendingUp,
@@ -19,68 +13,78 @@ import {
   ExternalLink,
   X,
 } from "lucide-react";
+import {
+  Card as UICard,
+  CardHeader as UICardHeader,
+  CardTitle as UICardTitle,
+  CardDescription as UICardDescription,
+  CardContent as UICardContent,
+} from "@/components/ui/card";
 
 export const FeaturedProducts: React.FC = () => {
   const [expanded, setExpanded] = useState<number | null>(null);
   const navigate = useNavigate();
-  const featuredProjects = useMemo(() => [
-    {
-      id: 1,
-      title: "EcoTrack",
-      subtitle: "Carbon Footprint Monitor",
-      description:
-        "AI-powered sustainability tracker for businesses and individuals. This tool helps you monitor, analyze, and reduce your carbon emissions with real-time data and actionable insights.",
-      category: "Sustainability",
-      author: "MIT Research Team",
-      rating: 4.9,
-      users: "2.5K",
-      image: "https://images.unsplash.com/photo-1501854140801-50d01698950b",
-      tags: ["AI", "Sustainability", "IoT"],
-      gradient: "from-green-500 to-emerald-600",
-    },
-    {
-      id: 2,
-      title: "QuantumMed",
-      subtitle: "Drug Discovery Platform",
-      description:
-        "Quantum computing approach to pharmaceutical research. QuantumMed accelerates the discovery of new drugs by simulating molecular interactions at unprecedented speeds.",
-      category: "Healthcare",
-      author: "Stanford PhD Collective",
-      rating: 4.8,
-      users: "1.8K",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
-      tags: ["Quantum", "Healthcare", "Research"],
-      gradient: "from-blue-500 to-purple-600",
-    },
-    {
-      id: 3,
-      title: "AgriBot",
-      subtitle: "Smart Farming Assistant",
-      description:
-        "Autonomous farming solution with predictive analytics. AgriBot leverages robotics and AI to optimize crop yields and reduce manual labor.",
-      category: "Agriculture",
-      author: "AgTech Innovators",
-      rating: 4.7,
-      users: "3.2K",
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22",
-      tags: ["Robotics", "Agriculture", "AI"],
-      gradient: "from-yellow-500 to-orange-600",
-    },
-    {
-      id: 4,
-      title: "ROBot",
-      subtitle: "Smart Farming Assistant",
-      description:
-        "Autonomous farming solution with predictive analytics. ROBot is designed to enhance efficiency and sustainability in agriculture.",
-      category: "Agriculture",
-      author: "AgTech Innovators",
-      rating: 4.7,
-      users: "3.2K",
-      image: "https://plus.unsplash.com/premium_photo-1678344170545-c3edef92a16e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      tags: ["Robotics", "Agriculture", "AI"],
-      gradient: "from-yellow-500 to-orange-600",
-    }
-  ], []);
+  const featuredProjects = useMemo(
+    () => [
+      {
+        id: 1,
+        title: "EcoTrack",
+        subtitle: "Carbon Footprint Monitor",
+        description:
+          "AI-powered sustainability tracker for businesses and individuals. This tool helps you monitor, analyze, and reduce your carbon emissions with real-time data and actionable insights.",
+        category: "Sustainability",
+        author: "MIT Research Team",
+        rating: 4.9,
+        users: "2.5K",
+        image: "https://images.unsplash.com/photo-1501854140801-50d01698950b",
+        tags: ["AI", "Sustainability", "IoT"],
+        gradient: "from-green-500 to-emerald-600",
+      },
+      {
+        id: 2,
+        title: "QuantumMed",
+        subtitle: "Drug Discovery Platform",
+        description:
+          "Quantum computing approach to pharmaceutical research. QuantumMed accelerates the discovery of new drugs by simulating molecular interactions at unprecedented speeds.",
+        category: "Healthcare",
+        author: "Stanford PhD Collective",
+        rating: 4.8,
+        users: "1.8K",
+        image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+        tags: ["Quantum", "Healthcare", "Research"],
+        gradient: "from-blue-500 to-purple-600",
+      },
+      {
+        id: 3,
+        title: "AgriBot",
+        subtitle: "Smart Farming Assistant",
+        description:
+          "Autonomous farming solution with predictive analytics. AgriBot leverages robotics and AI to optimize crop yields and reduce manual labor.",
+        category: "Agriculture",
+        author: "AgTech Innovators",
+        rating: 4.7,
+        users: "3.2K",
+        image: "https://images.unsplash.com/photo-1500673922987-e212871fec22",
+        tags: ["Robotics", "Agriculture", "AI"],
+        gradient: "from-yellow-500 to-orange-600",
+      },
+      {
+        id: 4,
+        title: "ROBot",
+        subtitle: "Smart Farming Assistant",
+        description:
+          "Autonomous farming solution with predictive analytics. ROBot is designed to enhance efficiency and sustainability in agriculture.",
+        category: "Agriculture",
+        author: "AgTech Innovators",
+        rating: 4.7,
+        users: "3.2K",
+        image: "https://plus.unsplash.com/premium_photo-1678344170545-c3edef92a16e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        tags: ["Robotics", "Agriculture", "AI"],
+        gradient: "from-yellow-500 to-orange-600",
+      },
+    ],
+    []
+  );
 
   // Overlay for background blur/dim when a card is expanded
   const Overlay = () =>
@@ -91,7 +95,7 @@ export const FeaturedProducts: React.FC = () => {
   // The expanded card (modal-like) on click
   const ExpandedCard = ({ project }: { project: typeof featuredProjects[0] }) => (
     <div className="fixed z-50 inset-0 flex items-center justify-center px-2 py-4 sm:px-4 sm:py-8">
-      <div
+      <UICard
         className={`
           bg-white rounded-2xl shadow-2xl overflow-hidden animate-bounce-in relative
           w-full max-w-[95vw] sm:max-w-4xl
@@ -115,7 +119,6 @@ export const FeaturedProducts: React.FC = () => {
             alt={project.title}
             className="w-full h-full object-cover object-center"
             style={{ aspectRatio: "4/3" }}
-            loading="lazy"
           />
           <div
             className={`absolute inset-0 bg-gradient-to-t ${project.gradient} opacity-20`}
@@ -125,24 +128,26 @@ export const FeaturedProducts: React.FC = () => {
           </Badge>
         </div>
         {/* Content */}
-        <div className="w-full sm:w-[70%] flex flex-col px-4 py-4 sm:px-8 sm:py-6 overflow-y-auto">
-          <div>
-            <h3 className="text-xl sm:text-3xl font-extrabold text-gray-900 mb-2">
+        <UICardContent className="w-full sm:w-[70%] flex flex-col px-4 py-4 sm:px-8 sm:py-6 overflow-y-auto">
+          <UICardHeader className="px-0 pb-1">
+            <UICardTitle className="text-xl sm:text-3xl font-extrabold text-gray-900 mb-2">
               {project.title}
-            </h3>
-            <div className="text-xs sm:text-base text-gray-500 mb-2">{project.subtitle}</div>
-            <div className="text-sm sm:text-lg text-gray-700 mb-4">{project.description}</div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {project.tags.map((t) => (
-                <Badge
-                  key={t}
-                  variant="outline"
-                  className="text-xs rounded-full px-2 py-1 border-blue-100 bg-blue-50 text-blue-700"
-                >
-                  {t}
-                </Badge>
-              ))}
-            </div>
+            </UICardTitle>
+            <p className="text-xs sm:text-base text-gray-500 mb-2">{project.subtitle}</p>
+          </UICardHeader>
+          <UICardDescription className="text-sm sm:text-lg text-gray-700 mb-4">
+            {project.description}
+          </UICardDescription>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {project.tags.map((t) => (
+              <Badge
+                key={t}
+                variant="outline"
+                className="text-xs rounded-full px-2 py-1 border-blue-100 bg-blue-50 text-blue-700"
+              >
+                {t}
+              </Badge>
+            ))}
           </div>
           <div className="flex items-center justify-between text-xs text-gray-500 mb-4 mt-auto">
             <span className="font-medium truncate">{project.author}</span>
@@ -157,12 +162,15 @@ export const FeaturedProducts: React.FC = () => {
               </div>
             </div>
           </div>
-          <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-base font-semibold rounded-lg transition-all duration-300">
+          <Button 
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-base font-bold rounded-lg transition-all duration-300"
+            onClick={() => window.open('https://www.chainfly.co/')}
+          >
             Connect
             <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
           </Button>
-        </div>
-      </div>
+        </UICardContent>
+      </UICard>
       {/* Click outside to close */}
       <div
         className="fixed inset-0 z-40"
@@ -188,10 +196,10 @@ export const FeaturedProducts: React.FC = () => {
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-[92vw] relative z-10">
         {/* Header */}
         <div className="text-center mb-14">
-          <h2 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-2">
+          <h1 className="text-[17px] sm:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight mobile-text-4xl">
             Discover <span className="text-blue-600">Game-Changing</span> Projects
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+          </h1>
+          <p className="text-[12px] sm:text-base text-gray-600 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
             Explore innovative solutions from our talented community.
           </p>
         </div>
@@ -199,7 +207,7 @@ export const FeaturedProducts: React.FC = () => {
         {/* Desktop Grid */}
         <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {featuredProjects.map((p) => (
-            <Card
+            <UICard
               key={p.id}
               className={`group flex flex-col rounded-2xl border border-gray-200 bg-white/90 shadow transition-all duration-300 h-full cursor-pointer
                 ${expanded === p.id ? "z-40" : ""}
@@ -231,7 +239,6 @@ export const FeaturedProducts: React.FC = () => {
                     width: "100%",
                     height: "100%",
                   }}
-                  loading="lazy"
                 />
                 <div
                   className={`absolute inset-0 bg-gradient-to-t ${p.gradient} opacity-20`}
@@ -241,18 +248,18 @@ export const FeaturedProducts: React.FC = () => {
                 </Badge>
               </div>
               {/* Content */}
-              <div className="flex flex-col flex-1 px-5 py-4">
-                <CardHeader className="px-0 pb-1">
-                  <CardTitle className="text-lg md:text-xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+              <UICardContent className="flex flex-col flex-1 px-5 py-4">
+                <UICardHeader className="px-0 pb-1">
+                  <UICardTitle className="text-lg md:text-lg font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                     {p.title}
-                  </CardTitle>
+                  </UICardTitle>
                   <p className="text-xs text-gray-500 mb-1">{p.subtitle}</p>
-                </CardHeader>
-                <CardDescription
+                </UICardHeader>
+                <UICardDescription
                   className="text-gray-600 text-sm mb-3 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]"
                 >
                   {p.description}
-                </CardDescription>
+                </UICardDescription>
                 <div className="flex flex-wrap gap-2 mb-3">
                   {p.tags.map((t) => (
                     <Badge
@@ -279,14 +286,14 @@ export const FeaturedProducts: React.FC = () => {
                   </div>
                 </div>
                 <Button
-                  className="mt-auto w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-sm font-semibold rounded-lg transition-all duration-300"
+                  className="mt-auto w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-sm font-bold rounded-lg transition-all duration-300"
                   onClick={() => setExpanded(p.id)}
                 >
                   View Details
                   <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Button>
-              </div>
-            </Card>
+              </UICardContent>
+            </UICard>
           ))}
         </div>
 
@@ -294,7 +301,7 @@ export const FeaturedProducts: React.FC = () => {
         <div className="sm:hidden">
           <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory">
             {featuredProjects.map((p) => (
-              <div
+              <UICard
                 key={p.id}
                 className={`
                   flex-shrink-0 snap-start
@@ -326,41 +333,40 @@ export const FeaturedProducts: React.FC = () => {
                     src={p.image}
                     alt={p.title}
                     className="w-full h-full object-cover"
-                    loading="lazy"
                   />
                   <div
                     className={`absolute inset-0 bg-gradient-to-t ${p.gradient} opacity-20`}
                   />
-                  <Badge className="absolute top-2 left-2 h-6 px-2 text-[11px] rounded-full bg-white/95 text-gray-800 shadow">
+                  <Badge className="absolute top-2 left-2 h-6 px-2 mobile-text-xs rounded-full bg-white/95 text-gray-800 shadow">
                     {p.category}
                   </Badge>
                 </div>
                 {/* Content */}
-                <div className="flex flex-col flex-1 px-3 py-3">
-                  <CardHeader className="px-0 pb-1">
-                    <CardTitle className="text-base font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                <UICardContent className="flex flex-col flex-1 px-3 py-3">
+                  <UICardHeader className="px-0 pb-1">
+                    <UICardTitle className="mobile-text-2xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                       {p.title}
-                    </CardTitle>
-                    <p className="text-xs text-gray-500 mb-1">{p.subtitle}</p>
-                  </CardHeader>
-                  <CardDescription
-                    className="text-gray-600 text-xs mb-2 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]"
+                    </UICardTitle>
+                    <p className="mobile-text-base text-gray-500 mb-1">{p.subtitle}</p>
+                  </UICardHeader>
+                  <UICardDescription
+                    className="text-gray-600 mobile-text-base mb-2 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]"
                   >
                     {p.description}
-                  </CardDescription>
+                  </UICardDescription>
                   <div className="flex flex-wrap gap-1 mb-2">
                     {p.tags.map((t) => (
                       <Badge
                         key={t}
                         variant="outline"
-                        className="text-[10px] rounded-full px-1 py-0.5 border-blue-100 bg-blue-50 text-blue-700"
+                        className="mobile-text-base rounded-full px-1 py-0.5 border-blue-100 bg-blue-50 text-blue-700"
                       >
                         {t}
                       </Badge>
                     ))}
                   </div>
                   {/* Footer */}
-                  <div className="flex items-center justify-between text-[11px] text-gray-500 mb-2">
+                  <div className="flex items-center justify-between mobile-text-sm text-gray-500 mb-2">
                     <span className="font-medium truncate">{p.author}</span>
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1">
@@ -374,14 +380,14 @@ export const FeaturedProducts: React.FC = () => {
                     </div>
                   </div>
                   <Button
-                    className="mt-auto w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-xs font-semibold rounded-lg transition-all duration-300 py-2"
+                    className="mt-auto w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md mobile-text-base font-bold rounded-lg transition-all duration-300 py-2"
                     onClick={() => setExpanded(p.id)}
                   >
                     View Details
                     <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                   </Button>
-                </div>
-              </div>
+                </UICardContent>
+              </UICard>
             ))}
           </div>
         </div>
@@ -392,7 +398,7 @@ export const FeaturedProducts: React.FC = () => {
             onClick={() => navigate("/marketplace")}
             size="lg"
             variant="outline"
-            className="hover:scale-105 transition-all duration-300 border-blue-200 text-blue-700 font-semibold rounded-lg"
+            className="hover:scale-105 transition-all duration-300 border-blue-200 text-blue-700 font-bold rounded-lg mobile-text-2xl"
           >
             <TrendingUp className="mr-2 w-5 h-5" />
             View All Projects
@@ -401,7 +407,7 @@ export const FeaturedProducts: React.FC = () => {
         </div>
       </div>
 
-      {/* Scoped CSS for bounce animation */}
+      {/* Scoped CSS for bounce animation and mobile font sizes */}
       <style>{`
         @keyframes bounce-in {
           0% { transform: scale(0.96); }
