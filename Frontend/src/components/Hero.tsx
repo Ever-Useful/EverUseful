@@ -93,7 +93,7 @@ export const Hero = () => {
               </h1>
               <p className="text-[12px] sm:text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
                 A platform where students, PhD holders, professors, and
-                businesses collaborate to transform ideas into real‐world impact.
+                businesses collaborate to transform ideas into real-world impact.
                 Join the future of collaborative innovation today.
               </p>
               <div className="flex justify-center lg:justify-start animate-fade-in delay-300">

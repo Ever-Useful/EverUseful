@@ -1,20 +1,16 @@
 // API Configuration
+// This application uses IAM roles for AWS authentication in production
+
 const isDevelopment = import.meta.env.DEV;
 const isProduction = import.meta.env.PROD;
 
-// Base API URL - automatically switches between localhost and production
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (isDevelopment ? 'http://localhost:3000' : 'http://amoghconnect.com');
-
-// For production, we need to ensure the API calls go through the proxy
+// Simple API URL configuration
 export const getApiUrl = (endpoint: string) => {
-  if (isDevelopment) {
-    return `${API_BASE_URL}${endpoint}`;
-  } else {
-    // In production, use the backend directly with HTTP
-    // Now that frontend is HTTP, there's no mixed content issue
-    return `http://13.235.148.91:3000${endpoint}`;
-  }
+  // Use localhost for development, api.amoghconnect.com for production
+  const baseUrl = isDevelopment ? 'http://localhost:3000' : 'https://api.amoghconnect.com';
+  const url = `${baseUrl}${endpoint}`;
+  console.log(`API Request: ${url} (${isDevelopment ? 'development' : 'production'})`);
+  return url;
 };
 
 // API Endpoints
@@ -55,10 +51,8 @@ export const API_ENDPOINTS = {
 
 // Helper function to get auth headers
 export const getAuthHeaders = async (): Promise<HeadersInit> => {
-  // This will be implemented based on your auth system
   return {
     'Content-Type': 'application/json',
-    // Add any other default headers here
   };
 };
 
@@ -76,12 +70,4 @@ export const makeAuthenticatedRequest = async (
       ...options.headers,
     },
   });
-};
-
-// Environment info for debugging
-export const API_CONFIG = {
-  baseUrl: API_BASE_URL,
-  isDevelopment,
-  isProduction,
-  endpoints: API_ENDPOINTS,
 }; 

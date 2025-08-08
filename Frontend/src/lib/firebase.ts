@@ -4,6 +4,7 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, GithubAuthProvider, signI
 import { getAnalytics } from "firebase/analytics";
 // Removed Firestore import - using DynamoDB now
 import { getStorage } from 'firebase/storage';
+import { API_ENDPOINTS } from '../config/api';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -31,8 +32,8 @@ export const handleGoogleAuth = async (navigate: (url: string) => void, userType
   const userCredential = await signInWithPopup(auth, provider);
   const token = await userCredential.user.getIdToken();
 
-  // Use the correct API endpoint based on environment
-  const apiUrl = import.meta.env.DEV ? 'http://localhost:3000/token' : 'http://13.235.148.91:3000/token';
+  // Use the API configuration
+  const apiUrl = API_ENDPOINTS.TOKEN;
   
   const response = await fetch(apiUrl, {
     method: "POST",
@@ -65,8 +66,8 @@ export const handleGithubAuth = async (navigate: (url: string) => void, userType
   const userCredential = await signInWithPopup(auth, provider);
   const token = await userCredential.user.getIdToken();
 
-  // Use the correct API endpoint based on environment
-  const apiUrl = import.meta.env.DEV ? 'http://localhost:3000/token' : 'http://13.235.148.91:3000/token';
+  // Use the API configuration
+  const apiUrl = API_ENDPOINTS.TOKEN;
   
   const response = await fetch(apiUrl, {
     method: "POST",

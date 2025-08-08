@@ -330,10 +330,17 @@ const SignUp = () => {
       const result = await response.json();
       console.log('User data saved successfully:', result);
       
-      // Set localStorage to indicate user is logged in
+      // Set localStorage to indicate user is logged in and store user data
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userType", formData.userType);
       localStorage.setItem("userName", `${formData.firstName} ${formData.lastName}`);
+      localStorage.setItem("userFirstName", formData.firstName);
+      localStorage.setItem("userLastName", formData.lastName);
+      localStorage.setItem("userEmail", formData.email);
+      localStorage.setItem("userPhone", selectedCode + formData.phone);
+      localStorage.setItem("userDataSaved", "true");
+      
+      // Dispatch storage event to notify other components
       window.dispatchEvent(new Event("storage"));
       
       // Navigate to profile page

@@ -32,7 +32,7 @@ const TeamSection = () => {
     avatar: techLead,
     linkedin: "https://www.linkedin.com/in/ankit-kumar-451aba203?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
     // email: "francis@microphonemedia.nl",
-    description: "Passion for building scalable digital solutions. lead product development and also serve as a technical consultant to support the company’s growth. Driven by innovation, I align tech with business goals to deliver real impact."
+    description: "Passion for building scalable digital solutions. Lead product development and also serve as a technical consultant to support the company's growth. Driven by innovation, I align tech with business goals to deliver real impact."
   };
 
   const techTeam = [

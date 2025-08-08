@@ -20,6 +20,9 @@ interface UserProfile {
 interface UserStats {
   projectsCount: number;
   totalLikes: number;
+  followersCount: number;
+  followingCount: number;
+  connectionsCount: number;
 }
 
 interface UserData {
@@ -35,6 +38,9 @@ interface UserData {
       mobile: string;
       gender: string;
       username: string;
+      domain?: string;
+      purpose?: string;
+      role?: string;
     };
     profile: UserProfile;
     stats?: UserStats;
