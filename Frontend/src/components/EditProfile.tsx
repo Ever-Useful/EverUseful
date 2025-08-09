@@ -183,8 +183,20 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           location: userProfileData?.location || '',
           year: studentInfo?.year || '',
           userType: normalizeUserType(authData?.userType || storedUserType || ''),
-          username: authData?.username || '',
-          email: authData?.email || storedEmail || '',
+          // Added robust fallbacks for username
+          username:
+            authData?.username ||
+            userProfileData?.username ||
+            (authData?.email ? authData.email.split('@')[0] : '') ||
+            (userProfileData?.email ? userProfileData.email.split('@')[0] : '') ||
+            '',
+          // Added robust fallbacks for email
+          email:
+            authData?.email ||
+            userProfileData?.email ||
+            storedEmail ||
+            (auth && auth.currentUser ? auth.currentUser.email || '' : '') ||
+            '',
           mobile: authData?.mobile || authData?.phoneNumber || storedPhone || '',
           countryCode: '+91',
           gender: authData?.gender || userProfileData?.gender || '',
@@ -258,9 +270,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           phoneNumber: profileData.mobile,
         });
         
-        // Also update profile with mobile field
+        // Also update profile with mobile field (and username if provided)
         await userService.updateProfile({
           mobile: profileData.mobile,
+          ...(profileData.username ? { username: profileData.username } : {})
         });
         
         // Update profile info (userData.json fields)

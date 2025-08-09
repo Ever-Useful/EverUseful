@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X, Upload, Image as ImageIcon } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 import SuccessAnimation from './SuccessAnimation';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { API_ENDPOINTS } from '../config/api';
 import { DropdownWithOther } from './ui/dropdown-with-other';
 import { getDropdownOptions } from '../utils/dropdownUtils';
+import s3Service from '@/services/s3Service';
 
 interface MyProjectsSidebarProps {
   onClose: () => void;
@@ -41,6 +42,10 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
   const [loading, setLoading] = useState(false);
   const [showProjectSuccess, setShowProjectSuccess] = useState(false);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [projectData, setProjectData] = useState<ProjectFormData>({
     title: '',
@@ -50,7 +55,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
     category: '',
     price: '',
     duration: '',
-    status: 'active',
+    status: '',
     teamSize: '',
     tags: '',
     skills: '',
@@ -78,6 +83,11 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         techStack: (projectToEdit.techStack || []).join(', '),
         deliverables: (projectToEdit.deliverables || []).join(', '),
       });
+      
+      // Set uploaded images if they exist
+      if (projectToEdit.images && Array.isArray(projectToEdit.images)) {
+        setUploadedImages(projectToEdit.images);
+      }
     }
   }, [editMode, projectToEdit]);
 
@@ -99,6 +109,46 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
     const { name, value } = e.target;
     setProjectData(prev => ({ ...prev, [name]: value }));
   };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    
+    // Validate files
+    const validFiles: File[] = [];
+    files.forEach(file => {
+      const validation = s3Service.validateFile(file);
+      if (validation.isValid) {
+        validFiles.push(file);
+      } else {
+        toast.error(`${file.name}: ${validation.error}`);
+      }
+    });
+
+    if (validFiles.length > 0) {
+      setSelectedFiles(prev => [...prev, ...validFiles]);
+      
+      // Create preview URLs
+      const newPreviewUrls = validFiles.map(file => URL.createObjectURL(file));
+      setImagePreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveUploadedImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    
+    // Update project data
+    const remainingImages = uploadedImages.filter((_, i) => i !== index);
+    setProjectData(prev => ({
+      ...prev,
+      image: remainingImages[0] || '',
+      images: remainingImages.join(', ')
+    }));
+  };
   
   const handleSaveProject = async () => {
     if (!user) {
@@ -116,6 +166,29 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
       const token = await user.getIdToken();
       const customUserId = user.uid;
 
+      // If there are selected files, upload them first
+      let finalImages = [...uploadedImages];
+      if (selectedFiles.length > 0) {
+        try {
+          // Generate a temporary project ID for upload
+          const tempProjectId = `temp-${Date.now()}`;
+          
+          // Upload images to S3
+          const imageResults = await s3Service.uploadProjectImages(selectedFiles, tempProjectId);
+          
+          // Extract URLs
+          const imageUrls = imageResults.map(result => result.main);
+          finalImages = [...uploadedImages, ...imageUrls];
+          
+          toast.success(`${imageResults.length} images uploaded successfully`);
+        } catch (error) {
+          console.error('Error uploading images:', error);
+          toast.error('Failed to upload images');
+          setLoading(false);
+          return;
+        }
+      }
+
       const payload = {
         title: projectData.title,
         description: projectData.description,
@@ -128,6 +201,8 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         features: projectData.features.split(',').map(feature => feature.trim()),
         techStack: projectData.techStack.split(',').map(tech => tech.trim()),
         deliverables: projectData.deliverables.split(',').map(deliverable => deliverable.trim()),
+        image: finalImages[0] || '', // First image as main image
+        images: finalImages,
         status: 'Active',
         posted: new Date().toISOString().split('T')[0],
         views: 0,
@@ -266,13 +341,91 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             <Label htmlFor="skills">Required Skills (comma-separated)</Label>
             <Input id="skills" name="skills" value={projectData.skills} onChange={handleInputChange} placeholder="e.g., Machine Learning, Python" />
           </div>
-          <div>
-            <Label htmlFor="image">Main Image URL</Label>
-            <Input id="image" name="image" value={projectData.image} onChange={handleInputChange} placeholder="https://example.com/image.jpg" />
-          </div>
-          <div>
-            <Label htmlFor="images">Additional Image URLs (comma-separated)</Label>
-            <Input id="images" name="images" value={projectData.images} onChange={handleInputChange} placeholder="https://.../img1.jpg, https://.../img2.jpg" />
+          {/* Image Upload Section */}
+          <div className="space-y-4">
+            <Label>Project Images</Label>
+            
+            {/* Uploaded Images Display */}
+            {(uploadedImages.length > 0 || selectedFiles.length > 0) && (
+              <div className="space-y-3">
+                {/* Uploaded Images */}
+                {uploadedImages.length > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">Uploaded Images:</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {uploadedImages.map((imageUrl, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={imageUrl}
+                            alt={`Project image ${index + 1}`}
+                            className="w-full h-20 object-cover rounded border"
+                          />
+                          <button
+                            onClick={() => handleRemoveUploadedImage(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Selected Files with Previews */}
+                {selectedFiles.length > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">Selected Files (will be uploaded when you save):</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {selectedFiles.map((file, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={imagePreviewUrls[index]}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg border"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <button
+                              onClick={() => handleRemoveFile(index)}
+                              className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1 truncate">{file.name}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* File Selection */}
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2"
+              >
+                <ImageIcon className="w-4 h-4" />
+                Select Images
+              </Button>
+              <span className="text-sm text-gray-500">
+                {uploadedImages.length + selectedFiles.length} image{(uploadedImages.length + selectedFiles.length) !== 1 ? 's' : ''} selected
+              </span>
+            </div>
+            
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
           </div>
           <div>
             <Label htmlFor="features">Features (comma-separated)</Label>
