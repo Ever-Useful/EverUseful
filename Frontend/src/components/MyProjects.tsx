@@ -9,6 +9,8 @@ import toast from 'react-hot-toast';
 import SuccessAnimation from './SuccessAnimation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { API_ENDPOINTS } from '../config/api';
+import { DropdownWithOther } from './ui/dropdown-with-other';
+import { getDropdownOptions } from '../utils/dropdownUtils';
 
 interface MyProjectsSidebarProps {
   onClose: () => void;
@@ -221,9 +223,15 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="category">Category <span className="text-red-500">*</span></Label>
-              <Input id="category" name="category" value={projectData.category} onChange={handleInputChange} placeholder="e.g., AI & ML" />
-              {formErrors.category && <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>}
+              <DropdownWithOther
+                label="Category"
+                options={getDropdownOptions('projectCategories')}
+                value={projectData.category}
+                onChange={(value) => setProjectData(prev => ({ ...prev, category: value }))}
+                placeholder="Select Category"
+                required={true}
+                error={formErrors.category}
+              />
             </div>
             <div>
               <Label htmlFor="price">Price ($) <span className="text-red-500">*</span></Label>
@@ -242,17 +250,13 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             </div>
           </div>
           <div>
-            <Label htmlFor="status">Status</Label>
-            <Select name="status" value={projectData.status} onValueChange={(value) => setProjectData(prev => ({ ...prev, status: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
+            <DropdownWithOther
+              label="Status"
+              options={getDropdownOptions('projectStatuses')}
+              value={projectData.status}
+              onChange={(value) => setProjectData(prev => ({ ...prev, status: value }))}
+              placeholder="Select Status"
+            />
           </div>
           <div>
             <Label htmlFor="tags">Tags (comma-separated)</Label>

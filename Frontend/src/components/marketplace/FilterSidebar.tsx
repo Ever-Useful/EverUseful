@@ -213,7 +213,7 @@ export const FilterSidebar = ({ onFiltersChange, disableMobileDropdown = false }
               }`}
               onClick={() => handleSkillChange(skill)}
             >
-              {skill}
+              {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
             </Badge>
           ))}
         </div>
