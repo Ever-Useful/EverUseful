@@ -385,7 +385,7 @@ const ProductDisplay = () => {
               <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6">
                 {project.skills && project.skills.map((skill, index) => (
                   <Badge key={index} variant="outline" className="border-gray-300 text-gray-700 text-xs hover:bg-gray-50">
-                    {skill}
+                    {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                   </Badge>
                 ))}
               </div>

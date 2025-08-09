@@ -111,7 +111,7 @@ export const FreelancingPreview = () => {
                   <div className="flex flex-wrap gap-2">
                     {freelancer.skills.map((skill, skillIndex) => (
                       <Badge key={skillIndex} variant="outline" className="text-xs">
-                        {skill}
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                       </Badge>
                     ))}
                   </div>

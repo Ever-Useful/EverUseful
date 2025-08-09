@@ -92,8 +92,11 @@ const App = () => (
             <Route path="/connect" element={<Connect />} />
             <Route path="/freelancing" element={<Freelancing />} />
             <Route path="/freelancerprofile" element={<FreelancerProfile />} />
+            <Route path="/freelancerprofile/:id" element={<FreelancerProfile />} />
             <Route path="/studentprofile" element={<StudentProfile />} />
+            <Route path="/studentprofile/:id" element={<StudentProfile />} />
             <Route path="/businessprofile" element={<BussinessProfile />} />
+            <Route path="/businessprofile/:id" element={<BussinessProfile />} />
             <Route path="/become-mentor" element={<BecomeAMentor />} />
             <Route path="/findexpert" element={<FindExpert />} />
             <Route path="/new-project" element={<NewProject />} />
@@ -110,7 +113,7 @@ const App = () => (
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/delivery-policy" element={<DeliveryPolicy />} />
-            <Route path="/send-feedback" element={<SendFeedback />} />
+            <Route path="/sendfeedback" element={<SendFeedback />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

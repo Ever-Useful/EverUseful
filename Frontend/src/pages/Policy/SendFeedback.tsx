@@ -57,7 +57,7 @@ const SendFeedback = () => {
             </p>
             <div className="flex items-center justify-center text-sm text-gray-500">
               <Clock className="w-4 h-4 mr-2" />
-              Last Updated: February 4, 2025
+              Last Updated: June, 2025
             </div>
           </div>
         </div>

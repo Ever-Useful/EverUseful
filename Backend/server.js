@@ -33,7 +33,7 @@ app.use('/api', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.get('/token', authorize, async (req, res) => {
-  const { uid, name, email, phone_number, firebase } = req.user;
+  const { uid, name, email, phone_number } = req.user;
 
   try {
     if (!uid) throw new Error("Missing UID from Firebase token");
@@ -46,8 +46,8 @@ app.get('/token', authorize, async (req, res) => {
       const customUserId = await userService.generateCustomUserId();
 
       // Parse firstName and lastName from name if available
-      let firstName = null;
-      let lastName = null;
+      let firstName = '';
+      let lastName = '';
       if (name) {
         const nameParts = name.split(' ');
         firstName = nameParts[0] || '';
@@ -56,12 +56,19 @@ app.get('/token', authorize, async (req, res) => {
 
       // Create user in DynamoDB
       await userService.createUser(uid, {
-        firstName: firstName ?? '',
-        lastName: lastName ?? '',
+        firstName: firstName,
+        lastName: lastName,
         email: email ?? 'no-email@example.com',
         userType: 'student',
         mobile: phone_number ?? '',
         phoneNumber: phone_number ?? '',
+      });
+
+      console.log('New OAuth user created with data:', {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phoneNumber: phone_number
       });
     }
 
@@ -89,13 +96,19 @@ app.post('/token', authorize, async (req, res) => {
       // Use provided firstName/lastName or parse from name
       let resolvedFirstName = firstName;
       let resolvedLastName = lastName;
-      if ((!firstName || !lastName) && name) {
+      
+      // If firstName/lastName are provided from signup form, use them
+      if (firstName && lastName) {
+        resolvedFirstName = firstName;
+        resolvedLastName = lastName;
+      } else if (name) {
+        // Parse from OAuth provider name
         const nameParts = name.split(' ');
         resolvedFirstName = resolvedFirstName || nameParts[0] || '';
         resolvedLastName = resolvedLastName || nameParts.slice(1).join(' ') || '';
       }
 
-      // Create user in DynamoDB
+      // Create user in DynamoDB with all provided data
       await userService.createUser(uid, {
         firstName: resolvedFirstName ?? '',
         lastName: resolvedLastName ?? '',
@@ -105,6 +118,13 @@ app.post('/token', authorize, async (req, res) => {
         phoneNumber: phoneNumber ?? phone_number ?? '',
       });
 
+      console.log('New user created with data:', {
+        firstName: resolvedFirstName,
+        lastName: resolvedLastName,
+        email: email,
+        userType: userType,
+        phoneNumber: phoneNumber ?? phone_number
+      });
 
     } else {
       // Update existing user's profile if provided
@@ -116,6 +136,7 @@ app.post('/token', authorize, async (req, res) => {
       
       if (Object.keys(updateFields).length > 0) {
         await userService.updateUserProfile(user.customUserId, updateFields);
+        console.log('Existing user updated with fields:', updateFields);
       }
     }
 
