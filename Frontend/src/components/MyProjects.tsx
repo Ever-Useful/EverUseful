@@ -84,9 +84,26 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         deliverables: (projectToEdit.deliverables || []).join(', '),
       });
       
-      // Set uploaded images if they exist
-      if (projectToEdit.images && Array.isArray(projectToEdit.images)) {
-        setUploadedImages(projectToEdit.images);
+      // Set uploaded images if they exist - handle both string and array formats
+      if (projectToEdit.images) {
+        if (Array.isArray(projectToEdit.images)) {
+          setUploadedImages(projectToEdit.images);
+        } else if (typeof projectToEdit.images === 'string') {
+          // If it's a string, try to parse it as JSON or split by comma
+          try {
+            const parsedImages = JSON.parse(projectToEdit.images);
+            if (Array.isArray(parsedImages)) {
+              setUploadedImages(parsedImages);
+            } else {
+              setUploadedImages([projectToEdit.images]);
+            }
+          } catch {
+            // If parsing fails, treat as single image
+            setUploadedImages([projectToEdit.images]);
+          }
+        }
+      } else {
+        setUploadedImages([]);
       }
     }
   }, [editMode, projectToEdit]);

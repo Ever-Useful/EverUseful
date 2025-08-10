@@ -343,6 +343,20 @@ const Header = () => {
         return () => unsubscribe();
     }, []);
 
+    // Function to refresh profile data
+    const refreshProfileData = async () => {
+        try {
+            const userProfile = await userService.getUserProfile();
+            setProfileData({
+                firstName: userProfile.data?.auth?.firstName || '',
+                lastName: userProfile.data?.auth?.lastName || '',
+                avatar: userProfile.data?.profile?.avatar || '',
+            });
+        } catch (error) {
+            console.error('Error refreshing profile data:', error);
+        }
+    };
+
     const handleMessageClick = (messageId: number) => {
         setMessages(prev =>
             prev.map(m => m.id === messageId ? { ...m, unread: false } : m)

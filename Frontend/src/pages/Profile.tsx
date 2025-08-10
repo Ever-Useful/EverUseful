@@ -435,9 +435,9 @@ const Profile = () => {
         <PhotoUpload
           currentImage={resolvedBackground}
           onImageUpload={async (imageUrl) => {
+            // Update local state immediately for UI responsiveness
             setBackgroundImage(imageUrl);
-            // Refresh user data to get updated profile information
-            await fetchUserData();
+            setResolvedBackground(imageUrl);
             toast.success('Cover photo updated successfully!');
           }}
           type="background"
@@ -459,9 +459,9 @@ const Profile = () => {
                 <PhotoUpload
                   currentImage={resolvedAvatar}
                   onImageUpload={async (imageUrl) => {
+                    // Update local state immediately for UI responsiveness
                     setProfileData(prev => ({ ...prev, avatar: imageUrl }));
-                    // Refresh user data to get updated profile information
-                    await fetchUserData();
+                    setResolvedAvatar(imageUrl);
                     toast.success('Profile photo updated successfully!');
                   }}
                   type="avatar"
