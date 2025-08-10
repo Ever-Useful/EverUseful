@@ -15,6 +15,9 @@ export const getApiUrl = (endpoint: string) => {
 
 // API Endpoints
 export const API_ENDPOINTS = {
+  // Base URL for direct use
+  BASE_URL: isDevelopment ? 'http://localhost:3000' : 'https://api.amoghconnect.com',
+  
   // Auth endpoints
   TOKEN: getApiUrl('/token'),
   
@@ -29,6 +32,14 @@ export const API_ENDPOINTS = {
   USER_BY_ID: (id: string) => getApiUrl(`/api/users/${id}`),
   USER_BULK: (ids: string) => getApiUrl(`/api/users/bulk/${ids}`),
   USER_FOLLOW: getApiUrl('/api/users/follow'),
+  
+  // S3 endpoints
+  S3_UPLOAD_PROFILE_IMAGE: getApiUrl('/api/s3/upload-profile-image'),
+  S3_UPLOAD_PROJECT_IMAGES: getApiUrl('/api/s3/upload-project-images'),
+  S3_DELETE_IMAGE: getApiUrl('/api/s3/delete-image'),
+  S3_LIST_USER_IMAGES: getApiUrl('/api/s3/list-user-images'),
+  S3_SIGNED_URL: getApiUrl('/api/s3/signed-url'),
+  S3_CREATE_USER_FOLDER: getApiUrl('/api/s3/create-user-folder'),
   
   // Marketplace endpoints
   MARKETPLACE: getApiUrl('/api/marketplace'),

@@ -318,6 +318,7 @@ const SignUp = () => {
           lastName: formData.lastName,
           phoneNumber: selectedCode + formData.phone,
           email: formData.email,
+          username: formData.email.split('@')[0], // Send username derived from email
         }),
       });
 
@@ -338,6 +339,7 @@ const SignUp = () => {
       localStorage.setItem("userLastName", formData.lastName);
       localStorage.setItem("userEmail", formData.email);
       localStorage.setItem("userPhone", selectedCode + formData.phone);
+      localStorage.setItem("userUsername", formData.email.split('@')[0]); // Store username derived from email
       localStorage.setItem("userDataSaved", "true");
       
       // Dispatch storage event to notify other components

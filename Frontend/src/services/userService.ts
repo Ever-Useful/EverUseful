@@ -3,17 +3,24 @@ import { API_ENDPOINTS, makeAuthenticatedRequest } from '../config/api';
 
 interface UserProfile {
   avatar: string;
+  backgroundImage?: string;
   bio: string;
   location: string;
   website: string;
   title: string;
   createdAt: string;
   updatedAt: string;
+  firstName?: string;
+  lastName?: string;
+  userType?: string;
+  username?: string;
+  email?: string;
+  mobile?: string;
+  phoneNumber?: string;
   gender?: string;
   domain?: string;
   purpose?: string;
   role?: string;
-  mobile?: string;
   dateOfBirth?: string;
 }
 
