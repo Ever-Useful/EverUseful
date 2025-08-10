@@ -617,7 +617,7 @@ const ProductDisplay = () => {
                 ) : (
                   <div className="flex items-center space-x-3 mb-4">
                     <img 
-                      src={getAuthorDetails(project.author).image} 
+                      src={getUserAvatarUrl({ avatar: getAuthorDetails(project.author).image })} 
                       alt={getAuthorDetails(project.author).name}
                       className="w-16 h-16 rounded-full cursor-pointer"
                       onError={e => { e.currentTarget.src = NoUserProfile; }}
@@ -674,7 +674,7 @@ const ProductDisplay = () => {
               <CardContent className="pt-0 px-4">
                 <div className="flex items-center space-x-3 mb-3">
                   <img 
-                    src={getAuthorDetails(project.author).image} 
+                    src={getUserAvatarUrl({ avatar: getAuthorDetails(project.author).image })} 
                     alt={getAuthorDetails(project.author).name}
                     className="w-12 h-12 rounded-full cursor-pointer transition-transform hover:scale-110"
                     onError={e => { e.currentTarget.src = NoUserProfile; }}

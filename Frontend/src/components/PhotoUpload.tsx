@@ -143,8 +143,23 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
       // Prefer medium for avatar, large for background
       const chosen = type === 'avatar' ? imageUrls.medium.url : imageUrls.large.url;
-      const cacheBusted = `${chosen}${chosen.includes('?') ? '&' : '?'}t=${Date.now()}`;
-      onImageUpload(cacheBusted);
+              // Since bucket is public, use direct URL with cache busting
+        const cacheBusted = `${chosen}${chosen.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        
+        // Delete old image from S3 if it exists
+        if (currentImage && currentImage.includes('amazonaws.com/')) {
+          try {
+            const key = currentImage.split('.amazonaws.com/')[1]?.split('?')[0];
+            if (key) {
+              await s3Service.deleteImage(key);
+              console.log('Old image deleted successfully:', key);
+            }
+          } catch (deleteError) {
+            console.warn('Failed to delete old image, but continuing with upload:', deleteError);
+          }
+        }
+        
+        onImageUpload(cacheBusted);
 
       toast.success(`${type === 'avatar' ? 'Profile photo' : 'Cover photo'} updated successfully!`);
       setIsOpen(false);
@@ -295,10 +310,40 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-gray-700 hover:bg-gray-100 text-xs px-2"
+              onClick={async () => {
+                try {
+                  // Attempt to delete from S3 if current image is an S3 URL and we can extract a key
+                  const img = currentImage || '';
+                  if (img.includes('amazonaws.com/')) {
+                    const key = img.split('.amazonaws.com/')[1]?.split('?')[0];
+                    if (key) {
+                      try { 
+                        await s3Service.deleteImage(key);
+                        console.log('S3 image deleted successfully:', key);
+                      } catch (s3Error) {
+                        console.warn('Failed to delete from S3, but continuing with profile update:', s3Error);
+                      }
+                    }
+                  }
+                  
+                  // Persist clear to backend profile
+                  await userService.updateUserProfile({ avatar: '' });
+                  
+                  // Clear on UI immediately
+                  onImageUpload('');
+                  toast.success('Profile photo removed successfully');
+                  resetState();
+                  setIsOpen(false);
+                } catch (e) {
+                  console.error('Delete photo failed:', e);
+                  toast.error('Failed to remove photo');
+                }
+              }}
+              disabled={!currentImage}
+              className="text-gray-700 hover:text-red-600 text-xs px-2"
             >
-              <Frame className="w-3 h-3 mr-1" />
-              Frames
+              <Trash2 className="w-3 h-3 mr-1" />
+              Delete
             </Button>
           </div>
 
@@ -575,14 +620,22 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 if (img.includes('amazonaws.com/')) {
                   const key = img.split('.amazonaws.com/')[1]?.split('?')[0];
                   if (key) {
-                    try { await s3Service.deleteImage(key); } catch {}
+                    try { 
+                      await s3Service.deleteImage(key);
+                      console.log('S3 image deleted successfully:', key);
+                    } catch (s3Error) {
+                      console.warn('Failed to delete from S3, but continuing with profile update:', s3Error);
+                    }
                   }
                 }
+                
                 // Persist clear to backend profile
-                await userService.updateUserProfile({ backgroundImage: '' });
+                const updateData = { backgroundImage: '' };
+                await userService.updateUserProfile(updateData);
+                
                 // Clear on UI immediately
                 onImageUpload('');
-                toast.success('Photo removed');
+                toast.success('Cover photo removed successfully');
                 resetState();
                 setIsOpen(false);
               } catch (e) {

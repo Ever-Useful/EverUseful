@@ -25,15 +25,39 @@ export const getS3ImageUrl = (
     return imageUrl;
   }
 
-  // If it's an S3 key, construct the full URL
-  if (imageUrl.startsWith('user-content/') || imageUrl.startsWith('stock-images/')) {
+  // If it's an S3 key, construct the full URL (bucket is public)
+  if (imageUrl.startsWith('user-content/') || imageUrl.startsWith('stock-images/') || imageUrl.startsWith('marketplace/')) {
     return `${S3_BASE_URL}/${imageUrl}`;
   }
 
-  // For project images, try to get the specific size
-  if (type === 'project' && imageUrl.includes('.')) {
-    const baseKey = imageUrl.replace(/\.(jpg|jpeg|png|webp)$/i, '');
-    return `${S3_BASE_URL}/${baseKey}-${size}.jpg`;
+  // For project images, handle different scenarios
+  if (type === 'project') {
+    // If the URL already contains a size suffix, return as is
+    if (imageUrl.includes('-thumbnail.') || imageUrl.includes('-small.') || 
+        imageUrl.includes('-medium.') || imageUrl.includes('-large.')) {
+      return `${S3_BASE_URL}/${imageUrl}`;
+    }
+    
+    // If it's a base image URL, construct the size-specific URL
+    if (imageUrl.includes('.')) {
+      const baseKey = imageUrl.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+      return `${S3_BASE_URL}/${baseKey}-${size}.jpg`;
+    }
+  }
+
+  // For profile images (avatar/background), handle size suffixes
+  if (type === 'avatar' || type === 'background') {
+    // If the URL already contains a size suffix, return as is
+    if (imageUrl.includes('-thumbnail.') || imageUrl.includes('-small.') || 
+        imageUrl.includes('-medium.') || imageUrl.includes('-large.')) {
+      return `${S3_BASE_URL}/${imageUrl}`;
+    }
+    
+    // If it's a base image URL, construct the size-specific URL
+    if (imageUrl.includes('.')) {
+      const baseKey = imageUrl.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+      return `${S3_BASE_URL}/${baseKey}-${size}.jpg`;
+    }
   }
 
   // Fallback to the original URL

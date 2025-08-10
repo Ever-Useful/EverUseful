@@ -71,7 +71,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         title: projectToEdit.title || '',
         description: projectToEdit.description || '',
         image: projectToEdit.image || '',
-        images: (projectToEdit.images || []).join(', '),
+        images: '', // We'll handle images separately
         category: projectToEdit.category || '',
         price: projectToEdit.price ? String(projectToEdit.price) : '',
         duration: projectToEdit.duration || '',
@@ -113,6 +113,13 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     
+    // Check if adding these files would exceed the 4 image limit
+    const totalImages = uploadedImages.length + selectedFiles.length + files.length;
+    if (totalImages > 4) {
+      toast.error(`You can only upload up to 4 images per project. You currently have ${uploadedImages.length + selectedFiles.length} images.`);
+      return;
+    }
+    
     // Validate files
     const validFiles: File[] = [];
     files.forEach(file => {
@@ -138,7 +145,22 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
     setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleRemoveUploadedImage = (index: number) => {
+  const handleRemoveUploadedImage = async (index: number) => {
+    const imageToRemove = uploadedImages[index];
+    
+    // Delete from S3 if it's an S3 image
+    if (imageToRemove && imageToRemove.includes('amazonaws.com/')) {
+      try {
+        const key = imageToRemove.split('.amazonaws.com/')[1]?.split('?')[0];
+        if (key) {
+          await s3Service.deleteImage(key);
+          console.log('Image deleted from S3:', key);
+        }
+      } catch (deleteError) {
+        console.warn('Failed to delete image from S3, but continuing with removal:', deleteError);
+      }
+    }
+    
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
     
     // Update project data
@@ -208,6 +230,30 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         views: 0,
         favoritedBy: [],
       };
+
+      // If editing, delete old images that are no longer in the project
+      if (editMode && projectToEdit && projectToEdit.images) {
+        const oldImages = projectToEdit.images;
+        const newImages = finalImages;
+        
+        // Find images that were removed
+        const removedImages = oldImages.filter((oldImg: string) => !newImages.includes(oldImg));
+        
+        // Delete removed images from S3
+        for (const removedImage of removedImages) {
+          if (removedImage && removedImage.includes('amazonaws.com/')) {
+            try {
+              const key = removedImage.split('.amazonaws.com/')[1]?.split('?')[0];
+              if (key) {
+                await s3Service.deleteImage(key);
+                console.log('Old project image deleted from S3:', key);
+              }
+            } catch (deleteError) {
+              console.warn('Failed to delete old project image from S3:', deleteError);
+            }
+          }
+        }
+      }
 
       let res;
       if (editMode && projectToEdit && projectToEdit.id) {

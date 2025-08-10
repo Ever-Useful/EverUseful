@@ -50,6 +50,8 @@ const Profile = () => {
     username: '',
     mobile: '',
   });
+  const [resolvedAvatar, setResolvedAvatar] = useState('');
+  const [resolvedBackground, setResolvedBackground] = useState('');
   const [studentData, setStudentData] = useState({
     college: '',
     degree: '',
@@ -123,35 +125,26 @@ const Profile = () => {
       const storedEmail = localStorage.getItem("userEmail");
       const storedPhone = localStorage.getItem("userPhone");
 
-      // Resolve avatar URL, sign if needed
-      let resolvedAvatar = userProfileData?.avatar || '';
-      if (resolvedAvatar && resolvedAvatar.includes('amazonaws.com/')) {
-        try {
-          const key = resolvedAvatar.split('.amazonaws.com/')[1]?.split('?')[0] || '';
-          if (key) {
-            const signed = await s3Service.getSignedUrl(key, 300);
-            resolvedAvatar = `${signed}&t=${Date.now()}`;
-          }
-        } catch (e) {
-          console.warn('Failed to sign avatar URL, falling back to original:', e);
-        }
+      // Resolve avatar URL - use direct S3 URL since bucket is public
+      let resolvedAvatarUrl = userProfileData?.avatar || '';
+      console.log('Profile - Raw avatar URL from database:', resolvedAvatarUrl);
+      if (resolvedAvatarUrl && resolvedAvatarUrl.includes('amazonaws.com/')) {
+        // Since bucket is public, use direct URL with cache busting
+        resolvedAvatarUrl = `${resolvedAvatarUrl}${resolvedAvatarUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        console.log('Profile - Final avatar URL with cache busting:', resolvedAvatarUrl);
       }
+      setResolvedAvatar(resolvedAvatarUrl);
 
-      // Resolve background URL, sign if needed and set state
-      let resolvedBackground = userProfileData?.backgroundImage || backgroundImage;
-      if (resolvedBackground && resolvedBackground.includes('amazonaws.com/')) {
-        try {
-          const key = resolvedBackground.split('.amazonaws.com/')[1]?.split('?')[0] || '';
-          if (key) {
-            const signed = await s3Service.getSignedUrl(key, 300);
-            resolvedBackground = `${signed}&t=${Date.now()}`;
-          }
-        } catch (e) {
-          console.warn('Failed to sign background URL, falling back to original:', e);
-        }
+      // Resolve background URL - use direct S3 URL since bucket is public
+      let resolvedBackgroundUrl = userProfileData?.backgroundImage || backgroundImage;
+      console.log('Profile - Raw background URL from database:', resolvedBackgroundUrl);
+      if (resolvedBackgroundUrl && resolvedBackgroundUrl.includes('amazonaws.com/')) {
+        // Since bucket is public, use direct URL with cache busting
+        resolvedBackgroundUrl = `${resolvedBackgroundUrl}${resolvedBackgroundUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        console.log('Profile - Final background URL with cache busting:', resolvedBackgroundUrl);
       }
-
-      setBackgroundImage(resolvedBackground || backgroundImage);
+      setResolvedBackground(resolvedBackgroundUrl);
+      setBackgroundImage(resolvedBackgroundUrl || backgroundImage);
       
       setProfileData({
         firstName: authData?.firstName || storedFirstName || (storedName ? storedName.split(' ')[0] : ''),
@@ -434,13 +427,13 @@ const Profile = () => {
       {/* Hero Section */}
       <div
         className="relative h-64 md:h-96 bg-cover bg-center bg-no-repeat pt-24"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
+        style={{ backgroundImage: `url("${backgroundImage}")` }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
         
         {/* Background photo upload */}
         <PhotoUpload
-          currentImage={backgroundImage}
+          currentImage={resolvedBackground}
           onImageUpload={async (imageUrl) => {
             setBackgroundImage(imageUrl);
             // Refresh user data to get updated profile information
@@ -464,7 +457,7 @@ const Profile = () => {
               {/* Profile Photo */}
               <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0 z-20">
                 <PhotoUpload
-                  currentImage={profileData.avatar}
+                  currentImage={resolvedAvatar}
                   onImageUpload={async (imageUrl) => {
                     setProfileData(prev => ({ ...prev, avatar: imageUrl }));
                     // Refresh user data to get updated profile information
@@ -474,11 +467,12 @@ const Profile = () => {
                   type="avatar"
                   trigger={
                     <div className="relative cursor-pointer group">
-                      {profileData.avatar ? (
+                      {resolvedAvatar ? (
                         <img
-                          src={profileData.avatar}
+                          src={resolvedAvatar}
                           alt={getDisplayName()}
                           className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full object-cover mx-auto md:mx-0 hover:opacity-90 transition-opacity"
+                          onError={(e) => { e.currentTarget.src = NoUserProfile; }}
                         />
                       ) : (
                         <div className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-2xl sm:text-3xl font-bold text-gray-600 mx-auto md:mx-0 hover:bg-gray-200 transition-colors">

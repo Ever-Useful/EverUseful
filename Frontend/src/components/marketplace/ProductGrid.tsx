@@ -912,7 +912,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               ) : (
                 <>
                   <img
-                    src={getAuthorDetails(selected.author).image || NoUserProfile}
+                    src={getUserAvatarUrl({ avatar: getAuthorDetails(selected.author).image }) || NoUserProfile}
                     alt={getAuthorDetails(selected.author).name}
                     className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
                     onError={e => { e.currentTarget.src = NoUserProfile; }}
