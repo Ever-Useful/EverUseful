@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import {
@@ -35,7 +35,7 @@ import {
     ShoppingCart,
     Menu
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/assets/Logo/Logo Side Simple.png';
 import InitialsAvatar from './InitialsAvatar';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +43,7 @@ import Navigation from '@/components/Navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import userService from '@/services/userService';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Connections from '@/components/Connections';
 import { EditProfile } from '../components/EditProfile';
@@ -219,6 +220,19 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
 
 const Header = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    // Check if current page needs user data (only pages that require authentication)
+    const needsUserData = useMemo(() => {
+        const authRequiredRoutes = [
+            '/dashboard', '/profile', '/marketplace', '/cart', '/chat', 
+            '/connections', '/collaborators', '/freelancing', '/findexpert',
+            '/freelancerprofile', '/studentprofile', '/businessprofile',
+            '/new-project', '/schedule-meeting'
+        ];
+        const needsData = authRequiredRoutes.some(route => location.pathname.startsWith(route));
+        return needsData;
+    }, [location.pathname]);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [messages, setMessages] = useState(mockMessages);
     const unreadMessageCount = messages.filter(m => m.unread).length;
@@ -228,8 +242,7 @@ const Header = () => {
     const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
     const [notifications, setNotifications] = useState(mockNotifications);
     const unreadNotificationCount = notifications.filter(n => n.unread).length;
-    const [profileData, setProfileData] = useState({ firstName: '', lastName: '', avatar: '' });
-    const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
+    const { profileData, isLoggedIn, refreshProfile } = useUserProfile();
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
@@ -321,40 +334,23 @@ const Header = () => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                setIsLoggedIn(true);
                 localStorage.setItem("isLoggedIn", "true");
-                try {
-                    const userProfile = await userService.getUserProfile();
-                    setProfileData({
-                        firstName: userProfile.data?.auth?.firstName || '',
-                        lastName: userProfile.data?.auth?.lastName || '',
-                        avatar: userProfile.data?.profile?.avatar || '',
-                    });
-                } catch (error) {
-                    console.error('Error fetching user profile:', error);
-                    setProfileData({ firstName: '', lastName: '', avatar: '' });
+                
+                // Only fetch user profile if the current page needs it AND we don't have cached data
+                if (needsUserData) {
+                    await refreshProfile();
                 }
             } else {
-                setIsLoggedIn(false);
                 localStorage.removeItem("isLoggedIn");
-                setProfileData({ firstName: '', lastName: '', avatar: '' });
             }
         });
         return () => unsubscribe();
-    }, []);
+    }, [needsUserData, refreshProfile]);
 
-    // Function to refresh profile data
+    // Function to refresh profile data - only called when explicitly needed
     const refreshProfileData = async () => {
-        try {
-            const userProfile = await userService.getUserProfile();
-            setProfileData({
-                firstName: userProfile.data?.auth?.firstName || '',
-                lastName: userProfile.data?.auth?.lastName || '',
-                avatar: userProfile.data?.profile?.avatar || '',
-            });
-        } catch (error) {
-            console.error('Error refreshing profile data:', error);
-        }
+        if (!needsUserData) return; // Skip if not needed
+        await refreshProfile();
     };
 
     const handleMessageClick = (messageId: number) => {
@@ -372,8 +368,6 @@ const Header = () => {
     const handleLogout = async () => {
         try {
             // Clear all user-related state
-            setIsLoggedIn(false);
-            setProfileData({ firstName: '', lastName: '', avatar: '' });
             setShowNotificationsSidebar(false);
             setShowMessagesSidebar(false);
             setShowProfileSidebar(false);
@@ -395,9 +389,7 @@ const Header = () => {
     useEffect(() => {
         const handleStorageChange = () => {
             const loginStatus = localStorage.getItem("isLoggedIn") === "true";
-            setIsLoggedIn(loginStatus);
             if (!loginStatus) {
-                setProfileData({ firstName: '', lastName: '', avatar: '' });
                 setShowNotificationsSidebar(false);
                 setShowMessagesSidebar(false);
                 setShowProfileSidebar(false);
