@@ -116,6 +116,7 @@ export const Hero = () => {
               {/* Desktop: animated cards */}
               <div className="hidden lg:flex overflow-visible w-full h-[560px] py-[40px]">
                 {OPTIONS.map((opt) => {
+                  // Determine which animation and baseline to use:
                   const isOdd = opt.id % 2 !== 0;
                   const animationName = isOdd ? "float-down" : "float-up";
                   return (
@@ -132,8 +133,8 @@ export const Hero = () => {
                         mx-[24px]
                         rounded-[64px]
                         transition-all
-                        duration-500
-                        ease-out
+                        duration-700
+                        ease-[cubic-bezier(0.22,1,0.36,1)]
                         hover:flex-[10_1_600px]
                         hover:rounded-[32px]
                         hover:bg-[length:auto_100%]
@@ -141,13 +142,12 @@ export const Hero = () => {
                       style={{
                         backgroundImage: `url(${opt.imageUrl})`,
                         animationName,
-                        animationDuration: "6s",
+                        animationDuration: "5s",
                         animationTimingFunction: "ease-in-out",
                         animationIterationCount: "infinite",
-                        willChange: "transform",
                       }}
                     >
-                      <img src={opt.imageUrl} alt={opt.label} className="absolute inset-0 w-full h-full object-cover opacity-0" />
+                      {/* Shadow overlay at bottom for gradient effect ONLY on hover */}
                       <div
                         className="
                           absolute
@@ -156,15 +156,16 @@ export const Hero = () => {
                           right-0
                           h-[80px]
                           transition-all
-                          duration-500
-                          ease-out
+                          duration-700
+                          ease-[cubic-bezier(0.22,1,0.36,1)]
                           group-hover:h-[120px]
                         "
                         style={{
                           boxShadow:
-                            "inset 0 -80px 80px -80px rgba(0,0,0,0.8)",
+                            "inset 0 -120px 120px -120px rgba(0,0,0,0.8), inset 0 -120px 120px -100px rgba(0,0,0,0.6)",
                         }}
                       />
+                      {/* Label & Icon */}
                       <div
                         className="
                           absolute
@@ -173,22 +174,59 @@ export const Hero = () => {
                           bottom-[8px]
                           left-[64px]
                           transition-all
-                          duration-500
-                          ease-out
+                          duration-700
+                          ease-[cubic-bezier(0.22,1,0.36,1)]
                           group-hover:bottom-[54px]
                           group-hover:left-[12px]
                           z-10
+                          text-shadow-lg
                         "
+                        style={{
+                          textShadow: "0 0 8px rgba(0,0,0,0.75)",
+                        }}
                       >
-                        <div className="flex items-center text-white">
-                          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3 group-hover:mr-3 -translate-y-5">
-                            <i className={`${opt.iconClass} text-sm`}></i>
+                        <div className="flex items-center justify-center w-[40px] h-[40px] bg-white rounded-full shadow-sm">
+                          <i className={`${opt.iconClass} text-gray-800`} />
+                        </div>
+                        <div className="flex flex-col justify-center ml-2 text-white whitespace-pre">
+                          <div
+                            className="
+                              relative
+                              transition-all
+                              duration-700
+                              ease-[cubic-bezier(0.22,1,0.36,1)]
+                              left-[16px]
+                              opacity-0
+                              group-hover:left-0
+                              group-hover:opacity-100
+                              font-semibold
+                              text-lg
+                            "
+                            style={{
+                              textShadow: "0 0 8px rgba(0,0,0,0.75)",
+                            }}
+                          >
+                            {opt.label}
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out">
-                            <div className="font-bold text-sm">{opt.label}</div>
-                            <div className="text-xs opacity-80 max-w-[200px] transition-all duration-500 ease-out overflow-hidden">
-                              {opt.description}
-                            </div>
+                          <div
+                            className="
+                              relative
+                              transition-all
+                              duration-700
+                              ease-[cubic-bezier(0.22,1,0.36,1)]
+                              delay-150
+                              left-[16px]
+                              opacity-0
+                              group-hover:left-0
+                              group-hover:opacity-100
+                              text-sm
+                              text-gray-200
+                            "
+                            style={{
+                              textShadow: "0 0 6px rgba(0,0,0,0.6)",
+                            }}
+                          >
+                            {opt.description}
                           </div>
                         </div>
                       </div>
@@ -197,7 +235,7 @@ export const Hero = () => {
                 })}
               </div>
 
-              {/* Mobile: disoriented flexbox focusing on labels */}
+              {/* Mobile: flexbox focusing on labels */}
               <div className="lg:hidden w-full">
                 <div className="grid grid-cols-2 gap-3 p-4">
                   {OPTIONS.map((opt, index) => (
@@ -216,9 +254,6 @@ export const Hero = () => {
                       <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white p-3">
                         <div className="font-bold text-lg sm:text-xl mb-1 leading-tight">
                           {opt.label}
-                        </div>
-                        <div className="text-xs sm:text-sm opacity-90 text-center leading-tight">
-                          {opt.description}
                         </div>
                       </div>
                     </div>

@@ -239,7 +239,7 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
                 { id: 'greenprojects', label: 'Sustainable', href: '/sustainable' },
                 { id: 'consulting', label: 'Consulting', href: '/consulting' },
                 { id: 'review', label: 'Project Review', href: '/services/review' },
-                { id: 'impact', label: 'Impact Metrics', href: '/sustainable/impact' },
+                { id: 'impact', label: 'Impact Metrics', href: '/' },
                 { id: 'agents', label: 'AI Agents', href: '/aiagents' },
             ],
             content: {
@@ -335,7 +335,6 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
                 aboutus: {
                     subcategories: [
                         { name: 'Platform', href: '/aboutus' },
-                        { name: 'Team', href: '/about#team' },
                         { name: 'Stories', href: '/aboutus#stroies' },
                         { name: 'Team', href: '/aboutus#team' },
                         { name: 'Community', href: '/aboutus' },
@@ -361,7 +360,7 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
                 },
                 legal: {
                     subcategories: [
-                        { name: 'Provacy Policy', href: '/privacy-policy' },
+                        { name: 'Privacy Policy', href: '/privacy-policy' },
                         { name: 'Cookie Policy', href: '/cookie-policy' },
                         { name: 'Refund Policy', href: '/refund-policy' },
                         { name: 'Accessibility', href: '/accessibility' },
