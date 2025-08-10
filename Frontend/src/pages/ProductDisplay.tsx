@@ -29,6 +29,7 @@ import NoUserProfile from "@/assets/images/no user profile.png";
 import { Skeleton } from "@/components/ui/skeleton";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
+import { getS3ImageUrl, getUserAvatarUrl, handleImageError } from '../utils/s3ImageUtils';
 
 const ProductDisplay = () => {
   const { id } = useParams();
@@ -284,10 +285,16 @@ const ProductDisplay = () => {
             <div className="order-1">
               <div className="mb-2 xs:mb-3 sm:mb-4">
                 <img 
-                  src={project.images && project.images[selectedImage] ? project.images[selectedImage] : (project.image || NoImageAvailable)} 
+                  src={getS3ImageUrl(
+                    project.images && project.images[selectedImage] 
+                      ? project.images[selectedImage] 
+                      : project.image, 
+                    'project', 
+                    'large'
+                  )} 
                   alt={project.title}
                   className="w-full h-96 object-cover rounded-lg shadow-lg"
-                  onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                  onError={(e) => handleImageError(e, NoImageAvailable)}
                 />
               </div>
               {project.images && project.images.length > 1 && (
@@ -301,9 +308,10 @@ const ProductDisplay = () => {
                       }`}
                     >
                       <img 
-                        src={image} 
+                        src={getS3ImageUrl(image, 'project', 'thumbnail')} 
                         alt={`${project.title} ${index + 1}`}
                         className="w-full h-10 xs:h-12 sm:h-16 lg:h-20 object-cover"
+                        onError={(e) => handleImageError(e, NoImageAvailable)}
                       />
                     </button>
                   ))}
@@ -355,10 +363,10 @@ const ProductDisplay = () => {
                 ) : (
                   <>
                     <img 
-                      src={getAuthorDetails(project.author).image} 
+                      src={getUserAvatarUrl(getAuthorDetails(project.author))} 
                       alt={getAuthorDetails(project.author).name}
                       className="w-12 h-12 rounded-full cursor-pointer"
-                      onError={e => { e.currentTarget.src = NoUserProfile; }}
+                      onError={(e) => handleImageError(e, NoUserProfile)}
                       onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                     />
                     <div>
@@ -609,7 +617,7 @@ const ProductDisplay = () => {
                 ) : (
                   <div className="flex items-center space-x-3 mb-4">
                     <img 
-                      src={getAuthorDetails(project.author).image} 
+                      src={getUserAvatarUrl({ avatar: getAuthorDetails(project.author).image })} 
                       alt={getAuthorDetails(project.author).name}
                       className="w-16 h-16 rounded-full cursor-pointer"
                       onError={e => { e.currentTarget.src = NoUserProfile; }}
@@ -666,7 +674,7 @@ const ProductDisplay = () => {
               <CardContent className="pt-0 px-4">
                 <div className="flex items-center space-x-3 mb-3">
                   <img 
-                    src={getAuthorDetails(project.author).image} 
+                    src={getUserAvatarUrl({ avatar: getAuthorDetails(project.author).image })} 
                     alt={getAuthorDetails(project.author).name}
                     className="w-12 h-12 rounded-full cursor-pointer transition-transform hover:scale-110"
                     onError={e => { e.currentTarget.src = NoUserProfile; }}

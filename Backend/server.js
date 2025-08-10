@@ -7,6 +7,7 @@ const userRoutes = require('./routes/users');
 const userService = require('./services/userService');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
+const s3Routes = require('./routes/s3');
 
 const app = express();
 
@@ -28,6 +29,9 @@ app.use('/api/marketplace', marketplaceRoutes);
 
 // User routes
 app.use('/api/users', userRoutes);
+
+// S3 routes
+app.use('/api/s3', s3Routes);
 
 app.use('/api', dashboardRoutes);
 app.use('/api/admin', adminRoutes);

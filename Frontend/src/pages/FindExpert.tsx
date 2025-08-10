@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowUpDown } from 'lucide-react';
 import noUserProfile from '../assets/images/no user profile.png';
+import { getUserAvatarUrl } from '../utils/s3ImageUtils';
 import { API_ENDPOINTS } from '../config/api';
 
 // Define types for freelancer data
@@ -107,7 +108,7 @@ const FindExpert = () => {
       skills: user.skills || [],
       rate: user.freelancerData?.hourlyRate ? `$${user.freelancerData.hourlyRate}/hr` : 'N/A',
       experience: user.freelancerData?.experience ? `${user.freelancerData.experience} years` : 'N/A',
-      image: user.profile?.avatar || noUserProfile,
+      image: getUserAvatarUrl({ avatar: user.profile?.avatar }) || noUserProfile,
       rating: user.rating || 0,
       completedProjects: user.stats?.projectsCount || 0,
       isAvailable: true,

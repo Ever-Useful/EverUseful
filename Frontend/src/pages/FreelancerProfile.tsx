@@ -9,6 +9,7 @@ import { Footer } from "@/components/Footer";
 import { useState, useEffect } from "react";
 import userService from "@/services/userService";
 import NoUserProfile from "@/assets/images/no user profile.png";
+import { getUserAvatarUrl } from "@/utils/s3ImageUtils";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
 
@@ -103,7 +104,7 @@ const VisitingProfile = () => {
   const auth = freelancer.auth || {};
   const fullName = `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User';
   const about = profile.bio || 'No bio available';
-  const avatar = profile.avatar || NoUserProfile;
+  const avatar = getUserAvatarUrl({ avatar: profile.avatar }) || NoUserProfile;
   const title = profile.title || '';
   const location = profile.location || '';
   const userType = auth.userType || '';
