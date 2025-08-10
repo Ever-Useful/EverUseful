@@ -228,7 +228,7 @@ const Header = () => {
     const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
     const [notifications, setNotifications] = useState(mockNotifications);
     const unreadNotificationCount = notifications.filter(n => n.unread).length;
-    const [profileData, setProfileData] = useState({ firstName: '', lastName: '' });
+    const [profileData, setProfileData] = useState({ firstName: '', lastName: '', avatar: '' });
     const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -328,15 +328,16 @@ const Header = () => {
                     setProfileData({
                         firstName: userProfile.data?.auth?.firstName || '',
                         lastName: userProfile.data?.auth?.lastName || '',
+                        avatar: userProfile.data?.profile?.avatar || '',
                     });
                 } catch (error) {
                     console.error('Error fetching user profile:', error);
-                    setProfileData({ firstName: '', lastName: '' });
+                    setProfileData({ firstName: '', lastName: '', avatar: '' });
                 }
             } else {
                 setIsLoggedIn(false);
                 localStorage.removeItem("isLoggedIn");
-                setProfileData({ firstName: '', lastName: '' });
+                setProfileData({ firstName: '', lastName: '', avatar: '' });
             }
         });
         return () => unsubscribe();
@@ -358,7 +359,7 @@ const Header = () => {
         try {
             // Clear all user-related state
             setIsLoggedIn(false);
-            setProfileData({ firstName: '', lastName: '' });
+            setProfileData({ firstName: '', lastName: '', avatar: '' });
             setShowNotificationsSidebar(false);
             setShowMessagesSidebar(false);
             setShowProfileSidebar(false);
@@ -382,7 +383,7 @@ const Header = () => {
             const loginStatus = localStorage.getItem("isLoggedIn") === "true";
             setIsLoggedIn(loginStatus);
             if (!loginStatus) {
-                setProfileData({ firstName: '', lastName: '' });
+                setProfileData({ firstName: '', lastName: '', avatar: '' });
                 setShowNotificationsSidebar(false);
                 setShowMessagesSidebar(false);
                 setShowProfileSidebar(false);
@@ -940,7 +941,23 @@ const Header = () => {
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 <div className="flex flex-col items-center text-center">
-                                    <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} size={80} className="sm:w-24 sm:h-24" />
+                                    {profileData.avatar ? (
+                                        <img 
+                                            src={profileData.avatar} 
+                                            alt={`${profileData.firstName} ${profileData.lastName}`}
+                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                            }}
+                                        />
+                                    ) : null}
+                                    <InitialsAvatar 
+                                        firstName={profileData.firstName} 
+                                        lastName={profileData.lastName} 
+                                        size={80} 
+                                        className={`sm:w-24 sm:h-24 ${profileData.avatar ? 'hidden' : ''}`} 
+                                    />
                                     <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">{profileData.firstName} {profileData.lastName}</h3>
                                     <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
                                         View Profile &gt;

@@ -27,6 +27,7 @@ import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { API_ENDPOINTS } from '../../config/api';
+import { getS3ImageUrl, getUserAvatarUrl, handleImageError } from '../../utils/s3ImageUtils';
 
 interface Project {
   id: number;
@@ -628,10 +629,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                 style={{ boxSizing: "border-box" }}
               >
                 <img
-                  src={project.image || NoImageAvailable}
+                  src={getS3ImageUrl(project.image, 'project', 'thumbnail')}
                   alt={project.title}
                   className="w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-cover flex-shrink-0 border border-gray-200 rounded"
-                  onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                  onError={(e) => handleImageError(e, NoImageAvailable)}
                 />
                 <div className="flex flex-col flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -651,10 +652,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                   </h3>
                   <div className="flex items-center gap-2 mb-1">
                     <img
-                      src={getAuthorDetails(project.author).image || NoUserProfile}
+                      src={getUserAvatarUrl(getAuthorDetails(project.author))}
                       alt={getAuthorDetails(project.author).name}
                       className="w-5 h-5 rounded-full border border-gray-200 cursor-pointer"
-                      onError={e => { e.currentTarget.src = NoUserProfile; }}
+                      onError={(e) => handleImageError(e, NoUserProfile)}
                       onClick={(e) => {
                         e.stopPropagation();
                         goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
@@ -721,12 +722,12 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               >
                 <div className="relative">
                   <img
-                    src={project.image || NoImageAvailable}
+                    src={getS3ImageUrl(project.image, 'project', 'medium')}
                     alt={project.title}
                     className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
                     loading="lazy"
                     onClick={() => setSelected(project)}
-                    onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                    onError={(e) => handleImageError(e, NoImageAvailable)}
                   />
                   <div className="absolute top-2 left-2">
                     <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow">
@@ -758,10 +759,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                   ) : (
                     <div className="flex items-center space-x-2 mb-2">
                       <img
-                        src={getAuthorDetails(project.author).image || NoUserProfile}
+                        src={getUserAvatarUrl(getAuthorDetails(project.author))}
                         alt={getAuthorDetails(project.author).name}
                         className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
-                        onError={e => { e.currentTarget.src = NoUserProfile; }}
+                        onError={(e) => handleImageError(e, NoUserProfile)}
                         onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id)}
                       />
                       <span
@@ -911,7 +912,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               ) : (
                 <>
                   <img
-                    src={getAuthorDetails(selected.author).image || NoUserProfile}
+                    src={getUserAvatarUrl({ avatar: getAuthorDetails(selected.author).image }) || NoUserProfile}
                     alt={getAuthorDetails(selected.author).name}
                     className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
                     onError={e => { e.currentTarget.src = NoUserProfile; }}
