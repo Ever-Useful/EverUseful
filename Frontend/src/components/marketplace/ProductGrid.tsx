@@ -758,13 +758,13 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     <AuthorSkeleton />
                   ) : (
                     <div className="flex items-center space-x-2 mb-2">
-                      <img
+                      {/* <img
                         src={getUserAvatarUrl(getAuthorDetails(project.author))}
                         alt={getAuthorDetails(project.author).name}
                         className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
                         onError={(e) => handleImageError(e, NoUserProfile)}
                         onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id)}
-                      />
+                      /> */}
                       <span
                         className="text-gray-700 text-xs cursor-pointer"
                         style={{ transition: 'color 0.2s' }}
@@ -928,11 +928,11 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     >
                       {getAuthorDetails(selected.author).name}
                     </div>
-                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                    {/* <div className="flex items-center space-x-1 text-xs text-gray-500">
                       <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                       <span className="text-yellow-500">{selected.rating}</span>
                       <span>({selected.reviews} reviews)</span>
-                    </div>
+                    </div> */}
                   </div>
                 </>
               )}
