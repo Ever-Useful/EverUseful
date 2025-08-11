@@ -213,7 +213,7 @@ export const Footer = () => {
               <h4 className="text-white font-semibold text-xs lg:text-sm">Legal</h4>
               <div className="space-y-1">
                 <Link to="/privacy-policy" className="block text-gray-400 hover:text-white text-xs transition-colors">Privacy Policy</Link>
-                <Link to="/cookie-policy" className="block text-gray-400 hover:text-white text-xs transition-colors">Cookie Policy</Link>
+                <Link to="/cookie-policy" className="block text-gray-400 hover:text-white text-xs transition-colors">Cookies Policy</Link>
                 <Link to="/accessibility" className="block text-gray-400 hover:text-white text-xs transition-colors">Accessibility</Link>
               </div>
             </div>

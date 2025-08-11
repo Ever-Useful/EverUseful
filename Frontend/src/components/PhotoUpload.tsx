@@ -143,23 +143,25 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
       // Prefer medium for avatar, large for background
       const chosen = type === 'avatar' ? imageUrls.medium.url : imageUrls.large.url;
-              // Since bucket is public, use direct URL with cache busting
-        const cacheBusted = `${chosen}${chosen.includes('?') ? '&' : '?'}t=${Date.now()}`;
-        
-        // Delete old image from S3 if it exists
-        if (currentImage && currentImage.includes('amazonaws.com/')) {
-          try {
-            const key = currentImage.split('.amazonaws.com/')[1]?.split('?')[0];
-            if (key) {
-              await s3Service.deleteImage(key);
-              console.log('Old image deleted successfully:', key);
-            }
-          } catch (deleteError) {
-            console.warn('Failed to delete old image, but continuing with upload:', deleteError);
+      
+      // Since bucket is public, use direct URL with cache busting
+      const cacheBusted = `${chosen}${chosen.includes('?') ? '&' : '?'}t=${Date.now()}`;
+      
+      // Delete old image from S3 if it exists
+      if (currentImage && currentImage.includes('amazonaws.com/')) {
+        try {
+          const key = currentImage.split('.amazonaws.com/')[1]?.split('?')[0];
+          if (key) {
+            await s3Service.deleteImage(key);
+            console.log('Old image deleted successfully:', key);
           }
+        } catch (deleteError) {
+          console.warn('Failed to delete old image, but continuing with upload:', deleteError);
         }
-        
-        onImageUpload(cacheBusted);
+      }
+      
+      // Update the UI immediately
+      onImageUpload(cacheBusted);
 
       toast.success(`${type === 'avatar' ? 'Profile photo' : 'Cover photo'} updated successfully!`);
       setIsOpen(false);
