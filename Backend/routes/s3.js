@@ -152,7 +152,14 @@ router.post('/upload-profile-image', authorize, upload.single('image'), async (r
     console.error('=== Profile Image Upload Error ===');
     console.error('Error details:', error);
     console.error('Error stack:', error.stack);
-    res.status(500).json({ error: 'Failed to upload profile image' });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to upload profile image',
+      errorMessage: error.message || null,
+      errorStack: error.stack || null,
+      errorFull: error,
+      updatedProfile: null
+    });
   }
 });
 
