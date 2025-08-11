@@ -59,7 +59,7 @@ class S3Service {
       if (!response.ok) {
         const error = await response.json();
         console.error('Upload failed:', error);
-        throw new Error(error.error || 'Failed to upload profile image');
+        throw new Error(error.errorMessage || error.error || 'Failed to upload profile image');
       }
 
       const result = await response.json();
@@ -100,7 +100,7 @@ class S3Service {
       if (!response.ok) {
         const error = await response.json();
         console.error('Upload failed:', error);
-        throw new Error(error.error || 'Failed to upload project images');
+        throw new Error(error.errorMessage || error.error || 'Failed to upload project images');
       }
 
       const result = await response.json();
@@ -135,7 +135,7 @@ class S3Service {
       if (!response.ok) {
         const error = await response.json();
         console.error('Delete failed:', error);
-        throw new Error(error.error || 'Failed to delete image');
+        throw new Error(error.errorMessage || error.error || 'Failed to delete image');
       }
 
       console.log('Delete successful');

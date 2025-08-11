@@ -14,16 +14,20 @@ import userService from '@/services/userService';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import { TrendingUp, Star, Shield, LayoutGrid, UserPlus, Heart, BarChart2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useUserProfile } from '@/contexts/UserProfileContext';
+import { auth } from '@/lib/firebase';
 
 type UserType = 'academic' | 'freelancer' | 'business';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { profileData, isLoggedIn, isLoading: profileLoading, refreshProfile } = useUserProfile();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [userProjects, setUserProjects] = useState<any>(null);
   const [userType, setUserType] = useState<UserType>('academic');
   const [selectedStat, setSelectedStat] = useState<string>('all');
-  const [profileData, setProfileData] = useState({ firstName: '', lastName: '', avatar: '' });
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasEarnings, setHasEarnings] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -36,180 +40,186 @@ const Dashboard = () => {
     likes: 0,
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [earningsData, setEarningsData] = useState([
-    { name: 'Jan', value: 0 },
-    { name: 'Feb', value: 0 },
-    { name: 'Mar', value: 0 },
-    { name: 'Apr', value: 0 },
-    { name: 'May', value: 0 },
-    { name: 'Jun', value: 0 },
-  ]);
-  const [userProjects, setUserProjects] = useState([]);
-  const [lineGraphData, setLineGraphData] = useState([
-    { month: 'Jan', projects: 0, favourites: 0, connections: 0, views: 0 },
-    { month: 'Feb', projects: 0, favourites: 0, connections: 0, views: 0 },
-    { month: 'Mar', projects: 0, favourites: 0, connections: 0, views: 0 },
-    { month: 'Apr', projects: 0, favourites: 0, connections: 0, views: 0 },
-    { month: 'May', projects: 0, favourites: 0, connections: 0, views: 0 },
-    { month: 'Jun', projects: 0, favourites: 0, connections: 0, views: 0 },
-  ]);
+  const [earningsData, setEarningsData] = useState(() => {
+    // Initialize with dynamic month names for the last 6 months
+    const now = new Date();
+    console.log('Initial earnings state - current date:', now);
+    const months = [];
+    
+    // Get the last 6 months ending with current month
+    for (let i = 0; i < 6; i++) {
+      // Create date for i months ago from current month
+      const targetMonth = now.getMonth() - (5 - i);
+      const targetYear = now.getFullYear();
+      const d = new Date(targetYear, targetMonth, 1);
+      months.push({
+        name: d.toLocaleString('default', { month: 'short' }),
+        value: 0
+      });
+    }
+    
+    console.log('Initial earnings months:', months);
+    return months;
+  });
+  const [lineGraphData, setLineGraphData] = useState(() => {
+    // Initialize with dynamic month names for the last 6 months
+    const now = new Date();
+    console.log('Initial line graph state - current date:', now);
+    const months = [];
+    
+    // Get the last 6 months ending with current month
+    for (let i = 0; i < 6; i++) {
+      // Create date for i months ago from current month
+      const targetMonth = now.getMonth() - (5 - i);
+      const targetYear = now.getFullYear();
+      const d = new Date(targetYear, targetMonth, 1);
+      months.push({
+        month: d.toLocaleString('default', { month: 'short' }),
+        projects: 0,
+        favourites: 0,
+        connections: 0,
+        views: 0
+      });
+    }
+    
+    console.log('Initial line graph months:', months);
+    return months;
+  });
 
-  // Fetch userType from API on mount
+  // Load data when component mounts
   useEffect(() => {
-    const fetchUserType = async () => {
+    const loadData = async () => {
+      // Wait for both authentication and profile loading to complete
+      if (!isLoggedIn || profileLoading) return;
+      
+      // Prevent multiple requests
+      if (loading) return;
+      
+      setLoading(true);
       try {
-        const userProfile = await userService.getUserProfile();
-        // userType may be in auth or profile
-        let apiType = (userProfile?.auth?.userType || userProfile?.profile?.userType || '').toLowerCase();
+        // Load dashboard data
+        const dashboardResponse = await userService.getDashboardData();
+        setDashboardData(dashboardResponse);
+        
+        // Load user projects
+        const projectsResponse = await userService.getUserProjects();
+        setUserProjects(projectsResponse);
+        
+        // Set user type from profile data
+        const apiType = (profileData.userType || '').toLowerCase();
         let mappedType: UserType = 'academic';
         if (apiType === 'student' || apiType === 'professor') mappedType = 'academic';
         else if (apiType === 'freelancer') mappedType = 'freelancer';
         else if (apiType === 'business' || apiType === 'enterprise') mappedType = 'business';
         setUserType(mappedType);
-      } catch (e) {
-        console.log('User not authenticated or error fetching user type:', e);
-        if (e.message?.includes('not authenticated')) {
-          navigate('/signin');
-          return;
-        }
-        setUserType('academic'); // fallback
-      }
-    };
-    fetchUserType();
-  }, [navigate]);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const userProfile = await userService.getUserProfile();
-        setProfileData({
-          firstName: userProfile?.auth?.firstName || '',
-          lastName: userProfile?.auth?.lastName || '',
-          avatar: userProfile?.profile?.avatar || '',
-        });
-      } catch (error) {
-        console.log('User not authenticated or error fetching profile:', error);
-        if (error.message?.includes('not authenticated')) {
-          navigate('/signin');
-          return;
-        }
-        setProfileData({ firstName: '', lastName: '', avatar: '' });
-      }
-    };
-    fetchProfile();
-  }, [navigate]);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setLoading(true);
         
-        // Check if user is authenticated before making API calls
-        const userProfile = await userService.getUserProfile();
-        setIsAuthenticated(true);
-        
-        // Fetch aggregated dashboard data
-        const dashboardData = await userService.getDashboardData();
-        
-        // Update stats with real data
-        const stats = {
-          projectsPosted: dashboardData.projectCount,
-          projectViews: dashboardData.totalViews,
-          projectFavourites: dashboardData.favourites,
-          connections: dashboardData.connections,
-          likes: 0, // Keep as 0 for now, can be added to backend if needed
-        };
-
-        setUserStats(stats);
-        setRecentActivity(dashboardData.activities || []);
-        
-        // Initialize earnings data - will be updated after projects are fetched
-        setEarningsData([]);
-        setHasEarnings(false);
-
-        const projectsData = await userService.getUserProjects();
-        const userProjects = projectsData.created || [];
-        setUserProjects(userProjects);
-
-        // Calculate earnings based on actual project data
-        const now = new Date();
-        const months = [];
-        for (let i = 5; i >= 0; i--) {
-          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-          months.push({
-            name: d.toLocaleString('default', { month: 'short' }),
-            value: 0
-          });
-        }
-        
-        // Distribute earnings based on project creation dates
-        if (userProjects && userProjects.length > 0) {
-          userProjects.forEach((project: any) => {
-            if (project.createdAt) {
-              const projectDate = new Date(project.createdAt);
-              const monthIndex = months.findIndex(m => {
-                const monthDate = new Date(projectDate.getFullYear(), projectDate.getMonth(), 1);
-                return monthDate.getMonth() === projectDate.getMonth() && 
-                       monthDate.getFullYear() === projectDate.getFullYear();
-              });
-              if (monthIndex !== -1) {
-                // Add project price to that month's earnings
-                months[monthIndex].value += project.price || 0;
-              }
-            }
-          });
-        }
-        
-        setEarningsData(months);
-        setHasEarnings(months.some(e => e.value > 0));
-
-        const statusCounts = userProjects.reduce((acc: any, project: any) => {
-          const status = (project.status || 'Unknown').toLowerCase();
-          acc[status] = (acc[status] || 0) + 1;
-          return acc;
-        }, {});
-        const pieData = Object.entries(statusCounts).map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
-        const pieColors = ['#10b981', '#3b82f6', '#f59e42', '#6366f1', '#f43f5e'];
-      } catch (error) {
-        console.log('User not authenticated or error fetching user data:', error);
-        // Redirect to signin if not authenticated
-        if (error.message?.includes('not authenticated')) {
-          navigate('/signin');
-          return;
-        }
-        // Don't show error toast for authentication issues
-        if (!error.message?.includes('not authenticated')) {
-          toast.error('Failed to load dashboard data');
-        }
+      } catch (err) {
+        console.error('Error loading dashboard data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load data');
       } finally {
         setLoading(false);
       }
     };
 
-    if (userType !== 'business') {
-      fetchUserData();
-    } else {
-      setLoading(false);
+    loadData();
+  }, [isLoggedIn, profileLoading]); // Removed profileData.userType dependency to prevent multiple requests
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (error && error.includes('not authenticated')) {
+      navigate('/signin');
     }
-  }, [userType, navigate]);
+  }, [error, navigate]);
+
+  // Update data from loaded results
+  useEffect(() => {
+    if (dashboardData && userProjects) {
+      console.log('Dashboard data loaded:', dashboardData);
+      console.log('User projects loaded:', userProjects);
+      
+      // Update stats with real data from backend
+      const stats = {
+        projectsPosted: dashboardData.projectCount || 0,
+        projectViews: dashboardData.totalViews || 0,
+        projectFavourites: dashboardData.favourites || 0,
+        connections: dashboardData.connections || 0,
+        likes: 0, // Keep as 0 for now, can be added to backend if needed
+      };
+
+      console.log('Setting user stats:', stats);
+      setUserStats(stats);
+      setRecentActivity(dashboardData.activities || []);
+      
+      const projects = (userProjects as any)?.data?.created || (userProjects as any)?.created || [];
+      console.log('Projects for earnings calculation:', projects);
+
+      // Calculate earnings based on actual project data
+      const now = new Date();
+      console.log('Current date for earnings calculation:', now);
+      const months = [];
+      
+      // Get the last 6 months ending with current month
+      for (let i = 0; i < 6; i++) {
+        // Create date for i months ago from current month
+        const targetMonth = now.getMonth() - (5 - i);
+        const targetYear = now.getFullYear();
+        const d = new Date(targetYear, targetMonth, 1);
+        months.push({
+          name: d.toLocaleString('default', { month: 'short' }),
+          value: 0
+        });
+      }
+      
+      console.log('Calculated months for earnings:', months);
+      
+      // Distribute earnings based on project creation dates
+      if (projects && projects.length > 0) {
+        projects.forEach((project: any) => {
+          if (project.createdAt) {
+            const projectDate = new Date(project.createdAt);
+            const monthIndex = months.findIndex(m => {
+              const monthDate = new Date(projectDate.getFullYear(), projectDate.getMonth(), 1);
+              return monthDate.getMonth() === projectDate.getMonth() && 
+                     monthDate.getFullYear() === projectDate.getFullYear();
+            });
+            if (monthIndex !== -1) {
+              // Add project price to that month's earnings
+              months[monthIndex].value += project.price || 0;
+            }
+          }
+        });
+      }
+      
+      console.log('Final earnings data:', months);
+      setEarningsData(months);
+      setHasEarnings(months.some(e => e.value > 0));
+    }
+  }, [dashboardData, userProjects]);
 
   useEffect(() => {
-    const aggregateLineGraphData = async () => {
+    const aggregateLineGraphData = () => {
       try {
-        // Get real project data to create accurate graphs
-        const projectsData = await userService.getUserProjects();
-        const userProjects = projectsData.created || [];
+        // Use the already loaded userProjects data instead of making another API call
+        const projects = (userProjects as any)?.data?.created || (userProjects as any)?.created || [];
         
         // Prepare months (last 6 months)
         const now = new Date();
+        console.log('Current date for line graph:', now);
         const months = [];
-        for (let i = 5; i >= 0; i--) {
-          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        
+        // Get the last 6 months ending with current month
+        for (let i = 0; i < 6; i++) {
+          // Create date for i months ago from current month
+          const targetMonth = now.getMonth() - (5 - i);
+          const targetYear = now.getFullYear();
+          const d = new Date(targetYear, targetMonth, 1);
           months.push({
             key: `${d.getFullYear()}-${d.getMonth() + 1}`,
             label: d.toLocaleString('default', { month: 'short' }),
           });
         }
+        
+        console.log('Calculated months for line graph:', months);
 
         // Initialize monthly data
         const projectsByMonth = Array(6).fill(0);
@@ -218,8 +228,8 @@ const Dashboard = () => {
         const connectionsByMonth = Array(6).fill(0);
 
         // Distribute projects based on actual creation dates
-        if (userProjects && userProjects.length > 0) {
-          userProjects.forEach((project: any) => {
+        if (projects && projects.length > 0) {
+          projects.forEach((project: any) => {
             if (project.createdAt) {
               const projectDate = new Date(project.createdAt);
               const monthIndex = months.findIndex(m => {
@@ -261,6 +271,11 @@ const Dashboard = () => {
           connections: connectionsByMonth[i],
           views: viewsByMonth[i],
         }));
+        
+        console.log('Line graph data calculated:', newLineGraphData);
+        console.log('Projects by month:', projectsByMonth);
+        console.log('Views by month:', viewsByMonth);
+        
         setLineGraphData(newLineGraphData);
       } catch (e) {
         console.error('Error aggregating line graph data:', e);
@@ -268,10 +283,107 @@ const Dashboard = () => {
       }
     };
     
-    if (userStats.projectsPosted > 0 || userStats.projectViews > 0) {
+    // Always run when we have data loaded, even if stats are 0
+    if (userProjects && userStats) {
       aggregateLineGraphData();
     }
-  }, [userStats]);
+  }, [userStats, userProjects]); // Added userProjects dependency
+
+  // Force refresh of graph data when component mounts or data changes
+  useEffect(() => {
+    if (dashboardData && userProjects) {
+      // Force recalculation of both earnings and line graph data
+      const now = new Date();
+      console.log('Force refreshing data with current date:', now);
+      
+      // Recalculate earnings data
+      const months = [];
+      for (let i = 0; i < 6; i++) {
+        const targetMonth = now.getMonth() - (5 - i);
+        const targetYear = now.getFullYear();
+        const d = new Date(targetYear, targetMonth, 1);
+        months.push({
+          name: d.toLocaleString('default', { month: 'short' }),
+          value: 0
+        });
+      }
+      
+      // Process projects for earnings
+      const projects = (userProjects as any)?.data?.created || (userProjects as any)?.created || [];
+      if (projects && projects.length > 0) {
+        projects.forEach((project: any) => {
+          if (project.createdAt) {
+            const projectDate = new Date(project.createdAt);
+            const monthIndex = months.findIndex(m => {
+              const monthDate = new Date(projectDate.getFullYear(), projectDate.getMonth(), 1);
+              return monthDate.getMonth() === projectDate.getMonth() && 
+                     monthDate.getFullYear() === projectDate.getFullYear();
+            });
+            if (monthIndex !== -1) {
+              months[monthIndex].value += project.price || 0;
+            }
+          }
+        });
+      }
+      
+      console.log('Force refreshed earnings data:', months);
+      setEarningsData(months);
+      setHasEarnings(months.some(e => e.value > 0));
+      
+      // Force recalculation of line graph data by calling the function directly
+      // We'll do this by updating the lineGraphData state directly
+      const lineGraphMonths = [];
+      for (let i = 0; i < 6; i++) {
+        const targetMonth = now.getMonth() - (5 - i);
+        const targetYear = now.getFullYear();
+        const d = new Date(targetYear, targetMonth, 1);
+        lineGraphMonths.push({
+          month: d.toLocaleString('default', { month: 'short' }),
+          projects: 0,
+          favourites: 0,
+          connections: 0,
+          views: 0
+        });
+      }
+      
+      // Process projects for line graph
+      if (projects && projects.length > 0) {
+        projects.forEach((project: any) => {
+          if (project.createdAt) {
+            const projectDate = new Date(project.createdAt);
+            const monthIndex = lineGraphMonths.findIndex(m => {
+              const monthDate = new Date(projectDate.getFullYear(), projectDate.getMonth(), 1);
+              return monthDate.getMonth() === projectDate.getMonth() && 
+                     monthDate.getFullYear() === projectDate.getFullYear();
+            });
+            if (monthIndex !== -1) {
+              lineGraphMonths[monthIndex].projects++;
+              const projectViews = project.views || 0;
+              const projectFavourites = project.favourites || 0;
+              lineGraphMonths[monthIndex].views += projectViews;
+              lineGraphMonths[monthIndex].favourites += projectFavourites;
+            }
+          }
+        });
+      }
+      
+      // Add connections data
+      const totalConnections = userStats.connections || 0;
+      if (totalConnections > 0) {
+        const connectionsPerMonth = Math.floor(totalConnections / 6);
+        for (let i = 0; i < 6; i++) {
+          lineGraphMonths[i].connections = connectionsPerMonth;
+        }
+        const remainder = totalConnections % 6;
+        for (let i = 0; i < remainder; i++) {
+          lineGraphMonths[i].connections++;
+        }
+      }
+      
+      console.log('Force refreshed line graph data:', lineGraphMonths);
+      setLineGraphData(lineGraphMonths);
+    }
+  }, [dashboardData, userProjects, userStats]);
 
   const onUserTypeChange = (type: UserType) => {
     setUserType(type);
@@ -520,13 +632,15 @@ const Dashboard = () => {
     '#f59e42', // Pending - orange
   ];
 
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <ThemeProvider defaultTheme="light" storageKey="amogh-ui-theme">
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-300">Loading dashboard...</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-300">
+              {profileLoading ? 'Loading profile...' : 'Loading dashboard...'}
+            </p>
           </div>
         </div>
       </ThemeProvider>
@@ -534,7 +648,7 @@ const Dashboard = () => {
   }
 
   // Don't render dashboard if not authenticated
-  if (!isAuthenticated && !loading) {
+  if (!isLoggedIn && !loading) {
     return null; // This will trigger the redirect in useEffect
   }
 

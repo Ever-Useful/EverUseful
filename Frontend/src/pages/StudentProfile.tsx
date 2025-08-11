@@ -14,6 +14,7 @@ import { ChatBox } from "@/components/ChatBox";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
+import { getUserAvatarUrl, getBackgroundImageUrl } from '@/utils/s3ImageUtils';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -21,9 +22,7 @@ const Profile = () => {
   const [userData, setUserData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
-  const [backgroundImage, setBackgroundImage] = useState(
-    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
-  );
+  const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [editSection, setEditSection] = useState('');
   const [showMyProjects, setShowMyProjects] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -47,6 +46,15 @@ const Profile = () => {
         setUserData(data.data);
         setEducation(data.data.education || []);
         setWorkExperience(data.data.workExperience || []);
+        
+        // Set background image from user profile data
+        const userBackgroundImage = data.data.profile?.backgroundImage;
+        if (userBackgroundImage) {
+          setBackgroundImage(userBackgroundImage);
+        } else {
+          // Fallback to default background
+          setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
+        }
         console.log('StudentProfile - User data set:', data.data);
         console.log('StudentProfile - Projects object:', data.data.projects);
         console.log('StudentProfile - Projects.created:', data.data.projects?.created);
@@ -214,7 +222,10 @@ const Profile = () => {
       {/* Hero Section */}
       <div
         className="relative h-64 sm:h-80 md:h-96 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
+        style={{ 
+          backgroundImage: `url(${getBackgroundImageUrl(backgroundImage)})`,
+          backgroundColor: '#1e293b' // Fallback color if image fails to load
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-12 sm:my-[99px] py-6 sm:py-[34px] px-3 sm:px-[23px]">
@@ -223,12 +234,9 @@ const Profile = () => {
               <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0">
                 <Avatar className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg mx-auto md:mx-0">
                   <AvatarImage
-                    src={profile.avatar}
-                    alt={profile.name}
+                    src={getUserAvatarUrl({ avatar: profile.avatar })}
+                    alt={fullName}
                     className="object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = NoUserProfile;
-                    }}
                   />
                   <AvatarFallback className="bg-slate-200 text-slate-600 font-bold text-2xl sm:text-3xl flex items-center justify-center">
                     {profile.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "NA"}
@@ -444,7 +452,7 @@ const Profile = () => {
             </Card>
             <ChatBox
               freelancerName={profile.name}
-              freelancerImage={profile.avatar}
+              freelancerImage={getUserAvatarUrl({ avatar: profile.avatar })}
             />
           </div>
         </div>

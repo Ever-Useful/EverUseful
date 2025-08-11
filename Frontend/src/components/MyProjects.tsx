@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, X, Upload, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, X, Upload, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 import SuccessAnimation from './SuccessAnimation';
@@ -12,6 +12,8 @@ import { API_ENDPOINTS } from '../config/api';
 import { DropdownWithOther } from './ui/dropdown-with-other';
 import { getDropdownOptions } from '../utils/dropdownUtils';
 import s3Service from '@/services/s3Service';
+import { getS3ImageUrl, handleImageError } from '@/utils/s3ImageUtils';
+import NoImageAvailable from '@/assets/images/no image available.png';
 
 interface MyProjectsSidebarProps {
   onClose: () => void;
@@ -36,6 +38,8 @@ interface ProjectFormData {
   techStack: string;
   deliverables: string;
 }
+
+const MAX_IMAGES = 4;
 
 export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjectCreated, editMode = false, projectToEdit }) => {
   const user = auth.currentUser;
@@ -84,12 +88,43 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         deliverables: (projectToEdit.deliverables || []).join(', '),
       });
       
-      // Set uploaded images if they exist
-      if (projectToEdit.images && Array.isArray(projectToEdit.images)) {
-        setUploadedImages(projectToEdit.images);
+      // Set uploaded images if they exist - handle both string and array formats
+      if (projectToEdit.images) {
+        if (Array.isArray(projectToEdit.images)) {
+          setUploadedImages(projectToEdit.images);
+        } else if (typeof projectToEdit.images === 'string') {
+          // If it's a string, try to parse it as JSON or split by comma
+          try {
+            const parsedImages = JSON.parse(projectToEdit.images);
+            if (Array.isArray(parsedImages)) {
+              setUploadedImages(parsedImages);
+            } else {
+              setUploadedImages([projectToEdit.images]);
+            }
+          } catch {
+            // If parsing fails, treat as single image
+            setUploadedImages([projectToEdit.images]);
+          }
+        }
+      } else if (projectToEdit.image) {
+        // If no images array but there's a main image, use that
+        setUploadedImages([projectToEdit.image]);
+      } else {
+        setUploadedImages([]);
       }
     }
   }, [editMode, projectToEdit]);
+
+  // Cleanup preview URLs when component unmounts
+  React.useEffect(() => {
+    return () => {
+      imagePreviewUrls.forEach(url => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [imagePreviewUrls]);
 
   const validateForm = () => {
     const errors: {[key: string]: string} = {};
@@ -101,6 +136,12 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
     } else if (isNaN(Number(projectData.price)) || Number(projectData.price) < 0) {
       errors.price = 'Price must be a valid positive number';
     }
+    
+    // Validate that at least one image is uploaded or selected
+    if (uploadedImages.length === 0 && selectedFiles.length === 0) {
+      errors.images = 'At least one project image is required';
+    }
+    
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -115,8 +156,8 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
     
     // Check if adding these files would exceed the 4 image limit
     const totalImages = uploadedImages.length + selectedFiles.length + files.length;
-    if (totalImages > 4) {
-      toast.error(`You can only upload up to 4 images per project. You currently have ${uploadedImages.length + selectedFiles.length} images.`);
+    if (totalImages > MAX_IMAGES) {
+      toast.error(`You can only upload up to ${MAX_IMAGES} images per project. You currently have ${uploadedImages.length + selectedFiles.length} images.`);
       return;
     }
     
@@ -137,12 +178,65 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
       // Create preview URLs
       const newPreviewUrls = validFiles.map(file => URL.createObjectURL(file));
       setImagePreviewUrls(prev => [...prev, ...newPreviewUrls]);
+      
+      // Clear the file input so the same file can be selected again
+      if (event.target) {
+        event.target.value = '';
+      }
     }
   };
 
   const handleRemoveFile = (index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Function to handle immediate upload of selected files (for edit mode)
+  const handleImmediateUpload = async () => {
+    if (selectedFiles.length === 0) return;
+    
+    // Only allow immediate upload for existing projects
+    if (!editMode || !projectToEdit || !projectToEdit.id) {
+      console.log('Images will be uploaded when you save the project');
+      return;
+    }
+    
+    try {
+      const token = await user?.getIdToken();
+      if (!token) {
+        toast.error('Please sign in to upload images');
+        return;
+      }
+
+      // Use actual project ID for immediate upload
+      const projectId = projectToEdit.id;
+      
+      // Upload images to S3
+      const imageResults = await s3Service.uploadProjectImages(selectedFiles, projectId);
+      
+      // Extract URLs
+      const imageUrls = imageResults.map(result => result.main);
+      
+      // Update local state
+      const updatedImages = [...uploadedImages, ...imageUrls];
+      setUploadedImages(updatedImages);
+      
+      // Clear selected files
+      setSelectedFiles([]);
+      setImagePreviewUrls([]);
+      
+      // Update project data
+      setProjectData(prev => ({
+        ...prev,
+        image: updatedImages[0] || '',
+        images: updatedImages.join(', ')
+      }));
+      
+      toast.success(`${imageResults.length} images uploaded successfully`);
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error('Failed to upload images');
+    }
   };
 
   const handleRemoveUploadedImage = async (index: number) => {
@@ -161,16 +255,51 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
       }
     }
     
-    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    // Update local state
+    const updatedImages = uploadedImages.filter((_, i) => i !== index);
+    setUploadedImages(updatedImages);
     
     // Update project data
-    const remainingImages = uploadedImages.filter((_, i) => i !== index);
     setProjectData(prev => ({
       ...prev,
-      image: remainingImages[0] || '',
-      images: remainingImages.join(', ')
+      image: updatedImages[0] || '',
+      images: updatedImages.join(', ')
     }));
+    
+    // If we're in edit mode, we need to update the project in DynamoDB immediately
+    if (editMode && projectToEdit && projectToEdit.id) {
+      try {
+        const token = await user?.getIdToken();
+        if (token) {
+          const updatePayload = {
+            ...projectToEdit,
+            image: updatedImages[0] || '',
+            images: updatedImages
+          };
+          
+          await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectToEdit.id), {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(updatePayload)
+          });
+          
+          toast.success('Image removed successfully');
+        }
+      } catch (error) {
+        console.error('Failed to update project after image removal:', error);
+        toast.error('Failed to update project');
+      }
+    }
   };
+
+  // Get the total number of images (uploaded + selected)
+  const totalImageCount = uploadedImages.length + selectedFiles.length;
+  
+  // Check if user can add more images
+  const canAddMoreImages = totalImageCount < MAX_IMAGES;
   
   const handleSaveProject = async () => {
     if (!user) {
@@ -188,19 +317,104 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
       const token = await user.getIdToken();
       const customUserId = user.uid;
 
-      // If there are selected files, upload them first
+      // Prepare project payload without images first
+      const payload = {
+        title: projectData.title,
+        description: projectData.description,
+        category: projectData.category,
+        tags: projectData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
+        price: parseFloat(projectData.price) || 0,
+        duration: projectData.duration,
+        teamSize: parseInt(projectData.teamSize) || 1,
+        skills: projectData.skills.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0),
+        features: projectData.features.split(',').map(feature => feature.trim()).filter(feature => feature.length > 0),
+        techStack: projectData.techStack.split(',').map(tech => tech.trim()).filter(tech => tech.length > 0),
+        deliverables: projectData.deliverables.split(',').map(deliverable => deliverable.trim()).filter(deliverable => deliverable.length > 0),
+        image: uploadedImages[0] || '', // Use existing uploaded images
+        images: uploadedImages, // Use existing uploaded images
+        status: 'Active',
+        posted: new Date().toISOString().split('T')[0],
+        views: 0,
+        favoritedBy: [],
+      };
+
+      let projectId: string;
+      let res;
+
+      if (editMode && projectToEdit && projectToEdit.id) {
+        // Edit mode: update existing project
+        projectId = projectToEdit.id;
+        res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectId), {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        // Create new project first
+        res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECTS, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Failed to create project');
+        }
+
+        const result = await res.json();
+        projectId = result.project.id;
+      }
+
+      // Now upload any selected files using the real project ID
       let finalImages = [...uploadedImages];
       if (selectedFiles.length > 0) {
         try {
-          // Generate a temporary project ID for upload
-          const tempProjectId = `temp-${Date.now()}`;
-          
-          // Upload images to S3
-          const imageResults = await s3Service.uploadProjectImages(selectedFiles, tempProjectId);
+          // Upload images to S3 using the real project ID
+          const imageResults = await s3Service.uploadProjectImages(selectedFiles, projectId);
           
           // Extract URLs
           const imageUrls = imageResults.map(result => result.main);
           finalImages = [...uploadedImages, ...imageUrls];
+          
+          // Clear selected files after successful upload
+          setSelectedFiles([]);
+          setImagePreviewUrls([]);
+          
+          // Update the project with the new images
+          const updatedPayload = {
+            ...payload,
+            image: finalImages[0] || '',
+            images: finalImages
+          };
+
+          if (editMode) {
+            // Update the project with new images
+            res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectId), {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(updatedPayload)
+            });
+          } else {
+            // Update the newly created project with images
+            res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectId), {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(updatedPayload)
+            });
+          }
           
           toast.success(`${imageResults.length} images uploaded successfully`);
         } catch (error) {
@@ -211,29 +425,9 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         }
       }
 
-      const payload = {
-        title: projectData.title,
-        description: projectData.description,
-        category: projectData.category,
-        tags: projectData.tags.split(',').map(tag => tag.trim()),
-        price: parseFloat(projectData.price) || 0,
-        duration: projectData.duration,
-        teamSize: parseInt(projectData.teamSize) || 1,
-        skills: projectData.skills.split(',').map(skill => skill.trim()),
-        features: projectData.features.split(',').map(feature => feature.trim()),
-        techStack: projectData.techStack.split(',').map(tech => tech.trim()),
-        deliverables: projectData.deliverables.split(',').map(deliverable => deliverable.trim()),
-        image: finalImages[0] || '', // First image as main image
-        images: finalImages,
-        status: 'Active',
-        posted: new Date().toISOString().split('T')[0],
-        views: 0,
-        favoritedBy: [],
-      };
-
       // If editing, delete old images that are no longer in the project
       if (editMode && projectToEdit && projectToEdit.images) {
-        const oldImages = projectToEdit.images;
+        const oldImages = Array.isArray(projectToEdit.images) ? projectToEdit.images : [projectToEdit.images];
         const newImages = finalImages;
         
         // Find images that were removed
@@ -253,31 +447,6 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             }
           }
         }
-      }
-
-      let res;
-      if (editMode && projectToEdit && projectToEdit.id) {
-        console.log('Editing project:', projectToEdit);
-        console.log('Editing project id:', projectToEdit.id);
-        // Edit mode: update project
-        res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectToEdit.id), {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
-      } else {
-        // Add mode: create new project
-        res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECTS, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
       }
 
       if (!res.ok) {
@@ -387,81 +556,115 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             <Label htmlFor="skills">Required Skills (comma-separated)</Label>
             <Input id="skills" name="skills" value={projectData.skills} onChange={handleInputChange} placeholder="e.g., Machine Learning, Python" />
           </div>
-          {/* Image Upload Section */}
-          <div className="space-y-4">
-            <Label>Project Images</Label>
+          
+                      {/* Image Upload Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label>Project Images</Label>
+                <span className="text-sm text-gray-500">
+                  {totalImageCount}/{MAX_IMAGES} images
+                </span>
+              </div>
+              {formErrors.images && (
+                <div className="text-red-500 text-sm">{formErrors.images}</div>
+              )}
             
-            {/* Uploaded Images Display */}
-            {(uploadedImages.length > 0 || selectedFiles.length > 0) && (
-              <div className="space-y-3">
-                {/* Uploaded Images */}
-                {uploadedImages.length > 0 && (
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">Uploaded Images:</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {uploadedImages.map((imageUrl, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={imageUrl}
-                            alt={`Project image ${index + 1}`}
-                            className="w-full h-20 object-cover rounded border"
-                          />
-                          <button
-                            onClick={() => handleRemoveUploadedImage(index)}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Selected Files with Previews */}
-                {selectedFiles.length > 0 && (
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">Selected Files (will be uploaded when you save):</p>
-                    <div className="grid grid-cols-3 gap-3">
-                      {selectedFiles.map((file, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={imagePreviewUrls[index]}
-                            alt={`Preview ${index + 1}`}
-                            className="w-full h-24 object-cover rounded-lg border"
-                          />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                            <button
-                              onClick={() => handleRemoveFile(index)}
-                              className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </div>
-                          <p className="text-xs text-gray-600 mt-1 truncate">{file.name}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+            {/* Image Limit Warning */}
+            {totalImageCount >= MAX_IMAGES && (
+              <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <AlertCircle className="w-4 h-4 text-yellow-600" />
+                <span className="text-sm text-yellow-800">
+                  Maximum {MAX_IMAGES} images reached. Remove some images to add more.
+                </span>
               </div>
             )}
             
-            {/* File Selection */}
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2"
-              >
-                <ImageIcon className="w-4 h-4" />
-                Select Images
-              </Button>
-              <span className="text-sm text-gray-500">
-                {uploadedImages.length + selectedFiles.length} image{(uploadedImages.length + selectedFiles.length) !== 1 ? 's' : ''} selected
-              </span>
-            </div>
+            {/* Uploaded Images Display */}
+            {uploadedImages.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 mb-2">Uploaded Images:</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {uploadedImages.map((imageUrl, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={imageUrl || NoImageAvailable}
+                        alt={`Project image ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border shadow-sm"
+                        onError={(e) => { 
+                          e.currentTarget.src = NoImageAvailable; 
+                        }}
+                      />
+                      <button
+                        onClick={() => handleRemoveUploadedImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                        title="Remove image"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        Image {index + 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Selected Files with Previews */}
+            {selectedFiles.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 mb-2">Selected Files (will be uploaded when you save):</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={imagePreviewUrls[index]}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border shadow-sm"
+                      />
+                      <button
+                        onClick={() => handleRemoveFile(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                        title="Remove file"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        {file.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+                                {/* File Selection */}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-2"
+                        disabled={!canAddMoreImages}
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                        Select Images
+                      </Button>
+                      <span className="text-sm text-gray-500">
+                        {totalImageCount} image{(totalImageCount) !== 1 ? 's' : ''} selected
+                      </span>
+                      {selectedFiles.length > 0 && editMode && projectToEdit && projectToEdit.id && (
+                        <Button
+                          type="button"
+                          variant="default"
+                          onClick={handleImmediateUpload}
+                          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Upload className="w-4 h-4" />
+                          Upload Now
+                        </Button>
+                      )}
+                    </div>
             
             {/* Hidden file input */}
             <input
@@ -473,6 +676,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
               className="hidden"
             />
           </div>
+          
           <div>
             <Label htmlFor="features">Features (comma-separated)</Label>
             <Textarea id="features" name="features" value={projectData.features} onChange={handleInputChange} placeholder="Feature 1, Feature 2, Feature 3" />
