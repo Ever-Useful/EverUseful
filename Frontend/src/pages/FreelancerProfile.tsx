@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { useState, useEffect } from "react";
 import userService from "@/services/userService";
 import NoUserProfile from "@/assets/images/no user profile.png";
-import { getUserAvatarUrl } from "@/utils/s3ImageUtils";
+import { getUserAvatarUrl, getBackgroundImageUrl } from "@/utils/s3ImageUtils";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
 
@@ -18,9 +18,7 @@ const VisitingProfile = () => {
   const navigate = useNavigate();
   const [freelancer, setFreelancer] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [backgroundImage] = useState(
-    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
-  );
+  const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
   const MAX_LENGTH = 200;
   const [isExpanded, setIsExpanded] = useState(false);
@@ -54,6 +52,15 @@ const VisitingProfile = () => {
               setFreelancer(data.data);
               setEducation(data.data.education || []);
               setWorkExperience(data.data.workExperience || []);
+              
+              // Set background image from user profile data
+              const userBackgroundImage = data.data.profile?.backgroundImage;
+              if (userBackgroundImage) {
+                setBackgroundImage(userBackgroundImage);
+              } else {
+                // Fallback to default background
+                setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
+              }
               // Fetch full project details for each project ID
               const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
               console.log('FreelancerProfile - Project IDs found:', projectIds);
@@ -139,7 +146,8 @@ const VisitingProfile = () => {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
       <Header />
       <div className="relative h-96 bg-cover bg-center bg-no-repeat" style={{
-        backgroundImage: `url(${backgroundImage})`
+        backgroundImage: `url(${getBackgroundImageUrl(backgroundImage)})`,
+        backgroundColor: '#1e293b' // Fallback color if image fails to load
       }}>
         {/* Darker overlay for better text contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />

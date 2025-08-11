@@ -20,23 +20,42 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Ensure output directory is properly configured
     outDir: 'dist',
-    // Add cache busting
     rollupOptions: {
       output: {
         entryFileNames: `assets/[name]-[hash].js`,
         chunkFileNames: `assets/[name]-[hash].js`,
-        assetFileNames: `assets/[name]-[hash].[ext]`
+        assetFileNames: `assets/[name]-[hash].[ext]`,
+        // Simple manual chunks without problematic dependencies
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
+          'utils-vendor': ['clsx', 'tailwind-merge', 'class-variance-authority'],
+        }
       }
     },
-    // Ensure source maps are generated for debugging
-    sourcemap: true,
-    // Ensure index.html is generated
+    sourcemap: mode === 'development',
+    chunkSizeWarningLimit: 1000,
+    minify: mode === 'production' ? 'terser' : false,
+    terserOptions: mode === 'production' ? {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    } : undefined,
     emptyOutDir: true,
   },
-  // Add cache busting for development
   define: {
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+    ],
+  },
+  css: {
+    devSourcemap: mode === 'development',
   },
 }));
