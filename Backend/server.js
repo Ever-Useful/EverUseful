@@ -12,9 +12,10 @@ const s3Routes = require('./routes/s3');
 const app = express();
 
 app.use(cors({
-  origin: '*', // In production, replace with your frontend domain
+  origin: 'https://amoghconnect.com',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
 
 app.use(express.json());

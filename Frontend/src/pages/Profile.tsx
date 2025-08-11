@@ -703,7 +703,7 @@ const Profile = () => {
                                   <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">{tech}</Badge>
                                 ))}
                               </div>
-                                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
                                  <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
                                  <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
                                  <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
