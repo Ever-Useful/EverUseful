@@ -9,7 +9,7 @@ const userService = require('../services/userService');
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 20 * 1024 * 1024, // 20MB limit
+    fileSize: 25 * 1024 * 1024, // 25MB limit
   },
   fileFilter: (req, file, cb) => {
     // Allow only image files

@@ -11,14 +11,18 @@ const s3Routes = require('./routes/s3');
 
 const app = express();
 
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ limit: '25mb', extended: true }));
+
 app.use(cors({
-  origin: 'https://amoghconnect.com',
+  origin: [
+    'https://amoghconnect.com',
+    // 'https://www.amoghconnect.com', // Uncomment if you use www subdomain
+    // Add more allowed origins as needed
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
 }));
-
-app.use(express.json());
 
 // Test endpoint to check if server is running
 app.get('/api/test', (req, res) => {
