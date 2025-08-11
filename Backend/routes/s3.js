@@ -244,7 +244,15 @@ router.post('/upload-project-images', authorize, upload.array('images', 10), asy
     console.error('=== Project Images Upload Error ===');
     console.error('Error details:', error);
     console.error('Error stack:', error.stack);
-    res.status(500).json({ error: 'Failed to upload project images' });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to upload project images',
+      errorMessage: error.message || null,
+      errorStack: error.stack || null,
+      errorFull: error,
+      imageUrls: null,
+      count: 0
+    });
   }
 });
 

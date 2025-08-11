@@ -195,6 +195,12 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
   const handleImmediateUpload = async () => {
     if (selectedFiles.length === 0) return;
     
+    // Only allow immediate upload for existing projects
+    if (!editMode || !projectToEdit || !projectToEdit.id) {
+      console.log('Images will be uploaded when you save the project');
+      return;
+    }
+    
     try {
       const token = await user?.getIdToken();
       if (!token) {
@@ -203,9 +209,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
       }
 
       // Use actual project ID for immediate upload
-      const projectId = editMode && projectToEdit && projectToEdit.id 
-        ? projectToEdit.id 
-        : `temp-${Date.now()}`;
+      const projectId = projectToEdit.id;
       
       // Upload images to S3
       const imageResults = await s3Service.uploadProjectImages(selectedFiles, projectId);
@@ -313,35 +317,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
       const token = await user.getIdToken();
       const customUserId = user.uid;
 
-      // If there are selected files, upload them first
-      let finalImages = [...uploadedImages];
-      if (selectedFiles.length > 0) {
-        try {
-          // Use actual project ID if editing, otherwise generate temporary ID
-          const projectId = editMode && projectToEdit && projectToEdit.id 
-            ? projectToEdit.id 
-            : `temp-${Date.now()}`;
-          
-          // Upload images to S3
-          const imageResults = await s3Service.uploadProjectImages(selectedFiles, projectId);
-          
-          // Extract URLs
-          const imageUrls = imageResults.map(result => result.main);
-          finalImages = [...uploadedImages, ...imageUrls];
-          
-          // Clear selected files after successful upload
-          setSelectedFiles([]);
-          setImagePreviewUrls([]);
-          
-          toast.success(`${imageResults.length} images uploaded successfully`);
-        } catch (error) {
-          console.error('Error uploading images:', error);
-          toast.error('Failed to upload images');
-          setLoading(false);
-          return;
-        }
-      }
-
+      // Prepare project payload without images first
       const payload = {
         title: projectData.title,
         description: projectData.description,
@@ -354,13 +330,100 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         features: projectData.features.split(',').map(feature => feature.trim()).filter(feature => feature.length > 0),
         techStack: projectData.techStack.split(',').map(tech => tech.trim()).filter(tech => tech.length > 0),
         deliverables: projectData.deliverables.split(',').map(deliverable => deliverable.trim()).filter(deliverable => deliverable.length > 0),
-        image: finalImages[0] || '', // First image as main image
-        images: finalImages, // Store as array for proper DynamoDB storage
+        image: uploadedImages[0] || '', // Use existing uploaded images
+        images: uploadedImages, // Use existing uploaded images
         status: 'Active',
         posted: new Date().toISOString().split('T')[0],
         views: 0,
         favoritedBy: [],
       };
+
+      let projectId: string;
+      let res;
+
+      if (editMode && projectToEdit && projectToEdit.id) {
+        // Edit mode: update existing project
+        projectId = projectToEdit.id;
+        res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectId), {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        // Create new project first
+        res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECTS, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Failed to create project');
+        }
+
+        const result = await res.json();
+        projectId = result.project.id;
+      }
+
+      // Now upload any selected files using the real project ID
+      let finalImages = [...uploadedImages];
+      if (selectedFiles.length > 0) {
+        try {
+          // Upload images to S3 using the real project ID
+          const imageResults = await s3Service.uploadProjectImages(selectedFiles, projectId);
+          
+          // Extract URLs
+          const imageUrls = imageResults.map(result => result.main);
+          finalImages = [...uploadedImages, ...imageUrls];
+          
+          // Clear selected files after successful upload
+          setSelectedFiles([]);
+          setImagePreviewUrls([]);
+          
+          // Update the project with the new images
+          const updatedPayload = {
+            ...payload,
+            image: finalImages[0] || '',
+            images: finalImages
+          };
+
+          if (editMode) {
+            // Update the project with new images
+            res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectId), {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(updatedPayload)
+            });
+          } else {
+            // Update the newly created project with images
+            res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectId), {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(updatedPayload)
+            });
+          }
+          
+          toast.success(`${imageResults.length} images uploaded successfully`);
+        } catch (error) {
+          console.error('Error uploading images:', error);
+          toast.error('Failed to upload images');
+          setLoading(false);
+          return;
+        }
+      }
 
       // If editing, delete old images that are no longer in the project
       if (editMode && projectToEdit && projectToEdit.images) {
@@ -384,31 +447,6 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             }
           }
         }
-      }
-
-      let res;
-      if (editMode && projectToEdit && projectToEdit.id) {
-        console.log('Editing project:', projectToEdit);
-        console.log('Editing project id:', projectToEdit.id);
-        // Edit mode: update project
-        res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(projectToEdit.id), {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
-      } else {
-        // Add mode: create new project
-        res = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECTS, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
       }
 
       if (!res.ok) {
@@ -615,7 +653,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
                       <span className="text-sm text-gray-500">
                         {totalImageCount} image{(totalImageCount) !== 1 ? 's' : ''} selected
                       </span>
-                      {selectedFiles.length > 0 && (
+                      {selectedFiles.length > 0 && editMode && projectToEdit && projectToEdit.id && (
                         <Button
                           type="button"
                           variant="default"

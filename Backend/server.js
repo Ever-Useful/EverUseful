@@ -14,6 +14,8 @@ const app = express();
 app.use(cors({
   origin: [
     'https://amoghconnect.com',
+    'http://localhost:8080',
+    'http://localhost:3000',
     // 'https://www.amoghconnect.com', // Uncomment if you use www subdomain
     // Add more allowed origins as needed
   ],
