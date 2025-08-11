@@ -8,6 +8,7 @@ type Partner = {
   tagline: string;
   description: string;
   imageUrl: string;
+  href?: string; 
 };
 
 const partners: Partner[] = [
@@ -16,56 +17,72 @@ const partners: Partner[] = [
     name: 'TechNova',
     tagline: 'AI Solutions Pioneer',
     description: 'Leading provider of enterprise AI solutions',
-    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+    href: '#'
   },
   {
     id: 2,
     name: 'GreenScape',
     tagline: 'Sustainable Technology',
     description: 'Innovators in eco-friendly tech solutions',
-    imageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+    imageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+    href: '#'
   },
   {
     id: 3,
     name: 'QuantumLeap',
     tagline: 'Quantum Computing',
     description: 'Frontiers of computational technology',
-    imageUrl: 'https://images.unsplash.com/photo-1609151376730-f246ec0b99e5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+    imageUrl: 'https://images.unsplash.com/photo-1609151376730-f246ec0b99e5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    href: '#'
   },
   {
     id: 4,
     name: 'Nexus Dynamics',
     tagline: 'Enterprise Solutions',
     description: 'End-to-end business transformation',
-    imageUrl: 'https://images.unsplash.com/photo-1605868587355-5acbe10a8fab?q=80&w=2017&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+    imageUrl: 'https://images.unsplash.com/photo-1605868587355-5acbe10a8fab?q=80&w=2017&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    href: '#'
   },
   {
     id: 5,
     name: 'AeroSystems',
     tagline: 'Aviation Technology',
     description: 'Next-gen aerospace solutions',
-    imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+    imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+    href: '#'
   },
   {
     id: 6,
     name: 'BioGenius',
     tagline: 'Healthcare Innovation',
     description: 'Revolutionizing medical technology',
-    imageUrl: 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+    imageUrl: 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+    href: '#'
   },
   {
     id: 7,
     name: 'SolarFlare',
     tagline: 'Renewable Energy',
     description: 'Clean energy for tomorrow',
-    imageUrl: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+    imageUrl: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+    href: '#'
   },
   {
     id: 8,
     name: 'CryptoChain',
     tagline: 'Blockchain Solutions',
     description: 'Secure decentralized technology',
-    imageUrl: 'https://images.unsplash.com/photo-1526378800651-c32d170fe6f8?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+    imageUrl: 'https://images.unsplash.com/photo-1526378800651-c32d170fe6f8?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    href: '#'
+  },
+  {
+    id: 9,
+    name: 'Chainfly',
+    tagline: 'Solar Asset Management',
+    description: 'AI-Powered Solar Asset Intelligence',
+    imageUrl: 'https://images.indianexpress.com/2025/05/solar-panels.jpg',
+    href: 'https://www.chainfly.co/'
   },
 ];
 
@@ -208,7 +225,7 @@ export const GlobalCollaborations: React.FC = () => {
                   <p className="text-sm text-gray-500 mb-2 text-center line-clamp-2 mobile-text-sm">{partner.description}</p>
                   <div className="flex justify-center text-cyan-700 text-xs sm:text-base font-semibold underline hover:text-red-600 transition">
                     <Link
-                      to="#"
+                      to={partner.href}
                       tabIndex={0}
                     >
                       Learn More &rarr;

@@ -31,7 +31,7 @@ export const ImpactMotive = () => {
     {
       icon: TrendingUp,
       title: "Success Rate",
-      value: 89,
+      value: 100,
       suffix: "%",
       description: "Projects successfully commercialized",
       iconBg: "bg-purple-100",
