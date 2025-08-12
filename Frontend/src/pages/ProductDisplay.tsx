@@ -124,7 +124,7 @@ const ProductDisplay = () => {
     };
     
     if (project) fetchAuthor();
-  }, [project, authorCache]);
+  }, [project]); // Removed authorCache from dependencies to prevent infinite re-renders
 
   // Helper to get author details with loading state
   const getAuthorDetails = (authorId: string) => {
@@ -142,8 +142,6 @@ const ProductDisplay = () => {
         description: ''
       };
     }
-    
-    console.log('Processing author data for ID:', authorId, 'Data:', user);
     
     // Extract data from the proper structure - handle multiple response formats
     const auth = user.auth || user.data?.auth || {};
@@ -214,7 +212,6 @@ const ProductDisplay = () => {
       description: description
     };
     
-    console.log('Author details result:', result);
     return result;
   };
 
@@ -237,6 +234,12 @@ const ProductDisplay = () => {
   const showReceipt = () => {
     navigate("/paymentSuccess")
   }
+
+  // Calculate text truncation
+  const shouldTruncate = project?.description && project.description.length > MAX_LENGTH;
+  const displayedText = isExpanded
+    ? project?.description
+    : project?.description ? project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "") : "";
 
   const handleAddToCart = async (projectId: number) => {
     if (!user || !token) {
@@ -261,22 +264,26 @@ const ProductDisplay = () => {
     }
   };
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-  if (error || !project) {
-    return <div className="min-h-screen flex items-center justify-center text-red-500">{error || 'Project not found'}</div>;
-  }
-
-  const shouldTruncate = project.description && project.description.length > MAX_LENGTH
-  const displayedText = isExpanded
-  ? project.description
-  : project.description ? project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "") : ""
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-100">
+    <div className="min-h-screen bg-gray-50 pt-16"> {/* Added pt-16 for top padding */}
       <Header />
-      
+      {loading ? (
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-96 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded mb-4"></div>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Error</h2>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      ) : project ? (
+        <>
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-2 xs:px-3 sm:px-4 lg:px-6 py-2 xs:py-3 sm:py-6 lg:py-8">
@@ -286,7 +293,7 @@ const ProductDisplay = () => {
               <div className="mb-2 xs:mb-3 sm:mb-4">
                 <img 
                   src={getS3ImageUrl(
-                    project.images && project.images[selectedImage] 
+                        project.images && Array.isArray(project.images) && project.images[selectedImage] 
                       ? project.images[selectedImage] 
                       : project.image, 
                     'project', 
@@ -297,7 +304,7 @@ const ProductDisplay = () => {
                   onError={(e) => handleImageError(e, NoImageAvailable)}
                 />
               </div>
-              {project.images && project.images.length > 1 && (
+                  {project.images && Array.isArray(project.images) && project.images.length > 1 && (
                 <div className="grid grid-cols-4 xs:grid-cols-4 sm:grid-cols-5 lg:grid-cols-4 gap-1 sm:gap-2">
                   {project.images.map((image: string, index: number) => (
                     <button
@@ -351,44 +358,6 @@ const ProductDisplay = () => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 mb-6">
-                {(!authorCache[project.author]) ? (
-                  <>
-                    <Skeleton className="w-12 h-12 rounded-full" />
-                    <div>
-                      <Skeleton className="w-32 h-5 mb-2 rounded" />
-                      <Skeleton className="w-20 h-4 rounded" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <img 
-                      src={getUserAvatarUrl(getAuthorDetails(project.author))} 
-                      alt={getAuthorDetails(project.author).name}
-                      className="w-12 h-12 rounded-full cursor-pointer"
-                      onError={(e) => handleImageError(e, NoUserProfile)}
-                      onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                    />
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span 
-                          className="font-semibold text-gray-900 cursor-pointer"
-                          style={{ transition: 'color 0.2s' }}
-                          onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
-                          onMouseOut={e => e.currentTarget.style.color = ''}
-                          onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                        >
-                          {getAuthorDetails(project.author).name}
-                        </span>
-                        {project.author.verified && (
-                          <CheckCircle className="w-4 h-4 text-blue-500" />
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500">{project.author.projects} projects</p>
-                    </div>
-                  </>
-                )}
-              </div>
 
               <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6">
                 {project.skills && project.skills.map((skill, index) => (
@@ -732,6 +701,8 @@ const ProductDisplay = () => {
           />
         </div>
       </div>
+        </>
+      ) : null}
       
       <Footer/>
       
