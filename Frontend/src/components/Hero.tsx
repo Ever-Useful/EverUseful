@@ -99,7 +99,7 @@ export const Hero = () => {
               <div className="flex justify-center lg:justify-start animate-fade-in delay-300">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
+                  className="w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
                   asChild
                 >
                   <Link to="/signup" className="font-bold flex items-center justify-center">
@@ -122,30 +122,8 @@ export const Hero = () => {
                   return (
                     <div
                       key={opt.id}
-                      className={`
-                        group
-                        relative
-                        cursor-pointer
-                        overflow-hidden
-                        bg-center
-                        bg-cover
-                        flex-[1_1_60px]
-                        mx-[24px]
-                        rounded-[64px]
-                        transition-all
-                        duration-700
-                        ease-[cubic-bezier(0.22,1,0.36,1)]
-                        hover:flex-[10_1_600px]
-                        hover:rounded-[32px]
-                        hover:bg-[length:auto_100%]
-                      `}
-                      style={{
-                        backgroundImage: `url(${opt.imageUrl})`,
-                        animationName,
-                        animationDuration: "5s",
-                        animationTimingFunction: "ease-in-out",
-                        animationIterationCount: "infinite",
-                      }}
+                      className={`group relative cursor-pointer overflow-hidden bg-center bg-cover flex-[1_1_60px] mx-[24px] rounded-[64px] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:flex-[10_1_600px] hover:rounded-[32px] hover:bg-[length:auto_100%]`}
+                      style={{backgroundImage: `url(${opt.imageUrl})`, animationName, animationDuration: "5s", animationTimingFunction: "ease-in-out", animationIterationCount: "infinite",}}
                     >
                       {/* Shadow overlay at bottom for gradient effect ONLY on hover */}
                       <div
