@@ -89,25 +89,28 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
       });
       
       // Set uploaded images if they exist - handle both string and array formats
+      const collected: string[] = [];
       if (projectToEdit.images) {
         if (Array.isArray(projectToEdit.images)) {
-          setUploadedImages(projectToEdit.images);
+          collected.push(...projectToEdit.images);
         } else if (typeof projectToEdit.images === 'string') {
-          // If it's a string, try to parse it as JSON or split by comma
           try {
-            const parsedImages = JSON.parse(projectToEdit.images);
-            if (Array.isArray(parsedImages)) {
-              setUploadedImages(parsedImages);
-            } else {
-              setUploadedImages([projectToEdit.images]);
-            }
+            const parsed = JSON.parse(projectToEdit.images);
+            if (Array.isArray(parsed)) collected.push(...parsed);
+            else collected.push(projectToEdit.images);
           } catch {
-            // If parsing fails, treat as single image
-            setUploadedImages([projectToEdit.images]);
+            collected.push(projectToEdit.images);
           }
         }
+      }
+      // Legacy fields support
+      ['image1','image2','image3','image4'].forEach((k)=>{
+        const v = (projectToEdit as any)[k];
+        if (typeof v === 'string' && v.trim().length > 0) collected.push(v);
+      });
+      if (collected.length > 0) {
+        setUploadedImages(Array.from(new Set(collected)));
       } else if (projectToEdit.image) {
-        // If no images array but there's a main image, use that
         setUploadedImages([projectToEdit.image]);
       } else {
         setUploadedImages([]);
@@ -332,6 +335,10 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
         deliverables: projectData.deliverables.split(',').map(deliverable => deliverable.trim()).filter(deliverable => deliverable.length > 0),
         image: uploadedImages[0] || '', // Use existing uploaded images
         images: uploadedImages, // Use existing uploaded images
+        image1: uploadedImages[0] || '',
+        image2: uploadedImages[1] || '',
+        image3: uploadedImages[2] || '',
+        image4: uploadedImages[3] || '',
         status: 'Active',
         posted: new Date().toISOString().split('T')[0],
         views: 0,
@@ -391,7 +398,11 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
           const updatedPayload = {
             ...payload,
             image: finalImages[0] || '',
-            images: finalImages
+            images: finalImages,
+            image1: finalImages[0] || '',
+            image2: finalImages[1] || '',
+            image3: finalImages[2] || '',
+            image4: finalImages[3] || ''
           };
 
           if (editMode) {

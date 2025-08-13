@@ -252,7 +252,7 @@ export const FeaturedProducts: React.FC = () => {
               </div>
               {/* Content */}
               <UICardContent className="flex flex-col flex-1 px-5 py-4">
-                <UICardHeader className="pb-1">
+                <UICardHeader className="-translate-x-6 pb-1">
                   <UICardTitle className="text-lg md:text-lg font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                     {p.title}
                   </UICardTitle>
