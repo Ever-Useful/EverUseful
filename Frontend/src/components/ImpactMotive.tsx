@@ -95,7 +95,7 @@ export const ImpactMotive = () => {
                   px-1 py-1 sm:p-0
                 ">
                   <CardContent className="p-2 sm:p-6 flex flex-col flex-grow">
-                    <div className={`w-7 h-7 sm:w-14 sm:h-14 ${impact.iconBg} rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-4`}>
+                    <div className={`w-7 h-7 sm:w-14 sm:h-14 sm:${impact.iconBg} rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-4`}>
                       <impact.icon className={`w-4 h-4 sm:w-6 sm:h-6 ${impact.iconColor}`} />
                     </div>
                     <div className="text-base sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2 text-center mobile-text-base sm:mobile-text-2xl">
@@ -136,7 +136,7 @@ export const ImpactMotive = () => {
               >
                 <Card className="h-full bg-white shadow-lg rounded-xl">
                   <CardContent className="p-2 sm:p-6 flex flex-row mt-0">
-                    <div className="w-7 h-7 sm:w-12 sm:h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <div className="w-7 h-7 sm:w-12 sm:h-12 sm:bg-indigo-100 rounded-xl flex items-center justify-center">
                       <motive.icon className="text-indigo-600 w-4 h-4 sm:w-6 sm:h-6" />
                     </div>
                     <div>

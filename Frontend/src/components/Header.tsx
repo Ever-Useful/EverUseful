@@ -94,7 +94,7 @@ const mockNotifications = [
     {
         id: 6,
         title: "Payment received",
-        message: "$250 payment received for your freelance work",
+        message: "₹250 payment received for your freelance work",
         time: "2 days ago",
         unread: false,
         type: "payment",
@@ -441,25 +441,25 @@ const Header = () => {
 
     return (
         <>
-            <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-white shadow-sm">
-                <div className="container max-w-full md:w-[1320px] mx-auto px-2 sm:px-4">
-                    <div className="flex h-14 items-center justify-between">
+            <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-white/95 backdrop-blur-sm shadow-sm">
+                <div className="container max-w-full md:w-[1320px] mx-auto px-3 sm:px-4 lg:px-6">
+                    <div className="flex h-16 sm:h-14 items-center justify-between">
                         {/* Logo */}
-                        <div className="flex items-center space-x-1 flex-shrink-0">
+                        <div className="flex items-center space-x-2 flex-shrink-0">
                             <Link to="/" className="flex items-center space-x-2 group">
-                                <img src={Logo} alt="AMOGH" className="h-10 w-auto md:h-8" />
+                                <img src={Logo} alt="" className="h-8 w-auto sm:h-8 md:h-9" />
                             </Link>
                         </div>
 
                         {/* Desktop Navigation and Search */}
-                        <div className="hidden md:flex flex-1 items-center">
-                            <div className="mx-4 flex-1 max-w-md">
+                        <div className="hidden lg:flex flex-1 items-center justify-center">
+                            <div className="mx-6 flex-1 max-w-lg">
                                 <div className="relative w-full">
                                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                     <input
                                         type="text"
                                         placeholder="Search projects, services..."
-                                        className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
+                                        className="flex h-10 w-full rounded-full border border-gray-200 bg-gray-50 py-2 pl-10 pr-3 text-sm shadow-sm transition-all duration-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
                                     />
                                 </div>
                             </div>
@@ -471,12 +471,12 @@ const Header = () => {
                             {isLoggedIn ? (
                                 <>
                                     {/* Mobile: Hamburger and Profile */}
-                                    <div className="flex md:hidden items-center space-x-2">
+                                    <div className="flex lg:hidden items-center space-x-2">
                                         {/* Profile Button */}
                                         <Button
                                             variant="ghost"
                                             onClick={() => setShowProfileSidebar(true)}
-                                            className="hover:bg-white/10 hover:text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 py-2 rounded-lg flex items-center"
+                                            className="hover:bg-gray-100 hover:text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 py-2 rounded-lg flex items-center"
                                         >
                                             <User className="h-5 w-5 text-gray-600" />
                                         </Button>
@@ -484,7 +484,7 @@ const Header = () => {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="p-2"
+                                            className="p-2 hover:bg-gray-100 hover:scale-105 transition-all duration-300"
                                             aria-label="Open menu"
                                             onClick={() => setShowMobileMenu(true)}
                                         >
@@ -492,11 +492,20 @@ const Header = () => {
                                         </Button>
                                     </div>
                                     {/* Desktop: All header actions */}
-                                    <div className="hidden md:flex items-center space-x-2 sm:space-x-3">
+                                    <div className="hidden lg:flex items-center space-x-2 sm:space-x-3">
                                         {/* Cart Button */}
-                                        <Button variant="ghost" size="icon" className="hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300" asChild>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="hover:bg-gray-100 hover:text-gray-900 hover:scale-105 transition-all duration-300 relative" 
+                                            asChild
+                                        >
                                             <Link to="/cart">
                                                 <ShoppingCart className="h-5 w-5 text-gray-600" />
+                                                {/* Cart Badge */}
+                                                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                                                    0
+                                                </span>
                                             </Link>
                                         </Button>
                                         {/* Messages Button */}
@@ -633,9 +642,8 @@ const Header = () => {
                                         <Button
                                             variant="default"
                                             size="sm"
-                                            bg-background="emerald-600"
                                             asChild
-                                            className="text-sm px-3 py-1"
+                                            className="text-sm px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
                                         >
                                             <Link to="/signup">Join</Link>
                                         </Button>
@@ -655,16 +663,14 @@ const Header = () => {
                                         <Button
                                             variant="outline"
                                             asChild
-                                            bg-border="emerald-600"
-                                            className="text-sm px-4 py-2"
+                                            className="text-sm px-4 py-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold rounded-lg transition-all duration-200"
                                         >
                                             <Link to="/signin">Sign In</Link>
                                         </Button>
                                         <Button
                                             variant="default"
                                             asChild
-                                            bg-background="emerald-600"
-                                            className="text-sm px-4 py-2"
+                                            className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
                                         >
                                             <Link to="/signup">Join</Link>
                                         </Button>
@@ -680,13 +686,15 @@ const Header = () => {
                 <div className="fixed inset-0 z-50 flex">
                     {/* Overlay */}
                     <div
-                        className="fixed inset-0 bg-black bg-opacity-50"
+                        className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
                         onClick={() => setShowMobileMenu(false)}
                     />
                     {/* Drawer */}
-                    <div className="relative ml-auto w-72 max-w-[90vw] h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
-                        <div className="flex items-center justify-between p-4 border-b">
-                            <h2 className="font-bold text-xl text-gray-900">Menu</h2>
+                    <div className="relative ml-auto w-full sm:w-80 lg:w-96 max-w-[95vw] h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
+                        <div className="flex items-center justify-between p-4 sm:p-6 border-b bg-gradient-to-r from-gray-50 to-white">
+                            <div className="flex items-center space-x-3">
+                                <h2 className="font-bold text-lg sm:text-xl text-gray-900">Menu</h2>
+                            </div>
                             <button
                                 onClick={() => setShowMobileMenu(false)}
                                 className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
@@ -694,84 +702,108 @@ const Header = () => {
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3">
                             {isLoggedIn ? (
                                 <>
                                     {/* Search */}
-                                    <div className="mb-4">
+                                    <div className="mb-6">
                                         <div className="relative">
                                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                             <input
                                                 type="text"
                                                 placeholder="Search projects, services..."
-                                                className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
+                                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
                                             />
                                         </div>
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
-                                    {/* Cart */}
-                                    <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                        <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Cart</span>
-                                    </Link>
-                                    {/* Messages */}
-                                    <button
-                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
-                                        onClick={() => {
-                                            setShowMessagesSidebar(true);
-                                            setShowMobileMenu(false);
-                                        }}
-                                    >
-                                        <MessageSquare className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Messages</span>
-                                        {unreadMessageCount > 0 && (
-                                            <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
-                                                {unreadMessageCount}
-                                            </Badge>
-                                        )}
-                                    </button>
-                                    {/* Notifications */}
-                                    <button
-                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
-                                        onClick={() => {
-                                            setShowNotificationsSidebar(true);
-                                            setShowMobileMenu(false);
-                                        }}
-                                    >
-                                        <Bell className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Notifications</span>
-                                        {unreadNotificationCount > 0 && (
-                                            <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
-                                                {unreadNotificationCount}
-                                            </Badge>
-                                        )}
-                                    </button>
+                                    
+                                    {/* Quick Actions */}
+                                    <div className="pt-4 border-t border-gray-100">
+                                        <h3 className="text-sm font-semibold text-gray-700 mb-3">Quick Actions</h3>
+                                        <div className="space-y-2">
+                                            {/* Cart */}
+                                            <Link to="/cart" className="flex items-center p-3 rounded-lg hover:bg-blue-50 transition-colors group">
+                                                <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                                    <ShoppingCart className="w-5 h-5 text-blue-600" />
+                                                </div>
+                                                <span className="text-gray-700 font-medium ml-3">Cart</span>
+                                            </Link>
+                                            
+                                            {/* Messages */}
+                                            <button
+                                                className="flex items-center p-3 rounded-lg hover:bg-green-50 transition-colors w-full group"
+                                                onClick={() => {
+                                                    setShowMessagesSidebar(true);
+                                                    setShowMobileMenu(false);
+                                                }}
+                                            >
+                                                <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                                                    <MessageSquare className="w-5 h-5 text-green-600" />
+                                                </div>
+                                                <span className="text-gray-700 font-medium ml-3">Messages</span>
+                                                {unreadMessageCount > 0 && (
+                                                    <Badge className="ml-auto h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
+                                                        {unreadMessageCount}
+                                                    </Badge>
+                                                )}
+                                            </button>
+                                            
+                                            {/* Notifications */}
+                                            <button
+                                                className="flex items-center p-3 rounded-lg hover:bg-orange-50 transition-colors w-full group"
+                                                onClick={() => {
+                                                    setShowNotificationsSidebar(true);
+                                                    setShowMobileMenu(false);
+                                                }}
+                                            >
+                                                <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
+                                                    <Bell className="w-5 h-5 text-orange-600" />
+                                                </div>
+                                                <span className="text-gray-700 font-medium ml-3">Notifications</span>
+                                                {unreadNotificationCount > 0 && (
+                                                    <Badge className="ml-auto h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
+                                                        {unreadNotificationCount}
+                                                    </Badge>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </>
                             ) : (
                                 <>
                                     {/* Search */}
-                                    <div className="mb-4">
+                                    <div className="mb-6">
                                         <div className="relative">
                                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                             <input
                                                 type="text"
                                                 placeholder="Search projects, services..."
-                                                className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
+                                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
                                             />
                                         </div>
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    
                                     {/* Sign In Button */}
-                                    <Link 
-                                        to="/signin" 
-                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors"
-                                        onClick={() => setShowMobileMenu(false)}
-                                    >
-                                        <User className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Sign In</span>
-                                    </Link>
+                                    <div className="pt-4 border-t border-gray-100">
+                                        <Link 
+                                            to="/signin" 
+                                            className="flex items-center justify-center w-full p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+                                            onClick={() => setShowMobileMenu(false)}
+                                        >
+                                            <User className="w-5 h-5 mr-2" />
+                                            Sign In
+                                        </Link>
+                                        <p className="text-center text-sm text-gray-500 mt-3">
+                                            Don't have an account?{' '}
+                                            <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+                                                Sign up
+                                            </Link>
+                                        </p>
+                                    </div>
                                 </>
                             )}
                         </div>

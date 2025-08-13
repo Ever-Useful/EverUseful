@@ -111,7 +111,7 @@ const pricingPlans = [
   },
   {
     name: "Professional",
-    price: "$29",
+          price: "₹29",
     period: "/month",
     description: "For serious research projects",
     features: [
@@ -224,10 +224,10 @@ const stories = [
     name: "Dr. Sophia Müller",
     country: "🇩🇪",
     title: "Biotech Startup Success",
-    desc: "Helped a biotech startup secure $2M in funding through research-backed proposals.",
+          desc: "Helped a biotech startup secure ₹2M in funding through research-backed proposals.",
     img: "https://randomuser.me/api/portraits/women/65.jpg",
     color: "bg-green-100",
-    impact: "$2M funding",
+          impact: "₹2M funding",
   },
   {
     name: "Dr. Ahmed El-Sayed",

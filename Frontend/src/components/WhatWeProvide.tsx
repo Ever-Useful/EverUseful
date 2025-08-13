@@ -93,13 +93,13 @@ export const WhatWeProvide = () => {
   return (
     <section className="relative py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
       {/* Background Blobs */}
-      <div className="absolute top-[-120px] left-[-120px] w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-purple-300 opacity-30 rounded-full blur-[70px] sm:blur-[120px] z-0" />
-      <div className="absolute bottom-[-80px] right-[-80px] w-[200px] sm:w-[500px] h-[200px] sm:h-[500px] bg-pink-300 opacity-30 rounded-full blur-[50px] sm:blur-[100px] z-0" />
-      <div className="absolute top-[60%] left-[10%] w-[120px] sm:w-[400px] h-[120px] sm:h-[400px] bg-blue-200 opacity-20 rounded-full blur-[40px] sm:blur-[90px] z-0" />
+      <div className="absolute top-[-120px] left-[-120px] w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-purple-300 opacity-30 rounded-full blur-[70px] sm:blur-[120px] z-0"></div>
+      <div className="absolute bottom-[-80px] right-[-80px] w-[200px] sm:w-[500px] h-[200px] sm:h-[500px] bg-pink-300 opacity-30 rounded-full blur-[50px] sm:blur-[100px] z-0"></div>
+      <div className="absolute top-[60%] left-[10%] w-[120px] sm:w-[400px] h-[120px] sm:h-[400px] bg-blue-200 opacity-20 rounded-full blur-[40px] sm:blur-[90px] z-0"></div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+        <div className="text-center mb-4 sm:mb-12 lg:mb-16">
           <h2 className="mt-2 text-4xl font-bold text-gray-800 leading-tight mobile-text-4xl">
             Empowering Innovation with{" "}
             <span className="text-indigo-600">Creative Technology</span>
@@ -109,15 +109,66 @@ export const WhatWeProvide = () => {
           </p>
         </div>
 
-        {/* Responsive Masonry Cards Grid */}
+        {/* Mobile Layout - Simple Grid */}
+        <div className="sm:hidden">
+          <div
+            ref={containerRef}
+            className="grid grid-cols-1 gap-4"
+          >
+            {services.map((item, idx) => {
+              const stagger = idx * 0.1;
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: stagger, ease: "easeOut" }}
+                  whileHover={{
+                    scale: 1.02,
+                    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                  }}
+                  className={`
+                    rounded-xl
+                    p-4
+                    ${item.color}
+                    bg-opacity-90
+                    border border-gray-200
+                    shadow-sm
+                    transition duration-300
+                    flex flex-col
+                    justify-between
+                    relative
+                    overflow-hidden
+                    min-h-[160px]
+                  `}
+                >
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="w-10 h-10 flex items-center justify-center rounded-lg mb-3 bg-white/60">
+                      <item.icon className="w-5 h-5 text-gray-700" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-white mb-2 leading-tight">
+                      {item.title}
+                    </h3>
+                    <div
+                      className="text-sm text-white/90 [&_ul]:pl-4 [&_li]:text-sm [&_li]:mb-1 leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: item.description }}
+                    />
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Desktop Layout - Masonry Grid */}
         <div
           ref={containerRef}
           className="
-            grid
+            hidden sm:grid
             grid-cols-1
             sm:grid-cols-2
             lg:grid-cols-3
-            gap-6
+            gap-1
             sm:gap-6
             lg:gap-8
             auto-rows-[120px]
@@ -142,7 +193,7 @@ export const WhatWeProvide = () => {
                   ${item.rowSpan}
                   rounded-xl
                   sm:rounded-2xl
-                  p-5
+                  p-3
                   sm:p-5
                   lg:p-6
                   ${item.color}
@@ -155,7 +206,7 @@ export const WhatWeProvide = () => {
                   relative
                   overflow-hidden
                   min-h-[140px]
-                  sm:min-h-[160px]
+                  sm:min-h-[180px]
                   lg:min-h-[180px]
                 `}
               >
@@ -182,6 +233,17 @@ export const WhatWeProvide = () => {
               alt="What We Provide"
               className="w-full h-full object-cover object-bottom-right rounded-xl sm:rounded-2xl"
             />
+          </div>
+          
+          {/* Additional section for desktop to fill space - spans both columns */}
+          <div className="hidden sm:block col-span-2">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-6 flex flex-col justify-center items-center text-center text-white">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14 flex items-center justify-center rounded-lg sm:rounded-xl mb-3 sm:mb-3 lg:mb-4 bg-white/60">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-700" />
+            </div>
+            <h3 className="text-2xl font-semibold text-white mb-2 sm:mb-2 leading-tight mobile-text-2xl">Ready to Get Started?</h3>
+            <p className="text-xs sm:text-sm lg:text-base text-white/90">Join our platform and start building amazing projects with our tools and support.</p>
+            </div>
           </div>
         </div>
       </div>

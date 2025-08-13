@@ -452,7 +452,7 @@ const VisitingProfile = () => {
                   </div>
                   <div className="flex items-start">
                     <DollarSign className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
-                    <span>Hourly Rate: <span className="font-medium">{freelancer.hourlyRate || '$50'}</span></span>
+                    <span>Hourly Rate: <span className="font-medium">{freelancer.hourlyRate || '₹50'}</span></span>
                   </div>
                 </div>
               </CardContent>

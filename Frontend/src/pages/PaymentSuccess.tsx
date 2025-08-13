@@ -25,7 +25,7 @@ const PaymentSuccess = () => {
   const orderDetails = {
     orderId: "ORD-" + Math.random().toString(36).substr(2, 9).toUpperCase(),
     transactionId: sessionId,
-    amount: "$2,500.00",
+            amount: "₹2,500.00",
     currency: "USD",
     paymentMethod: "**** **** **** 4242",
     purchaseDate: new Date().toLocaleDateString('en-US', {

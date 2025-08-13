@@ -535,7 +535,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
               />
             </div>
             <div>
-              <Label htmlFor="price">Price ($) <span className="text-red-500">*</span></Label>
+              <Label htmlFor="price">Price (₹) <span className="text-red-500">*</span></Label>
               <Input id="price" name="price" type="number" value={projectData.price} onChange={handleInputChange} placeholder="e.g., 2500" />
               {formErrors.price && <p className="text-red-500 text-sm mt-1">{formErrors.price}</p>}
             </div>
@@ -655,7 +655,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
                         type="button"
                         variant="outline"
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold rounded-lg transition-all duration-200"
                         disabled={!canAddMoreImages}
                       >
                         <ImageIcon className="w-4 h-4" />
@@ -669,7 +669,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
                           type="button"
                           variant="default"
                           onClick={handleImmediateUpload}
-                          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
                         >
                           <Upload className="w-4 h-4" />
                           Upload Now
@@ -702,10 +702,10 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
           </div>
         </main>
         <footer className="p-4 border-t flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold rounded-lg transition-all duration-200">
             Cancel
           </Button>
-          <Button onClick={handleSaveProject} disabled={loading}>
+          <Button onClick={handleSaveProject} disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-6 py-2 transition-all duration-200 hover:shadow-md border-0">
             {loading ? (editMode ? 'Saving...' : 'Creating...') : (editMode ? 'Save Changes' : 'Create Project')}
           </Button>
         </footer>

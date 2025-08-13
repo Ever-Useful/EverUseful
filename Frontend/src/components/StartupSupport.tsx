@@ -32,21 +32,21 @@ export const StartupSupport = () => {
       company: "EcoLogistics",
       founder: "Alex Chen",
       description: "Sustainable delivery platform",
-      funding: "$2.5M Series A",
+      funding: "₹2.5M Series A",
       growth: "500% user growth"
     },
     {
       company: "HealthTracker",
       founder: "Maria Santos",
       description: "Personal health monitoring",
-      funding: "$1.8M Seed",
+      funding: "₹1.8M Seed",
       growth: "100K+ active users"
     },
     {
       company: "StudyAI",
       founder: "James Kim",
       description: "AI-powered learning assistant",
-      funding: "$3.2M Series A",
+      funding: "₹3.2M Series A",
       growth: "1M+ students helped"
     }
   ];

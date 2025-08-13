@@ -62,7 +62,7 @@ const DetailedStatsSection: React.FC<DetailedStatsSectionProps> = ({
         ];
       case 'enterprise':
         return [
-          { label: 'Average deal size', value: '$45K', icon: Target },
+          { label: 'Average deal size', value: '₹45K', icon: Target },
           { label: 'Conversion rate', value: '23%', icon: TrendingUp },
           { label: 'Time to close', value: '18 days', icon: Calendar },
         ];
