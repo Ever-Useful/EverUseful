@@ -150,7 +150,7 @@ export const Hero = () => {
                           right-0
                           h-[40px]
                           bottom-[8px]
-                          left-[64px]
+                          left-14
                           transition-all
                           duration-700
                           ease-[cubic-bezier(0.22,1,0.36,1)]
