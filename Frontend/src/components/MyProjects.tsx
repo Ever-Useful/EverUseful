@@ -535,7 +535,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
               />
             </div>
             <div>
-              <Label htmlFor="price">Price (₹) <span className="text-red-500">*</span></Label>
+              <Label htmlFor="price">Price ($) <span className="text-red-500">*</span></Label>
               <Input id="price" name="price" type="number" value={projectData.price} onChange={handleInputChange} placeholder="e.g., 2500" />
               {formErrors.price && <p className="text-red-500 text-sm mt-1">{formErrors.price}</p>}
             </div>

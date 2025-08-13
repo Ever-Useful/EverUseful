@@ -11,7 +11,7 @@ export const CareerSection = () => {
       company: "AMOGH Labs",
       location: "San Francisco, CA",
       type: "Full-time",
-      salary: "₹150K - ₹200K",
+      salary: "$150K - $200K",
       experience: "5+ years",
       skills: ["Python", "TensorFlow", "Deep Learning"],
       posted: "2 days ago"
@@ -21,7 +21,7 @@ export const CareerSection = () => {
       company: "Innovation Hub",
       location: "Austin, TX",
       type: "Remote",
-      salary: "₹120K - ₹160K",
+      salary: "$120K - $160K",
       experience: "3+ years",
       skills: ["Solidity", "Web3", "Smart Contracts"],
       posted: "1 week ago"
@@ -31,7 +31,7 @@ export const CareerSection = () => {
       company: "GreenTech Solutions",
       location: "Seattle, WA",
       type: "Hybrid",
-      salary: "₹110K - ₹140K",
+      salary: "$110K - $140K",
       experience: "4+ years",
       skills: ["Product Strategy", "Agile", "Sustainability"],
       posted: "3 days ago"
@@ -41,7 +41,7 @@ export const CareerSection = () => {
       company: "Design Collective",
       location: "New York, NY",
       type: "Full-time",
-      salary: "₹90K - ₹120K",
+      salary: "$90K - $120K",
       experience: "2+ years",
       skills: ["Figma", "Design Systems", "User Research"],
       posted: "5 days ago"

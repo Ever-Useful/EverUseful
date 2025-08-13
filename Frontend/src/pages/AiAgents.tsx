@@ -252,7 +252,7 @@ const Artificial = () => {
   };
 
   return (
-    <div className="mt-10 min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-indigo-950 text-white overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-indigo-950 text-white overflow-x-hidden">
       <Header />
       
       {/* Loading Animation */}
@@ -472,7 +472,7 @@ const Artificial = () => {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="text-center lg:text-left order-2 lg:order-1"
+              className="text-center lg:text-left"
             >
               <div className="inline-flex items-center px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded-full bg-indigo-800/30 border border-indigo-600 mb-3 sm:mb-4 md:mb-6">
                 <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-400 mr-1.5 sm:mr-2 animate-pulse"></div>
@@ -536,28 +536,9 @@ const Artificial = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative order-1 lg:order-2 mb-8 lg:mb-0"
+              className="relative hidden lg:block"
             >
-              {/* Mobile: Simplified card */}
-              <div className="lg:hidden">
-                <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-6 rounded-2xl border border-gray-700 shadow-xl">
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-cyan-500 to-indigo-600 rounded-full flex items-center justify-center">
-                      <TbRobot className="text-2xl text-white" />
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-white mb-2">AI Agent Marketplace</h3>
-                    <p className="text-sm text-gray-300 mb-4">Discover cutting-edge AI solutions</p>
-                    <div className="flex justify-center space-x-2">
-                      {['Business', 'Education', 'Creative'].map((tag, i) => (
-                        <span key={i} className="px-3 py-1 bg-indigo-900/50 text-xs rounded-full text-cyan-300">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Desktop: Full dashboard */}
-              <div className="relative z-10 rounded-3xl overflow-hidden border border-gray-700 shadow-2xl hidden lg:block">
+              <div className="relative z-10 rounded-3xl overflow-hidden border border-gray-700 shadow-2xl">
                 <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6">
                   <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center space-x-2">
@@ -610,9 +591,99 @@ const Artificial = () => {
                   </div>
                   
                   <div className="flex justify-between">
-                    <div className="text-2xl font-bold">₹149.99</div>
+                    <div className="text-2xl font-bold">$149.99</div>
                     <button className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-sm flex items-center">
                       <FiShoppingCart className="mr-1" />
+                      <span>Add to Cart</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Decorative elements */}
+              <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-cyan-500 filter blur-[60px] opacity-30"></div>
+              <div className="absolute -bottom-6 -left-6 w-40 h-40 rounded-full bg-indigo-500 filter blur-[80px] opacity-20"></div>
+              
+              {/* Floating AI elements */}
+              <motion.div
+                className="absolute -top-12 left-1/4"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                <GiArtificialIntelligence className="text-cyan-400 text-4xl opacity-50" />
+              </motion.div>
+              <motion.div
+                className="absolute bottom-8 -right-8"
+                animate={{ rotate: [0, 15, 0] }}
+                transition={{ duration: 4, repeat: Infinity }}
+              >
+                <TbRobot className="text-purple-400 text-5xl opacity-40" />
+              </motion.div>
+            </motion.div>
+            
+            {/* Mobile Dashboard Preview */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative lg:hidden mt-6 sm:mt-8"
+            >
+              <div className="relative z-10 rounded-xl overflow-hidden border border-gray-700 shadow-lg max-w-xs sm:max-w-sm mx-auto">
+                <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-3 sm:p-4">
+                  <div className="flex justify-between items-center mb-3 sm:mb-4">
+                    <div className="flex items-center space-x-1.5 sm:space-x-2">
+                      <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-red-500"></div>
+                      <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-yellow-500"></div>
+                      <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-green-500"></div>
+                    </div>
+                    <div className="text-xs text-gray-400">AI Agent Dashboard</div>
+                  </div>
+                  
+                  <div className="bg-gray-900 rounded-lg p-2.5 sm:p-3 mb-2.5 sm:mb-3">
+                    <div className="flex justify-between items-center mb-1.5 sm:mb-2">
+                      <div className="text-cyan-400 font-medium text-xs sm:text-sm">SynthAnalytics Pro</div>
+                      <div className="flex items-center text-yellow-400">
+                        <FiStar className="fill-current w-2.5 sm:w-3 h-2.5 sm:h-3" />
+                        <span className="ml-1 text-xs">4.9</span>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-300 mb-2 sm:mb-3">Real-time market intelligence</div>
+                    <div className="flex flex-wrap gap-1">
+                      {['Business', 'Analytics', 'Finance'].map((tag, i) => (
+                        <span key={i} className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-indigo-900/50 text-xs rounded-full">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2.5 sm:mb-3">
+                    <div className="bg-gray-900 rounded-lg p-2 sm:p-3">
+                      <div className="text-cyan-400 text-xs mb-1">Revenue Forecast</div>
+                      <div className="h-1 sm:h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                        <motion.div 
+                          className="h-full bg-cyan-500 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: '85%' }}
+                          transition={{ duration: 1, delay: 0.8 }}
+                        ></motion.div>
+                      </div>
+                    </div>
+                    <div className="bg-gray-900 rounded-lg p-2 sm:p-3">
+                      <div className="text-emerald-400 text-xs mb-1">Accuracy</div>
+                      <div className="h-1 sm:h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                        <motion.div 
+                          className="h-full bg-emerald-500 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: '92%' }}
+                          transition={{ duration: 1, delay: 1 }}
+                        ></motion.div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="text-base sm:text-lg font-bold">$149.99</div>
+                    <button className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-xs flex items-center">
+                      <FiShoppingCart className="mr-1 w-2.5 sm:w-3 h-2.5 sm:h-3" />
                       <span>Add to Cart</span>
                     </button>
                   </div>
@@ -669,116 +740,6 @@ const Artificial = () => {
               </motion.div>
             ))}
           </div>  
-        </div>
-      </section>
-
-      {/* Categories Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-4 md:px-8 relative">
-        {/* Tube light effect */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
-        
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
-            >
-              Browse by <span className="text-cyan-400">Category</span>
-            </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-gray-400 max-w-3xl mx-auto text-sm sm:text-base"
-            >
-              Discover AI agents tailored to your specific needs and industry requirements
-            </motion.p>
-          </div>
-          
-          {/* Mobile: Horizontal scrollable categories */}
-          <div className="lg:hidden mb-8">
-            <div className="flex space-x-3 overflow-x-auto pb-4 px-2 scrollbar-hide">
-              {categories.map((category, index) => (
-                <motion.button
-                  key={category.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  onClick={() => setActiveCategory(category.id)}
-                  className={`flex-shrink-0 px-4 py-2 rounded-xl border transition-all duration-300 ${
-                    activeCategory === category.id
-                      ? 'bg-cyan-600 border-cyan-500 text-white shadow-lg shadow-cyan-500/30'
-                      : 'bg-gray-800/50 border-gray-700 text-gray-300 hover:border-cyan-500/50 hover:bg-gray-800/70'
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    {category.icon && <span className="text-lg">{category.icon}</span>}
-                    <span className="text-sm font-medium">{category.name}</span>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-          
-          {/* Desktop: Grid categories */}
-          <div className="hidden lg:grid lg:grid-cols-3 gap-6 mb-12">
-            {categories.slice(1).map((category, index) => (
-              <motion.button
-                key={category.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                onClick={() => setActiveCategory(category.id)}
-                className={`p-6 rounded-2xl border transition-all duration-300 text-left ${
-                  activeCategory === category.id
-                    ? 'bg-cyan-600/20 border-cyan-500/50 text-cyan-300 shadow-lg shadow-cyan-500/20'
-                    : 'bg-gray-800/30 border-gray-700 text-gray-300 hover:border-cyan-500/30 hover:bg-gray-800/50'
-                }`}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    activeCategory === category.id
-                      ? 'bg-cyan-600/30 text-cyan-400'
-                      : 'bg-gray-700/50 text-gray-400'
-                  }`}>
-                    {category.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-1">{category.name}</h3>
-                    <p className="text-sm text-gray-400">Explore {category.name.toLowerCase()} agents</p>
-                  </div>
-                </div>
-              </motion.button>
-            ))}
-          </div>
-          
-          {/* Search and Filter */}
-          <div className="mb-8">
-            <div className="max-w-2xl mx-auto">
-              <div className="relative">
-                <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
-                <input
-                  type="text"
-                  placeholder="Search AI agents by name, description, or tags..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-800/50 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-white placeholder-gray-400 text-sm sm:text-base"
-                />
-              </div>
-            </div>
-          </div>
-          
-          {/* Results Count */}
-          <div className="text-center mb-6">
-            <p className="text-gray-400 text-sm sm:text-base">
-              Showing <span className="text-cyan-400 font-semibold">{filteredAgents.length}</span> AI agents
-            </p>
-          </div>
         </div>
       </section>
 
