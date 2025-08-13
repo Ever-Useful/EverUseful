@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import partnersImage from '@/assets/images/team.png'; // Adjust path as needed
 import { Link } from 'react-router-dom';
 import cfLogo from '@/assets/images/chainfly.png';
+import rlLogo from '@/assets/images/reslink.jpg';
 
 type Partner = {
   id: number;
@@ -9,7 +10,7 @@ type Partner = {
   tagline: string;
   description: string;
   imageUrl: string;
-  href?: string; 
+  href?: string;
 };
 
 const partners: Partner[] = [
@@ -23,11 +24,11 @@ const partners: Partner[] = [
   },
   {
     id: 2,
-    name: 'Chainfly',
-    tagline: 'Solar Asset Management',
-    description: 'AI-Powered Solar Asset Intelligence',
-    imageUrl: cfLogo,
-    href: 'https://www.chainfly.co/'
+    name: 'Reslink',
+    tagline: 'Semiconductor Inventions',
+    description: 'Material Science for Sustainability',
+    imageUrl: rlLogo,
+    href: 'https://www.reslink.org/'
   },
 ];
 
@@ -110,39 +111,54 @@ export const GlobalCollaborations: React.FC = () => {
 
       {/* Marquee Rows */}
       <div className="space-y-6 sm:space-y-8 w-full">
-        
+
         {/* Bottom Row - right to left */}
         <div className="overflow-x-auto w-full" ref={bottomMarqueeRef} style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
-          <div
-            className="flex w-[100vw] gap-4 sm:gap-6 items-center justify-evenly"
-          >
+          <div className="flex w-[100vw] gap-4 sm:gap-6 items-center justify-evenly py-4">
             {partnersRow.map((partner, idx) => (
               <div
                 key={`bottom-${idx}-${partner.id}`}
-                className="bg-white rounded-2xl shadow-xl border border-slate-100 min-w-[400px] max-w-[400px] sm:min-w-[400px] sm:max-w-[400px] mx-1 flex flex-row items-center p-0 transition hover:shadow-2xl hover:border-cyan-400"
+                className="bg-white rounded-xl shadow-lg border border-gray-100 min-w-[320px] max-w-[320px] sm:min-w-[500px] sm:max-w-[500px] mx-1 flex flex-row items-stretch transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-blue-200 group overflow-hidden"
                 style={{
-                  boxShadow:
-                    '0 2px 16px 0 rgba(55, 151, 255, 0.07), 0 1.5px 6px 0 rgba(0,0,0,0.04)'
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
                 }}
               >
-                {/* use image of resolution max 600*450 */}
-                <div className="w-full h-full sm:h-36 rounded-t-2xl overflow-hidden">
-                  <img
-                    src={partner.imageUrl}
-                    alt={partner.name}
-                    className="w-full h-full object-cover transition-transform duration-300 scale-105 group-hover:scale-110"
-                  />
+                {/* Logo/image container - fixed width */}
+                <div className="w-32 sm:w-40 flex-shrink-0 relative">
+                  <div className="absolute inset-0 bg-gray-50 flex items-center justify-center p-4">
+                    <img
+                      src={partner.imageUrl}
+                      alt={partner.name}
+                      className="w-full h-auto max-h-24 object-contain transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
                 </div>
-                <div className="px-3 sm:px-4 py-2 sm:py-3 w-full">
-                  <h5 className="text-xl font-bold text-gray-900 mb-0.5 text-left mobile-text-lg">{partner.name}</h5>
-                  <p className="text-sm text-cyan-600 font-medium mb-0.5 text-left mobile-text-sm">{partner.tagline}</p>
-                  <p className="text-sm text-gray-500 mb-2 text-left line-clamp-2 mobile-text-sm">{partner.description}</p>
-                  <div className="flex right text-cyan-700 text-xs sm:text-base font-semibold underline hover:text-red-600 transition">
+
+                {/* Text content container - flexible width */}
+                <div className="flex-1 p-4 sm:p-5 flex flex-col">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h5 className="text-lg sm:text-xl font-bold text-gray-900 line-clamp-1">
+                      {partner.name}
+                    </h5>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Partner
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-blue-600 font-medium mb-2 line-clamp-1">
+                    {partner.tagline}
+                  </p>
+
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {partner.description}
+                  </p>
+
+                  <div className="mt-auto">
                     <Link
                       to={partner.href}
-                      tabIndex={0}
+                      className="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
                     >
-                      Learn More &rarr;
+                      Learn more
                     </Link>
                   </div>
                 </div>
@@ -162,7 +178,7 @@ export const GlobalCollaborations: React.FC = () => {
         >
           {/* Hide this on mobile */}
           <div className="flex-1 cta-mobile-hide">
-            <h2 className="text-4xl font-bold text-white mb-2 mobile-text-3xl">Ready to Collaborate?</h2>
+            <h2 className="text-3xl font-bold text-white mb-2 mobile-text-3xl">Ready to Collaborate?</h2>
             <ul className="space-y-1 text-cyan-100 text-base mb-2 mobile-text-base">
               <li>• Access global expertise and innovation</li>
               <li>• Work with industry leaders</li>

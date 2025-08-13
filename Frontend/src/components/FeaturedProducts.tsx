@@ -251,7 +251,7 @@ export const FeaturedProducts: React.FC = () => {
                 </Badge>
               </div>
               {/* Content */}
-              <UICardContent className="flex flex-col flex-1 px-5 py-4">
+              <UICardContent className="flex flex-col flex-1 px-5">
                 <UICardHeader className="-translate-x-6 pb-1">
                   <UICardTitle className="text-lg md:text-lg font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                     {p.title}
@@ -345,7 +345,7 @@ export const FeaturedProducts: React.FC = () => {
                   </Badge>
                 </div>
                 {/* Content */}
-                <UICardContent className="flex flex-col flex-1 px-3 py-3">
+                <UICardContent className="flex flex-col flex-1 px-3">
                   <UICardHeader className="px-0 pb-1">
                     <UICardTitle className="mobile-text-2xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                       {p.title}
