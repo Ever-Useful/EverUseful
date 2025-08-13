@@ -14,7 +14,7 @@ const projects = [
 communities: "Rural & Urban",
     status: "Active Research",
     teamSize: "12 researchers",
-    fundingGoal: "$2.5M secured"  },
+            fundingGoal: "₹2.5M secured"  },
   {
     id: 2,
     title: "Renewable Energy Hubs",
@@ -25,7 +25,7 @@ communities: "Rural & Urban",
  communities: "Remote & Developing",
     status: "Seeking Partners",
     teamSize: "8 engineers",
-    fundingGoal: "$1.8M target"  },
+            fundingGoal: "₹1.8M target"  },
   {
     id: 3,
     title: "Smart Agriculture",
@@ -36,7 +36,7 @@ communities: "Rural & Urban",
     communities: "Agricultural & Coastal",
     status: "Pilot Testing",
     teamSize: "15 field experts",
-    fundingGoal: "$3.2M funded"  },
+            fundingGoal: "₹3.2M funded"  },
   {
     id: 4,
     title: "Waste Management",
@@ -47,7 +47,7 @@ communities: "Rural & Urban",
  communities: "Urban & Industrial",
     status: "Implementation",
     teamSize: "6 policy experts",
-    fundingGoal: "$4.1M raised"  },
+            fundingGoal: "₹4.1M raised"  },
   {
     id: 5,
     title: "Carbon Capture",
@@ -67,7 +67,7 @@ communities: "Rural & Urban",
 communities: "Industrial & Research",
     status: "R&D Phase",
     teamSize: "20 scientists",
-    fundingGoal: "$5.5M needed"  }
+            fundingGoal: "₹5.5M needed"  }
 ];
 
 export const ProjectsSection = () => {
