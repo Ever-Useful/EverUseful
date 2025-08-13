@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
-export default function Navigation({ mobile = false }: { mobile?: boolean }) {
+export default function Navigation({ mobile = false, isLoggedIn = false }: { mobile?: boolean, isLoggedIn?: boolean }) {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const location = useLocation();
@@ -32,7 +32,7 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
         Marketplace: {
             categories: [
                 { id: 'explore', label: 'Projects', href: '/marketplace' },
-                { id: 'new project', label: 'Add New Project', href: '/profile#projects' },
+                ...(isLoggedIn ? [{ id: 'new project', label: 'Add New Project', href: '/profile#projects' }] : []),
                 // { id: 'datasets', label: 'Datasets', href: '/marketplace/datasets' },
                 // { id: 'algorithms', label: 'Algorithms', href: '/marketplace/algorithms' },
                 // { id: 'models', label: 'AI Models', href: '/marketplace/models' },
@@ -176,8 +176,10 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
             categories: [
                 { id: 'freelance', label: 'Find Freelancers', href: '/freelancing' },
                 { id: 'mentorship', label: 'Find Expert', href: '/findexpert' },
-                { id: 'dashboard', label: 'My Dashboard', href: '/dashboard' },
-                { id: 'profile', label: 'My Profile', href: '/profile' },
+                ...(isLoggedIn ? [
+                    { id: 'dashboard', label: 'My Dashboard', href: '/dashboard' },
+                    { id: 'profile', label: 'My Profile', href: '/profile' },
+                ] : []),
             ],
             content: {
                 freelance: {
