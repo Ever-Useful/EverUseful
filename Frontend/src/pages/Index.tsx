@@ -24,20 +24,6 @@ const BackUp = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden header-spacer">
-      <div
-        className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
-        style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%)'
-        }}
-      />
-
-      <div
-        className="fixed inset-0 -z-10 opacity-2"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.07), rgba(255,255,255,0.07) 1px, transparent 1px, transparent 2px)'
-        }}
-      />
-
       {MemoHeader}
       {MemoHero}
       {MemoFeaturedProducts}

@@ -12,9 +12,9 @@ export const ImpactMotive = () => {
   const impacts = [
     {
       icon: Globe,
-      title: "Global Reach",
-      value: 50,
-      suffix: "+",
+      title: "Reach",
+      value: 'Worldwide',
+      suffix: "",
       description: "Countries connected through our platform",
       iconBg: "bg-blue-100",
       iconColor: "text-blue-600"
@@ -22,7 +22,7 @@ export const ImpactMotive = () => {
     {
       icon: Lightbulb,
       title: "Innovation Projects",
-      value: 1200,
+      value: 100,
       suffix: "+",
       description: "Breakthrough solutions developed",
       iconBg: "bg-green-100",
@@ -40,7 +40,7 @@ export const ImpactMotive = () => {
     {
       icon: Users,
       title: "Community Members",
-      value: 25000,
+      value: 1000,
       suffix: "+",
       description: "Active innovators and collaborators",
       iconBg: "bg-yellow-100",
@@ -99,10 +99,14 @@ export const ImpactMotive = () => {
                       <impact.icon className={`w-4 h-4 sm:w-6 sm:h-6 ${impact.iconColor}`} />
                     </div>
                     <div className="text-base sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2 text-center mobile-text-base sm:mobile-text-2xl">
-                      {impactInView ? <CountUp end={impact.value} duration={2} suffix={impact.suffix} /> : "0"}
+                      {impactInView
+                        ? (typeof impact.value === "number"
+                            ? <CountUp end={impact.value} duration={2} suffix={impact.suffix} />
+                            : impact.value)
+                        : "0"}
                     </div>
                     <h3 className="text-2xl sm:text-lg font-bold text-gray-800 text-center mobile-text-2xl sm:mobile-text-lg">{impact.title}</h3>
-                    <p className="text-base sm:text-sm text-gray-600 text-center mt-1 mobile-text-base sm:mobile-text-sm">{impact.description}</p>
+                    <p className="hidden sm:block text-base sm:text-sm text-gray-600 text-center mt-1 mobile-text-base sm:mobile-text-sm">{impact.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -112,7 +116,7 @@ export const ImpactMotive = () => {
       </section>
 
       {/* Motive Section */}
-      <section id="mission" className="py-8 sm:py-12 bg-gradient-to-r from-gray-700/5 via-gray-800/10 to-gray-700/5">
+      <section id="mission" className="relative overflow-hidden py-14 sm:py-16 bg-[#002f48]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[85vw]">
           <div className="text-center mb-8 sm:mb-16">
             <h2 className="text-[17px] sm:text-3xl font-bold text-gray-100 mb-2 sm:mb-4 mobile-text-3xl">

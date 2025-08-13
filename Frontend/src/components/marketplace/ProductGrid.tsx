@@ -993,7 +993,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition-all duration-300 mb-6"
               onClick={() => handleViewDetails(selected.id)}
             >
-              Let's Connect
+              View Product
             </Button>
 
             {/* Related Projects */}

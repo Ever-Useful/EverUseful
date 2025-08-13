@@ -43,19 +43,19 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
             content: {
                 explore: {
                     subcategories: [
-                        { name: 'AI & ML', href: '/marketplace' },
-                        { name: 'Data Science', href: '/marketplace' },
-                        { name: 'Sustainable', href: '/sustainable' },
-                        { name: 'FinTech', href: '/marketplace' },
-                        { name: 'HealthTech', href: '/marketplacelth' },
-                        { name: 'EdTech', href: '/marketplace' },
-                        { name: 'IoT', href: '/marketplace' },
-                        { name: 'BlockChain', href: '/marketplace' },
-                        { name: 'Mobile', href: '/marketplace' }
+                        { name: 'AI & ML'},
+                        { name: 'Data Science'},
+                        { name: 'Sustainable'},
+                        { name: 'FinTech'},
+                        { name: 'HealthTech'},
+                        { name: 'EdTech'},
+                        { name: 'IoT'},
+                        { name: 'BlockChain'},
+                        { name: 'Mobile'}
                     ],
                     featured: [
-                        { name: 'TensorFlow Starter Kit', image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=150&h=100&fit=crop', href: '/product/tensorflow-starter' },
-                        { name: 'React Dashboard Pro', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop', href: '/product/react-dashboard' }
+                        { name: 'TensorFlow Starter Kit', image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=150&h=100&fit=crop'},
+                        { name: 'React Dashboard Pro', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop'}
                     ]
                 },
                 // research: {
@@ -247,34 +247,34 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
             content: {
                 greenprojects: {
                     subcategories: [
-                        { name: 'Renewable Energy', href: '/sustainable/category/renewable-energy' },
-                        { name: 'Carbon Tracking', href: '/sustainable/category/carbon-tracking' },
-                        { name: 'Waste Management', href: '/sustainable/category/waste-management' },
-                        { name: 'Water Conservation', href: '/sustainable/category/water-conservation' },
-                        { name: 'Sustainable Agriculture', href: '/sustainable/category/agriculture' },
-                        { name: 'Green Transportation', href: '/sustainable/category/transportation' },
-                        { name: 'Eco-friendly Materials', href: '/sustainable/category/eco-materials' },
-                        { name: 'Climate Monitoring', href: '/sustainable/category/climate-monitoring' }
+                        { name: 'Renewable Energy'},
+                        { name: 'Carbon Tracking'},
+                        { name: 'Waste Management'},
+                        { name: 'Water Conservation'},
+                        { name: 'Sustainable Agriculture'},
+                        { name: 'Green Transportation'},
+                        { name: 'Eco-friendly Materials'},
+                        { name: 'Climate Monitoring'}
                     ],
                     featured: [
-                        { name: 'Solar Panel Optimizer', image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=150&h=100&fit=crop', href: '/product/solar-optimizer' },
-                        { name: 'Carbon Footprint Tracker', image: 'https://images.unsplash.com/photo-1569163139394-de44cb130c82?w=150&h=100&fit=crop', href: '/product/carbon-tracker' }
+                        { name: 'Solar Panel Optimizer', image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=150&h=100&fit=crop'},
+                        { name: 'Carbon Footprint Tracker', image: 'https://images.unsplash.com/photo-1569163139394-de44cb130c82?w=150&h=100&fit=crop'}
                     ]
                 },
                 consulting: {
                     subcategories: [
-                        { name: 'Technical Architecture', href: '/consulting/technical-architecture' },
-                        { name: 'Strategy Planning', href: '/consulting/strategy-planning' },
-                        { name: 'Digital Transformation', href: '/consulting/digital-transformation' },
-                        { name: 'AI Implementation', href: '/consulting/ai-implementation' },
-                        { name: 'Security Audit', href: '/consulting/security-audit' },
-                        { name: 'Performance Optimization', href: '/consulting/performance-optimization' },
-                        { name: 'Process Improvement', href: '/consulting/process-improvement' },
-                        { name: 'Technology Assessment', href: '/consulting/technology-assessment' }
+                        { name: 'Technical Architecture'},
+                        { name: 'Strategy Planning'},
+                        { name: 'Digital Transformation'},
+                        { name: 'AI Implementation'},
+                        { name: 'Security Audit'},
+                        { name: 'Performance Optimization'},
+                        { name: 'Process Improvement'},
+                        { name: 'Technology Assessment'}
                     ],
                     featured: [
-                        { name: 'Impact Dashboard Pro', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop', href: '/product/impact-dashboard' },
-                        { name: 'ESG Reporting Tool', image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=150&h=100&fit=crop', href: '/product/esg-reporting' }
+                        { name: 'Impact Dashboard Pro', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop'},
+                        { name: 'ESG Reporting Tool', image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=150&h=100&fit=crop'}
                     ]
                 },
                 // review: {
@@ -311,17 +311,17 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                 // },
                 agents: {
                     subcategories: [
-                        { name: 'Agent Directories', href: '/aiagents' },
-                        { name: 'Agent Studio', href: '/aiagents' },
-                        { name: 'Custom Agents', href: '/aiagents' },
-                        { name: 'Integrations', href: '/aiagents' },
-                        { name: 'Analytics', href: '/aiagents' },
-                        { name: 'Use Cases', href: '/aiagents' },
-                        { name: 'Ethics & Safety', href: '/aiagents' },
+                        { name: 'Agent Directories'},
+                        { name: 'Agent Studio'},
+                        { name: 'Custom Agents'},
+                        { name: 'Integrations'},
+                        { name: 'Analytics'},
+                        { name: 'Use Cases'},
+                        { name: 'Ethics & Safety'},
                     ],
                     featured: [
-                        { name: 'Global Green Alliance', image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=150&h=100&fit=crop', href: '/partnerships/green-alliance' },
-                        { name: 'Sustainability Network', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=150&h=100&fit=crop', href: '/partnerships/sustainability-network' }
+                        { name: 'Global Green Alliance', image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=150&h=100&fit=crop'},
+                        { name: 'Sustainability Network', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=150&h=100&fit=crop'}
                     ]
                 },
             }
@@ -336,28 +336,28 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
             content: {
                 aboutus: {
                     subcategories: [
-                        { name: 'Platform', href: '/aboutus' },
-                        { name: 'Stories', href: '/aboutus#stroies' },
-                        { name: 'Team', href: '/aboutus#team' },
-                        { name: 'Community', href: '/aboutus' },
+                        { name: 'Platform'},
+                        { name: 'Stories'},
+                        { name: 'Team'},
+                        { name: 'Community'},
                     ],
                     featured: [
-                        { name: 'Complete API Guide', image: 'https://images.unsplash.com/photo-1481487196290-c152efe083f5?w=150&h=100&fit=crop', href: '/resources/docs/api-guide' },
-                        { name: 'Integration Handbook', image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=150&h=100&fit=crop', href: '/resources/docs/integration-handbook' }
+                        { name: 'Complete API Guide', image: 'https://images.unsplash.com/photo-1481487196290-c152efe083f5?w=150&h=100&fit=crop'},
+                        { name: 'Integration Handbook', image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=150&h=100&fit=crop'}
                     ]
                 },
                 connect: {
                     subcategories: [
-                        { name: 'Community Hub', href: '/connect' },
-                        { name: 'Events and Webinars', href: '/connect' },
-                        { name: 'Collab Spaces', href: '/connect' },
-                        { name: 'Mentorship', href: '/connect' },
-                        { name: 'Partner Network', href: '/connect' },
-                        { name: 'Showcase', href: '/connect' },
+                        { name: 'Community Hub'},
+                        { name: 'Events and Webinars'},
+                        { name: 'Collab Spaces'},
+                        { name: 'Mentorship'},
+                        { name: 'Partner Network'},
+                        { name: 'Showcase'},
                     ],
                     featured: [
-                        { name: 'ML Mastery Course', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&h=100&fit=crop', href: '/resources/tutorials/ml-mastery' },
-                        { name: 'Web Dev Bootcamp', image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=150&h=100&fit=crop', href: '/resources/tutorials/web-bootcamp' }
+                        { name: 'ML Mastery Course', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&h=100&fit=crop'},
+                        { name: 'Web Dev Bootcamp', image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=150&h=100&fit=crop'}
                     ]
                 },
                 legal: {
@@ -367,28 +367,28 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Refund Policy', href: '/refund-policy' },
                         { name: 'Accessibility', href: '/accessibility' },
                         { name: 'Delivery Policy', href: '/delivery-policy' },
-                        { name: 'GDPR Compliance', href: '/sustainable#' },
-                        { name: 'Security Practices', href: '/sustainable#' },
+                        // { name: 'GDPR Compliance', href: '/sustainable#' },
+                        // { name: 'Security Practices', href: '/sustainable#' },
                     ],
                     featured: [
-                        { name: 'Global Developer Network', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=150&h=100&fit=crop', href: '/connect/global-network' },
-                        { name: 'Monthly Tech Meetup', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=150&h=100&fit=crop', href: '/connect/monthly-meetup' }
+                        { name: 'Global Developer Network', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=150&h=100&fit=crop'},
+                        { name: 'Monthly Tech Meetup', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=150&h=100&fit=crop'}
                     ]
                 },
                 feedback: {
                     subcategories: [
-                        { name: 'Submit Feedback', href: '/feedback' },
-                        { name: 'Feature Requests', href: '/feedback' },
-                        { name: 'Bug Reports', href: '/feedback' },
-                        { name: 'User Ratings', href: '/feedback' },
-                        { name: 'Community Polls', href: '/feedback' },
-                        { name: 'Feedback Dashboard', href: '/feedback' },
-                        { name: 'Response Timeline', href: '/feedback' },
-                        { name: 'Give Kudos', href: '/feedback' }
+                        { name: 'Submit Feedback'},
+                        { name: 'Feature Requests'},
+                        { name: 'Bug Reports'},
+                        { name: 'User Ratings'},
+                        { name: 'Community Polls'},
+                        { name: 'Feedback Dashboard'},
+                        { name: 'Response Timeline'},
+                        { name: 'Give Kudos'}
                     ],
                     featured: [
-                        { name: '24/7 Expert Support', image: 'https://images.unsplash.com/photo-1553484771-371a605b060b?w=150&h=100&fit=crop', href: '/support/24-7' },
-                        { name: 'Premium Support Plan', image: 'https://images.unsplash.com/photo-1556155092-8707de31f9c4?w=150&h=100&fit=crop', href: '/support/premium' }
+                        { name: '24/7 Expert Support', image: 'https://images.unsplash.com/photo-1553484771-371a605b060b?w=150&h=100&fit=crop'},
+                        { name: 'Premium Support Plan', image: 'https://images.unsplash.com/photo-1556155092-8707de31f9c4?w=150&h=100&fit=crop'}
                     ]
                 }
             }

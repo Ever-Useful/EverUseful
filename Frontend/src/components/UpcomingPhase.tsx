@@ -134,18 +134,34 @@ const ProjectCards: React.FC = () => (
 
 // --- Features (smaller in mobile) ---
 const Features: React.FC = () => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 mt-4 md:mt-12">
-    {features.map((feature, idx) => (
-      <div
-        key={idx}
-        className={`flex flex-col items-center rounded-2xl shadow p-2 md:p-6 hover:shadow-lg transition min-h-[70px] md:min-h-[160px] ${feature.bg}`}
-      >
-        <div className="mb-1 md:mb-3">{feature.icon}</div>
-        <h4 className="text-xs md:text-lg font-semibold text-teal-800 mb-0.5 md:mb-1">{feature.title}</h4>
-        <p className="text-gray-600 text-[11px] md:text-sm text-center">{feature.description}</p>
-      </div>
-    ))}
-  </div>
+  <>
+    {/* Mobile: horizontal scroll */}
+    <div className="flex md:hidden gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory mt-4">
+      {features.map((feature, idx) => (
+        <div
+          key={idx}
+          className={`min-w-[220px] max-w-xs flex-shrink-0 flex flex-col items-center rounded-2xl shadow p-2 hover:shadow-lg transition min-h-[70px] ${feature.bg} snap-start`}
+        >
+          <div className="mb-1">{feature.icon}</div>
+          <h4 className="text-xs font-semibold text-teal-800 mb-0.5">{feature.title}</h4>
+          <p className="text-gray-600 text-[11px] text-center">{feature.description}</p>
+        </div>
+      ))}
+    </div>
+    {/* Desktop: grid */}
+    <div className="hidden md:grid grid-cols-3 gap-6 mt-12">
+      {features.map((feature, idx) => (
+        <div
+          key={idx}
+          className={`flex flex-col items-center rounded-2xl shadow p-6 hover:shadow-lg transition min-h-[160px] ${feature.bg}`}
+        >
+          <div className="mb-3">{feature.icon}</div>
+          <h4 className="md:text-lg font-semibold text-teal-800 mb-1">{feature.title}</h4>
+          <p className="text-gray-600 md:text-sm text-center">{feature.description}</p>
+        </div>
+      ))}
+    </div>
+  </>
 );
 
 // --- Pre-Book Form ---
@@ -176,12 +192,6 @@ const PreJoinForm: React.FC = () => {
         autoComplete="off"
       >
         <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1 md:mb-2">
-          <span className="inline-block bg-gradient-to-r from-teal-400 to-green-400 text-white px-2 py-1 rounded-full font-bold text-xs shadow uppercase tracking-wider">
-            Join Now
-          </span>
-          <span className="text-teal-600 font-bold text-xs md:text-sm animate-pulse">
-            Limited Early Access
-          </span>
         </div>
         <h3 className="text-gray-900 text-[17px] sm:text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
           Register for Early Notifications.
@@ -316,7 +326,10 @@ export const UpcomingPhase: React.FC = () => (
         </div>
         {/* Right: Zig-Zag Collage Cards */}
         <div className="flex flex-col items-center w-full">
-          <ProjectCards />
+          {/* Only show ProjectCards on md and up */}
+          <div className="hidden md:block w-full">
+            <ProjectCards />
+          </div>
           <div className="mt-4 md:mt-24 text-center text-gray-800 font-semibold text-base bg-white rounded-xl px-2 py-2 md:px-6 md:py-3 shadow mobile-text-base">
             <span className="text-teal-700 font-extrabold">
               Why these projects?
@@ -324,7 +337,7 @@ export const UpcomingPhase: React.FC = () => (
             <br />
             Each project is handpicked for its real-world impact, innovation, and the excitement it brings to our community.
             <span className="block mt-1 text-green-600">
-              By pre-booking, you’re joining a movement for a sustainable tomorrow.
+              By registering, you’re joining a movement for a sustainable tomorrow.
             </span>
           </div>
         </div>
