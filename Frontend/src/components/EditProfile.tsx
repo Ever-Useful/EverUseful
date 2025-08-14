@@ -1019,7 +1019,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div className="flex justify-end gap-2 mt-4">
                         <Button type="button" variant="outline" onClick={handleCancelEducation}>Cancel</Button>
-                        <Button type="submit" className="bg-blue-600 text-white" variant="default">Save</Button>
+                        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0" variant="default">Save</Button>
                       </div>
                     </form>
                   ) : (
@@ -1114,7 +1114,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div className="flex justify-end gap-2 mt-4">
                         <Button type="button" variant="outline" onClick={handleCancelWork}>Cancel</Button>
-                        <Button type="submit" className="bg-blue-600 text-white" variant="default">Save</Button>
+                        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0" variant="default">Save</Button>
                       </div>
                     </form>
                   ) : (

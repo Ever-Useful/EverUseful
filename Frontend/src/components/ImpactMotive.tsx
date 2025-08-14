@@ -77,7 +77,7 @@ export const ImpactMotive = () => {
           <div
             ref={impactRef}
             className="
-              grid grid-cols-2 grid-rows-2 gap-2
+              grid grid-cols-2 grid-rows-2 gap-3
               sm:grid-cols-4 sm:grid-rows-1 sm:gap-8
               mb-8 sm:mb-20
               max-w-xs mx-auto sm:max-w-none
@@ -92,21 +92,21 @@ export const ImpactMotive = () => {
               >
                 <Card className="
                   h-full flex flex-col bg-white shadow-md hover:shadow-xl transition-transform transform hover:-translate-y-1 rounded-xl border border-gray-200
-                  px-1 py-1 sm:p-0
+                  p-3 sm:p-6
                 ">
-                  <CardContent className="p-2 sm:p-6 flex flex-col flex-grow">
-                    <div className={`w-7 h-7 sm:w-14 sm:h-14 ${impact.iconBg} rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-4`}>
-                      <impact.icon className={`w-4 h-4 sm:w-6 sm:h-6 ${impact.iconColor}`} />
+                  <CardContent className="p-0 flex flex-col flex-grow items-center text-center">
+                    <div className={`w-10 h-10 sm:w-14 sm:h-14 ${impact.iconBg} rounded-full flex items-center justify-center mb-3 sm:mb-4`}>
+                      <impact.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${impact.iconColor}`} />
                     </div>
-                    <div className="text-base sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2 text-center mobile-text-base sm:mobile-text-2xl">
+                    <div className="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-2 text-center">
                       {impactInView
                         ? (typeof impact.value === "number"
                             ? <CountUp end={impact.value} duration={2} suffix={impact.suffix} />
                             : impact.value)
                         : "0"}
                     </div>
-                    <h3 className="text-2xl sm:text-lg font-bold text-gray-800 text-center mobile-text-2xl sm:mobile-text-lg">{impact.title}</h3>
-                    <p className="hidden sm:block text-base sm:text-sm text-gray-600 text-center mt-1 mobile-text-base sm:mobile-text-sm">{impact.description}</p>
+                    <h3 className="text-sm sm:text-lg font-semibold text-gray-800 text-center mb-1 sm:mb-2">{impact.title}</h3>
+                    <p className="hidden sm:block text-xs sm:text-sm text-gray-600 text-center leading-tight">{impact.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -126,7 +126,7 @@ export const ImpactMotive = () => {
               Driven by the belief that innovation should know no boundaries, we're building a world where every idea has the potential to create positive impact
             </p>
           </div>
-          <div ref={motiveRef} className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-8">
+          <div ref={motiveRef} className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
             {motives.map((motive, index) => (
               <motion.div
                 key={index}
@@ -135,13 +135,13 @@ export const ImpactMotive = () => {
                 transition={{ duration: 0.8, delay: index * 0.2 }}
               >
                 <Card className="h-full bg-white shadow-lg rounded-xl">
-                  <CardContent className="p-2 sm:p-6 flex flex-row mt-0">
-                    <div className="w-7 h-7 sm:w-12 sm:h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-                      <motive.icon className="text-indigo-600 w-4 h-4 sm:w-6 sm:h-6" />
+                  <CardContent className="p-4 sm:p-6 flex flex-row items-start">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <motive.icon className="text-indigo-600 w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <h3 className="text-2xl sm:text-lg font-bold text-gray-900 mb-1 ml-2 sm:ml-4 mobile-text-2xl sm:mobile-text-lg">{motive.title}</h3>
-                      <p className="text-base sm:text-sm text-gray-600 ml-2 sm:ml-4 mobile-text-base sm:mobile-text-sm">{motive.description}</p>
+                    <div className="ml-3 sm:ml-4 flex-1">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-2">{motive.title}</h3>
+                      <p className="text-sm sm:text-sm text-gray-600 leading-relaxed">{motive.description}</p>
                     </div>
                   </CardContent>
                 </Card>
