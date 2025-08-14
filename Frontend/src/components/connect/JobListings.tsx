@@ -8,14 +8,17 @@ import ApplicationForm from "./ApplicationForm";
 const JobListings = () => {
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
- const [isResumeFormOpen, setIsResumeFormOpen] = useState(false);
-  // Filter states
-    const [selectedRole, setSelectedRole] = useState("All");
-  const [selectedLocation, setSelectedLocation] = useState("All");
-  const [selectedJobType, setSelectedJobType] = useState("All");
-  const [selectedWorkTime, setSelectedWorkTime] = useState("All");
-  const [selectedTechnology, setSelectedTechnology] = useState("All");
+  const [isResumeFormOpen, setIsResumeFormOpen] = useState(false);
+  
+  // Filter states - commented out since no jobs are listed
+  // const [selectedRole, setSelectedRole] = useState("All");
+  // const [selectedLocation, setSelectedLocation] = useState("All");
+  // const [selectedJobType, setSelectedJobType] = useState("All");
+  // const [selectedWorkTime, setSelectedWorkTime] = useState("All");
+  // const [selectedTechnology, setSelectedTechnology] = useState("All");
 
+  // Commented out all job listings
+  /*
   const jobs = [
     {
       title: "Senior Frontend Developer",
@@ -61,7 +64,10 @@ const JobListings = () => {
       description: "Drive growth through strategic marketing campaigns and brand development."
     }
   ];
+  */
 
+  // Commented out filter options since no jobs are listed
+  /*
   // Get unique values for filter options
   const departments = ["All", ...new Set(jobs.map(job => job.department))];
   const locations = ["All", ...new Set(jobs.map(job => job.location.split(" / ")[0]))];
@@ -73,9 +79,10 @@ const JobListings = () => {
     const roleMatch = selectedRole === "All" || job.department === selectedRole;
     const locationMatch = selectedLocation === "All" || job.location.includes(selectedLocation);
     const typeMatch = selectedJobType === "All" || job.type === selectedJobType;
- const workTimeMatch = selectedWorkTime === "All" || job.type === selectedWorkTime;
+    const workTimeMatch = selectedWorkTime === "All" || job.type === selectedWorkTime;
     return roleMatch && locationMatch && typeMatch && workTimeMatch;
   });
+  */
 
   const handleApply = (jobTitle: string) => {
     setSelectedJob(jobTitle);
@@ -90,16 +97,16 @@ const JobListings = () => {
     <>
       <section id="job-listings" className="py-20" style={{ backgroundColor: '#5A6B3F' }}>
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16 bg-olive-dark">
-            <h2 className="text-4xl lg:text-5xl font-bold text-black mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
               Open Positions
             </h2>
-            <p className="text-xl text-white/80 max-w-2xl mx-auto mb-8">
+            <p className="text-xl text-white/90 max-w-2xl mx-auto mb-8">
               Find your next opportunity and join our growing team of innovators.
             </p>
             
-            {/* Advanced Filter Section */}
-             {/* New Filter Section */}
+            {/* Commented out Advanced Filter Section since no jobs are listed */}
+            {/* 
             <div className="max-w-6xl mx-auto mb-12">
               <div className="bg-black/20 backdrop-blur rounded-2xl p-8 shadow-xl">
                 <div className="flex items-center justify-between mb-6">
@@ -205,8 +212,41 @@ const JobListings = () => {
                 </div>
               </div>
             </div>
+            */}
           </div>
 
+          {/* Openings Soon Message */}
+          <div className="text-center py-16">
+            <div className="bg-white/95 backdrop-blur border-0 shadow-lg rounded-2xl p-12 max-w-2xl mx-auto">
+              <h3 className="text-3xl font-bold mb-4" style={{ color: '#2A311B' }}>
+                🚀 Openings Soon
+              </h3>
+              <p className="text-lg mb-6 leading-relaxed" style={{ color: '#3A4325' }}>
+                We're currently preparing exciting new opportunities for talented individuals like you. 
+                Our team is growing and we'll be posting new positions soon!
+              </p>
+              <p className="text-sm mb-8" style={{ color: '#3A4325' }}>
+                Stay tuned for updates on our latest openings in engineering, design, marketing, and more.
+              </p>
+              <Button 
+                onClick={handleResumeSubmit}
+                className="rounded-lg transition-colors duration-300 px-8 py-3"
+                style={{ backgroundColor: '#B8E6CC', color: '#3A4325' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#95D5B2';
+                  e.currentTarget.style.color = '#2A311B';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#B8E6CC';
+                  e.currentTarget.style.color = '#3A4325';
+                }}
+              >
+                Send Us Your Resume
+              </Button>
+            </div>
+          </div>
+
+          {/* Commented out job listings grid
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredJobs.map((job, index) => (
               <Card key={index} className="bg-white/95 backdrop-blur border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-xl">                <CardContent className="p-6">
@@ -270,7 +310,9 @@ const JobListings = () => {
               </Button>
             </div>
           )}
+          */}
 
+          {/* Commented out the bottom CTA since we have the main one above
           <div className="text-center mt-12">
             <p className="text-white/80 mb-4">
               Don't see the perfect role? We're always looking for exceptional talent.
@@ -282,10 +324,11 @@ const JobListings = () => {
             >              Send Us Your Resume
             </Button>
           </div>
+          */}
         </div>
       </section>
 
-<ApplicationForm 
+      <ApplicationForm 
         jobTitle={selectedJob || ""} 
         isOpen={isFormOpen} 
         onClose={() => setIsFormOpen(false)} 
@@ -299,4 +342,5 @@ const JobListings = () => {
     </>
   );    
 };
+
 export default JobListings;

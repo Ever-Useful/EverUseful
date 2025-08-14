@@ -3,10 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
-import Students from "@/assets/images/Students.jpg";
-import PhD from "@/assets/images/PhD.jpg";
-import Professors from "@/assets/images/Professors.jpg";
-import Business from "@/assets/images/Business.jpg";
+import Students from "@/assets/images/Students.jpeg";
+import PhD from "@/assets/images/phdscholars.jpeg";
+import Professors from "@/assets/images/professors.jpeg";
+import Business from "@/assets/images/Business.jpeg";
 
 type Option = {
   id: number;
@@ -26,8 +26,7 @@ const OPTIONS: Option[] = [
   },
   {
     id: 2,
-    imageUrl:
-      "", // scientist in lab
+    imageUrl: PhD, // scientist in lab
     label: "PhD Holders",
     description: "Collaborate on research & funding",
     iconClass: "fas fa-flask",

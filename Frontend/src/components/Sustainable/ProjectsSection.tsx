@@ -1,5 +1,5 @@
 
-import { ChevronRight, ChevronLeft, Heart, Plus, ArrowRight, Eye } from "lucide-react";
+import { ChevronRight, ChevronLeft, ArrowRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 
@@ -151,73 +151,63 @@ export const ProjectsSection = () => {
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {projects.map((project) => (
-               <div
-               key={project.id}
-               className="flex-shrink-0 w-56 sm:w-64 md:w-80 group cursor-pointer"
-             >
-               <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
-                 {/* Project Image */}
-                 <div className="relative overflow-hidden">
-                   <img
-                    src={project.image}
-                    alt={project.title}
-                    className="w-full aspect-[3/2] object-cover group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-500"
-                  />
+              <div
+                key={project.id}
+                className="flex-shrink-0 w-56 sm:w-64 md:w-80 group cursor-pointer"
+              >
+                <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                  {/* Project Image */}
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full aspect-[3/2] object-cover group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-500"
+                    />
 
-                  {/* Overlay on hover (always visible on mobile) */}
-                  <div className="absolute inset-0 bg-black/60 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="text-center text-white p-3 sm:p-4 lg:p-6">
-                      <h3 className="text-base sm:text-lg lg:text-xl font-bold mb-1 sm:mb-2">{project.title}</h3>
-                      <p className="text-xs sm:text-sm mb-2 sm:mb-3 leading-relaxed">{project.description}</p>
-                      <div className="space-y-0.5 sm:space-y-1 text-[10px] sm:text-xs">
-                        <p>
-                          <span className="font-semibold">Category:</span> {project.category}
-                        </p>
-                        <p>
-                          <span className="font-semibold">Impact:</span> {project.impact}
-                        </p>
-                        <p>
-                          <span className="font-semibold">Communities:</span> {project.communities}
-                        </p>
+                    {/* Overlay on hover (always visible on mobile) */}
+                    <div className="absolute inset-0 bg-black/60 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <div className="text-center text-white p-3 sm:p-4 lg:p-6">
+                        <h3 className="text-base sm:text-lg lg:text-xl font-bold mb-1 sm:mb-2">{project.title}</h3>
+                        <p className="text-xs sm:text-sm mb-2 sm:mb-3 leading-relaxed">{project.description}</p>
+                        <div className="space-y-0.5 sm:space-y-1 text-[10px] sm:text-xs">
+                          <p>
+                            <span className="font-semibold">Category:</span> {project.category}
+                          </p>
+                          <p>
+                            <span className="font-semibold">Impact:</span> {project.impact}
+                          </p>
+                          <p>
+                            <span className="font-semibold">Communities:</span> {project.communities}
+                          </p>
                         </div>
-                    
-                    {/* Action Buttons - Appear on Hover */}
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 mb-3">
-                      <Button 
-                        size="sm" 
-                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] sm:text-xs h-6 sm:h-8"
-                        onClick={() => toggleWatchlist(project.id)}
-                      >
-                        <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
-                        {watchlist.includes(project.id) ? "Watching" : "Watch"}
-                      </Button>
-                        <Button
-                          size="sm"
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] sm:text-xs h-6 sm:h-8 px-2 sm:px-3"
+
+                        {/* Action Buttons - Appear on Hover */}
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 mb-3">
+                          <Button
+                            size="sm"
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] sm:text-xs h-6 sm:h-8"
+                            onClick={() => toggleWatchlist(project.id)}
+                          >
+                            <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
+                            {watchlist.includes(project.id) ? "Watching" : "Watch"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] sm:text-xs h-6 sm:h-8 px-2 sm:px-3"
                           >
                             <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                        </Button>
+                          </Button>
+                        </div>
                       </div>
-                      {/* <Button 
-                        size="sm" 
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] sm:text-xs h-6 sm:h-8 px-2 sm:px-3"
-                        >
-                          <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                      </Button> */}
-
                     </div>
-                       
-                
-                  
+
+                    {/* Category badge */}
+                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3 lg:top-4 lg:left-4">
+                      <span className="bg-white/90 backdrop-blur-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium text-gray-800">
+                        {project.category}
+                      </span>
+                    </div>
                   </div>
-                </div>
-
-
-                {/* Category badge */}
-                <div className="absolute top-2 left-2 sm:top-3 sm:left-3 lg:top-4 lg:left-4">
-                  <span className="bg-white/90 backdrop-blur-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium text-gray-800">
-                    {project.category}
-                  </span>
                 </div>
               </div>
             ))}
@@ -237,7 +227,6 @@ export const ProjectsSection = () => {
               Submit Your Proposal
             </Button>
           </div>
-        </div>
         </div>
       </div>
     </section>
