@@ -94,7 +94,7 @@ const mockNotifications = [
     {
         id: 6,
         title: "Payment received",
-        message: "$250 payment received for your freelance work",
+                        message: "₹250 payment received for your freelance work",
         time: "2 days ago",
         unread: false,
         type: "payment",
@@ -633,9 +633,8 @@ const Header = () => {
                                         <Button
                                             variant="default"
                                             size="sm"
-                                            bg-background="emerald-600"
                                             asChild
-                                            className="text-sm px-3 py-1"
+                                            className="text-sm px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
                                         >
                                             <Link to="/signup">Join</Link>
                                         </Button>
@@ -655,16 +654,14 @@ const Header = () => {
                                         <Button
                                             variant="outline"
                                             asChild
-                                            bg-border="emerald-600"
-                                            className="text-sm px-4 py-2"
+                                            className="text-sm px-4 py-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold rounded-lg transition-all duration-200"
                                         >
                                             <Link to="/signin">Sign In</Link>
                                         </Button>
                                         <Button
                                             variant="default"
                                             asChild
-                                            bg-background="emerald-600"
-                                            className="text-sm px-4 py-2"
+                                            className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
                                         >
                                             <Link to="/signup">Join</Link>
                                         </Button>

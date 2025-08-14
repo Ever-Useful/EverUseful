@@ -99,7 +99,7 @@ export const GlobalCollaborations: React.FC = () => {
               Partnering with global innovators to shape the future of technology and business.
             </p>
           </div>
-          <div className="flex-1 flex justify-end gap-4">
+          <div className="hidden sm:flex flex-1 justify-end gap-4">
             <img
               src={partnersImage}
               alt="Global Partners 1"
@@ -113,56 +113,58 @@ export const GlobalCollaborations: React.FC = () => {
       <div className="space-y-6 sm:space-y-8 w-full">
 
         {/* Bottom Row - right to left */}
-        <div className="overflow-x-auto w-full" ref={bottomMarqueeRef} style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
-          <div className="flex w-[100vw] gap-4 sm:gap-6 items-center justify-evenly py-4">
+        <div className="w-full" ref={bottomMarqueeRef}>
+          <div className="flex flex-col sm:flex-row w-full gap-4 sm:gap-6 items-center justify-evenly py-4">
             {partnersRow.map((partner, idx) => (
-              <div
-                key={`bottom-${idx}-${partner.id}`}
-                className="bg-white rounded-xl shadow-lg border border-gray-100 min-w-[320px] max-w-[320px] sm:min-w-[500px] sm:max-w-[500px] mx-1 flex flex-row items-stretch transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-blue-200 group overflow-hidden"
-                style={{
-                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-                }}
-              >
-                {/* Logo/image container - fixed width */}
-                <div className="w-32 sm:w-40 flex-shrink-0 relative">
-                  <div className="absolute inset-0 bg-gray-50 flex items-center justify-center p-4">
-                    <img
-                      src={partner.imageUrl}
-                      alt={partner.name}
-                      className="w-full h-auto max-h-24 object-contain transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                </div>
+                             <div
+                 key={`bottom-${idx}-${partner.id}`}
+                 className="bg-white rounded-xl shadow-lg border border-gray-100 w-full sm:min-w-[500px] sm:max-w-[500px] mx-1 flex flex-col sm:flex-row items-stretch transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-blue-200 group overflow-hidden"
+                 style={{
+                   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+                 }}
+               >
+                 {/* Logo/image container - full width on mobile, fixed width on desktop */}
+                 <div className="w-full sm:w-40 flex-shrink-0 relative">
+                   <div className="w-full h-32 sm:h-auto sm:absolute sm:inset-0 bg-gray-50 flex items-center justify-center p-4">
+                     <img
+                       src={partner.imageUrl}
+                       alt={partner.name}
+                       className="w-full h-full sm:h-auto sm:max-h-24 object-contain transition-transform duration-500 group-hover:scale-105"
+                     />
+                   </div>
+                 </div>
 
-                {/* Text content container - flexible width */}
-                <div className="flex-1 p-4 sm:p-5 flex flex-col">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h5 className="text-lg sm:text-xl font-bold text-gray-900 line-clamp-1">
-                      {partner.name}
-                    </h5>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      Partner
-                    </span>
-                  </div>
+                 {/* Text content container - full width on mobile */}
+                 <div className="w-full sm:flex-1 p-4 sm:p-5 flex flex-col">
+                   <div className="flex items-start justify-between gap-2 mb-2">
+                     <h5 className="text-lg sm:text-xl font-bold text-gray-900 line-clamp-1">
+                       {partner.name}
+                     </h5>
+                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                       Partner
+                     </span>
+                   </div>
 
-                  <p className="text-sm text-blue-600 font-medium mb-2 line-clamp-1">
-                    {partner.tagline}
-                  </p>
+                   <p className="text-sm text-blue-600 font-medium mb-2 line-clamp-1">
+                     {partner.tagline}
+                   </p>
 
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {partner.description}
-                  </p>
+                   <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                     {partner.description}
+                   </p>
 
-                  <div className="mt-auto">
-                    <Link
-                      to={partner.href}
-                      className="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      Learn more
-                    </Link>
-                  </div>
-                </div>
-              </div>
+                   <div className="mt-auto">
+                     <a
+                       href={partner.href}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                     >
+                       Learn more
+                     </a>
+                   </div>
+                 </div>
+               </div>
             ))}
           </div>
         </div>

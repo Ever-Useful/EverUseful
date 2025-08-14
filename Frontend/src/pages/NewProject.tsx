@@ -122,7 +122,7 @@ const NewProject = () => {
             />
           </div>
           
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg py-3 transition-all duration-200 hover:shadow-md border-0">
             {loading ? 'Creating...' : 'Create Project'}
           </Button>
         </form>
