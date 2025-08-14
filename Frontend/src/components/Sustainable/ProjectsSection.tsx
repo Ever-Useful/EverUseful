@@ -11,10 +11,9 @@ const projects = [
     image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&h=400&fit=crop",
     category: "Water Solutions",
     impact: "50M+ people served",
-communities: "Rural & Urban",
-    status: "Active Research",
-    teamSize: "12 researchers",
-            fundingGoal: "₹2.5M secured"  },
+
+    communities: "Rural & Urban"
+  },
   {
     id: 2,
     title: "Renewable Energy Hubs",
@@ -22,10 +21,10 @@ communities: "Rural & Urban",
     image: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?w=600&h=400&fit=crop",
     category: "Energy Solutions",
     impact: "75% emission reduction",
- communities: "Remote & Developing",
-    status: "Seeking Partners",
-    teamSize: "8 engineers",
-            fundingGoal: "₹1.8M target"  },
+
+    communities: "Remote & Developing"
+  },
+
   {
     id: 3,
     title: "Smart Agriculture",
@@ -33,10 +32,9 @@ communities: "Rural & Urban",
     image: "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=600&h=400&fit=crop",
     category: "Food Security",
     impact: "40% yield increase",
-    communities: "Agricultural & Coastal",
-    status: "Pilot Testing",
-    teamSize: "15 field experts",
-            fundingGoal: "₹3.2M funded"  },
+
+    communities: "Agricultural & Coastal"
+  },
   {
     id: 4,
     title: "Waste Management",
@@ -44,10 +42,9 @@ communities: "Rural & Urban",
     image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=600&h=400&fit=crop",
     category: "Circular Economy",
     impact: "90% waste reduction",
- communities: "Urban & Industrial",
-    status: "Implementation",
-    teamSize: "6 policy experts",
-            fundingGoal: "₹4.1M raised"  },
+
+    communities: "Urban & Industrial"
+  },
   {
     id: 5,
     title: "Carbon Capture",
@@ -64,10 +61,9 @@ communities: "Rural & Urban",
     image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=400&fit=crop",
     category: "Conservation",
     impact: "10K+ species protected",
-communities: "Industrial & Research",
-    status: "R&D Phase",
-    teamSize: "20 scientists",
-            fundingGoal: "₹5.5M needed"  }
+
+    communities: "Forest & Marine"
+  }
 ];
 
 export const ProjectsSection = () => {
@@ -75,7 +71,6 @@ export const ProjectsSection = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const navigate = useNavigate();
 
   const toggleWatchlist = (projectId: number) => {
     setWatchlist(prev => 
@@ -83,14 +78,6 @@ export const ProjectsSection = () => {
         ? prev.filter(id => id !== projectId)
         : [...prev, projectId]
     );
-  };
-  
-  const handleBrowseAllProjects = () => {
-    navigate('/marketplace');
-  };
-
-  const handleSubmitProposal = () => {
-    navigate('/projects/new');
   };
 
   const scroll = (direction: 'left' | 'right') => {
@@ -127,18 +114,19 @@ export const ProjectsSection = () => {
   return (
 
     <section className="py-6 sm:py-8 md:py-10 lg:py-12 bg-gradient-to-br from-stone-50 via-yellow-50 to-green-50">
-    <div className="container mx-auto px-4 sm:px-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-16">
-        <div>
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-16">
+          <div>
             <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
               SOLUTION CATEGORIES
             </p>
+            
 
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
               Sustainable Project Types
             </h2>
           </div>
-           <div className="max-w-full md:max-w-md">
+          <div className="max-w-full md:max-w-md">
             <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-4 sm:mb-6 leading-relaxed">
               Explore active research projects and join collaborative teams making real-world impact. Connect with experts and contribute to meaningful solutions.
             </p>
@@ -266,31 +254,20 @@ export const ProjectsSection = () => {
           </div>
         </div>
 
-
-
-
-        
         {/* Call to action */}
 
         <div className="text-center mt-8 sm:mt-10 md:mt-14 lg:mt-16">
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Ready to Join a Research Team?</h3>
           <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Connect with professors and students worldwide working on sustainable solutions</p>
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-            <Button 
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-base"
-              onClick={handleBrowseAllProjects}
-            >
+            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-base">
               Browse All Projects
             </Button>
-            <Button 
-              variant="outline" 
-              className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 px-6 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-base"
-              onClick={handleSubmitProposal}
-            >
+            <Button variant="outline" className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 px-6 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-base">
               Submit Your Proposal
             </Button>
           </div>
-      </div>
+        </div>
       </div>
     </section>
   );

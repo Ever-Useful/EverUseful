@@ -9,6 +9,7 @@ import PhD from "../assets/images/phdscholars.jpeg";
 import Professors from "../assets/images/professors.jpeg";
 import Business from "../assets/images/Business.jpeg";
 
+
 type Option = {
   id: number;
   imageUrl: string;
@@ -16,6 +17,40 @@ type Option = {
   description: string;
   iconClass: string;
 };
+
+const OPTIONS: Option[] = [
+  {
+    id: 1,
+    imageUrl: Students, // student studying
+    label: "Students",
+    description: "Join peer communities & showcase projects",
+    iconClass: "fas fa-user-graduate",
+  },
+  {
+    id: 2,
+    imageUrl: PhD, // scientist in lab
+    label: "PhD Holders",
+    description: "Collaborate on research & funding",
+    iconClass: "fas fa-flask",
+  },
+  {
+    id: 3,
+    imageUrl:
+      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80", // professor lecturing
+    label: "Professors",
+    description: "Share knowledge & mentor next gen",
+    iconClass: "fas fa-chalkboard-teacher",
+  },
+  {
+    id: 4,
+    imageUrl:
+      "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80", // business meeting
+    label: "Business",
+    description: "Discover solutions & partnerships",
+    iconClass: "fas fa-briefcase",
+  },
+];
+
 
 export const Hero = () => {
   // Memoize options to prevent recreation on every render
@@ -88,9 +123,11 @@ export const Hero = () => {
         <div className="container relative mx-auto px-2 sm:px-6 lg:px-32 z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             {/* LEFT: Text + Button */}
+
             <div className="w-full lg:w-1/3 text-center lg:text-left mb-8 lg:mb-0">
               <h1 className="text-[17px] sm:text-4xl font-bold text-white mb-4 leading-tight mobile-text-4xl">
                 Connect{" "}
+
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
                   Innovation
                 </span>{" "}
@@ -99,7 +136,9 @@ export const Hero = () => {
                   Opportunity
                 </span>
               </h1>
-              <p className="text-[12px] sm:text-base text-gray-300 mb-6 sm:mb-12 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed mobile-text-base">
+
+              <p className="text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200">
+
                 A platform where students, PhD holders, professors, and
                 businesses collaborate to transform ideas into real-world impact.
                 Join the future of collaborative innovation today.
@@ -107,7 +146,9 @@ export const Hero = () => {
               <div className="flex justify-center lg:justify-start">
                 <Button
                   size="lg"
+
                   className="w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font transform transition-all duration-200 hover:scale-105 shadow-lg font-bold"
+
                   asChild
                 >
                   <Link to="/signup" className="font-bold flex items-center justify-center">
@@ -134,7 +175,7 @@ export const Hero = () => {
                         ...getAnimationStyle(isOdd)
                       }}
                     >
-                      {/* Shadow overlay at bottom for gradient effect ONLY on hover */}
+                      <img src={opt.imageUrl} alt={opt.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-0" />
                       <div
                         className="
                           absolute
@@ -172,48 +213,17 @@ export const Hero = () => {
                           textShadow: "0 0 8px rgba(0,0,0,0.75)",
                         }}
                       >
-                        <div className="flex items-center justify-center w-[40px] h-[40px] bg-white rounded-full shadow-sm">
-                          <i className={`${opt.iconClass} text-gray-800`} />
-                        </div>
-                        <div className="flex flex-col justify-center ml-2 text-white whitespace-pre">
-                          <div
-                            className="
-                              relative
-                              transition-all
-                              duration-500
-                              ease-out
-                              left-[16px]
-                              opacity-0
-                              group-hover:left-0
-                              group-hover:opacity-100
-                              font-semibold
-                              text-lg
-                            "
-                            style={{
-                              textShadow: "0 0 8px rgba(0,0,0,0.75)",
-                            }}
-                          >
-                            {opt.label}
+
+                        <div className="flex items-center text-white">
+                          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">
+                            <i className={`${opt.iconClass} text-sm`}></i>
                           </div>
-                          <div
-                            className="
-                              relative
-                              transition-all
-                              duration-500
-                              ease-out
-                              delay-100
-                              left-[16px]
-                              opacity-0
-                              group-hover:left-0
-                              group-hover:opacity-100
-                              text-sm
-                              text-gray-200
-                            "
-                            style={{
-                              textShadow: "0 0 6px rgba(0,0,0,0.6)",
-                            }}
-                          >
-                            {opt.description}
+                          <div>
+                            <div className="font-bold text-sm">{opt.label}</div>
+                            <div className="text-xs opacity-80 max-w-0 group-hover:max-w-[200px] transition-all duration-500 ease-out overflow-hidden">
+                              {opt.description}
+                            </div>
+
                           </div>
                         </div>
                       </div>
@@ -222,25 +232,22 @@ export const Hero = () => {
                 })}
               </div>
 
-              {/* Mobile: optimized grid layout */}
+              {/* Mobile: horizontal scroll cards */}
               <div className="lg:hidden w-full">
-                <div className="grid grid-cols-2 gap-3 p-4">
+                <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory">
                   {OPTIONS.map((opt) => (
                     <div
                       key={opt.id}
-                      className="relative h-32 rounded-xl overflow-hidden"
+                      className="relative min-w-[70vw] max-w-xs h-44 rounded-2xl overflow-hidden bg-center bg-cover snap-start flex-shrink-0"
+                      style={{
+                        backgroundImage: `url(${opt.imageUrl})`,
+                      }}
                     >
-                      <img
-                        src={opt.imageUrl}
-                        alt={opt.label}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-black/50" />
-                      <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white p-3">
-                        <div className="font-bold text-lg sm:text-xl mb-1 leading-tight">
-                          {opt.label}
-                        </div>
+                      <div className="absolute inset-0 bg-black/40" />
+                      <div className="absolute bottom-4 left-4 text-white">
+                        <div className="font-bold text-lg">{opt.label}</div>
+                        <div className="text-xs opacity-80">{opt.description}</div>
+
                       </div>
                     </div>
                   ))}
