@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { getDropdownOptions } from '../utils/dropdownUtils';
 
 const heroImage =
   "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?auto=format&fit=crop&w=1200&q=80";
@@ -53,9 +54,7 @@ const initialForm = {
   bio: "",
 };
 
-const countries = [
-  "United States", "United Kingdom", "India", "Germany", "Canada", "Australia", "France", "China", "Japan", "Other"
-];
+const countries = getDropdownOptions('countries').map(option => option.value);
 
 const BecomeMentor: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -177,7 +176,7 @@ const BecomeMentor: React.FC = () => {
             className="w-full py-8 xs:py-14 px-2 xs:px-4 flex flex-col items-center bg-[#f8fafc] border-t border-[#fa5954]/10"
           >
             <div className="max-w-3xl w-full mx-auto bg-white rounded-2xl shadow-xl p-4 xs:p-6 sm:p-8">
-              <h2 className="text-xl xs:text-2xl font-bold text-gray-900 mb-4 xs:mb-6 text-center">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4 xs:mb-6 text-center mobile-text-4xl">
                 Mentor Application
               </h2>
               {submitted ? (
@@ -312,10 +311,11 @@ const BecomeMentor: React.FC = () => {
                         className={`w-full px-3 xs:px-4 py-2 rounded-lg border ${errors.mentoringType ? "border-red-400" : "border-gray-300"} focus:border-[#fa5954] focus:outline-none text-xs xs:text-sm`}
                       >
                         <option value="">Select</option>
-                        <option value="Academic Guidance">Academic Guidance</option>
-                        <option value="Industry R&D">Industry R&D</option>
-                        <option value="Career Coaching">Career Coaching</option>
-                        <option value="Other">Other</option>
+                        {getDropdownOptions('mentoringTypes').map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
                       </select>
                       {errors.mentoringType && <div className="text-xs text-red-500 mt-1">{errors.mentoringType}</div>}
                     </div>

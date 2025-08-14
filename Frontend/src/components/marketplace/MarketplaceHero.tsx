@@ -92,13 +92,12 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
           border: "1px solid #b6d4fe",
         }}
       >
-        <h1 className={`font-extrabold mb-4 sm:mb-6 tracking-tight leading-tight drop-shadow-sm bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-400 bg-clip-text text-transparent
-          ${isMobile ? "text-xl sm:text-2xl" : "text-3xl sm:text-4xl lg:text-5xl"}`}>
+        <h1 className="text-4xl font-extrabold mb-4 sm:mb-6 tracking-tight leading-tight drop-shadow-sm bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-400 bg-clip-text text-transparent mobile-text-4xl">
           Empowering Innovation, Globally
         </h1>
         
         {!isMobile && (
-          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto text-slate-700 font-medium leading-relaxed">
+          <p className="text-base mb-6 sm:mb-8 max-w-2xl mx-auto text-slate-700 font-medium leading-relaxed mobile-text-base">
             Join the world's brightest minds—explore, collaborate, and create in the next-generation global marketplace.
           </p>
         )}

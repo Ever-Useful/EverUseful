@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import {
@@ -35,14 +35,15 @@ import {
     ShoppingCart,
     Menu
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/assets/Logo/Logo Side Simple.png';
 import InitialsAvatar from './InitialsAvatar';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Connections from '@/components/Connections';
 import { EditProfile } from '../components/EditProfile';
@@ -93,7 +94,7 @@ const mockNotifications = [
     {
         id: 6,
         title: "Payment received",
-        message: "$250 payment received for your freelance work",
+                        message: "₹250 payment received for your freelance work",
         time: "2 days ago",
         unread: false,
         type: "payment",
@@ -219,6 +220,19 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
 
 const Header = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    // Check if current page needs user data (only pages that require authentication)
+    const needsUserData = useMemo(() => {
+        const authRequiredRoutes = [
+            '/dashboard', '/profile', '/marketplace', '/cart', '/chat', 
+            '/connections', '/collaborators', '/freelancing', '/findexpert',
+            '/freelancerprofile', '/studentprofile', '/businessprofile',
+            '/new-project', '/schedule-meeting'
+        ];
+        const needsData = authRequiredRoutes.some(route => location.pathname.startsWith(route));
+        return needsData;
+    }, [location.pathname]);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [messages, setMessages] = useState(mockMessages);
     const unreadMessageCount = messages.filter(m => m.unread).length;
@@ -228,8 +242,7 @@ const Header = () => {
     const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
     const [notifications, setNotifications] = useState(mockNotifications);
     const unreadNotificationCount = notifications.filter(n => n.unread).length;
-    const [profileData, setProfileData] = useState({ firstName: '', lastName: '' });
-    const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
+    const { profileData, isLoggedIn, refreshProfile } = useUserProfile();
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
@@ -321,21 +334,24 @@ const Header = () => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                setIsLoggedIn(true);
                 localStorage.setItem("isLoggedIn", "true");
-                const userProfile = await userService.getUserProfile();
-                setProfileData({
-                    firstName: userProfile.auth.firstName || '',
-                    lastName: userProfile.auth.lastName || '',
-                });
+                
+                // Only fetch user profile if the current page needs it AND we don't have cached data
+                if (needsUserData) {
+                    await refreshProfile();
+                }
             } else {
-                setIsLoggedIn(false);
                 localStorage.removeItem("isLoggedIn");
-                setProfileData({ firstName: '', lastName: '' });
             }
         });
         return () => unsubscribe();
-    }, []);
+    }, [needsUserData, refreshProfile]);
+
+    // Function to refresh profile data - only called when explicitly needed
+    const refreshProfileData = async () => {
+        if (!needsUserData) return; // Skip if not needed
+        await refreshProfile();
+    };
 
     const handleMessageClick = (messageId: number) => {
         setMessages(prev =>
@@ -352,8 +368,6 @@ const Header = () => {
     const handleLogout = async () => {
         try {
             // Clear all user-related state
-            setIsLoggedIn(false);
-            setProfileData({ firstName: '', lastName: '' });
             setShowNotificationsSidebar(false);
             setShowMessagesSidebar(false);
             setShowProfileSidebar(false);
@@ -375,9 +389,7 @@ const Header = () => {
     useEffect(() => {
         const handleStorageChange = () => {
             const loginStatus = localStorage.getItem("isLoggedIn") === "true";
-            setIsLoggedIn(loginStatus);
             if (!loginStatus) {
-                setProfileData({ firstName: '', lastName: '' });
                 setShowNotificationsSidebar(false);
                 setShowMessagesSidebar(false);
                 setShowProfileSidebar(false);
@@ -429,16 +441,13 @@ const Header = () => {
 
     return (
         <>
-            <header className="sticky top-0 z-50 w-full border-b bg-white backdrop-blur supports-[backdrop-filter]:bg-white/80">
+            <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-white shadow-sm">
                 <div className="container max-w-full md:w-[1320px] mx-auto px-2 sm:px-4">
                     <div className="flex h-14 items-center justify-between">
                         {/* Logo */}
                         <div className="flex items-center space-x-1 flex-shrink-0">
                             <Link to="/" className="flex items-center space-x-2 group">
                                 <img src={Logo} alt="AMOGH" className="h-10 w-auto md:h-8" />
-                                <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
-                                    beta
-                                </div>
                             </Link>
                         </div>
 
@@ -454,166 +463,211 @@ const Header = () => {
                                     />
                                 </div>
                             </div>
-                            <Navigation />
+                            <Navigation isLoggedIn={isLoggedIn} />
                         </div>
 
                         {/* Right Section */}
                         <div className="flex items-center space-x-2 sm:space-x-3">
-                            {/* Mobile: Hamburger and Profile */}
-                            <div className="flex md:hidden items-center space-x-2">
-                                {/* Profile Button */}
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => setShowProfileSidebar(true)}
-                                    className="hover:bg-white/10 hover:text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 py-2 rounded-lg flex items-center"
-                                >
-                                    <User className="h-5 w-5 text-gray-600" />
-                                </Button>
-                                {/* Hamburger Menu */}
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="p-2"
-                                    aria-label="Open menu"
-                                    onClick={() => setShowMobileMenu(true)}
-                                >
-                                    <Menu className="h-6 w-6 text-gray-700" />
-                                </Button>
-                            </div>
-                            {/* Desktop: All header actions */}
-                            <div className="hidden md:flex items-center space-x-2 sm:space-x-3">
-                                {/* Cart Button */}
-                                <Button variant="ghost" size="icon" className="hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300" asChild>
-                                    <Link to="/cart">
-                                        <ShoppingCart className="h-5 w-5 text-gray-600" />
-                                    </Link>
-                                </Button>
-                                {/* Messages Button */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
-                                            <MessageSquare className="h-5 w-5 text-gray-600" />
-                                            {unreadMessageCount > 0 && (
-                                                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
-                                                    {unreadMessageCount}
-                                                </Badge>
+                            {isLoggedIn ? (
+                                <>
+                                    {/* Mobile: Hamburger and Profile */}
+                                    <div className="flex md:hidden items-center space-x-2">
+                                        {/* Profile Button */}
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => setShowProfileSidebar(true)}
+                                            className="hover:bg-white/10 hover:text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 py-2 rounded-lg flex items-center"
+                                        >
+                                            <User className="h-5 w-5 text-gray-600" />
+                                        </Button>
+                                        {/* Hamburger Menu */}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="p-2"
+                                            aria-label="Open menu"
+                                            onClick={() => setShowMobileMenu(true)}
+                                        >
+                                            <Menu className="h-6 w-6 text-gray-700" />
+                                        </Button>
+                                    </div>
+                                    {/* Desktop: All header actions */}
+                                    <div className="hidden md:flex items-center space-x-2 sm:space-x-3">
+                                        {/* Cart Button */}
+                                        <Button variant="ghost" size="icon" className="hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300" asChild>
+                                            <Link to="/cart">
+                                                <ShoppingCart className="h-5 w-5 text-gray-600" />
+                                            </Link>
+                                        </Button>
+                                        {/* Messages Button */}
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
+                                                    <MessageSquare className="h-5 w-5 text-gray-600" />
+                                                    {unreadMessageCount > 0 && (
+                                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
+                                                            {unreadMessageCount}
+                                                        </Badge>
+                                                    )}
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
+                                                <div className="p-3 border-b border-gray-200">
+                                                    <h3 className="font-semibold text-slate-800">Recent Messages</h3>
+                                                </div>
+                                                <div className="max-h-64 overflow-y-auto">
+                                                    {messages.slice(0, 3).map((message) => (
+                                                        <DropdownMenuItem
+                                                            key={message.id}
+                                                            className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
+                                                            onClick={() => handleMessageClick(message.id)}
+                                                        >
+                                                            <div className="flex items-start justify-between w-full">
+                                                                <div className="flex items-start gap-3 flex-1">
+                                                                    <span className="text-2xl">{message.avatar}</span>
+                                                                    <div className="flex-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <p className="font-medium text-sm text-slate-800">
+                                                                                {message.sender}
+                                                                            </p>
+                                                                            {message.unread && (
+                                                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                                            )}
+                                                                        </div>
+                                                                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                                                                            {message.message}
+                                                                        </p>
+                                                                        <p className="text-xs text-slate-400 mt-1">
+                                                                            {message.time}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                    {messages.length === 0 && (
+                                                        <div className="p-4 text-center text-slate-500">
+                                                            No messages yet
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem onClick={() => setShowMessagesSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-green-600 font-medium hover:bg-green-50">
+                                                    See All Messages
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                        {/* Notifications Button */}
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
+                                                    <Bell className="h-5 w-5 text-gray-600" />
+                                                    {unreadNotificationCount > 0 && (
+                                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
+                                                            {unreadNotificationCount}
+                                                        </Badge>
+                                                    )}
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
+                                                <div className="p-3 border-b border-gray-200">
+                                                    <h3 className="font-semibold text-slate-800">Recent Notifications</h3>
+                                                </div>
+                                                <div className="max-h-64 overflow-y-auto">
+                                                    {notifications.slice(0, 3).map((notification) => (
+                                                        <DropdownMenuItem
+                                                            key={notification.id}
+                                                            className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
+                                                            onClick={() => handleNotificationClick(notification.id)}
+                                                        >
+                                                            <div className="flex items-start justify-between w-full">
+                                                                <div className="flex items-start gap-3 flex-1">
+                                                                    <span className="text-lg">{getNotificationIcon(notification.type)}</span>
+                                                                    <div className="flex-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <p className="font-medium text-sm text-slate-800">
+                                                                                {notification.title}
+                                                                            </p>
+                                                                            {notification.unread && (
+                                                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                                            )}
+                                                                        </div>
+                                                                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                                                                            {notification.message}
+                                                                        </p>
+                                                                        <p className="text-xs text-slate-400 mt-1">
+                                                                            {notification.time}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                    {notifications.length === 0 && (
+                                                        <div className="p-4 text-center text-slate-500">
+                                                            No notifications yet
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem onClick={() => setShowNotificationsSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-blue-600 font-medium hover:bg-blue-50">
+                                                    See All Notifications
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                        {/* Profile Button with User Name */}
+                                        <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
+                                            <User className="h-5 w-5 text-gray-600" />
+                                            {profileData.firstName && (
+                                                <span className="hidden sm:inline text-sm font-medium">
+                                                    Hi, {profileData.firstName}
+                                                </span>
                                             )}
                                         </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
-                                        <div className="p-3 border-b border-gray-200">
-                                            <h3 className="font-semibold text-slate-800">Recent Messages</h3>
-                                        </div>
-                                        <div className="max-h-64 overflow-y-auto">
-                                            {messages.slice(0, 3).map((message) => (
-                                                <DropdownMenuItem
-                                                    key={message.id}
-                                                    className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
-                                                    onClick={() => handleMessageClick(message.id)}
-                                                >
-                                                    <div className="flex items-start justify-between w-full">
-                                                        <div className="flex items-start gap-3 flex-1">
-                                                            <span className="text-2xl">{message.avatar}</span>
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2">
-                                                                    <p className="font-medium text-sm text-slate-800">
-                                                                        {message.sender}
-                                                                    </p>
-                                                                    {message.unread && (
-                                                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                                    )}
-                                                                </div>
-                                                                <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                                                    {message.message}
-                                                                </p>
-                                                                <p className="text-xs text-slate-400 mt-1">
-                                                                    {message.time}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </DropdownMenuItem>
-                                            ))}
-                                            {messages.length === 0 && (
-                                                <div className="p-4 text-center text-slate-500">
-                                                    No messages yet
-                                                </div>
-                                            )}
-                                        </div>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={() => setShowMessagesSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-green-600 font-medium hover:bg-green-50">
-                                            See All Messages
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                                {/* Notifications Button */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
-                                            <Bell className="h-5 w-5 text-gray-600" />
-                                            {unreadNotificationCount > 0 && (
-                                                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
-                                                    {unreadNotificationCount}
-                                                </Badge>
-                                            )}
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    {/* Mobile: Join and Hamburger buttons */}
+                                    <div className="flex md:hidden items-center space-x-2">
+                                        <Button
+                                            variant="default"
+                                            size="sm"
+                                            asChild
+                                            className="text-sm px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
+                                        >
+                                            <Link to="/signup">Join</Link>
                                         </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
-                                        <div className="p-3 border-b border-gray-200">
-                                            <h3 className="font-semibold text-slate-800">Recent Notifications</h3>
-                                        </div>
-                                        <div className="max-h-64 overflow-y-auto">
-                                            {notifications.slice(0, 3).map((notification) => (
-                                                <DropdownMenuItem
-                                                    key={notification.id}
-                                                    className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
-                                                    onClick={() => handleNotificationClick(notification.id)}
-                                                >
-                                                    <div className="flex items-start justify-between w-full">
-                                                        <div className="flex items-start gap-3 flex-1">
-                                                            <span className="text-lg">{getNotificationIcon(notification.type)}</span>
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2">
-                                                                    <p className="font-medium text-sm text-slate-800">
-                                                                        {notification.title}
-                                                                    </p>
-                                                                    {notification.unread && (
-                                                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                                    )}
-                                                                </div>
-                                                                <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                                                    {notification.message}
-                                                                </p>
-                                                                <p className="text-xs text-slate-400 mt-1">
-                                                                    {notification.time}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </DropdownMenuItem>
-                                            ))}
-                                            {notifications.length === 0 && (
-                                                <div className="p-4 text-center text-slate-500">
-                                                    No notifications yet
-                                                </div>
-                                            )}
-                                        </div>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={() => setShowNotificationsSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-blue-600 font-medium hover:bg-blue-50">
-                                            See All Notifications
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                                {/* Profile Button with User Name */}
-                                <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
-                                    <User className="h-5 w-5 text-gray-600" />
-                                    {profileData.firstName && (
-                                        <span className="hidden sm:inline text-sm font-medium">
-                                            Hi, {profileData.firstName}
-                                        </span>
-                                    )}
-                                </Button>
-                            </div>
+                                        {/* Hamburger Menu for logged out users */}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="p-2"
+                                            aria-label="Open menu"
+                                            onClick={() => setShowMobileMenu(true)}
+                                        >
+                                            <Menu className="h-6 w-6 text-gray-700" />
+                                        </Button>
+                                    </div>
+                                    {/* Desktop: Join and Sign In buttons */}
+                                    <div className="hidden md:flex items-center space-x-3 ">
+                                        <Button
+                                            variant="outline"
+                                            asChild
+                                            className="text-sm px-4 py-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold rounded-lg transition-all duration-200"
+                                        >
+                                            <Link to="/signin">Sign In</Link>
+                                        </Button>
+                                        <Button
+                                            variant="default"
+                                            asChild
+                                            className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
+                                        >
+                                            <Link to="/signup">Join</Link>
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -638,56 +692,85 @@ const Header = () => {
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                            {/* Search */}
-                            <div className="mb-4">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search projects, services..."
-                                        className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
-                                    />
-                                </div>
-                            </div>
-                            {/* Navigation */}
-                            <Navigation mobile />
-                            {/* Cart */}
-                            <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
-                                <span className="text-gray-700 font-medium">Cart</span>
-                            </Link>
-                            {/* Messages */}
-                            <button
-                                className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
-                                onClick={() => {
-                                    setShowMessagesSidebar(true);
-                                    setShowMobileMenu(false);
-                                }}
-                            >
-                                <MessageSquare className="w-5 h-5 mr-3 text-gray-600" />
-                                <span className="text-gray-700 font-medium">Messages</span>
-                                {unreadMessageCount > 0 && (
-                                    <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
-                                        {unreadMessageCount}
-                                    </Badge>
-                                )}
-                            </button>
-                            {/* Notifications */}
-                            <button
-                                className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
-                                onClick={() => {
-                                    setShowNotificationsSidebar(true);
-                                    setShowMobileMenu(false);
-                                }}
-                            >
-                                <Bell className="w-5 h-5 mr-3 text-gray-600" />
-                                <span className="text-gray-700 font-medium">Notifications</span>
-                                {unreadNotificationCount > 0 && (
-                                    <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
-                                        {unreadNotificationCount}
-                                    </Badge>
-                                )}
-                            </button>
+                            {isLoggedIn ? (
+                                <>
+                                    {/* Search */}
+                                    <div className="mb-4">
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search projects, services..."
+                                                className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
+                                            />
+                                        </div>
+                                    </div>
+                                    {/* Navigation */}
+                                    <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    {/* Cart */}
+                                    <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                        <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Cart</span>
+                                    </Link>
+                                    {/* Messages */}
+                                    <button
+                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
+                                        onClick={() => {
+                                            setShowMessagesSidebar(true);
+                                            setShowMobileMenu(false);
+                                        }}
+                                    >
+                                        <MessageSquare className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Messages</span>
+                                        {unreadMessageCount > 0 && (
+                                            <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
+                                                {unreadMessageCount}
+                                            </Badge>
+                                        )}
+                                    </button>
+                                    {/* Notifications */}
+                                    <button
+                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
+                                        onClick={() => {
+                                            setShowNotificationsSidebar(true);
+                                            setShowMobileMenu(false);
+                                        }}
+                                    >
+                                        <Bell className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Notifications</span>
+                                        {unreadNotificationCount > 0 && (
+                                            <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
+                                                {unreadNotificationCount}
+                                            </Badge>
+                                        )}
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    {/* Search */}
+                                    <div className="mb-4">
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search projects, services..."
+                                                className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
+                                            />
+                                        </div>
+                                    </div>
+                                    {/* Navigation */}
+                                    <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    {/* Sign In Button */}
+                                    <Link 
+                                        to="/signin" 
+                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors"
+                                        onClick={() => setShowMobileMenu(false)}
+                                    >
+                                        <User className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Sign In</span>
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -892,7 +975,23 @@ const Header = () => {
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 <div className="flex flex-col items-center text-center">
-                                    <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} size={80} className="sm:w-24 sm:h-24" />
+                                    {profileData.avatar ? (
+                                        <img 
+                                            src={profileData.avatar} 
+                                            alt={`${profileData.firstName} ${profileData.lastName}`}
+                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                            }}
+                                        />
+                                    ) : null}
+                                    <InitialsAvatar 
+                                        firstName={profileData.firstName} 
+                                        lastName={profileData.lastName} 
+                                        size={80} 
+                                        className={`sm:w-24 sm:h-24 ${profileData.avatar ? 'hidden' : ''}`} 
+                                    />
                                     <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">{profileData.firstName} {profileData.lastName}</h3>
                                     <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
                                         View Profile &gt;

@@ -1,9 +1,11 @@
 const dynamoDBService = require('./dynamoDBService');
+const s3Service = require('./s3Service');
 
 class UserService {
   constructor() {
     // Use DynamoDB service instead of JSON files
     this.dbService = dynamoDBService;
+    this.s3Service = s3Service;
   }
 
   // Generate custom user ID
@@ -13,11 +15,27 @@ class UserService {
 
   // Create new user
   async createUser(firebaseUid, userData) {
-    return await this.dbService.createUser(firebaseUid, userData);
+    const user = await this.dbService.createUser(firebaseUid, userData);
+    
+    // Create S3 folder structure for the new user
+    try {
+      await this.s3Service.createUserFolder(user.customUserId);
+      console.log(`Created S3 folder structure for user: ${user.customUserId}`);
+    } catch (error) {
+      console.error(`Failed to create S3 folder for user ${user.customUserId}:`, error);
+      // Don't fail user creation if S3 folder creation fails
+    }
+    
+    return user;
   }
 
   // Find user by Firebase UID
   async findUserByFirebaseUid(firebaseUid) {
+    return await this.dbService.findUserByFirebaseUid(firebaseUid);
+  }
+
+  // Alias for findUserByFirebaseUid (for dashboard compatibility)
+  async getUserByFirebaseUid(firebaseUid) {
     return await this.dbService.findUserByFirebaseUid(firebaseUid);
   }
 
@@ -110,6 +128,11 @@ class UserService {
   // Add to cart
   async addToCart(customUserId, productData) {
     return await this.dbService.addToCart(customUserId, productData);
+  }
+
+  // Get user cart
+  async getUserCart(customUserId) {
+    return await this.dbService.getUserCart(customUserId);
   }
 
   // Remove from cart

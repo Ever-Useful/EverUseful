@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Github, Linkedin, Shield, Smartphone, Mail, Check, Phone } from "lucide-react";
 import { auth, handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "@/lib/firebase";
 import { sendEmailVerification, RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail } from "firebase/auth";
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import Logo from '../assets/Logo/Logo Side.png'
 
 // Extend the Window interface to include confirmationResult
@@ -828,19 +828,16 @@ const SignIn = () => {
               <div className="flex items-center space-x-1 flex-shrink-0">
                 <Link to="/" className="flex items-center space-x-2 group">
                   <img src={Logo} alt="AMOGH" className="h-10 xs:h-14 w-auto md:h-8" />
-                  <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
-                    beta
-                  </div>
                 </Link>
               </div>
               <div className="text-center">
-                <h1 className="text-xl xs:text-2xl lg:text-5xl font-bold text-gray-900 mb-2 xs:mb-4 lg:mb-4 leading-tight">
+                <h1 className="text-4xl font-bold text-gray-900 mb-2 xs:mb-4 lg:mb-4 leading-tight mobile-text-4xl">
                   Welcome Back to
                   <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Innovation
                   </span>
                 </h1>
-                <p className="text-xs xs:text-sm lg:text-xl text-gray-600 leading-relaxed mb-2 xs:mb-4 lg:mb-4">
+                <p className="text-base text-gray-600 leading-relaxed mb-2 xs:mb-4 lg:mb-4 mobile-text-base">
                   Continue your journey of building the future with cutting-edge projects and collaborations.
                 </p>
                 <div className="flex items-center justify-center space-x-2">

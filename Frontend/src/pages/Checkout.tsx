@@ -36,8 +36,8 @@ const Checkout = () => {
       
       <div className="container mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Checkout</h1>
-          <p className="text-gray-400 text-sm sm:text-base">Complete your purchase securely</p>
+                  <h1 className="text-4xl font-bold text-white mb-2 mobile-text-4xl">Checkout</h1>
+        <p className="text-gray-400 text-sm sm:text-base mobile-text-base">Complete your purchase securely</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">

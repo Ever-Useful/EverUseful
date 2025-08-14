@@ -10,43 +10,43 @@ const RefundPolicy = () => {
       
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-red-50 to-pink-100 border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <div className="bg-red-100 p-4 rounded-full">
-                <RefreshCw className="w-8 h-8 text-red-600" />
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="bg-red-100 p-3 sm:p-4 rounded-full">
+                <RefreshCw className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
               Refund Policy
             </h1>
-            <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-4 sm:mb-6 max-w-3xl mx-auto px-2">
               We want you to be completely satisfied with your purchase. Learn about our refund process, 
               eligibility criteria, and how to request a refund.
             </p>
-            <div className="flex items-center justify-center text-sm text-gray-500">
-              <Calendar className="w-4 h-4 mr-2" />
-              Last Updated: February 4, 2025
+            <div className="flex items-center justify-center text-xs sm:text-sm text-gray-500">
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+              Last Updated: June, 2025
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="prose prose-lg max-w-none">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none">
           
           {/* Overview */}
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Overview</h2>
-            <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-r-lg mb-8">
-              <p className="text-gray-700 leading-relaxed">
+          <section className="mb-8 sm:mb-12">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">1. Overview</h2>
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 sm:p-6 rounded-r-lg mb-6 sm:mb-8">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed">
                 At AMOGH, we are committed to providing high-quality products and services. 
                 If you are not completely satisfied with your purchase, we offer a comprehensive 
                 refund policy to ensure your satisfaction.
               </p>
             </div>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed mb-4 sm:mb-6">
               This refund policy outlines the terms and conditions for requesting refunds, 
               the refund process, and what you can expect when seeking a refund for our 
               products and services.
@@ -97,7 +97,7 @@ const RefundPolicy = () => {
                 </p>
                 <ul className="text-gray-700 text-sm space-y-1">
                   <li>• Use our online refund form</li>
-                  <li>• Email us at refunds@amoghedu.com</li>
+                  <li>• Email us at amogheveruseful@gmail.com</li>
                   <li>• Call our customer service line</li>
                   <li>• Provide order details and reason</li>
                 </ul>

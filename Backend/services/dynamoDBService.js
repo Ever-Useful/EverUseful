@@ -193,7 +193,12 @@ class DynamoDBService {
       };
 
       const result = await dynamodb.query(params).promise();
-      return result.Items.length > 0 ? result.Items[0] : null;
+      const user = result.Items.length > 0 ? result.Items[0] : null;
+      
+      if (user) {
+        return this.reconstructUserData(user);
+      }
+      return null;
     } catch (error) {
       console.error('Error finding user by Firebase UID:', error);
       // Fallback to scan if index doesn't exist
@@ -206,7 +211,12 @@ class DynamoDBService {
           }
         };
         const scanResult = await dynamodb.scan(scanParams).promise();
-        return scanResult.Items.length > 0 ? scanResult.Items[0] : null;
+        const user = scanResult.Items.length > 0 ? scanResult.Items[0] : null;
+        
+        if (user) {
+          return this.reconstructUserData(user);
+        }
+        return null;
       } catch (scanError) {
         console.error('Error in fallback scan:', scanError);
         return null;
@@ -224,11 +234,93 @@ class DynamoDBService {
       };
 
       const result = await dynamodb.get(params).promise();
-      return result.Item || null;
+      const user = result.Item || null;
+      
+      if (user) {
+        return this.reconstructUserData(user);
+      }
+      return null;
     } catch (error) {
       console.error('Error finding user by custom ID:', error);
       return null;
     }
+  }
+
+  // Reconstruct user data from flattened DynamoDB structure
+  reconstructUserData(user) {
+    const reconstructed = {
+      customUserId: user.customUserId,
+      firebaseUid: user.firebaseUid,
+      profile: {},
+      stats: user.stats || {},
+      studentData: user.studentData || null,
+      professorData: user.professorData || null,
+      freelancerData: user.freelancerData || null,
+      education: user.education || [],
+      workExperience: user.workExperience || [],
+      skills: user.skills || [],
+      personalDetails: user.personalDetails || {},
+      socialLinks: user.socialLinks || {},
+      projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 },
+      activities: user.activities || {},
+      preferences: user.preferences || {},
+      marketplace: user.marketplace || {},
+      social: user.social || {}
+    };
+
+    // Reconstruct profile from flattened keys
+    Object.keys(user).forEach(key => {
+      if (key.startsWith('profile.')) {
+        const profileKey = key.replace('profile.', '');
+        reconstructed.profile[profileKey] = user[key];
+      }
+    });
+
+    // Reconstruct studentData from flattened keys
+    if (!reconstructed.studentData) {
+      reconstructed.studentData = {};
+      Object.keys(user).forEach(key => {
+        if (key.startsWith('studentData.')) {
+          const studentKey = key.replace('studentData.', '');
+          reconstructed.studentData[studentKey] = user[key];
+        }
+      });
+    }
+
+    // Reconstruct professorData from flattened keys
+    if (!reconstructed.professorData) {
+      reconstructed.professorData = {};
+      Object.keys(user).forEach(key => {
+        if (key.startsWith('professorData.')) {
+          const professorKey = key.replace('professorData.', '');
+          reconstructed.professorData[professorKey] = user[key];
+        }
+      });
+    }
+
+    // Reconstruct freelancerData from flattened keys or use existing nested object
+    if (!reconstructed.freelancerData || Object.keys(reconstructed.freelancerData).length === 0) {
+      reconstructed.freelancerData = {};
+      Object.keys(user).forEach(key => {
+        if (key.startsWith('freelancerData.')) {
+          const freelancerKey = key.replace('freelancerData.', '');
+          reconstructed.freelancerData[freelancerKey] = user[key];
+        }
+      });
+    }
+
+    // Reconstruct personalDetails from flattened keys
+    if (!reconstructed.personalDetails) {
+      reconstructed.personalDetails = {};
+      Object.keys(user).forEach(key => {
+        if (key.startsWith('personalDetails.')) {
+          const personalKey = key.replace('personalDetails.', '');
+          reconstructed.personalDetails[personalKey] = user[key];
+        }
+      });
+    }
+
+    return reconstructed;
   }
 
   async updateUser(customUserId, updateData) {
@@ -320,15 +412,24 @@ class DynamoDBService {
 
   async updateFreelancerData(customUserId, freelancerData) {
     try {
+      // Prepare the complete freelancerData object
+      const completeFreelancerData = {
+        experience: freelancerData.experience || '',
+        portfolio: freelancerData.portfolio || '',
+        location: freelancerData.location || '',
+        skills: freelancerData.skills || [],
+        hourlyRate: freelancerData.hourlyRate || '',
+        avgResponseTime: freelancerData.avgResponseTime || '',
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Save the entire freelancerData object as a nested object
       const updateData = {
-        'freelancerData.updatedAt': new Date().toISOString()
+        'freelancerData': completeFreelancerData
       };
 
-      Object.keys(freelancerData).forEach(key => {
-        updateData[`freelancerData.${key}`] = freelancerData[key];
-      });
-
-      return await this.updateUser(customUserId, updateData);
+      const result = await this.updateUser(customUserId, updateData);
+      return result;
     } catch (error) {
       console.error('Error updating freelancer data:', error);
       throw error;
@@ -577,14 +678,14 @@ class DynamoDBService {
     }
   }
 
-  async addUserProject(customUserId, projectData) {
+    async addUserProject(customUserId, projectData) {
     try {
       // First, get the current user to check if projects object exists
       const user = await this.findUserByCustomId(customUserId);
       if (!user) {
         throw new Error('User not found');
       }
-
+  
       // Ensure projects object exists
       if (!user.projects) {
         user.projects = {
@@ -594,7 +695,7 @@ class DynamoDBService {
           count: 0
         };
       }
-
+  
       // Create project object with the correct structure
       const project = {
         projectId: projectData.id || Date.now().toString(),
@@ -611,22 +712,28 @@ class DynamoDBService {
         views: 0,
         downloads: 0
       };
-
+  
+      // Store only the project ID in the user's projects.created array
+      const projectId = project.projectId;
+  
       const params = {
         TableName: this.usersTable,
         Key: {
           customUserId: customUserId
         },
-        UpdateExpression: 'SET projects.created = list_append(if_not_exists(projects.created, :empty_list), :project_item), projects.count = if_not_exists(projects.count, :zero) + :inc, stats.projectsCount = if_not_exists(stats.projectsCount, :zero) + :inc',
+        UpdateExpression: 'SET projects.created = list_append(if_not_exists(projects.created, :empty_list), :project_id), projects.#count = if_not_exists(projects.#count, :zero) + :inc, stats.projectsCount = if_not_exists(stats.projectsCount, :zero) + :inc',
+        ExpressionAttributeNames: {
+          '#count': 'count'
+        },
         ExpressionAttributeValues: {
-          ':project_item': [project],
+          ':project_id': [projectId],
           ':empty_list': [],
           ':inc': 1,
           ':zero': 0
         },
         ReturnValues: 'ALL_NEW'
       };
-
+  
       const result = await dynamodb.update(params).promise();
       return project;
     } catch (error) {
@@ -642,11 +749,18 @@ class DynamoDBService {
         throw new Error('User not found');
       }
 
-      const projectIndex = user.projects.created.findIndex(p => p.projectId === projectId);
-      if (projectIndex === -1) {
-        throw new Error('Project not found');
+      // Check if projects.created exists and is an array
+      if (!user.projects || !user.projects.created || !Array.isArray(user.projects.created)) {
+        return { success: true, message: 'No projects to remove' };
       }
 
+      // Find the project ID in the array (projects.created contains strings, not objects)
+      const projectIndex = user.projects.created.findIndex(p => p === projectId);
+      if (projectIndex === -1) {
+        return { success: true, message: 'Project not found in user projects' };
+      }
+
+      // Remove the project ID from the array
       const updatedProjects = user.projects.created.filter((_, index) => index !== projectIndex);
 
       const params = {
@@ -772,6 +886,20 @@ class DynamoDBService {
       return updatedCart;
     } catch (error) {
       console.error('Error adding to cart:', error);
+      throw error;
+    }
+  }
+
+  async getUserCart(customUserId) {
+    try {
+      const user = await this.findUserByCustomId(customUserId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return user.marketplace.cart || [];
+    } catch (error) {
+      console.error('Error getting user cart:', error);
       throw error;
     }
   }
@@ -936,16 +1064,11 @@ class DynamoDBService {
   async getAllUsers() {
     try {
       const params = {
-        TableName: this.usersTable,
-        ProjectionExpression: 'customUserId, profile, stats'
+        TableName: this.usersTable
       };
 
       const result = await dynamodb.scan(params).promise();
-      return result.Items.map(user => ({
-        customUserId: user.customUserId,
-        profile: user.profile,
-        stats: user.stats
-      }));
+      return result.Items.map(user => this.reconstructUserData(user));
     } catch (error) {
       console.error('Error getting all users:', error);
       throw error;
@@ -1024,17 +1147,41 @@ class DynamoDBService {
     }
   }
 
-  // Marketplace Operations
+    // Marketplace Operations
   async getAllMarketplaceItems() {
     try {
       const params = {
         TableName: this.marketplaceTable
       };
-
+      
       const result = await dynamodb.scan(params).promise();
       return result.Items || [];
     } catch (error) {
       console.error('Error getting marketplace items:', error);
+      throw error;
+    }
+  }
+
+  async getMarketplaceData() {
+    try {
+      const params = {
+        TableName: this.marketplaceTable
+      };
+      
+      const result = await dynamodb.scan(params).promise();
+      const items = result.Items || [];
+      
+
+      
+      // Since most items don't have a type field, treat all items as projects for now
+      // In the future, we can add proper type classification
+      return {
+        projects: items, // Return all items as projects since they're all marketplace items
+        products: items.filter(item => item.type === 'product'),
+        services: items.filter(item => item.type === 'service')
+      };
+    } catch (error) {
+      console.error('Error getting marketplace data:', error);
       throw error;
     }
   }

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Filter, Star, DollarSign, Clock, Users } from "lucide-react";
+import { Filter, Star, DollarSign, Clock, Users, ChevronDown } from "lucide-react";
 import debounce from "lodash/debounce";
 
 export interface FilterSidebarProps {
@@ -121,142 +121,157 @@ export const FilterSidebar = ({ onFiltersChange, disableMobileDropdown = false }
   }, [debouncedPriceChange]);
 
   // Render filter content (used by both mobile and desktop)
-  const renderFilterContent = () => (
+  const renderFilterContent = (isMobileView: boolean) => (
     <div className="space-y-6">
       {/* Categories */}
       <section>
-        <h3 className="flex items-center gap-2 font-semibold text-gray-400 text-sm mb-3">
-          <Users className="w-4 h-4 text-gray-400" />
+        <h3 className="flex items-center gap-2 font-semibold text-gray-700 text-sm mb-3 uppercase tracking-wider">
+          <Users className="w-4 h-4 text-blue-500" />
           Categories
         </h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="space-y-2">
           {categories.map((category, idx) => (
-            <label
-              key={idx}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-xs text-gray-200 cursor-pointer transition ${
-                selectedCategories.includes(category.name)
-                  ? 'bg-blue-600'
-                  : 'bg-[#3a3f4d] hover:bg-[#464c5b]'
-              }`}
-              onClick={() => handleCategoryChange(category.name)}
-            >
+            <div key={idx} className="flex items-center">
               <Checkbox
                 id={`cat-${idx}`}
-                className="scale-90 border-gray-500 checked:bg-gray-300"
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 checked={selectedCategories.includes(category.name)}
                 onCheckedChange={() => handleCategoryChange(category.name)}
               />
-              <span>{category.name}</span>
-            </label>
+              <label
+                htmlFor={`cat-${idx}`}
+                className="ml-3 text-sm text-gray-700 flex justify-between w-full"
+              >
+                <span>{category.name}</span>
+                <span className="text-gray-400 text-xs">{category.count}</span>
+              </label>
+            </div>
           ))}
         </div>
       </section>
-      {/* Budget Range */}
+
+      {/* Price Range */}
       <section>
-        <h3 className="flex items-center gap-2 font-semibold text-gray-400 text-sm mb-3">
-          <DollarSign className="w-4 h-4 text-gray-400" />
-          Budget
+        <h3 className="flex items-center gap-2 font-semibold text-gray-700 text-sm mb-3 uppercase tracking-wider">
+          <DollarSign className="w-4 h-4 text-blue-500" />
+          Price Range
         </h3>
-        <Slider
-          defaultValue={[0, 10000]}
-          max={10000}
-          min={0}
-          step={100}
-          value={priceRange}
-          onValueChange={handlePriceRangeChange}
-          className="w-full"
-        />
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>${priceRange[0]}</span>
-          <span>${priceRange[1]}</span>
+        <div className="px-2">
+          <Slider
+            defaultValue={[0, 10000]}
+            max={10000}
+            min={0}
+            step={100}
+            value={priceRange}
+            onValueChange={handlePriceRangeChange}
+            className="w-full"
+          />
+          <div className="flex justify-between mt-3">
+            <div className="text-sm font-medium text-gray-700">
+              ${priceRange[0]}
+            </div>
+            <div className="text-sm font-medium text-gray-700">
+              ${priceRange[1]}
+            </div>
+          </div>
         </div>
       </section>
+
       {/* Duration */}
       <section>
-        <h3 className="flex items-center gap-2 font-semibold text-gray-400 text-sm mb-3">
-          <Clock className="w-4 h-4 text-gray-400" />
+        <h3 className="flex items-center gap-2 font-semibold text-gray-700 text-sm mb-3 uppercase tracking-wider">
+          <Clock className="w-4 h-4 text-blue-500" />
           Duration
         </h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {durations.map((duration, idx) => (
-            <label
-              key={idx}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-xs text-gray-200 cursor-pointer transition ${
-                selectedDurations.includes(duration)
-                  ? 'bg-blue-600'
-                  : 'bg-[#3a3f4d] hover:bg-[#464c5b]'
-              }`}
-              onClick={() => handleDurationChange(duration)}
-            >
+            <div key={idx} className="flex items-center">
               <Checkbox
                 id={`duration-${idx}`}
-                className="scale-90 border-gray-500 checked:bg-gray-300"
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 checked={selectedDurations.includes(duration)}
                 onCheckedChange={() => handleDurationChange(duration)}
               />
-              <span>{duration}</span>
-            </label>
+              <label
+                htmlFor={`duration-${idx}`}
+                className="ml-2 text-sm text-gray-700"
+              >
+                {duration}
+              </label>
+            </div>
           ))}
         </div>
       </section>
+
       {/* Skills */}
       <section>
-        <h3 className="font-semibold text-gray-400 text-sm mb-3">Required Skills</h3>
+        <h3 className="font-semibold text-gray-700 text-sm mb-3 uppercase tracking-wider">
+          Required Skills
+        </h3>
         <div className="flex flex-wrap gap-2">
           {skills.map((skill, idx) => (
-            <Badge
+            <div
               key={idx}
-              variant="outline"
-              className={`cursor-pointer transition-colors font-medium px-2 py-1 text-xs ${
+              className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${
                 selectedSkills.includes(skill)
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'text-gray-300 border-gray-500 bg-transparent hover:bg-gray-400 hover:border-gray-400'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               onClick={() => handleSkillChange(skill)}
             >
               {skill}
-            </Badge>
+            </div>
           ))}
         </div>
       </section>
+
       {/* Rating */}
       <section>
-        <h3 className="flex items-center gap-2 font-semibold text-gray-400 text-sm mb-3">
-          <Star className="w-4 h-4 text-gray-400" />
-          Minimum Rating
+        <h3 className="flex items-center gap-2 font-semibold text-gray-700 text-sm mb-3 uppercase tracking-wider">
+          <Star className="w-4 h-4 text-blue-500" />
+          Rating
         </h3>
-        <div className="flex gap-2 flex-wrap">
+        <div className="space-y-2">
           {[5, 4, 3, 2, 1].map((rating) => (
-            <label
-              key={rating}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-xs text-gray-200 cursor-pointer transition ${
-                selectedRatings.includes(rating)
-                  ? 'bg-blue-600'
-                  : 'bg-[#3a3f4d] hover:bg-[#464c5b]'
-              }`}
-              onClick={() => handleRatingChange(rating)}
-            >
+            <div key={rating} className="flex items-center">
               <Checkbox
                 id={`rating-${rating}`}
-                className="scale-90 border-gray-500 checked:bg-gray-300"
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 checked={selectedRatings.includes(rating)}
                 onCheckedChange={() => handleRatingChange(rating)}
               />
-              <span className="flex items-center">
+              <label
+                htmlFor={`rating-${rating}`}
+                className="ml-3 text-sm text-gray-700 flex items-center"
+              >
                 {Array.from({ length: rating }).map((_, i) => (
-                  <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-0.5" />
+                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                 ))}
-              </span>
-              <span>&up</span>
-            </label>
+                <span className="ml-1">& Up</span>
+              </label>
+            </div>
           ))}
         </div>
       </section>
+
       <Button
-        className="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold shadow-sm mt-2 text-sm py-2 rounded-xl transition"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md transition-colors shadow-sm"
         onClick={handleApplyFilters}
       >
         Apply Filters
+      </Button>
+      <Button
+        variant="outline"
+        className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 rounded-md transition-colors shadow-sm"
+        onClick={() => {
+          setSelectedCategories([]);
+          setPriceRange([0, 10000]);
+          setSelectedRatings([]);
+          setSelectedSkills([]);
+          setSelectedDurations([]);
+        }}
+      >
+        Clear All
       </Button>
     </div>
   );
@@ -265,178 +280,37 @@ export const FilterSidebar = ({ onFiltersChange, disableMobileDropdown = false }
     return (
       <div className="w-full mb-4">
         <button
-          className="w-full bg-[#2f343d] text-white rounded-lg p-3 flex items-center justify-between font-semibold text-lg mb-2"
+          className="w-full bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between font-medium text-gray-700 mb-2 shadow-sm hover:bg-gray-50 transition-colors"
           onClick={() => setOpen((o) => !o)}
         >
-          <span>Filters</span>
-          <span>{open ? '▲' : '▼'}</span>
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-blue-500" />
+            <span>Filters</span>
+          </div>
+          <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
         {open && (
-          <div className="bg-[#2f343d] rounded-lg p-4">
-            {renderFilterContent()}
+          <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+            {renderFilterContent(true)}
           </div>
         )}
       </div>
     );
   }
 
-  // Desktop: sidebar or mobile fullscreen content
   return (
-    <aside className={`${!isMobile ? 'w-full max-w-xs lg:w-72 sticky top-8 z-20' : 'w-full'} font-sans`}>
-      <Card
-        className={`${!isMobile ? 'bg-[#2f343d] border-[#444b59]' : 'bg-white border-gray-200'} border shadow-md rounded-lg overflow-hidden`}
-        style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}
-      >
-        <CardHeader className={`py-4 px-5 border-b ${!isMobile ? 'border-[#444b59] bg-[#2f343d]' : 'border-gray-200 bg-white'}`}>
-          <CardTitle className={`flex items-center gap-2 text-lg font-semibold tracking-tight ${!isMobile ? 'text-gray-300' : 'text-gray-800'}`}>
-            <Filter className={`w-5 h-5 ${!isMobile ? 'text-gray-400' : 'text-blue-600'}`} />
+    <aside className={`${!isMobile ? 'w-full max-w-xs lg:w-72 sticky top-4 h-fit' : 'w-full'}`}>
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-gray-200">
+          <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+            <Filter className="w-5 h-5 text-blue-500" />
             Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="py-5 px-5">
-          {isMobile ? (
-            <div className="space-y-6">
-              {/* Categories */}
-              <section>
-                <h3 className="flex items-center gap-2 font-semibold text-gray-700 text-sm mb-3">
-                  <Users className="w-4 h-4 text-blue-600" />
-                  Categories
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {categories.map((category, idx) => (
-                    <label
-                      key={idx}
-                      className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm cursor-pointer transition ${
-                        selectedCategories.includes(category.name)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      onClick={() => handleCategoryChange(category.name)}
-                    >
-                      <Checkbox
-                        id={`cat-${idx}`}
-                        className="scale-90 border-gray-400 checked:bg-blue-600"
-                        checked={selectedCategories.includes(category.name)}
-                        onCheckedChange={() => handleCategoryChange(category.name)}
-                      />
-                      <span>{category.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </section>
-              {/* Budget Range */}
-              <section>
-                <h3 className="flex items-center gap-2 font-semibold text-gray-700 text-sm mb-3">
-                  <DollarSign className="w-4 h-4 text-blue-600" />
-                  Budget
-                </h3>
-                <Slider
-                  defaultValue={[0, 10000]}
-                  max={10000}
-                  min={0}
-                  step={100}
-                  value={priceRange}
-                  onValueChange={handlePriceRangeChange}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-sm text-gray-600 mt-2">
-                  <span>${priceRange[0]}</span>
-                  <span>${priceRange[1]}</span>
-                </div>
-              </section>
-              {/* Duration */}
-              <section>
-                <h3 className="flex items-center gap-2 font-semibold text-gray-700 text-sm mb-3">
-                  <Clock className="w-4 h-4 text-blue-600" />
-                  Duration
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {durations.map((duration, idx) => (
-                    <label
-                      key={idx}
-                      className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm cursor-pointer transition ${
-                        selectedDurations.includes(duration)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      onClick={() => handleDurationChange(duration)}
-                    >
-                      <Checkbox
-                        id={`duration-${idx}`}
-                        className="scale-90 border-gray-400 checked:bg-blue-600"
-                        checked={selectedDurations.includes(duration)}
-                        onCheckedChange={() => handleDurationChange(duration)}
-                      />
-                      <span>{duration}</span>
-                    </label>
-                  ))}
-                </div>
-              </section>
-              {/* Skills */}
-              <section>
-                <h3 className="font-semibold text-gray-700 text-sm mb-3">Required Skills</h3>
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((skill, idx) => (
-                    <Badge
-                      key={idx}
-                      variant="outline"
-                      className={`cursor-pointer transition-colors font-medium px-3 py-1 text-sm ${
-                        selectedSkills.includes(skill)
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'text-gray-700 border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400'
-                      }`}
-                      onClick={() => handleSkillChange(skill)}
-                    >
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </section>
-              {/* Rating */}
-              <section>
-                <h3 className="flex items-center gap-2 font-semibold text-gray-700 text-sm mb-3">
-                  <Star className="w-4 h-4 text-blue-600" />
-                  Minimum Rating
-                </h3>
-                <div className="flex gap-2 flex-wrap">
-                  {[5, 4, 3, 2, 1].map((rating) => (
-                    <label
-                      key={rating}
-                      className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm cursor-pointer transition ${
-                        selectedRatings.includes(rating)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      onClick={() => handleRatingChange(rating)}
-                    >
-                      <Checkbox
-                        id={`rating-${rating}`}
-                        className="scale-90 border-gray-400 checked:bg-blue-600"
-                        checked={selectedRatings.includes(rating)}
-                        onCheckedChange={() => handleRatingChange(rating)}
-                      />
-                      <span className="flex items-center">
-                        {Array.from({ length: rating }).map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-0.5" />
-                        ))}
-                      </span>
-                      <span>&up</span>
-                    </label>
-                  ))}
-                </div>
-              </section>
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm mt-4 text-sm py-3 rounded-xl transition"
-                onClick={handleApplyFilters}
-              >
-                Apply Filters
-              </Button>
-            </div>
-          ) : (
-            renderFilterContent()
-          )}
-        </CardContent>
-      </Card>
+          </h3>
+        </div>
+        <div className="p-4">
+          {renderFilterContent(false)}
+        </div>
+      </div>
     </aside>
   );
 };

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 // Import team member images
 import founderImage from "@/assets/images/Founder.jpg";
 import kritenshImage from "@/assets/images/Kritensh.jpg";
-import noImageAvailable from "@/assets/images/no image available.png";
+
 import pooja from "@/assets/images/pooja.jpg";
 import techLead from "@/assets/images/tech lead.jpg";
 import rishika from "@/assets/images/Rishika.jpg";
@@ -18,29 +18,29 @@ const TeamSection = () => {
   const [isPaused, setIsPaused] = useState(false);
 
   const founder = {
-    name: "Harsh",
+    name: "Harsh Parashar",
     role: "Founder",
     avatar: founderImage,
     linkedin: "https://www.linkedin.com/in/harsh-parashar-0b8baa224?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BuUrPtS5UTfClY0yh1aPmvg%3D%3D",
-    email: "koos@microphonemedia.nl",
-    description: "Studied Journalism and History at the University of Groningen. Storytelling is his strength, podcasts are his medium. He leads Microphone Media together with Frank."
+    email: "amogheveruseful@gmail.com",
+    description: "Founder - Sarvagya Nirakar Community Working at World Wide Level for Youth Empowerment & Nation Building. Other Community Works include - teaching students at government schools, doing charity for needy people, science for all campaign, bringing ancient Indian knowledge back to life, women empowerment and biggest free Startup Incubation Center for all"
   };
 
   const teamLead = {
-    name: "Ankit",
+    name: "Ankit Kumar",
     role: "Team Lead",
     avatar: techLead,
     linkedin: "https://www.linkedin.com/in/ankit-kumar-451aba203?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
-    email: "francis@microphonemedia.nl",
-    description: "Podcast editor, studied Communication and Media at Erasmus University. Has an ear for beautiful stories and is interested in a wide range of subjects."
+    // email: "francis@microphonemedia.nl",
+    description: "Passion for building scalable digital solutions. Lead product development and also serve as a technical consultant to support the company's growth. Driven by innovation, I align tech with business goals to deliver real impact."
   };
 
   const techTeam = [
     {
       name: "Rishika Gupta",
       role: "Frontend Developer",
-      avatar: rishika,
-      linkedin: "https://linkedin.com/in/dylan-de-heer",
+      avatar: rishika ,
+      linkedin: "https://www.linkedin.com/in/rishika-gupta0306/",
       description: "Full-stack developer passionate about creating user-centered experiences and scalable solutions."
     },
     {
@@ -115,8 +115,8 @@ const TeamSection = () => {
               </div>
               {/* Name and description */}
               <div className="flex-1 flex flex-col items-start justify-center text-left">
-                <h4 className="text-3xl md:text-4xl font-bold mb-1 text-white leading-tight tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>{founder.name}</h4>
-                <p className="text-gray-300 leading-relaxed max-w-xl text-lg" style={{fontFamily: 'Inter, sans-serif'}}>{founder.description}</p>
+                <h4 className="text-3xl md:text-4xl font-bold mb-1 text-white leading-tight tracking-tight">{founder.name}</h4>
+                <p className="text-gray-300 leading-relaxed max-w-xl text-lg">{founder.description}</p>
               </div>
             </div>
             {/* Team Lead */}
@@ -141,8 +141,8 @@ const TeamSection = () => {
               </div>
               {/* Name and description */}
               <div className="flex-1 flex flex-col items-start justify-center text-left">
-                <h4 className="text-3xl md:text-4xl font-bold mb-1 text-white leading-tight tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>{teamLead.name}</h4>
-                <p className="text-gray-300 leading-relaxed max-w-xl text-lg" style={{fontFamily: 'Inter, sans-serif'}}>{teamLead.description}</p>
+                <h4 className="text-3xl md:text-4xl font-bold mb-1 text-white leading-tight tracking-tight">{teamLead.name}</h4>
+                <p className="text-gray-300 leading-relaxed max-w-xl text-lg">{teamLead.description}</p>
               </div>
             </div>
           </div>
@@ -150,7 +150,7 @@ const TeamSection = () => {
 
         {/* Mobile Horizontal Scroll Section */}
         <div className="lg:hidden mb-10">
-          <h3 className="text-2xl font-bold text-white mb-6 text-center tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>Our Team</h3>
+                          <h3 className="text-2xl font-bold text-white mb-6 text-center tracking-tight">Our Team</h3>
           <div className="overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             <div className="flex space-x-5 pb-3" style={{ minWidth: 'max-content' }}>
               {allMobileMembers.map((member, index) => (
@@ -162,8 +162,8 @@ const TeamSection = () => {
                       className="w-20 h-20 object-cover rounded-full mx-auto grayscale group-hover:grayscale-0 group-hover:scale-105 transition duration-300"
                     />
                   </a>
-                  <h4 className="text-base font-semibold mt-3 mb-1 text-white tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>{member.name}</h4>
-                  <p className="text-gray-400 text-xs mb-2" style={{fontFamily: 'Inter, sans-serif'}}>{member.role}</p>
+                                  <h4 className="text-base font-semibold mt-3 mb-1 text-white tracking-tight">{member.name}</h4>
+                <p className="text-gray-400 text-xs mb-2">{member.role}</p>
                   <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition">
                     <Linkedin size={16} />
                     <span className="text-xs font-medium">LinkedIn</span>
@@ -194,8 +194,8 @@ const TeamSection = () => {
                         style={{ cursor: 'pointer' }}
                       />
                     </a>
-                    <h4 className="text-lg font-semibold mt-3 mb-1 text-white tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>{member.name}</h4>
-                    <p className="text-gray-400 text-sm mb-2" style={{fontFamily: 'Inter, sans-serif'}}>{member.role}</p>
+                    <h4 className="text-lg font-semibold mt-3 mb-1 text-white tracking-tight">{member.name}</h4>
+                    <p className="text-gray-400 text-sm mb-2">{member.role}</p>
                     <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition">
                       <Linkedin size={16} />
                       <span className="text-xs font-medium">LinkedIn</span>
@@ -227,8 +227,8 @@ const TeamSection = () => {
                         style={{ cursor: 'pointer' }}
                       />
                     </a>
-                    <h4 className="text-lg font-semibold mt-3 mb-1 text-white tracking-tight" style={{fontFamily: 'Inter, sans-serif'}}>{member.name}</h4>
-                    <p className="text-gray-400 text-sm mb-2" style={{fontFamily: 'Inter, sans-serif'}}>{member.role}</p>
+                    <h4 className="text-lg font-semibold mt-3 mb-1 text-white tracking-tight">{member.name}</h4>
+                    <p className="text-gray-400 text-sm mb-2">{member.role}</p>
                     <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition">
                       <Linkedin size={16} />
                       <span className="text-xs font-medium">LinkedIn</span>

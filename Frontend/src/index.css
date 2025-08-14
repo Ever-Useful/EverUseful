@@ -5,6 +5,250 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Performance optimizations */
+* {
+  /* Optimize paint and layout */
+  box-sizing: border-box;
+}
+
+/* Hardware acceleration for animations */
+.animate-optimized {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Optimize transitions */
+.transition-optimized {
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Optimize mobile performance */
+@media (max-width: 768px) {
+  .mobile-optimized {
+    will-change: auto;
+    transform: none;
+  }
+  
+  /* Reduce blur effects on mobile for better performance */
+  .mobile-optimized-blur {
+    filter: blur(0);
+  }
+  
+  /* Ensure mobile cards are visible */
+  .mobile-cards-container {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    min-height: 200px !important;
+  }
+  
+  .mobile-card {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 160px !important;
+    background-color: var(--card-color, #6b7280) !important;
+    border-radius: 0.75rem !important;
+    padding: 1rem !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Optimize background images */
+.bg-optimized {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: auto;
+}
+
+/* Optimize text rendering */
+.text-optimized {
+  text-rendering: optimizeSpeed;
+  font-feature-settings: "kern" 1;
+  font-kerning: normal;
+}
+
+/* Optimize images */
+.img-optimized {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Optimize scroll performance */
+.scroll-optimized {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Optimize hover effects */
+.hover-optimized {
+  transition: all 0.2s ease-out;
+}
+
+.hover-optimized:hover {
+  transform: translateY(-2px);
+}
+
+/* Optimize focus states */
+.focus-optimized:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Optimize button interactions */
+.btn-optimized {
+  transition: all 0.2s ease-out;
+  will-change: transform;
+}
+
+.btn-optimized:active {
+  transform: scale(0.98);
+}
+
+/* Optimize card animations */
+.card-optimized {
+  transition: all 0.3s ease-out;
+  will-change: transform, box-shadow;
+}
+
+.card-optimized:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Optimize loading states */
+.loading-optimized {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Optimize grid layouts */
+.grid-optimized {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Optimize flexbox layouts */
+.flex-optimized {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Optimize responsive images */
+.responsive-img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Optimize video elements */
+.video-optimized {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  will-change: auto;
+}
+
+/* Optimize form elements */
+.form-optimized {
+  transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.form-optimized:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Optimize navigation */
+.nav-optimized {
+  transition: background-color 0.2s ease-out;
+}
+
+/* Optimize modal animations */
+.modal-optimized {
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  will-change: opacity, transform;
+}
+
+.modal-optimized.enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.modal-optimized.enter-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Optimize tooltip animations */
+.tooltip-optimized {
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  will-change: opacity, transform;
+}
+
+/* Optimize dropdown animations */
+.dropdown-optimized {
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  will-change: opacity, transform;
+}
+
+/* Optimize carousel animations */
+.carousel-optimized {
+  transition: transform 0.3s ease-out;
+  will-change: transform;
+}
+
+/* Optimize chart animations */
+.chart-optimized {
+  transition: opacity 0.3s ease-out;
+  will-change: opacity;
+}
+
+/* Optimize skeleton loading */
+.skeleton-optimized {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 /* Custom styles using @apply */
 .btn-primary {
   @apply bg-blue-500 text-white font-bold py-2 px-4 rounded;
@@ -488,6 +732,11 @@ html {
   .delay-300 { animation-delay: 300ms; }
   .delay-500 { animation-delay: 500ms; }
   .delay-1000 { animation-delay: 1000ms; }
+  
+  /* Header spacing utility */
+  .header-spacer {
+    padding-top: 50px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -498,21 +747,32 @@ html {
     font-size: 10px !important;
   }
   .mobile-text-base {
-    font-size: 12px !important;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
   .mobile-text-lg {
-    font-size: 13px !important;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
   .mobile-text-xl {
-    font-size: 14px !important;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
   .mobile-text-2xl {
-    font-size: 15px !important;
+    font-size: 1.5rem;
+    line-height: 2rem;
   }
   .mobile-text-3xl {
-    font-size: 16px !important;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
   }
   .mobile-text-4xl {
-    font-size: 17px !important;
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+  
+  /* Mobile header spacing */
+  .header-spacer {
+    padding-top: 50px;
   }
 }

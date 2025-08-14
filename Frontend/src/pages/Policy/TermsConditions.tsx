@@ -10,42 +10,42 @@ const TermsConditions = () => {
       
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-green-50 to-emerald-100 border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <div className="bg-green-100 p-4 rounded-full">
-                <FileText className="w-8 h-8 text-green-600" />
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="bg-green-100 p-3 sm:p-4 rounded-full">
+                <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
               Terms & Conditions
             </h1>
-            <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-4 sm:mb-6 max-w-3xl mx-auto px-2">
               Please read these terms and conditions carefully before using our services. 
               By accessing our platform, you agree to be bound by these terms.
             </p>
-            <div className="flex items-center justify-center text-sm text-gray-500">
-              <Calendar className="w-4 h-4 mr-2" />
-              Last Updated: February 4, 2025
+            <div className="flex items-center justify-center text-xs sm:text-sm text-gray-500">
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+              Last Updated: June, 2025
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="prose prose-lg max-w-none">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none">
           
           {/* Acceptance of Terms */}
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Acceptance of Terms</h2>
-            <div className="bg-green-50 border-l-4 border-green-400 p-6 rounded-r-lg mb-8">
-              <p className="text-gray-700 leading-relaxed">
+          <section className="mb-8 sm:mb-12">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">1. Acceptance of Terms</h2>
+            <div className="bg-green-50 border-l-4 border-green-400 p-4 sm:p-6 rounded-r-lg mb-6 sm:mb-8">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed">
                 By accessing and using this website, you accept and agree to be bound by the terms and provision 
                 of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
             </div>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed mb-4 sm:mb-6">
               These Terms and Conditions ("Terms") govern your use of the AMOGH platform and services. 
               By using our services, you acknowledge that you have read, understood, and agree to be bound 
               by these Terms. If you do not agree with any part of these Terms, you must not use our services.

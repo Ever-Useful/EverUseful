@@ -11,6 +11,7 @@ export interface CartItem {
   licenseType: 'personal' | 'commercial' | 'enterprise';
   tags: string[];
   image?: string;
+  quantity: number;
 }
 
 export interface SavedItem {
