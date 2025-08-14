@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { useEffect } from "react";
 
+
 // Lazy load all pages for code splitting
 const Index = React.lazy(() => import("@/pages/Index"));
 const SignIn = React.lazy(() => import("@/pages/SignIn"));
@@ -91,7 +92,7 @@ const App = () => (
               v7_relativeSplatPath: true 
             }}
           >
-            <GlobalScrollToTop />       
+            <GlobalScrollToTop />
             
              <Routes>
             <Route path="/" element={

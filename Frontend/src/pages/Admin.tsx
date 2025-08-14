@@ -12,7 +12,7 @@ const Admin = () => {
   const [stats, setStats] = useState([
     { title: "Total Users", value: "-", change: "-", icon: Users },
     { title: "Total Projects", value: "-", change: "-", icon: TrendingUp },
-    { title: "Revenue", value: "$1.2M", change: "+15%", icon: DollarSign }
+            { title: "Revenue", value: "₹1.2M", change: "+15%", icon: DollarSign }
   ]);
   const [userGrowth, setUserGrowth] = useState<number[]>([0,0,0,0,0,0,0]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +56,7 @@ const Admin = () => {
         setStats([
           { title: "Total Users", value: data.totalUsers, change: "+12%", icon: Users },
           { title: "Total Projects", value: data.totalProjects, change: "+8%", icon: TrendingUp },
-          { title: "Revenue", value: "$1.2M", change: "+15%", icon: DollarSign }
+          { title: "Revenue", value: "₹1.2M", change: "+15%", icon: DollarSign }
         ]);
         setUserGrowth(data.userGrowth || [0,0,0,0,0,0,0]);
       } catch (err: any) {

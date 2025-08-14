@@ -95,91 +95,106 @@ export const FeaturedProducts: React.FC = () => {
       <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"></div>
     ) : null;
 
-  // The expanded card (modal-like) on click
-  const ExpandedCard = ({ project }: { project: typeof featuredProjects[0] }) => (
-    <div className="fixed z-50 inset-0 flex items-center justify-center px-2 py-4 sm:px-4 sm:py-8">
-      <UICard
-        className={`
-          bg-white rounded-2xl shadow-2xl overflow-hidden animate-bounce-in relative
-          w-full max-w-[95vw] sm:max-w-4xl
-          flex flex-col sm:flex-row
-          h-auto sm:h-[360px]
-        `}
-        style={{ minWidth: 0 }}
-      >
+  // New improved modal popup
+  const ProjectModal = ({ project }: { project: typeof featuredProjects[0] }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={() => setExpanded(null)}
+      />
+      
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-[95vw] lg:max-w-4xl w-full h-[400px] sm:h-[380px] overflow-hidden animate-in slide-in-from-bottom-2 duration-300">
         {/* Close button */}
         <button
-          className="absolute top-4 right-4 z-10 bg-white/80 rounded-full p-1 shadow hover:bg-gray-100 transition"
+          className="absolute top-3 right-3 z-20 bg-white/90 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
           onClick={() => setExpanded(null)}
           aria-label="Close"
         >
-          <X className="w-6 h-6 text-gray-700" />
+          <X className="w-5 h-5 text-gray-700" />
         </button>
-        {/* Image */}
-        <div className="w-full sm:w-[30%] min-w-[180px] flex-shrink-0 h-48 sm:h-full relative">
-          <img
-            src={project.image}
-            alt={project.title}
-            className="w-full h-full object-cover object-center"
-            style={{ aspectRatio: "4/3" }}
-          />
-          <div
-            className={`absolute inset-0 bg-gradient-to-t ${project.gradient} opacity-20`}
-          />
-          <Badge className="absolute top-3 left-3 h-7 px-3 text-xs rounded-full bg-white/95 text-gray-800 shadow">
-            {project.category}
-          </Badge>
-        </div>
-        {/* Content */}
-        <UICardContent className="w-full sm:w-[70%] flex flex-col px-4 py-4 sm:px-8 sm:py-6 overflow-y-auto">
-          <UICardHeader className="px-0 pb-1">
-            <UICardTitle className="text-xl sm:text-3xl font-extrabold text-gray-900 mb-2">
-              {project.title}
-            </UICardTitle>
-            <p className="text-xs sm:text-base text-gray-500 mb-2">{project.subtitle}</p>
-          </UICardHeader>
-          <UICardDescription className="text-sm sm:text-lg text-gray-700 mb-4">
-            {project.description}
-          </UICardDescription>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {project.tags.map((t) => (
-              <Badge
-                key={t}
-                variant="outline"
-                className="text-xs rounded-full px-2 py-1 border-blue-100 bg-blue-50 text-blue-700"
-              >
-                {t}
-              </Badge>
-            ))}
+        
+        <div className="flex flex-col lg:flex-row h-full">
+          {/* Image Section - Full height, no white space */}
+          <div className="w-full lg:w-2/5 h-32 sm:h-48 lg:h-full relative overflow-hidden">
+            <img
+              src={project.image}
+              alt={project.title}
+              className="w-full h-full object-cover object-center"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
+            <div className={`absolute inset-0 bg-gradient-to-t ${project.gradient} opacity-20`} />
+            <Badge 
+              variant="outline" 
+              className="absolute top-2 left-2 lg:top-3 lg:left-3 bg-white/95 text-gray-800 border-0 shadow-sm text-xs lg:text-sm px-2 py-1 lg:px-3 lg:py-1.5"
+            >
+              {project.category}
+            </Badge>
           </div>
-          <div className="flex items-center justify-between text-xs text-gray-500 mb-4 mt-auto">
-            <span className="font-medium truncate">{project.author}</span>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+          
+          {/* Content Section */}
+          <div className="w-full lg:w-3/5 p-4 sm:p-6 lg:p-8 flex flex-col">
+            {/* Header */}
+            <div className="mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mb-2">
+                {project.title}
+              </h2>
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-2 sm:mb-4">
+                {project.subtitle}
+              </p>
+              <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed">
+                {project.description}
+              </p>
+            </div>
+            
+            {/* Tags */}
+            <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6">
+              {project.tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="px-2 py-1 text-xs sm:text-sm border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-50 hover:border-blue-200"
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+            
+            {/* Project Stats */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mb-4 sm:mb-6 text-xs sm:text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-current" />
                 <span>{project.rating}</span>
               </div>
-              <div className="flex items-center gap-1">
-                <Users className="w-4 h-4 text-blue-500" />
-                <span>{project.users}</span>
+              <div className="flex items-center gap-2">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />
+                <span>{project.users} users</span>
+              </div>
+              <div className="text-gray-500">
+                by {project.author}
               </div>
             </div>
+            
+            {/* Action Buttons */}
+            <div className="space-y-2 sm:space-y-3">
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 sm:py-3 rounded-lg transition-colors duration-200 hover:shadow-lg text-sm sm:text-base"
+                onClick={() => {
+                  window.open(project.href, "_blank", "noopener,noreferrer");
+                }}
+              >
+                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                Connect to Project
+              </Button>
+            </div>
           </div>
-          <Button 
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-base font-bold rounded-lg transition-all duration-300"
-            onClick={() => window.open(project.href, "_blank")}
-          >
-            Connect
-            <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
-            </Button>
-        </UICardContent>
-      </UICard>
-      {/* Click outside to close */}
-      <div
-        className="fixed inset-0 z-40"
-        onClick={() => setExpanded(null)}
-        aria-label="Close"
-      />
+        </div>
+      </div>
     </div>
   );
 
@@ -189,9 +204,9 @@ export const FeaturedProducts: React.FC = () => {
       {/* Overlay for blur/dim */}
       <Overlay />
 
-      {/* Expanded Card Modal */}
+      {/* Project Modal */}
       {expanded !== null && (
-        <ExpandedCard
+        <ProjectModal
           project={featuredProjects.find((p) => p.id === expanded)!}
         />
       )}
@@ -246,20 +261,20 @@ export const FeaturedProducts: React.FC = () => {
                 <div
                   className={`absolute inset-0 bg-gradient-to-t ${p.gradient} opacity-20`}
                 />
-                <Badge className="absolute top-3 left-3 h-7 px-3 text-xs rounded-full bg-white/95 text-gray-800 shadow">
+                <p className="absolute top-3 left-3 h-7 px-3 flex items-center justify-center text-xs rounded-full bg-white/95 text-gray-800 shadow">
                   {p.category}
-                </Badge>
+                </p>
               </div>
               {/* Content */}
-              <UICardContent className="flex flex-col flex-1 px-5">
-                <UICardHeader className="-translate-x-6 pb-1">
-                  <UICardTitle className="text-lg md:text-lg font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+              <UICardContent className="flex flex-col flex-1">
+                
+                  <UICardTitle className="mt-2 text-lg md:text-lg font-extrabold text-gray-900 group-hover:text-blue-600 transition-colors">
                     {p.title}
                   </UICardTitle>
-                  <p className="text-xs text-gray-500 mb-1">{p.subtitle}</p>
-                </UICardHeader>
+                  <p className="text-xs text-gray-500">{p.subtitle}</p>
+            
                 <UICardDescription
-                  className="text-gray-600 text-sm mb-3 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]"
+                  className="text-gray-600 text-sm overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]"
                 >
                   {p.description}
                 </UICardDescription>
@@ -268,28 +283,15 @@ export const FeaturedProducts: React.FC = () => {
                     <Badge
                       key={t}
                       variant="outline"
-                      className="text-xs rounded-full px-2 py-1 border-blue-100 bg-blue-50 text-blue-700"
+                      className="mt-2 text-xs rounded-full px-2 py-1 border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-50 hover:border-blue-100"
                     >
                       {t}
                     </Badge>
                   ))}
                 </div>
                 {/* Footer */}
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                  <span className="font-medium truncate">{p.author}</span>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                      <span>{p.rating}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4 text-blue-500" />
-                      <span>{p.users}</span>
-                    </div>
-                  </div>
-                </div>
                 <Button
-                  className="mt-auto w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-sm font-bold rounded-lg transition-all duration-300"
+                  className="mt-1 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-sm font-bold rounded-lg transition-all duration-300"
                   onClick={() => setExpanded(p.id)}
                 >
                   View Details
@@ -340,18 +342,18 @@ export const FeaturedProducts: React.FC = () => {
                   <div
                     className={`absolute inset-0 bg-gradient-to-t ${p.gradient} opacity-20`}
                   />
-                  <Badge className="absolute top-2 left-2 h-6 px-2 mobile-text-xs rounded-full bg-white/95 text-gray-800 shadow">
+                  <p className="flex items-center justify-center absolute top-2 left-2 h-6 px-2 mobile-text-xs rounded-full bg-white/95 text-gray-800 shadow">
                     {p.category}
-                  </Badge>
+                  </p>
                 </div>
                 {/* Content */}
                 <UICardContent className="flex flex-col flex-1 px-3">
-                  <UICardHeader className="px-0 pb-1">
-                    <UICardTitle className="mobile-text-2xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                  
+                    <UICardTitle className="mt-2 mobile-text-2xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                       {p.title}
                     </UICardTitle>
                     <p className="mobile-text-base text-gray-500 mb-1">{p.subtitle}</p>
-                  </UICardHeader>
+               
                   <UICardDescription
                     className="text-gray-600 mobile-text-base mb-2 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]"
                   >
@@ -362,29 +364,19 @@ export const FeaturedProducts: React.FC = () => {
                       <Badge
                         key={t}
                         variant="outline"
-                        className="mobile-text-base rounded-full px-1 py-0.5 border-blue-100 bg-blue-50 text-blue-700"
+                        className="mt-2 mobile-text-base rounded-full px-1 py-0.5 border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-50 hover:border-blue-100"
                       >
                         {t}
                       </Badge>
                     ))}
                   </div>
                   {/* Footer */}
-                  <div className="flex items-center justify-between mobile-text-sm text-gray-500 mb-2">
-                    <span className="font-medium truncate">{p.author}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                        <span>{p.rating}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3 h-3 text-blue-500" />
-                        <span>{p.users}</span>
-                      </div>
-                    </div>
-                  </div>
+
                   <Button
-                    className="mt-auto w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md mobile-text-base font-bold rounded-lg transition-all duration-300 py-2"
-                    onClick={() => setExpanded(p.id)}
+                    className="mt-1 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md mobile-text-base font-bold rounded-lg transition-all duration-300 py-2"
+                    onClick={() => {
+                      window.open("https://www.chainfly.co/", "_blank", "noopener,noreferrer");
+                    }}
                   >
                     View Details
                     <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -410,16 +402,23 @@ export const FeaturedProducts: React.FC = () => {
         </div>
       </div>
 
-      {/* Scoped CSS for bounce animation and mobile font sizes */}
+      {/* Scoped CSS for animations and mobile font sizes */}
       <style>{`
-        @keyframes bounce-in {
-          0% { transform: scale(0.96); }
-          60% { transform: scale(1.04); }
-          100% { transform: scale(1); }
+        @keyframes slide-in-from-bottom-2 {
+          0% { 
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+          }
+          100% { 
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
         }
-        .animate-bounce-in {
-          animation: bounce-in 0.5s cubic-bezier(.68,-0.55,.27,1.55);
+        
+        .animate-in {
+          animation: slide-in-from-bottom-2 0.3s ease-out;
         }
+        
         /* Hide scrollbar for horizontal scroll on mobile */
         .overflow-x-auto::-webkit-scrollbar {
           display: none;
