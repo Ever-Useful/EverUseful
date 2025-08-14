@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import {
@@ -35,7 +35,7 @@ import {
     ShoppingCart,
     Menu
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/assets/Logo/Logo Side Simple.png';
 import InitialsAvatar from './InitialsAvatar';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +43,7 @@ import Navigation from '@/components/Navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import userService from '@/services/userService';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Connections from '@/components/Connections';
 import { EditProfile } from '../components/EditProfile';
@@ -219,6 +220,19 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
 
 const Header = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    // Check if current page needs user data (only pages that require authentication)
+    const needsUserData = useMemo(() => {
+        const authRequiredRoutes = [
+            '/dashboard', '/profile', '/marketplace', '/cart', '/chat', 
+            '/connections', '/collaborators', '/freelancing', '/findexpert',
+            '/freelancerprofile', '/studentprofile', '/businessprofile',
+            '/new-project', '/schedule-meeting'
+        ];
+        const needsData = authRequiredRoutes.some(route => location.pathname.startsWith(route));
+        return needsData;
+    }, [location.pathname]);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [messages, setMessages] = useState(mockMessages);
     const unreadMessageCount = messages.filter(m => m.unread).length;
@@ -228,8 +242,7 @@ const Header = () => {
     const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
     const [notifications, setNotifications] = useState(mockNotifications);
     const unreadNotificationCount = notifications.filter(n => n.unread).length;
-    const [profileData, setProfileData] = useState({ firstName: '', lastName: '' });
-    const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
+    const { profileData, isLoggedIn, refreshProfile } = useUserProfile();
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
@@ -321,26 +334,24 @@ const Header = () => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                setIsLoggedIn(true);
                 localStorage.setItem("isLoggedIn", "true");
-                try {
-                    const userProfile = await userService.getUserProfile();
-                    setProfileData({
-                        firstName: userProfile.data?.auth?.firstName || '',
-                        lastName: userProfile.data?.auth?.lastName || '',
-                    });
-                } catch (error) {
-                    console.error('Error fetching user profile:', error);
-                    setProfileData({ firstName: '', lastName: '' });
+                
+                // Only fetch user profile if the current page needs it AND we don't have cached data
+                if (needsUserData) {
+                    await refreshProfile();
                 }
             } else {
-                setIsLoggedIn(false);
                 localStorage.removeItem("isLoggedIn");
-                setProfileData({ firstName: '', lastName: '' });
             }
         });
         return () => unsubscribe();
-    }, []);
+    }, [needsUserData, refreshProfile]);
+
+    // Function to refresh profile data - only called when explicitly needed
+    const refreshProfileData = async () => {
+        if (!needsUserData) return; // Skip if not needed
+        await refreshProfile();
+    };
 
     const handleMessageClick = (messageId: number) => {
         setMessages(prev =>
@@ -357,8 +368,6 @@ const Header = () => {
     const handleLogout = async () => {
         try {
             // Clear all user-related state
-            setIsLoggedIn(false);
-            setProfileData({ firstName: '', lastName: '' });
             setShowNotificationsSidebar(false);
             setShowMessagesSidebar(false);
             setShowProfileSidebar(false);
@@ -380,9 +389,7 @@ const Header = () => {
     useEffect(() => {
         const handleStorageChange = () => {
             const loginStatus = localStorage.getItem("isLoggedIn") === "true";
-            setIsLoggedIn(loginStatus);
             if (!loginStatus) {
-                setProfileData({ firstName: '', lastName: '' });
                 setShowNotificationsSidebar(false);
                 setShowMessagesSidebar(false);
                 setShowProfileSidebar(false);
@@ -940,7 +947,23 @@ const Header = () => {
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 <div className="flex flex-col items-center text-center">
-                                    <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} size={80} className="sm:w-24 sm:h-24" />
+                                    {profileData.avatar ? (
+                                        <img 
+                                            src={profileData.avatar} 
+                                            alt={`${profileData.firstName} ${profileData.lastName}`}
+                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                            }}
+                                        />
+                                    ) : null}
+                                    <InitialsAvatar 
+                                        firstName={profileData.firstName} 
+                                        lastName={profileData.lastName} 
+                                        size={80} 
+                                        className={`sm:w-24 sm:h-24 ${profileData.avatar ? 'hidden' : ''}`} 
+                                    />
                                     <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">{profileData.firstName} {profileData.lastName}</h3>
                                     <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
                                         View Profile &gt;

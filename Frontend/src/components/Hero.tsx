@@ -94,7 +94,7 @@ export const Hero = () => {
               </h1>
               <p className="text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200">
                 A platform where students, PhD holders, professors, and
-                businesses collaborate to transform ideas into real‐world impact.
+                businesses collaborate to transform ideas into real-world impact.
                 Join the future of collaborative innovation today.
               </p>
               <div className="flex justify-center lg:justify-start animate-fade-in delay-300">
@@ -117,36 +117,14 @@ export const Hero = () => {
               {/* Desktop: animated cards */}
               <div className="hidden lg:flex overflow-visible w-full h-[560px] py-[40px]">
                 {OPTIONS.map((opt) => {
+                  // Determine which animation and baseline to use:
                   const isOdd = opt.id % 2 !== 0;
                   const animationName = isOdd ? "float-down" : "float-up";
                   return (
                     <div
                       key={opt.id}
-                      className={`
-                        group
-                        relative
-                        cursor-pointer
-                        overflow-hidden
-                        bg-center
-                        bg-cover
-                        flex-[1_1_60px]
-                        mx-[24px]
-                        rounded-[64px]
-                        transition-all
-                        duration-500
-                        ease-out
-                        hover:flex-[10_1_600px]
-                        hover:rounded-[32px]
-                        hover:bg-[length:auto_100%]
-                      `}
-                      style={{
-                        backgroundImage: `url(${opt.imageUrl})`,
-                        animationName,
-                        animationDuration: "6s",
-                        animationTimingFunction: "ease-in-out",
-                        animationIterationCount: "infinite",
-                        willChange: "transform",
-                      }}
+                      className={`group relative cursor-pointer overflow-hidden bg-center bg-cover flex-[1_1_60px] mx-[24px] rounded-[64px] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:flex-[10_1_600px] hover:rounded-[32px] hover:bg-[length:auto_100%]`}
+                      style={{backgroundImage: `url(${opt.imageUrl})`, animationName, animationDuration: "5s", animationTimingFunction: "ease-in-out", animationIterationCount: "infinite",}}
                     >
                       <img src={opt.imageUrl} alt={opt.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-0" />
                       <div
@@ -157,15 +135,16 @@ export const Hero = () => {
                           right-0
                           h-[80px]
                           transition-all
-                          duration-500
-                          ease-out
+                          duration-700
+                          ease-[cubic-bezier(0.22,1,0.36,1)]
                           group-hover:h-[120px]
                         "
                         style={{
                           boxShadow:
-                            "inset 0 -80px 80px -80px rgba(0,0,0,0.8)",
+                            "inset 0 -120px 120px -120px rgba(0,0,0,0.8), inset 0 -120px 120px -100px rgba(0,0,0,0.6)",
                         }}
                       />
+                      {/* Label & Icon */}
                       <div
                         className="
                           absolute
@@ -174,12 +153,16 @@ export const Hero = () => {
                           bottom-[8px]
                           left-[64px]
                           transition-all
-                          duration-500
-                          ease-out
+                          duration-700
+                          ease-[cubic-bezier(0.22,1,0.36,1)]
                           group-hover:bottom-[54px]
                           group-hover:left-[12px]
                           z-10
+                          text-shadow-lg
                         "
+                        style={{
+                          textShadow: "0 0 8px rgba(0,0,0,0.75)",
+                        }}
                       >
                         <div className="flex items-center text-white">
                           <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">

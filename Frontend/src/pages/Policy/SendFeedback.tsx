@@ -57,7 +57,7 @@ const SendFeedback = () => {
             </p>
             <div className="flex items-center justify-center text-sm text-gray-500">
               <Clock className="w-4 h-4 mr-2" />
-              Last Updated: February 4, 2025
+              Last Updated: June, 2025
             </div>
           </div>
         </div>
@@ -362,10 +362,10 @@ const SendFeedback = () => {
                   <Mail className="w-5 h-5 text-blue-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-gray-900">Email</h4>
-                    <p className="text-gray-700">feedback@amoghedu.com</p>
+                    <p className="text-gray-700">amogheveruseful@gmail.com</p>
                   </div>
                 </div>
-                
+{/*                 
                 <div className="flex items-start">
                   <Phone className="w-5 h-5 text-green-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
@@ -380,7 +380,7 @@ const SendFeedback = () => {
                     <h4 className="font-semibold text-gray-900">Address</h4>
                     <p className="text-gray-700">123 Business Street, City, State 12345</p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </section>

@@ -2,13 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera } from "lucide-react";
+import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera, Upload, X } from "lucide-react";
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import userService from '@/services/userService';
+import s3Service from '@/services/s3Service';
 import { EditProfile } from '@/components/EditProfile';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import toast from "react-hot-toast";
@@ -19,6 +20,7 @@ import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { API_ENDPOINTS } from '../config/api';
+import { PhotoUpload } from '@/components/PhotoUpload';
 // import GlobeLoader from '@/components/GlobeLoader';
 
 
@@ -48,6 +50,8 @@ const Profile = () => {
     username: '',
     mobile: '',
   });
+  const [resolvedAvatar, setResolvedAvatar] = useState('');
+  const [resolvedBackground, setResolvedBackground] = useState('');
   const [studentData, setStudentData] = useState({
     college: '',
     degree: '',
@@ -68,14 +72,7 @@ const Profile = () => {
   const [showMyProjects, setShowMyProjects] = useState(false);
   const [editSection, setEditSection] = useState('');
 
-  // Camera functionality state
-  const [showCamera, setShowCamera] = useState(false);
-  const [showCropper, setShowCropper] = useState(false);
-  const [imageSrc, setImageSrc] = useState('');
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Removed camera state since we're using ProfilePhotoUpload component
 
   const MAX_LENGTH = 200;
   const [isExpanded, setIsExpanded] = useState(false);
@@ -108,29 +105,61 @@ const Profile = () => {
   const fetchUserData = async () => {
     try {
       setLoading(true);
+      console.log('Profile - Fetching user data...');
       const userProfile = await userService.getUserProfile();
       console.log('Profile - Raw user profile data:', userProfile);
       
-      // Extract data from the response structure - backend now returns reconstructed data directly
-      const { auth: authData, profile: userProfileData, studentData: studentInfo, education: educationArr, workExperience: workArr } = userProfile;
-      const userStats = (userProfile as any).stats;
+      // Extract data from the response structure - backend returns data in nested structure
+      const { data } = userProfile;
+      const { auth: authData, profile: userProfileData, studentData: studentInfo, education: educationArr, workExperience: workArr } = data;
+      const userStats = data.stats;
       
       console.log('Profile - Extracted auth data:', authData);
       console.log('Profile - Extracted profile data:', userProfileData);
       
+      // Use localStorage as fallback for immediate display after signup
+      const storedName = localStorage.getItem("userName");
+      const storedUserType = localStorage.getItem("userType");
+      const storedFirstName = localStorage.getItem("userFirstName");
+      const storedLastName = localStorage.getItem("userLastName");
+      const storedEmail = localStorage.getItem("userEmail");
+      const storedPhone = localStorage.getItem("userPhone");
+
+      // Resolve avatar URL - use direct S3 URL since bucket is public
+      let resolvedAvatarUrl = userProfileData?.avatar || '';
+      console.log('Profile - Raw avatar URL from database:', resolvedAvatarUrl);
+      if (resolvedAvatarUrl && resolvedAvatarUrl.includes('amazonaws.com/')) {
+        // Since bucket is public, use direct URL with cache busting
+        resolvedAvatarUrl = `${resolvedAvatarUrl}${resolvedAvatarUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        console.log('Profile - Final avatar URL with cache busting:', resolvedAvatarUrl);
+      }
+      setResolvedAvatar(resolvedAvatarUrl);
+
+      // Resolve background URL - use direct S3 URL since bucket is public
+      let resolvedBackgroundUrl = userProfileData?.backgroundImage || backgroundImage;
+      console.log('Profile - Raw background URL from database:', resolvedBackgroundUrl);
+      if (resolvedBackgroundUrl && resolvedBackgroundUrl.includes('amazonaws.com/')) {
+        // Since bucket is public, use direct URL with cache busting
+        resolvedBackgroundUrl = `${resolvedBackgroundUrl}${resolvedBackgroundUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        console.log('Profile - Final background URL with cache busting:', resolvedBackgroundUrl);
+      }
+      setResolvedBackground(resolvedBackgroundUrl);
+      setBackgroundImage(resolvedBackgroundUrl || backgroundImage);
+      
       setProfileData({
-        firstName: authData?.firstName || '',
-        lastName: authData?.lastName || '',
+        firstName: authData?.firstName || storedFirstName || (storedName ? storedName.split(' ')[0] : ''),
+        lastName: authData?.lastName || storedLastName || (storedName ? storedName.split(' ').slice(1).join(' ') : ''),
         userType: (authData?.userType) ? 
           (authData.userType).charAt(0).toUpperCase() + 
-          (authData.userType).slice(1) : '',
+          (authData.userType).slice(1) : 
+          (storedUserType ? storedUserType.charAt(0).toUpperCase() + storedUserType.slice(1) : ''),
         bio: userProfileData?.bio || 'No bio available',
-        avatar: userProfileData?.avatar || '',
+        avatar: resolvedAvatar || '',
         location: userProfileData?.location || '',
         title: userProfileData?.title || '',
         website: userProfileData?.website || '',
-        mobile: authData?.mobile || authData?.phoneNumber || userProfileData?.mobile || '',
-        username: authData?.email?.split('@')[0] || '',
+        mobile: authData?.mobile || authData?.phoneNumber || storedPhone || userProfileData?.mobile || '',
+        username: authData?.email?.split('@')[0] || storedEmail?.split('@')[0] || '',
       });
 
       setStudentData({
@@ -165,7 +194,7 @@ const Profile = () => {
       }
 
       // Set skills - handle both string arrays and object arrays
-      const skillsData = (userProfile as any).skills || userProfile.freelancerData?.skills || [];
+      const skillsData = data.skills || data.freelancerData?.skills || [];
       if (Array.isArray(skillsData)) {
         // Convert skill objects to strings if needed
         const skillStrings = skillsData.map(skill => {
@@ -211,7 +240,7 @@ const Profile = () => {
       setWorkExperience(workArr || []);
 
       // Fetch freelancerData
-      const freelancerData = userProfile.freelancerData;
+      const freelancerData = data.freelancerData;
       console.log('Profile - Freelancer data from API:', freelancerData);
       setFreelancerData({
         hourlyRate: freelancerData?.hourlyRate || '',
@@ -227,6 +256,15 @@ const Profile = () => {
       toast.error('Failed to load profile data');
     } finally {
       setLoading(false);
+      // Only clean up localStorage after successful load if we have real data from backend
+      if (profileData.firstName && profileData.lastName && !localStorage.getItem("userDataSaved")) {
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userType");
+        localStorage.removeItem("userFirstName");
+        localStorage.removeItem("userLastName");
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("userPhone");
+      }
     }
   };
 
@@ -239,7 +277,19 @@ const Profile = () => {
         navigate('/signin');
       }
     });
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      // Clean up localStorage when component unmounts only if data was successfully loaded
+      if (!loading && profileData.firstName && profileData.lastName) {
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userType");
+        localStorage.removeItem("userFirstName");
+        localStorage.removeItem("userLastName");
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("userPhone");
+        localStorage.removeItem("userDataSaved");
+      }
+    };
   }, []);
 //test
   const handleEditSection = (section: string) => {
@@ -302,52 +352,40 @@ const Profile = () => {
   };
 
   // Camera functionality handlers
-  const handleCapture = () => {
-    if (videoRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext('2d');
-      if (context) {
-        canvasRef.current.width = videoRef.current.videoWidth;
-        canvasRef.current.height = videoRef.current.videoHeight;
-        context.drawImage(videoRef.current, 0, 0);
-        const imageData = canvasRef.current.toDataURL('image/jpeg');
-        setImageSrc(imageData);
-        setShowCamera(false);
-        setShowCropper(true);
-      }
-    }
-  };
-
-  const handleCropComplete = (cropArea: any) => {
-    // Handle crop completion
-  };
-
-  const handleCropDone = () => {
-    setShowCropper(false);
-    // Handle the cropped image
-  };
+  // Removed camera-related functions since we're using ProfilePhotoUpload component
 
   const handleBackgroundChange = (newBackground: string) => {
     setBackgroundImage(newBackground);
   };
 
-  const handleRemoveAvatar = () => {
-    setProfileData(prev => ({ ...prev, avatar: '' }));
-  };
+  // Removed old upload state since we're using ProfilePhotoUpload component
 
-  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setProfileData(prev => ({ ...prev, avatar: result }));
-      };
-      reader.readAsDataURL(file);
+  const handleRemoveAvatar = async () => {
+    try {
+      setProfileData(prev => ({ ...prev, avatar: '' }));
+      // Update in database
+      await userService.updateUserProfile({ avatar: '' });
+      toast.success('Avatar removed successfully');
+    } catch (error) {
+      console.error('Error removing avatar:', error);
+      toast.error('Failed to remove avatar');
     }
   };
 
+  // Removed old upload handlers since we're using ProfilePhotoUpload component
+
   // Get display name for profile
   const getDisplayName = () => {
+    // First try to get from localStorage (for immediate display after signup)
+    const storedName = localStorage.getItem("userName");
+    const storedFirstName = localStorage.getItem("userFirstName");
+    const storedLastName = localStorage.getItem("userLastName");
+    
+    if (storedName && storedName !== 'undefined undefined' && storedName !== 'null null') {
+      return storedName;
+    }
+    
+    // Then try from profile data
     if (profileData.firstName && profileData.lastName) {
       return `${profileData.firstName} ${profileData.lastName}`;
     } else if (profileData.firstName) {
@@ -355,6 +393,14 @@ const Profile = () => {
     } else if (profileData.username) {
       return profileData.username;
     }
+    
+    // Fallback to localStorage individual fields
+    if (storedFirstName && storedLastName) {
+      return `${storedFirstName} ${storedLastName}`;
+    } else if (storedFirstName) {
+      return storedFirstName;
+    }
+    
     return 'User';
   };
 
@@ -380,36 +426,75 @@ const Profile = () => {
       
       {/* Hero Section */}
       <div
-        className="relative h-64 md:h-96 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
+        className="relative h-64 md:h-96 bg-cover bg-center bg-no-repeat pt-24"
+        style={{ backgroundImage: `url("${backgroundImage}")` }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
         
-        {/* Camera icon for background photo */}
-        <button
-          className="absolute top-4 right-4 md:top-6 md:right-6 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors z-10"
-          onClick={() => setShowEditProfile(true)}
-          title="Change Background Photo"
-        >
-          <Camera className="text-slate-700 w-5 h-5" />
-        </button>
+        {/* Background photo upload */}
+        <PhotoUpload
+          currentImage={resolvedBackground}
+          onImageUpload={async (imageUrl) => {
+            // Update local state immediately for UI responsiveness
+            setBackgroundImage(imageUrl);
+            setResolvedBackground(imageUrl);
+            toast.success('Cover photo updated successfully!');
+          }}
+          type="background"
+          trigger={
+            <button
+              className="absolute top-20 right-4 md:top-24 md:right-6 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors z-20"
+              title="Change Background Photo"
+            >
+              <Camera className="text-slate-700 w-5 h-5" />
+            </button>
+          }
+        />
         
         <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-12 sm:my-[99px] py-6 sm:py-[34px] px-3 sm:px-[23px]">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 w-full">
               {/* Profile Photo */}
-              <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0">
-                {profileData.avatar ? (
-                  <img
-                    src={profileData.avatar}
-                    alt={getDisplayName()}
-                    className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full object-cover mx-auto md:mx-0"
-                  />
-                ) : (
-                  <div className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-2xl sm:text-3xl font-bold text-gray-600 mx-auto md:mx-0">
-                    {getAvatarInitials()}
-                  </div>
-                )}
+              <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0 z-20">
+                <PhotoUpload
+                  currentImage={resolvedAvatar}
+                  onImageUpload={async (imageUrl) => {
+                    // Update local state immediately for UI responsiveness
+                    setProfileData(prev => ({ ...prev, avatar: imageUrl }));
+                    setResolvedAvatar(imageUrl);
+                    toast.success('Profile photo updated successfully!');
+                  }}
+                  type="avatar"
+                  trigger={
+                    <div className="relative cursor-pointer group">
+                      {resolvedAvatar ? (
+                        <img
+                          src={resolvedAvatar}
+                          alt={getDisplayName()}
+                          className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full object-cover mx-auto md:mx-0 hover:opacity-90 transition-opacity"
+                          onError={(e) => { e.currentTarget.src = NoUserProfile; }}
+                        />
+                      ) : (
+                        <div className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-2xl sm:text-3xl font-bold text-gray-600 mx-auto md:mx-0 hover:bg-gray-200 transition-colors">
+                          {getAvatarInitials()}
+                        </div>
+                      )}
+                      
+                      {/* LinkedIn-style edit icon overlay */}
+                      <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors group-hover:scale-110">
+                        <Camera className="w-4 h-4 text-gray-600" />
+                      </div>
+                      
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="text-white text-center">
+                          <Camera className="w-8 h-8 mx-auto mb-1" />
+                          <span className="text-xs font-medium">Change photo</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                />
               </div>
               
               {/* Profile Info */}
@@ -418,7 +503,7 @@ const Profile = () => {
                   {getDisplayName()}
                 </h1>
                 <p className="text-base text-slate-200 drop-shadow-md text-center md:text-left mobile-text-base">
-                  {profileData.userType}
+                  {profileData.userType || localStorage.getItem("userType") || "User"}
                 </p>
                 
                 {/* Edit Profile Button */}
@@ -441,7 +526,7 @@ const Profile = () => {
       <div className="max-w-7xl mx-auto px-8 -mt-8 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Only show Hourly Rate and Avg Response Time for freelancers */}
-          {(profileData.userType?.toLowerCase() === 'freelancer' || profileData.userType === 'Freelancers') && (
+          {(profileData.userType?.toLowerCase() === 'freelancer' || profileData.userType === 'Freelancers' || profileData.userType === 'Business') && (
             <>
               <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
@@ -618,7 +703,7 @@ const Profile = () => {
                                   <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">{tech}</Badge>
                                 ))}
                               </div>
-                                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
                                  <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
                                  <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
                                  <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
@@ -677,7 +762,9 @@ const Profile = () => {
                 <div className="flex flex-wrap gap-3">
                   {skills && skills.length > 0 ? (
                     skills.map((skill, index) => (
-                      <Badge key={index} className="px-3 py-1 text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">{skill}</Badge>
+                      <Badge key={index} className="px-3 py-1 text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                      </Badge>
                     ))
                   ) : (
                     <p className="text-gray-500 text-sm">No skills added yet. Click edit to add your skills.</p>

@@ -27,6 +27,7 @@ import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { API_ENDPOINTS } from '../../config/api';
+import { getS3ImageUrl, getUserAvatarUrl, handleImageError } from '../../utils/s3ImageUtils';
 
 interface Project {
   id: number;
@@ -324,14 +325,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       // Get avatar with fallback
       const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
       
-      // Get customUserId with fallback
-      const customUserId = user.customUserId || user.data?.customUserId || authorId;
+      // Get customUserId with fallback - this is the ID we'll use for navigation
+      const customUserId = user.customUserId || user.data?.customUserId || user.id || authorId;
       
       detailsMap[authorId] = {
         name: name || 'username',
         image: avatar,
         userType: userType,
-        id: customUserId,
+        id: customUserId, // Use customUserId for navigation
         isLoading: false
       };
     });
@@ -567,10 +568,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     else if (type === 'freelancer') {
       navigate(`/freelancerprofile/${id}`);
     } 
+    // Check if user type is business
+    else if (type === 'business') {
+      navigate(`/businessprofile/${id}`);
+    }
     // Default fallback to student profile for unknown user types
     else {
       console.warn(`Unknown user type: ${userType}, redirecting to student profile`);
-      // navigate(`/studentprofile/${id}`);
+      navigate(`/studentprofile/${id}`);
     }
   };
 
@@ -624,10 +629,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                 style={{ boxSizing: "border-box" }}
               >
                 <img
-                  src={project.image || NoImageAvailable}
+                  src={getS3ImageUrl(project.image, 'project', 'thumbnail')}
                   alt={project.title}
                   className="w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-cover flex-shrink-0 border border-gray-200 rounded"
-                  onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                  onError={(e) => handleImageError(e, NoImageAvailable)}
                 />
                 <div className="flex flex-col flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -647,12 +652,24 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                   </h3>
                   <div className="flex items-center gap-2 mb-1">
                     <img
-                      src={getAuthorDetails(project.author).image || NoUserProfile}
+                      src={getUserAvatarUrl(getAuthorDetails(project.author))}
                       alt={getAuthorDetails(project.author).name}
-                      className="w-5 h-5 rounded-full border border-gray-200"
-                      onError={e => { e.currentTarget.src = NoUserProfile; }}
+                      className="w-5 h-5 rounded-full border border-gray-200 cursor-pointer"
+                      onError={(e) => handleImageError(e, NoUserProfile)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
+                      }}
                     />
-                    <span className="text-[10px] text-gray-700 truncate">{getAuthorDetails(project.author).name}</span>
+                    <span 
+                      className="text-[10px] text-gray-700 truncate cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
+                      }}
+                    >
+                      {getAuthorDetails(project.author).name}
+                    </span>
                     <span className="flex items-center gap-0.5 text-[10px] text-yellow-500">
                       <Star className="w-3 h-3 fill-yellow-400" />
                       {project.rating}
@@ -666,7 +683,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                         variant="outline"
                         className="text-[8px] border-gray-200 text-gray-600 bg-gray-100 font-medium px-1 py-1 "
                       >
-                        {skill}
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                       </Badge>
                     ))}
                     {project.skills && project.skills.length > 2 && (
@@ -705,12 +722,12 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               >
                 <div className="relative">
                   <img
-                    src={project.image || NoImageAvailable}
+                    src={getS3ImageUrl(project.image, 'project', 'medium')}
                     alt={project.title}
                     className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
                     loading="lazy"
                     onClick={() => setSelected(project)}
-                    onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                    onError={(e) => handleImageError(e, NoImageAvailable)}
                   />
                   <div className="absolute top-2 left-2">
                     <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow">
@@ -741,19 +758,19 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     <AuthorSkeleton />
                   ) : (
                     <div className="flex items-center space-x-2 mb-2">
-                      <img
-                        src={getAuthorDetails(project.author).image || NoUserProfile}
+                      {/* <img
+                        src={getUserAvatarUrl(getAuthorDetails(project.author))}
                         alt={getAuthorDetails(project.author).name}
                         className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
-                        onError={e => { e.currentTarget.src = NoUserProfile; }}
-                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                      />
+                        onError={(e) => handleImageError(e, NoUserProfile)}
+                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id)}
+                      /> */}
                       <span
                         className="text-gray-700 text-xs cursor-pointer"
                         style={{ transition: 'color 0.2s' }}
                         onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
                         onMouseOut={e => e.currentTarget.style.color = ''}
-                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
+                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id)}
                       >
                         {getAuthorDetails(project.author).name}
                       </span>
@@ -780,7 +797,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                           variant="outline"
                           className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
                         >
-                          {skill}
+                          {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                         </Badge>
                       ))}
                       {Array.isArray(project.skills) && project.skills.length > 3 && (
@@ -895,11 +912,11 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               ) : (
                 <>
                   <img
-                    src={getAuthorDetails(selected.author).image || NoUserProfile}
+                    src={getUserAvatarUrl({ avatar: getAuthorDetails(selected.author).image }) || NoUserProfile}
                     alt={getAuthorDetails(selected.author).name}
                     className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
                     onError={e => { e.currentTarget.src = NoUserProfile; }}
-                    onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
+                    onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, getAuthorDetails(selected.author).id)}
                   />
                   <div>
                     <div
@@ -907,15 +924,15 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                       style={{ transition: 'color 0.2s' }}
                       onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
                       onMouseOut={e => e.currentTarget.style.color = ''}
-                      onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, selected.author)}
+                      onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, getAuthorDetails(selected.author).id)}
                     >
                       {getAuthorDetails(selected.author).name}
                     </div>
-                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                    {/* <div className="flex items-center space-x-1 text-xs text-gray-500">
                       <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                       <span className="text-yellow-500">{selected.rating}</span>
                       <span>({selected.reviews} reviews)</span>
-                    </div>
+                    </div> */}
                   </div>
                 </>
               )}
@@ -940,7 +957,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                   variant="outline"
                   className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
                 >
-                  {skill}
+                  {typeof skill === 'string' ? skill : skill.name || skill.expertise || 'Unknown Skill'}
                 </Badge>
               ))}
             </div>
@@ -976,7 +993,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition-all duration-300 mb-6"
               onClick={() => handleViewDetails(selected.id)}
             >
-              Let's Connect
+              View Product
             </Button>
 
             {/* Related Projects */}

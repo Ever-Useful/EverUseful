@@ -4,7 +4,6 @@ import React, { useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
 import {
   Star,
   TrendingUp,
@@ -39,6 +38,7 @@ export const FeaturedProducts: React.FC = () => {
         image: "https://images.unsplash.com/photo-1501854140801-50d01698950b",
         tags: ["AI", "Sustainability", "IoT"],
         gradient: "from-green-500 to-emerald-600",
+        href: "https://www.chainfly.co/"
       },
       {
         id: 2,
@@ -53,6 +53,7 @@ export const FeaturedProducts: React.FC = () => {
         image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
         tags: ["Quantum", "Healthcare", "Research"],
         gradient: "from-blue-500 to-purple-600",
+        href: "https://www.chainfly.co/"
       },
       {
         id: 3,
@@ -67,6 +68,7 @@ export const FeaturedProducts: React.FC = () => {
         image: "https://images.unsplash.com/photo-1500673922987-e212871fec22",
         tags: ["Robotics", "Agriculture", "AI"],
         gradient: "from-yellow-500 to-orange-600",
+        href: "https://www.chainfly.co/"
       },
       {
         id: 4,
@@ -81,6 +83,7 @@ export const FeaturedProducts: React.FC = () => {
         image: "https://plus.unsplash.com/premium_photo-1678344170545-c3edef92a16e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         tags: ["Robotics", "Agriculture", "AI"],
         gradient: "from-yellow-500 to-orange-600",
+        href: "https://www.chainfly.co/"
       },
     ],
     []
@@ -164,11 +167,11 @@ export const FeaturedProducts: React.FC = () => {
           </div>
           <Button 
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md text-base font-bold rounded-lg transition-all duration-300"
-            onClick={() => window.open('https://www.chainfly.co/')}
+            onClick={() => window.open(project.href, "_blank")}
           >
             Connect
             <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300" />
-          </Button>
+            </Button>
         </UICardContent>
       </UICard>
       {/* Click outside to close */}
@@ -249,7 +252,7 @@ export const FeaturedProducts: React.FC = () => {
               </div>
               {/* Content */}
               <UICardContent className="flex flex-col flex-1 px-5 py-4">
-                <UICardHeader className="px-0 pb-1">
+                <UICardHeader className="-translate-x-6 pb-1">
                   <UICardTitle className="text-lg md:text-lg font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                     {p.title}
                   </UICardTitle>

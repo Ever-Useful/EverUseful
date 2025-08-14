@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import bgImage from '@/assets/images/community.jpg';
 import { Link } from "react-router-dom";
 
 export const CommunityConnect: React.FC = () => {
@@ -17,6 +18,13 @@ export const CommunityConnect: React.FC = () => {
 
   return (
     <section id="community" className="relative overflow-hidden py-16 sm:py-20">
+      {/* Blurred Background Image */}
+      <div className="absolute inset-0 -z-20">
+        <div
+          className="w-full h-full bg-cover bg-center filter blur-xs"
+          style={{ backgroundImage: `url(${bgImage})` }}
+        />
+      </div>
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black/50 -z-10" />
 

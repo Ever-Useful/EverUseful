@@ -9,6 +9,7 @@ import { Footer } from "@/components/Footer";
 import { useState, useEffect } from "react";
 import userService from "@/services/userService";
 import NoUserProfile from "@/assets/images/no user profile.png";
+import { getUserAvatarUrl, getBackgroundImageUrl } from "@/utils/s3ImageUtils";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
 
@@ -17,14 +18,28 @@ const VisitingProfile = () => {
   const navigate = useNavigate();
   const [freelancer, setFreelancer] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [backgroundImage] = useState(
-    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
-  );
+  const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
   const MAX_LENGTH = 200;
   const [isExpanded, setIsExpanded] = useState(false);
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
+
+  const fetchProjectData = async (pid: string) => {
+    try {
+      console.log(`FreelancerProfile - Fetching project ${pid}...`);
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
+      if (!response.ok) {
+        console.log(`FreelancerProfile - Project ${pid} not found (${response.status})`);
+        return null;
+      }
+      const data = await response.json();
+      return data && data.project ? data.project : null;
+    } catch (error) {
+      console.error(`FreelancerProfile - Error fetching project ${pid}:`, error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const fetchFreelancer = async () => {
@@ -37,18 +52,25 @@ const VisitingProfile = () => {
               setFreelancer(data.data);
               setEducation(data.data.education || []);
               setWorkExperience(data.data.workExperience || []);
+              
+              // Set background image from user profile data
+              const userBackgroundImage = data.data.profile?.backgroundImage;
+              if (userBackgroundImage) {
+                setBackgroundImage(userBackgroundImage);
+              } else {
+                // Fallback to default background
+                setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
+              }
               // Fetch full project details for each project ID
               const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
+              console.log('FreelancerProfile - Project IDs found:', projectIds);
               if (projectIds.length > 0) {
-                const projectPromises = projectIds.map((pid) =>
-                  fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid))
-                    .then(res => res.ok ? res.json() : null)
-                    .then(res => res && res.project ? res.project : null)
-                    .catch(() => null)
-                );
+                const projectPromises = projectIds.map((pid) => fetchProjectData(pid));
                 const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
+                console.log(`FreelancerProfile - Successfully loaded ${fullProjects.length} out of ${projectIds.length} projects`);
                 setPortfolioProjects(fullProjects);
               } else {
+                console.log('FreelancerProfile - No project IDs found');
                 setPortfolioProjects([]);
               }
             } else {
@@ -89,7 +111,7 @@ const VisitingProfile = () => {
   const auth = freelancer.auth || {};
   const fullName = `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User';
   const about = profile.bio || 'No bio available';
-  const avatar = profile.avatar || NoUserProfile;
+  const avatar = getUserAvatarUrl({ avatar: profile.avatar }) || NoUserProfile;
   const title = profile.title || '';
   const location = profile.location || '';
   const userType = auth.userType || '';
@@ -124,7 +146,8 @@ const VisitingProfile = () => {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
       <Header />
       <div className="relative h-96 bg-cover bg-center bg-no-repeat" style={{
-        backgroundImage: `url(${backgroundImage})`
+        backgroundImage: `url(${getBackgroundImageUrl(backgroundImage)})`,
+        backgroundColor: '#1e293b' // Fallback color if image fails to load
       }}>
         {/* Darker overlay for better text contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
@@ -330,11 +353,12 @@ const VisitingProfile = () => {
                     safePortfolioProjects.map((project, index) => (
                       <Card
                         key={project.id || index}
-                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[140px]"
+                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[140px] cursor-pointer"
+                        onClick={() => navigate(`/product/${project.id}`)}
                       >
                         <div className="w-full md:w-48 flex-shrink-0 h-36 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
-                            src={project.image}
+                            src={project.image || NoImageAvailable}
                             alt={project.title}
                             className="object-cover w-full h-full rounded-l-lg"
                             onError={e => { e.currentTarget.src = NoImageAvailable; }}
@@ -393,7 +417,7 @@ const VisitingProfile = () => {
                       key={index}
                       className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
                     >
-                      {skill}
+                      {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                     </Badge>
                   ))}
                 </div>

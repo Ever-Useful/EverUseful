@@ -14,6 +14,7 @@ import { ChatBox } from "@/components/ChatBox";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
+import { getUserAvatarUrl, getBackgroundImageUrl } from '@/utils/s3ImageUtils';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -21,9 +22,7 @@ const Profile = () => {
   const [userData, setUserData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
-  const [backgroundImage, setBackgroundImage] = useState(
-    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
-  );
+  const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [editSection, setEditSection] = useState('');
   const [showMyProjects, setShowMyProjects] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -41,30 +40,56 @@ const Profile = () => {
         throw new Error('Failed to fetch user data');
       }
       const data = await response.json();
-      setUserData(data);
-      setEducation(data.education || []);
-      setWorkExperience(data.workExperience || []);
-      console.log('User data set:', data.data);
-      console.log('Projects object:', data.data.projects);
-      console.log('Projects.created:', data.data.projects?.created);
-      console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
-      // Fetch full project details for each project ID
-      const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-      console.log('Project IDs found:', projectIds);
-      console.log('Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
-      if (projectIds.length > 0) {
-        const projectPromises = projectIds.map((pid) =>
-          fetchProjectData(pid)
-        );
-        const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-        console.log('Full projects fetched:', fullProjects);
-        setPortfolioProjects(fullProjects);
+      console.log('StudentProfile - Raw API response:', data);
+      
+      if (data.success && data.data) {
+        setUserData(data.data);
+        setEducation(data.data.education || []);
+        setWorkExperience(data.data.workExperience || []);
+        
+        // Set background image from user profile data
+        const userBackgroundImage = data.data.profile?.backgroundImage;
+        if (userBackgroundImage) {
+          setBackgroundImage(userBackgroundImage);
+        } else {
+          // Fallback to default background
+          setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
+        }
+        console.log('StudentProfile - User data set:', data.data);
+        console.log('StudentProfile - Projects object:', data.data.projects);
+        console.log('StudentProfile - Projects.created:', data.data.projects?.created);
+        console.log('StudentProfile - Is projects.created an array?', Array.isArray(data.data.projects?.created));
+        
+        // Fetch full project details for each project ID
+        const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
+        console.log('StudentProfile - Project IDs found:', projectIds);
+        console.log('StudentProfile - Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
+        
+        if (projectIds.length > 0) {
+          console.log('StudentProfile - Attempting to fetch projects:', projectIds);
+          const projectPromises = projectIds.map((pid) =>
+            fetchProjectData(pid)
+          );
+          const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
+          console.log('StudentProfile - Full projects fetched:', fullProjects);
+          console.log('StudentProfile - Project details:', fullProjects.map(p => ({
+            id: p.id,
+            title: p.title,
+            image: p.image,
+            hasImage: !!p.image
+          })));
+          setPortfolioProjects(fullProjects);
+        } else {
+          console.log('StudentProfile - No project IDs found');
+          setPortfolioProjects([]);
+        }
       } else {
-        console.log('No project IDs found');
+        console.log('StudentProfile - No user data found or API error');
+        setUserData({});
         setPortfolioProjects([]);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('StudentProfile - Error fetching user data:', error);
       setError('Failed to load user profile');
       setUserData({});
       setPortfolioProjects([]);
@@ -75,14 +100,16 @@ const Profile = () => {
 
   const fetchProjectData = async (pid: string) => {
     try {
+      console.log(`StudentProfile - Fetching project ${pid}...`);
       const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
       if (!response.ok) {
-        throw new Error('Failed to fetch project data');
+        console.log(`StudentProfile - Project ${pid} not found (${response.status})`);
+        return null;
       }
       const data = await response.json();
-      return data;
+      return data && data.project ? data.project : null;
     } catch (error) {
-      console.error('Error fetching project data:', error);
+      console.error(`StudentProfile - Error fetching project ${pid}:`, error);
       return null;
     }
   };
@@ -106,16 +133,16 @@ const Profile = () => {
 
   const profile = {
     name: fullName,
-    title: userData.profile?.title || "New Member",
-    bio: userData.profile?.bio || "This is a new profile. Update your bio!",
-    avatar: userData.profile?.avatar || NoUserProfile,
+    title: userData?.profile?.title || "New Member",
+    bio: userData?.profile?.bio || "This is a new profile. Update your bio!",
+    avatar: userData?.profile?.avatar || NoUserProfile,
     stats: {
-      followers: userData.social?.followersCount || 0,
-      following: userData.social?.followingCount || 0,
-      projects: userData.stats?.projectsCount || 0,
-      likes: userData.stats?.totalLikes || 0,
-      connections: userData.social?.connections?.length || 0,
-      skills: userData.skills || [],  
+      followers: userData?.social?.followersCount || 0,
+      following: userData?.social?.followingCount || 0,
+      projects: userData?.stats?.projectsCount || 0,
+      likes: userData?.stats?.totalLikes || 0,
+      connections: userData?.social?.connections?.length || 0,
+      skills: userData?.skills || [],  
     },
   };
 
@@ -195,7 +222,10 @@ const Profile = () => {
       {/* Hero Section */}
       <div
         className="relative h-64 sm:h-80 md:h-96 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
+        style={{ 
+          backgroundImage: `url(${getBackgroundImageUrl(backgroundImage)})`,
+          backgroundColor: '#1e293b' // Fallback color if image fails to load
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-12 sm:my-[99px] py-6 sm:py-[34px] px-3 sm:px-[23px]">
@@ -204,12 +234,9 @@ const Profile = () => {
               <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0">
                 <Avatar className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg mx-auto md:mx-0">
                   <AvatarImage
-                    src={profile.avatar}
-                    alt={profile.name}
+                    src={getUserAvatarUrl({ avatar: profile.avatar })}
+                    alt={fullName}
                     className="object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = NoUserProfile;
-                    }}
                   />
                   <AvatarFallback className="bg-slate-200 text-slate-600 font-bold text-2xl sm:text-3xl flex items-center justify-center">
                     {profile.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "NA"}
@@ -350,11 +377,12 @@ const Profile = () => {
                     safePortfolioProjects.map((project, index) => (
                       <Card
                         key={project.id || index}
-                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[120px] sm:min-h-[140px]"
+                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[120px] sm:min-h-[140px] cursor-pointer"
+                        onClick={() => navigate(`/product/${project.id}`)}
                       >
                         <div className="w-full md:w-40 lg:w-48 flex-shrink-0 h-28 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
-                            src={project.image}
+                            src={project.image || NoImageAvailable}
                             alt={project.title}
                             className="object-cover w-full h-full rounded-l-lg"
                             onError={e => { e.currentTarget.src = NoImageAvailable; }}
@@ -367,7 +395,9 @@ const Profile = () => {
                               <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{project.description}</p>
                               <div className="flex flex-wrap gap-2 mb-2">
                                 {(project.skills || []).map((skill, skillIndex) => (
-                                  <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">{skill}</Badge>
+                                  <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">
+                                    {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                                  </Badge>
                                 ))}
                               </div>
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
@@ -409,8 +439,10 @@ const Profile = () => {
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   {profile.stats.skills && profile.stats.skills.length > 0 ? (
-                    profile.stats.skills.map((skill: string, index: number) => (
-                      <Badge key={index} className="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">{skill}</Badge>
+                    profile.stats.skills.map((skill: any, index: number) => (
+                      <Badge key={index} className="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                      </Badge>
                     ))
                   ) : (
                     <p className="text-gray-500 text-xs sm:text-sm">No skills added yet. Click edit to add your skills.</p>
@@ -420,7 +452,7 @@ const Profile = () => {
             </Card>
             <ChatBox
               freelancerName={profile.name}
-              freelancerImage={profile.avatar}
+              freelancerImage={getUserAvatarUrl({ avatar: profile.avatar })}
             />
           </div>
         </div>
