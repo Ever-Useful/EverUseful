@@ -591,7 +591,7 @@ const Artificial = () => {
                   </div>
                   
                   <div className="flex justify-between">
-                    <div className="text-2xl font-bold">₹149.99</div>
+                    <div className="text-2xl font-bold">$149.99</div>
                     <button className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-sm flex items-center">
                       <FiShoppingCart className="mr-1" />
                       <span>Add to Cart</span>
@@ -681,7 +681,7 @@ const Artificial = () => {
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <div className="text-base sm:text-lg font-bold">₹149.99</div>
+                    <div className="text-base sm:text-lg font-bold">$149.99</div>
                     <button className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-xs flex items-center">
                       <FiShoppingCart className="mr-1 w-2.5 sm:w-3 h-2.5 sm:h-3" />
                       <span>Add to Cart</span>
@@ -753,7 +753,7 @@ const Artificial = () => {
           <div className="absolute inset-0 backdrop-blur-md bg-gray-900/20 rounded-3xl z-10"></div>
           
           {/* Coming Soon Poster */}
-          <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <div className=" inset-0 relative z-20 flex items-center justify-center">
                           <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -762,20 +762,6 @@ const Artificial = () => {
                 className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 border-2 border-cyan-500/30 rounded-3xl p-6 sm:p-8 md:p-12 backdrop-blur-sm shadow-2xl shadow-cyan-500/20 max-w-2xl mx-auto text-center"
               >
                 {/* Animated icon */}
-                <motion.div
-                  animate={{ 
-                    rotate: [0, 10, -10, 0],
-                    scale: [1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="mb-6 sm:mb-8"
-                >
-                  <TbRobot className="text-4xl sm:text-5xl md:text-6xl text-cyan-400 mx-auto" />
-                </motion.div>
                 
                 {/* Coming Soon Badge */}
                 <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 mb-4 sm:mb-6">
@@ -791,25 +777,6 @@ const Artificial = () => {
                   We're building the most advanced marketplace for AI agents. Get ready to discover, 
                   deploy, and monetize cutting-edge AI solutions that will transform your business.
                 </p>
-              
-              {/* Features preview */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
-                  <div className="text-cyan-400 text-xl sm:text-2xl mb-2">🚀</div>
-                  <h3 className="text-base sm:text-lg font-bold mb-1">Deploy Instantly</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">One-click deployment to your infrastructure</p>
-                </div>
-                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
-                  <div className="text-emerald-400 text-xl sm:text-2xl mb-2">💰</div>
-                  <h3 className="text-base sm:text-lg font-bold mb-1">Monetize</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">Earn revenue from your AI creations</p>
-                </div>
-                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
-                  <div className="text-purple-400 text-xl sm:text-2xl mb-2">🔗</div>
-                  <h3 className="text-base sm:text-lg font-bold mb-1">Integrate</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">Seamless API integration</p>
-                </div>
-              </div>
               
               {/* Notification signup */}
               <div className="bg-gray-800/30 rounded-2xl p-4 sm:p-6 border border-gray-700">
@@ -835,7 +802,7 @@ const Artificial = () => {
               </div>
               
               {/* Progress indicator */}
-              <div className="mt-6 sm:mt-8">
+              {/* <div className="mt-6 sm:mt-8">
                 <div className="flex justify-between text-xs sm:text-sm text-gray-400 mb-2">
                   <span>Development Progress</span>
                   <span>85%</span>
@@ -849,205 +816,12 @@ const Artificial = () => {
                     transition={{ duration: 2, ease: "easeOut" }}
                   />
                 </div>
-              </div>
+              </div> */}
             </motion.div>
           </div>
           
           {/* Blurred content underneath */}
           <div className="opacity-30 pointer-events-none">
-            <div className="text-center mb-16">
-              <motion.h2 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-3xl md:text-4xl font-bold mb-4"
-              >
-                Explore <span className="text-cyan-400">AI Agents</span>
-              </motion.h2>
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="text-gray-400 max-w-2xl mx-auto text-base"
-              >
-                Discover powerful AI solutions created by developers worldwide. Deploy in minutes to enhance your workflows.
-              </motion.p>
-            </div>
-            
-            {/* Category Filter */}
-            <motion.div 
-              className="flex flex-wrap justify-center gap-4 mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-300 text-base bg-gray-800/50 border border-gray-700"
-                >
-                  {category.icon && <span>{category.icon}</span>}
-                  <span>{category.name}</span>
-                </button>
-              ))}
-            </motion.div>
-            
-            {/* Search */}
-            <motion.div 
-              className="max-w-2xl mx-auto mb-16"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500">
-                  <FiSearch />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search for agents, capabilities, or industries..."
-                  className="w-full pl-12 pr-4 py-4 text-base bg-gray-800/50 border border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                  disabled
-                />
-              </div>
-            </motion.div>
-            
-            {/* Desktop Agents Grid */}
-            <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredAgents.map((agent) => (
-                <motion.div
-                  key={agent.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl overflow-hidden"
-                >
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold">{agent.name}</h3>
-                        <p className="text-gray-400 text-xs">by {agent.creator}</p>
-                      </div>
-                      <div className="bg-indigo-500/10 px-3 py-1 rounded-full text-xs flex items-center">
-                        <span>${agent.price}</span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-gray-300 text-sm mb-6 h-16">{agent.description}</p>
-                    
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {agent.tags.map((tag, i) => (
-                        <span 
-                          key={i} 
-                          className="px-3 py-1 bg-gray-800/50 text-xs rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="flex text-yellow-400">
-                          {[...Array(5)].map((_, i) => (
-                            <FiStar 
-                              key={i} 
-                              className={`${i < Math.floor(agent.rating) ? 'fill-current' : ''}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="ml-2 text-sm">{agent.rating}</span>
-                      </div>
-                      <div className="text-sm text-gray-400 flex items-center">
-                        <FiTrendingUp className="mr-1" />
-                        <span>{agent.sales} sales</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="px-6 py-4 bg-gray-800/50 border-t border-gray-700 flex justify-between">
-                    <button className="text-sm text-cyan-400">
-                      View Details
-                    </button>
-                    <button className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-sm flex items-center">
-                      <FiShoppingCart className="mr-2" />
-                      <span>Add to Cart</span>
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Mobile Horizontal Scroll */}
-            <div className="md:hidden">
-              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
-                {filteredAgents.map((agent) => (
-                  <motion.div
-                    key={agent.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="flex-shrink-0 snap-start w-[85vw] max-w-[320px] bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl overflow-hidden"
-                  >
-                    <div className="p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h3 className="text-lg font-bold">{agent.name}</h3>
-                          <p className="text-gray-400 text-xs">by {agent.creator}</p>
-                        </div>
-                        <div className="bg-indigo-500/10 px-2 py-1 rounded-full text-xs flex items-center">
-                          <span>${agent.price}</span>
-                        </div>
-                      </div>
-                      
-                      <p className="text-gray-300 text-sm mb-4 h-12">{agent.description}</p>
-                      
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {agent.tags.map((tag, i) => (
-                          <span 
-                            key={i} 
-                            className="px-2 py-1 bg-gray-800/50 text-xs rounded-full"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                          <div className="flex text-yellow-400">
-                            {[...Array(5)].map((_, i) => (
-                              <FiStar 
-                                key={i} 
-                                className={`w-3 h-3 ${i < Math.floor(agent.rating) ? 'fill-current' : ''}`}
-                              />
-                            ))}
-                          </div>
-                          <span className="ml-1 text-xs">{agent.rating}</span>
-                        </div>
-                        <div className="text-xs text-gray-400 flex items-center">
-                          <FiTrendingUp className="mr-1 w-3 h-3" />
-                          <span>{agent.sales} sales</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700 flex justify-between">
-                      <button className="text-xs text-cyan-400">
-                        View Details
-                      </button>
-                      <button className="px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-xs flex items-center">
-                        <FiShoppingCart className="mr-1 w-3 h-3" />
-                        <span>Add to Cart</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </section>
