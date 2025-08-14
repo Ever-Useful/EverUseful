@@ -3,11 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
-import Students from "../assets/images/Students.jpeg";
-import PhD from "../assets/images/phdscholars.jpeg";
-import Professors from "../assets/images/professors.jpeg";
-import Business from "../assets/images/Business.jpeg";
-
+import Students from "@/assets/images/Students.jpg";
+import PhD from "@/assets/images/PhD.jpg";
+import Professors from "@/assets/images/Professors.jpg";
+import Business from "@/assets/images/Business.jpg";
 
 type Option = {
   id: number;
@@ -20,28 +19,31 @@ type Option = {
 const OPTIONS: Option[] = [
   {
     id: 1,
-    imageUrl: Students,
+    imageUrl: Students, // student studying
+    label: "Students",
     description: "Join peer communities & showcase projects",
     iconClass: "fas fa-user-graduate",
-    label: ""
   },
   {
     id: 2,
-    imageUrl: PhD,
+    imageUrl:
+      "", // scientist in lab
+    label: "PhD Holders",
     description: "Collaborate on research & funding",
     iconClass: "fas fa-flask",
-    label: ""
   },
   {
     id: 3,
-    imageUrl: Professors,
+    imageUrl:
+      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80", // professor lecturing
     label: "Professors",
     description: "Share knowledge & mentor next gen",
     iconClass: "fas fa-chalkboard-teacher",
   },
   {
     id: 4,
-    imageUrl: Business,
+    imageUrl:
+      "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80", // business meeting
     label: "Business",
     description: "Discover solutions & partnerships",
     iconClass: "fas fa-briefcase",
@@ -80,8 +82,8 @@ export const Hero = () => {
             {/* LEFT: Text + Button */}
 
             <div className="w-full lg:w-1/3 text-center lg:text-left mb-10 lg:mb-0">
-              <h1 className="text-[17px] sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight mobile-text-4xl">
-                Connect{" "}
+              <h1 className="text-3xl xs:text-4xl sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight">
+                Connnect{" "}
 
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
                   Innovation
@@ -91,7 +93,7 @@ export const Hero = () => {
                   Opportunity
                 </span>
               </h1>
-              <p className="text-[12px] sm:text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
+              <p className="text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200">
                 A platform where students, PhD holders, professors, and
                 businesses collaborate to transform ideas into real‐world impact.
                 Join the future of collaborative innovation today.
@@ -99,7 +101,7 @@ export const Hero = () => {
               <div className="flex justify-center lg:justify-start animate-fade-in delay-300">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
+                  className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font-bold transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
                   asChild
                 >
                   <Link to="/signup" className="font-bold flex items-center justify-center">
@@ -147,7 +149,7 @@ export const Hero = () => {
                         willChange: "transform",
                       }}
                     >
-                      <img src={opt.imageUrl} alt={opt.label} className="absolute inset-0 w-full h-full object-cover opacity-0" />
+                      <img src={opt.imageUrl} alt={opt.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-0" />
                       <div
                         className="
                           absolute
@@ -181,12 +183,12 @@ export const Hero = () => {
                         "
                       >
                         <div className="flex items-center text-white">
-                          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3 group-hover:mr-3 -translate-y-5">
+                          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">
                             <i className={`${opt.iconClass} text-sm`}></i>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out">
+                          <div>
                             <div className="font-bold text-sm">{opt.label}</div>
-                            <div className="text-xs opacity-80 max-w-[200px] transition-all duration-500 ease-out overflow-hidden">
+                            <div className="text-xs opacity-80 max-w-0 group-hover:max-w-[200px] transition-all duration-500 ease-out overflow-hidden">
                               {opt.description}
                             </div>
                           </div>
@@ -197,29 +199,21 @@ export const Hero = () => {
                 })}
               </div>
 
-              {/* Mobile: disoriented flexbox focusing on labels */}
+              {/* Mobile: horizontal scroll cards */}
               <div className="lg:hidden w-full">
-                <div className="grid grid-cols-2 gap-3 p-4">
-                  {OPTIONS.map((opt, index) => (
+                <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory">
+                  {OPTIONS.map((opt) => (
                     <div
                       key={opt.id}
-                      className={`
-                        relative h-32 rounded-xl overflow-hidden
-                      `}
+                      className="relative min-w-[70vw] max-w-xs h-44 rounded-2xl overflow-hidden bg-center bg-cover snap-start flex-shrink-0"
+                      style={{
+                        backgroundImage: `url(${opt.imageUrl})`,
+                      }}
                     >
-                      <img
-                        src={opt.imageUrl}
-                        alt={opt.label}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/50" />
-                      <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white p-3">
-                        <div className="font-bold text-lg sm:text-xl mb-1 leading-tight">
-                          {opt.label}
-                        </div>
-                        <div className="text-xs sm:text-sm opacity-90 text-center leading-tight">
-                          {opt.description}
-                        </div>
+                      <div className="absolute inset-0 bg-black/40" />
+                      <div className="absolute bottom-4 left-4 text-white">
+                        <div className="font-bold text-lg">{opt.label}</div>
+                        <div className="text-xs opacity-80">{opt.description}</div>
                       </div>
                     </div>
                   ))}
