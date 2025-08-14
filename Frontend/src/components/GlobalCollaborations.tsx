@@ -87,7 +87,6 @@ export const GlobalCollaborations: React.FC = () => {
         background: 'linear-gradient(135deg, #f8fcff 0%, #e6f0fa 100%)'
       }}
     >
-      {/* Inject marquee keyframes and CTA mobile CSS */}
       <div className="max-w-7xl mx-auto px-4">
         {/* Header with image */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-8">
