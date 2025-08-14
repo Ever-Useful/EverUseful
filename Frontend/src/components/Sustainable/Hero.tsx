@@ -17,7 +17,7 @@ export const Hero = () => {
 
   return (
 
-    <section className="min-h-[80vh] sm:min-h-[85vh] md:min-h-[90vh] bg-gradient-to-br from-stone-100 via-yellow-50 to-green-100 relative overflow-hidden">
+    <section className="mt-10 min-h-[80vh] sm:min-h-[85vh] md:min-h-[90vh] bg-gradient-to-br from-stone-100 via-yellow-50 to-green-100 relative overflow-hidden">
       {/* Background sustainable energy image or video - hidden on mobile */}
       <div className="absolute right-0 top-0 h-full w-full md:w-1/2 opacity-90 hidden md:block">
         {showVideo ? (
@@ -27,6 +27,8 @@ export const Hero = () => {
             autoPlay
             muted
             loop
+            controls
+            controlsList="nodownload"
           />
         ) : (
           <img
@@ -64,23 +66,29 @@ export const Hero = () => {
           </div>
         </div>
         
-        {/* Show image/video on small screens below main content */}
-        <div className="w-full mt-6 sm:mt-8 md:hidden">
+        {/* Show image/video on small screens below main content - improved mobile layout */}
+        <div className="w-full mt-4 sm:mt-6 md:hidden">
           {showVideo ? (
-            <video
-              src={sustainableVideo}
-              className="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg shadow-lg"
-              controls
-              autoPlay
-              muted
-              loop
-            />
+            <div className="relative">
+              <video
+                src={sustainableVideo}
+                className="w-full h-48 sm:h-56 object-cover rounded-xl shadow-lg"
+                controls
+                autoPlay
+                muted
+                loop
+                controlsList="nodownload"
+              />
+            </div>
           ) : (
-            <img
-              src={sustainableHeroImage}
-              alt="Sustainable development and green innovation"
-              className="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg shadow-lg"
-            />
+            <div className="relative">
+              <img
+                src={sustainableHeroImage}
+                alt="Sustainable development and green innovation"
+                className="w-full h-48 sm:h-56 object-cover rounded-xl shadow-lg"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl"></div>
+            </div>
           )}
         </div>
       </div>

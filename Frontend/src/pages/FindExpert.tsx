@@ -198,7 +198,7 @@ const FindExpert = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header />
       {/* HERO SECTION */}
-      <div className="relative bg-gradient-to-br from-[#0a192f] to-[#800020] text-white overflow-hidden">
+      <div className="mt-10 relative bg-gradient-to-br from-[#0a192f] to-[#800020] text-white overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-[#0a192f]/30 to-[#800020]/20"></div>
         <div className="relative z-10 max-w-7xl mx-auto px-2 xs:px-3 sm:px-6 lg:px-8 py-10 xs:py-14 sm:py-24">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8 xs:gap-10 lg:gap-12">
@@ -323,11 +323,11 @@ const FindExpert = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 xs:mb-6 text-center"
         >
-                                          <h2 className="text-3xl font-bold text-gray-900 mb-1 xs:mb-2 mobile-text-3xl">Browse Research Domains</h2>
-                <p className="text-xs xs:text-base text-gray-600 mobile-text-base">Find experts in specific academic disciplines</p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-1 xs:mb-2 mobile-text-3xl">Browse Research Domains</h2>
+        <p className="text-xs xs:text-base text-gray-600 mobile-text-base">Find experts in specific academic disciplines</p>
         </motion.div>
         <motion.div
-          className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 xs:gap-3"
+          className="hidden sm:grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 xs:gap-3"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -353,7 +353,7 @@ const FindExpert = () => {
 
     {/* Filter Bar */}
     <div className="max-w-7xl mx-auto px-2 xs:px-4 py-6 xs:py-12 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-xl shadow-sm p-3 xs:p-4 mb-6 xs:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 xs:gap-4">
+      <div className="hidden sm:block bg-white rounded-xl shadow-sm p-3 xs:p-4 mb-6 xs:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 xs:gap-4">
         <div>
           <h2 className="text-base xs:text-xl font-bold text-gray-900">
             PhD Research Experts
@@ -591,7 +591,7 @@ const FindExpert = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-t from-amber-900/80 to-transparent z-10"></div>
             <img 
-              src="https://images.unsplash.com/photo-1581093458799-ef0d1c3d3f5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+              src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
               alt="Research Marketplace" 
               className="w-full h-full object-cover"
             />
