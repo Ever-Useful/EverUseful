@@ -7,6 +7,7 @@ import { Footer } from "../components/Footer";
 import { ArrowUpDown } from "lucide-react";
 import noUserProfile from "../assets/images/no user profile.png";
 import { API_ENDPOINTS } from '../config/api';
+import { getUserAvatarUrl } from '@/utils/s3ImageUtils';
 
 // HERO SECTION DATA
 const heroFeatures = [
@@ -110,7 +111,7 @@ const pricingPlans = [
   },
   {
     name: "Professional",
-    price: "$29",
+            price: "₹29",
     period: "/month",
     description: "For serious research projects",
     features: [
@@ -223,10 +224,10 @@ const stories = [
     name: "Dr. Sophia Müller",
     country: "🇩🇪",
     title: "Biotech Startup Success",
-    desc: "Helped a biotech startup secure $2M in funding through research-backed proposals.",
+            desc: "Helped a biotech startup secure ₹2M in funding through research-backed proposals.",
     img: "https://randomuser.me/api/portraits/women/65.jpg",
     color: "bg-green-100",
-    impact: "$2M funding",
+            impact: "₹2M funding",
   },
   {
     name: "Dr. Ahmed El-Sayed",
@@ -716,7 +717,7 @@ const Work: React.FC = () => {
               <div className="p-4 xs:p-5 flex-1 flex flex-col">
                 <div className="flex justify-center mb-2 xs:mb-3">
                   <img
-                    src={f.profile?.avatar || noUserProfile}
+                    src={getUserAvatarUrl({ avatar: f.profile?.avatar }) || noUserProfile}
                     alt={f.profile?.firstName || 'Freelancer'}
                     className="w-16 xs:w-20 h-16 xs:h-20 rounded-full object-cover border-2 xs:border-3 border-white/80 shadow-lg"
                   />

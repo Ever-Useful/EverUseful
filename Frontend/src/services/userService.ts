@@ -3,17 +3,24 @@ import { API_ENDPOINTS, makeAuthenticatedRequest } from '../config/api';
 
 interface UserProfile {
   avatar: string;
+  backgroundImage?: string;
   bio: string;
   location: string;
   website: string;
   title: string;
   createdAt: string;
   updatedAt: string;
+  firstName?: string;
+  lastName?: string;
+  userType?: string;
+  username?: string;
+  email?: string;
+  mobile?: string;
+  phoneNumber?: string;
   gender?: string;
   domain?: string;
   purpose?: string;
   role?: string;
-  mobile?: string;
   dateOfBirth?: string;
 }
 
@@ -132,9 +139,7 @@ class UserService {
   }
 
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
-    console.log('Making request to:', endpoint);
     const token = await this.getAuthToken();
-    console.log('Token retrieved, making fetch request');
     
     const response = await fetch(endpoint, {
       ...options,
@@ -144,9 +149,6 @@ class UserService {
         ...options.headers,
       },
     });
-
-    console.log('Response status:', response.status);
-    console.log('Response ok:', response.ok);
 
     if (!response.ok) {
       const error = await response.json();
@@ -441,16 +443,11 @@ class UserService {
 
   // Get dashboard data
   async getDashboardData() {
-    // Replace with your actual API endpoint
-    const response = await fetch('/api/dashboard', {
+    const token = await this.getAuthToken();
+    const response = await this.makeRequest(`${API_ENDPOINTS.DASHBOARD}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // Add authorization header if needed
-      },
     });
-    if (!response.ok) throw new Error('Failed to fetch dashboard data');
-    return await response.json();
+    return response;
   }
 }
 

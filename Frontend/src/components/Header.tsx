@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import {
@@ -35,7 +35,7 @@ import {
     ShoppingCart,
     Menu
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/assets/Logo/Logo Side Simple.png';
 import InitialsAvatar from './InitialsAvatar';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +43,7 @@ import Navigation from '@/components/Navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import userService from '@/services/userService';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Connections from '@/components/Connections';
 import { EditProfile } from '../components/EditProfile';
@@ -93,7 +94,7 @@ const mockNotifications = [
     {
         id: 6,
         title: "Payment received",
-        message: "$250 payment received for your freelance work",
+                        message: "₹250 payment received for your freelance work",
         time: "2 days ago",
         unread: false,
         type: "payment",
@@ -219,6 +220,19 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
 
 const Header = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    // Check if current page needs user data (only pages that require authentication)
+    const needsUserData = useMemo(() => {
+        const authRequiredRoutes = [
+            '/dashboard', '/profile', '/marketplace', '/cart', '/chat', 
+            '/connections', '/collaborators', '/freelancing', '/findexpert',
+            '/freelancerprofile', '/studentprofile', '/businessprofile',
+            '/new-project', '/schedule-meeting'
+        ];
+        const needsData = authRequiredRoutes.some(route => location.pathname.startsWith(route));
+        return needsData;
+    }, [location.pathname]);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [messages, setMessages] = useState(mockMessages);
     const unreadMessageCount = messages.filter(m => m.unread).length;
@@ -228,8 +242,7 @@ const Header = () => {
     const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
     const [notifications, setNotifications] = useState(mockNotifications);
     const unreadNotificationCount = notifications.filter(n => n.unread).length;
-    const [profileData, setProfileData] = useState({ firstName: '', lastName: '' });
-    const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
+    const { profileData, isLoggedIn, refreshProfile } = useUserProfile();
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
@@ -321,26 +334,24 @@ const Header = () => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                setIsLoggedIn(true);
                 localStorage.setItem("isLoggedIn", "true");
-                try {
-                    const userProfile = await userService.getUserProfile();
-                    setProfileData({
-                        firstName: userProfile.data?.auth?.firstName || '',
-                        lastName: userProfile.data?.auth?.lastName || '',
-                    });
-                } catch (error) {
-                    console.error('Error fetching user profile:', error);
-                    setProfileData({ firstName: '', lastName: '' });
+                
+                // Only fetch user profile if the current page needs it AND we don't have cached data
+                if (needsUserData) {
+                    await refreshProfile();
                 }
             } else {
-                setIsLoggedIn(false);
                 localStorage.removeItem("isLoggedIn");
-                setProfileData({ firstName: '', lastName: '' });
             }
         });
         return () => unsubscribe();
-    }, []);
+    }, [needsUserData, refreshProfile]);
+
+    // Function to refresh profile data - only called when explicitly needed
+    const refreshProfileData = async () => {
+        if (!needsUserData) return; // Skip if not needed
+        await refreshProfile();
+    };
 
     const handleMessageClick = (messageId: number) => {
         setMessages(prev =>
@@ -357,8 +368,6 @@ const Header = () => {
     const handleLogout = async () => {
         try {
             // Clear all user-related state
-            setIsLoggedIn(false);
-            setProfileData({ firstName: '', lastName: '' });
             setShowNotificationsSidebar(false);
             setShowMessagesSidebar(false);
             setShowProfileSidebar(false);
@@ -380,9 +389,7 @@ const Header = () => {
     useEffect(() => {
         const handleStorageChange = () => {
             const loginStatus = localStorage.getItem("isLoggedIn") === "true";
-            setIsLoggedIn(loginStatus);
             if (!loginStatus) {
-                setProfileData({ firstName: '', lastName: '' });
                 setShowNotificationsSidebar(false);
                 setShowMessagesSidebar(false);
                 setShowProfileSidebar(false);
@@ -456,7 +463,7 @@ const Header = () => {
                                     />
                                 </div>
                             </div>
-                            <Navigation />
+                            <Navigation isLoggedIn={isLoggedIn} />
                         </div>
 
                         {/* Right Section */}
@@ -621,24 +628,25 @@ const Header = () => {
                                 </>
                             ) : (
                                 <>
-                                    {/* Mobile: Join and Sign In buttons */}
-                                    <div className="flex md:hidden items-center space-x-2 ">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            asChild
-                                            className="text-sm px-3 py-1"
-                                        >
-                                            <Link to="/signin">Sign In</Link>
-                                        </Button>
+                                    {/* Mobile: Join and Hamburger buttons */}
+                                    <div className="flex md:hidden items-center space-x-2">
                                         <Button
                                             variant="default"
                                             size="sm"
-                                            bg-background="emerald-600"
                                             asChild
-                                            className="text-sm px-3 py-1"
+                                            className="text-sm px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
                                         >
                                             <Link to="/signup">Join</Link>
+                                        </Button>
+                                        {/* Hamburger Menu for logged out users */}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="p-2"
+                                            aria-label="Open menu"
+                                            onClick={() => setShowMobileMenu(true)}
+                                        >
+                                            <Menu className="h-6 w-6 text-gray-700" />
                                         </Button>
                                     </div>
                                     {/* Desktop: Join and Sign In buttons */}
@@ -646,16 +654,14 @@ const Header = () => {
                                         <Button
                                             variant="outline"
                                             asChild
-                                            bg-border="emerald-600"
-                                            className="text-sm px-4 py-2"
+                                            className="text-sm px-4 py-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold rounded-lg transition-all duration-200"
                                         >
                                             <Link to="/signin">Sign In</Link>
                                         </Button>
                                         <Button
                                             variant="default"
                                             asChild
-                                            bg-background="emerald-600"
-                                            className="text-sm px-4 py-2"
+                                            className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
                                         >
                                             <Link to="/signup">Join</Link>
                                         </Button>
@@ -686,56 +692,85 @@ const Header = () => {
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                            {/* Search */}
-                            <div className="mb-4">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search projects, services..."
-                                        className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
-                                    />
-                                </div>
-                            </div>
-                            {/* Navigation */}
-                            <Navigation mobile />
-                            {/* Cart */}
-                            <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
-                                <span className="text-gray-700 font-medium">Cart</span>
-                            </Link>
-                            {/* Messages */}
-                            <button
-                                className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
-                                onClick={() => {
-                                    setShowMessagesSidebar(true);
-                                    setShowMobileMenu(false);
-                                }}
-                            >
-                                <MessageSquare className="w-5 h-5 mr-3 text-gray-600" />
-                                <span className="text-gray-700 font-medium">Messages</span>
-                                {unreadMessageCount > 0 && (
-                                    <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
-                                        {unreadMessageCount}
-                                    </Badge>
-                                )}
-                            </button>
-                            {/* Notifications */}
-                            <button
-                                className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
-                                onClick={() => {
-                                    setShowNotificationsSidebar(true);
-                                    setShowMobileMenu(false);
-                                }}
-                            >
-                                <Bell className="w-5 h-5 mr-3 text-gray-600" />
-                                <span className="text-gray-700 font-medium">Notifications</span>
-                                {unreadNotificationCount > 0 && (
-                                    <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
-                                        {unreadNotificationCount}
-                                    </Badge>
-                                )}
-                            </button>
+                            {isLoggedIn ? (
+                                <>
+                                    {/* Search */}
+                                    <div className="mb-4">
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search projects, services..."
+                                                className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
+                                            />
+                                        </div>
+                                    </div>
+                                    {/* Navigation */}
+                                    <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    {/* Cart */}
+                                    <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                        <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Cart</span>
+                                    </Link>
+                                    {/* Messages */}
+                                    <button
+                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
+                                        onClick={() => {
+                                            setShowMessagesSidebar(true);
+                                            setShowMobileMenu(false);
+                                        }}
+                                    >
+                                        <MessageSquare className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Messages</span>
+                                        {unreadMessageCount > 0 && (
+                                            <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
+                                                {unreadMessageCount}
+                                            </Badge>
+                                        )}
+                                    </button>
+                                    {/* Notifications */}
+                                    <button
+                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
+                                        onClick={() => {
+                                            setShowNotificationsSidebar(true);
+                                            setShowMobileMenu(false);
+                                        }}
+                                    >
+                                        <Bell className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Notifications</span>
+                                        {unreadNotificationCount > 0 && (
+                                            <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
+                                                {unreadNotificationCount}
+                                            </Badge>
+                                        )}
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    {/* Search */}
+                                    <div className="mb-4">
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search projects, services..."
+                                                className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
+                                            />
+                                        </div>
+                                    </div>
+                                    {/* Navigation */}
+                                    <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    {/* Sign In Button */}
+                                    <Link 
+                                        to="/signin" 
+                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors"
+                                        onClick={() => setShowMobileMenu(false)}
+                                    >
+                                        <User className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Sign In</span>
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -940,7 +975,23 @@ const Header = () => {
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 <div className="flex flex-col items-center text-center">
-                                    <InitialsAvatar firstName={profileData.firstName} lastName={profileData.lastName} size={80} className="sm:w-24 sm:h-24" />
+                                    {profileData.avatar ? (
+                                        <img 
+                                            src={profileData.avatar} 
+                                            alt={`${profileData.firstName} ${profileData.lastName}`}
+                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                            }}
+                                        />
+                                    ) : null}
+                                    <InitialsAvatar 
+                                        firstName={profileData.firstName} 
+                                        lastName={profileData.lastName} 
+                                        size={80} 
+                                        className={`sm:w-24 sm:h-24 ${profileData.avatar ? 'hidden' : ''}`} 
+                                    />
                                     <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">{profileData.firstName} {profileData.lastName}</h3>
                                     <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
                                         View Profile &gt;

@@ -41,43 +41,156 @@ const SendFeedback = () => {
       
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-indigo-50 to-purple-100 border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <div className="bg-indigo-100 p-4 rounded-full">
-                <MessageSquare className="w-8 h-8 text-indigo-600" />
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="bg-indigo-100 p-3 sm:p-4 rounded-full">
+                <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
               Send Feedback
             </h1>
-            <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-4 sm:mb-6 max-w-3xl mx-auto px-2">
               We value your feedback and suggestions. Share your thoughts, report issues, 
               or suggest improvements to help us enhance our platform.
             </p>
-            <div className="flex items-center justify-center text-sm text-gray-500">
-              <Clock className="w-4 h-4 mr-2" />
+            <div className="flex items-center justify-center text-xs sm:text-sm text-gray-500">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
               Last Updated: June, 2025
             </div>
           </div>
         </div>
       </div>
 
+      {/* Feedback Form Section */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 sm:p-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+              Share Your Feedback
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600">
+              Help us improve by sharing your thoughts, suggestions, or reporting issues
+            </p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                  placeholder="Enter your full name"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                  placeholder="Enter your email"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label htmlFor="feedbackType" className="block text-sm font-medium text-gray-700 mb-2">
+                Feedback Type *
+              </label>
+              <select
+                id="feedbackType"
+                name="feedbackType"
+                value={formData.feedbackType}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+              >
+                <option value="general">General Feedback</option>
+                <option value="bug">Bug Report</option>
+                <option value="feature">Feature Request</option>
+                <option value="improvement">Improvement Suggestion</option>
+                <option value="complaint">Complaint</option>
+                <option value="praise">Praise/Appreciation</option>
+              </select>
+            </div>
+            
+            <div>
+              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                Subject *
+              </label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                placeholder="Brief summary of your feedback"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                Detailed Message *
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                required
+                rows={6}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm resize-vertical"
+                placeholder="Please provide detailed information about your feedback, suggestions, or the issue you're experiencing..."
+              />
+            </div>
+            
+            <div className="flex items-center justify-center pt-4">
+              <button
+                type="submit"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 hover:shadow-lg flex items-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                Submit Feedback
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="prose prose-lg max-w-none">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none">
           
           {/* Overview */}
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Overview</h2>
-            <div className="bg-indigo-50 border-l-4 border-indigo-400 p-6 rounded-r-lg mb-8">
-              <p className="text-gray-700 leading-relaxed">
+          <section className="mb-8 sm:mb-12">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">1. Overview</h2>
+            <div className="bg-indigo-50 border-l-4 border-indigo-400 p-4 sm:p-6 rounded-r-lg mb-6 sm:mb-8">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed">
                 Your feedback is essential to our continuous improvement. We welcome suggestions, 
                 bug reports, feature requests, and general comments about your experience with our platform. 
                 Your input helps us create a better experience for all users.
               </p>
             </div>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed mb-4 sm:mb-6">
               We review all feedback carefully and use it to prioritize improvements, fix issues, 
               and develop new features. While we may not be able to implement every suggestion, 
               we appreciate and consider all feedback we receive.
@@ -85,16 +198,16 @@ const SendFeedback = () => {
           </section>
 
           {/* Types of Feedback */}
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">2. Types of Feedback We Welcome</h2>
-            <p className="text-gray-700 mb-6">
+          <section className="mb-8 sm:mb-12">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">2. Types of Feedback We Welcome</h2>
+            <p className="text-xs sm:text-sm lg:text-base text-gray-700 mb-4 sm:mb-6">
               We encourage feedback in the following categories:
             </p>
             
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-green-800 mb-3">Feature Requests</h3>
-                <ul className="text-gray-700 space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-green-800 mb-2 sm:mb-3">Feature Requests</h3>
+                <ul className="text-xs sm:text-sm lg:text-base text-gray-700 space-y-1 sm:space-y-2">
                   <li>• New functionality ideas</li>
                   <li>• Platform improvements</li>
                   <li>• User experience enhancements</li>
@@ -103,9 +216,9 @@ const SendFeedback = () => {
                 </ul>
               </div>
               
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-blue-800 mb-3">Bug Reports</h3>
-                <ul className="text-gray-700 space-y-2">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-blue-800 mb-2 sm:mb-3">Bug Reports</h3>
+                <ul className="text-xs sm:text-sm lg:text-base text-gray-700 space-y-1 sm:space-y-2">
                   <li>• Technical issues</li>
                   <li>• Error messages</li>
                   <li>• Performance problems</li>
@@ -114,9 +227,9 @@ const SendFeedback = () => {
                 </ul>
               </div>
               
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-purple-800 mb-3">User Experience</h3>
-                <ul className="text-gray-700 space-y-2">
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-purple-800 mb-2 sm:mb-3">User Experience</h3>
+                <ul className="text-xs sm:text-sm lg:text-base text-gray-700 space-y-1 sm:space-y-2">
                   <li>• Interface improvements</li>
                   <li>• Navigation suggestions</li>
                   <li>• Accessibility concerns</li>
@@ -125,9 +238,9 @@ const SendFeedback = () => {
                 </ul>
               </div>
               
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-orange-800 mb-3">Content & Services</h3>
-                <ul className="text-gray-700 space-y-2">
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-orange-800 mb-2 sm:mb-3">Content & Services</h3>
+                <ul className="text-xs sm:text-sm lg:text-base text-gray-700 space-y-1 sm:space-y-2">
                   <li>• Course content quality</li>
                   <li>• Service delivery</li>
                   <li>• Support experience</li>
@@ -350,35 +463,19 @@ const SendFeedback = () => {
           </section>
 
           {/* Contact Information */}
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">9. Contact Us</h2>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-              <p className="text-gray-700 mb-6">
+          <section className="mb-8 sm:mb-12">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">9. Contact Us</h2>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-700 mb-4 sm:mb-6">
                 For feedback or questions about our feedback process, please contact us:
               </p>
               
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-4 sm:gap-6">
                 <div className="flex items-start">
-                  <Mail className="w-5 h-5 text-blue-600 mt-1 mr-3 flex-shrink-0" />
+                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-1 mr-2 sm:mr-3 flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold text-gray-900">Email</h4>
-                    <p className="text-gray-700">feedback@amoghedu.com</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <Phone className="w-5 h-5 text-green-600 mt-1 mr-3 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Phone</h4>
-                    <p className="text-gray-700">+1 (555) 123-4567</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <MessageSquare className="w-5 h-5 text-purple-600 mt-1 mr-3 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Address</h4>
-                    <p className="text-gray-700">123 Business Street, City, State 12345</p>
+                    <h4 className="font-semibold text-gray-900 text-sm sm:text-base">Email</h4>
+                    <p className="text-xs sm:text-sm lg:text-base text-gray-700">amogheveruseful@gmail.com</p>
                   </div>
                 </div>
               </div>

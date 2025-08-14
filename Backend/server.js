@@ -7,16 +7,24 @@ const userRoutes = require('./routes/users');
 const userService = require('./services/userService');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
+const s3Routes = require('./routes/s3');
 
 const app = express();
 
 app.use(cors({
-  origin: '*', // In production, replace with your frontend domain
+  origin: [
+    'https://amoghconnect.com',
+    'http://localhost:8080',
+    'http://localhost:3000',
+    // 'https://www.amoghconnect.com', // Uncomment if you use www subdomain
+    // Add more allowed origins as needed
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ limit: '25mb', extended: true }));
 
 // Test endpoint to check if server is running
 app.get('/api/test', (req, res) => {
@@ -28,6 +36,9 @@ app.use('/api/marketplace', marketplaceRoutes);
 
 // User routes
 app.use('/api/users', userRoutes);
+
+// S3 routes
+app.use('/api/s3', s3Routes);
 
 app.use('/api', dashboardRoutes);
 app.use('/api/admin', adminRoutes);

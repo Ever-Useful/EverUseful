@@ -183,8 +183,20 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           location: userProfileData?.location || '',
           year: studentInfo?.year || '',
           userType: normalizeUserType(authData?.userType || storedUserType || ''),
-          username: authData?.username || '',
-          email: authData?.email || storedEmail || '',
+          // Added robust fallbacks for username
+          username:
+            authData?.username ||
+            userProfileData?.username ||
+            (authData?.email ? authData.email.split('@')[0] : '') ||
+            (userProfileData?.email ? userProfileData.email.split('@')[0] : '') ||
+            '',
+          // Added robust fallbacks for email
+          email:
+            authData?.email ||
+            userProfileData?.email ||
+            storedEmail ||
+            (auth && auth.currentUser ? auth.currentUser.email || '' : '') ||
+            '',
           mobile: authData?.mobile || authData?.phoneNumber || storedPhone || '',
           countryCode: '+91',
           gender: authData?.gender || userProfileData?.gender || '',
@@ -258,9 +270,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           phoneNumber: profileData.mobile,
         });
         
-        // Also update profile with mobile field
+        // Also update profile with mobile field (and username if provided)
         await userService.updateProfile({
           mobile: profileData.mobile,
+          ...(profileData.username ? { username: profileData.username } : {})
         });
         
         // Update profile info (userData.json fields)
@@ -1006,7 +1019,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div className="flex justify-end gap-2 mt-4">
                         <Button type="button" variant="outline" onClick={handleCancelEducation}>Cancel</Button>
-                        <Button type="submit" className="bg-blue-600 text-white" variant="default">Save</Button>
+                        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0" variant="default">Save</Button>
                       </div>
                     </form>
                   ) : (
@@ -1101,7 +1114,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div className="flex justify-end gap-2 mt-4">
                         <Button type="button" variant="outline" onClick={handleCancelWork}>Cancel</Button>
-                        <Button type="submit" className="bg-blue-600 text-white" variant="default">Save</Button>
+                        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0" variant="default">Save</Button>
                       </div>
                     </form>
                   ) : (
