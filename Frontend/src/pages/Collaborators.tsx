@@ -4,9 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
-import { auth, db } from '@/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-
+import { auth } from '@/lib/firebase';
+import { API_ENDPOINTS } from '../config/api';
 
 interface User {
   id: string;
@@ -21,6 +20,7 @@ const Collaborators = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -28,25 +28,22 @@ const Collaborators = () => {
 
   const fetchUsers = async () => {
     try {
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('type', 'in', ['student', 'professor']));
-      const querySnapshot = await getDocs(q);
-      
-      const usersData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as User[];
-
-      setUsers(usersData);
+      setLoading(true);
+      const response = await fetch(API_ENDPOINTS.USERS + "/all");
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      const data = await response.json();
+      setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error('Failed to load users');
+      setError('Failed to load users');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleConnect = async (userId: string) => {
+  const handleFollow = async (userId: string) => {
     const currentUser = auth.currentUser;
     if (!currentUser) {
       toast.error('Please sign in to connect with others');
@@ -54,11 +51,25 @@ const Collaborators = () => {
     }
 
     try {
-      // await incrementFollowing(currentUser.uid);
-      toast.success('Connection request sent!');
+      const response = await fetch(API_ENDPOINTS.USER_FOLLOW, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await currentUser.getIdToken()}`
+        },
+        body: JSON.stringify({ targetUserId: userId })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to follow user');
+      }
+
+      // Refresh users list
+      fetchUsers();
+      toast.success('User followed successfully!');
     } catch (error) {
-      console.error('Error connecting with user:', error);
-      toast.error('Failed to send connection request');
+      console.error('Error following user:', error);
+      toast.error('Failed to follow user');
     }
   };
 
@@ -123,7 +134,7 @@ const Collaborators = () => {
                     </div>
                   </div>
                   <Button
-                    onClick={() => handleConnect(user.id)}
+                    onClick={() => handleFollow(user.id)}
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   >
                     Connect

@@ -15,15 +15,18 @@ import {
   GithubAuthProvider,
   FacebookAuthProvider,
   sendEmailVerification,
-  Auth 
+  Auth,
+  RecaptchaVerifier,
+  ConfirmationResult,
+  signInWithPhoneNumber
 } from "firebase/auth";
 import { auth, handleGoogleAuth, handleGithubAuth } from "../lib/firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, addDoc, getFirestore, collection, setDoc } from "firebase/firestore";
-import { db } from "../lib/firebase"; // Make sure db is exported from your firebase config
+// Removed Firestore imports - using DynamoDB now
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { userService } from '@/services/userService';
-import { firestoreService } from '@/services/firestoreService';
+import userService from '@/services/userService';
+// Removed Firestore import - using DynamoDB now
+import { API_ENDPOINTS } from '../config/api';
 import Logo from '../assets/Logo/Logo Side.png'
 
 const SignUp = () => {
@@ -219,8 +222,7 @@ const SignUp = () => {
     } catch (error: any) {
       // Error is already handled in signUpWithEmailAndPassword
       console.error("Signup failed:", error);
-    } finally {
-      setIsLoading(false);
+      // Don't set loading to false here as it's handled in signUpWithEmailAndPassword
     }
   };
 
@@ -290,55 +292,77 @@ const SignUp = () => {
 
   const signUpWithEmailAndPassword = async () => {
     try {
+      // First, create the Firebase account
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const idToken = await userCredential.user.getIdToken();
 
-      // Ensure user exists in backend and customUserId is saved
-      const backendUser = await userService.ensureUserExists({
-        name: formData.firstName + ' ' + formData.lastName,
-        email: formData.email,
-        avatar: userCredential.user.photoURL || null,
-        bio: null,
-        location: null,
-        website: null,
+      console.log('Firebase account created successfully:', userCredential.user.uid);
+      console.log('Sending user data to backend:', {
         userType: formData.userType,
-        title: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-      // Save backend customUserId in Firestore
-      await firestoreService.setCurrentUserData({
-        customUserId: backendUser.customUserId,
-        name: formData.firstName + ' ' + formData.lastName,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: selectedCode + formData.phone,
         email: formData.email,
-        userType: formData.userType,
-        createdAt: new Date().toISOString(),
       });
 
-      await fetch('http://localhost:3000/token', {
+      // Save user data to DynamoDB via backend with all form data
+      const response = await fetch(API_ENDPOINTS.TOKEN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
+          'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({
+          userType: formData.userType,
           firstName: formData.firstName,
           lastName: formData.lastName,
-          phone: formData.phone,
-          userType: formData.userType,
+          phoneNumber: selectedCode + formData.phone,
+          email: formData.email,
+          username: formData.email.split('@')[0], // Send username derived from email
         }),
       });
-      navigate('/signin');
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Backend error response:', errorData);
+        throw new Error(errorData.error || `Failed to save user data to backend: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('User data saved successfully:', result);
+      
+      // Set localStorage to indicate user is logged in and store user data
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userType", formData.userType);
+      localStorage.setItem("userName", `${formData.firstName} ${formData.lastName}`);
+      localStorage.setItem("userFirstName", formData.firstName);
+      localStorage.setItem("userLastName", formData.lastName);
+      localStorage.setItem("userEmail", formData.email);
+      localStorage.setItem("userPhone", selectedCode + formData.phone);
+      localStorage.setItem("userUsername", formData.email.split('@')[0]); // Store username derived from email
+      localStorage.setItem("userDataSaved", "true");
+      
+      // Dispatch storage event to notify other components
+      window.dispatchEvent(new Event("storage"));
+      
+      // Navigate to profile page
+      navigate('/profile');
     } catch (error: any) {
       console.error("Error creating account:", error);
       if (error.code === 'auth/email-already-in-use') {
         setError("An account with this email already exists. Please sign in instead.");
+        // Add a link to signin page
+        setTimeout(() => {
+          navigate('/signin');
+        }, 3000);
       } else if (error.code === 'auth/invalid-email') {
         setError("Please enter a valid email address");
       } else if (error.code === 'auth/weak-password') {
         setError("Please use a stronger password");
       } else if (error.code === 'auth/network-request-failed') {
         setError("Network error. Please check your connection and try again.");
+      } else if (error.message.includes('Failed to save user data')) {
+        setError("Account created but failed to save profile. Please try signing in.");
       } else {
         setError("An error occurred while creating your account. Please try again.");
       }
@@ -387,14 +411,11 @@ const SignUp = () => {
             <div className="flex items-center space-x-1 flex-shrink-0">
               <Link to="/" className="flex items-center space-x-2 group">
                 <img src={Logo} alt="AMOGH" className="h-10 xs:h-14 w-auto md:h-8" />
-                <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
-                  beta
-                </div>
               </Link>
             </div>
           </div>
-          <h1 className="text-xl xs:text-2xl lg:text-4xl font-bold text-gray-900 mb-2 lg:mb-4">Join the Innovation Network</h1>
-          <p className="text-base xs:text-lg lg:text-xl text-gray-600 mb-2 xs:mb-3 lg:mb-4">Create your account and start building the future</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2 lg:mb-4 mobile-text-4xl">Join the Innovation Network</h1>
+          <p className="text-base text-gray-600 mb-2 xs:mb-3 lg:mb-4 mobile-text-base">Create your account and start building the future</p>
           <div className="flex items-center justify-center space-x-2 flex-wrap gap-2">
             <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:scale-105 transition-transform text-xs lg:text-sm">
               <Star className="w-3 h-3 mr-1" />
@@ -494,7 +515,7 @@ const SignUp = () => {
               {/* Sign Up Form */}
               <Card className="backdrop-blur-xl bg-white/90 border-0 shadow-2xl animate-scale-in delay-500">
                 <CardHeader className="text-center pb-4 lg:pb-6">
-                  <CardTitle className="text-xl lg:text-2xl font-bold text-gray-900">Create Account</CardTitle>
+                  <CardTitle className="text-3xl font-bold text-gray-900">Create Account</CardTitle>
                   <CardDescription className="text-gray-600 text-sm lg:text-base">
                     Fill in your information to get started
                   </CardDescription>
@@ -700,6 +721,16 @@ const SignUp = () => {
                   {error && (
                     <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
                       <p className="text-sm text-red-600">{error}</p>
+                      {error.includes("already exists") && (
+                        <div className="mt-2">
+                          <Link 
+                            to="/signin" 
+                            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                          >
+                            Click here to sign in →
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -750,8 +781,17 @@ const SignUp = () => {
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     disabled={!isFormValid() || isLoading}
                   >
-                    {isLoading ? "Creating Account..." : "Continue"}
-                    {!isLoading && <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+                    {isLoading ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Creating Account...
+                      </div>
+                    ) : (
+                      <>
+                        Continue
+                        <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
                   </Button>
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
@@ -764,7 +804,19 @@ const SignUp = () => {
 
                   <div className="flex justify-center gap-3 lg:gap-4">
                     <Button 
-                    onClick={() => handleGoogleAuth(navigate, formData.userType)}
+                    onClick={async () => {
+                      try {
+                        setIsLoading(true);
+                        setError(null);
+                        await handleGoogleAuth(navigate, formData.userType);
+                      } catch (error: any) {
+                        console.error("Google auth error:", error);
+                        setError("Google sign-in failed. Please try again.");
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }}
+                    disabled={isLoading}
                     variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
                       <svg className="w-4 h-4 lg:w-5 lg:h-5" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -774,7 +826,19 @@ const SignUp = () => {
                       </svg>
                     </Button>
                     <Button 
-                    onClick={() => handleGithubAuth(navigate, formData.userType)}
+                    onClick={async () => {
+                      try {
+                        setIsLoading(true);
+                        setError(null);
+                        await handleGithubAuth(navigate, formData.userType);
+                      } catch (error: any) {
+                        console.error("GitHub auth error:", error);
+                        setError("GitHub sign-in failed. Please try again.");
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }}
+                    disabled={isLoading}
                     variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
                       <Github className="w-4 h-4 lg:w-5 lg:h-5" />
                     </Button>
@@ -797,7 +861,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Mail className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl font-bold text-gray-900">Verify Your Email</CardTitle>
+                <CardTitle className="text-3xl font-bold text-gray-900">Verify Your Email</CardTitle>
                 <CardDescription className="text-gray-600">
                   We've sent a verification code to {formData.email}
                 </CardDescription>
@@ -846,7 +910,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl font-bold text-gray-900">Setup Multi-Factor Authentication</CardTitle>
+                <CardTitle className="text-3xl font-bold text-gray-900">Setup Multi-Factor Authentication</CardTitle>
                 <CardDescription className="text-gray-600">
                   Choose your preferred authentication method for enhanced security
                 </CardDescription>
@@ -896,7 +960,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl font-bold text-gray-900">Welcome to ProjectBridge!</CardTitle>
+                <CardTitle className="text-3xl font-bold text-gray-900">Welcome to ProjectBridge!</CardTitle>
                 <CardDescription className="text-gray-600">
                   Your account has been created successfully
                 </CardDescription>

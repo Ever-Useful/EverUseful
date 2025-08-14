@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ArrowLeft, Truck, Mail, Phone, MapPin, Calendar } from "lucide-react";
 
-const DeliveryPolicy = () => {
+const AccessibilityPolicy = () => {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      
+
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-teal-50 to-cyan-100 border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -18,15 +18,14 @@ const DeliveryPolicy = () => {
               </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Delivery Policy
+              Accessibility Policy
             </h1>
             <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
-              Learn about our delivery processes, timelines, and policies for digital products, 
-              services, and physical items available on our platform.
+              Learn about our commitment to accessibility for all users, including accessible digital content, physical products, and support services.
             </p>
             <div className="flex items-center justify-center text-sm text-gray-500">
               <Calendar className="w-4 h-4 mr-2" />
-              Last Updated: February 4, 2025
+              Last Updated: June, 2025
             </div>
           </div>
         </div>
@@ -35,243 +34,216 @@ const DeliveryPolicy = () => {
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="prose prose-lg max-w-none">
-          
-          {/* Overview */}
+
+          {/* Accessibility Commitment */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Overview</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Our Accessibility Commitment</h2>
             <div className="bg-teal-50 border-l-4 border-teal-400 p-6 rounded-r-lg mb-8">
               <p className="text-gray-700 leading-relaxed">
-                This Delivery Policy outlines how we deliver our products and services to you. 
-                Our delivery methods vary depending on the type of product or service you purchase, 
-                and we strive to ensure timely and secure delivery of all items.
+                We are dedicated to providing an inclusive experience for all users, regardless of ability. Our website, digital products, and customer support are designed to meet recognized accessibility standards such as WCAG and ADA.
               </p>
             </div>
             <p className="text-gray-700 leading-relaxed mb-6">
-              We offer various delivery options for different types of products and services, 
-              including instant digital access, scheduled deliveries, and physical shipping. 
-              This policy explains what you can expect from our delivery process.
+              We continually review and improve our accessibility features. If you encounter any barriers or need accommodations, please contact us and we will work with you to ensure equal access.
             </p>
           </section>
 
-          {/* Digital Products */}
+          {/* Accessible Digital Products */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">2. Digital Products & Services</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">2. Accessible Digital Products & Services</h2>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-              <h3 className="text-xl font-semibold text-blue-800 mb-3">Instant Access</h3>
+              <h3 className="text-xl font-semibold text-blue-800 mb-3">Accessibility Features</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Most digital products and services are delivered instantly upon successful payment:
+                All digital products and services are delivered in accessible formats, compatible with screen readers, keyboard navigation, and alternative text for images. We provide:
               </p>
               <ul className="text-gray-700 space-y-2">
-                <li>• Online courses and educational content</li>
-                <li>• Digital downloads and resources</li>
-                <li>• Software licenses and access codes</li>
-                <li>• Membership access and subscriptions</li>
-                <li>• Virtual consultations and services</li>
+                <li>• Online courses and content with captions, transcripts, and alt text</li>
+                <li>• Digital downloads in accessible formats (PDF, audio, large print)</li>
+                <li>• Software and platforms supporting assistive technologies</li>
+                <li>• Accessible membership and subscription portals</li>
+                <li>• Virtual consultations with live captioning available</li>
               </ul>
             </div>
-            
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                 <h4 className="font-semibold text-green-800 mb-2">Access Methods</h4>
                 <ul className="text-gray-700 text-sm space-y-2">
-                  <li>• Email confirmation with access details</li>
-                  <li>• Direct login to your account</li>
-                  <li>• Download links sent to your email</li>
-                  <li>• Dashboard access for course materials</li>
+                  <li>• Accessible email confirmations and instructions</li>
+                  <li>• Account login with screen reader support</li>
+                  <li>• Download links with accessible file formats</li>
+                  <li>• WCAG-compliant dashboards and course materials</li>
                 </ul>
               </div>
-              
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                <h4 className="font-semibold text-purple-800 mb-2">Support</h4>
+                <h4 className="font-semibold text-purple-800 mb-2">Accessibility Support</h4>
                 <ul className="text-gray-700 text-sm space-y-2">
-                  <li>• 24/7 technical support available</li>
-                  <li>• Help documentation and guides</li>
-                  <li>• Live chat support during business hours</li>
-                  <li>• Email support for complex issues</li>
+                  <li>• 24/7 technical support for accessibility issues</li>
+                  <li>• Help guides in accessible formats</li>
+                  <li>• Live chat and email support for accommodations</li>
+                  <li>• Dedicated accessibility assistance</li>
                 </ul>
               </div>
             </div>
           </section>
 
-          {/* Physical Products */}
+          {/* Accessible Physical Products */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">3. Physical Products</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">3. Accessible Physical Products</h2>
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-6">
-              <h3 className="text-xl font-semibold text-orange-800 mb-3">Shipping Information</h3>
+              <h3 className="text-xl font-semibold text-orange-800 mb-3">Accessible Packaging & Instructions</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
-                For physical products, we offer various shipping options:
+                We offer accessible packaging, delivery instructions in large print or braille, and can accommodate special needs upon request.
               </p>
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="text-center">
                   <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-green-600 font-bold">1-3</span>
+                    <span className="text-green-600 font-bold">Vision</span>
                   </div>
-                  <h4 className="font-semibold text-green-800 text-sm">Express</h4>
-                  <p className="text-gray-600 text-xs">1-3 business days</p>
+                  <h4 className="font-semibold text-green-800 text-sm">Large Print/Braille</h4>
+                  <p className="text-gray-600 text-xs">Accessible labels & instructions</p>
                 </div>
                 <div className="text-center">
                   <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-blue-600 font-bold">3-7</span>
+                    <span className="text-blue-600 font-bold">Mobility</span>
                   </div>
-                  <h4 className="font-semibold text-blue-800 text-sm">Standard</h4>
-                  <p className="text-gray-600 text-xs">3-7 business days</p>
+                  <h4 className="font-semibold text-blue-800 text-sm">Easy-Open Packaging</h4>
+                  <p className="text-gray-600 text-xs">Accessible for limited mobility</p>
                 </div>
                 <div className="text-center">
                   <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-gray-600 font-bold">7-14</span>
+                    <span className="text-gray-600 font-bold">Hearing</span>
                   </div>
-                  <h4 className="font-semibold text-gray-800 text-sm">Economy</h4>
-                  <p className="text-gray-600 text-xs">7-14 business days</p>
+                  <h4 className="font-semibold text-gray-800 text-sm">Visual Instructions</h4>
+                  <p className="text-gray-600 text-xs">Pictorial guides included</p>
                 </div>
               </div>
             </div>
-            
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                <h4 className="font-semibold text-yellow-800 mb-2">Shipping Partners</h4>
+                <h4 className="font-semibold text-yellow-800 mb-2">Accessibility Partners</h4>
                 <ul className="text-gray-700 text-sm space-y-2">
-                  <li>• FedEx Express and Ground</li>
-                  <li>• UPS Standard and Express</li>
-                  <li>• USPS Priority and First Class</li>
-                  <li>• DHL International</li>
-                  <li>• Local courier services</li>
+                  <li>• Collaboration with accessible shipping providers</li>
+                  <li>• Delivery instructions in accessible formats upon request</li>
+                  <li>• Accommodations for mobility, vision, or hearing needs</li>
                 </ul>
               </div>
-              
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-6">
-                <h4 className="font-semibold text-indigo-800 mb-2">Tracking</h4>
+                <h4 className="font-semibold text-indigo-800 mb-2">Accessible Tracking</h4>
                 <ul className="text-gray-700 text-sm space-y-2">
-                  <li>• Real-time tracking updates</li>
-                  <li>• Email notifications at each stage</li>
-                  <li>• SMS alerts for delivery status</li>
-                  <li>• Online tracking portal access</li>
-                  <li>• Customer service support</li>
+                  <li>• Real-time tracking on accessible websites</li>
+                  <li>• Email and SMS notifications in accessible formats</li>
+                  <li>• Customer service for accessibility support</li>
                 </ul>
               </div>
             </div>
           </section>
 
-          {/* Delivery Areas */}
+          {/* Accessibility Areas */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">4. Delivery Areas</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">4. Accessibility Areas</h2>
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
               <p className="text-gray-700 leading-relaxed mb-4">
-                We currently deliver to the following areas:
+                We provide accessible services and products domestically and internationally. Please specify any accessibility needs during checkout or contact support for assistance.
               </p>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold text-green-800 mb-2">Domestic Delivery</h4>
+                  <h4 className="font-semibold text-green-800 mb-2">Domestic Accessibility</h4>
                   <ul className="text-gray-700 text-sm space-y-1">
-                    <li>• All 50 US states</li>
-                    <li>• Washington D.C.</li>
-                    <li>• US territories (Puerto Rico, Guam, etc.)</li>
-                    <li>• Alaska and Hawaii</li>
+                    <li>• Accessible service available in all US states and territories</li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-green-800 mb-2">International Delivery</h4>
+                  <h4 className="font-semibold text-green-800 mb-2">International Accessibility</h4>
                   <ul className="text-gray-700 text-sm space-y-1">
-                    <li>• Canada and Mexico</li>
-                    <li>• European Union countries</li>
-                    <li>• United Kingdom</li>
-                    <li>• Australia and New Zealand</li>
-                    <li>• Select Asian countries</li>
+                    <li>• Accessible service available in supported international regions</li>
                   </ul>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Delivery Fees */}
+          {/* Accessibility Fees */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">5. Delivery Fees</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">5. Accessibility Fees</h2>
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
               <p className="text-gray-700 leading-relaxed mb-4">
-                Our delivery fees vary based on the type of product and delivery method:
+                Accessibility features and accommodations are provided at no extra cost. Contact us for fee waivers or accommodations if needed.
               </p>
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-white border border-purple-200 rounded-lg p-4">
                   <h4 className="font-semibold text-purple-800 mb-2">Digital Products</h4>
                   <p className="text-2xl font-bold text-purple-600">Free</p>
-                  <p className="text-gray-600 text-sm">Instant delivery</p>
+                  <p className="text-gray-600 text-sm">Accessible formats available</p>
                 </div>
                 <div className="bg-white border border-purple-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-purple-800 mb-2">Standard Shipping</h4>
-                  <p className="text-2xl font-bold text-purple-600">$5.99</p>
-                  <p className="text-gray-600 text-sm">3-7 business days</p>
+                  <h4 className="font-semibold text-purple-800 mb-2">Physical Products</h4>
+                  <p className="text-2xl font-bold text-purple-600">No Extra Fee</p>
+                  <p className="text-gray-600 text-sm">Accessible packaging available</p>
                 </div>
                 <div className="bg-white border border-purple-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-purple-800 mb-2">Express Shipping</h4>
-                  <p className="text-2xl font-bold text-purple-600">$12.99</p>
-                  <p className="text-gray-600 text-sm">1-3 business days</p>
+                  <h4 className="font-semibold text-purple-800 mb-2">Support Services</h4>
+                  <p className="text-2xl font-bold text-purple-600">Free</p>
+                  <p className="text-gray-600 text-sm">Accessibility assistance included</p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Delivery Process */}
+          {/* Accessibility Process */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">6. Delivery Process</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">6. Accessibility Process</h2>
             <div className="space-y-6">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-blue-800 mb-3">Step 1: Order Confirmation</h3>
+                <h3 className="text-xl font-semibold text-blue-800 mb-3">Step 1: Accessible Confirmation</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  Upon successful payment, you will receive an order confirmation email with your order details, 
-                  estimated delivery date, and tracking information (for physical products).
+                  Confirmation emails and instructions are provided in accessible formats. Contact us for braille, large print, or audio versions.
                 </p>
               </div>
-              
               <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-green-800 mb-3">Step 2: Processing</h3>
+                <h3 className="text-xl font-semibold text-green-800 mb-3">Step 2: Processing & Accommodation</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  For physical products, we process your order within 1-2 business days. Digital products 
-                  are typically available immediately or within a few hours.
+                  Orders and requests are processed with accessibility in mind. Notify us of any special requirements and we will accommodate your needs.
                 </p>
               </div>
-              
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-yellow-800 mb-3">Step 3: Shipping</h3>
+                <h3 className="text-xl font-semibold text-yellow-800 mb-3">Step 3: Accessible Support</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  Physical products are shipped using your selected shipping method. You'll receive 
-                  tracking updates via email and SMS.
+                  Support and updates are sent in accessible formats. Our team is available to assist with any accessibility needs.
                 </p>
               </div>
-              
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-purple-800 mb-3">Step 4: Delivery</h3>
+                <h3 className="text-xl font-semibold text-purple-800 mb-3">Step 4: Accessible Completion</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  Your order will be delivered to the address provided during checkout. 
-                  For digital products, access will be granted to your account.
+                  Completion of your order or service includes accessibility accommodations as requested.
                 </p>
               </div>
             </div>
           </section>
 
-          {/* Delivery Issues */}
+          {/* Accessibility Issues & Support */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">7. Delivery Issues</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">7. Accessibility Issues & Support</h2>
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
               <p className="text-gray-700 leading-relaxed mb-4">
-                If you experience any issues with delivery, please contact us immediately:
+                If you experience any accessibility barriers or issues, please contact us immediately. We will resolve accessibility concerns promptly and provide alternative formats or accommodations as needed.
               </p>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold text-red-800 mb-2">Common Issues</h4>
+                  <h4 className="font-semibold text-red-800 mb-2">Common Accessibility Issues</h4>
                   <ul className="text-gray-700 text-sm space-y-2">
-                    <li>• Package not received within expected timeframe</li>
-                    <li>• Damaged or missing items</li>
-                    <li>• Incorrect delivery address</li>
-                    <li>• Digital access not working</li>
-                    <li>• Missing order confirmation</li>
+                    <li>• Inaccessible digital content or files</li>
+                    <li>• Packaging not suitable for your needs</li>
+                    <li>• Instructions not provided in accessible format</li>
+                    <li>• Difficulty using support tools</li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-semibold text-red-800 mb-2">Resolution Steps</h4>
                   <ul className="text-gray-700 text-sm space-y-2">
-                    <li>• Contact customer support within 48 hours</li>
-                    <li>• Provide order number and details</li>
-                    <li>• We'll investigate and resolve promptly</li>
-                    <li>• Refund or replacement if necessary</li>
+                    <li>• Contact accessibility support within 48 hours</li>
+                    <li>• Provide details of your accessibility needs</li>
+                    <li>• We will investigate and resolve promptly</li>
+                    <li>• Alternative formats or accommodations provided</li>
                     <li>• Follow-up to ensure satisfaction</li>
                   </ul>
                 </div>
@@ -279,38 +251,38 @@ const DeliveryPolicy = () => {
             </div>
           </section>
 
-          {/* Contact Information */}
+          {/* Accessibility Contact Information */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">8. Contact Us</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">8. Accessibility Contact</h2>
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
               <p className="text-gray-700 mb-6">
-                For questions about delivery or to report issues, please contact us:
+                For accessibility questions, requests, or to report barriers, please contact our accessibility team:
               </p>
-              
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="flex items-start">
                   <Mail className="w-5 h-5 text-blue-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-gray-900">Email</h4>
-                    <p className="text-gray-700">delivery@amoghedu.com</p>
+                    <p className="text-gray-700">amogheveruseful@gmail.com</p>
                   </div>
                 </div>
-                
-                <div className="flex items-start">
+                {/* <div className="flex items-start">
                   <Phone className="w-5 h-5 text-green-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-gray-900">Phone</h4>
                     <p className="text-gray-700">+1 (555) 123-4567</p>
                   </div>
-                </div>
-                
+                </div> */}
                 <div className="flex items-start">
                   <MapPin className="w-5 h-5 text-red-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-gray-900">Address</h4>
-                    <p className="text-gray-700">123 Business Street, City, State 12345</p>
+                    <p className="text-gray-700">Connaught place , New Delhi-110001, India</p>
                   </div>
                 </div>
+              </div>
+              <div className="mt-4 text-gray-700 text-sm">
+                <strong>Accessibility Requests:</strong> If you need products, services, or communications in an accessible format or have specific accessibility requirements, please mention them when contacting us. We are committed to providing equal access for all customers.
               </div>
             </div>
           </section>
@@ -322,4 +294,4 @@ const DeliveryPolicy = () => {
   );
 };
 
-export default DeliveryPolicy;
+export default AccessibilityPolicy;

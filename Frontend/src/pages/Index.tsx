@@ -1,21 +1,47 @@
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { ImpactMotive } from "@/components/ImpactMotive";
 import { HowItWorks } from "@/components/HowItWorks";
 import { CommunityConnect } from "@/components/CommunityConnect";
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense, useMemo, useCallback } from "react";
 
-// Lazy load heavy components
-const LazyGlobalCollaborations = lazy(() => import("@/components/GlobalCollaborations").then(module => ({ default: module.GlobalCollaborations })));
-const LazyWhatWeProvide = lazy(() => import("@/components/WhatWeProvide").then(module => ({ default: module.WhatWeProvide })));
-const LazyUpcomingPhase = lazy(() => import("@/components/UpcomingPhase").then(module => ({ default: module.UpcomingPhase })));
-const LazyFooter = lazy(() => import("@/components/Footer").then(module => ({ default: module.Footer })));
-const LazyChatbot = lazy(() => import("@/components/Chatbot").then(module => ({ default: module.Chatbot })));
+// Lazy load heavy components with better chunking
+const LazyGlobalCollaborations = lazy(() => 
+  import("@/components/GlobalCollaborations").then(module => ({ 
+    default: module.GlobalCollaborations 
+  }))
+);
+const LazyWhatWeProvide = lazy(() => 
+  import("@/components/WhatWeProvide").then(module => ({ 
+    default: module.WhatWeProvide 
+  }))
+);
+const LazyUpcomingPhase = lazy(() => 
+  import("@/components/UpcomingPhase").then(module => ({ 
+    default: module.UpcomingPhase 
+  }))
+);
+const LazyFooter = lazy(() => 
+  import("@/components/Footer").then(module => ({ 
+    default: module.Footer 
+  }))
+);
+const LazyChatbot = lazy(() => 
+  import("@/components/Chatbot").then(module => ({ 
+    default: module.Chatbot 
+  }))
+);
 
-// import { FreelancingPreview } from "@/components/FreelancingPreview";
+// Performance-optimized loading fallback
+const OptimizedFallback = () => (
+  <div className="min-h-[200px] flex items-center justify-center">
+    <div className="animate-pulse text-gray-400">Loading...</div>
+  </div>
+);
 
-const BackUp = () => {
+const Index = () => {
+  // Memoize components to prevent unnecessary re-renders
   const MemoHeader = useMemo(() => <Header />, []);
   const MemoHero = useMemo(() => <Hero />, []);
   const MemoFeaturedProducts = useMemo(() => <FeaturedProducts />, []);
@@ -23,42 +49,38 @@ const BackUp = () => {
   const MemoHowItWorks = useMemo(() => <HowItWorks deferVideo={true} />, []);
   const MemoCommunityConnect = useMemo(() => <CommunityConnect />, []);
 
+  // Optimize lazy loading with better suspense boundaries
+  const renderLazyComponents = useCallback(() => (
+    <>
+      <Suspense fallback={<OptimizedFallback />}>
+        <LazyGlobalCollaborations />
+      </Suspense>
+      <Suspense fallback={<OptimizedFallback />}>
+        <LazyUpcomingPhase />
+      </Suspense>
+      <Suspense fallback={<OptimizedFallback />}>
+        <LazyWhatWeProvide />
+      </Suspense>
+      <Suspense fallback={<OptimizedFallback />}>
+        <LazyFooter />
+      </Suspense>
+      <Suspense fallback={null}>
+        <LazyChatbot />
+      </Suspense>
+    </>
+  ), []);
+
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* Optimized Background - Static gradient instead of animated */}
-      <div
-        className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
-        style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%)'
-        }}
-      />
-
-      {/* Single overlay for scanline effect, reduced opacity */}
-      <div
-        className="fixed inset-0 -z-10 opacity-2"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.07), rgba(255,255,255,0.07) 1px, transparent 1px, transparent 2px)'
-        }}
-      />
-
-      {/* Main content */}
+    <div className="relative min-h-screen overflow-hidden header-spacer">
       {MemoHeader}
       {MemoHero}
       {MemoFeaturedProducts}
       {MemoImpactMotive}
-      <Suspense fallback={null}>
-        <LazyGlobalCollaborations />
-      </Suspense>
       {MemoHowItWorks}
       {MemoCommunityConnect}
-      <Suspense fallback={null}>
-        <LazyUpcomingPhase />
-        <LazyWhatWeProvide />
-        <LazyFooter />
-        <LazyChatbot />
-      </Suspense>
+      {renderLazyComponents()}
     </div>
   );
 };
 
-export default BackUp;
+export default Index;

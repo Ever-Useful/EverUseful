@@ -1,26 +1,30 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const authorize = require('./authorize');
-const admin = require('firebase-admin');
 const marketplaceRoutes = require('./routes/marketplace');
 const userRoutes = require('./routes/users');
 const userService = require('./services/userService');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
+const s3Routes = require('./routes/s3');
 
 const app = express();
 
-// Initialize Firestore
-//this is server
-const db = admin.firestore();
-
 app.use(cors({
-  origin: '*', // In production, replace with your frontend domain
+  origin: [
+    'https://amoghconnect.com',
+    'http://localhost:8080',
+    'http://localhost:3000',
+    // 'https://www.amoghconnect.com', // Uncomment if you use www subdomain
+    // Add more allowed origins as needed
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ limit: '25mb', extended: true }));
 
 // Test endpoint to check if server is running
 app.get('/api/test', (req, res) => {
@@ -33,54 +37,50 @@ app.use('/api/marketplace', marketplaceRoutes);
 // User routes
 app.use('/api/users', userRoutes);
 
+// S3 routes
+app.use('/api/s3', s3Routes);
+
 app.use('/api', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.get('/token', authorize, async (req, res) => {
-  const { uid, name, email, phone_number, firebase } = req.user;
+  const { uid, name, email, phone_number } = req.user;
 
   try {
     if (!uid) throw new Error("Missing UID from Firebase token");
 
-    const userRef = db.collection('users').doc(uid);
-    const userSnap = await userRef.get();
+    // Check if user exists in DynamoDB
+    let user = await userService.findUserByFirebaseUid(uid);
 
-    if (!userSnap.exists) {
-      // Create custom user ID and save to both Firestore and userData.json
+    if (!user) {
+      // Create new user in DynamoDB
       const customUserId = await userService.generateCustomUserId();
 
       // Parse firstName and lastName from name if available
-      let firstName = null;
-      let lastName = null;
+      let firstName = '';
+      let lastName = '';
       if (name) {
         const nameParts = name.split(' ');
         firstName = nameParts[0] || '';
         lastName = nameParts.slice(1).join(' ') || '';
       }
 
-      // Save to Firestore (minimal fields only)
-      await userRef.set({
-        customUserId: customUserId,
-        firstName: firstName ?? '',
-        lastName: lastName ?? '',
-        phoneNumber: phone_number ?? '',
-        email: email ?? 'no-email@example.com',
-        userType: 'student', // Default userType for GET requests
-      });
-
-      // Create user in userData.json with all the user data
+      // Create user in DynamoDB
       await userService.createUser(uid, {
-        firstName: firstName ?? '',
-        lastName: lastName ?? '',
+        firstName: firstName,
+        lastName: lastName,
         email: email ?? 'no-email@example.com',
         userType: 'student',
         mobile: phone_number ?? '',
         phoneNumber: phone_number ?? '',
       });
 
-      console.log("New user created with custom ID:", customUserId);
-    } else {
-      console.log("Existing user logged in:", email ?? uid);
+      console.log('New OAuth user created with data:', {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phoneNumber: phone_number
+      });
     }
 
     return res.json({ redirectUrl: '/profile' });
@@ -97,33 +97,29 @@ app.post('/token', authorize, async (req, res) => {
   try {
     if (!uid) throw new Error("Missing UID from Firebase token");
 
-    const userRef = db.collection('users').doc(uid);
-    const userSnap = await userRef.get();
+    // Check if user exists in DynamoDB
+    let user = await userService.findUserByFirebaseUid(uid);
 
-    if (!userSnap.exists) {
-      // Create custom user ID
+    if (!user) {
+      // Create new user in DynamoDB
       const customUserId = await userService.generateCustomUserId();
 
       // Use provided firstName/lastName or parse from name
       let resolvedFirstName = firstName;
       let resolvedLastName = lastName;
-      if ((!firstName || !lastName) && name) {
+      
+      // If firstName/lastName are provided from signup form, use them
+      if (firstName && lastName) {
+        resolvedFirstName = firstName;
+        resolvedLastName = lastName;
+      } else if (name) {
+        // Parse from OAuth provider name
         const nameParts = name.split(' ');
         resolvedFirstName = resolvedFirstName || nameParts[0] || '';
         resolvedLastName = resolvedLastName || nameParts.slice(1).join(' ') || '';
       }
 
-      // Save to Firestore (minimal fields only)
-      await userRef.set({
-        customUserId: customUserId,
-        firstName: resolvedFirstName ?? '',
-        lastName: resolvedLastName ?? '',
-        phoneNumber: phoneNumber ?? phone_number ?? '',
-        email: email ?? 'no-email@example.com',
-        userType: userType ?? 'student',
-      });
-
-      // Create user in userData.json with all the user data
+      // Create user in DynamoDB with all provided data
       await userService.createUser(uid, {
         firstName: resolvedFirstName ?? '',
         lastName: resolvedLastName ?? '',
@@ -133,19 +129,25 @@ app.post('/token', authorize, async (req, res) => {
         phoneNumber: phoneNumber ?? phone_number ?? '',
       });
 
-      console.log("New user created with custom ID:", customUserId, "userType:", userType, "firstName:", resolvedFirstName, "lastName:", resolvedLastName);
+      console.log('New user created with data:', {
+        firstName: resolvedFirstName,
+        lastName: resolvedLastName,
+        email: email,
+        userType: userType,
+        phoneNumber: phoneNumber ?? phone_number
+      });
+
     } else {
-      // Update existing user's userType, firstName, lastName, phoneNumber if provided
+      // Update existing user's profile if provided
       const updateFields = {};
       if (userType) updateFields.userType = userType;
       if (firstName) updateFields.firstName = firstName;
       if (lastName) updateFields.lastName = lastName;
       if (phoneNumber) updateFields.phoneNumber = phoneNumber;
+      
       if (Object.keys(updateFields).length > 0) {
-        await userRef.update(updateFields);
-        console.log("Updated user fields for existing user:", email ?? uid, updateFields);
-      } else {
-        console.log("Existing user logged in:", email ?? uid);
+        await userService.updateUserProfile(user.customUserId, updateFields);
+        console.log('Existing user updated with fields:', updateFields);
       }
     }
 
@@ -156,11 +158,12 @@ app.post('/token', authorize, async (req, res) => {
   }
 });
 
-const port = 3000;
-app.listen(port, (error) => {
+const port = process.env.PORT || 3000;
+
+app.listen(port, '0.0.0.0', (error) => {
   if (error) {
     console.log(`App Failed at port :${port}`);
   } else {
-    console.log(`App running at http://localhost:${port}`);
+    console.log(`App running at http://0.0.0.0:${port}`);
   }
 });

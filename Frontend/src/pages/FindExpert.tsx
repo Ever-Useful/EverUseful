@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Footer } from '../components/Footer';
-import { Header } from '../components/Header';
+import Header from '../components/Header';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowUpDown } from 'lucide-react';
 import noUserProfile from '../assets/images/no user profile.png';
+import { getUserAvatarUrl } from '../utils/s3ImageUtils';
+import { API_ENDPOINTS } from '../config/api';
 
 // Define types for freelancer data
 type Freelancer = {
@@ -56,11 +58,16 @@ const FindExpert = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/users/all')
-      .then(res => res.json())
-      .then(data => {
+    const fetchExperts = async () => {
+      try {
+        const response = await fetch(API_ENDPOINTS.USERS + "/all");
+        if (!response.ok) {
+          throw new Error('Failed to fetch experts');
+        }
+        const data = await response.json();
         if (data && data.users) {
-          const phdUsers = Object.values(data.users).filter((user: any) => {
+          const all = Object.values(data.users);
+          const onlyPhdUsers = all.filter((user: any) => {
             // Check if user has education data
             if (!user.education || !Array.isArray(user.education)) {
               return false;
@@ -80,35 +87,37 @@ const FindExpert = () => {
             return hasPhd;
           });
           
-          console.log('PhD Users found:', phdUsers.length);
-          setPhdExperts(phdUsers);
+          console.log('PhD Users found:', onlyPhdUsers.length);
+          setPhdExperts(onlyPhdUsers);
         }
-      })
-      .catch(error => {
-        console.error('Error fetching users:', error);
-      });
+      } catch (error) {
+        console.error('Error fetching experts:', error);
+      }
+    };
+
+    fetchExperts();
   }, []);
 
   // Filter experts based on category and search query
   useEffect(() => {
-    // Transform backend data to match Freelancer type with fallback values
+    // Transform backend data to match Freelancer type with real data
     let result = phdExperts.map((user, index) => ({
       id: user.customUserId || `user-${index}`,
-      name: `${user.profile?.firstName || 'Dr.'} ${user.profile?.lastName || 'Researcher'}`,
+      name: `${user.auth?.firstName || user.profile?.firstName || 'Dr.'} ${user.auth?.lastName || user.profile?.lastName || 'Researcher'}`,
       title: user.profile?.title || 'Research Expert',
       skills: user.skills || [],
-      rate: '$50/hr',
-      experience: '5+ years',
-      image: user.profile?.avatar || noUserProfile,
-      rating: 4.5,
-      completedProjects: 10,
+      rate: user.freelancerData?.hourlyRate ? `$${user.freelancerData.hourlyRate}/hr` : 'N/A',
+      experience: user.freelancerData?.experience ? `${user.freelancerData.experience} years` : 'N/A',
+      image: getUserAvatarUrl({ avatar: user.profile?.avatar }) || noUserProfile,
+      rating: user.rating || 0,
+      completedProjects: user.stats?.projectsCount || 0,
       isAvailable: true,
-      location: user.profile?.location || 'University',
-      responseTime: '2 hours',
-      portfolio: '',
-      university: user.profile?.university || 'Research University',
-      researchFocus: user.profile?.researchFocus || 'Academic Research',
-      publications: 5,
+      location: user.profile?.location || 'N/A',
+      responseTime: user.freelancerData?.avgResponseTime ? `${user.freelancerData.avgResponseTime} hours` : 'N/A',
+      portfolio: user.freelancerData?.portfolio || '',
+      university: user.studentData?.college || user.profile?.college || 'N/A',
+      researchFocus: user.professorData?.researchInterests || 'Academic Research',
+      publications: user.stats?.publicationsCount || 0,
       // Keep original user properties for profile navigation
       profile: user.profile,
       customUserId: user.customUserId
@@ -189,7 +198,7 @@ const FindExpert = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header />
       {/* HERO SECTION */}
-      <div className="relative bg-gradient-to-br from-[#0a192f] to-[#800020] text-white overflow-hidden">
+      <div className="mt-10 relative bg-gradient-to-br from-[#0a192f] to-[#800020] text-white overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-[#0a192f]/30 to-[#800020]/20"></div>
         <div className="relative z-10 max-w-7xl mx-auto px-2 xs:px-3 sm:px-6 lg:px-8 py-10 xs:py-14 sm:py-24">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8 xs:gap-10 lg:gap-12">
@@ -200,10 +209,10 @@ const FindExpert = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold mb-4 xs:mb-6 leading-tight">
+                <h1 className="text-4xl font-bold mb-4 xs:mb-6 leading-tight mobile-text-4xl">
                   Connect with <span className="text-amber-400">PhD Experts</span> for Research & Mentorship
                 </h1>
-                <p className="text-base xs:text-lg sm:text-xl text-indigo-100 mb-5 xs:mb-8 max-w-xl">
+                <p className="text-base text-indigo-100 mb-5 xs:mb-8 max-w-xl mobile-text-base">
                   Access specialized knowledge from verified PhD researchers and academics. Collaborate on research projects, receive expert mentorship, and accelerate your R&D initiatives with qualified doctoral experts.
                 </p>
               </motion.div>
@@ -314,11 +323,11 @@ const FindExpert = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 xs:mb-6 text-center"
         >
-          <h2 className="text-lg xs:text-2xl font-bold text-gray-900 mb-1 xs:mb-2">Browse Research Domains</h2>
-          <p className="text-xs xs:text-base text-gray-600">Find experts in specific academic disciplines</p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-1 xs:mb-2 mobile-text-3xl">Browse Research Domains</h2>
+        <p className="text-xs xs:text-base text-gray-600 mobile-text-base">Find experts in specific academic disciplines</p>
         </motion.div>
         <motion.div
-          className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 xs:gap-3"
+          className="hidden sm:grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 xs:gap-3"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -344,7 +353,7 @@ const FindExpert = () => {
 
     {/* Filter Bar */}
     <div className="max-w-7xl mx-auto px-2 xs:px-4 py-6 xs:py-12 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-xl shadow-sm p-3 xs:p-4 mb-6 xs:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 xs:gap-4">
+      <div className="hidden sm:block bg-white rounded-xl shadow-sm p-3 xs:p-4 mb-6 xs:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 xs:gap-4">
         <div>
           <h2 className="text-base xs:text-xl font-bold text-gray-900">
             PhD Research Experts
@@ -502,7 +511,7 @@ const FindExpert = () => {
       <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 xs:mb-12">
           <motion.h2 
-            className="text-lg xs:text-3xl font-bold text-gray-900 mb-2 xs:mb-4"
+                            className="text-2xl font-bold text-gray-900 mb-2 xs:mb-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -582,7 +591,7 @@ const FindExpert = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-t from-amber-900/80 to-transparent z-10"></div>
             <img 
-              src="https://images.unsplash.com/photo-1581093458799-ef0d1c3d3f5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+              src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
               alt="Research Marketplace" 
               className="w-full h-full object-cover"
             />

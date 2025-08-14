@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Chatbot } from "@/components/Chatbot";
 import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
@@ -55,6 +55,7 @@ const Marketplace = () => {
             <ProductGrid
               searchQuery={searchQuery}
               filters={filters}
+              onFiltersChange={handleFiltersChange}
               sortBy={sortBy}
               setSortBy={setSortBy}
               showSortTab={showSortTab}
@@ -113,6 +114,7 @@ const Marketplace = () => {
                 <FilterSidebar
                   onFiltersChange={handleFiltersChange}
                   onClose={() => setShowFilterTab(false)}
+                  disableMobileDropdown={true}
                 />
               </div>
             </div>

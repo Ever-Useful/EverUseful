@@ -21,14 +21,15 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { useNavigate, useParams } from "react-router-dom";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header";
 import { useAuthState } from "@/hooks/useAuthState";
-import { firestoreService } from "@/services/firestoreService";
-import { userService } from "@/services/userService";
+import userService from "@/services/userService";
 import { toast } from "sonner";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { Skeleton } from "@/components/ui/skeleton";
 import NoImageAvailable from "@/assets/images/no image available.png";
+import { API_ENDPOINTS } from '../config/api';
+import { getS3ImageUrl, getUserAvatarUrl, handleImageError } from '../utils/s3ImageUtils';
 
 const ProductDisplay = () => {
   const { id } = useParams();
@@ -44,13 +45,14 @@ const ProductDisplay = () => {
   const [showPopupMenu, setShowPopupMenu] = useState(false);
   const [authorCache, setAuthorCache] = useState<Record<string, any>>({});
   const [currentUserCustomId, setCurrentUserCustomId] = useState<string | null>(null);
+  const [authorsLoading, setAuthorsLoading] = useState(false);
 
   // Fetch current user's customUserId
   useEffect(() => {
     const fetchCurrentUserData = async () => {
       if (user) {
         try {
-          const userData = await firestoreService.getCurrentUserData();
+          const userData = await userService.getUserProfile();
           if (userData && userData.customUserId) {
             setCurrentUserCustomId(userData.customUserId);
           }
@@ -64,29 +66,46 @@ const ProductDisplay = () => {
   }, [user]);
   
   useEffect(() => {
-    const fetchProject = async () => {
-      setLoading(true);
-      setError(null);
+    const fetchProjectData = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/marketplace/projects/${id}`);
-        if (!response.ok) throw new Error('Failed to fetch project');
+        setLoading(true);
+        const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(id));
+        if (!response.ok) {
+          throw new Error('Failed to fetch project data');
+        }
         const data = await response.json();
         setProject(data.project);
-      } catch (err: any) {
-        setError(err.message || 'An error occurred');
+        
+        // Fetch author data
+        if (data.author) {
+          setAuthorsLoading(true);
+          const res = await fetch(API_ENDPOINTS.USER_BY_ID(data.author));
+          if (res.ok) {
+            const authorData = await res.json();
+            setAuthorCache(prev => ({
+              ...prev,
+              [data.author]: authorData.data
+            }));
+          }
+          setAuthorsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching project:', error);
+        setError('Failed to load project');
       } finally {
         setLoading(false);
       }
     };
-    if (id) fetchProject();
+    if (id) fetchProjectData();
   }, [id]);
 
   // Fetch author details for the project
   useEffect(() => {
     const fetchAuthor = async () => {
       if (project && project.author && !authorCache[project.author]) {
+        setAuthorsLoading(true);
         try {
-          const res = await fetch(`http://localhost:3000/api/users/${project.author}`);
+          const res = await fetch(API_ENDPOINTS.USER_BY_ID(project.author));
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.data) {
@@ -98,25 +117,102 @@ const ProductDisplay = () => {
           }
         } catch (error) {
           console.error('Error fetching author details:', error);
+        } finally {
+          setAuthorsLoading(false);
         }
       }
     };
     
     if (project) fetchAuthor();
-  }, [project, authorCache]);
+  }, [project]); // Removed authorCache from dependencies to prevent infinite re-renders
 
-  // Helper to get author details
+  // Helper to get author details with loading state
   const getAuthorDetails = (authorId: string) => {
-    const user = authorCache[authorId];
-    if (!user) return { name: 'Unknown', image: NoUserProfile, userType: '', id: authorId };
-    const auth = user.auth || {};
-    const profile = user.profile || {};
-    return {
-      name: `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User',
-      image: profile.avatar || NoUserProfile,
-      userType: auth.userType || '',
-      id: user.customUserId
+    const user = authorCache[authorId as keyof typeof authorCache];
+    
+    if (!user) {
+      return { 
+        name: authorsLoading ? 'Loading...' : 'username', 
+        image: NoUserProfile, 
+        userType: '', 
+        id: authorId,
+        isLoading: authorsLoading,
+        verified: false,
+        rating: 0,
+        description: ''
+      };
+    }
+    
+    // Extract data from the proper structure - handle multiple response formats
+    const auth = user.auth || user.data?.auth || {};
+    const profile = user.profile || user.data?.profile || {};
+    
+    // Try multiple sources for the name with better priority
+    let name = '';
+    
+    // First priority: firstName + lastName from auth
+    if (auth.firstName || auth.lastName) {
+      name = `${auth.firstName || ''} ${auth.lastName || ''}`.trim();
+    }
+    // Second priority: firstName + lastName from profile
+    else if (profile.firstName || profile.lastName) {
+      name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
+    }
+    // Third priority: username from auth
+    else if (auth.username) {
+      name = auth.username;
+    }
+    // Fourth priority: username from profile
+    else if (profile.username) {
+      name = profile.username;
+    }
+    // Fifth priority: email username from auth
+    else if (auth.email) {
+      name = auth.email.split('@')[0];
+    }
+    // Sixth priority: email username from profile
+    else if (profile.email) {
+      name = profile.email.split('@')[0];
+    }
+    // Seventh priority: direct name field
+    else if (user.name) {
+      name = user.name;
+    }
+    // Eighth priority: direct username field
+    else if (user.username) {
+      name = user.username;
+    }
+    
+    // Get userType with fallbacks
+    const userType = profile.userType || auth.userType || user.userType || '';
+    
+    // Get avatar with fallback
+    const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
+    
+    // Get customUserId with fallback
+    const customUserId = user.customUserId || user.data?.customUserId || authorId;
+    
+    // Get verified status with fallback
+    const verified = profile.verified || auth.verified || user.verified || false;
+    
+    // Get rating with fallback
+    const rating = profile.rating || auth.rating || user.rating || 0;
+    
+    // Get description with fallback
+    const description = profile.description || auth.description || user.description || profile.bio || auth.bio || user.bio || '';
+    
+    const result = {
+      name: name || 'username',
+      image: avatar,
+      userType: userType,
+      id: customUserId,
+      isLoading: false,
+      verified: verified,
+      rating: rating,
+      description: description
     };
+    
+    return result;
   };
 
   const goToAuthorProfile = (userType: string, id: string) => {
@@ -139,20 +235,26 @@ const ProductDisplay = () => {
     navigate("/paymentSuccess")
   }
 
+  // Calculate text truncation
+  const shouldTruncate = project?.description && project.description.length > MAX_LENGTH;
+  const displayedText = isExpanded
+    ? project?.description
+    : project?.description ? project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "") : "";
+
   const handleAddToCart = async (projectId: number) => {
     if (!user || !token) {
       setShowPopupMenu(true);
       return;
     }
     try {
-      const firestoreData = await firestoreService.getCurrentUserData();
-      if (!firestoreData) {
+      const userData = await userService.getUserProfile();
+      if (!userData) {
         toast.error('User data not found');
         return;
       }
-      await userService.addToCart(firestoreData.customUserId, {
-        productId: projectId.toString(),
-        addedAt: new Date().toISOString(),
+      await userService.addToCart({
+        name: project.title,
+        price: project.price || 0,
         quantity: 1
       });
       toast.success('Project added to cart successfully');
@@ -162,22 +264,26 @@ const ProductDisplay = () => {
     }
   };
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-  if (error || !project) {
-    return <div className="min-h-screen flex items-center justify-center text-red-500">{error || 'Project not found'}</div>;
-  }
-
-  const shouldTruncate = project.description.length > MAX_LENGTH
-  const displayedText = isExpanded
-  ? project.description
-  : project.description.slice(0, MAX_LENGTH) + (shouldTruncate ? "..." : "")
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-100">
+    <div className="min-h-screen bg-gray-50 pt-16"> {/* Added pt-16 for top padding */}
       <Header />
-      
+      {loading ? (
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-96 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded mb-4"></div>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Error</h2>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      ) : project ? (
+        <>
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-2 xs:px-3 sm:px-4 lg:px-6 py-2 xs:py-3 sm:py-6 lg:py-8">
@@ -186,13 +292,19 @@ const ProductDisplay = () => {
             <div className="order-1">
               <div className="mb-2 xs:mb-3 sm:mb-4">
                 <img 
-                  src={project.images && project.images[selectedImage] ? project.images[selectedImage] : (project.image || NoImageAvailable)} 
+                  src={getS3ImageUrl(
+                        project.images && Array.isArray(project.images) && project.images[selectedImage] 
+                      ? project.images[selectedImage] 
+                      : project.image, 
+                    'project', 
+                    'large'
+                  )} 
                   alt={project.title}
                   className="w-full h-96 object-cover rounded-lg shadow-lg"
-                  onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                  onError={(e) => handleImageError(e, NoImageAvailable)}
                 />
               </div>
-              {project.images && project.images.length > 1 && (
+                  {project.images && Array.isArray(project.images) && project.images.length > 1 && (
                 <div className="grid grid-cols-4 xs:grid-cols-4 sm:grid-cols-5 lg:grid-cols-4 gap-1 sm:gap-2">
                   {project.images.map((image: string, index: number) => (
                     <button
@@ -203,9 +315,10 @@ const ProductDisplay = () => {
                       }`}
                     >
                       <img 
-                        src={image} 
+                        src={getS3ImageUrl(image, 'project', 'thumbnail')} 
                         alt={`${project.title} ${index + 1}`}
                         className="w-full h-10 xs:h-12 sm:h-16 lg:h-20 object-cover"
+                        onError={(e) => handleImageError(e, NoImageAvailable)}
                       />
                     </button>
                   ))}
@@ -219,11 +332,11 @@ const ProductDisplay = () => {
                 {project.category}
               </Badge>
               
-              <h1 className="text-lg xs:text-xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight mobile-text-4xl">
                 {project.title}
               </h1>
               
-              <p className="text-xs xs:text-sm sm:text-base lg:text-lg text-gray-600 mb-3 sm:mb-4 leading-relaxed">
+              <p className="text-base text-gray-600 mb-3 sm:mb-4 leading-relaxed mobile-text-base">
                 {project.subtitle}
               </p>
 
@@ -245,49 +358,11 @@ const ProductDisplay = () => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 mb-6">
-                {(!authorCache[project.author]) ? (
-                  <>
-                    <Skeleton className="w-12 h-12 rounded-full" />
-                    <div>
-                      <Skeleton className="w-32 h-5 mb-2 rounded" />
-                      <Skeleton className="w-20 h-4 rounded" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <img 
-                      src={getAuthorDetails(project.author).image} 
-                      alt={getAuthorDetails(project.author).name}
-                      className="w-12 h-12 rounded-full cursor-pointer"
-                      onError={e => { e.currentTarget.src = NoUserProfile; }}
-                      onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                    />
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span 
-                          className="font-semibold text-gray-900 cursor-pointer"
-                          style={{ transition: 'color 0.2s' }}
-                          onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
-                          onMouseOut={e => e.currentTarget.style.color = ''}
-                          onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
-                        >
-                          {getAuthorDetails(project.author).name}
-                        </span>
-                        {project.author.verified && (
-                          <CheckCircle className="w-4 h-4 text-blue-500" />
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500">{project.author.projects} projects</p>
-                    </div>
-                  </>
-                )}
-              </div>
 
               <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6">
-                {project.skills.map((skill, index) => (
+                {project.skills && project.skills.map((skill, index) => (
                   <Badge key={index} variant="outline" className="border-gray-300 text-gray-700 text-xs hover:bg-gray-50">
-                    {skill}
+                    {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                   </Badge>
                 ))}
               </div>
@@ -360,7 +435,7 @@ const ProductDisplay = () => {
               <TabsContent value="overview" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-base xs:text-base sm:text-xl lg:text-2xl">Project Overview</CardTitle>
+                    <CardTitle className="text-gray-900 text-3xl">Project Overview</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <p className="text-gray-700 leading-relaxed text-xs xs:text-sm sm:text-base lg:text-lg">
@@ -378,16 +453,20 @@ const ProductDisplay = () => {
               <TabsContent value="features" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-base xs:text-base sm:text-xl lg:text-2xl">Key Features</CardTitle>
+                    <CardTitle className="text-gray-900 text-3xl">Key Features</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="grid grid-cols-1 gap-1 xs:gap-2 sm:gap-3">
-                      {project.features.map((feature, index) => (
-                        <div key={index} className="flex items-start space-x-2 xs:space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                          <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700 text-xs xs:text-sm sm:text-base leading-relaxed">{feature}</span>
-                        </div>
-                      ))}
+                      {project.features && Array.isArray(project.features) ? (
+                        project.features.map((feature, index) => (
+                          <div key={index} className="flex items-start space-x-2 xs:space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                            <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-gray-700 text-xs xs:text-sm sm:text-base leading-relaxed">{feature}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm">No features listed</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -396,16 +475,20 @@ const ProductDisplay = () => {
               <TabsContent value="tech" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-base xs:text-base sm:text-xl lg:text-2xl">Technology Stack</CardTitle>
+                    <CardTitle className="text-gray-900 text-3xl">Technology Stack</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-1 xs:gap-2 sm:gap-3 lg:gap-4">
-                      {project.techStack.map((tech, index) => (
-                        <div key={index} className="flex items-center space-x-2 xs:space-x-3 p-2 xs:p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                          <Code className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" />
-                          <span className="text-gray-700 font-medium text-xs xs:text-sm sm:text-base">{tech}</span>
-                        </div>
-                      ))}
+                      {project.techStack && Array.isArray(project.techStack) ? (
+                        project.techStack.map((tech, index) => (
+                          <div key={index} className="flex items-center space-x-2 xs:space-x-3 p-2 xs:p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <Code className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" />
+                            <span className="text-gray-700 font-medium text-xs xs:text-sm sm:text-base">{tech}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm">No technology stack listed</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -414,16 +497,20 @@ const ProductDisplay = () => {
               <TabsContent value="deliverables" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-base xs:text-base sm:text-xl lg:text-2xl">What You'll Get</CardTitle>
+                    <CardTitle className="text-gray-900 text-3xl">What You'll Get</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="space-y-1 xs:space-y-2 sm:space-y-3">
-                      {project.deliverables.map((deliverable, index) => (
-                        <div key={index} className="flex items-start space-x-2 xs:space-x-3 p-2 xs:p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                          <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700 text-xs xs:text-sm sm:text-base leading-relaxed">{deliverable}</span>
-                        </div>
-                      ))}
+                      {project.deliverables && Array.isArray(project.deliverables) ? (
+                        project.deliverables.map((deliverable, index) => (
+                          <div key={index} className="flex items-start space-x-2 xs:space-x-3 p-2 xs:p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-gray-700 text-xs xs:text-sm sm:text-base leading-relaxed">{deliverable}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm">No deliverables listed</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -438,12 +525,16 @@ const ProductDisplay = () => {
                 </CardHeader>
                 <CardContent className="pt-0 px-3">
                   <div className="grid grid-cols-1 gap-1">
-                    {project.techStack.map((tech, index) => (
-                      <div key={index} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
-                        <Code className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                        <span className="text-gray-700 font-medium text-xs">{tech}</span>
-                      </div>
-                    ))}
+                    {project.techStack && Array.isArray(project.techStack) ? (
+                      project.techStack.map((tech, index) => (
+                        <div key={index} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
+                          <Code className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                          <span className="text-gray-700 font-medium text-xs">{tech}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm">No technology stack listed</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -454,12 +545,16 @@ const ProductDisplay = () => {
                 </CardHeader>
                 <CardContent className="pt-0 px-3">
                   <div className="space-y-1">
-                    {project.deliverables.map((deliverable, index) => (
-                      <div key={index} className="flex items-start space-x-2 p-2 bg-gray-50 rounded-lg">
-                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-xs leading-relaxed">{deliverable}</span>
-                      </div>
-                    ))}
+                    {project.deliverables && Array.isArray(project.deliverables) ? (
+                      project.deliverables.map((deliverable, index) => (
+                        <div key={index} className="flex items-start space-x-2 p-2 bg-gray-50 rounded-lg">
+                          <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-700 text-xs leading-relaxed">{deliverable}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm">No deliverables listed</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -491,7 +586,7 @@ const ProductDisplay = () => {
                 ) : (
                   <div className="flex items-center space-x-3 mb-4">
                     <img 
-                      src={getAuthorDetails(project.author).image} 
+                      src={getUserAvatarUrl({ avatar: getAuthorDetails(project.author).image })} 
                       alt={getAuthorDetails(project.author).name}
                       className="w-16 h-16 rounded-full cursor-pointer"
                       onError={e => { e.currentTarget.src = NoUserProfile; }}
@@ -508,13 +603,13 @@ const ProductDisplay = () => {
                         >
                           {getAuthorDetails(project.author).name}
                         </h3>
-                        {project.author.verified && (
+                        {getAuthorDetails(project.author).verified && (
                           <CheckCircle className="w-4 h-4 text-blue-500" />
                         )}
                       </div>
                       <div className="flex items-center space-x-1">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm text-gray-600">{project.author.rating}</span>
+                        <span className="text-sm text-gray-600">{getAuthorDetails(project.author).rating}</span>
                       </div>
                     </div>
                   </div>
@@ -522,7 +617,11 @@ const ProductDisplay = () => {
                 {(!authorCache[project.author]) ? (
                   <Skeleton className="w-full h-4 mb-4 rounded" />
                 ) : (
-                  <p className="text-sm text-gray-600 mb-4">{project.author.bio}</p>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {(typeof project.author === 'object' && project.author?.bio) || 
+                     getAuthorDetails(project.author).description || 
+                     "No description available."}
+                  </p>
                 )}
                 <Button 
                   variant="outline" 
@@ -544,7 +643,7 @@ const ProductDisplay = () => {
               <CardContent className="pt-0 px-4">
                 <div className="flex items-center space-x-3 mb-3">
                   <img 
-                    src={getAuthorDetails(project.author).image} 
+                    src={getUserAvatarUrl({ avatar: getAuthorDetails(project.author).image })} 
                     alt={getAuthorDetails(project.author).name}
                     className="w-12 h-12 rounded-full cursor-pointer transition-transform hover:scale-110"
                     onError={e => { e.currentTarget.src = NoUserProfile; }}
@@ -558,20 +657,22 @@ const ProductDisplay = () => {
                       >
                         {getAuthorDetails(project.author).name}
                       </h3>
-                      {project.author.verified && (
+                      {getAuthorDetails(project.author).verified && (
                         <CheckCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
                       )}
                     </div>
                     <div className="flex items-center space-x-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-xs text-gray-600">{project.author.rating}</span>
+                      <span className="text-xs text-gray-600">{getAuthorDetails(project.author).rating}</span>
                     </div>
                   </div>
                 </div>
                 {/* Author Description */}
                 <div className="mb-3">
                   <p className="text-xs text-gray-600 leading-relaxed">
-                    {getAuthorDetails(project.author).description || project.author.bio || "No description available."}
+                    {getAuthorDetails(project.author).description || 
+                     (typeof project.author === 'object' && project.author?.bio) || 
+                     "No description available."}
                   </p>
                 </div>
                 <Button 
@@ -600,6 +701,8 @@ const ProductDisplay = () => {
           />
         </div>
       </div>
+        </>
+      ) : null}
       
       <Footer/>
       

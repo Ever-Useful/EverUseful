@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import classNames from "classnames";
 import React, { useRef, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { API_ENDPOINTS } from '../config/api';
+import NoImageAvailable from '@/assets/images/no image available.png';
 
 // Define Project type if not imported from elsewhere
 interface Project {
@@ -49,22 +51,24 @@ export const RelatedProducts = () => {
   }, [isMobile]);
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchRelatedProjects = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:3000/api/marketplace/projects');
+        const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECTS);
         if (!response.ok) {
           throw new Error('Failed to fetch projects');
         }
         const data = await response.json();
-        setProjects(data.projects);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setProjects(data);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setError('Failed to load projects');
       } finally {
         setLoading(false);
       }
     };
-    fetchProjects();
+
+    fetchRelatedProjects();
   }, []);
 
   const featuredProjects = [
@@ -212,9 +216,10 @@ export const RelatedProducts = () => {
                 <Card className="hover:shadow-lg transition-shadow duration-200 bg-white rounded-lg">
                   <div className="relative">
                     <img
-                      src={project.image}
+                      src={project.image || NoImageAvailable}
                       alt={project.title}
                       className="w-full h-32 xs:h-36 object-cover rounded-t-lg"
+                      onError={e => { e.currentTarget.src = NoImageAvailable; }}
                     />
                     <Badge className="absolute top-2 right-2 bg-blue-600 text-white text-[10px] px-2 py-0.5">
                       {project.category}
@@ -289,9 +294,10 @@ export const RelatedProducts = () => {
                   <Card className="h-full hover:shadow-lg transition-shadow duration-200 rounded-lg">
                     <div className="relative">
                       <img
-                        src={project.image}
+                        src={project.image || NoImageAvailable}
                         alt={project.title}
                         className="w-full h-28 md:h-32 lg:h-36 object-cover rounded-t-lg"
+                        onError={e => { e.currentTarget.src = NoImageAvailable; }}
                       />
                       <Badge className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5">
                         {project.category}

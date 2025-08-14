@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +26,6 @@ const ApplicationForm = ({ jobTitle, isOpen, onClose }: ApplicationFormProps) =>
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Application submitted for:", jobTitle, formData);
-    // Here you would typically send the data to your backend
     alert(`Application submitted for ${jobTitle}! We'll be in touch soon.`);
     onClose();
   };
@@ -42,12 +40,12 @@ const ApplicationForm = ({ jobTitle, isOpen, onClose }: ApplicationFormProps) =>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-mint-light p-6 flex justify-between items-center rounded-t-2xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto flex flex-col">
+        <div className="sticky top-0 bg-white border-b border-mint-light p-4 sm:p-6 flex justify-between items-center rounded-t-2xl">
           <div>
-            <h2 className="text-2xl font-bold text-olive-dark">Apply for Position</h2>
-            <p className="text-olive">{jobTitle}</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-olive-dark">Apply for Position</h2>
+            <p className="text-olive text-sm sm:text-base">{jobTitle}</p>
           </div>
           <button
             onClick={onClose}
@@ -57,8 +55,8 @@ const ApplicationForm = ({ jobTitle, isOpen, onClose }: ApplicationFormProps) =>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name *</Label>
               <Input
@@ -130,7 +128,7 @@ const ApplicationForm = ({ jobTitle, isOpen, onClose }: ApplicationFormProps) =>
               required
               className="border-mint focus:border-olive"
             />
-            <p className="text-sm text-olive">Accepted formats: PDF, DOC, DOCX (max 5MB)</p>
+            <p className="text-xs sm:text-sm text-olive">Accepted formats: PDF, DOC, DOCX (max 5MB)</p>
           </div>
 
           <div className="space-y-2">
@@ -145,7 +143,7 @@ const ApplicationForm = ({ jobTitle, isOpen, onClose }: ApplicationFormProps) =>
             />
           </div>
 
-          <div className="flex gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Button
               type="submit"
               className="flex-1 bg-olive hover:bg-olive-dark text-white py-3"
@@ -156,7 +154,7 @@ const ApplicationForm = ({ jobTitle, isOpen, onClose }: ApplicationFormProps) =>
               type="button"
               variant="outline"
               onClick={onClose}
-              className="px-8 border-olive text-olive hover:bg-olive hover:text-white"
+              className="flex-1 sm:flex-none px-8 border-olive text-olive hover:bg-olive hover:text-white"
             >
               Cancel
             </Button>

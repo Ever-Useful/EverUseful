@@ -2,12 +2,12 @@ import React, { useRef, useState, useEffect } from "react";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Header } from "../components/Header";
+import Header from "../components/Header";
 import { Footer } from "../components/Footer";
-import { FreelanceFilterSidebar } from "../components/freelancing/FreelanceFilterSidebar";
-import { FreelancerGrid } from "../components/freelancing/FreelancerGrid";
 import { ArrowUpDown } from "lucide-react";
 import noUserProfile from "../assets/images/no user profile.png";
+import { API_ENDPOINTS } from '../config/api';
+import { getUserAvatarUrl } from '@/utils/s3ImageUtils';
 
 // HERO SECTION DATA
 const heroFeatures = [
@@ -111,7 +111,7 @@ const pricingPlans = [
   },
   {
     name: "Professional",
-    price: "$29",
+            price: "₹29",
     period: "/month",
     description: "For serious research projects",
     features: [
@@ -224,10 +224,10 @@ const stories = [
     name: "Dr. Sophia Müller",
     country: "🇩🇪",
     title: "Biotech Startup Success",
-    desc: "Helped a biotech startup secure $2M in funding through research-backed proposals.",
+            desc: "Helped a biotech startup secure ₹2M in funding through research-backed proposals.",
     img: "https://randomuser.me/api/portraits/women/65.jpg",
     color: "bg-green-100",
-    impact: "$2M funding",
+            impact: "₹2M funding",
   },
   {
     name: "Dr. Ahmed El-Sayed",
@@ -244,8 +244,89 @@ const stories = [
     title: "Global Education Impact",
     desc: "Designed an online curriculum for Latin American universities, reaching 10,000+ students.",
     img: "https://randomuser.me/api/portraits/women/12.jpg",
-    color: "bg-pink-100",
+    color: "bg-purple-100",
     impact: "10k+ students taught",
+  },
+  {
+    name: "Dr. James Chen",
+    country: "🇺🇸",
+    title: "M L Breakthrough",
+    desc: "Developed an advanced ML algorithm that improved prediction accuracy by 45% for a Fortune 500 company.",
+    img: "https://randomuser.me/api/portraits/men/28.jpg",
+    color: "bg-indigo-100",
+    impact: "45% better accuracy",
+  },
+  {
+    name: "Dr. Elena Petrova",
+    country: "🇷🇺",
+    title: "Climate Research Leadership",
+    desc: "Led international climate research team, publishing findings that influenced policy in 15 countries.",
+    img: "https://randomuser.me/api/portraits/women/33.jpg",
+    color: "bg-teal-100",
+    impact: "15 countries influenced",
+  },
+  {
+    name: "Dr. Rajesh Kumar",
+    country: "🇮🇳",
+    title: "Digital Transformation Expert",
+    desc: "Transformed traditional manufacturing processes for 50+ companies using IoT and AI technologies.",
+    img: "https://randomuser.me/api/portraits/men/45.jpg",
+    color: "bg-cyan-100",
+    impact: "50+ companies transformed",
+  },
+  {
+    name: "Dr. Sarah Johnson",
+    country: "🇨🇦",
+    title: "Sustainable Development",
+    desc: "Designed sustainable urban planning solutions that reduced carbon emissions by 60% in major cities.",
+    img: "https://randomuser.me/api/portraits/women/56.jpg",
+    color: "bg-emerald-100",
+    impact: "60% emissions reduction",
+  },
+  {
+    name: "Dr. Carlos Rodriguez",
+    country: "🇲🇽",
+    title: "Agricultural Innovation",
+    desc: "Developed smart farming solutions that increased crop yields by 75% for small-scale farmers.",
+    img: "https://randomuser.me/api/portraits/men/67.jpg",
+    color: "bg-lime-100",
+    impact: "75% yield increase",
+  },
+  {
+    name: "Dr. Yuki Tanaka",
+    country: "🇯🇵",
+    title: "Robotics & Automation",
+    desc: "Created advanced robotics systems that improved manufacturing efficiency by 80% for automotive industry.",
+    img: "https://randomuser.me/api/portraits/women/78.jpg",
+    color: "bg-rose-100",
+    impact: "80% efficiency gain",
+  },
+  {
+    name: "Dr. Pierre Dubois",
+    country: "🇫🇷",
+    title: "Aerospace Engineering",
+    desc: "Led development of lightweight materials for aerospace applications, reducing fuel consumption by 25%.",
+    img: "https://randomuser.me/api/portraits/men/89.jpg",
+    color: "bg-sky-100",
+    impact: "25% fuel reduction",
+  },
+  {
+    name: "Dr. Anna Kowalski",
+    country: "🇵🇱",
+    title: "Cybersecurity Innovation",
+    desc: "Developed next-generation cybersecurity protocols protecting over 1 million users from cyber threats.",
+    img: "https://randomuser.me/api/portraits/women/90.jpg",
+    color: "bg-violet-100",
+    impact: "1M+ users protected",
+  },
+  {
+    name: "Dr. Miguel Santos",
+    country: "🇧🇷",
+    title: "Biomedical Engineering",
+    desc: "Invented medical devices that improved patient recovery rates by 40% in clinical trials.",
+    img: "https://randomuser.me/api/portraits/men/91.jpg",
+    color: "bg-amber-100",
+    impact: "40% recovery improvement",
   },
 ];
 
@@ -257,7 +338,7 @@ const sliderSettings = {
   slidesToShow: 5,
   slidesToScroll: 1,
   arrows: false,
-  autoplay: true,
+  autoplay: false,
   autoplaySpeed: 3200,
   cssEase: "cubic-bezier(0.4,0,0.2,1)",
   pauseOnHover: true,
@@ -382,7 +463,35 @@ const orbPulse = {
 
 const Work: React.FC = () => {
   const [visibleIndexes, setVisibleIndexes] = useState<number[]>([0, 1, 2, 3, 4]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentHowItWorksSlide, setCurrentHowItWorksSlide] = useState(0);
   const sliderRef = useRef<Slider | null>(null);
+  
+  // Auto-sliding functionality
+  const [isPaused, setIsPaused] = useState(false);
+  
+  useEffect(() => {
+    if (isPaused) return;
+    
+    const totalSlides = stories.length - 4; // Show 5 cards, so total slides = total stories - 4
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }, 3000); // Change slide every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [stories.length, isPaused]);
+
+  // Auto-sliding for How It Works section
+  useEffect(() => {
+    if (isPaused) return;
+    
+    const totalSlides = steps.length - (window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 4);
+    const interval = setInterval(() => {
+      setCurrentHowItWorksSlide((prev) => (prev + 1) % totalSlides);
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [steps.length, isPaused]);
   const [filters, setFilters] = useState({});
   const [freelancers, setFreelancers] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
@@ -391,6 +500,41 @@ const Work: React.FC = () => {
   const [skillFilter, setSkillFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [showCount, setShowCount] = useState(4);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchFreelancers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(API_ENDPOINTS.USERS + "/all");
+      if (!response.ok) {
+        throw new Error('Failed to fetch freelancers');
+      }
+      const data = await response.json();
+      console.log('Freelancing - Fetched users data:', data);
+      
+      // Handle different response structures
+      let users = [];
+      if (Array.isArray(data)) {
+        users = data;
+      } else if (data && Array.isArray(data.users)) {
+        users = data.users;
+      } else if (data && Array.isArray(data.data)) {
+        users = data.data;
+      } else {
+        console.warn('Unexpected response structure:', data);
+        users = [];
+      }
+      
+      setFreelancers(users);
+    } catch (error) {
+      console.error('Error fetching freelancers:', error);
+      setError('Failed to load freelancers');
+      setFreelancers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Update visible indexes on slide change
   const handleBeforeChange = (_: number, next: number) => {
@@ -404,22 +548,30 @@ const Work: React.FC = () => {
 
   // Fetch all users and filter for freelancers
   useEffect(() => {
-    fetch("http://localhost:3000/api/users/all")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.users) {
-          const all = Object.values(data.users);
-          const onlyFreelancers = all.filter((u: any) => u.profile?.userType?.toLowerCase() === "freelancer");
-          setFreelancers(onlyFreelancers);
-        }
-      });
+    fetchFreelancers();
   }, []);
 
   // Filtering and sorting
   useEffect(() => {
-    let result = freelancers;
+    let result = freelancers || [];
+    
+    // Ensure result is always an array
+    if (!Array.isArray(result)) {
+      console.warn('Freelancers data is not an array:', result);
+      result = [];
+    }
+    
+    // Filter for freelancers only
+    result = result.filter((f) => {
+      const userType = f.auth?.userType || f.profile?.userType || '';
+      return userType.toLowerCase().includes('freelancer');
+    });
+    
     if (skillFilter) {
-      result = result.filter((f) => (f.skills || []).some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase())));
+      result = result.filter((f) => {
+        const skills = f.skills || [];
+        return Array.isArray(skills) && skills.some((s: string) => s.toLowerCase().includes(skillFilter.toLowerCase()));
+      });
     }
     if (locationFilter) {
       result = result.filter((f) => (f.profile?.location || "").toLowerCase().includes(locationFilter.toLowerCase()));
@@ -428,7 +580,7 @@ const Work: React.FC = () => {
       result = result.filter((f) =>
         (f.profile?.firstName + " " + f.profile?.lastName).toLowerCase().includes(search.toLowerCase()) ||
         (f.profile?.title || "").toLowerCase().includes(search.toLowerCase()) ||
-        (f.skills || []).some((s: string) => s.toLowerCase().includes(search.toLowerCase()))
+        (f.skills || []).some((s: any) => (typeof s === 'string' ? s : s.name).toLowerCase().includes(search.toLowerCase()))
       );
     }
     // Sort
@@ -442,8 +594,8 @@ const Work: React.FC = () => {
 
   return (
     <main className="w-full min-h-screen bg-white">
-    {/* HERO SECTION */}
     <Header />
+    {/* HERO SECTION */}
     <section className="relative w-full min-h-[70vh] flex items-center justify-center overflow-hidden">
       <img
         src="https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1600&q=80"
@@ -458,14 +610,14 @@ const Work: React.FC = () => {
         className="relative z-10 max-w-4xl mx-auto px-4 xs:px-4 sm:px-8 py-16 xs:py-20 sm:py-24 text-center flex flex-col items-center"
       >
         <motion.h1
-          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 drop-shadow-[0_0_8px_rgba(250,89,84,0.7)] mb-4 xs:mb-6 leading-tight"
+                          className="text-4xl font-bold text-gray-900 drop-shadow-[0_0_8px_rgba(250,89,84,0.7)] mb-4 xs:mb-6 leading-tight mobile-text-4xl"
           variants={fadeUp}
           custom={1}
         >
           Connect with World-Class <span className="text-[#fa5954]">PhD Experts</span> for R&D and Mentorship
         </motion.h1>
         <motion.p
-          className="text-base xs:text-lg sm:text-xl text-gray-700 mb-6 xs:mb-10 max-w-xl font-medium"
+                          className="text-base text-gray-700 mb-6 xs:mb-10 max-w-xl font-medium mobile-text-base"
           variants={fadeUp}
           custom={2}
         >
@@ -509,8 +661,8 @@ const Work: React.FC = () => {
 
     {/* HIRE THE BEST SECTION */}
     <section className="w-full bg-white py-10 xs:py-16 px-2 xs:px-4 border-b border-gray-100 flex flex-col items-center justify-center text-center">
-      <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 xs:mb-6">Hire the Best Professionals</h2>
-      <p className="text-base xs:text-lg text-gray-600 mb-6 xs:mb-8 max-w-2xl mx-auto">
+                  <h2 className="text-4xl font-extrabold text-gray-900 mb-4 xs:mb-6 mobile-text-4xl">Hire the Best Professionals</h2>
+            <p className="text-base xs:text-lg text-gray-600 mb-6 xs:mb-8 max-w-2xl mx-auto mobile-text-base">
         Check out professionals on <span className="font-bold text-[#fa5954]">AMOGH</span>, with the skills you need for your next job.
       </p>
       <a
@@ -526,7 +678,7 @@ const Work: React.FC = () => {
       {/* Filter Bar */}
       <div className="bg-white rounded-xl shadow-sm p-3 xs:p-4 mb-6 xs:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 xs:gap-4 w-full max-w-5xl">
         <div>
-          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+          <h2 className="text-3xl font-bold text-gray-900 mb-1">
             Freelance Research Experts
           </h2>
           <p className="text-sm xs:text-lg text-gray-600 font-medium">
@@ -565,20 +717,29 @@ const Work: React.FC = () => {
               <div className="p-4 xs:p-5 flex-1 flex flex-col">
                 <div className="flex justify-center mb-2 xs:mb-3">
                   <img
-                    src={f.profile?.avatar || noUserProfile}
+                    src={getUserAvatarUrl({ avatar: f.profile?.avatar }) || noUserProfile}
                     alt={f.profile?.firstName || 'Freelancer'}
                     className="w-16 xs:w-20 h-16 xs:h-20 rounded-full object-cover border-2 xs:border-3 border-white/80 shadow-lg"
                   />
                 </div>
                 <div className="text-center mb-2 xs:mb-3">
-                  <h3 className="text-base xs:text-lg font-bold text-black">{f.profile?.firstName} {f.profile?.lastName}</h3>
-                  <p className="text-black font-medium text-xs xs:text-sm">{f.profile?.title}</p>
-                  <p className="text-black text-xs mt-1">{f.profile?.location}</p>
+                  <h3 className="text-base xs:text-lg font-bold text-black">{f.auth?.firstName || f.profile?.firstName} {f.auth?.lastName || f.profile?.lastName}</h3>
+                  <p className="text-black font-medium text-xs xs:text-sm">{f.profile?.title || 'Freelancer'}</p>
+                  <p className="text-black text-xs mt-1">{f.profile?.location || 'N/A'}</p>
+                  <div className="flex justify-center items-center gap-2 mt-1">
+                    <span className="text-green-600 text-xs font-medium">
+                      ${f.freelancerData?.hourlyRate || 'N/A'}/hr
+                    </span>
+                    <span className="text-gray-500 text-xs">•</span>
+                    <span className="text-blue-600 text-xs font-medium">
+                      {f.freelancerData?.avgResponseTime || 'N/A'}h response
+                    </span>
+                  </div>
                 </div>
                 <div className="flex flex-wrap justify-center gap-1 mb-2 xs:mb-3">
-                  {(f.skills || []).slice(0, 3).map((skill: string, i: number) => (
+                  {(f.skills || []).slice(0, 3).map((skill: any, i: number) => (
                     <span key={i} className="bg-indigo-100 text-indigo-700 text-[10px] xs:text-xs font-medium px-2 py-1 rounded-full">
-                      {skill}
+                      {typeof skill === 'string' ? skill : skill.name}
                     </span>
                   ))}
                   {(f.skills || []).length > 3 && (
@@ -600,7 +761,7 @@ const Work: React.FC = () => {
                       </svg>
                     ))}
                   </div>
-                  <span className="ml-2 text-gray-700 text-xs xs:text-sm font-medium">{(f.stats?.rating || 4.5).toFixed(1)}</span>
+                  <span className="ml-2 text-gray-700 text-xs xs:text-sm font-medium">{(f.rating || 0).toFixed(1)}</span>
                 </div>
                 <button
                   className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mt-auto transition text-xs xs:text-sm"
@@ -635,7 +796,7 @@ const Work: React.FC = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 xs:mb-12 text-center"
         >
-          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
             Popular Skills & Expertise
           </h2>
           <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
@@ -671,7 +832,7 @@ const Work: React.FC = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 xs:mb-12 text-center"
         >
-          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
             Featured Categories
           </h2>
           <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
@@ -715,7 +876,7 @@ const Work: React.FC = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 xs:mb-12 text-center"
         >
-          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
             What Our Clients Say
           </h2>
           <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
@@ -798,137 +959,117 @@ const Work: React.FC = () => {
     </section>
 
     {/* SUCCESS STORIES SECTION */}
-    <section className="w-full py-10 xs:py-20 px-2 xs:px-6 bg-gray-50 border-b border-gray-100">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6 xs:mb-8 text-center">
-          <h2 className="text-lg xs:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+    <section className="w-full py-8 sm:py-10 lg:py-20 px-4 sm:px-6 bg-gray-50 border-b border-gray-100">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6 sm:mb-8 lg:mb-12 text-center">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
             Success Stories
           </h2>
-          <p className="text-xs xs:text-base text-gray-600 max-w-xl mx-auto">
+          <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-2">
             Real impact, real results. Explore how PhD experts have transformed research, innovation, and mentorship for clients worldwide.
           </p>
-          <div className="w-12 xs:w-16 h-1 mx-auto mt-2 rounded-full bg-[#fa5954]/30" />
+          <div className="w-12 sm:w-16 lg:w-20 h-1 mx-auto mt-3 sm:mt-4 rounded-full bg-[#fa5954]/30" />
         </div>
-        {/* Desktop: Carousel, Mobile: Horizontal Scroll Cards */}
-        <div className="hidden sm:block relative">
-          <Slider
-            {...sliderSettings}
-            ref={sliderRef}
-            beforeChange={(_: number, next: number) => {
-              const slidesToShow = sliderSettings.slidesToShow as number;
-              const newIndexes: number[] = [];
-              for (let i = 0; i < slidesToShow; i++) {
-                newIndexes.push((next + i) % stories.length);
-              }
-              setVisibleIndexes(newIndexes);
+
+        {/* Slideshow Container */}
+        <div className="relative w-full max-w-7xl mx-auto">
+          {/* Navigation Arrows */}
+          <button
+            onClick={() => {
+              const totalSlides = stories.length - (window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 4);
+              setCurrentSlide(currentSlide === 0 ? totalSlides - 1 : currentSlide - 1);
             }}
+            className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
           >
-            {stories.map((story, idx) => (
-              <div key={story.name} className="h-full flex items-stretch">
-                <motion.div
-                  key={visibleIndexes.includes(idx) ? `active-${idx}` : `inactive-${idx}`}
-                  initial="initial"
-                  animate={visibleIndexes.includes(idx) ? "animate" : "initial"}
-                  variants={cardVariants}
-                  className={`
-                    flex flex-col items-center justify-between
-                    rounded-xl shadow-lg ${story.color}
-                    border border-white/60 px-4 xs:px-6 py-6 xs:py-8 mx-2 xs:mx-3
-                    w-[180px] xs:w-[220px] h-[${cardFixedHeight - 40}px] xs:h-[${cardFixedHeight}px] min-h-[${cardFixedHeight - 40}px] xs:min-h-[${cardFixedHeight}px] max-h-[${cardFixedHeight}px]
-                    transition-all
-                  `}
-                  style={{
-                    minHeight: cardFixedHeight - 40,
-                    maxHeight: cardFixedHeight,
-                    height: cardFixedHeight - 40,
-                    width: 180,
-                  }}
-                >
-                  <div className="flex flex-col items-center">
-                    <img
-                      src={story.img}
-                      alt={story.name}
-                      className="w-12 xs:w-16 h-12 xs:h-16 rounded-full object-cover mb-2 xs:mb-4 ring-2 ring-blue-100 shadow"
-                      onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(story.name) + '&background=E0E7EF&color=374151&size=64'; }}
-                    />
-                    <div className="flex items-center gap-1 xs:gap-2 mb-1">
-                      <span className="text-xs xs:text-base font-bold text-gray-900">{story.name}</span>
-                      <span className="text-xs xs:text-md">{story.country}</span>
-                    </div>
-                    <span className="text-[10px] xs:text-xs font-semibold text-[#fa5954] mb-1 text-center">{story.title}</span>
-                    <p className="text-[10px] xs:text-xs text-gray-700 text-center mb-1 xs:mb-2">{story.desc}</p>
-                  </div>
-                  <div className="mt-1 xs:mt-2 flex items-center justify-center w-full">
-                    <span className="text-[10px] xs:text-xs px-2 xs:px-3 py-1 rounded bg-white/90 text-[#fa5954] font-semibold shadow">
-                      {story.impact}
-                    </span>
-                  </div>
-                </motion.div>
-              </div>
-            ))}
-          </Slider>
-          {/* CSS for slick spacing and fixed height */}
-          <style>{`
-            .slick-track {
-              display: flex !important;
-              align-items: stretch !important;
-            }
-            .slick-slide {
-              height: ${cardFixedHeight - 40}px !important;
-              display: flex !important;
-              align-items: stretch !important;
-              justify-content: center !important;
-              padding: 0 8px;
-              box-sizing: border-box;
-            }
-            .slick-list {
-              margin: 0 -8px;
-              padding-bottom: 8px;
-            }
-            .slick-dots {
-              margin-top: 12px;
-            }
-          `}</style>
-        </div>
-        {/* Mobile: Horizontal Scroll Cards */}
-        <div className="sm:hidden flex overflow-x-auto gap-4 py-2 px-1">
-          {stories.map((story, idx) => (
-            <div
-              key={story.name}
-              className={`
-                flex flex-col items-center justify-between
-                rounded-xl shadow-lg ${story.color}
-                border border-white/60 px-4 py-6 mx-1 min-w-[220px] max-w-[240px]
-                transition-all
-              `}
-              style={{
-                minHeight: 220,
-                maxHeight: 260,
-                height: 220,
-                width: 220,
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <button
+            onClick={() => {
+              const totalSlides = stories.length - (window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 4);
+              setCurrentSlide((currentSlide + 1) % totalSlides);
+            }}
+            className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+          >
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+          </button>
+
+          {/* Slideshow */}
+          <div 
+            className="relative overflow-hidden rounded-xl sm:rounded-2xl"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
+            <div 
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{ 
+                transform: `translateX(-${currentSlide * (window.innerWidth < 640 ? 100 : window.innerWidth < 1024 ? 50 : 20)}%)` 
               }}
             >
-              <div className="flex flex-col items-center">
-                <img
-                  src={story.img}
-                  alt={story.name}
-                  className="w-12 h-12 rounded-full object-cover mb-2 ring-2 ring-blue-100 shadow"
-                  onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(story.name) + '&background=E0E7EF&color=374151&size=64'; }}
-                />
-                <div className="flex items-center gap-1 mb-1">
-                  <span className="text-xs font-bold text-gray-900">{story.name}</span>
-                  <span className="text-xs">{story.country}</span>
+              {stories.map((story, idx) => (
+                <div 
+                  key={story.name} 
+                  className={`flex-shrink-0 px-1 sm:px-2 ${
+                    window.innerWidth < 640 ? 'w-full' : 
+                    window.innerWidth < 1024 ? 'w-1/2' : 'w-1/5'
+                  }`}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                    className={`
+                      flex flex-col items-center justify-between
+                      rounded-lg sm:rounded-xl shadow-lg ${story.color}
+                      border border-white/60 px-3 sm:px-4 py-4 sm:py-6
+                      h-48 sm:h-56 lg:h-64 transition-all duration-300 hover:shadow-xl hover:scale-105
+                    `}
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <img
+                        src={story.img}
+                        alt={story.name}
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover mb-2 sm:mb-3 ring-2 ring-white/50 shadow-md"
+                        onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(story.name) + '&background=E0E7EF&color=374151&size=64'; }}
+                      />
+                      <div className="flex items-center gap-1 mb-1">
+                        <span className="text-xs sm:text-sm font-bold text-gray-900">{story.name}</span>
+                        <span className="text-xs text-gray-600">{story.country}</span>
+                      </div>
+                      <span className="text-xs font-semibold text-[#fa5954] mb-2 text-center leading-tight">{story.title}</span>
+                      <p className="text-xs text-gray-700 text-center leading-relaxed mb-3 line-clamp-3">{story.desc}</p>
+                    </div>
+                    <div className="flex items-center justify-center w-full">
+                      <span className="text-xs px-2 sm:px-3 py-1 rounded-full bg-white/90 text-[#fa5954] font-semibold shadow">
+                        {story.impact}
+                      </span>
+                    </div>
+                  </motion.div>
                 </div>
-                <span className="text-[10px] font-semibold text-[#fa5954] mb-1 text-center">{story.title}</span>
-                <p className="text-[10px] text-gray-700 text-center mb-1">{story.desc}</p>
-              </div>
-              <div className="mt-1 flex items-center justify-center w-full">
-                <span className="text-[10px] px-2 py-1 rounded bg-white/90 text-[#fa5954] font-semibold shadow">
-                  {story.impact}
-                </span>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Dots Indicator */}
+          <div className="flex justify-center items-center mt-4 sm:mt-6 space-x-1 sm:space-x-2">
+            {Array.from({ 
+              length: stories.length - (window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 4) 
+            }, (_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-200 ${
+                  currentSlide === idx 
+                    ? 'bg-[#fa5954] scale-125' 
+                    : 'bg-gray-300 hover:bg-gray-400'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -1011,41 +1152,119 @@ const Work: React.FC = () => {
         </motion.div>
       </motion.ol>
       {/* Horizontal scroll for mobile */}
-      <motion.div
-        className="md:hidden flex overflow-x-auto gap-6 py-6 px-1"
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-      >
-        {steps.map((step, idx) => (
-          <motion.div
-            key={step.title}
-            variants={stepVariant}
-            className="flex flex-col items-center min-w-[220px] max-w-[240px] bg-gradient-to-br from-white via-[#fff6f5] to-[#fbeeea] rounded-xl shadow-lg px-5 py-6 border border-[#fa5954]/10 mx-1"
+      {/* Slideshow for mobile */}
+      <div className="md:hidden relative w-full max-w-4xl mx-auto">
+        {/* Navigation Arrows */}
+        <button
+          onClick={() => {
+            const totalSlides = steps.length - (window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 4);
+            setCurrentHowItWorksSlide(currentHowItWorksSlide === 0 ? totalSlides - 1 : currentHowItWorksSlide - 1);
+          }}
+          className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+        >
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
+        <button
+          onClick={() => {
+            const totalSlides = steps.length - (window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 4);
+            setCurrentHowItWorksSlide((currentHowItWorksSlide + 1) % totalSlides);
+          }}
+          className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+        >
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* Slideshow Container */}
+        <div 
+          className="relative overflow-hidden rounded-xl sm:rounded-2xl"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div 
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{ 
+              transform: `translateX(-${currentHowItWorksSlide * (window.innerWidth < 640 ? 100 : window.innerWidth < 1024 ? 50 : 20)}%)` 
+            }}
           >
-            <motion.div
-              className="rounded-full bg-white border-4 border-[#fa5954] shadow-lg p-2 mb-3"
-              variants={orbPulse}
-              animate="animate"
+            {steps.map((step, idx) => (
+              <div 
+                key={step.title} 
+                className={`flex-shrink-0 px-1 sm:px-2 ${
+                  window.innerWidth < 640 ? 'w-full' : 
+                  window.innerWidth < 1024 ? 'w-1/2' : 'w-1/5'
+                }`}
+              >
+                <motion.div
+                  variants={stepVariant}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  className="flex flex-col items-center bg-gradient-to-br from-white via-[#fff6f5] to-[#fbeeea] rounded-lg sm:rounded-xl shadow-lg px-4 sm:px-5 py-4 sm:py-6 border border-[#fa5954]/10 h-48 sm:h-56 lg:h-64 transition-all duration-300 hover:shadow-xl hover:scale-105"
+                >
+                  <motion.div
+                    className="rounded-full bg-white border-4 border-[#fa5954] shadow-lg p-2 mb-3 sm:mb-4"
+                    variants={orbPulse}
+                    animate="animate"
+                  >
+                    {step.icon}
+                  </motion.div>
+                  <h3 className="text-sm sm:text-base font-bold mb-2 text-gray-900 text-center">{step.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 text-center leading-relaxed">{step.desc}</p>
+                  {idx < steps.length - 1 && (
+                    <div className="w-8 h-1 bg-gradient-to-r from-[#fa5954]/40 to-transparent mt-3 sm:mt-4 rounded-full" />
+                  )}
+                </motion.div>
+              </div>
+            ))}
+            {/* CTA Card */}
+            <div 
+              className={`flex-shrink-0 px-1 sm:px-2 ${
+                window.innerWidth < 640 ? 'w-full' : 
+                window.innerWidth < 1024 ? 'w-1/2' : 'w-1/5'
+              }`}
             >
-              {step.icon}
-            </motion.div>
-            <h3 className="text-base font-bold mb-1 text-gray-900">{step.title}</h3>
-            <p className="text-xs text-gray-600">{step.desc}</p>
-            {idx < steps.length - 1 && (
-              <div className="w-8 h-1 bg-gradient-to-r from-[#fa5954]/40 to-transparent mt-4 rounded-full" />
-            )}
-          </motion.div>
-        ))}
-        {/* CTA at the end */}
-        <div className="flex flex-col items-center justify-center min-w-[160px]">
-          <button className="px-6 py-3 rounded-full bg-[#fa5954] text-white font-bold shadow-lg hover:shadow-[0_0_18px_rgba(250,89,84,0.7)] transition-all duration-300 text-base">
-            Start Now
-          </button>
-          <span className="mt-2 text-gray-500 text-xs">It's free!</span>
+              <motion.div
+                variants={stepVariant}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                className="flex flex-col items-center justify-center bg-gradient-to-br from-[#fa5954] to-[#e0514d] rounded-lg sm:rounded-xl shadow-lg px-4 sm:px-5 py-4 sm:py-6 border border-[#fa5954]/20 h-48 sm:h-56 lg:h-64 transition-all duration-300 hover:shadow-xl hover:scale-105"
+              >
+                <div className="text-center">
+                  <h3 className="text-sm sm:text-base font-bold mb-2 text-white">Ready to Start?</h3>
+                  <p className="text-xs sm:text-sm text-white/90 mb-4">Begin your journey today!</p>
+                  <button className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-white text-[#fa5954] font-bold shadow-lg hover:shadow-xl transition-all duration-300 text-xs sm:text-sm">
+                    Start Your Project
+                  </button>
+                  <p className="mt-2 text-white/80 text-xs">It's free to post!</p>
+                </div>
+              </motion.div>
+            </div>
+          </div>
         </div>
-      </motion.div>
+
+        {/* Dots Indicator */}
+        <div className="flex justify-center items-center mt-4 sm:mt-6 space-x-1 sm:space-x-2">
+          {Array.from({ 
+            length: steps.length - (window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 4) + 1 
+          }, (_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentHowItWorksSlide(idx)}
+              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-200 ${
+                currentHowItWorksSlide === idx 
+                  ? 'bg-[#fa5954] scale-125' 
+                  : 'bg-gray-300 hover:bg-gray-400'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
     </section>
 
     {/* FINAL CTA SECTION */}

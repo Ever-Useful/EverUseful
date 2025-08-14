@@ -5,8 +5,10 @@ import { ArrowLeft, X } from 'lucide-react';
 import InitialsAvatar from './InitialsAvatar';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 import toast from 'react-hot-toast';
+import { DropdownWithOther } from './ui/dropdown-with-other';
+import { getDropdownOptions, getCountryCodeOptions, getDesignationOptions } from '../utils/dropdownUtils';
 
 interface EditProfileSidebarProps {
   onClose: () => void;
@@ -82,6 +84,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     username: '',
     email: '',
     mobile: '',
+    countryCode: '+91',
     gender: '',
     domain: '',
     startYear: '',
@@ -97,6 +100,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     portfolio: '',
     hourlyRate: '',
     avgResponseTime: '',
+    dateOfBirth: '',
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -145,59 +149,100 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
   });
 
   useEffect(() => {
-    const normalizeUserType = (dbType: string) => {
-      switch ((dbType || '').toLowerCase()) {
-        case 'student':
-          return 'Students';
-        case 'professor':
-          return 'Professors';
-        case 'freelancer':
-          return 'Freelancers';
-        default:
-          return '';
-      }
-    };
     const fetchProfile = async () => {
       try {
         const userProfile = await userService.getUserProfile();
-        console.log('Fetched user profile:', userProfile); // Debug log
+        console.log('EditProfile - Fetched user profile:', userProfile); // Debug log
+        
+        // Extract data from the response structure - backend returns data in nested structure
+        const { data } = userProfile;
+        const { auth: authData, profile: userProfileData, studentData: studentInfo, professorData: professorInfo, freelancerData: freelancerInfo } = data;
+        
+        console.log('EditProfile - Extracted auth data:', authData);
+        console.log('EditProfile - Extracted profile data:', userProfileData);
+        console.log('EditProfile - Extracted freelancer data:', freelancerInfo);
+        
+        // Get localStorage data as fallback for immediate display after signup
+        const storedFirstName = localStorage.getItem("userFirstName");
+        const storedLastName = localStorage.getItem("userLastName");
+        const storedEmail = localStorage.getItem("userEmail");
+        const storedPhone = localStorage.getItem("userPhone");
+        const storedUserType = localStorage.getItem("userType");
+        
+        console.log('EditProfile - Raw userType from auth:', authData?.userType);
+        console.log('EditProfile - Stored userType from localStorage:', storedUserType);
+        console.log('EditProfile - Normalized userType:', normalizeUserType(authData?.userType || storedUserType || ''));
         
         setProfileData({
-          firstName: userProfile.auth?.firstName || userProfile.profile?.firstName || '',
-          lastName: userProfile.auth?.lastName || userProfile.profile?.lastName || '',
-          bio: userProfile.profile?.bio || '',
-          college: userProfile.studentData?.college || '',
-          degree: userProfile.studentData?.degree || '',
-          course: userProfile.studentData?.course || '',
-          location: userProfile.profile?.location || '',
-          year: userProfile.studentData?.year || '',
-          userType: normalizeUserType(userProfile.auth?.userType || userProfile.profile?.userType),
-          username: userProfile.auth?.username || userProfile.profile?.username || '',
-          email: userProfile.auth?.email || userProfile.profile?.email || '',
-          mobile: userProfile.auth?.mobile || userProfile.auth?.phoneNumber || userProfile.profile?.mobile || '',
-          gender: userProfile.auth?.gender || userProfile.profile?.gender || '',
-          domain: userProfile.auth?.domain || userProfile.profile?.domain || '',
-          startYear: userProfile.studentData?.startYear || '',
-          endYear: userProfile.studentData?.endYear || '',
-          purpose: userProfile.auth?.purpose || userProfile.profile?.purpose || '',
-          role: userProfile.auth?.role || userProfile.profile?.role || '',
-          specialization: userProfile.studentData?.specialization || '',
-          department: userProfile.professorData?.department || '',
-          designation: userProfile.professorData?.designation || '',
-          researchInterests: userProfile.professorData?.researchInterests || '',
-          skills: (((userProfile as any).skills && Array.isArray((userProfile as any).skills)) ? (userProfile as any).skills : (userProfile.freelancerData?.skills && Array.isArray(userProfile.freelancerData.skills) ? userProfile.freelancerData.skills : [])).join(','),
-          experience: userProfile.freelancerData?.experience || '',
-          portfolio: userProfile.freelancerData?.portfolio || '',
-          hourlyRate: userProfile.freelancerData?.hourlyRate || '',
-          avgResponseTime: userProfile.freelancerData?.avgResponseTime || '',
+          firstName: authData?.firstName || storedFirstName || '',
+          lastName: authData?.lastName || storedLastName || '',
+          bio: userProfileData?.bio || '',
+          college: studentInfo?.college || '',
+          degree: studentInfo?.degree || '',
+          course: studentInfo?.course || '',
+          location: userProfileData?.location || '',
+          year: studentInfo?.year || '',
+          userType: normalizeUserType(authData?.userType || storedUserType || ''),
+          // Added robust fallbacks for username
+          username:
+            authData?.username ||
+            userProfileData?.username ||
+            (authData?.email ? authData.email.split('@')[0] : '') ||
+            (userProfileData?.email ? userProfileData.email.split('@')[0] : '') ||
+            '',
+          // Added robust fallbacks for email
+          email:
+            authData?.email ||
+            userProfileData?.email ||
+            storedEmail ||
+            (auth && auth.currentUser ? auth.currentUser.email || '' : '') ||
+            '',
+          mobile: authData?.mobile || authData?.phoneNumber || storedPhone || '',
+          countryCode: '+91',
+          gender: authData?.gender || userProfileData?.gender || '',
+          domain: authData?.domain || userProfileData?.domain || '',
+          startYear: studentInfo?.startYear || '',
+          endYear: studentInfo?.endYear || '',
+          purpose: authData?.purpose || userProfileData?.purpose || '',
+          role: authData?.role || userProfileData?.role || '',
+          specialization: studentInfo?.specialization || '',
+          department: professorInfo?.department || '',
+          designation: professorInfo?.designation || '',
+          researchInterests: professorInfo?.researchInterests || '',
+          skills: (freelancerInfo?.skills && Array.isArray(freelancerInfo.skills) ? freelancerInfo.skills : []).join(','),
+          experience: freelancerInfo?.experience || '',
+          portfolio: freelancerInfo?.portfolio || '',
+          hourlyRate: freelancerInfo?.hourlyRate || '',
+          avgResponseTime: freelancerInfo?.avgResponseTime || '',
+          dateOfBirth: userProfileData?.dateOfBirth || '',
         });
-        setEducationList(userProfile.education || []);
-        setWorkList(userProfile.workExperience || []);
-        setSkills(((userProfile as any).skills && Array.isArray((userProfile as any).skills)) ? (userProfile as any).skills : (userProfile.freelancerData?.skills && Array.isArray(userProfile.freelancerData.skills) ? userProfile.freelancerData.skills : []));
-        setPersonalDetails(userProfile.personalDetails || {
+        
+        console.log('EditProfile - Set profile data with freelancer fields:', {
+          experience: freelancerInfo?.experience || '',
+          portfolio: freelancerInfo?.portfolio || '',
+          hourlyRate: freelancerInfo?.hourlyRate || '',
+          avgResponseTime: freelancerInfo?.avgResponseTime || ''
+        });
+        setEducationList(data.education || []);
+        setWorkList(data.workExperience || []);
+        
+        // Handle skills - convert objects to strings if needed
+        const skillsData = data.skills || freelancerInfo?.skills || [];
+        if (Array.isArray(skillsData)) {
+          const skillStrings = skillsData.map(skill => {
+            if (typeof skill === 'string') return skill;
+            if (skill && typeof skill === 'object' && skill.name) return skill.name;
+            return String(skill);
+          });
+          setSkills(skillStrings);
+        } else {
+          setSkills([]);
+        }
+        
+        setPersonalDetails(data.personalDetails || {
           address1: '', address2: '', landmark: '', pincode: '', location: '', hobbies: '', copyCurrent: false
         });
-        setSocialLinks(userProfile.socialLinks || {
+        setSocialLinks(data.socialLinks || {
           linkedin: '', facebook: '', instagram: '', twitter: '', git: '', medium: '', reddit: '', slack: '', dribbble: '', behance: '', codepen: '', figma: '', custom: ''
         });
       } catch (error) {
@@ -216,12 +261,19 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     toast.loading('Saving...');
     try {
       if (activeSection === 'Basic Details') {
-        // Update auth info (Firestore fields)
+        // Update auth info (backend fields)
+        console.log('EditProfile - Updating auth info with userType:', denormalizeUserType(profileData.userType));
         await userService.updateAuthInfo({
           firstName: profileData.firstName,
           lastName: profileData.lastName,
           userType: denormalizeUserType(profileData.userType),
           phoneNumber: profileData.mobile,
+        });
+        
+        // Also update profile with mobile field (and username if provided)
+        await userService.updateProfile({
+          mobile: profileData.mobile,
+          ...(profileData.username ? { username: profileData.username } : {})
         });
         
         // Update profile info (userData.json fields)
@@ -231,6 +283,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           purpose: profileData.purpose,
           role: profileData.role,
           location: profileData.location,
+          dateOfBirth: profileData.dateOfBirth,
         });
         
         // Update student data if user is a student
@@ -247,7 +300,15 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         }
         
         // Update freelancer data if user is a freelancer
-        if (profileData.userType === 'Freelancers') {
+        console.log('EditProfile - Current userType:', profileData.userType);
+        if (profileData.userType === 'Freelancers' || profileData.userType === 'Business') {
+          console.log('EditProfile - Saving freelancer data:', {
+            experience: profileData.experience,
+            portfolio: profileData.portfolio,
+            location: profileData.location,
+            hourlyRate: profileData.hourlyRate,
+            avgResponseTime: profileData.avgResponseTime,
+          });
           await userService.updateFreelancerData({
             experience: profileData.experience,
             portfolio: profileData.portfolio,
@@ -255,6 +316,8 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
             hourlyRate: profileData.hourlyRate,
             avgResponseTime: profileData.avgResponseTime,
           });
+        } else {
+          console.log('EditProfile - User is not a freelancer, userType:', profileData.userType);
         }
         
         // Update professor data if user is a professor
@@ -265,6 +328,21 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
             researchInterests: profileData.researchInterests,
           });
         }
+        
+        // Clean up localStorage after successful save
+        localStorage.removeItem("userDataSaved");
+        
+        // Debug: Check if data was saved by fetching it again
+        setTimeout(async () => {
+          try {
+            const refreshedProfile = await userService.getUserProfile();
+            console.log('EditProfile - Refreshed profile after save:', refreshedProfile);
+            console.log('EditProfile - Refreshed freelancer data:', refreshedProfile.freelancerData);
+          } catch (error) {
+            console.error('EditProfile - Error fetching refreshed profile:', error);
+          }
+        }, 1000);
+        
       } else if (activeSection === 'About') {
         await userService.updateProfile({ bio: profileData.bio });
       } else if (activeSection === 'Education') {
@@ -338,7 +416,11 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     }
     
     try {
-      await userService.addSkill({ name: trimmedSkill });
+      await userService.addSkill({ 
+        name: trimmedSkill,
+        level: 'intermediate',
+        category: 'general'
+      });
       setSkills(prev => [...prev, trimmedSkill]);
       toast.success('Skill added successfully!');
     } catch (error) {
@@ -496,8 +578,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         return 'Professors';
       case 'freelancer':
         return 'Freelancers';
+      case 'business':
+        return 'Business';
       default:
-        return '';
+        return dbType || '';
     }
   };
 
@@ -509,8 +593,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         return 'professor';
       case 'Freelancers':
         return 'freelancer';
+      case 'Business':
+        return 'business';
       default:
-        return '';
+        return uiType.toLowerCase();
     }
   };
 
@@ -560,44 +646,55 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Username</label>
-                      <Input name="username" value={profileData.username ?? ''} disabled className="mt-1 bg-gray-100" />
+                      <Input name="username" value={profileData.username ?? ''} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Email</label>
-                      <Input name="email" value={profileData.email ?? ''} disabled className="mt-1 bg-gray-100 cursor-not-allowed text-gray-500" />
+                      <Input name="email" value={profileData.email ?? ''} onChange={handleInputChange} className="mt-1" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-700">Mobile <span className="text-red-500">*</span></label>
                       <div className="flex gap-2 mt-1">
-                        <select className="border rounded-md px-2 py-1 text-sm bg-white">
-                          <option value="+91">+91</option>
-                          <option value="+1">+1</option>
-                          <option value="+44">+44</option>
+                        <select 
+                          className="border rounded-md px-2 py-1 text-sm bg-white w-32"
+                          value={profileData.countryCode ?? '+91'}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, countryCode: e.target.value }))}
+                        >
+                          {getCountryCodeOptions().map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
                         </select>
-                        <Input name="mobile" value={profileData.mobile ?? ''} onChange={handleInputChange} className="flex-1" />
+                        <Input name="mobile" value={profileData.mobile ?? ''} onChange={handleInputChange} className="flex-1" placeholder="Enter mobile number" />
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Gender <span className="text-red-500">*</span></label>
-                      <div className="flex gap-3 mt-1">
-                        {['Male', 'Female', 'Others'].map(gender => (
-                          <button
-                            key={gender}
-                            type="button"
-                            className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${profileData.gender === gender ? 'bg-blue-50 border-blue-600 text-blue-900' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}
-                            onClick={() => setProfileData(prev => ({ ...prev, gender }))}
-                          >
-                            {gender}
-                          </button>
-                        ))}
-                      </div>
+                      <DropdownWithOther
+                        label="Gender"
+                        options={getDropdownOptions('genders')}
+                        value={profileData.gender ?? ''}
+                        onChange={(value) => setProfileData(prev => ({ ...prev, gender: value }))}
+                        placeholder="Select Gender"
+                        required={true}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Date of Birth</label>
+                      <Input 
+                        name="dateOfBirth" 
+                        type="date" 
+                        value={profileData.dateOfBirth ?? ''} 
+                        onChange={handleInputChange} 
+                        className="mt-1" 
+                      />
                     </div>
                   </div>
                   {/* User Type */}
                   <div>
                     <label className="text-sm font-medium text-gray-700">User Type <span className="text-red-500">*</span></label>
                     <div className="flex flex-wrap gap-2 mt-1">
-                      {['Students', 'Professors', 'Freelancers'].map(type => (
+                      {['Students', 'Professors', 'Freelancers', 'Business'].map(type => (
                         <button
                           key={type}
                           type="button"
@@ -608,30 +705,33 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         </button>
                       ))}
                     </div>
+                    <div className="mt-2 text-xs text-gray-500">
+                      Current userType: {profileData.userType || 'Not set'} (Normalized: {normalizeUserType(profileData.userType) || profileData.userType})
+                    </div>
                   </div>
                   
                   {/* Conditional Fields by User Type */}
                   {profileData.userType === 'Students' && (
                     <div className="space-y-6">
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Course <span className="text-red-500">*</span></label>
-                        <select name="course" value={profileData.course ?? ''} onChange={handleSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Course</option>
-                          <option value="B.Tech/BE">B.Tech/BE (Bachelor of Technology / Bachelor of Engineering)</option>
-                          <option value="B.Sc">B.Sc</option>
-                          <option value="MBA">MBA</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Course"
+                          options={getDropdownOptions('courses')}
+                          value={profileData.course ?? ''}
+                          onChange={(value) => setProfileData(prev => ({ ...prev, course: value }))}
+                          placeholder="Select Course"
+                          required={true}
+                        />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Course Specialization <span className="text-red-500">*</span></label>
-                        <select name="specialization" value={profileData.specialization ?? ''} onChange={handleSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Specialization</option>
-                          <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                          <option value="Electronics">Electronics</option>
-                          <option value="Mechanical">Mechanical</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Course Specialization"
+                          options={getDropdownOptions('courseSpecializations')}
+                          value={profileData.specialization ?? ''}
+                          onChange={(value) => setProfileData(prev => ({ ...prev, specialization: value }))}
+                          placeholder="Select Specialization"
+                          required={true}
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -647,19 +747,14 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         <Input name="college" value={profileData.college ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Purpose <span className="text-red-500">*</span></label>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {['To find a Job', 'Compete & Upskill', 'To Host an Event', 'To be a Mentor'].map(purpose => (
-                            <button
-                              key={purpose}
-                              type="button"
-                              className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${profileData.purpose === purpose ? 'bg-blue-50 border-blue-600 text-blue-900' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}
-                              onClick={() => setProfileData(prev => ({ ...prev, purpose }))}
-                            >
-                              {purpose}
-                            </button>
-                          ))}
-                        </div>
+                        <DropdownWithOther
+                          label="Purpose"
+                          options={getDropdownOptions('purposes')}
+                          value={profileData.purpose ?? ''}
+                          onChange={(value) => setProfileData(prev => ({ ...prev, purpose: value }))}
+                          placeholder="Select Purpose"
+                          required={true}
+                        />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Select Role</label>
@@ -677,20 +772,37 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   {profileData.userType === 'Professors' && (
                     <div className="space-y-6">
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Department <span className="text-red-500">*</span></label>
-                        <Input name="department" value={profileData.department ?? ''} onChange={handleInputChange} className="mt-1" />
+                        <DropdownWithOther
+                          label="Department"
+                          options={getDropdownOptions('departments')}
+                          value={profileData.department ?? ''}
+                          onChange={(value) => setProfileData(prev => ({ ...prev, department: value }))}
+                          placeholder="Select Department"
+                          required={true}
+                        />
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Designation <span className="text-red-500">*</span></label>
-                        <Input name="designation" value={profileData.designation ?? ''} onChange={handleInputChange} className="mt-1" />
-                      </div>
+                                              <div>
+                          <DropdownWithOther
+                            label="Designation"
+                            options={getDesignationOptions(profileData.userType)}
+                            value={profileData.designation ?? ''}
+                            onChange={(value) => setProfileData(prev => ({ ...prev, designation: value }))}
+                            placeholder="Select Designation"
+                            required={true}
+                          />
+                        </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">College/University <span className="text-red-500">*</span></label>
                         <Input name="college" value={profileData.college ?? ''} onChange={handleInputChange} className="mt-1" />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Research Interests</label>
-                        <Input name="researchInterests" value={profileData.researchInterests ?? ''} onChange={handleInputChange} className="mt-1" />
+                        <DropdownWithOther
+                          label="Research Interests"
+                          options={getDropdownOptions('researchInterests')}
+                          value={profileData.researchInterests ?? ''}
+                          onChange={(value) => setProfileData(prev => ({ ...prev, researchInterests: value }))}
+                          placeholder="Select Research Interests"
+                        />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Location <span className="text-red-500">*</span></label>
@@ -701,7 +813,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                     </div>
                   )}
-                  {profileData.userType === 'Freelancers' && (
+                  {(profileData.userType === 'Freelancers' || profileData.userType === 'Business') && (
                     <div className="space-y-6">
                       <div>
                         <label className="text-sm font-medium text-gray-700">Experience (years)</label>
@@ -719,6 +831,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         <label className="text-sm font-medium text-gray-700">Avg Response Time (hrs)</label>
                         <Input name="avgResponseTime" value={profileData.avgResponseTime ?? ''} onChange={handleInputChange} className="mt-1" placeholder="e.g. 5" />
                       </div>
+
                       <div>
                         <label className="text-sm font-medium text-gray-700">Location <span className="text-red-500">*</span></label>
                         <div className="flex items-center gap-2 mt-1">
@@ -768,9 +881,9 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                           <div className="text-gray-500 text-center py-4">No skills added yet. Add some skills to showcase your expertise!</div>
                         ) : (
                           <div className="flex flex-wrap gap-2">
-                              {skills.map(skill => (
-                                  <div key={skill} className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                                      <span>{skill}</span>
+                              {skills.map((skill, index) => (
+                                  <div key={`${typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'skill'}-${index}`} className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                                      <span>{typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}</span>
                                       <button onClick={() => handleRemoveSkill(skill)} className="ml-2 text-blue-600 hover:text-blue-800 transition-colors">
                                           <X className="w-4 h-4" />
                                       </button>
@@ -815,35 +928,34 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   {showEducationForm ? (
                     <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSaveEducation(); }}>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Qualification <span className="text-red-500">*</span></label>
-                        <select name="qualification" value={educationForm.qualification ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Qualification</option>
-                          <option value="PhD">PhD</option>
-                          <option value="Post Graduation">Post Graduation</option>
-                          <option value="Graduation">Graduation</option>
-                          <option value="Intermediate (12th)">Intermediate (12th)</option>
-                          <option value="High School (10th)">High School (10th)</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Qualification"
+                          options={getDropdownOptions('qualifications')}
+                          value={educationForm.qualification ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, qualification: value }))}
+                          placeholder="Select Qualification"
+                          required={true}
+                        />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Course <span className="text-red-500">*</span></label>
-                        <select name="course" value={educationForm.course ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Course</option>
-                          <option value="B.Tech/BE">B.Tech/BE (Bachelor of Technology / Bachelor of Engineering)</option>
-                          <option value="B.Sc">B.Sc</option>
-                          <option value="MBA">MBA</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Course"
+                          options={getDropdownOptions('courses')}
+                          value={educationForm.course ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, course: value }))}
+                          placeholder="Select Course"
+                          required={true}
+                        />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Specialization <span className="text-red-500">*</span></label>
-                        <select name="specialization" value={educationForm.specialization ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Specialization</option>
-                          <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                          <option value="Electronics">Electronics</option>
-                          <option value="Mechanical">Mechanical</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Specialization"
+                          options={getDropdownOptions('courseSpecializations')}
+                          value={educationForm.specialization ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, specialization: value }))}
+                          placeholder="Select Specialization"
+                          required={true}
+                        />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">College <span className="text-red-500">*</span></label>
@@ -860,13 +972,13 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Course Type</label>
-                        <select name="courseType" value={educationForm.courseType ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Course Type</option>
-                          <option value="Full Time">Full Time</option>
-                          <option value="Part Time">Part Time</option>
-                          <option value="Distance">Distance</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Course Type"
+                          options={getDropdownOptions('courseTypes')}
+                          value={educationForm.courseType ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, courseType: value }))}
+                          placeholder="Select Course Type"
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -884,12 +996,13 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                           <Input name="rollNumber" value={educationForm.rollNumber ?? ''} onChange={handleEducationInputChange} className="mt-1" placeholder="Roll number" />
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-700">Are you a Lateral Entry Student?</label>
-                          <select name="lateralEntry" value={educationForm.lateralEntry ?? ''} onChange={handleEducationSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                            <option value="">Lateral entry</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                          </select>
+                          <DropdownWithOther
+                            label="Are you a Lateral Entry Student?"
+                            options={getDropdownOptions('lateralEntryOptions')}
+                            value={educationForm.lateralEntry ?? ''}
+                            onChange={(value) => setEducationForm(prev => ({ ...prev, lateralEntry: value }))}
+                            placeholder="Select Lateral Entry Status"
+                          />
                         </div>
                       </div>
                       <div>
@@ -906,7 +1019,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div className="flex justify-end gap-2 mt-4">
                         <Button type="button" variant="outline" onClick={handleCancelEducation}>Cancel</Button>
-                        <Button type="submit" className="bg-blue-600 text-white" variant="default">Save</Button>
+                        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0" variant="default">Save</Button>
                       </div>
                     </form>
                   ) : (
@@ -923,7 +1036,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                             </div>
                             <div className="flex gap-2">
                               <Button variant="outline" size="sm" onClick={() => handleEditEducation(idx)}>Edit</Button>
-                              <Button variant="destructive" size="sm" onClick={() => handleDeleteEducation(idx)}>Delete</Button>
+                              <Button variant="outline" size="sm" onClick={() => handleDeleteEducation(idx)} className="text-red-600 border-red-600 hover:bg-red-50">Delete</Button>
                             </div>
                           </div>
                         ))
@@ -944,30 +1057,28 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   {showWorkForm ? (
                     <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSaveWork(); }}>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Designation <span className="text-red-500">*</span></label>
-                        <select name="designation" value={workForm.designation ?? ''} onChange={handleWorkSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Designation</option>
-                          <option value="Software Engineer">Software Engineer</option>
-                          <option value="Research Intern">Research Intern</option>
-                          <option value="Product Manager">Product Manager</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Designation"
+                          options={getDesignationOptions(profileData.userType)}
+                          value={workForm.designation ?? ''}
+                          onChange={(value) => setWorkForm(prev => ({ ...prev, designation: value }))}
+                          placeholder="Select Designation"
+                          required={true}
+                        />
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-700">Organisation <span className="text-red-500">*</span></label>
                         <Input name="organization" value={workForm.organization ?? ''} onChange={handleWorkInputChange} className="mt-1" placeholder="Select Organisation" />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Employment Type <span className="text-red-500">*</span></label>
-                        <select name="employmentType" value={workForm.employmentType ?? ''} onChange={handleWorkSelectChange} className="w-full border rounded-md px-3 py-2 mt-1 text-sm bg-white">
-                          <option value="">Select Employment Type</option>
-                          <option value="Full Time">Full Time</option>
-                          <option value="Part Time">Part Time</option>
-                          <option value="Internship">Internship</option>
-                          <option value="Contract">Contract</option>
-                          <option value="Freelance">Freelance</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownWithOther
+                          label="Employment Type"
+                          options={getDropdownOptions('employmentTypes')}
+                          value={workForm.employmentType ?? ''}
+                          onChange={(value) => setWorkForm(prev => ({ ...prev, employmentType: value }))}
+                          placeholder="Select Employment Type"
+                          required={true}
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-4 items-end">
                         <div>
@@ -1003,7 +1114,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                       </div>
                       <div className="flex justify-end gap-2 mt-4">
                         <Button type="button" variant="outline" onClick={handleCancelWork}>Cancel</Button>
-                        <Button type="submit" className="bg-blue-600 text-white" variant="default">Save</Button>
+                        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0" variant="default">Save</Button>
                       </div>
                     </form>
                   ) : (
@@ -1020,7 +1131,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                             </div>
                             <div className="flex gap-2">
                               <Button variant="outline" size="sm" onClick={() => handleEditWork(idx)}>Edit</Button>
-                              <Button variant="destructive" size="sm" onClick={() => handleDeleteWork(idx)}>Delete</Button>
+                              <Button variant="outline" size="sm" onClick={() => handleDeleteWork(idx)} className="text-red-600 border-red-600 hover:bg-red-50">Delete</Button>
                             </div>
                           </div>
                         ))
