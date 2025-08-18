@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera, Upload, X } from "lucide-react";
+import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera, Upload, X, Image as ImageIcon } from "lucide-react";
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect, useRef } from "react";
@@ -71,6 +71,7 @@ const Profile = () => {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showMyProjects, setShowMyProjects] = useState(false);
   const [editSection, setEditSection] = useState('');
+
 
   // Removed camera state since we're using ProfilePhotoUpload component
 
@@ -424,69 +425,77 @@ const Profile = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Header />
       
-      {/* Hero Section */}
+      {/* Hero Section - LinkedIn Mobile Style */}
       <div
-        className="relative h-64 md:h-96 bg-cover bg-center bg-no-repeat pt-24"
+        className="relative h-64 sm:h-64 md:h-96 bg-cover bg-center bg-no-repeat pt-20 sm:pt-24"
         style={{ backgroundImage: `url("${backgroundImage}")` }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
         
-        {/* Background photo upload */}
-        <PhotoUpload
-          currentImage={resolvedBackground}
-          onImageUpload={async (imageUrl) => {
-            // Update local state immediately for UI responsiveness
-            setBackgroundImage(imageUrl);
-            setResolvedBackground(imageUrl);
-            toast.success('Cover photo updated successfully!');
-          }}
-          type="background"
-          trigger={
-            <button
-              className="absolute top-20 right-4 md:top-24 md:right-6 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors z-20"
-              title="Change Background Photo"
-            >
-              <Camera className="text-slate-700 w-5 h-5" />
-            </button>
-          }
-        />
+        {/* Background photo upload - Visible on all devices */}
+        <div>
+          <PhotoUpload
+            currentImage={resolvedBackground}
+            onImageUpload={async (imageUrl) => {
+              setBackgroundImage(imageUrl);
+              setResolvedBackground(imageUrl);
+              toast.success('Cover photo updated successfully!');
+            }}
+            type="background"
+            trigger={
+              <button
+                data-cover-photo-trigger
+                className="absolute top-20 right-4 md:top-24 md:right-6 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors z-20"
+                title="Change Background Photo"
+              >
+                {/* Mobile: Pencil icon, Desktop: Camera icon */}
+                <Edit className="md:hidden text-slate-700 w-4 h-4" />
+                <Camera className="hidden md:block text-slate-700 w-5 h-5" />
+              </button>
+            }
+          />
+        </div>
         
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-12 sm:my-[99px] py-6 sm:py-[34px] px-3 sm:px-[23px]">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 w-full">
-              {/* Profile Photo */}
-              <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0 z-20">
+            <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6 w-full">
+              {/* Profile Photo - LinkedIn Mobile Style - Left side on mobile */}
+              <div className="relative flex justify-start md:justify-center w-full md:w-auto z-20 mt-4 md:mt-0">
                 <PhotoUpload
                   currentImage={resolvedAvatar}
                   onImageUpload={async (imageUrl) => {
-                    // Update local state immediately for UI responsiveness
                     setProfileData(prev => ({ ...prev, avatar: imageUrl }));
                     setResolvedAvatar(imageUrl);
                     toast.success('Profile photo updated successfully!');
                   }}
                   type="avatar"
                   trigger={
-                    <div className="relative cursor-pointer group">
+                    <div data-profile-photo-trigger className="relative cursor-pointer group">
                       {resolvedAvatar ? (
                         <img
                           src={resolvedAvatar}
                           alt={getDisplayName()}
-                          className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full object-cover mx-auto md:mx-0 hover:opacity-90 transition-opacity"
+                          className="w-20 h-20 sm:w-24 md:w-36 sm:h-24 md:h-36 border-4 border-white shadow-lg rounded-full object-cover hover:opacity-90 transition-opacity"
                           onError={(e) => { e.currentTarget.src = NoUserProfile; }}
                         />
                       ) : (
-                        <div className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-2xl sm:text-3xl font-bold text-gray-600 mx-auto md:mx-0 hover:bg-gray-200 transition-colors">
+                        <div className="w-20 h-20 sm:w-24 md:w-36 sm:h-24 md:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-lg sm:text-xl md:text-3xl font-bold text-gray-600 hover:bg-gray-200 transition-colors">
                           {getAvatarInitials()}
                         </div>
                       )}
                       
-                      {/* LinkedIn-style edit icon overlay */}
-                      <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors group-hover:scale-110">
+                      {/* Pencil icon for mobile - Profile photo edit */}
+                      <div className="md:hidden absolute -bottom-1 -right-1 bg-white rounded-full p-1.5 shadow-lg border border-gray-200">
+                        <Edit className="w-3 h-3 text-gray-600" />
+                      </div>
+                      
+                      {/* LinkedIn-style edit icon overlay - Desktop only */}
+                      <div className="hidden md:block absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors group-hover:scale-110">
                         <Camera className="w-4 h-4 text-gray-600" />
                       </div>
                       
-                      {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      {/* Hover overlay - Desktop only */}
+                      <div className="hidden md:block absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <div className="text-white text-center">
                           <Camera className="w-8 h-8 mx-auto mb-1" />
                           <span className="text-xs font-medium">Change photo</span>
@@ -495,95 +504,133 @@ const Profile = () => {
                     </div>
                   }
                 />
+                
+                {/* Profile Info - LinkedIn Mobile Style - Aligned with profile photo */}
+                <div className="flex-1 text-white w-full text-center md:text-left ml-4 md:ml-0">
+                  <h1 className="text-lg sm:text-xl md:text-4xl font-bold drop-shadow-lg mb-1 sm:mb-1.5">
+                    {getDisplayName()}
+                  </h1>
+                  <p className="text-xs sm:text-sm md:text-base text-slate-200 drop-shadow-md">
+                    {profileData.userType || localStorage.getItem("userType") || "User"}
+                  </p>
+                </div>
               </div>
               
-              {/* Profile Info */}
-              <div className="flex-1 text-white mt-4 md:mt-0 w-full">
-                <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5 text-center md:text-left mobile-text-4xl">
-                  {getDisplayName()}
-                </h1>
-                <p className="text-base text-slate-200 drop-shadow-md text-center md:text-left mobile-text-base">
-                  {profileData.userType || localStorage.getItem("userType") || "User"}
-                </p>
+              {/* Edit Profile Button - Bottom right corner on mobile */}
+              <div className="flex justify-end md:justify-start mt-4 md:mt-0">
+                {/* Desktop Edit Button */}
+                <button
+                  onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
+                  className="hidden md:flex items-center gap-2 text-white drop-shadow-md text-sm sm:text-base md:text-lg bg-transparent border border-white hover:bg-white/10 px-3 md:px-6 py-1.5 md:py-2 rounded-full font-medium md:font-semibold transition-all duration-200"
+                >
+                  <Edit className="w-3 h-3 md:w-4 md:h-4" />
+                  Edit Profile
+                </button>
                 
-                {/* Edit Profile Button */}
-                <div className="flex flex-row items-center justify-center md:justify-start mt-4">
-                  <button
-                    onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
-                    className="flex items-center gap-2 text-white drop-shadow-md text-base sm:text-lg bg-transparent border-2 border-white hover:bg-white/10 px-4 md:px-6 py-2 rounded-full font-semibold transition-all duration-200"
-                  >
-                    <Edit className="w-4 h-4" />
-                    Edit Profile
-                  </button>
-                </div>
+                {/* Mobile Edit Button - Goes directly to edit profile */}
+                <button
+                  onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
+                  className="md:hidden flex items-center gap-2 text-white drop-shadow-md text-xs bg-transparent border border-white hover:bg-white/10 px-2 py-1 rounded-full font-medium transition-all duration-200"
+                >
+                  <Edit className="w-3 h-3" />
+                  Edit
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="max-w-7xl mx-auto px-8 -mt-8 relative z-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Stats Cards - LinkedIn Mobile Style */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 -mt-2 sm:-mt-8 relative z-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
           {/* Only show Hourly Rate and Avg Response Time for freelancers */}
           {(profileData.userType?.toLowerCase() === 'freelancer' || profileData.userType === 'Freelancers' || profileData.userType === 'Business') && (
             <>
-              <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <DollarSign className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `₹${freelancerData.hourlyRate}` : '₹0'}</div>
+              <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-lg sm:rounded-xl">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2" />
+                  <div className="text-base sm:text-lg md:text-2xl font-bold">{freelancerData.hourlyRate ? `₹${freelancerData.hourlyRate}` : '₹0'}</div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-xl">
-                <CardContent className="p-4 text-center">
-                  <Clock className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : '0'}</div>
+              <Card className="bg-gradient-to-br from-emerald-600 to-teal-500 text-white rounded-lg sm:rounded-xl">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <Clock className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2" />
+                  <div className="text-base sm:text-lg md:text-2xl font-bold">{freelancerData.avgResponseTime ? freelancerData.avgResponseTime : '0'}</div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Avg Response Time (hrs)</div>
                 </CardContent>
               </Card>
             </>
           )}
-          <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
-            <CardContent className="p-4 text-center">
-              <Award className="w-6 h-6 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{stats.projects}+</div>
+          <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-lg sm:rounded-xl">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Award className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2" />
+              <div className="text-base sm:text-lg md:text-2xl font-bold">{stats.projects}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
-            <CardContent className="p-4 text-center">
-              <UserPlus className="w-6 h-6 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{stats.connections}+</div>
+          <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-lg sm:rounded-xl">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <UserPlus className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2" />
+              <div className="text-base sm:text-lg md:text-2xl font-bold">{stats.connections}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Main Content - LinkedIn Mobile Style */}
+      <div className="container mx-auto px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Column */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* About Section */}
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+            {/* Skills Section - LinkedIn Mobile Style - Moved to top for mobile */}
+            <Card className="bg-white shadow-lg rounded-xl lg:hidden">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-sm sm:text-lg font-semibold text-gray-900 flex items-center">
+                    <span className="bg-indigo-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
+                      <Star className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
+                    </span>
+                    Research Skills & Technical Expertise
+                  </h3>
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Skills'); setShowEditProfile(true); }} className="-translate-y-[20px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2 sm:gap-3">
+                  {skills && skills.length > 0 ? (
+                    skills.map((skill, index) => (
+                      <Badge key={index} className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-xs sm:text-sm">No skills added yet. Click edit to add your skills.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* About Section - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-                    <span className="bg-purple-100 p-2 rounded-lg mr-3">
-                      <GraduationCap className="w-5 h-5 text-purple-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h2 className="text-lg sm:text-xl md:text-3xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-purple-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
+                      <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
                     </span>
                     About
                   </h2>
-                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('About'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
-                    <Edit className="w-2 h-2 mr-1" />Edit
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('About'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
                   </Button>
                 </div>
                 <div>
-                  <p className="text-gray-700 leading-relaxed">{displayedText}</p>
+                  <p className="text-gray-700 leading-relaxed text-sm sm:text-base">{displayedText}</p>
                   {shouldTruncate && (
-                    <button className="mt-2 text-blue-600 hover:underline text-sm" onClick={() => setIsExpanded(!isExpanded)}>
+                    <button className="mt-2 text-blue-600 hover:underline text-xs sm:text-sm" onClick={() => setIsExpanded(!isExpanded)}>
                       {isExpanded ? "Read Less" : "Read More"}
                     </button>
                   )}
@@ -591,27 +638,27 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            {/* Academic Background */}
+            {/* Academic Background - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-                    <span className="bg-blue-100 p-2 rounded-lg mr-3">
-                      <BookOpen className="w-5 h-5 text-blue-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h2 className="text-lg sm:text-xl md:text-3xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-blue-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
+                      <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                     </span>
                     Academic Background
                   </h2>
-                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Education'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
-                    <Edit className="w-2 h-2 mr-1" />Edit
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Education'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
                   </Button>
                 </div>
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {(education && education.length > 0) ? (
                     education.map((edu, idx) => (
-                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                      <div key={idx} className="border rounded-lg p-3 sm:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 bg-white">
                         <div>
-                          <div className="font-semibold text-gray-900">{edu.qualification} - {edu.course}</div>
-                          <div className="text-gray-700 text-sm">{edu.college} | {edu.startYear} - {edu.endYear}</div>
+                          <div className="font-semibold text-gray-900 text-sm sm:text-base">{edu.qualification} - {edu.course}</div>
+                          <div className="text-gray-700 text-xs sm:text-sm">{edu.college} | {edu.startYear} - {edu.endYear}</div>
                           {edu.specialization && <div className="text-gray-500 text-xs mt-1">{edu.specialization}</div>}
                           {edu.description && <div className="text-gray-500 text-xs mt-1">{edu.description}</div>}
                           {edu.skills && <div className="text-gray-500 text-xs mt-1">Skills: {edu.skills}</div>}
@@ -619,33 +666,33 @@ const Profile = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="text-gray-500 text-sm">No education added yet.</div>
+                    <div className="text-gray-500 text-xs sm:text-sm">No education added yet.</div>
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Work Experience Section */}
+            {/* Work Experience Section - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-                    <span className="bg-green-100 p-2 rounded-lg mr-3">
-                      <Briefcase className="w-5 h-5 text-green-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h2 className="text-lg sm:text-xl md:text-3xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-green-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
+                      <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     </span>
                     Work Experience
                   </h2>
-                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Work Experience'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
-                    <Edit className="w-2 h-2 mr-1" />Edit
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Work Experience'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
                   </Button>
                 </div>
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {(workExperience && workExperience.length > 0) ? (
                     workExperience.map((work, idx) => (
-                      <div key={idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white">
+                      <div key={idx} className="border rounded-lg p-3 sm:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 bg-white">
                         <div>
-                          <div className="font-semibold text-gray-900">{work.designation} - {work.organization}</div>
-                          <div className="text-gray-700 text-sm">{work.startDate} - {work.currentlyWorking ? 'Present' : work.endDate}</div>
+                          <div className="font-semibold text-gray-900 text-sm sm:text-base">{work.designation} - {work.organization}</div>
+                          <div className="text-gray-700 text-xs sm:text-sm">{work.startDate} - {work.currentlyWorking ? 'Present' : work.endDate}</div>
                           <div className="text-gray-500 text-xs mt-1">{work.employmentType}</div>
                           {work.description && <div className="text-gray-500 text-xs mt-1">{work.description}</div>}
                           {work.skills && <div className="text-gray-500 text-xs mt-1">Skills: {work.skills}</div>}
@@ -653,19 +700,19 @@ const Profile = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="text-gray-500 text-sm">No work experience added yet.</div>
+                    <div className="text-gray-500 text-xs sm:text-sm">No work experience added yet.</div>
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Portfolio Section */}
+            {/* Portfolio Section - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-                    <span className="bg-green-100 p-2 rounded-lg mr-3">
-                      <Briefcase className="w-5 h-5 text-green-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h2 className="text-lg sm:text-xl md:text-3xl font-bold text-gray-900 flex items-center">
+                    <span className="bg-green-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
+                      <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     </span>
                     Research Projects & Commercial Work
                   </h2>
@@ -673,58 +720,58 @@ const Profile = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowMyProjects(true)}
-                    className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50"
+                    className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50"
                   >
-                    <Edit className="w-2 h-2 mr-1" />Add Project
+                    <Plus className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Add Project</span>
                   </Button>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {projects.length > 0 ? (
                     projects.map((project, index) => (
                       <Card
                         key={project.id || index}
-                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[140px]"
+                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col sm:flex-row items-stretch min-h-[120px] sm:min-h-[140px]"
                       >
-                        <div className="w-full md:w-48 flex-shrink-0 h-36 md:h-auto bg-gray-100 flex items-center justify-center">
+                        <div className="w-full sm:w-48 flex-shrink-0 h-32 sm:h-36 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
                             src={project.image || NoImageAvailable}
                             alt={project.title}
-                            className="object-cover w-full h-full rounded-l-lg"
+                            className="object-cover w-full h-full rounded-t-lg sm:rounded-l-lg sm:rounded-t-none"
                             onError={e => { e.currentTarget.src = NoImageAvailable; }}
                           />
                         </div>
-                        <div className="flex-1 flex flex-col justify-between p-4">
+                        <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">
                           <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">{project.title}</h3>
-                              <p className="text-gray-600 text-sm mb-2 line-clamp-2">{project.description}</p>
-                              <div className="flex flex-wrap gap-2 mb-2">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 text-sm sm:text-lg mb-1 line-clamp-1">{project.title}</h3>
+                              <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{project.description}</p>
+                              <div className="flex flex-wrap gap-1 sm:gap-2 mb-2">
                                 {(project.skills || project.tags || []).map((tech, techIndex) => (
                                   <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">{tech}</Badge>
                                 ))}
                               </div>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
-                                 <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
-                                 <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
-                                 <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
-                                 <div><span className="font-medium text-gray-700">Date Added:</span> {
-                                   project.dateAdded ? new Date(project.dateAdded).toLocaleDateString() : 
-                                   project.posted ? new Date(project.posted).toLocaleDateString() :
-                                   project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'
-                                 }</div>
-                               </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-2 text-xs text-gray-500">
+                                <div><span className="font-medium text-gray-700">Price:</span> {project.price ? `₹${project.price}` : 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Duration:</span> {project.duration || 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Status:</span> {project.status || 'N/A'}</div>
+                                <div><span className="font-medium text-gray-700">Date Added:</span> {
+                                  project.dateAdded ? new Date(project.dateAdded).toLocaleDateString() : 
+                                  project.posted ? new Date(project.posted).toLocaleDateString() :
+                                  project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'
+                                }</div>
+                              </div>
                             </div>
-                            <div className="flex flex-col gap-2 items-end ml-2">
-                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700" onClick={() => { setEditingProject(project); setShowEditProjectSidebar(true); }}>
-                                <Edit className="w-4 h-4" />
+                            <div className="flex flex-col gap-1 sm:gap-2 items-end ml-2">
+                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700 h-8 w-8 sm:h-10 sm:w-10" onClick={() => { setEditingProject(project); setShowEditProjectSidebar(true); }}>
+                                <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="text-red-500 bg-white hover:bg-red-500 hover:bg-opacity-80 hover:text-white transition-colors shadow-sm"
+                                className="text-red-500 bg-white hover:bg-red-500 hover:bg-opacity-80 hover:text-white transition-colors shadow-sm h-8 w-8 sm:h-10 sm:w-10"
                                 onClick={() => handleDeleteProject(project.id)}
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                             </div>
                           </div>
@@ -732,10 +779,10 @@ const Profile = () => {
                       </Card>
                     ))
                   ) : (
-                    <div className="text-center py-20">
-                      <Briefcase className="w-12 h-12 mx-auto text-gray-300" />
-                      <h3 className="mt-4 text-lg font-medium text-gray-900">No projects yet</h3>
-                      <p className="mt-1 text-sm text-gray-500">Click "Add Project" to showcase your work.</p>
+                    <div className="text-center py-16 sm:py-20">
+                      <Briefcase className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-gray-300" />
+                      <h3 className="mt-3 sm:mt-4 text-base sm:text-lg font-medium text-gray-900">No projects yet</h3>
+                      <p className="mt-1 text-xs sm:text-sm text-gray-500">Click "Add Project" to showcase your work.</p>
                     </div>
                   )}
                 </div>
@@ -743,39 +790,45 @@ const Profile = () => {
             </Card>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Skills Section */}
-            <Card className="bg-white shadow-lg rounded-xl max-w-md">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <span className="bg-indigo-100 p-2 rounded-lg mr-3">
-                      <Star className="w-5 h-5 text-indigo-600" />
+          {/* Sidebar - LinkedIn Mobile Style */}
+          <div className="space-y-4 sm:space-y-6">
+            {/* Skills Section - LinkedIn Mobile Style - Desktop only */}
+            <Card className="hidden lg:block bg-white shadow-lg rounded-xl max-w-md">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-sm sm:text-lg font-semibold text-gray-900 flex items-center">
+                    <span className="bg-indigo-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
+                      <Star className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                     </span>
                     Research Skills & Technical Expertise
                   </h3>
-                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Skills'); setShowEditProfile(true); }} className="-translate-y-[20px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
-                    <Edit className="w-2 h-2 mr-1" />Edit
+                  <Button variant="ghost" size="sm" onClick={() => { setEditSection('Skills'); setShowEditProfile(true); }} className="-translate-y-[20px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
+                    <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
                   </Button>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   {skills && skills.length > 0 ? (
                     skills.map((skill, index) => (
-                      <Badge key={index} className="px-3 py-1 text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">
+                      <Badge key={index} className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">
                         {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                       </Badge>
                     ))
                   ) : (
-                    <p className="text-gray-500 text-sm">No skills added yet. Click edit to add your skills.</p>
+                    <p className="text-gray-500 text-xs sm:text-sm">No skills added yet. Click edit to add your skills.</p>
                   )}
                 </div>
               </CardContent>
             </Card>
-            <UnreadMessagesCard />
+            
+            {/* Unread Messages Card - Desktop only */}
+            <div className="hidden lg:block">
+              <UnreadMessagesCard />
+            </div>
           </div>
         </div>
       </div>
+
+
 
       {/* EditProfile Sidebar */}
       {showEditProfile && (
