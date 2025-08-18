@@ -9,8 +9,7 @@ const CommunityLinks = () => {
       icon: Github,
       link: "https://github.com/HARSH6309",
       color: "bg-gray-800",
-      hoverColor: "hover:bg-gray-900",
-      members: "500+ contributors"
+      hoverColor: "hover:bg-gray-900"
     },
     {
       title: "Tech Meetups",
@@ -18,8 +17,7 @@ const CommunityLinks = () => {
       icon: Users,
       link: "https://meetup.com/techforward",
       color: "bg-blue-500",
-      hoverColor: "hover:bg-blue-600",
-      members: "25 cities"
+      hoverColor: "hover:bg-blue-600"
     },
     {
       title: "Tech Blog",
@@ -27,8 +25,7 @@ const CommunityLinks = () => {
       icon: BookOpen,
       link: "https://blog.techforward.com",
       color: "bg-green-500",
-      hoverColor: "hover:bg-green-600",
-      members: "Weekly posts"
+      hoverColor: "hover:bg-green-600"
     }
   ];
 
@@ -65,16 +62,13 @@ const CommunityLinks = () => {
                     <h3 className="text-xl font-bold text-olive-dark mb-2 group-hover:text-olive transition-colors duration-300">
                       {community.title}
                     </h3>
-                    <p className="text-olive text-sm mb-3 leading-relaxed">
+                    <p className="text-olive text-sm mb-4 leading-relaxed">
                       {community.description}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-olive-dark font-medium bg-mint-light px-3 py-1 rounded-full">
-                        {community.members}
-                      </span>
-                      <span className="text-olive text-sm group-hover:text-olive-dark transition-colors duration-300">
+                    <div className="flex justify-end">
+                      <button className="bg-olive hover:bg-olive-dark text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-300 group-hover:scale-105">
                         Join →
-                      </span>
+                      </button>
                     </div>
                   </div>
                 </div>
