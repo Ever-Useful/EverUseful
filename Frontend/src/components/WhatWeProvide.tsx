@@ -286,22 +286,42 @@ export const WhatWeProvide = () => {
 
                 {/* Shimmer effect on hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              </motion.div>
+          </motion.div>
             );
           })}
 
-          {/* Bottom-right image filling the blank space */}
-          <div className="hidden sm:block">
+          {/* Bottom-right image filling the blank space (desktop only) */}
+          <motion.div
+            variants={desktopVariants}
+            initial="hidden"
+            animate={isInView ? "visible" : "hidden"}
+            transition={{ 
+              duration: 0.6,
+              delay: Math.min(services.length * 0.1, 0.6),
+              ease: "easeOut" 
+            }}
+            className="hidden sm:block"
+          >
             <img
               src={provideImg}
               alt="What We Provide"
               className="w-full h-full object-cover object-bottom-right rounded-2xl shadow-lg"
               loading="lazy"
             />
-          </div>
-          
+          </motion.div>
+
           {/* Additional section for desktop to fill space - spans both columns */}
-          <div className="hidden sm:block col-span-2">
+          <motion.div
+            variants={desktopVariants}
+            initial="hidden"
+            animate={isInView ? "visible" : "hidden"}
+            transition={{ 
+              duration: 0.6,
+              delay: Math.min(services.length * 0.1, 0.6) + 0.1,
+              ease: "easeOut" 
+            }}
+            className="hidden sm:block col-span-2"
+          >
             <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 rounded-2xl p-6 flex flex-col justify-center items-center text-center text-white shadow-lg relative overflow-hidden">
               {/* Pattern overlay */}
               <div className="absolute inset-0 opacity-10">
@@ -312,14 +332,14 @@ export const WhatWeProvide = () => {
               </div>
               
               <div className="relative z-10">
-                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                <div className="w-auto h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300 group-hover:shadow-2xl group-hover:shadow-white">
                   <Shield className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold mb-3 leading-tight">Ready to Get Started?</h3>
                 <p className="text-base text-white/90">Join our platform and start building amazing projects with our tools and support.</p>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
