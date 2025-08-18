@@ -661,7 +661,7 @@ const Work: React.FC = () => {
 
     {/* HIRE THE BEST SECTION */}
     <section className="w-full bg-white py-10 xs:py-16 px-2 xs:px-4 border-b border-gray-100 flex flex-col items-center justify-center text-center">
-                  <h2 className="text-4xl font-extrabold text-gray-900 mb-4 xs:mb-6 mobile-text-4xl">Hire the Best Professionals</h2>
+                  <h2 className="heading-section font-extrabold text-gray-900 mb-4 xs:mb-6 mobile-text-4xl">Hire the Best Professionals</h2>
             <p className="text-base xs:text-lg text-gray-600 mb-6 xs:mb-8 max-w-2xl mx-auto mobile-text-base">
         Check out professionals on <span className="font-bold text-[#fa5954]">AMOGH</span>, with the skills you need for your next job.
       </p>
@@ -678,7 +678,7 @@ const Work: React.FC = () => {
       {/* Filter Bar */}
       <div className="bg-white rounded-xl shadow-sm p-3 xs:p-4 mb-6 xs:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 xs:gap-4 w-full max-w-5xl">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-1">
+          <h2 className="heading-header font-bold text-gray-900 mb-1">
             Freelance Research Experts
           </h2>
           <p className="text-sm xs:text-lg text-gray-600 font-medium">
@@ -796,7 +796,7 @@ const Work: React.FC = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 xs:mb-12 text-center"
         >
-          <h2 className="text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+          <h2 className="heading-section font-bold text-gray-900 mb-2 xs:mb-4">
             Popular Skills & Expertise
           </h2>
           <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
@@ -832,7 +832,7 @@ const Work: React.FC = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 xs:mb-12 text-center"
         >
-          <h2 className="text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+          <h2 className="heading-section font-bold text-gray-900 mb-2 xs:mb-4">
             Featured Categories
           </h2>
           <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
@@ -876,7 +876,7 @@ const Work: React.FC = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8 xs:mb-12 text-center"
         >
-          <h2 className="text-3xl font-bold text-gray-900 mb-2 xs:mb-4">
+          <h2 className="heading-section font-bold text-gray-900 mb-2 xs:mb-4">
             What Our Clients Say
           </h2>
           <p className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto">
@@ -962,7 +962,7 @@ const Work: React.FC = () => {
     <section className="w-full py-8 sm:py-10 lg:py-20 px-4 sm:px-6 bg-gray-50 border-b border-gray-100">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6 sm:mb-8 lg:mb-12 text-center">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+          <h2 className="heading-section font-bold text-gray-900 mb-3 sm:mb-4">
             Success Stories
           </h2>
           <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-2">

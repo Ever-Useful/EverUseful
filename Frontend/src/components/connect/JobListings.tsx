@@ -95,13 +95,13 @@ const JobListings = () => {
 
   return (
     <>
-      <section id="job-listings" className="py-20" style={{ backgroundColor: '#5A6B3F' }}>
+      <section id="job-listings" className="py-8 sm:py-10 bg-olive-light">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+          <div className="text-center mb-6">
+            <h2 className="heading-header font-bold text-white mb-2">
               Open Positions
             </h2>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto mb-8">
+            <p className="text-base sm:text-lg text-white/90 max-w-xl mx-auto">
               Find your next opportunity and join our growing team of innovators.
             </p>
             
@@ -216,30 +216,21 @@ const JobListings = () => {
           </div>
 
           {/* Openings Soon Message */}
-          <div className="text-center py-16">
-            <div className="bg-white/95 backdrop-blur border-0 shadow-lg rounded-2xl p-12 max-w-2xl mx-auto">
-              <h3 className="text-3xl font-bold mb-4" style={{ color: '#2A311B' }}>
+          <div className="text-center py-8">
+            <div className="bg-white/95 backdrop-blur border-0 shadow-lg rounded-xl p-6 sm:p-8 max-w-xl mx-auto">
+              <h3 className="text-2xl font-bold mb-2 text-olive-dark">
                 🚀 Openings Soon
               </h3>
-              <p className="text-lg mb-6 leading-relaxed" style={{ color: '#3A4325' }}>
+              <p className="text-base mb-4 leading-relaxed text-olive">
                 We're currently preparing exciting new opportunities for talented individuals like you. 
                 Our team is growing and we'll be posting new positions soon!
               </p>
-              <p className="text-sm mb-8" style={{ color: '#3A4325' }}>
+              <p className="text-xs mb-6 text-olive">
                 Stay tuned for updates on our latest openings in engineering, design, marketing, and more.
               </p>
               <Button 
                 onClick={handleResumeSubmit}
-                className="rounded-lg transition-colors duration-300 px-8 py-3"
-                style={{ backgroundColor: '#B8E6CC', color: '#3A4325' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#95D5B2';
-                  e.currentTarget.style.color = '#2A311B';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#B8E6CC';
-                  e.currentTarget.style.color = '#3A4325';
-                }}
+                className="rounded-lg transition-colors duration-300 px-6 py-2.5 bg-mint text-olive hover:bg-mint-dark hover:text-olive-dark"
               >
                 Send Us Your Resume
               </Button>

@@ -35,7 +35,7 @@ const CultureGallery = () => {
      <section className="py-20" style={{ backgroundColor: '#E2F4ED' }}>
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-         <h2 className="text-4xl lg:text-5xl font-bold mb-4" style={{ color: '#2A311B' }}>            Life at Our Company
+         <h2 className="heading-section font-bold mb-4" style={{ color: '#2A311B' }}>            Life at Our Company
           </h2>
           <p className="text-xl max-w-2xl mx-auto" style={{ color: '#3A4325' }}>
             Discover what makes our workplace special through the experiences that define our culture.
