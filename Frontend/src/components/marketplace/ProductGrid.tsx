@@ -115,10 +115,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -137,7 +137,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         }
       }
     };
-    
+
     fetchCurrentUserData();
   }, [user]);
 
@@ -146,11 +146,11 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       try {
         setLoading(true);
         const queryParams = new URLSearchParams();
-        
+
         if (searchQuery) {
           queryParams.append('search', searchQuery);
         }
-        
+
         if (filters) {
           if (filters.category) queryParams.append('category', filters.category);
           if (filters.minPrice) queryParams.append('minPrice', filters.minPrice.toString());
@@ -162,10 +162,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
 
         // Add sort parameter
         queryParams.append('sort', sortBy);
-        
+
         // Add pagination parameters
         queryParams.append('page', currentPage.toString());
-        
+
         // Calculate optimal limit based on grid columns to ensure full rows
         let optimalLimit = 12; // Default for 3 columns (4 rows)
         if (selected && !isMobile) {
@@ -185,12 +185,12 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
             optimalLimit = 8; // 4 rows of 2 columns
           }
         }
-        
+
         queryParams.append('limit', optimalLimit.toString());
 
         const response = await fetch(`${API_ENDPOINTS.MARKETPLACE_PROJECTS}?${queryParams}`);
         if (!response.ok) throw new Error('Failed to fetch projects');
-        
+
         const data = await response.json();
         setProjects(data.projects);
         setPagination(data.pagination);
@@ -220,14 +220,14 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     const fetchAuthors = async () => {
       if (uncachedAuthorIds.length === 0) return;
       if (isFetchingAuthors.current) return; // Prevent multiple simultaneous calls
-      
+
       // Add a small delay to prevent rapid API calls
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       isFetchingAuthors.current = true;
       try {
         setAuthorsLoading(true);
-        
+
         // Fetch each author individually like ProductDisplay.tsx does
         for (const authorId of uncachedAuthorIds) {
           try {
@@ -252,7 +252,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         isFetchingAuthors.current = false;
       }
     };
-    
+
     fetchAuthors();
   }, [uncachedAuthorIds]);
 
@@ -261,31 +261,31 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
   // Stable author details - only recalculate when authorCache actually changes
   const authorDetailsMap = useMemo(() => {
     const detailsMap: Record<string, { name: string; image: string; userType: string; id: string; isLoading: boolean }> = {};
-    
+
     // Get all unique author IDs from projects
     const allAuthorIds = [...new Set(projects.map(project => project.author))];
-    
+
     allAuthorIds.forEach(authorId => {
       const user = authorCache[authorId as keyof typeof authorCache];
-      
+
       if (!user) {
-        detailsMap[authorId] = { 
-          name: 'username', 
-          image: NoUserProfile, 
-          userType: '', 
+        detailsMap[authorId] = {
+          name: 'username',
+          image: NoUserProfile,
+          userType: '',
           id: authorId,
           isLoading: false
         };
         return;
       }
-      
+
       // Extract data from the proper structure - handle multiple response formats
       const auth = user.auth || user.data?.auth || {};
       const profile = user.profile || user.data?.profile || {};
-      
+
       // Try multiple sources for the name with better priority
       let name = '';
-      
+
       // First priority: firstName + lastName from auth
       if (auth.firstName || auth.lastName) {
         name = `${auth.firstName || ''} ${auth.lastName || ''}`.trim();
@@ -318,16 +318,16 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       else if (user.username) {
         name = user.username;
       }
-      
+
       // Get userType with fallbacks
       const userType = profile.userType || auth.userType || user.userType || '';
-      
+
       // Get avatar with fallback
       const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
-      
+
       // Get customUserId with fallback - this is the ID we'll use for navigation
       const customUserId = user.customUserId || user.data?.customUserId || user.id || authorId;
-      
+
       detailsMap[authorId] = {
         name: name || 'username',
         image: avatar,
@@ -336,16 +336,16 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         isLoading: false
       };
     });
-    
+
     return detailsMap;
   }, [authorCache]); // Only depend on authorCache, not projects
 
   // Stable getAuthorDetails function
   const getAuthorDetails = useCallback((authorId: string) => {
-    return authorDetailsMap[authorId] || { 
-      name: 'username', 
-      image: NoUserProfile, 
-      userType: '', 
+    return authorDetailsMap[authorId] || {
+      name: 'username',
+      image: NoUserProfile,
+      userType: '',
       id: authorId,
       isLoading: false
     };
@@ -459,11 +459,11 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         method: 'POST',
         headers
       });
-      
+
       if (viewResponse.ok) {
         console.log('View recorded successfully');
       }
-      
+
       // Update the project views in the local state
       setProjects(prevProjects =>
         prevProjects.map(project =>
@@ -497,16 +497,16 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       });
 
       if (!response.ok) throw new Error('Failed to toggle favorite');
-      
+
       const data = await response.json();
-      
+
       setProjects(prevProjects =>
         prevProjects.map(project =>
           project.id === parseInt(projectId, 10) // Ensure projectId is number for comparison
             ? {
-                ...project,
-                isFavorited: data.isFavorited
-              }
+              ...project,
+              isFavorited: data.isFavorited
+            }
             : project
         )
       );
@@ -538,7 +538,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
 
       // Add project to cart
       await userService.addItemToCart(project.id.toString());
-      
+
       toast.success('Project added to cart successfully');
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -557,17 +557,17 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       navigate('/profile');
       return;
     }
-    
+
     const type = (userType || '').toLowerCase();
-    
+
     // Check if user type is student or professor
     if (type === 'student' || type === 'professor') {
       navigate(`/studentprofile/${id}`);
-    } 
+    }
     // Check if user type is freelancer
     else if (type === 'freelancer') {
       navigate(`/freelancerprofile/${id}`);
-    } 
+    }
     // Check if user type is business
     else if (type === 'business') {
       navigate(`/businessprofile/${id}`);
@@ -596,7 +596,6 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       {/* Product Grid */}
       <div className={`flex-1 transition-all duration-300 ${selected && !isMobile ? "pr-0 md:pr-[440px]" : ""}`}>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-5 gap-3">
-          {/* Hide sorting select on mobile */}
           {!isMobile && (
             <div className="flex items-center space-x-3">
               <select
@@ -612,246 +611,112 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
             </div>
           )}
         </div>
-        {/* Responsive Product List */}
-        <div
-          className={
-            isMobile
-              ? "w-full mx-auto flex flex-col divide-y divide-gray-200"
-              : `grid ${selected ? "grid-cols-2" : "grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"} gap-8`
-          }
-        >
+
+        <div className={
+          isMobile
+            ? "w-full mx-auto flex flex-col divide-y divide-gray-200"
+            : `grid ${selected ? "grid-cols-2" : "grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"} gap-0 border-t border-l border-gray-200`
+        }>
           {projects.map((project, idx) => (
             isMobile ? (
-              <div
-                key={project.id}
-                className="flex items-center gap-4 py-4 cursor-pointer bg-white w-full"
-                onClick={() => navigate(`/product/${project.id}`)}
-                style={{ boxSizing: "border-box" }}
-              >
-                <img
-                  src={getS3ImageUrl(project.image, 'project', 'thumbnail')}
-                  alt={project.title}
-                  className="w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-cover flex-shrink-0 border border-gray-200 rounded"
-                  onError={(e) => handleImageError(e, NoImageAvailable)}
-                />
-                <div className="flex flex-col flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[6px] rounded shadow">
-                      {project.category}
-                    </Badge>
-                    <div className="flex items-center space-x-1 bg-white/90 rounded px-1 py-0.5 shadow border border-gray-200">
-                      <Eye className="w-3 h-3 text-gray-700" />
-                      <span className="text-gray-700 text-[6px]">{project.views}</span>
-                    </div>
-                  </div>
-                  <h3
-                    className="font-semibold text-xs text-gray-900 break-words whitespace-normal line-clamp-2"
-                    style={{ wordBreak: "break-word" }}
-                  >
-                    {project.title}
-                  </h3>
-                  <div className="flex items-center gap-2 mb-1">
-                    <img
-                      src={getUserAvatarUrl(getAuthorDetails(project.author))}
-                      alt={getAuthorDetails(project.author).name}
-                      className="w-5 h-5 rounded-full border border-gray-200 cursor-pointer"
-                      onError={(e) => handleImageError(e, NoUserProfile)}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
-                      }}
-                    />
-                    <span 
-                      className="text-[10px] text-gray-700 truncate cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
-                      }}
-                    >
-                      {getAuthorDetails(project.author).name}
-                    </span>
-                    <span className="flex items-center gap-0.5 text-[10px] text-yellow-500">
-                      <Star className="w-3 h-3 fill-yellow-400" />
-                      {project.rating}
-                      <span className="text-gray-400 text-[10px] ml-1">({project.reviews})</span>
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mb-1">
-                    {project.skills && project.skills.slice(0, 2).map((skill, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="text-[8px] border-gray-200 text-gray-600 bg-gray-100 font-medium px-1 py-1 "
-                      >
-                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
-                      </Badge>
-                    ))}
-                    {project.skills && project.skills.length > 2 && (
-                      <span className="text-[10px] text-gray-400">+{project.skills.length - 2} more</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4 mt-2">
-                    <div className="flex items-center gap-1 text-xs text-gray-700 font-medium">
-                      <DollarSign className="w-3 h-3" />
-                      {project.price}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-gray-700 font-medium">
-                      <Clock className="w-3 h-3" />
-                      {project.duration}
-                    </div>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center justify-center"
-                      style={{ minWidth: 0, padding: 0 }}
-                      aria-label="Add to Cart"
-                      onClick={e => {
-                        e.stopPropagation();
-                        handleAddToCart(project.id);
-                      }}
-                    >
-                      <ShoppingCart className="w-5 h-5 mx-auto" />
-                    </Button>
-                  </div>
-                </div>
+              <div key={project.id} className="flex items-center gap-4 py-4 px-2 cursor-pointer bg-white w-full">
               </div>
             ) : (
-              <Card
+              <div
                 key={project.id}
-                className="group hover:shadow-xl transition-all duration-300 hover:scale-102 bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col"
+                className={`
+            bg-white p-4 border-b border-r border-gray-200 
+            hover:bg-gray-50 transition-colors duration-200
+            flex flex-col
+          `}
               >
-                <div className="relative">
+                {/* Image Section */}
+                <div className="relative mb-3 flex justify-center">
                   <img
                     src={getS3ImageUrl(project.image, 'project', 'medium')}
                     alt={project.title}
-                    className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+                    className="w-full h-40 object-contain cursor-pointer"
                     loading="lazy"
                     onClick={() => setSelected(project)}
                     onError={(e) => handleImageError(e, NoImageAvailable)}
                   />
-                  <div className="absolute top-2 left-2">
-                    <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow">
+                  <div className="absolute top-0 left-0">
+                    <span className="inline-block bg-gray-100 text-gray-800 text-sm px-2 py-1 rounded-full">
                       {project.category}
-                    </Badge>
-                  </div>
-                  <div className="absolute top-2 right-2 flex space-x-1">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="w-7 h-7 p-0 bg-white/70 hover:bg-white/90 shadow"
-                      onClick={e => {
-                        e.stopPropagation();
-                        handleFavorite(project.id.toString());
-                      }}
-                    >
-                      <Heart className={`w-4 h-4 ${project.isFavorited ? 'fill-pink-500 text-pink-500' : 'text-pink-500'}`} />
-                    </Button>
-                    <div className="flex items-center space-x-1 bg-white/70 rounded px-1 py-0.5 shadow">
-                      <Eye className="w-3 h-3 text-gray-700" />
-                      <span className="text-gray-700 text-[10px]">{project.views}</span>
-                    </div>
+                    </span>
                   </div>
                 </div>
 
-                <CardContent className="p-4 flex flex-col flex-1">
-                  {getAuthorDetails(project.author).isLoading ? (
-                    <AuthorSkeleton />
-                  ) : (
-                    <div className="flex items-center space-x-2 mb-2">
-                      {/* <img
-                        src={getUserAvatarUrl(getAuthorDetails(project.author))}
-                        alt={getAuthorDetails(project.author).name}
-                        className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer"
-                        onError={(e) => handleImageError(e, NoUserProfile)}
-                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id)}
-                      /> */}
-                      <span
-                        className="text-gray-700 text-xs cursor-pointer"
-                        style={{ transition: 'color 0.2s' }}
-                        onMouseOver={e => e.currentTarget.style.color = '#2563eb'}
-                        onMouseOut={e => e.currentTarget.style.color = ''}
-                        onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id)}
-                      >
-                        {getAuthorDetails(project.author).name}
-                      </span>
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-yellow-500 text-xs">{project.rating}</span>
-                        <span className="text-gray-400 text-[10px]">({project.reviews})</span>
-                      </div>
-                    </div>
-                  )}
+                <h3
+                  className="text-2xl font-medium text-gray-900 mb-1 cursor-pointer line-clamp-2 hover:text-blue-600"
+                  onClick={() => setSelected(project)}
+                >
+                  {project.title}
+                </h3>
+                <span
+                  className="text-base text-gray-700 truncate cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
+                  }}
+                >
+                  {getAuthorDetails(project.author).name}
+                </span>
 
-                  <h3
-                    className="text-base font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors cursor-pointer break-words whitespace-normal line-clamp-2"
-                    style={{ wordBreak: "break-word" }}
-                    onClick={() => setSelected(project)}
-                  >
-                    {project.title}
-                  </h3>
-
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {Array.isArray(project.skills) && project.skills.slice(0, 3).map((skill, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
-                        >
-                          {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
-                        </Badge>
-                      ))}
-                      {Array.isArray(project.skills) && project.skills.length > 3 && (
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
-                      >
-                        +{project.skills.length - 3}
-                      </Badge>
-                    )}
+                {/* Rating */}
+                <div className="flex items-center mb-2">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-3 h-3 ${i < Math.floor(project.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                      />
+                    ))}
                   </div>
-
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-2 text-sm font-sm font-semibold text-gray-500">
-                      <div className="flex items-center space-x-1">
-                        <DollarSign className="w-3 h-3" />
-                        <span>{project.price}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{project.duration}</span>
-                      </div>
-                    </div>
-                  </div>
-                  </CardContent>
-                  {/* Fixed Buttons at Card Bottom */}
-                  <div className="px-3 sm:px-4 pb-3 sm:pb-4 mt-auto flex gap-2">
-                    <Button
-                      size="sm"
-                      className="rounded-lg shadow transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm"
-                      style={{ width: "85%" }}
-                      onClick={() => handleViewDetails(project.id)}
-                    >
-                      <ArrowRight className="mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
-                      {user ? 'Purchase Now' : 'Sign in to View'}
-                    </Button>
-                    <Button
-                      size="icon"
+                  <span className="text-xs text-gray-500 ml-1">({project.reviews})</span>
+                </div>
+                <div className="flex flex-wrap gap-1 mb-1">
+                  {project.skills && project.skills.slice(0, 2).map((skill, index) => (
+                    <Badge
+                      key={index}
                       variant="outline"
-                      className="rounded-lg border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center justify-center"
-                      style={{ width: "15%", minWidth: 0, padding: 0 }}
-                      aria-label="Add to Cart"
-                      onClick={e => {
-                        e.stopPropagation();
-                        handleAddToCart(project.id);
-                      }}
+                      className="text-sm border-gray-200 text-gray-600 bg-gray-100 font-medium px-2 py-2 "
                     >
-                      <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 mx-auto" />
-                    </Button>
-                  </div>
-                </Card>
+                      {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                    </Badge>
+                  ))}
+                  {project.skills && project.skills.length > 2 && (
+                    <span className="text-sm py-2 text-gray-400">+{project.skills.length - 2} more</span>
+                  )}
+                </div>
+                {/* Price */}
+                <div className="mb-3">
+                  <span className="text-lg font-bold text-gray-900">&#8377;{project.price}</span>
+                  {project.originalPrice && (
+                    <span className="text-xs text-gray-500 line-through ml-2">&#8377;{project.originalPrice}/-</span>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="mt-auto flex gap-2">
+                  <button
+                    className="text-base bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl shadow-sm w-full"
+                    onClick={() => handleAddToCart(project.id)}
+                  >
+                    Add to Cart
+                  </button>
+                  <button
+                    className="text-base bg-white text-black px-3 py-1.5 rounded-xl shadow-sm w-full"
+                    onClick={() => handleViewDetails(project.id)}
+                  >
+                    Buy Now
+                  </button>
+                </div>
+              </div>
             )
-            ))}
-          </div>
+          ))}
+        </div>
+
         {renderPagination()}
       </div>
 
@@ -870,13 +735,12 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
               <Badge
-                className={`text-xs px-2 py-0.5 rounded ${
-                  selected.status === "Active"
+                className={`text-xs px-2 py-0.5 rounded ${selected.status === "Active"
                     ? "bg-green-100 text-green-700"
                     : selected.status === "New"
-                    ? "bg-blue-100 text-blue-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
               >
                 {selected.status}
               </Badge>
@@ -989,7 +853,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               </Button>
             </div>
 
-            <Button 
+            <Button
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition-all duration-300 mb-6"
               onClick={() => handleViewDetails(selected.id)}
             >

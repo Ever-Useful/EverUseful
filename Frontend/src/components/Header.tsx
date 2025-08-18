@@ -94,7 +94,7 @@ const mockNotifications = [
     {
         id: 6,
         title: "Payment received",
-        message: "$250 payment received for your freelance work",
+                        message: "₹250 payment received for your freelance work",
         time: "2 days ago",
         unread: false,
         type: "payment",
@@ -463,7 +463,7 @@ const Header = () => {
                                     />
                                 </div>
                             </div>
-                            <Navigation />
+                            <Navigation isLoggedIn={isLoggedIn} />
                         </div>
 
                         {/* Right Section */}
@@ -628,24 +628,25 @@ const Header = () => {
                                 </>
                             ) : (
                                 <>
-                                    {/* Mobile: Join and Sign In buttons */}
-                                    <div className="flex md:hidden items-center space-x-2 ">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            asChild
-                                            className="text-sm px-3 py-1"
-                                        >
-                                            <Link to="/signin">Sign In</Link>
-                                        </Button>
+                                    {/* Mobile: Join and Hamburger buttons */}
+                                    <div className="flex md:hidden items-center space-x-2">
                                         <Button
                                             variant="default"
                                             size="sm"
-                                            bg-background="emerald-600"
                                             asChild
-                                            className="text-sm px-3 py-1"
+                                            className="text-sm px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
                                         >
                                             <Link to="/signup">Join</Link>
+                                        </Button>
+                                        {/* Hamburger Menu for logged out users */}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="p-2"
+                                            aria-label="Open menu"
+                                            onClick={() => setShowMobileMenu(true)}
+                                        >
+                                            <Menu className="h-6 w-6 text-gray-700" />
                                         </Button>
                                     </div>
                                     {/* Desktop: Join and Sign In buttons */}
@@ -653,16 +654,14 @@ const Header = () => {
                                         <Button
                                             variant="outline"
                                             asChild
-                                            bg-border="emerald-600"
-                                            className="text-sm px-4 py-2"
+                                            className="text-sm px-4 py-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold rounded-lg transition-all duration-200"
                                         >
                                             <Link to="/signin">Sign In</Link>
                                         </Button>
                                         <Button
                                             variant="default"
                                             asChild
-                                            bg-background="emerald-600"
-                                            className="text-sm px-4 py-2"
+                                            className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
                                         >
                                             <Link to="/signup">Join</Link>
                                         </Button>
@@ -693,56 +692,85 @@ const Header = () => {
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                            {/* Search */}
-                            <div className="mb-4">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search projects, services..."
-                                        className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
-                                    />
-                                </div>
-                            </div>
-                            {/* Navigation */}
-                            <Navigation mobile />
-                            {/* Cart */}
-                            <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
-                                <span className="text-gray-700 font-medium">Cart</span>
-                            </Link>
-                            {/* Messages */}
-                            <button
-                                className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
-                                onClick={() => {
-                                    setShowMessagesSidebar(true);
-                                    setShowMobileMenu(false);
-                                }}
-                            >
-                                <MessageSquare className="w-5 h-5 mr-3 text-gray-600" />
-                                <span className="text-gray-700 font-medium">Messages</span>
-                                {unreadMessageCount > 0 && (
-                                    <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
-                                        {unreadMessageCount}
-                                    </Badge>
-                                )}
-                            </button>
-                            {/* Notifications */}
-                            <button
-                                className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
-                                onClick={() => {
-                                    setShowNotificationsSidebar(true);
-                                    setShowMobileMenu(false);
-                                }}
-                            >
-                                <Bell className="w-5 h-5 mr-3 text-gray-600" />
-                                <span className="text-gray-700 font-medium">Notifications</span>
-                                {unreadNotificationCount > 0 && (
-                                    <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
-                                        {unreadNotificationCount}
-                                    </Badge>
-                                )}
-                            </button>
+                            {isLoggedIn ? (
+                                <>
+                                    {/* Search */}
+                                    <div className="mb-4">
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search projects, services..."
+                                                className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
+                                            />
+                                        </div>
+                                    </div>
+                                    {/* Navigation */}
+                                    <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    {/* Cart */}
+                                    <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                        <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Cart</span>
+                                    </Link>
+                                    {/* Messages */}
+                                    <button
+                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
+                                        onClick={() => {
+                                            setShowMessagesSidebar(true);
+                                            setShowMobileMenu(false);
+                                        }}
+                                    >
+                                        <MessageSquare className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Messages</span>
+                                        {unreadMessageCount > 0 && (
+                                            <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
+                                                {unreadMessageCount}
+                                            </Badge>
+                                        )}
+                                    </button>
+                                    {/* Notifications */}
+                                    <button
+                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
+                                        onClick={() => {
+                                            setShowNotificationsSidebar(true);
+                                            setShowMobileMenu(false);
+                                        }}
+                                    >
+                                        <Bell className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Notifications</span>
+                                        {unreadNotificationCount > 0 && (
+                                            <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
+                                                {unreadNotificationCount}
+                                            </Badge>
+                                        )}
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    {/* Search */}
+                                    <div className="mb-4">
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search projects, services..."
+                                                className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
+                                            />
+                                        </div>
+                                    </div>
+                                    {/* Navigation */}
+                                    <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    {/* Sign In Button */}
+                                    <Link 
+                                        to="/signin" 
+                                        className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors"
+                                        onClick={() => setShowMobileMenu(false)}
+                                    >
+                                        <User className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium">Sign In</span>
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

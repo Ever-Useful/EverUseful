@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const BlogSection = () => {
@@ -9,7 +9,7 @@ export const BlogSection = () => {
   const articles = [
     {
       id: 1,
-      category: "BLOCKCHAIN & SUSTAINABILITY",
+      category: "BLOCKCHAIN",
       date: "Jul 2, 2024",
       title: "How Blockchain Is Powering Sustainable Supply Chains",
       excerpt: "Discover how blockchain technology is being used to track and verify sustainable practices in global supply chains, increasing transparency and reducing fraud...",
@@ -61,11 +61,19 @@ export const BlogSection = () => {
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 400;
+      // On mobile, scroll by exactly one card width (full width + margins)
+      // On desktop, scroll by multiple cards with spacing
+      const isMobile = window.innerWidth < 640;
+      const containerWidth = scrollContainerRef.current.clientWidth;
+      const scrollAmount = isMobile ? containerWidth : 400; // Use actual container width on mobile
       const currentScroll = scrollContainerRef.current.scrollLeft;
-      const newScroll = direction === 'left' 
-        ? currentScroll - scrollAmount 
-        : currentScroll + scrollAmount;
+      
+      let newScroll;
+      if (direction === 'left') {
+        newScroll = Math.max(0, currentScroll - scrollAmount);
+      } else {
+        newScroll = currentScroll + scrollAmount;
+      }
       
       scrollContainerRef.current.scrollTo({
         left: newScroll,
@@ -120,35 +128,47 @@ export const BlogSection = () => {
         
         {/* Sliding Articles Container */}
         <div className="relative">
-          {/* Navigation Buttons */}
-          {canScrollLeft && (
+          {/* Navigation Buttons - Visible on Desktop, Hidden on Mobile */}
+          <div className="hidden sm:flex justify-between items-center mb-4 sm:mb-6">
             <button
               onClick={() => scroll('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 sm:p-3 transition-all hover:scale-110"
+              disabled={!canScrollLeft}
+              className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all ${
+                canScrollLeft 
+                  ? 'bg-white/90 hover:bg-white shadow-lg hover:scale-110 text-gray-600' 
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
             >
-              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-600" />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
             </button>
-          )}
-          
-          {canScrollRight && (
+            
+            <span className="text-sm sm:text-base text-gray-600 font-medium">
+              {Math.floor((scrollContainerRef.current?.scrollLeft || 0) / (scrollContainerRef.current?.clientWidth || 320)) + 1} of {articles.length}
+            </span>
+            
             <button
               onClick={() => scroll('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 sm:p-3 transition-all hover:scale-110"
+              disabled={!canScrollRight}
+              className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all ${
+                canScrollRight 
+                  ? 'bg-white/90 hover:bg-white shadow-lg hover:scale-110 text-gray-600' 
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
             >
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-600" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
             </button>
-          )}
+          </div>
           
           {/* Articles Slider */}
           <div 
             ref={scrollContainerRef}
             onScroll={handleScroll}
-            className="flex space-x-4 sm:space-x-6 overflow-x-auto scrollbar-hide pb-4"
+            className="flex gap-4 sm:gap-6 lg:gap-8 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-0"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {articles.map((article) => (
 
-              <div key={article.id} className="flex-shrink-0 w-72 sm:w-80 md:w-96 bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+              <div key={article.id} className="flex-shrink-0 w-[calc(100vw-2rem)] sm:w-80 md:w-96 bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
                 <div className="relative overflow-hidden">
                   <img 
                     src={article.image}

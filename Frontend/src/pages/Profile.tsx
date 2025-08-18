@@ -531,7 +531,7 @@ const Profile = () => {
               <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
                 <CardContent className="p-4 text-center">
                   <DollarSign className="w-6 h-6 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `$${freelancerData.hourlyRate}` : '$0'}</div>
+                  <div className="text-2xl font-bold">{freelancerData.hourlyRate ? `₹${freelancerData.hourlyRate}` : '₹0'}</div>
                   <div className="text-xs opacity-90 uppercase tracking-wider">Hourly Rate</div>
                 </CardContent>
               </Card>

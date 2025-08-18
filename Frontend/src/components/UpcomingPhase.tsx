@@ -31,19 +31,22 @@ const projectDetails = [
 const features = [
   {
     icon: <FaLeaf className="text-green-600 text-lg md:text-3xl" />,
-    title: "Eco-Friendly",
+    title1: "Eco-",
+    title2: "Friendly",
     description: "Every project reduces carbon and supports green energy.",
     bg: "bg-green-50"
   },
   {
     icon: <FaSeedling className="text-green-500 text-lg md:text-3xl" />,
-    title: "Community Powered",
+    title1: "Community",
+    title2: "Powered",
     description: "Local impact, global change. You help shape the future.",
     bg: "bg-teal-50"
   },
   {
     icon: <FaSolarPanel className="text-teal-500 text-lg md:text-3xl" />,
-    title: "Next-Gen Tech",
+    title1: "Next-Gen",
+    title2: "Tech",
     description: "AI, IoT, and solar—tech that’s ready for tomorrow.",
     bg: "bg-emerald-50"
   },
@@ -136,18 +139,18 @@ const ProjectCards: React.FC = () => (
 const Features: React.FC = () => (
   <>
     {/* Mobile: horizontal scroll */}
-    <div className="flex md:hidden gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory mt-4">
-      {features.map((feature, idx) => (
-        <div
-          key={idx}
-          className={`min-w-[220px] max-w-xs flex-shrink-0 flex flex-col items-center rounded-2xl shadow p-2 hover:shadow-lg transition min-h-[70px] ${feature.bg} snap-start`}
-        >
-          <div className="mb-1">{feature.icon}</div>
-          <h4 className="text-xs font-semibold text-teal-800 mb-0.5">{feature.title}</h4>
-          <p className="text-gray-600 text-[11px] text-center">{feature.description}</p>
-        </div>
-      ))}
+    <div className="grid grid-cols-3 gap-2 px-2 mt-4 md:hidden">
+  {features.map((feature, idx) => (
+    <div
+      key={idx}
+      className={`flex flex-col items-center rounded-2xl shadow p-2 hover:shadow-lg transition min-h-[55px] ${feature.bg}`}
+    >
+      <div className="mb-1">{feature.icon}</div>
+      <h4 className="text-[10px] font-semibold text-teal-800 text-center">{feature.title1}</h4>
+      <h4 className="text-[10px] font-semibold text-teal-800 mb-0.5 text-center"> {feature.title2}</h4>
     </div>
+  ))}
+</div>
     {/* Desktop: grid */}
     <div className="hidden md:grid grid-cols-3 gap-6 mt-12">
       {features.map((feature, idx) => (
@@ -156,7 +159,7 @@ const Features: React.FC = () => (
           className={`flex flex-col items-center rounded-2xl shadow p-6 hover:shadow-lg transition min-h-[160px] ${feature.bg}`}
         >
           <div className="mb-3">{feature.icon}</div>
-          <h4 className="md:text-lg font-semibold text-teal-800 mb-1">{feature.title}</h4>
+          <h4 className="md:text-lg font-semibold text-teal-800 mb-1">{feature.title1} {feature.title2}</h4>
           <p className="text-gray-600 md:text-sm text-center">{feature.description}</p>
         </div>
       ))}
@@ -164,7 +167,6 @@ const Features: React.FC = () => (
   </>
 );
 
-// --- Pre-Book Form ---
 const PreJoinForm: React.FC = () => {
   const [form, setForm] = useState({ name: "", email: "" });
   const [submitted, setSubmitted] = useState(false);

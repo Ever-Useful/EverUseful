@@ -3,10 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
-import Students from "@/assets/images/Students.jpeg";
-import PhD from "@/assets/images/phdscholars.jpeg";
-import Professors from "@/assets/images/professors.jpeg";
-import Business from "@/assets/images/Business.jpeg";
+import Students from "../assets/images/Students.jpeg";
+import PhD from "../assets/images/phdscholars.jpeg";
+import Professors from "../assets/images/professors.jpeg";
+import Business from "../assets/images/Business.jpeg";
+
 
 type Option = {
   id: number;
@@ -19,30 +20,28 @@ type Option = {
 const OPTIONS: Option[] = [
   {
     id: 1,
-    imageUrl: Students, // student studying
-    label: "Students",
+    imageUrl: Students,
     description: "Join peer communities & showcase projects",
     iconClass: "fas fa-user-graduate",
+    label: "Students"
   },
   {
     id: 2,
-    imageUrl: PhD, // scientist in lab
-    label: "PhD Holders",
+    imageUrl: PhD,
     description: "Collaborate on research & funding",
     iconClass: "fas fa-flask",
+    label: "PhD"
   },
   {
     id: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80", // professor lecturing
+    imageUrl: Professors,
     label: "Professors",
     description: "Share knowledge & mentor next gen",
     iconClass: "fas fa-chalkboard-teacher",
   },
   {
     id: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80", // business meeting
+    imageUrl: Business,
     label: "Business",
     description: "Discover solutions & partnerships",
     iconClass: "fas fa-briefcase",
@@ -81,8 +80,8 @@ export const Hero = () => {
             {/* LEFT: Text + Button */}
 
             <div className="w-full lg:w-1/3 text-center lg:text-left mb-10 lg:mb-0">
-              <h1 className="text-3xl xs:text-4xl sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight">
-                Connnect{" "}
+              <h1 className="text-[17px] sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight mobile-text-4xl">
+                Connect{" "}
 
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
                   Innovation
@@ -92,7 +91,7 @@ export const Hero = () => {
                   Opportunity
                 </span>
               </h1>
-              <p className="text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200">
+              <p className="text-[12px] sm:text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
                 A platform where students, PhD holders, professors, and
                 businesses collaborate to transform ideas into real-world impact.
                 Join the future of collaborative innovation today.
@@ -100,7 +99,7 @@ export const Hero = () => {
               <div className="flex justify-center lg:justify-start animate-fade-in delay-300">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font-bold transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
+                  className="w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
                   asChild
                 >
                   <Link to="/signup" className="font-bold flex items-center justify-center">
@@ -126,7 +125,7 @@ export const Hero = () => {
                       className={`group relative cursor-pointer overflow-hidden bg-center bg-cover flex-[1_1_60px] mx-[24px] rounded-[64px] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:flex-[10_1_600px] hover:rounded-[32px] hover:bg-[length:auto_100%]`}
                       style={{backgroundImage: `url(${opt.imageUrl})`, animationName, animationDuration: "5s", animationTimingFunction: "ease-in-out", animationIterationCount: "infinite",}}
                     >
-                      <img src={opt.imageUrl} alt={opt.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-0" />
+                      {/* Shadow overlay at bottom for gradient effect ONLY on hover */}
                       <div
                         className="
                           absolute
@@ -151,7 +150,7 @@ export const Hero = () => {
                           right-0
                           h-[40px]
                           bottom-[8px]
-                          left-[64px]
+                          left-14
                           transition-all
                           duration-700
                           ease-[cubic-bezier(0.22,1,0.36,1)]
@@ -164,15 +163,48 @@ export const Hero = () => {
                           textShadow: "0 0 8px rgba(0,0,0,0.75)",
                         }}
                       >
-                        <div className="flex items-center text-white">
-                          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">
-                            <i className={`${opt.iconClass} text-sm`}></i>
+                        <div className="flex items-center justify-center w-[40px] h-[40px] bg-white rounded-full shadow-sm">
+                          <i className={`${opt.iconClass} text-gray-800`} />
+                        </div>
+                        <div className="flex flex-col justify-center ml-2 text-white whitespace-pre">
+                          <div
+                            className="
+                              relative
+                              transition-all
+                              duration-700
+                              ease-[cubic-bezier(0.22,1,0.36,1)]
+                              left-[16px]
+                              opacity-0
+                              group-hover:left-0
+                              group-hover:opacity-100
+                              font-semibold
+                              text-lg
+                            "
+                            style={{
+                              textShadow: "0 0 8px rgba(0,0,0,0.75)",
+                            }}
+                          >
+                            {opt.label}
                           </div>
-                          <div>
-                            <div className="font-bold text-sm">{opt.label}</div>
-                            <div className="text-xs opacity-80 max-w-0 group-hover:max-w-[200px] transition-all duration-500 ease-out overflow-hidden">
-                              {opt.description}
-                            </div>
+                          <div
+                            className="
+                              relative
+                              transition-all
+                              duration-700
+                              ease-[cubic-bezier(0.22,1,0.36,1)]
+                              delay-150
+                              left-[16px]
+                              opacity-0
+                              group-hover:left-0
+                              group-hover:opacity-100
+                              text-sm
+                              text-gray-200
+                            "
+                            style={{
+                              textShadow: "0 0 6px rgba(0,0,0,0.6)",
+                            }}
+                          >
+                            {opt.description}
                           </div>
                         </div>
                       </div>
@@ -181,21 +213,26 @@ export const Hero = () => {
                 })}
               </div>
 
-              {/* Mobile: horizontal scroll cards */}
+              {/* Mobile: flexbox focusing on labels */}
               <div className="lg:hidden w-full">
-                <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory">
-                  {OPTIONS.map((opt) => (
+                <div className="grid grid-cols-2 gap-3 p-4">
+                  {OPTIONS.map((opt, index) => (
                     <div
                       key={opt.id}
-                      className="relative min-w-[70vw] max-w-xs h-44 rounded-2xl overflow-hidden bg-center bg-cover snap-start flex-shrink-0"
-                      style={{
-                        backgroundImage: `url(${opt.imageUrl})`,
-                      }}
+                      className={`
+                        relative h-32 rounded-xl overflow-hidden
+                      `}
                     >
-                      <div className="absolute inset-0 bg-black/40" />
-                      <div className="absolute bottom-4 left-4 text-white">
-                        <div className="font-bold text-lg">{opt.label}</div>
-                        <div className="text-xs opacity-80">{opt.description}</div>
+                      <img
+                        src={opt.imageUrl}
+                        alt={opt.label}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/50" />
+                      <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white p-3">
+                        <div className="font-bold text-lg sm:text-xl mb-1 leading-tight">
+                          {opt.label}
+                        </div>
                       </div>
                     </div>
                   ))}
