@@ -515,7 +515,7 @@ const SignUp = () => {
               {/* Sign Up Form */}
               <Card className="backdrop-blur-xl bg-white/90 border-0 shadow-2xl animate-scale-in delay-500">
                 <CardHeader className="text-center pb-4 lg:pb-6">
-                  <CardTitle className="text-3xl font-bold text-gray-900">Create Account</CardTitle>
+                  <CardTitle className="font-bold text-gray-900">Create Account</CardTitle>
                   <CardDescription className="text-gray-600 text-sm lg:text-base">
                     Fill in your information to get started
                   </CardDescription>
@@ -861,7 +861,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Mail className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-3xl font-bold text-gray-900">Verify Your Email</CardTitle>
+                <CardTitle className="font-bold text-gray-900">Verify Your Email</CardTitle>
                 <CardDescription className="text-gray-600">
                   We've sent a verification code to {formData.email}
                 </CardDescription>
@@ -910,7 +910,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-3xl font-bold text-gray-900">Setup Multi-Factor Authentication</CardTitle>
+                <CardTitle className="font-bold text-gray-900">Setup Multi-Factor Authentication</CardTitle>
                 <CardDescription className="text-gray-600">
                   Choose your preferred authentication method for enhanced security
                 </CardDescription>
@@ -960,7 +960,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-3xl font-bold text-gray-900">Welcome to ProjectBridge!</CardTitle>
+                <CardTitle className="font-bold text-gray-900">Welcome to ProjectBridge!</CardTitle>
                 <CardDescription className="text-gray-600">
                   Your account has been created successfully
                 </CardDescription>

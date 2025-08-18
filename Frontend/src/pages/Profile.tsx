@@ -570,12 +570,12 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+                  <h3 className="heading-card-2xl font-bold text-gray-900 flex items-center">
                     <span className="bg-purple-100 p-2 rounded-lg mr-3">
                       <GraduationCap className="w-5 h-5 text-purple-600" />
                     </span>
                     About
-                  </h2>
+                  </h3>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('About'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
                     <Edit className="w-2 h-2 mr-1" />Edit
                   </Button>
@@ -595,12 +595,12 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+                  <h3 className="heading-card-2xl font-bold text-gray-900 flex items-center">
                     <span className="bg-blue-100 p-2 rounded-lg mr-3">
                       <BookOpen className="w-5 h-5 text-blue-600" />
                     </span>
                     Academic Background
-                  </h2>
+                  </h3>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('Education'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
                     <Edit className="w-2 h-2 mr-1" />Edit
                   </Button>
@@ -629,12 +629,12 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+                  <h3 className="heading-card-2xl font-bold text-gray-900 flex items-center">
                     <span className="bg-green-100 p-2 rounded-lg mr-3">
                       <Briefcase className="w-5 h-5 text-green-600" />
                     </span>
                     Work Experience
-                  </h2>
+                  </h3>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('Work Experience'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-sm hover:text-purple-700 hover:bg-purple-50">
                     <Edit className="w-2 h-2 mr-1" />Edit
                   </Button>
@@ -663,12 +663,12 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+                  <h3 className="heading-card-2xl font-bold text-gray-900 flex items-center">
                     <span className="bg-green-100 p-2 rounded-lg mr-3">
                       <Briefcase className="w-5 h-5 text-green-600" />
                     </span>
                     Research Projects & Commercial Work
-                  </h2>
+                  </h3>
                   <Button
                     variant="ghost"
                     size="sm"

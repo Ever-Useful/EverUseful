@@ -17,7 +17,7 @@ const RefundPolicy = () => {
                 <RefreshCw className="w-8 h-8 text-red-600" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="heading-section text-gray-900 mb-4">
               Refund Policy
             </h1>
             <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
