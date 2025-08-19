@@ -456,11 +456,11 @@ const Profile = () => {
           />
         </div>
         
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 md:top-1/2 md:bottom-auto md:-translate-y-1/2">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6 w-full">
+            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 w-full">
               {/* Profile Photo - LinkedIn Mobile Style - Left side on mobile */}
-              <div className="relative flex justify-start md:justify-center w-full md:w-auto z-20 mt-4 md:mt-0">
+              <div className="relative flex items-center md:items-center justify-start md:justify-start w-full md:w-auto z-20 mt-4 md:mt-0">
                 <PhotoUpload
                   currentImage={resolvedAvatar}
                   onImageUpload={async (imageUrl) => {
@@ -506,36 +506,24 @@ const Profile = () => {
                 />
                 
                 {/* Profile Info - LinkedIn Mobile Style - Aligned with profile photo */}
-                <div className="flex-1 text-white w-full text-center md:text-left ml-4 md:ml-0">
-                  <h1 className="text-lg sm:text-xl md:text-4xl font-bold drop-shadow-lg mb-1 sm:mb-1.5">
+                <div className="flex-1 text-white w-full text-left ml-4 md:ml-6 lg:ml-8">
+                  <h1 className="text-lg sm:text-lg md:text-4xl font-bold drop-shadow-lg mb-0 md:mb-2">
                     {getDisplayName()}
                   </h1>
                   <p className="text-xs sm:text-sm md:text-base text-slate-200 drop-shadow-md">
                     {profileData.userType || localStorage.getItem("userType") || "User"}
                   </p>
+                  {/* Unified Edit button placed below user type on all devices */}
+                  <button
+                    onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
+                    className="mt-3 md:mt-4 inline-flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm md:text-base bg-transparent border border-white hover:bg-white/10 px-3 md:px-4 py-1.5 rounded-full font-medium transition-all duration-200"
+                  >
+                    <Edit className="w-3 h-3 md:w-4 md:h-4" />
+                    Edit Profile
+                  </button>
                 </div>
               </div>
-              
-              {/* Edit Profile Button - Bottom right corner on mobile */}
-              <div className="flex justify-end md:justify-start mt-4 md:mt-0">
-                {/* Desktop Edit Button */}
-                <button
-                  onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
-                  className="hidden md:flex items-center gap-2 text-white drop-shadow-md text-sm sm:text-base md:text-lg bg-transparent border border-white hover:bg-white/10 px-3 md:px-6 py-1.5 md:py-2 rounded-full font-medium md:font-semibold transition-all duration-200"
-                >
-                  <Edit className="w-3 h-3 md:w-4 md:h-4" />
-                  Edit Profile
-                </button>
-                
-                {/* Mobile Edit Button - Goes directly to edit profile */}
-                <button
-                  onClick={() => { setEditSection('Basic Details'); setShowEditProfile(true); }}
-                  className="md:hidden flex items-center gap-2 text-white drop-shadow-md text-xs bg-transparent border border-white hover:bg-white/10 px-2 py-1 rounded-full font-medium transition-all duration-200"
-                >
-                  <Edit className="w-3 h-3" />
-                  Edit
-                </button>
-              </div>
+              {/* Removed separate edit button container; button moved under user type */}
             </div>
           </div>
         </div>
@@ -589,11 +577,11 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl lg:hidden">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h3 className="text-sm sm:text-lg font-semibold text-gray-900 flex items-center">
+                  <h3 className="text-base sm:text-lg md:text-2xl font-semibold text-gray-900 flex items-center">
                     <span className="bg-indigo-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
                       <Star className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                     </span>
-                    Research Skills & Technical Expertise
+                    Skills
                   </h3>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('Skills'); setShowEditProfile(true); }} className="-translate-y-[20px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
                     <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
@@ -617,7 +605,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h2 className="text-lg sm:text-xl md:text-3xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
                     <span className="bg-purple-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
                       <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
                     </span>
@@ -642,11 +630,11 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-lg sm:text-xl md:text-3xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
                     <span className="bg-blue-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
                       <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                     </span>
-                    Academic Background
+                    Education
                   </h2>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('Education'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
                     <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
@@ -676,7 +664,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-lg sm:text-xl md:text-3xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
                     <span className="bg-green-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
                       <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     </span>
@@ -710,11 +698,11 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-lg sm:text-xl md:text-3xl font-bold text-gray-900 flex items-center">
+                  <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
                     <span className="bg-green-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
                       <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     </span>
-                    Research Projects & Commercial Work
+                    Projects
                   </h2>
                   <Button
                     variant="ghost"
@@ -796,11 +784,11 @@ const Profile = () => {
             <Card className="hidden lg:block bg-white shadow-lg rounded-xl max-w-md">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h3 className="text-sm sm:text-lg font-semibold text-gray-900 flex items-center">
+                  <h3 className="text-base sm:text-lg md:text-2xl font-semibold text-gray-900 flex items-center">
                     <span className="bg-indigo-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
                       <Star className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                     </span>
-                    Research Skills & Technical Expertise
+                    Skills
                   </h3>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('Skills'); setShowEditProfile(true); }} className="-translate-y-[20px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
                     <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
