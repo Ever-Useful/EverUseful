@@ -42,7 +42,10 @@ export const handleGoogleAuth = async (navigate: (url: string) => void, userType
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      userType: userType // Only used for new users, existing users keep their current userType
+      userType: userType, // Only used for new users, existing users keep their current userType
+      firstName: (userCredential.user.displayName || '').split(' ')[0] || '',
+      lastName: (userCredential.user.displayName || '').split(' ').slice(1).join(' ') || '',
+      email: userCredential.user.email || undefined
     })
   });
 
@@ -55,6 +58,15 @@ export const handleGoogleAuth = async (navigate: (url: string) => void, userType
   
   // Set localStorage to indicate user is logged in
   localStorage.setItem("isLoggedIn", "true");
+  // Mirror email signup localStorage behavior for parity
+  const displayName = userCredential.user.displayName || '';
+  const nameParts = displayName.split(' ');
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+  if (userType) localStorage.setItem('userType', userType);
+  if (displayName) localStorage.setItem('userName', displayName);
+  if (firstName) localStorage.setItem('userFirstName', firstName);
+  if (lastName) localStorage.setItem('userLastName', lastName);
   window.dispatchEvent(new Event("storage"));
   
   // Use redirectPath if provided, otherwise use backend response
@@ -63,6 +75,7 @@ export const handleGoogleAuth = async (navigate: (url: string) => void, userType
 
 export const handleGithubAuth = async (navigate: (url: string) => void, userType: string = 'student', redirectPath?: string) => {
   const provider = new GithubAuthProvider();
+  provider.addScope('user:email');
   const userCredential = await signInWithPopup(auth, provider);
   const token = await userCredential.user.getIdToken();
 
@@ -76,7 +89,10 @@ export const handleGithubAuth = async (navigate: (url: string) => void, userType
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      userType: userType // Only used for new users, existing users keep their current userType
+      userType: userType, // Only used for new users, existing users keep their current userType
+      firstName: (userCredential.user.displayName || '').split(' ')[0] || '',
+      lastName: (userCredential.user.displayName || '').split(' ').slice(1).join(' ') || '',
+      email: userCredential.user.email || undefined
     })
   });
 
@@ -89,6 +105,15 @@ export const handleGithubAuth = async (navigate: (url: string) => void, userType
   
   // Set localStorage to indicate user is logged in
   localStorage.setItem("isLoggedIn", "true");
+  // Mirror email signup localStorage behavior for parity
+  const displayName = userCredential.user.displayName || '';
+  const nameParts = displayName.split(' ');
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+  if (userType) localStorage.setItem('userType', userType);
+  if (displayName) localStorage.setItem('userName', displayName);
+  if (firstName) localStorage.setItem('userFirstName', firstName);
+  if (lastName) localStorage.setItem('userLastName', lastName);
   window.dispatchEvent(new Event("storage"));
   
   // Use redirectPath if provided, otherwise use backend response
