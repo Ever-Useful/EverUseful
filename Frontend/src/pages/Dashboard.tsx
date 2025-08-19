@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, CheckSquare, Calendar, BarChart3, User, Settings, HelpCircle, LogOut, BookOpen, GraduationCap, Building, Sparkles, Moon, Sun, Search, Plus, Clock, Minus, Briefcase, List, Users, Bell, Menu } from "lucide-react";
+import { LayoutDashboard, CheckSquare, Calendar, BarChart3, User, Settings, HelpCircle, LogOut, BookOpen, GraduationCap, Building, Sparkles, Moon, Sun, Search, Plus, Clock, Minus, Briefcase, List, Users, Bell, Menu, X } from "lucide-react";
 import { ThemeProvider, useTheme } from "@/components/dashboard/ThemeProvider";
 import StatsCard from "@/components/dashboard/StatsCards";
 import DetailedStatsSection from "@/components/dashboard/DetailedStatsSection";
@@ -717,20 +717,64 @@ const Dashboard = () => {
           
           {/* Mobile menu overlay */}
           {mobileMenuOpen && (
-            <div 
-              className="lg:hidden fixed inset-0 bg-black/50 z-20"
-              onClick={() => setMobileMenuOpen(false)}
-            />
+            <div className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end">
+              <div
+                className="absolute inset-0 bg-black/50"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <div className="relative bg-white rounded-t-2xl shadow-2xl p-4 pb-6 w-full">
+                <div className="flex items-center justify-between pb-2">
+                  <span className="text-sm font-semibold text-gray-600">MENU</span>
+                  <button
+                    className="p-2 rounded-full hover:bg-gray-100"
+                    onClick={() => setMobileMenuOpen(false)}
+                    aria-label="Close menu"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  <Button className="w-full justify-start gap-3 h-12 text-sm font-semibold rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-800 border-0">
+                    <LayoutDashboard className="w-5 h-5" />
+                    <span>Dashboard</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-sm font-semibold rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-800 border-0">
+                    <CheckSquare className="w-5 h-5" />
+                    <span>My Projects</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-sm font-semibold rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-800 border-0">
+                    <List className="w-5 h-5" />
+                    <span>My Tasks</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-sm font-semibold rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-800 border-0">
+                    <Users className="w-5 h-5" />
+                    <span>Messages</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-sm font-semibold rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-800 border-0">
+                    <Bell className="w-5 h-5" />
+                    <span>Notifications</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-sm font-semibold rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-800 border-0">
+                    <Calendar className="w-5 h-5" />
+                    <span>Calendar</span>
+                  </Button>
+                  <Button className="w-full justify-start gap-3 h-12 text-sm font-semibold rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-800 border-0">
+                    <BarChart3 className="w-5 h-5" />
+                    <span>Analytics</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
           )}
           
           <div className="flex-1 flex flex-col lg:ml-80"> {/* Add left margin to avoid sidebar overlap on desktop */}
-            <div className="max-w-7xl mx-auto space-y-10 pt-8 px-6"> {/* Add horizontal padding */}
-              <div className="flex justify-between items-center mb-6">
+            <div className="max-w-7xl mx-auto space-y-6 sm:space-y-10 pt-6 sm:pt-8 px-4 sm:px-6"> {/* Add horizontal padding */}
+              <div className="flex justify-between items-center mb-4 sm:mb-6">
                 <div>
-                          <h1 className="text-4xl font-extrabold text-gradient-emerald mb-2 mobile-text-4xl">Dashboard</h1>
-        <p className="text-base text-gray-600 dark:text-gray-300 mobile-text-base">Plan, prioritize, and accomplish your tasks with ease.</p>
+                          <h1 className="text-2xl sm:text-4xl font-extrabold text-gradient-emerald mb-1 sm:mb-2">Dashboard</h1>
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Plan, prioritize, and accomplish your tasks with ease.</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-3">
                   {/* Mobile menu button */}
                   <Button 
                     className="lg:hidden text-md bg-mint hover:bg-mint-dark dark:bg-mint-dark dark:hover:bg-mint text-olive font-bold gap-2 shadow-lg hover-lift rounded-xl"
@@ -740,14 +784,14 @@ const Dashboard = () => {
                     Menu
                   </Button>
                   {/* <DarkModeToggle /> */}
-                  <Button className="text-md bg-mint hover:bg-mint-dark dark:bg-mint-dark dark:hover:bg-mint text-olive font-bold gap-2 shadow-lg hover-lift rounded-xl">
+                  <Button className="text-md bg-mint hover:bg-mint-dark dark:bg-mint-dark dark:hover:bg-mint text-olive font-bold gap-2 shadow-lg hover-lift rounded-xl" onClick={() => window.dispatchEvent(new CustomEvent('open-myprojects'))}>
                     <Plus className="w-4 h-4" />
                     {getActionButtonText(userType)}
                   </Button>
                 </div>
               </div>
               {/* Stats cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
                 {stats.map((stat, index) => (
                   <div key={index} className="glass-effect hover-lift rounded-xl transition-all duration-200">
                     <StatsCard
@@ -763,9 +807,9 @@ const Dashboard = () => {
                 ))}
               </div>
               {/* Earnings, Project Status, Recent Activity cards */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Earnings Card */}
-                <Card className="h-80 glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
+                <Card className="h-64 sm:h-80 glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold text-olive-dark">Earnings</CardTitle>
                   </CardHeader>
@@ -797,7 +841,7 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
                 {/* Project Status Card (Pie Chart) */}
-                <Card className="h-80 bg-[#10b981] border-0 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:bg-[#059669] cursor-pointer rounded-xl flex flex-col items-center justify-center">
+                <Card className="h-64 sm:h-80 bg-[#10b981] border-0 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:bg-[#059669] cursor-pointer rounded-xl flex flex-col items-center justify-center">
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold text-white">Project Status</CardTitle>
                   </CardHeader>
@@ -819,7 +863,7 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
                 {/* Recent Activity Card */}
-                <Card className="h-80 glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
+                <Card className="h-64 sm:h-80 glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold text-olive-dark">Recent Activity</CardTitle>
                   </CardHeader>
@@ -847,10 +891,10 @@ const Dashboard = () => {
               {/* Line Graph */}
               <Card className="glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-olive-dark">Performance Overview</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl font-bold text-olive-dark">Performance Overview</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={400}>
+                <CardContent className="pt-2 sm:pt-4">
+                  <ResponsiveContainer width="100%" height={260}>
                     <LineChart data={lineGraphData}>
                       <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                       <XAxis
@@ -909,6 +953,25 @@ const Dashboard = () => {
                 </ResponsiveContainer>
                 </CardContent>
               </Card>
+            </div>
+          </div>
+          {/* Sticky bottom actions - mobile only */}
+          <div className="fixed bottom-0 left-0 w-full z-40 lg:hidden bg-white border-t border-gray-200 shadow-lg">
+            <div className="flex">
+              <button
+                className="flex-1 py-3 flex flex-col items-center justify-center text-gray-800 text-xs font-semibold active:bg-gray-50"
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <Menu className="w-4 h-4 mb-1" />
+                Menu
+              </button>
+              <button
+                className="flex-1 py-3 flex flex-col items-center justify-center text-blue-700 text-xs font-semibold active:bg-blue-50"
+                onClick={() => window.dispatchEvent(new CustomEvent('open-myprojects'))}
+              >
+                <Plus className="w-4 h-4 mb-1" />
+                New Project
+              </button>
             </div>
           </div>
         </div>
