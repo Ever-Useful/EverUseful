@@ -619,7 +619,40 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         }>
           {projects.map((project, idx) => (
             isMobile ? (
-              <div key={project.id} className="flex items-center gap-4 py-4 px-2 cursor-pointer bg-white w-full">
+              <div
+                key={project.id}
+                className="flex items-center gap-3 py-3 px-3 cursor-pointer bg-white w-full border-b border-gray-200"
+                onClick={() => handleViewDetails(project.id)}
+              >
+                <img
+                  src={getS3ImageUrl(project.image, 'project', 'small')}
+                  alt={project.title}
+                  className="w-16 h-16 object-cover rounded-md flex-shrink-0"
+                  onError={(e) => handleImageError(e, NoImageAvailable)}
+                />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-gray-900 truncate">{project.title}</h3>
+                  <div className="text-xs text-gray-600 truncate">
+                    {getAuthorDetails(project.author).name}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-sm font-bold text-gray-900">₹{project.price}</span>
+                    <span className="text-[10px] text-gray-500">{project.duration}</span>
+                  </div>
+                  <div className="flex gap-1 mt-1">
+                    {project.skills && project.skills.slice(0, 2).map((skill, i) => (
+                      <Badge key={i} variant="outline" className="text-[10px] border-gray-200 text-gray-600 bg-gray-100">
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Skill'}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  className="text-xs bg-blue-600 text-white px-2 py-1 rounded"
+                  onClick={(e) => { e.stopPropagation(); handleAddToCart(project.id); }}
+                >
+                  Add
+                </button>
               </div>
             ) : (
               <div
