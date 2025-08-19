@@ -503,26 +503,45 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
       <div className="w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
-        <header className="flex items-center justify-between p-2 border-b">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <ArrowLeft className="w-5 h-5" />
+        {/* Mobile Header */}
+        <header className="flex items-center justify-between p-3 sm:p-4 border-b bg-white">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Button variant="ghost" size="icon" onClick={onClose} className="h-10 w-10 sm:h-12 sm:w-12">
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </Button>
-            <h2 className="font-semibold text-lg">{editMode ? 'Edit Project' : 'Add New Project'}</h2>
+            <h2 className="font-semibold text-lg sm:text-xl">{editMode ? 'Edit Project' : 'Add New Project'}</h2>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        
+        {/* Main Content - LinkedIn Mobile Style */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-blue-500 hover:scrollbar-thumb-blue-600">
           <div>
-            <Label htmlFor="title">Project Title <span className="text-red-500">*</span></Label>
-            <Input id="title" name="title" value={projectData.title} onChange={handleInputChange} placeholder="e.g., AI-Powered Climate Change Model" />
-            {formErrors.title && <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>}
+            <Label htmlFor="title" className="text-xs sm:text-sm font-medium text-gray-700">Project Title <span className="text-red-500">*</span></Label>
+            <Input 
+              id="title" 
+              name="title" 
+              value={projectData.title} 
+              onChange={handleInputChange} 
+              placeholder="e.g., AI-Powered Climate Change Model" 
+              className="mt-1 h-10 sm:h-11 text-xs sm:text-sm"
+            />
+            {formErrors.title && <p className="text-red-500 text-xs sm:text-sm mt-1">{formErrors.title}</p>}
           </div>
+          
           <div>
-            <Label htmlFor="description">Description <span className="text-red-500">*</span></Label>
-            <Textarea id="description" name="description" value={projectData.description} onChange={handleInputChange} placeholder="Describe your project in detail..." />
-            {formErrors.description && <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>}
+            <Label htmlFor="description" className="text-xs sm:text-sm font-medium text-gray-700">Description <span className="text-red-500">*</span></Label>
+            <Textarea 
+              id="description" 
+              name="description" 
+              value={projectData.description} 
+              onChange={handleInputChange} 
+              placeholder="Describe your project in detail..." 
+              className="mt-1 h-24 sm:h-32 resize-none text-xs sm:text-sm"
+            />
+            {formErrors.description && <p className="text-red-500 text-xs sm:text-sm mt-1">{formErrors.description}</p>}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <DropdownWithOther
                 label="Category"
@@ -535,21 +554,46 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
               />
             </div>
             <div>
-                              <Label htmlFor="price">Price (₹) <span className="text-red-500">*</span></Label>
-              <Input id="price" name="price" type="number" value={projectData.price} onChange={handleInputChange} placeholder="e.g., 2500" />
-              {formErrors.price && <p className="text-red-500 text-sm mt-1">{formErrors.price}</p>}
+              <Label htmlFor="price" className="text-xs sm:text-sm font-medium text-gray-700">Price (₹) <span className="text-red-500">*</span></Label>
+              <Input 
+                id="price" 
+                name="price" 
+                type="number" 
+                value={projectData.price} 
+                onChange={handleInputChange} 
+                placeholder="e.g., 2500" 
+                className="mt-1 h-10 sm:h-11 text-xs sm:text-sm"
+              />
+              {formErrors.price && <p className="text-red-500 text-xs sm:text-sm mt-1">{formErrors.price}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <Label htmlFor="duration">Duration</Label>
-              <Input id="duration" name="duration" value={projectData.duration} onChange={handleInputChange} placeholder="e.g., 2 months" />
+              <Label htmlFor="duration" className="text-xs sm:text-sm font-medium text-gray-700">Duration</Label>
+              <Input 
+                id="duration" 
+                name="duration" 
+                value={projectData.duration} 
+                onChange={handleInputChange} 
+                placeholder="e.g., 2 months" 
+                className="mt-1 h-10 sm:h-11 text-xs sm:text-sm"
+              />
             </div>
             <div>
-              <Label htmlFor="teamSize">Team Size</Label>
-              <Input id="teamSize" name="teamSize" type="number" value={projectData.teamSize} onChange={handleInputChange} placeholder="e.g., 6" />
+              <Label htmlFor="teamSize" className="text-xs sm:text-sm font-medium text-gray-700">Team Size</Label>
+              <Input 
+                id="teamSize" 
+                name="teamSize" 
+                type="number" 
+                value={projectData.teamSize} 
+                onChange={handleInputChange} 
+                placeholder="e.g., 6" 
+                className="mt-1 h-10 sm:h-11 text-xs sm:text-sm"
+              />
             </div>
           </div>
+          
           <div>
             <DropdownWithOther
               label="Status"
@@ -559,32 +603,48 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
               placeholder="Select Status"
             />
           </div>
+          
           <div>
-            <Label htmlFor="tags">Tags (comma-separated)</Label>
-            <Input id="tags" name="tags" value={projectData.tags} onChange={handleInputChange} placeholder="e.g., AI, Climate, Prediction" />
-          </div>
-          <div>
-            <Label htmlFor="skills">Required Skills (comma-separated)</Label>
-            <Input id="skills" name="skills" value={projectData.skills} onChange={handleInputChange} placeholder="e.g., Machine Learning, Python" />
+            <Label htmlFor="tags" className="text-xs sm:text-sm font-medium text-gray-700">Tags (comma-separated)</Label>
+            <Input 
+              id="tags" 
+              name="tags" 
+              value={projectData.tags} 
+              onChange={handleInputChange} 
+              placeholder="e.g., AI, Climate, Prediction" 
+              className="mt-1 h-10 sm:h-11 text-xs sm:text-sm"
+            />
           </div>
           
-                      {/* Image Upload Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Project Images</Label>
-                <span className="text-sm text-gray-500">
-                  {totalImageCount}/{MAX_IMAGES} images
-                </span>
-              </div>
-              {formErrors.images && (
-                <div className="text-red-500 text-sm">{formErrors.images}</div>
-              )}
-            
+          <div>
+            <Label htmlFor="skills" className="text-xs sm:text-sm font-medium text-gray-700">Required Skills (comma-separated)</Label>
+            <Input 
+              id="skills" 
+              name="skills" 
+              value={projectData.skills} 
+              onChange={handleInputChange} 
+              placeholder="e.g., Machine Learning, Python" 
+              className="mt-1 h-10 sm:h-11 text-xs sm:text-sm"
+            />
+          </div>
+          
+          {/* Image Upload Section - LinkedIn Mobile Style */}
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs sm:text-sm font-medium text-gray-700">Project Images</Label>
+              <span className="text-xs sm:text-sm text-gray-500">
+                {totalImageCount}/{MAX_IMAGES} images
+              </span>
+            </div>
+            {formErrors.images && (
+              <div className="text-red-500 text-xs sm:text-sm">{formErrors.images}</div>
+            )}
+          
             {/* Image Limit Warning */}
             {totalImageCount >= MAX_IMAGES && (
               <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                 <AlertCircle className="w-4 h-4 text-yellow-600" />
-                <span className="text-sm text-yellow-800">
+                <span className="text-xs sm:text-sm text-yellow-800">
                   Maximum {MAX_IMAGES} images reached. Remove some images to add more.
                 </span>
               </div>
@@ -593,24 +653,24 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             {/* Uploaded Images Display */}
             {uploadedImages.length > 0 && (
               <div className="space-y-3">
-                <p className="text-sm text-gray-600 mb-2">Uploaded Images:</p>
-                <div className="grid grid-cols-2 gap-3">
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">Uploaded Images:</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                   {uploadedImages.map((imageUrl, index) => (
                     <div key={index} className="relative group">
                       <img
                         src={imageUrl || NoImageAvailable}
                         alt={`Project image ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg border shadow-sm"
+                        className="w-full h-24 sm:h-32 object-cover rounded-lg border shadow-sm"
                         onError={(e) => { 
                           e.currentTarget.src = NoImageAvailable; 
                         }}
                       />
                       <button
                         onClick={() => handleRemoveUploadedImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                        className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-red-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                         title="Remove image"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-3 h-3 sm:w-4 sm:h-4" />
                       </button>
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
                         Image {index + 1}
@@ -624,21 +684,21 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             {/* Selected Files with Previews */}
             {selectedFiles.length > 0 && (
               <div className="space-y-3">
-                <p className="text-sm text-gray-600 mb-2">Selected Files (will be uploaded when you save):</p>
-                <div className="grid grid-cols-2 gap-3">
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">Selected Files (will be uploaded when you save):</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                   {selectedFiles.map((file, index) => (
                     <div key={index} className="relative group">
                       <img
                         src={imagePreviewUrls[index]}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg border shadow-sm"
+                        className="w-full h-24 sm:h-32 object-cover rounded-lg border shadow-sm"
                       />
                       <button
                         onClick={() => handleRemoveFile(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                        className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-red-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                         title="Remove file"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-3 h-3 sm:w-4 sm:h-4" />
                       </button>
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
                         {file.name}
@@ -649,33 +709,33 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
               </div>
             )}
             
-                                {/* File Selection */}
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold rounded-lg transition-all duration-200"
-                        disabled={!canAddMoreImages}
-                      >
-                        <ImageIcon className="w-4 h-4" />
-                        Select Images
-                      </Button>
-                      <span className="text-sm text-gray-500">
-                        {totalImageCount} image{(totalImageCount) !== 1 ? 's' : ''} selected
-                      </span>
-                      {selectedFiles.length > 0 && editMode && projectToEdit && projectToEdit.id && (
-                        <Button
-                          type="button"
-                          variant="default"
-                          onClick={handleImmediateUpload}
-                          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 hover:shadow-md border-0"
-                        >
-                          <Upload className="w-4 h-4" />
-                          Upload Now
-                        </Button>
-                      )}
-                    </div>
+            {/* File Selection - LinkedIn Mobile Style */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-all duration-200 text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5"
+                disabled={!canAddMoreImages}
+              >
+                <ImageIcon className="w-4 h-4" />
+                Select Images
+              </Button>
+              <span className="text-xs sm:text-sm text-gray-500">
+                {totalImageCount} image{(totalImageCount) !== 1 ? 's' : ''} selected
+              </span>
+              {selectedFiles.length > 0 && editMode && projectToEdit && projectToEdit.id && (
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={handleImmediateUpload}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 hover:shadow-md border-0 text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5"
+                >
+                  <Upload className="w-4 h-4" />
+                  Upload Now
+                </Button>
+              )}
+            </div>
             
             {/* Hidden file input */}
             <input
@@ -689,23 +749,56 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
           </div>
           
           <div>
-            <Label htmlFor="features">Features (comma-separated)</Label>
-            <Textarea id="features" name="features" value={projectData.features} onChange={handleInputChange} placeholder="Feature 1, Feature 2, Feature 3" />
+            <Label htmlFor="features" className="text-xs sm:text-sm font-medium text-gray-700">Features (comma-separated)</Label>
+            <Textarea 
+              id="features" 
+              name="features" 
+              value={projectData.features} 
+              onChange={handleInputChange} 
+              placeholder="Feature 1, Feature 2, Feature 3" 
+              className="mt-1 h-20 sm:h-24 resize-none text-xs sm:text-sm"
+            />
           </div>
+          
           <div>
-            <Label htmlFor="techStack">Tech Stack (comma-separated)</Label>
-            <Textarea id="techStack" name="techStack" value={projectData.techStack} onChange={handleInputChange} placeholder="TensorFlow, Python, AWS" />
+            <Label htmlFor="techStack" className="text-xs sm:text-sm font-medium text-gray-700">Tech Stack (comma-separated)</Label>
+            <Textarea 
+              id="techStack" 
+              name="techStack" 
+              value={projectData.techStack} 
+              onChange={handleInputChange} 
+              placeholder="TensorFlow, Python, AWS" 
+              className="mt-1 h-20 sm:h-24 resize-none text-xs sm:text-sm"
+            />
           </div>
+          
           <div>
-            <Label htmlFor="deliverables">Deliverables (comma-separated)</Label>
-            <Textarea id="deliverables" name="deliverables" value={projectData.deliverables} onChange={handleInputChange} placeholder="Source code, Documentation" />
+            <Label htmlFor="deliverables" className="text-xs sm:text-sm font-medium text-gray-700">Deliverables (comma-separated)</Label>
+            <Textarea 
+              id="deliverables" 
+              name="deliverables" 
+              value={projectData.deliverables} 
+              onChange={handleInputChange} 
+              placeholder="Source code, Documentation" 
+              className="mt-1 h-20 sm:h-24 resize-none text-xs sm:text-sm"
+            />
           </div>
         </main>
-        <footer className="p-4 border-t flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose} className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold rounded-lg transition-all duration-200">
+        
+        {/* Footer - LinkedIn Mobile Style */}
+        <footer className="p-4 sm:p-6 border-t flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 bg-white">
+          <Button 
+            variant="outline" 
+            onClick={onClose} 
+            className="border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-all duration-200 text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 order-2 sm:order-1"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSaveProject} disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-6 py-2 transition-all duration-200 hover:shadow-md border-0">
+          <Button 
+            onClick={handleSaveProject} 
+            disabled={loading} 
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 sm:px-6 py-2 sm:py-2.5 transition-all duration-200 hover:shadow-md border-0 text-xs sm:text-sm order-1 sm:order-2"
+          >
             {loading ? (editMode ? 'Saving...' : 'Creating...') : (editMode ? 'Save Changes' : 'Create Project')}
           </Button>
         </footer>

@@ -331,11 +331,10 @@ export const WhatWeProvide = () => {
                 }}></div>
               </div>
               
-              <div className="relative z-10">
-                <div className="w-auto h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300 group-hover:shadow-2xl group-hover:shadow-white">
-                  <Shield className="w-8 h-8 text-white" />
+              <div className="relative z-10 h-30 mt-6 mb-3">
+                <div className="w-auto h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300 group-hover:shadow-2xl group-hover:shadow-white">
+                  <h3 className="mt-2 text-2xl font-bold mb-3 leading-tight">Ready to Get Started?</h3>
                 </div>
-                <h3 className="text-2xl font-bold mb-3 leading-tight">Ready to Get Started?</h3>
                 <p className="text-base text-white/90">Join our platform and start building amazing projects with our tools and support.</p>
               </div>
             </div>

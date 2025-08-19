@@ -211,7 +211,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
     };
   };
 
-  // Profile Photo Modal (White Theme)
+  // Profile Photo Modal (White Theme) - LinkedIn Mobile Style
   if (type === 'avatar') {
     return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -220,59 +220,59 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
             {trigger}
           </div>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-white text-gray-900 border-gray-200 z-[60] max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="flex flex-row items-center justify-between pb-4">
-            <DialogTitle className="text-lg font-semibold">Profile photo</DialogTitle>
+        <DialogContent className="max-w-md sm:max-w-lg bg-white text-gray-900 border-gray-200 z-[60] max-h-[90vh] overflow-y-auto p-4 sm:p-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-blue-500 hover:scrollbar-thumb-blue-600">
+          <DialogHeader className="flex flex-row items-center justify-between pb-4 sm:pb-6">
+            <DialogTitle className="text-lg sm:text-xl font-semibold">Profile photo</DialogTitle>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(false)}
-              className="text-gray-600 hover:bg-gray-100"
+              className="text-gray-600 hover:bg-gray-100 h-8 w-8 sm:h-10 sm:w-10"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </DialogHeader>
 
-          <div className="flex flex-col items-center space-y-4 py-2">
-            {/* Profile Photo Display */}
+          <div className="flex flex-col items-center space-y-4 sm:space-y-6 py-2 sm:py-4">
+            {/* Profile Photo Display - LinkedIn Mobile Style */}
             <div className="relative">
               {previewUrl ? (
                 <img
                   src={previewUrl}
                   alt="Profile preview"
-                  className="w-28 h-28 rounded-full object-cover border-4 border-gray-200 shadow-lg"
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-gray-200 shadow-lg"
                 />
               ) : currentImage ? (
                 <img
                   src={currentImage}
                   alt="Current profile"
-                  className="w-28 h-28 rounded-full object-cover border-4 border-gray-200 shadow-lg"
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-gray-200 shadow-lg"
                 />
               ) : (
-                <div className="w-28 h-28 rounded-full bg-gray-100 border-4 border-gray-200 flex items-center justify-center shadow-lg">
-                  <User className="w-14 h-14 text-gray-400" />
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-100 border-4 border-gray-200 flex items-center justify-center shadow-lg">
+                  <User className="w-12 h-12 sm:w-14 sm:h-14 text-gray-400" />
                 </div>
               )}
             </div>
 
-            {/* Visibility Setting */}
+            {/* Visibility Setting - LinkedIn Mobile Style */}
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50 bg-white">
-                <Eye className="w-4 h-4 mr-2" />
+              <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50 bg-white text-xs sm:text-sm px-3 sm:px-4 py-2">
+                <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 Anyone
               </Button>
             </div>
 
-            {/* Upload Section */}
+            {/* Upload Section - LinkedIn Mobile Style */}
             {!previewUrl && (
               <div className="w-full space-y-4">
-                <div className="text-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors bg-gray-50">
-                  <Upload className="w-6 h-6 mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600 mb-2">Upload a new photo</p>
+                <div className="text-center p-4 sm:p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors bg-gray-50">
+                  <Upload className="w-6 h-6 sm:w-8 sm:h-8 mx-auto text-gray-400 mb-2 sm:mb-3" />
+                  <p className="text-sm sm:text-base text-gray-600 mb-2 sm:mb-3">Upload a new photo</p>
                   <Button
                     onClick={() => fileInputRef.current?.click()}
                     size="sm"
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-blue-600 hover:bg-blue-700 text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-2.5"
                   >
                     Choose File
                   </Button>
@@ -288,132 +288,170 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
             )}
           </div>
 
-          {/* Action Buttons - Fixed layout */}
-          <div className="grid grid-cols-3 gap-1 pt-3 border-t border-gray-200">
+          {/* Action Buttons - LinkedIn Mobile Style */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-4 sm:pt-6 border-t border-gray-200">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setActiveTab('edit')}
               disabled={!previewUrl}
-              className="text-gray-700 hover:bg-gray-100 text-xs px-2"
+              className="text-gray-700 hover:bg-gray-100 text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5"
             >
-              <Edit3 className="w-3 h-3 mr-1" />
+              <Edit3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               Edit
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
-              className="text-gray-700 hover:bg-gray-100 text-xs px-2"
+              className="text-gray-700 hover:bg-gray-100 text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5"
             >
-              <Camera className="w-3 h-3 mr-1" />
-              Update
+              <Camera className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              Camera
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={async () => {
-                try {
-                  // Attempt to delete from S3 if current image is an S3 URL and we can extract a key
-                  const img = currentImage || '';
-                  if (img.includes('amazonaws.com/')) {
-                    const key = img.split('.amazonaws.com/')[1]?.split('?')[0];
-                    if (key) {
-                      try { 
-                        await s3Service.deleteImage(key);
-                        console.log('S3 image deleted successfully:', key);
-                      } catch (s3Error) {
-                        console.warn('Failed to delete from S3, but continuing with profile update:', s3Error);
-                      }
-                    }
-                  }
-                  
-                  // Persist clear to backend profile
-                  await userService.updateUserProfile({ avatar: '' });
-                  
-                  // Clear on UI immediately
-                  onImageUpload('');
-                  toast.success('Profile photo removed successfully');
-                  resetState();
-                  setIsOpen(false);
-                } catch (e) {
-                  console.error('Delete photo failed:', e);
-                  toast.error('Failed to remove photo');
-                }
-              }}
-              disabled={!currentImage}
-              className="text-gray-700 hover:text-red-600 text-xs px-2"
+              onClick={() => setActiveTab('gallery')}
+              className="text-gray-700 hover:bg-gray-100 text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5"
             >
-              <Trash2 className="w-3 h-3 mr-1" />
-              Delete
+              <ImageIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              Gallery
             </Button>
           </div>
 
-          {/* Edit Section - Improved layout */}
-          {previewUrl && activeTab === 'edit' && (
-            <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="space-y-3">
+          {/* Tabs Content - LinkedIn Mobile Style */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4 sm:mt-6">
+            <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-6">
+              <TabsTrigger value="upload" className="text-xs sm:text-sm">Upload</TabsTrigger>
+              <TabsTrigger value="edit" className="text-xs sm:text-sm">Edit</TabsTrigger>
+              <TabsTrigger value="gallery" className="text-xs sm:text-sm">Gallery</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="upload" className="space-y-4 sm:space-y-6">
+              <div className="text-center p-6 sm:p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors bg-gray-50">
+                <Upload className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-400 mb-3 sm:mb-4" />
+                <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Drag and drop your image here, or click to browse</p>
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5"
+                >
+                  Choose File
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="edit" className="space-y-4 sm:space-y-6">
+              {previewUrl && (
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex justify-center">
+                    <div className="relative">
+                      <img
+                        src={previewUrl}
+                        alt="Edit preview"
+                        style={getImageStyle()}
+                        className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-gray-200 shadow-lg"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4 sm:space-y-6">
+                    <div>
+                      <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                        <RotateCw className="w-4 h-4" />
+                        Rotate
+                      </Label>
+                      <Slider
+                        value={[editOptions.rotate]}
+                        onValueChange={([value]) => handleEditOptionChange('rotate', value)}
+                        max={360}
+                        min={0}
+                        step={1}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                        <ZoomIn className="w-4 h-4" />
+                        Scale
+                      </Label>
+                      <Slider
+                        value={[editOptions.scale]}
+                        onValueChange={([value]) => handleEditOptionChange('scale', value)}
+                        max={200}
+                        min={50}
+                        step={1}
+                        className="mt-2"
+                      />
+                    </div>
                 <div>
-                  <Label className="text-xs text-gray-700 mb-1 block font-medium">Brightness</Label>
+                      <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                        <Filter className="w-4 h-4" />
+                        Brightness
+                      </Label>
                   <Slider
                     value={[editOptions.brightness]}
                     onValueChange={([value]) => handleEditOptionChange('brightness', value)}
                     max={200}
                     min={0}
                     step={1}
-                    className="mt-1"
-                    style={{
-                      '--slider-track-color': '#22c55e',
-                      '--slider-thumb-color': '#22c55e'
-                    } as React.CSSProperties}
+                        className="mt-2"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-700 mb-1 block font-medium">Contrast</Label>
+                      <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                        <Edit3 className="w-4 h-4" />
+                        Contrast
+                      </Label>
                   <Slider
                     value={[editOptions.contrast]}
                     onValueChange={([value]) => handleEditOptionChange('contrast', value)}
                     max={200}
                     min={0}
                     step={1}
-                    className="mt-1"
-                    style={{
-                      '--slider-track-color': '#22c55e',
-                      '--slider-thumb-color': '#22c55e'
-                    } as React.CSSProperties}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                        <ImageIcon className="w-4 h-4" />
+                        Saturation
+                      </Label>
+                      <Slider
+                        value={[editOptions.saturation]}
+                        onValueChange={([value]) => handleEditOptionChange('saturation', value)}
+                        max={200}
+                        min={0}
+                        step={1}
+                        className="mt-2"
                   />
                 </div>
               </div>
             </div>
           )}
+            </TabsContent>
 
-          {/* Bottom Action Buttons - Only show when editing */}
-          {previewUrl && activeTab === 'edit' && (
-            <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200">
-              <Button
-                variant="outline"
-                onClick={resetState}
-                size="sm"
-                className="border-gray-300 text-gray-700 hover:bg-gray-50 text-xs px-3"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleUpload}
-                disabled={isUploading}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3"
-              >
-                {isUploading ? 'Uploading...' : 'Save'}
-              </Button>
+            <TabsContent value="gallery" className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
+                {galleryImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className="aspect-square bg-gray-200 rounded-lg cursor-pointer hover:opacity-75 transition-opacity"
+                    onClick={() => {
+                      setPreviewUrl(image);
+                      setActiveTab('edit');
+                    }}
+                  />
+                ))}
             </div>
-          )}
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     );
   }
 
-  // Cover Photo Modal (Light Theme)
+  // Cover Photo Modal (Light Theme) - LinkedIn Mobile Style
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -421,21 +459,21 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
           {trigger}
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white z-[60]">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="text-lg font-semibold text-gray-900">Cover image</DialogTitle>
+              <DialogContent className="max-w-4xl sm:max-w-5xl max-h-[90vh] overflow-y-auto bg-white z-[60] p-4 sm:p-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-blue-500 hover:scrollbar-thumb-blue-600">
+        <DialogHeader className="flex flex-row items-center justify-between pb-4 sm:pb-6">
+          <DialogTitle className="text-lg sm:text-xl font-semibold text-gray-900">Cover image</DialogTitle>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsOpen(false)}
-            className="text-gray-600 hover:bg-gray-100"
+            className="text-gray-600 hover:bg-gray-100 h-8 w-8 sm:h-10 sm:w-10"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Image Display */}
+        <div className="space-y-4 sm:space-y-6">
+          {/* Image Display - LinkedIn Mobile Style */}
           <div className="relative">
             {previewUrl ? (
               <div className="relative border-2 border-gray-200 rounded-lg overflow-hidden">
@@ -443,7 +481,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                   src={previewUrl}
                   alt="Cover preview"
                   style={getImageStyle()}
-                  className="w-full max-h-96 object-cover"
+                  className="w-full max-h-64 sm:max-h-96 object-cover"
                 />
               </div>
             ) : currentImage ? (
@@ -451,30 +489,28 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 <img
                   src={currentImage}
                   alt="Current cover"
-                  className="w-full max-h-96 object-cover"
+                  className="w-full max-h-64 sm:max-h-96 object-cover"
                 />
               </div>
             ) : (
-              <div className="w-full h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+              <div className="w-full h-32 sm:h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                 <div className="text-center">
-                  <ImageIcon className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                  <p className="text-gray-600">No cover image selected</p>
+                  <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-400 mb-2 sm:mb-3" />
+                  <p className="text-xs sm:text-sm text-gray-600">No cover image selected</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Upload Section */}
+          {/* Upload Section - LinkedIn Mobile Style */}
           {!previewUrl && (
-            <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
-              <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Upload cover image</h3>
-              <p className="text-gray-600 mb-4">
-                Choose an image from your device
-              </p>
+            <div className="text-center p-6 sm:p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
+              <Upload className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-400 mb-3 sm:mb-4" />
+              <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Upload cover image</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">Choose a high-quality image that represents your profile</p>
               <Button
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5"
               >
                 Choose File
               </Button>
@@ -488,35 +524,32 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
             </div>
           )}
 
-          {/* Edit Tools */}
+          {/* Edit Section - LinkedIn Mobile Style */}
           {previewUrl && (
-            <div className="space-y-4">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-gray-50 p-1 rounded-lg">
-                  <TabsTrigger value="crop" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                    <Crop className="w-4 h-4 mr-2" />
-                    Crop
-                  </TabsTrigger>
-                  <TabsTrigger value="filters" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filters
-                  </TabsTrigger>
-                  <TabsTrigger value="adjust" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Adjust
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="crop" className="space-y-4">
-                  <div className="space-y-4">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div>
+                  <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                    <RotateCw className="w-4 h-4" />
+                    Rotate
+                  </Label>
+                  <Slider
+                    value={[editOptions.rotate]}
+                    onValueChange={([value]) => handleEditOptionChange('rotate', value)}
+                    max={360}
+                    min={0}
+                    step={1}
+                    className="mt-2"
+                  />
+                </div>
                     <div>
-                      <Label className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2 text-xs sm:text-sm">
                         <ZoomIn className="w-4 h-4" />
-                        Zoom
+                    Scale
                       </Label>
                       <Slider
-                        value={[editOptions.zoom]}
-                        onValueChange={([value]) => handleEditOptionChange('zoom', value)}
+                    value={[editOptions.scale]}
+                    onValueChange={([value]) => handleEditOptionChange('scale', value)}
                         max={200}
                         min={50}
                         step={1}
@@ -524,47 +557,8 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="flex items-center gap-2">
-                        <RotateCw className="w-4 h-4" />
-                        Straighten
-                      </Label>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditOptionChange('straighten', editOptions.straighten - 1)}
-                        >
-                          -
-                        </Button>
-                        <Slider
-                          value={[editOptions.straighten]}
-                          onValueChange={([value]) => handleEditOptionChange('straighten', value)}
-                          max={45}
-                          min={-45}
-                          step={1}
-                          className="flex-1"
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditOptionChange('straighten', editOptions.straighten + 1)}
-                        >
-                          +
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="filters" className="space-y-4">
-                  <p className="text-gray-600">Filter options coming soon...</p>
-                </TabsContent>
-
-                <TabsContent value="adjust" className="space-y-4">
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="flex items-center gap-2">
-                        <ZoomIn className="w-4 h-4" />
+                  <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                    <Filter className="w-4 h-4" />
                         Brightness
                       </Label>
                       <Slider
@@ -577,7 +571,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2 text-xs sm:text-sm">
                         <Edit3 className="w-4 h-4" />
                         Contrast
                       </Label>
@@ -591,7 +585,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2 text-xs sm:text-sm">
                         <ImageIcon className="w-4 h-4" />
                         Saturation
                       </Label>
@@ -605,14 +599,12 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                       />
                     </div>
                   </div>
-                </TabsContent>
-              </Tabs>
             </div>
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-200">
+        {/* Action Buttons - LinkedIn Mobile Style */}
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-gray-200 gap-3 sm:gap-4">
           <Button
             variant="ghost"
             onClick={async () => {
@@ -646,16 +638,16 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
               }
             }}
             size="sm"
-            className="text-gray-600 hover:text-red-600"
+            className="text-gray-600 hover:text-red-600 text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5"
           >
             Delete photo
           </Button>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               size="sm"
-              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              className="border-blue-600 text-blue-600 hover:bg-blue-50 text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 w-full sm:w-auto"
             >
               Change photo
             </Button>
@@ -663,7 +655,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
               onClick={handleUpload}
               disabled={isUploading}
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 w-full sm:w-auto"
             >
               {isUploading ? 'Uploading...' : 'Apply'}
             </Button>
