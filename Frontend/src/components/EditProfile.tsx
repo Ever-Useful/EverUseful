@@ -887,59 +887,157 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                 <>
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Education</h3>
-                    <Button
-                      onClick={() => {
-                        setEducationForm({
-                          id: undefined,
-                          qualification: '', course: '', specialization: '', college: '', startYear: '', endYear: '', courseType: '', percentage: '', cgpa: '', rollNumber: '', lateralEntry: '', skills: '', description: '', attachments: null,
-                        });
-                        setEditingEducationIndex(null);
-                        setShowEducationForm(true);
-                      }}
-                      variant="ghost"
-                      size="sm"
-                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-2"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </Button>
+                    {!showEducationForm && (
+                      <Button
+                        onClick={handleAddEducation}
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-2"
+                      >
+                        <Plus className="w-5 h-5" />
+                      </Button>
+                    )}
                   </div>
-                  <div className="space-y-4 sm:space-y-6">
-                    {educationList.map((edu, index) => (
-                      <div key={index} className="border rounded-lg p-4 sm:p-6 bg-gray-50">
-                        <div className="flex justify-between items-start mb-3">
-                          <h4 className="font-semibold text-gray-900">Education #{index + 1}</h4>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setEducationForm(edu);
-                                setEditingEducationIndex(index);
-                                setShowEducationForm(true);
-                              }}
-                              className="text-xs sm:text-sm"
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteEducation(index)}
-                              className="text-red-600 border-red-300 text-xs sm:text-sm"
-                            >
-                              Delete
-                            </Button>
-                          </div>
+                  {showEducationForm ? (
+                    <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSaveEducation(); }}>
+                      <div>
+                        <DropdownWithOther
+                          label="Qualification"
+                          options={getDropdownOptions('qualifications')}
+                          value={educationForm.qualification ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, qualification: value }))}
+                          placeholder="Select Qualification"
+                          required={true}
+                        />
+                      </div>
+                      <div>
+                        <DropdownWithOther
+                          label="Course"
+                          options={getDropdownOptions('courses')}
+                          value={educationForm.course ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, course: value }))}
+                          placeholder="Select Course"
+                          required={true}
+                        />
+                      </div>
+                      <div>
+                        <DropdownWithOther
+                          label="Specialization"
+                          options={getDropdownOptions('courseSpecializations')}
+                          value={educationForm.specialization ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, specialization: value }))}
+                          placeholder="Select Specialization"
+                          required={true}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">College <span className="text-red-500">*</span></label>
+                        <Input name="college" value={educationForm.college ?? ''} onChange={handleEducationInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs sm:text-sm font-medium text-gray-700">Start Year</label>
+                          <Input name="startYear" value={educationForm.startYear ?? ''} onChange={handleEducationInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" placeholder="Start Year" />
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
-                          <div><span className="font-medium">Qualification:</span> {edu.qualification}</div>
-                          <div><span className="font-medium">Course:</span> {edu.course}</div>
-                          <div><span className="font-medium">College:</span> {edu.college}</div>
-                          <div><span className="font-medium">Duration:</span> {edu.startYear} - {edu.endYear}</div>
+                        <div>
+                          <label className="text-xs sm:text-sm font-medium text-gray-700">End Year</label>
+                          <Input name="endYear" value={educationForm.endYear ?? ''} onChange={handleEducationInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" placeholder="End Year" />
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div>
+                        <DropdownWithOther
+                          label="Course Type"
+                          options={getDropdownOptions('courseTypes')}
+                          value={educationForm.courseType ?? ''}
+                          onChange={(value) => setEducationForm(prev => ({ ...prev, courseType: value }))}
+                          placeholder="Select Course Type"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs sm:text-sm font-medium text-gray-700">Percentage</label>
+                          <Input name="percentage" value={educationForm.percentage ?? ''} onChange={handleEducationInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" placeholder="Percentage" />
+                        </div>
+                        <div>
+                          <label className="text-xs sm:text-sm font-medium text-gray-700">CGPA</label>
+                          <Input name="cgpa" value={educationForm.cgpa ?? ''} onChange={handleEducationInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" placeholder="CGPA" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs sm:text-sm font-medium text-gray-700">Roll Number</label>
+                          <Input name="rollNumber" value={educationForm.rollNumber ?? ''} onChange={handleEducationInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" placeholder="Roll number" />
+                        </div>
+                        <div>
+                          <DropdownWithOther
+                            label="Are you a Lateral Entry Student?"
+                            options={getDropdownOptions('lateralEntryOptions')}
+                            value={educationForm.lateralEntry ?? ''}
+                            onChange={(value) => setEducationForm(prev => ({ ...prev, lateralEntry: value }))}
+                            placeholder="Select Lateral Entry Status"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">Skills</label>
+                        <Input name="skills" value={educationForm.skills ?? ''} onChange={handleEducationInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" placeholder="Add skills" />
+                      </div>
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">Description</label>
+                        <textarea name="description" value={educationForm.description ?? ''} onChange={handleEducationInputChange} className="mt-1 w-full h-32 sm:h-40 p-3 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm" placeholder="Detail your education journey: degrees, accomplishments, skills gained. Share your academic and learning experiences to stand out" />
+                      </div>
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">Attachments</label>
+                        <Input type="file" name="attachments" onChange={e => setEducationForm(prev => ({ ...prev, attachments: e.target.files?.[0] || null }))} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" />
+                      </div>
+                      <div className="flex justify-end gap-2 mt-4">
+                        <Button type="button" variant="outline" onClick={handleCancelEducation}>Cancel</Button>
+                        <Button type="submit" className="bg-blue-600 text-white" variant="default">Save</Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="space-y-4 sm:space-y-6">
+                      {educationList.length === 0 ? (
+                        <div className="text-gray-500 text-sm">No education added yet.</div>
+                      ) : (
+                        educationList.map((edu, index) => (
+                          <div key={index} className="border rounded-lg p-4 sm:p-6 bg-gray-50">
+                            <div className="flex justify-between items-start mb-3">
+                              <h4 className="font-semibold text-gray-900">Education #{index + 1}</h4>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEducationForm(edu);
+                                    setEditingEducationIndex(index);
+                                    setShowEducationForm(true);
+                                  }}
+                                  className="text-xs sm:text-sm"
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteEducation(index)}
+                                  className="text-red-600 border-red-300 text-xs sm:text-sm"
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
+                              <div><span className="font-medium">Qualification:</span> {edu.qualification}</div>
+                              <div><span className="font-medium">Course:</span> {edu.course}</div>
+                              <div><span className="font-medium">College:</span> {edu.college}</div>
+                              <div><span className="font-medium">Duration:</span> {edu.startYear} - {edu.endYear}</div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </>
               )}
 
@@ -947,59 +1045,123 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                 <>
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Work Experience</h3>
-                    <Button
-                      onClick={() => {
-                        setWorkForm({
-                          id: undefined,
-                          gotFromUnstop: false, designation: '', organization: '', employmentType: '', startDate: '', endDate: '', currentlyWorking: false, location: '', remote: false, skills: '', description: '', attachments: null,
-                        });
-                        setEditingWorkIndex(null);
-                        setShowWorkForm(true);
-                      }}
-                      variant="ghost"
-                      size="sm"
-                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-2"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </Button>
+                    {!showWorkForm && (
+                      <Button
+                        onClick={handleAddWork}
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-2"
+                      >
+                        <Plus className="w-5 h-5" />
+                      </Button>
+                    )}
                   </div>
-                  <div className="space-y-4 sm:space-y-6">
-                    {workList.map((work, index) => (
-                      <div key={index} className="border rounded-lg p-4 sm:p-6 bg-gray-50">
-                        <div className="flex justify-between items-start mb-3">
-                          <h4 className="font-semibold text-gray-900">Experience #{index + 1}</h4>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setWorkForm(work);
-                                setEditingWorkIndex(index);
-                                setShowWorkForm(true);
-                              }}
-                              className="text-xs sm:text-sm"
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteWork(index)}
-                              className="text-red-600 border-red-300 text-xs sm:text-sm"
-                            >
-                              Delete
-                            </Button>
-                          </div>
+                  {showWorkForm ? (
+                    <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSaveWork(); }}>
+                      <div>
+                        <DropdownWithOther
+                          label="Designation"
+                          options={getDesignationOptions(profileData.userType)}
+                          value={workForm.designation ?? ''}
+                          onChange={(value) => setWorkForm(prev => ({ ...prev, designation: value }))}
+                          placeholder="Select Designation"
+                          required={true}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">Organisation <span className="text-red-500">*</span></label>
+                        <Input name="organization" value={workForm.organization ?? ''} onChange={handleWorkInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" placeholder="Select Organisation" />
+                      </div>
+                      <div>
+                        <DropdownWithOther
+                          label="Employment Type"
+                          options={getDropdownOptions('employmentTypes')}
+                          value={workForm.employmentType ?? ''}
+                          onChange={(value) => setWorkForm(prev => ({ ...prev, employmentType: value }))}
+                          placeholder="Select Employment Type"
+                          required={true}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                        <div>
+                          <label className="text-xs sm:text-sm font-medium text-gray-700">Start Date <span className="text-red-500">*</span></label>
+                          <Input type="date" name="startDate" value={workForm.startDate ?? ''} onChange={handleWorkInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" />
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
-                          <div><span className="font-medium">Designation:</span> {work.designation}</div>
-                          <div><span className="font-medium">Organization:</span> {work.organization}</div>
-                          <div><span className="font-medium">Duration:</span> {work.startDate} - {work.currentlyWorking ? 'Present' : work.endDate}</div>
-                          <div><span className="font-medium">Type:</span> {work.employmentType}</div>
+                        <div>
+                          <label className="text-xs sm:text-sm font-medium text-gray-700">End Date</label>
+                          <Input type="date" name="endDate" value={workForm.endDate ?? ''} onChange={handleWorkInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" disabled={workForm.currentlyWorking} />
+                        </div>
+                        <div className="flex items-center gap-2 sm:col-span-2">
+                          <input type="checkbox" name="currentlyWorking" checked={workForm.currentlyWorking} onChange={handleWorkInputChange} />
+                          <label className="text-xs sm:text-sm text-gray-700">Currently working in this role</label>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">Location <span className="text-red-500">*</span></label>
+                        <Input name="location" value={workForm.location ?? ''} onChange={handleWorkInputChange} className="mt-1 flex-1 h-10 sm:h-11 text-xs sm:text-sm" placeholder="Select Location" />
+                        <input type="checkbox" name="remote" checked={workForm.remote} onChange={handleWorkInputChange} />
+                        <label className="text-xs sm:text-sm text-gray-700">Remote</label>
+                      </div>
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">Skills</label>
+                        <Input name="skills" value={workForm.skills ?? ''} onChange={handleWorkInputChange} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" placeholder="Add skills" />
+                      </div>
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">Description</label>
+                        <textarea name="description" value={workForm.description ?? ''} onChange={handleWorkInputChange} className="mt-1 w-full h-32 sm:h-40 p-3 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm" placeholder="Describe your role here, detailing the responsibilities you handled, the skills you applied and developed, and the significant experiences you gained during your tenure." />
+                      </div>
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">Attachments</label>
+                        <Input type="file" name="attachments" onChange={e => setWorkForm(prev => ({ ...prev, attachments: e.target.files?.[0] || null }))} className="mt-1 h-10 sm:h-11 text-xs sm:text-sm" />
+                      </div>
+                      <div className="flex justify-end gap-2 mt-4">
+                        <Button type="button" variant="outline" onClick={handleCancelWork}>Cancel</Button>
+                        <Button type="submit" className="bg-blue-600 text-white" variant="default">Save</Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="space-y-4 sm:space-y-6">
+                      {workList.length === 0 ? (
+                        <div className="text-gray-500 text-sm">No work experience added yet.</div>
+                      ) : (
+                        workList.map((work, index) => (
+                          <div key={index} className="border rounded-lg p-4 sm:p-6 bg-gray-50">
+                            <div className="flex justify-between items-start mb-3">
+                              <h4 className="font-semibold text-gray-900">Experience #{index + 1}</h4>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setWorkForm(work);
+                                    setEditingWorkIndex(index);
+                                    setShowWorkForm(true);
+                                  }}
+                                  className="text-xs sm:text-sm"
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteWork(index)}
+                                  className="text-red-600 border-red-300 text-xs sm:text-sm"
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
+                              <div><span className="font-medium">Designation:</span> {work.designation}</div>
+                              <div><span className="font-medium">Organization:</span> {work.organization}</div>
+                              <div><span className="font-medium">Duration:</span> {work.startDate} - {work.currentlyWorking ? 'Present' : work.endDate}</div>
+                              <div><span className="font-medium">Type:</span> {work.employmentType}</div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </>
               )}
 
