@@ -92,7 +92,7 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
           border: "1px solid #b6d4fe",
         }}
       >
-        <h1 className="text-4xl font-extrabold mb-4 sm:mb-6 tracking-tight leading-tight drop-shadow-sm bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-400 bg-clip-text text-transparent mobile-text-4xl">
+        <h1 className="text-4xl font-extrabold mb-4 sm:mb-6 tracking-tight leading-tight drop-shadow-sm bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-400 bg-clip-text text-transparent mobile-text-2xl">
           Empowering Innovation, Globally
         </h1>
         

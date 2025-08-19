@@ -148,7 +148,7 @@ export const WhatWeProvide = () => {
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="mt-2 text-4xl font-bold text-gray-800 leading-tight mobile-text-4xl">
+          <h2 className="mt-2 text-4xl font-bold text-gray-800 leading-tight mobile-text-2xl">
             Empowering Innovation with{" "}
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               Creative Technology
