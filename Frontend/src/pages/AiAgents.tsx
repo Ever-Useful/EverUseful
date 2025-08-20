@@ -18,7 +18,7 @@ const Artificial = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [heroText, setHeroText] = useState('Intelligent AI Agents');
   const agentsRef = useRef<HTMLDivElement>(null);
-  
+
   // Section refs for highlighting
   const sections = {
     intro: useRef<HTMLDivElement>(null),
@@ -188,9 +188,9 @@ const Artificial = () => {
   // Filter agents based on category and search query
   const filteredAgents = agents.filter(agent => {
     const matchesCategory = activeCategory === 'all' || agent.category === activeCategory;
-    const matchesSearch = agent.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         agent.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         agent.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agent.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agent.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
@@ -198,13 +198,13 @@ const Artificial = () => {
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 200;
-      
+
       // Highlight section based on scroll position
       Object.entries(sections).forEach(([key, ref]) => {
         if (ref.current) {
           const sectionTop = ref.current.offsetTop;
           const sectionHeight = ref.current.offsetHeight;
-          
+
           if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
             setActiveTab(Object.keys(sections).indexOf(key));
           }
@@ -213,12 +213,12 @@ const Artificial = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    
+
     // Simulate loading time
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 3500);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
@@ -228,18 +228,18 @@ const Artificial = () => {
   // Typewriter effect for hero text
   useEffect(() => {
     const heroTexts = [
-      'Intelligent AI Agents', 
-      'Adv AI Solutions', 
+      'Intelligent AI Agents',
+      'Adv AI Solutions',
       'Smart AI Technology',
       'Auto AI Systems'
     ];
     let currentIndex = 0;
-    
+
     const interval = setInterval(() => {
       setHeroText(heroTexts[currentIndex]);
       currentIndex = (currentIndex + 1) % heroTexts.length;
     }, 3000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -254,22 +254,22 @@ const Artificial = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-indigo-950 text-white overflow-x-hidden">
       <Header />
-      
+
       {/* Loading Animation */}
       <AnimatePresence>
         {isLoading && (
-          <motion.div 
+          <motion.div
             className="fixed inset-0 bg-gray-950 z-50 flex flex-col items-center justify-center"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8 } }}
           >
             <motion.div
               initial={{ scale: 0.8, rotate: -30 }}
-              animate={{ 
+              animate={{
                 scale: [0.8, 1.2, 1],
                 rotate: [-30, 10, 0],
               }}
-              transition={{ 
+              transition={{
                 duration: 1.5,
                 repeat: Infinity,
                 repeatType: "reverse"
@@ -278,7 +278,7 @@ const Artificial = () => {
             >
               <TbRobot className="text-cyan-400 text-7xl" />
             </motion.div>
-            
+
             {/* Tube light effect */}
             <div className="relative mb-8">
               <motion.div
@@ -291,7 +291,7 @@ const Artificial = () => {
                 AmoghNeuro
               </h1>
             </div>
-            
+
             <div className="w-64 h-1 bg-gray-800 rounded-full overflow-hidden mb-4">
               <motion.div
                 initial={{ width: 0 }}
@@ -300,7 +300,7 @@ const Artificial = () => {
                 className="h-full bg-gradient-to-r from-cyan-500 to-indigo-600"
               />
             </div>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -315,8 +315,8 @@ const Artificial = () => {
                 Initializing neural network
               </motion.span>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="mt-8 text-gray-400 text-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -368,7 +368,7 @@ const Artificial = () => {
           const startY = Math.random() * 100;
           const endX = Math.random() * 100;
           const endY = Math.random() * 100;
-          
+
           return (
             <motion.div
               key={i}
@@ -450,11 +450,10 @@ const Artificial = () => {
             <button
               key={section}
               onClick={() => scrollToSection(sections[section as keyof typeof sections])}
-              className={`w-3 h-3 rounded-full transition-all ${
-                activeTab === index
-                  ? 'bg-cyan-400 scale-150 ring-4 ring-cyan-400/30'
-                  : 'bg-gray-600'
-              }`}
+              className={`w-3 h-3 rounded-full transition-all ${activeTab === index
+                ? 'bg-cyan-400 scale-150 ring-4 ring-cyan-400/30'
+                : 'bg-gray-600'
+                }`}
               aria-label={`Scroll to ${section} section`}
             />
           ))}
@@ -465,7 +464,7 @@ const Artificial = () => {
       <section ref={sections.intro} className="px-4 sm:px-6 md:px-8 relative min-h-[80vh] sm:min-h-[85vh] md:min-h-[90vh] flex items-center py-8 sm:py-12 md:py-16 lg:py-20">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
-        
+
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 items-center">
             <motion.div
@@ -478,7 +477,7 @@ const Artificial = () => {
                 <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-400 mr-1.5 sm:mr-2 animate-pulse"></div>
                 <span className="text-xs sm:text-sm">THE FUTURE OF AI AGENTS IS HERE</span>
               </div>
-              
+
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">
                   Discover, Share & Monetize
@@ -493,8 +492,8 @@ const Artificial = () => {
                   transition={{ duration: 0.5 }}
                 >
                   {heroText.split('').map((char, i) => (
-                    <motion.span 
-                      key={i} 
+                    <motion.span
+                      key={i}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: i * 0.05 }}
@@ -504,34 +503,36 @@ const Artificial = () => {
                   ))}
                 </motion.span>
               </h1>
-              
+
               <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-2xl mx-auto lg:mx-0 mb-4 sm:mb-6 md:mb-8 lg:mb-10">
                 Join the world's leading marketplace for AI solutions. Access cutting-edge agents, contribute your innovations, and transform how businesses operate.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8 md:mb-12 lg:mb-16 justify-center lg:justify-start">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => scrollToSection(sections.marketplace)}
-                  className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20 flex items-center justify-center text-sm sm:text-base"
-                >
-                  <span>Explore Agents</span>
-                  <IoRocketSharp className="ml-1.5 sm:ml-2" />
-                </motion.button>
-                <Link to="/notfound">
+                <div className="flex flex-row gap-2 sm:gap-3 md:gap-4 w-full">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-gray-800/70 border border-gray-700 rounded-xl font-medium hover:bg-gray-700/50 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
+                    onClick={() => scrollToSection(sections.marketplace)}
+                    className="flex-1 w-full px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20 flex items-center justify-center text-sm sm:text-base"
                   >
-                    <span>Publish Agent</span>
-                    <TbHexagon3D className="ml-1.5 sm:ml-2" />
+                    <span>Explore Agents</span>
+                    <IoRocketSharp className="ml-1.5 sm:ml-2" />
                   </motion.button>
-                </Link>
+                  <Link to="/notfound" className="flex-1">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex-1 w-full px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-gray-800/70 border border-gray-700 rounded-xl font-medium hover:bg-gray-700/50 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
+                    >
+                      <span>Publish Agent</span>
+                      <TbHexagon3D className="ml-1.5 sm:ml-2" />
+                    </motion.button>
+                  </Link>
+                </div>
               </div>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -548,7 +549,7 @@ const Artificial = () => {
                     </div>
                     <div className="text-sm text-gray-400">AI Agent Dashboard</div>
                   </div>
-                  
+
                   <div className="bg-gray-900 rounded-xl p-4 mb-4">
                     <div className="flex justify-between items-center mb-2">
                       <div className="text-cyan-400 font-medium">SynthAnalytics Pro</div>
@@ -564,12 +565,12 @@ const Artificial = () => {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="bg-gray-900 rounded-xl p-4">
                       <div className="text-cyan-400 text-sm mb-1">Revenue Forecast</div>
                       <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                        <motion.div 
+                        <motion.div
                           className="h-full bg-cyan-500 rounded-full"
                           initial={{ width: 0 }}
                           animate={{ width: '85%' }}
@@ -580,7 +581,7 @@ const Artificial = () => {
                     <div className="bg-gray-900 rounded-xl p-4">
                       <div className="text-emerald-400 text-sm mb-1">Accuracy</div>
                       <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                        <motion.div 
+                        <motion.div
                           className="h-full bg-emerald-500 rounded-full"
                           initial={{ width: 0 }}
                           animate={{ width: '92%' }}
@@ -589,9 +590,9 @@ const Artificial = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-between">
-                    <div className="text-2xl font-bold">₹149.99</div>
+                    <div className="text-2xl font-bold">$149.99</div>
                     <button className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-sm flex items-center">
                       <FiShoppingCart className="mr-1" />
                       <span>Add to Cart</span>
@@ -599,11 +600,11 @@ const Artificial = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Decorative elements */}
               <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-cyan-500 filter blur-[60px] opacity-30"></div>
               <div className="absolute -bottom-6 -left-6 w-40 h-40 rounded-full bg-indigo-500 filter blur-[80px] opacity-20"></div>
-              
+
               {/* Floating AI elements */}
               <motion.div
                 className="absolute -top-12 left-1/4"
@@ -620,7 +621,7 @@ const Artificial = () => {
                 <TbRobot className="text-purple-400 text-5xl opacity-40" />
               </motion.div>
             </motion.div>
-            
+
             {/* Mobile Dashboard Preview */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -638,7 +639,7 @@ const Artificial = () => {
                     </div>
                     <div className="text-xs text-gray-400">AI Agent Dashboard</div>
                   </div>
-                  
+
                   <div className="bg-gray-900 rounded-lg p-2.5 sm:p-3 mb-2.5 sm:mb-3">
                     <div className="flex justify-between items-center mb-1.5 sm:mb-2">
                       <div className="text-cyan-400 font-medium text-xs sm:text-sm">SynthAnalytics Pro</div>
@@ -654,12 +655,12 @@ const Artificial = () => {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2.5 sm:mb-3">
                     <div className="bg-gray-900 rounded-lg p-2 sm:p-3">
                       <div className="text-cyan-400 text-xs mb-1">Revenue Forecast</div>
                       <div className="h-1 sm:h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                        <motion.div 
+                        <motion.div
                           className="h-full bg-cyan-500 rounded-full"
                           initial={{ width: 0 }}
                           animate={{ width: '85%' }}
@@ -670,7 +671,7 @@ const Artificial = () => {
                     <div className="bg-gray-900 rounded-lg p-2 sm:p-3">
                       <div className="text-emerald-400 text-xs mb-1">Accuracy</div>
                       <div className="h-1 sm:h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                        <motion.div 
+                        <motion.div
                           className="h-full bg-emerald-500 rounded-full"
                           initial={{ width: 0 }}
                           animate={{ width: '92%' }}
@@ -679,9 +680,9 @@ const Artificial = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
-                    <div className="text-base sm:text-lg font-bold">₹149.99</div>
+                    <div className="text-base sm:text-lg font-bold">$149.99</div>
                     <button className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-xs flex items-center">
                       <FiShoppingCart className="mr-1 w-2.5 sm:w-3 h-2.5 sm:h-3" />
                       <span>Add to Cart</span>
@@ -698,10 +699,10 @@ const Artificial = () => {
       <section ref={sections.whatIs} className="py-12 sm:py-16 md:py-20 px-4 md:px-8 relative">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
-        
+
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -709,37 +710,65 @@ const Artificial = () => {
             >
               What are <span className="text-cyan-400">AI Agents</span>?
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
               className="text-gray-400 max-w-3xl mx-auto text-sm sm:text-base"
             >
-              AI agents are autonomous systems that perceive their environment, make decisions, and take actions to achieve specific goals. 
+              AI agents are autonomous systems that perceive their environment, make decisions, and take actions to achieve specific goals.
               They combine machine learning, reasoning, and problem-solving capabilities to perform complex tasks.
             </motion.p>
           </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {aiApplications.map((app, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
-                className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6 hover:border-cyan-500/30 transition-all duration-500 group"
-              >
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 flex items-center justify-center mb-6 group-hover:bg-gradient-to-br group-hover:from-cyan-600/30 group-hover:to-indigo-600/30">
-                  {app.icon}
+
+          <div className="relative">
+            <div className="relative">
+              {/* Mobile horizontal scroll container (no scrollbar) */}
+              <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
+                <div className="inline-flex gap-4 w-max min-w-full">
+                  {aiApplications.map((app, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ y: -10 }}
+                      className="w-[280px] flex-shrink-0 bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 hover:border-cyan-500/30 transition-all duration-500 group"
+                    >
+                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 flex items-center justify-center mb-6 group-hover:bg-gradient-to-br group-hover:from-cyan-600/30 group-hover:to-indigo-600/30">
+                        {app.icon}
+                      </div>
+                      <h4 className="text-xl font-bold mb-3 group-hover:text-cyan-300 transition-colors">{app.title}</h4>
+                      <p className="text-gray-300 text-base">{app.description}</p>
+                    </motion.div>
+                  ))}
                 </div>
-                <h4 className="text-xl font-bold mb-3 group-hover:text-cyan-300 transition-colors">{app.title}</h4>
-                <p className="text-gray-300 text-base">{app.description}</p>
-              </motion.div>
-            ))}
-          </div>  
+              </div>
+
+              {/* Desktop grid layout (hidden on mobile) */}
+              <div className="hidden lg:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                {aiApplications.map((app, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ y: -10 }}
+                    className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6 hover:border-cyan-500/30 transition-all duration-500 group"
+                  >
+                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 flex items-center justify-center mb-6 group-hover:bg-gradient-to-br group-hover:from-cyan-600/30 group-hover:to-indigo-600/30">
+                      {app.icon}
+                    </div>
+                    <h4 className="text-xl font-bold mb-3 group-hover:text-cyan-300 transition-colors">{app.title}</h4>
+                    <p className="text-gray-300 text-base">{app.description}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -747,70 +776,37 @@ const Artificial = () => {
       <section ref={sections.marketplace} className="py-12 sm:py-16 md:py-20 px-4 md:px-8 relative">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
-        
+
         <div className="max-w-7xl mx-auto relative">
           {/* Blur overlay for the entire marketplace section */}
           <div className="absolute inset-0 backdrop-blur-md bg-gray-900/20 rounded-3xl z-10"></div>
-          
+
           {/* Coming Soon Poster */}
-          <div className="absolute inset-0 z-20 flex items-center justify-center">
-                          <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 border-2 border-cyan-500/30 rounded-3xl p-6 sm:p-8 md:p-12 backdrop-blur-sm shadow-2xl shadow-cyan-500/20 max-w-2xl mx-auto text-center"
-              >
-                {/* Animated icon */}
-                <motion.div
-                  animate={{ 
-                    rotate: [0, 10, -10, 0],
-                    scale: [1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="mb-6 sm:mb-8"
-                >
-                  <TbRobot className="text-4xl sm:text-5xl md:text-6xl text-cyan-400 mx-auto" />
-                </motion.div>
-                
-                {/* Coming Soon Badge */}
-                <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 mb-4 sm:mb-6">
-                  <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></div>
-                  <span className="text-xs sm:text-sm font-medium text-cyan-300">COMING SOON</span>
-                </div>
-                
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">
-                  AI Agents Marketplace
-                </h2>
-                
-                <p className="text-gray-300 text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed">
-                  We're building the most advanced marketplace for AI agents. Get ready to discover, 
-                  deploy, and monetize cutting-edge AI solutions that will transform your business.
-                </p>
-              
-              {/* Features preview */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
-                  <div className="text-cyan-400 text-xl sm:text-2xl mb-2">🚀</div>
-                  <h3 className="text-base sm:text-lg font-bold mb-1">Deploy Instantly</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">One-click deployment to your infrastructure</p>
-                </div>
-                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
-                  <div className="text-emerald-400 text-xl sm:text-2xl mb-2">💰</div>
-                  <h3 className="text-base sm:text-lg font-bold mb-1">Monetize</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">Earn revenue from your AI creations</p>
-                </div>
-                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
-                  <div className="text-purple-400 text-xl sm:text-2xl mb-2">🔗</div>
-                  <h3 className="text-base sm:text-lg font-bold mb-1">Integrate</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">Seamless API integration</p>
-                </div>
+          <div className=" inset-0 relative z-20 flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 border-2 border-cyan-500/30 rounded-3xl p-6 sm:p-8 md:p-12 backdrop-blur-sm shadow-2xl shadow-cyan-500/20 max-w-2xl mx-auto text-center"
+            >
+              {/* Animated icon */}
+
+              {/* Coming Soon Badge */}
+              <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 mb-4 sm:mb-6">
+                <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></div>
+                <span className="text-xs sm:text-sm font-medium text-cyan-300">COMING SOON</span>
               </div>
-              
+
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">
+                AI Agents Marketplace
+              </h2>
+
+              <p className="text-gray-300 text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed">
+                We're building the most advanced marketplace for AI agents. Get ready to discover,
+                deploy, and monetize cutting-edge AI solutions that will transform your business.
+              </p>
+
               {/* Notification signup */}
               <div className="bg-gray-800/30 rounded-2xl p-4 sm:p-6 border border-gray-700">
                 <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">Get Early Access</h3>
@@ -833,9 +829,9 @@ const Artificial = () => {
                   </motion.button>
                 </div>
               </div>
-              
+
               {/* Progress indicator */}
-              <div className="mt-6 sm:mt-8">
+              {/* <div className="mt-6 sm:mt-8">
                 <div className="flex justify-between text-xs sm:text-sm text-gray-400 mb-2">
                   <span>Development Progress</span>
                   <span>85%</span>
@@ -849,205 +845,12 @@ const Artificial = () => {
                     transition={{ duration: 2, ease: "easeOut" }}
                   />
                 </div>
-              </div>
+              </div> */}
             </motion.div>
           </div>
-          
+
           {/* Blurred content underneath */}
           <div className="opacity-30 pointer-events-none">
-            <div className="text-center mb-16">
-              <motion.h2 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-3xl md:text-4xl font-bold mb-4"
-              >
-                Explore <span className="text-cyan-400">AI Agents</span>
-              </motion.h2>
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="text-gray-400 max-w-2xl mx-auto text-base"
-              >
-                Discover powerful AI solutions created by developers worldwide. Deploy in minutes to enhance your workflows.
-              </motion.p>
-            </div>
-            
-            {/* Category Filter */}
-            <motion.div 
-              className="flex flex-wrap justify-center gap-4 mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  className="px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-300 text-base bg-gray-800/50 border border-gray-700"
-                >
-                  {category.icon && <span>{category.icon}</span>}
-                  <span>{category.name}</span>
-                </button>
-              ))}
-            </motion.div>
-            
-            {/* Search */}
-            <motion.div 
-              className="max-w-2xl mx-auto mb-16"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500">
-                  <FiSearch />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search for agents, capabilities, or industries..."
-                  className="w-full pl-12 pr-4 py-4 text-base bg-gray-800/50 border border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                  disabled
-                />
-              </div>
-            </motion.div>
-            
-            {/* Desktop Agents Grid */}
-            <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredAgents.map((agent) => (
-                <motion.div
-                  key={agent.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl overflow-hidden"
-                >
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold">{agent.name}</h3>
-                        <p className="text-gray-400 text-xs">by {agent.creator}</p>
-                      </div>
-                      <div className="bg-indigo-500/10 px-3 py-1 rounded-full text-xs flex items-center">
-                        <span>${agent.price}</span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-gray-300 text-sm mb-6 h-16">{agent.description}</p>
-                    
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {agent.tags.map((tag, i) => (
-                        <span 
-                          key={i} 
-                          className="px-3 py-1 bg-gray-800/50 text-xs rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="flex text-yellow-400">
-                          {[...Array(5)].map((_, i) => (
-                            <FiStar 
-                              key={i} 
-                              className={`${i < Math.floor(agent.rating) ? 'fill-current' : ''}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="ml-2 text-sm">{agent.rating}</span>
-                      </div>
-                      <div className="text-sm text-gray-400 flex items-center">
-                        <FiTrendingUp className="mr-1" />
-                        <span>{agent.sales} sales</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="px-6 py-4 bg-gray-800/50 border-t border-gray-700 flex justify-between">
-                    <button className="text-sm text-cyan-400">
-                      View Details
-                    </button>
-                    <button className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-sm flex items-center">
-                      <FiShoppingCart className="mr-2" />
-                      <span>Add to Cart</span>
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Mobile Horizontal Scroll */}
-            <div className="md:hidden">
-              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
-                {filteredAgents.map((agent) => (
-                  <motion.div
-                    key={agent.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="flex-shrink-0 snap-start w-[85vw] max-w-[320px] bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl overflow-hidden"
-                  >
-                    <div className="p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h3 className="text-lg font-bold">{agent.name}</h3>
-                          <p className="text-gray-400 text-xs">by {agent.creator}</p>
-                        </div>
-                        <div className="bg-indigo-500/10 px-2 py-1 rounded-full text-xs flex items-center">
-                          <span>${agent.price}</span>
-                        </div>
-                      </div>
-                      
-                      <p className="text-gray-300 text-sm mb-4 h-12">{agent.description}</p>
-                      
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {agent.tags.map((tag, i) => (
-                          <span 
-                            key={i} 
-                            className="px-2 py-1 bg-gray-800/50 text-xs rounded-full"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                          <div className="flex text-yellow-400">
-                            {[...Array(5)].map((_, i) => (
-                              <FiStar 
-                                key={i} 
-                                className={`w-3 h-3 ${i < Math.floor(agent.rating) ? 'fill-current' : ''}`}
-                              />
-                            ))}
-                          </div>
-                          <span className="ml-1 text-xs">{agent.rating}</span>
-                        </div>
-                        <div className="text-xs text-gray-400 flex items-center">
-                          <FiTrendingUp className="mr-1 w-3 h-3" />
-                          <span>{agent.sales} sales</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="px-4 py-3 bg-gray-800/50 border-t border-gray-700 flex justify-between">
-                      <button className="text-xs text-cyan-400">
-                        View Details
-                      </button>
-                      <button className="px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-lg text-xs flex items-center">
-                        <FiShoppingCart className="mr-1 w-3 h-3" />
-                        <span>Add to Cart</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -1056,10 +859,10 @@ const Artificial = () => {
       <section ref={sections.benefits} className="py-12 sm:py-16 md:py-20 px-4 md:px-8 relative">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
-        
+
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -1067,7 +870,7 @@ const Artificial = () => {
             >
               How <span className="text-emerald-400">AI Agents</span> Transform Industries
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -1077,34 +880,34 @@ const Artificial = () => {
               Discover the tangible benefits of integrating AI agents into your operations
             </motion.p>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-12 sm:mb-16">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 sm:p-8"
+              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 sm:p-12"
             >
-              <h3 className="text-2xl font-bold mb-4 text-cyan-400">Real-World Impact</h3>
-              <p className="text-gray-300 mb-6 text-base">
-                AI agents are revolutionizing industries by automating complex processes, enhancing decision-making, 
-                and enabling innovation at unprecedented scales. From healthcare diagnostics to financial forecasting, 
+              <h3 className="text-2xl font-bold mb-4 text-cyan-400 mobile-text-xl">Real-World Impact</h3>
+              <p className="text-gray-300 mb-6 text-base mobile-text-base">
+                AI agents are revolutionizing industries by automating complex processes, enhancing decision-making,
+                and enabling innovation at unprecedented scales. From healthcare diagnostics to financial forecasting,
                 AI agents are driving efficiency and creating new possibilities.
               </p>
-              
+
               {/* Arrow graph */}
               <div className="mt-8">
                 <div className="flex items-end h-32 gap-4 mb-4">
                   {[30, 65, 85, 92].map((height, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center">
-                      <motion.div 
+                      <motion.div
                         className="w-full bg-gradient-to-t from-cyan-500 to-cyan-700 rounded-t-md"
                         initial={{ height: 0 }}
                         whileInView={{ height: `${height}%` }}
                         viewport={{ once: true }}
                         transition={{ duration: 1, delay: i * 0.2 }}
                       />
-                      <div className="text-xs mt-2 text-gray-400">Q{i+1}</div>
+                      <div className="text-xs mt-2 text-gray-400">Q{i + 1}</div>
                     </div>
                   ))}
                 </div>
@@ -1113,7 +916,7 @@ const Artificial = () => {
                 </div>
               </div>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -1127,20 +930,20 @@ const Artificial = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6"
+                  className="bg-gradient-to-b from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6 flex flex-col h-full"
                 >
-                  <div className="flex items-start mb-3">
-                    <div className="text-cyan-400 text-2xl font-bold mr-3">0{i+1}</div>
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">{benefit.title}</h3>
-                      <p className="text-gray-300 text-base">{benefit.description}</p>
+                  <div className="flex items-start mb-3 flex-grow">
+                    <div className="text-cyan-400 text-2xl font-bold mr-3 mobile-text-lg">0{i + 1}</div>
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold mb-2 mobile-text-lg">{benefit.title}</h3>
+                      <p className="text-gray-300 text-base mobile-text-base">{benefit.description}</p>
                     </div>
                   </div>
-                  
-                  {/* Mini arrow indicator */}
-                  <div className="flex items-center mt-4">
+
+                  {/* Mini arrow indicator - fixed at bottom */}
+                  <div className="flex items-center mt-auto pt-4">
                     <div className="h-0.5 bg-gray-600 flex-1 mr-2">
-                      <motion.div 
+                      <motion.div
                         className="h-0.5 bg-cyan-500"
                         initial={{ width: 0 }}
                         whileInView={{ width: "100%" }}
@@ -1154,7 +957,7 @@ const Artificial = () => {
               ))}
             </motion.div>
           </div>
-          
+
           {/* <motion.div 
             className="bg-gradient-to-br from-cyan-900/20 to-indigo-900/20 border border-cyan-500/30 rounded-2xl p-8"
             initial={{ opacity: 0, y: 30 }}
@@ -1208,28 +1011,28 @@ const Artificial = () => {
       <section ref={sections.research} className="py-12 sm:py-16 md:py-20 px-4 md:px-8 relative">
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
-        
+
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 leading-tight sm:leading-normal"
             >
               AI <span className="text-emerald-400">Research</span> & Innovation
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base"
+              className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base leading-4 sm:leading-normal"
             >
               Stay at the forefront of artificial intelligence advancements
             </motion.p>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-12 sm:mb-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -1237,21 +1040,21 @@ const Artificial = () => {
               viewport={{ once: true }}
               className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 sm:p-8"
             >
-              <h3 className="text-2xl font-bold mb-6">Latest Research</h3>
-              <div className="space-y-6">
+              <h3 className="text-2xl font-bold mb-6 mobile-text-xl leading-3 sm:leading-normal">Latest Research</h3>
+              <div className="space-y-4">
                 {researchNews.map((news) => (
                   <div key={news.id} className="pb-6 border-b border-gray-700 last:border-0 last:pb-0">
                     <div className="flex justify-between items-start mb-3">
-                      <h4 className="text-lg font-bold hover:text-cyan-300 cursor-pointer">{news.title}</h4>
+                      <h4 className="text-lg font-bold hover:text-cyan-300 cursor-pointer mobile-text-lg leading-2 sm:leading-normal">{news.title}</h4>
                       {news.trending && (
-                        <span className="px-2 py-1 bg-emerald-900/30 text-emerald-400 text-xs rounded-full flex items-center">
+                        <span className="px-2 py-1 bg-emerald-900/30 text-emerald-400 text-xs rounded-full flex items-center mobile-text-sm leading-2">
                           <FiTrendingUp className="mr-1" />
                           Trending
                         </span>
                       )}
                     </div>
-                    <p className="text-gray-300 mb-3">{news.excerpt}</p>
-                    <div className="flex justify-between text-sm">
+                    <p className="text-gray-300 mb-3 mobile-text-base leading-3 sm:leading-normal">{news.excerpt}</p>
+                    <div className="flex justify-between text-sm mobile-text-sm leading-2">
                       <span className="text-gray-500">{news.source}</span>
                       <span className="text-gray-500">{news.date}</span>
                     </div>
@@ -1259,61 +1062,61 @@ const Artificial = () => {
                 ))}
               </div>
             </motion.div>
-            
+
             <div>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 }}
-                className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-8 mb-8"
+                className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 sm:p-8 mb-8"
               >
-                <h3 className="text-2xl font-bold mb-6">Research Spotlight</h3>
-                <div className="bg-gray-900/30 rounded-xl p-6 mb-6 border border-gray-700">
-                  <div className="text-emerald-400 text-sm mb-2">Featured Paper</div>
-                  <h4 className="text-xl font-bold mb-3">Multi-Agent Reinforcement Learning in Complex Environments</h4>
-                  <p className="text-gray-300 mb-4">
+                <h3 className="text-2xl font-bold mb-6 leading-6 sm:leading-normal">Research Spotlight</h3>
+                <div>
+                  <div className="text-emerald-400 text-sm mb-2 leading-4 mobile-text-sm">Featured Paper</div>
+                  <h4 className="text-xl font-bold mb-3 leading-5 sm:leading-normal mobile-text-lg">Multi-Agent Reinforcement Learning in Complex Environments</h4>
+                  <p className="text-gray-300 mb-4 leading-4 sm:leading-normal mobile-text-base">
                     This groundbreaking research demonstrates how AI agents can collaborate to solve problems previously thought impossible for artificial intelligence.
                   </p>
-                  <div className="flex items-center text-cyan-400">
+                  <div className="flex items-center text-cyan-400 leading-2  mobile-text-base">
                     <span>Read Full Paper</span>
                     <FiArrowRight className="ml-2" />
                   </div>
                 </div>
-                <div className="flex">
+                <div className="flex mt-6">
                   <div className="flex-1 pr-4 border-r border-gray-700">
-                    <div className="text-lg font-bold text-cyan-400">92%</div>
-                    <div className="text-sm text-gray-400">Accuracy Improvement</div>
+                    <div className="text-lg font-bold text-cyan-400 leading-3 mobile-text-base">92%</div>
+                    <div className="text-sm text-gray-400 leading-2 mobile-text-sm">Accuracy Improvement</div>
                   </div>
                   <div className="flex-1 px-4 border-r border-gray-700">
-                    <div className="text-lg font-bold text-emerald-400">40%</div>
-                    <div className="text-sm text-gray-400">Faster Training</div>
+                    <div className="text-lg font-bold text-emerald-400 leading-3  mobile-text-base">40%</div>
+                    <div className="text-sm text-gray-400 leading-2 mobile-text-sm">Faster Training</div>
                   </div>
                   <div className="flex-1 pl-4">
-                    <div className="text-lg font-bold text-purple-400">15x</div>
-                    <div className="text-sm text-gray-400">Scalability</div>
+                    <div className="text-lg font-bold text-purple-400 leading-3 mobile-text-base">15x</div>
+                    <div className="text-sm text-gray-400 leading-2 mobile-text-sm">Scalability</div>
                   </div>
                 </div>
               </motion.div>
-              
+
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-8"
+                className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 sm:p-8"
               >
-                <h3 className="text-2xl font-bold mb-6">Upcoming Events</h3>
+                <h3 className="text-2xl font-bold mb-6 leading-6 sm:leading-normal">Upcoming Events</h3>
                 <div className="space-y-4">
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="flex items-start pb-4 border-b border-gray-700 last:border-0 last:pb-0">
                       <div className="bg-cyan-900/20 border border-cyan-500/30 rounded-lg px-3 py-2 mr-4">
-                        <div className="text-center text-cyan-400 font-bold">JUN</div>
-                        <div className="text-center text-xl font-bold">2{i+2}</div>
+                        <div className="text-center text-cyan-400 font-bold leading-4">JUN</div>
+                        <div className="text-center text-xl font-bold leading-6">2{i + 2}</div>
                       </div>
                       <div>
-                        <h4 className="font-bold mb-1">Global AI Agent Summit 2025</h4>
-                        <p className="text-gray-400 text-sm">Virtual Conference · 10:00 AM EST</p>
+                        <h4 className="font-bold mb-1 leading-5 sm:leading-normal">Global AI Agent Summit 2025</h4>
+                        <p className="text-gray-400 text-sm leading-4">Virtual Conference · 10:00 AM EST</p>
                       </div>
                     </div>
                   ))}
@@ -1321,8 +1124,8 @@ const Artificial = () => {
               </motion.div>
             </div>
           </div>
-          
-          <motion.div 
+
+          <motion.div
             className="text-center"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1330,7 +1133,7 @@ const Artificial = () => {
             transition={{ delay: 0.3 }}
           >
             <Link to="/notfound">
-              <button className="px-8 py-4 border border-gray-700 rounded-xl font-medium hover:bg-gray-800/50 transition-all duration-300 inline-flex items-center">
+              <button className="px-8 py-4 border border-gray-700 rounded-xl font-medium hover:bg-gray-800/50 transition-all duration-300 inline-flex items-center leading-4 sm:leading-normal">
                 <span>View Research Portal</span>
                 <FiArrowRight className="ml-2" />
               </button>
@@ -1345,11 +1148,11 @@ const Artificial = () => {
           <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/70 border border-gray-700 rounded-3xl p-6 sm:p-8 md:p-12 backdrop-blur-sm relative overflow-hidden">
             {/* Tube light effect */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
-            
+
             {/* Decorative elements */}
             <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-cyan-500 filter blur-[100px] opacity-10"></div>
             <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-indigo-500 filter blur-[100px] opacity-10"></div>
-            
+
             <div className="relative z-10 text-center">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -1365,7 +1168,7 @@ const Artificial = () => {
               <p className="text-gray-300 max-w-2xl mx-auto mb-6 sm:mb-10 text-sm sm:text-base">
                 Join thousands of developers and businesses leveraging AI agents to automate complex tasks and drive innovation.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                 <Link to="/signup">
                   <motion.button
@@ -1376,7 +1179,7 @@ const Artificial = () => {
                     Get Started Today
                   </motion.button>
                 </Link>
-                
+
                 <Link to="/notfound">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -1392,8 +1195,8 @@ const Artificial = () => {
         </div>
       </section>
 
-      <Footer/>
-      
+      <Footer />
+
       {/* Scoped CSS for mobile horizontal scroll */}
       <style>{`
         /* Hide scrollbar for horizontal scroll on mobile */
