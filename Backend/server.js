@@ -8,12 +8,14 @@ const userService = require('./services/userService');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
 const s3Routes = require('./routes/s3');
+const s3Service = require('./services/s3Service');
 
 const app = express();
 
 app.use(cors({
   origin: [
     'https://amoghconnect.com',
+    'https://www.amoghconnect.com',
     'http://localhost:8080',
     'http://localhost:3000',
     // 'https://www.amoghconnect.com', // Uncomment if you use www subdomain
@@ -66,7 +68,7 @@ app.get('/token', authorize, async (req, res) => {
       }
 
       // Create user in DynamoDB
-      await userService.createUser(uid, {
+      user = await userService.createUser(uid, {
         firstName: firstName,
         lastName: lastName,
         email: email ?? 'no-email@example.com',
@@ -81,6 +83,15 @@ app.get('/token', authorize, async (req, res) => {
         email: email,
         phoneNumber: phone_number
       });
+    }
+
+    // Ensure S3 folder structure exists (idempotent)
+    if (user && user.customUserId) {
+      try {
+        await s3Service.createUserFolder(user.customUserId);
+      } catch (e) {
+        console.error('Failed to ensure S3 folder for user:', e.message);
+      }
     }
 
     return res.json({ redirectUrl: '/profile' });
@@ -120,7 +131,7 @@ app.post('/token', authorize, async (req, res) => {
       }
 
       // Create user in DynamoDB with all provided data
-      await userService.createUser(uid, {
+      user = await userService.createUser(uid, {
         firstName: resolvedFirstName ?? '',
         lastName: resolvedLastName ?? '',
         email: email ?? 'no-email@example.com',
@@ -140,7 +151,6 @@ app.post('/token', authorize, async (req, res) => {
     } else {
       // Update existing user's profile if provided
       const updateFields = {};
-      if (userType) updateFields.userType = userType;
       if (firstName) updateFields.firstName = firstName;
       if (lastName) updateFields.lastName = lastName;
       if (phoneNumber) updateFields.phoneNumber = phoneNumber;
@@ -148,6 +158,15 @@ app.post('/token', authorize, async (req, res) => {
       if (Object.keys(updateFields).length > 0) {
         await userService.updateUserProfile(user.customUserId, updateFields);
         console.log('Existing user updated with fields:', updateFields);
+      }
+    }
+
+    // Ensure S3 folder structure exists (idempotent)
+    if (user && user.customUserId) {
+      try {
+        await s3Service.createUserFolder(user.customUserId);
+      } catch (e) {
+        console.error('Failed to ensure S3 folder for user:', e.message);
       }
     }
 

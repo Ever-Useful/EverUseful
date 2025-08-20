@@ -130,12 +130,12 @@ router.post('/upload-profile-image', authorize, upload.single('image'), async (r
     const imageUrls = await s3Service.uploadProfileImage(file, user.customUserId, type);
     console.log('S3 upload successful:', imageUrls);
     
-    // Update user profile with new image URL
+    // Update user profile with full public URL
     const updateData = {};
     if (type === 'avatar') {
-      updateData.avatar = imageUrls.medium.url; // Use medium size for avatar
+      updateData.avatar = (imageUrls.large && imageUrls.large.url) || imageUrls.medium.url;
     } else if (type === 'background') {
-      updateData.backgroundImage = imageUrls.large.url; // Use large size for background
+      updateData.backgroundImage = (imageUrls.large && imageUrls.large.url) || imageUrls.medium.url;
     }
 
     console.log('Updating user profile with:', updateData);
