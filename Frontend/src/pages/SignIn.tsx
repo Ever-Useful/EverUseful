@@ -341,7 +341,7 @@ const SignIn = () => {
           <div className="order-2 lg:order-1 w-full">
             <Card className="backdrop-blur-xl bg-white/90 border-0 shadow-2xl animate-scale-in delay-300">
               <CardHeader className="text-center pb-4 xs:pb-6">
-                <CardTitle className="text-lg xs:text-xl lg:text-2xl font-bold text-gray-900">
+                <CardTitle className="font-bold text-gray-900">
                   {showForgotPassword ? "Reset Password" : "Sign In"}
                 </CardTitle>
                 <CardDescription className="text-xs xs:text-sm lg:text-base text-gray-600">

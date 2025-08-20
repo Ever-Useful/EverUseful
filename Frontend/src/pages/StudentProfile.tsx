@@ -289,6 +289,7 @@ const Profile = () => {
             <Card className="bg-white shadow-lg rounded-xl lg:hidden">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
+
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
                     <span className="bg-indigo-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <Star className="w-5 h-5 text-indigo-600" />
@@ -315,11 +316,12 @@ const Profile = () => {
               <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-2 sm:mb-4">
                   <h2 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+
                     <span className="bg-purple-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <GraduationCap className="w-5 h-5 text-purple-600" />
                     </span>
                     About
-                  </h2>
+                  </h3>
                 </div>
                 <div>
                   <p className="text-gray-700 leading-relaxed text-xs sm:text-base">{displayedText}</p>
@@ -336,12 +338,14 @@ const Profile = () => {
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
+
                     <h2 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+
                       <span className="bg-blue-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <BookOpen className="w-5 h-5 text-blue-600" />
                       </span>
                       Academic Background
-                    </h2>
+                    </h3>
                   </div>
                   <div className="space-y-3 sm:space-y-6">
                     {education.map((edu, idx) => (
@@ -364,12 +368,14 @@ const Profile = () => {
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
+
                     <h2 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+
                       <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <Briefcase className="w-5 h-5 text-green-600" />
                       </span>
                       Work Experience
-                    </h2>
+                    </h3>
                   </div>
                   <div className="space-y-3 sm:space-y-6">
                     {workExperience.map((work, idx) => (
@@ -390,6 +396,7 @@ const Profile = () => {
             {/* Portfolio Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
+
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h2 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
                     <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
@@ -400,6 +407,7 @@ const Profile = () => {
                   </h2>
                 </div>
                 <div className="space-y-2 sm:space-y-4">
+
                   {safePortfolioProjects.length > 0 ? (
                     safePortfolioProjects.map((project, index) => (
                       <Card

@@ -209,7 +209,7 @@ const FindExpert = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <h1 className="text-4xl font-bold mb-4 xs:mb-6 leading-tight mobile-text-4xl">
+                <h1 className="heading-section mb-4 xs:mb-6 leading-tight">
                   Connect with <span className="text-amber-400">PhD Experts</span> for Research & Mentorship
                 </h1>
                 <p className="text-base text-indigo-100 mb-5 xs:mb-8 max-w-xl mobile-text-base">

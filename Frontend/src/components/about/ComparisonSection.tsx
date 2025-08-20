@@ -84,7 +84,7 @@ const ComparisonSection = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16 animate-fade-in">
           <Star className="w-8 h-8 text-yellow-500 mx-auto mb-4 animate-spin" />
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          <h2 className="heading-section font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
             Why Choose Amogh?
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">Experience the future of collaborative innovation</p>

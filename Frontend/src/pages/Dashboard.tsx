@@ -771,8 +771,10 @@ const Dashboard = () => {
             <div className="max-w-7xl mx-auto space-y-6 sm:space-y-10 pt-6 sm:pt-8 px-4 sm:px-6"> {/* Add horizontal padding */}
               <div className="flex justify-between items-center mb-4 sm:mb-6">
                 <div>
+
                           <h1 className="text-2xl sm:text-4xl font-extrabold text-gradient-emerald mb-1 sm:mb-2">Dashboard</h1>
         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Plan, prioritize, and accomplish your tasks with ease.</p>
+
                 </div>
                 <div className="hidden sm:flex items-center gap-3">
                   {/* Mobile menu button */}
@@ -811,7 +813,7 @@ const Dashboard = () => {
                 {/* Earnings Card */}
                 <Card className="h-64 sm:h-80 glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
                   <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-olive-dark">Earnings</CardTitle>
+                    <CardTitle className="font-bold text-olive-dark">Earnings</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {(!earningsData || earningsData.length === 0 || earningsData.every(e => !e.value || e.value === 0)) ? (
@@ -843,7 +845,7 @@ const Dashboard = () => {
                 {/* Project Status Card (Pie Chart) */}
                 <Card className="h-64 sm:h-80 bg-[#10b981] border-0 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:bg-[#059669] cursor-pointer rounded-xl flex flex-col items-center justify-center">
                   <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-white">Project Status</CardTitle>
+                    <CardTitle className="font-bold text-white">Project Status</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {userStats.projectsPosted > 0 ? (
@@ -865,7 +867,7 @@ const Dashboard = () => {
                 {/* Recent Activity Card */}
                 <Card className="h-64 sm:h-80 glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
                   <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-olive-dark">Recent Activity</CardTitle>
+                    <CardTitle className="font-bold text-olive-dark">Recent Activity</CardTitle>
                   </CardHeader>
                   <CardContent className="h-48 overflow-hidden"> {/* Fixed height container */}
                     <div className="bg-mint-light dark:bg-olive-dark p-4 rounded-lg h-full overflow-y-auto"> {/* Scrollable content */}
@@ -891,7 +893,9 @@ const Dashboard = () => {
               {/* Line Graph */}
               <Card className="glass-effect shadow-lg border-0 transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer bg-white dark:bg-gray-800">
                 <CardHeader>
+
                   <CardTitle className="text-xl sm:text-2xl font-bold text-olive-dark">Performance Overview</CardTitle>
+
                 </CardHeader>
                 <CardContent className="pt-2 sm:pt-4">
                   <ResponsiveContainer width="100%" height={260}>

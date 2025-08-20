@@ -605,6 +605,7 @@ const Profile = () => {
 
             {/* About Section - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
+
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
                   <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
@@ -615,6 +616,7 @@ const Profile = () => {
                   </h2>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('About'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
                     <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
+
                   </Button>
                 </div>
                 <div>
@@ -630,6 +632,7 @@ const Profile = () => {
 
             {/* Academic Background - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
+
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
@@ -639,7 +642,7 @@ const Profile = () => {
                     Education
                   </h2>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('Education'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
-                    <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
+
                   </Button>
                 </div>
                 <div className="space-y-4 sm:space-y-6">
@@ -664,6 +667,7 @@ const Profile = () => {
 
             {/* Work Experience Section - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
+
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
@@ -674,6 +678,7 @@ const Profile = () => {
                   </h2>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('Work Experience'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
                     <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
+
                   </Button>
                 </div>
                 <div className="space-y-4 sm:space-y-6">
@@ -698,6 +703,7 @@ const Profile = () => {
 
             {/* Portfolio Section - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
+
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
@@ -706,6 +712,7 @@ const Profile = () => {
                     </span>
                     Projects
                   </h2>
+
                   <Button
                     variant="ghost"
                     size="sm"
