@@ -38,6 +38,7 @@ const Sustainable = React.lazy(() => import("@/pages/Sustainable"));
 const AiAgents = React.lazy(() => import("@/pages/AiAgents"));
 const Admin = React.lazy(() => import("@/pages/Admin"));
 const NotFound = React.lazy(() => import("@/pages/NotFound"));
+const CampusAmbassadorPage = React.lazy(() => import("@/pages/CampusAmbassadorPage"));
 
 // Policy pages
 const PrivacyPolicy = React.lazy(() => import("@/pages/Policy/PrivacyPolicy"));
@@ -275,6 +276,12 @@ const App = () => (
             <Route path="/sendfeedback" element={
               <Suspense fallback={<PageLoader />}>
                 <SendFeedback />
+              </Suspense>
+            } />
+            
+            <Route path="/campus-ambassador" element={
+              <Suspense fallback={<PageLoader />}>
+                <CampusAmbassadorPage />
               </Suspense>
             } />
             
