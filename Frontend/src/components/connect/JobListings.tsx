@@ -94,7 +94,7 @@ const JobListings = () => {
   };
 
   return (
-    
+    <>
       <section id="job-listings" className="py-6 md:py-8 lg:py-10" style={{ backgroundColor: '#5A6B3F' }}>
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-6 md:mb-8 lg:mb-10">
