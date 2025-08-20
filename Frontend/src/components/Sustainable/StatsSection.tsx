@@ -39,7 +39,7 @@ export const StatsSection = () => {
               <p className="text-xs sm:text-sm font-semibold text-emerald-300 uppercase tracking-wide mb-2">
                 LAUNCHING THIS WINTER 2025
               </p>
-              <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4 lg:mb-6 leading-tight">
+              <h2 className="heading-section font-bold text-white mb-3 sm:mb-4 lg:mb-6 leading-tight">
                 Revolutionary Sustainable Solutions Worldwide
               </h2>
               <p className="text-sm sm:text-base lg:text-lg text-emerald-100 mb-4 sm:mb-6 lg:mb-8 max-w-full sm:max-w-lg mx-auto sm:ml-auto leading-relaxed">

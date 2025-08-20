@@ -279,6 +279,13 @@
     font-family: 'Inter', sans-serif;
     font-weight: 700;
   }
+  h1 { @apply text-4xl sm:text-5xl tracking-tight; }
+  h2 { @apply text-3xl tracking-tight; }
+  h3 { @apply text-2xl; }
+  h4 { @apply text-xl; }
+  h5 { @apply text-lg; }
+  p  { @apply text-base leading-relaxed; }
+  small { @apply text-xs; }
   :root {
     --background: 240 10% 98%;
     --foreground: 220 20% 15%;
@@ -456,6 +463,19 @@ html {
 
 
 @layer utilities {
+  /* Typography utilities for consistent hierarchy */
+  .heading-section { @apply text-4xl sm:text-5xl font-bold tracking-tight; }
+  .heading-header { @apply text-3xl font-bold tracking-tight; }
+  .heading-card-2xl { @apply text-2xl font-bold; }
+  .heading-card-xl { @apply text-xl font-semibold; }
+  .heading-card-lg { @apply text-lg font-semibold; }
+  .body-base { @apply text-base leading-relaxed; }
+  .meta-sm { @apply text-sm; }
+  .meta-xs { @apply text-xs; }
+
+  /* Consistent card media sizing */
+  .card-media { @apply w-full aspect-[3/2] object-cover; }
+
   /* Enhanced Creative Animations */
   @keyframes float {
     0%, 100% { transform: translateY(0px) rotate(0deg); }

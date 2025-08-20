@@ -484,8 +484,9 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
 
   if (showProjectSuccess) {
     return (
-      <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-        <div className="w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col justify-center items-center">
+      <div className="fixed inset-0 z-50 flex justify-end">
+        <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+        <div className="relative z-10 w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col justify-center items-center">
           <SuccessAnimation 
             isVisible={true} 
             onClose={() => {}} 
@@ -501,8 +502,9 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-      <div className="w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
         {/* Mobile Header */}
         <header className="flex items-center justify-between p-3 sm:p-4 border-b bg-white">
           <div className="flex items-center gap-3 sm:gap-4">

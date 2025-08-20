@@ -601,8 +601,12 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-      <div className="w-full max-w-5xl h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <div
+        className="fixed inset-0 bg-black/50"
+        onClick={onClose}
+      />
+      <div className="w-full max-w-5xl h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right relative z-10">
         {/* Mobile Header */}
         <header className="flex items-center justify-between p-3 sm:p-4 border-b bg-white">
             <div className="flex items-center gap-3 sm:gap-4">

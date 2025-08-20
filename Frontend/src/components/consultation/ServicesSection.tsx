@@ -68,7 +68,7 @@ export const ServicesSection = () => {
 		<section className="py-8 px-4 lg:px-8 bg-secondary/50">
 			<div className="max-w-7xl mx-auto">
 				<div className="text-center mb-16 space-y-4">
-					<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+					<h2 className="heading-section font-bold">
 						<span className="text-eco-green glow-text">Our Services</span>
 					</h2>
 					<p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">

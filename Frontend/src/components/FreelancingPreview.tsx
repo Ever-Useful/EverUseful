@@ -54,7 +54,7 @@ export const FreelancingPreview = () => {
             <Briefcase className="w-3 h-3 mr-1" />
             Expert Freelancers
           </Badge>
-          <h2 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-6">
+          <h2 className="heading-section font-bold text-slate-800 mb-6">
             Connect with{" "}
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               Top Talent

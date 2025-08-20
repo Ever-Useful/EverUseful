@@ -102,11 +102,13 @@ const JobListings = () => {
               Open Positions
             </h2>
             <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-4 md:mb-6 px-4">
+
               Find your next opportunity and join our growing team of innovators.
             </p>
           </div>
 
           {/* Openings Soon Message */}
+
           <div className="text-center py-6 md:py-8 lg:py-10">
             <div className="bg-white/95 backdrop-blur border-0 shadow-lg rounded-xl md:rounded-2xl p-5 md:p-6 lg:p-8 max-w-lg md:max-w-2xl mx-auto mx-4">
               <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4" style={{ color: '#2A311B' }}>
@@ -117,10 +119,12 @@ const JobListings = () => {
                 Our team is growing and we'll be posting new positions soon!
               </p>
               <p className="text-sm mb-5 md:mb-6" style={{ color: '#3A4325' }}>
+
                 Stay tuned for updates on our latest openings in engineering, design, marketing, and more.
               </p>
               <Button 
                 onClick={handleResumeSubmit}
+
                 className="rounded-lg transition-colors duration-300 px-6 md:px-8 py-2 md:py-3 text-sm md:text-base"
                 style={{ backgroundColor: '#B8E6CC', color: '#3A4325' }}
                 onMouseEnter={(e) => {
@@ -131,6 +135,7 @@ const JobListings = () => {
                   e.currentTarget.style.backgroundColor = '#B8E6CC';
                   e.currentTarget.style.color = '#3A4325';
                 }}
+
               >
                 Send Us Your Resume
               </Button>
