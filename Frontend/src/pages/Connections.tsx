@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { Search, Users, UserPlus, TrendingUp, MessageCircle, MapPin, Building, Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
 import {Footer} from '@/components/Footer';
 import Logo from '@/assets/Logo/Logo Main.png'; 
+import { userService } from '@/services/userService';
+import { useAuth } from '@/contexts/AuthContext';
+
 type Connection = {
   id: string;
   name: string;
@@ -21,73 +24,125 @@ type Connection = {
   sentTime?: string;
 };
 
-const mockConnections: Connection[] = [
-  {
-    id: '1',
-    name: 'Sarah Chen',
-    title: 'Senior Product Manager',
-    company: 'TechCorp',
-    location: 'San Francisco, CA',
-    mutualConnections: 15,
-    isConnected: true,
-    skills: ['Product Strategy', 'UX Design', 'Data Analysis']
-  },
-  {
-    id: '2',
-    name: 'Marcus Johnson',
-    title: 'Lead Developer',
-    company: 'StartupXYZ',
-    location: 'New York, NY',
-    mutualConnections: 8,
-    isConnected: true,
-    skills: ['React', 'Node.js', 'AWS']
-  },
-  {
-    id: '3',
-    name: 'Elena Rodriguez',
-    title: 'Marketing Director',
-    company: 'GrowthCo',
-    location: 'Austin, TX',
-    mutualConnections: 12,
-    isConnected: true,
-    skills: ['Digital Marketing', 'SEO', 'Analytics']
-  }
-];
+// const mockConnections: Connection[] = [
+//   {
+//     id: '1',
+//     name: 'Sarah Chen',
+//     title: 'Senior Product Manager',
+//     company: 'TechCorp',
+//     location: 'San Francisco, CA',
+//     mutualConnections: 15,
+//     isConnected: true,
+//     skills: ['Product Strategy', 'UX Design', 'Data Analysis']
+//   },
+//   {
+//     id: '2',
+//     name: 'Marcus Johnson',
+//     title: 'Lead Developer',
+//     company: 'StartupXYZ',
+//     location: 'New York, NY',
+//     mutualConnections: 8,
+//     isConnected: true,
+//     skills: ['React', 'Node.js', 'AWS']
+//   },
+//   {
+//     id: '3',
+//     name: 'Elena Rodriguez',
+//     title: 'Marketing Director',
+//     company: 'GrowthCo',
+//     location: 'Austin, TX',
+//     mutualConnections: 12,
+//     isConnected: true,
+//     skills: ['Digital Marketing', 'SEO', 'Analytics']
+//   }
+// ];
 
-const mockSuggestions: Connection[] = [
-  {
-    id: '4',
-    name: 'David Kim',
-    title: 'UX Designer',
-    company: 'DesignStudio',
-    location: 'Seattle, WA',
-    mutualConnections: 5,
-    isConnected: false,
-    skills: ['UI/UX', 'Figma', 'Design Systems'],
-    sentTime: 'Sent 2 weeks ago'
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    mutualConnections: 3,
-    isConnected: false,
-    skills: ['Machine Learning', 'Python', 'Statistics'],
-    sentTime: 'Sent 3 weeks ago'
-  }
-];
+// const mockSuggestions: Connection[] = [
+//   {
+//     id: '4',
+//     name: 'David Kim',
+//     title: 'UX Designer',
+//     company: 'DesignStudio',
+//     location: 'Seattle, WA',
+//     mutualConnections: 5,
+//     isConnected: false,
+//     skills: ['UI/UX', 'Figma', 'Design Systems'],
+//     sentTime: 'Sent 2 weeks ago'
+//   },
+//   {
+//     id: '5',
+//     name: 'Lisa Wang',
+//     title: 'Data Scientist',
+//     company: 'DataTech',
+//     location: 'Boston, MA',
+//     mutualConnections: 3,
+//     isConnected: false,
+//     skills: ['Machine Learning', 'Python', 'Statistics'],
+//     sentTime: 'Sent 3 weeks ago'
+//   }
+// ];
 
 type TabType = 'received' | 'sent' | 'find';
 
 const Connections = () => {
   const [activeTab, setActiveTab] = useState<TabType>('received');
   const [searchQuery, setSearchQuery] = useState('');
-  const [connections, setConnections] = useState(mockConnections);
-  const [suggestions, setSuggestions] = useState(mockSuggestions);
+  // const [connections, setConnections] = useState(mockConnections);
+  // const [suggestions, setSuggestions] = useState(mockSuggestions);
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [suggestions, setSuggestions] = useState<Connection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth();
 
-  const handleConnect = (personId: string) => {
+  // ADD THIS useEffect HOOK:
+  
+  // Fetch connections data
+  useEffect(() => {
+  const fetchConnections = async () => {
+    // Wait for auth to finish loading first
+    if (authLoading) {
+      return; // Exit early if auth is still loading
+    }
+
+    try {
+      setLoading(true);
+      
+      // Check if user is authenticated using the auth context
+      if (!user) {
+        setError('Please sign in to view connections');
+        setLoading(false); 
+        return;
+      }
+
+      const connectionsData = await userService.getConnections();
+      setConnections(connectionsData);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching connections:', err);
+      setError('Failed to load connections');
+      setConnections([]);
+    } finally {
+      setLoading(false); // ⬅️ MAKE SURE THIS RUNS
+    }
+  };
+
+  fetchConnections();
+}, [user, authLoading]); // Add dependencies here
+
+  // const handleConnect = (personId: string) => {
+  //   setSuggestions(prev => 
+  //     prev.map(person => 
+  //       person.id === personId 
+  //         ? { ...person, isConnected: true }
+  //         : person
+  //     )
+  //   );
+  // };
+
+  const handleConnect = async (personId: string) => {
+  try {
+    await userService.followUser(personId);
     setSuggestions(prev => 
       prev.map(person => 
         person.id === personId 
@@ -95,7 +150,12 @@ const Connections = () => {
           : person
       )
     );
-  };
+    const connectionsData = await userService.getConnections();
+    setConnections(connectionsData);
+  } catch (err) {
+    console.error('Error connecting with user:', err);
+  }
+};
 
   const handleWithdraw = (personId: string) => {
     setSuggestions(prev => 
@@ -152,6 +212,15 @@ const Connections = () => {
             Connect
           </Button>
         )}
+        
+        {/* NEW VIEW PROFILE BUTTON ADDED HERE */}
+        {person.isConnected && (
+          <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2" 
+           onClick={() => window.location.href = `/profile/${person.id}`}>
+            <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            View Profile
+           </Button>
+        )}
         {person.isConnected && (
           <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
             <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -163,6 +232,24 @@ const Connections = () => {
   );
 
   const renderTabContent = () => {
+    // Check BOTH auth loading AND connections loading
+  if (authLoading || loading) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading connections...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+        <p className="text-red-600 mb-4">{error}</p>
+        <Button onClick={() => window.location.reload()}>Try Again</Button>
+      </div>
+    );
+  }
     switch (activeTab) {
       case 'received':
         return (
@@ -182,9 +269,21 @@ const Connections = () => {
                 </Badge>
               </div>
               <div>
-                {connections.map(person => (
+                {/* {connections.map(person => (
                   <ConnectionItem key={person.id} person={person} />
-                ))}
+                ))} */}
+                
+                {connections.length > 0 ? (
+                  connections.map(person => (
+                    <ConnectionItem key={person.id} person={person} />
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">No connections yet</p>
+                    <p className="text-gray-400 text-sm mt-1">Start connecting with people to see them here</p>
+                  </div>
+                 )}
               </div>
             </div>
           </div>

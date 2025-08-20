@@ -132,6 +132,11 @@ class UserService {
     return await this.dbService.followUser(followerId, followingId);
   }
 
+  // Get user connections (following list with profile data)
+  async getUserConnections(customUserId) {
+    return await this.dbService.getUserConnections(customUserId);
+  }
+
   // Get user statistics
   async getUserStats(customUserId) {
     return await this.dbService.getUserStats(customUserId);

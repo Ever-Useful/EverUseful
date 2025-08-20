@@ -78,6 +78,18 @@ interface Activity {
   metadata: any;
 }
 
+export interface Connection {
+  id: string;
+  name: string;
+  title: string;
+  company: string;
+  location: string;
+  avatar?: string;
+  mutualConnections: number;
+  isConnected: boolean;
+  skills: string[];
+}
+
 class UserService {
   private async getAuthToken(): Promise<string> {
     const user = auth.currentUser;
@@ -287,6 +299,11 @@ class UserService {
   }> {
     const response = await this.makeRequest(`/social/${type}`);
     return response.data;
+  }
+
+  async getConnections(): Promise<Connection[]> {
+    const response = await this.makeRequest('/connections'); // GET /api/users/connections
+    return response.data as Connection[];
   }
 
   // Check if user exists and create if not

@@ -1008,6 +1008,67 @@ class DynamoDBService {
     }
   }
 
+
+  //To ftch user's connections(profiles user follows)  //Parul
+  async getUserConnections(customUserId) {
+  try {
+    const me = await this.findUserByCustomId(customUserId);
+    if (!me) throw new Error('User not found');
+
+    const followingIds = me.social?.following || [];
+    if (followingIds.length === 0) return [];
+
+    // Parallelize database calls
+    const users = await Promise.all(
+      followingIds.map(id => this.findUserByCustomId(id))
+    );
+
+    const myFollowingSet = new Set(followingIds);
+    const result = [];
+
+    for (const u of users) {
+      if (!u) continue; // Skip deleted users
+
+      const first = (u.profile?.firstName || '').trim();
+      const last = (u.profile?.lastName || '').trim();
+      const name = [first, last].filter(Boolean).join(' ') || 
+                   (u.profile?.username || u.profile?.email || 'User');
+
+      const fromWork = Array.isArray(u.workExperience) && u.workExperience[0]?.company;
+      const fromProfessor = u.professorData?.institution || u.professorData?.university;
+      const fromStudent = u.studentData?.college || u.studentData?.university;
+      const company = fromProfessor || fromStudent || fromWork || '';
+
+      const theirFollowing = u.social?.following || [];
+      const mutual = theirFollowing.filter(x => myFollowingSet.has(x)).length;
+
+      result.push({
+        id: u.customUserId,
+        name,
+        title: u.profile?.title || '',
+        company,
+        location: u.profile?.location || u.freelancerData?.location || '',
+        avatar: u.profile?.avatar || '',
+        mutualConnections: mutual,
+        isConnected: Array.isArray(u.social?.followers) ? 
+                    u.social.followers.includes(customUserId) : false,
+        skills: (u.skills || []).map(s => typeof s === 'string' ? s : (s.name || '')).filter(Boolean),
+      });
+    }
+
+    return result;
+  } catch (err) {
+    console.error('Error getUserConnections:', err);
+    throw err;
+  }
+}
+
+
+
+
+
+
+
   async getUserStats(customUserId) {
     try {
       const user = await this.findUserByCustomId(customUserId);

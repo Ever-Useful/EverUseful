@@ -82,6 +82,21 @@ router.get('/profile', authorize, async (req, res) => {
   }
 });
 
+// Get user connections (following list with profile data)
+router.get('/connections', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const connections = await userService.getUserConnections(user.customUserId);
+    res.json({ success: true, data: connections });
+  } catch (error) {
+    console.error('Error fetching connections:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // Get bulk users by custom user IDs (for marketplace author display)
 router.get('/bulk/:userIds', async (req, res) => {
   try {

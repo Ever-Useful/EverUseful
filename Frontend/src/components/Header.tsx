@@ -435,7 +435,12 @@ const Header = () => {
                         {/* Logo */}
                         <div className="flex items-center space-x-1 flex-shrink-0">
                             <Link to="/" className="flex items-center space-x-2 group">
-                                <img src={Logo} alt="AMOGH" className="h-10 w-auto md:h-8" />
+                                <img
+                                  src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/amoghlog.jpeg"
+                                  alt="AMOGH"
+                                  className="h-10 w-auto md:h-8"
+                                />
+
                                 <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
                                     beta
                                 </div>
