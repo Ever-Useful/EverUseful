@@ -155,7 +155,7 @@ const JobListings = () => {
         isOpen={isResumeFormOpen} 
         onClose={() => setIsResumeFormOpen(false)} 
       />
-    </>
+    
   );    
 };
 
