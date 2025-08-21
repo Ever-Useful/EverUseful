@@ -78,6 +78,8 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
       setIsLoading(true);
       try {
         const userProfile = await userService.getUserProfile();
+        console.log('UserProfileContext - Raw userProfile:', userProfile);
+        
         const newProfileData = {
           firstName: userProfile.data?.auth?.firstName || '',
           lastName: userProfile.data?.auth?.lastName || '',
@@ -86,6 +88,10 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
           userType: userProfile.data?.auth?.userType,
           email: userProfile.data?.auth?.email,
         };
+        
+        console.log('UserProfileContext - Processed profile data:', newProfileData);
+        console.log('UserProfileContext - Avatar from backend:', userProfile.data?.profile?.avatar);
+        
         setProfileData(newProfileData);
         localStorage.setItem("userProfile", JSON.stringify(newProfileData));
         setHasRefreshed(true);
