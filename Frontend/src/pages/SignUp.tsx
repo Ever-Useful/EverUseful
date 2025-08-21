@@ -453,7 +453,7 @@ const SignUp = () => {
         {currentStep === 1 && (
           <div className="animate-scale-in delay-400 mb-5 xs:mb-6 lg:mb-8">
             <Label className="text-xs xs:text-sm font-medium text-gray-700 mb-3 xs:mb-4 block text-center">I am a:</Label>
-            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 xs:gap-3">
+            <div className="grid grid-cols-3 gap-2 xs:gap-3">
               {userTypes.map((type) => {
                 const IconComponent = type.icon;
                 return (

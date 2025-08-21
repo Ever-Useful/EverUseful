@@ -25,7 +25,7 @@ const CultureGallery = () => {
     {
       src: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=400&fit=crop&crop=center",
       alt: "Creative brainstorming",
-      className: "md:row-span-2",
+      className: "md:col-span-2",
       title: "Innovation Hub",
       description: "Dedicated spaces and time for creative thinking and breakthrough solutions."
     }

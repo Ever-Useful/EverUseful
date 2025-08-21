@@ -51,9 +51,9 @@ const StatsCard: React.FC<StatsCardProps> = ({
       }`}
       onClick={onClick}
     >
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className={`text-sm font-medium ${
+      <CardContent className="p-3 sm:p-6">
+        <div className="flex items-center justify-between mb-2 sm:mb-4">
+          <h3 className={`text-xs sm:text-sm font-medium ${
             primary 
               ? 'text-white' 
               : 'text-gray-600 dark:text-gray-300'
@@ -61,12 +61,12 @@ const StatsCard: React.FC<StatsCardProps> = ({
             {title}
           </h3>
           <div className="flex items-center gap-2">
-            <TrendingUp className={`w-4 h-4 ${
+            <TrendingUp className={`w-3 h-3 sm:w-4 sm:h-4 ${
               primary 
                 ? 'text-white' 
                 : 'text-gray-400 dark:text-gray-500'
             }`} />
-            <BarChart3 className={`w-4 h-4 ${
+            <BarChart3 className={`w-3 h-3 sm:w-4 sm:h-4 ${
               primary 
                 ? 'text-white' 
                 : 'text-gray-400 dark:text-gray-500'
@@ -75,20 +75,20 @@ const StatsCard: React.FC<StatsCardProps> = ({
         </div>
         
         <div className="space-y-2">
-          <p className={`text-3xl font-bold ${
+          <p className={`text-2xl sm:text-3xl font-bold ${
             primary ? 'text-white' : 'text-gray-900 dark:text-white'
           }`}>
             {value}
           </p>
           <div className="flex items-center gap-2">
-            <TrendingUp className={`w-3 h-3 ${
+            <TrendingUp className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${
               primary 
                 ? 'text-white' 
                 : status 
                   ? 'text-green-600 dark:text-green-400' 
                   : 'text-gray-500 dark:text-gray-400'
             }`} />
-            <span className={`text-xs ${
+            <span className={`text-[10px] sm:text-xs ${
               primary 
                 ? 'text-white' 
                 : status 

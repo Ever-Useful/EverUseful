@@ -19,6 +19,7 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
+  ShoppingCartIcon,
 } from "lucide-react";
 import { useAuthState } from "../../hooks/useAuthState";
 import userService from "../../services/userService";
@@ -619,16 +620,94 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         }>
           {projects.map((project, idx) => (
             isMobile ? (
-              <div key={project.id} className="flex items-center gap-4 py-4 px-2 cursor-pointer bg-white w-full">
+
+              <div key={project.id} className="flex items-center gap-3 p-3 cursor-pointer bg-white w-full">
+                {/* Image on left - fixed size and centered */}
+                <div className="relative flex-shrink-0 w-24 h-24 flex items-center justify-center">
+                  <img
+                    src={getS3ImageUrl(project.image, 'project', 'medium')}
+                    alt={project.title}
+                    className="max-w-full max-h-full object-contain rounded"
+                    loading="lazy"
+                    onClick={() => setSelected(project)}
+                    onError={(e) => handleImageError(e, NoImageAvailable)}
+                  />
+                </div>
+
+                {/* Content on right - centered vertically */}
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  {/* Title with line clamp */}
+                  <h3
+                    className="text-sm font-medium text-gray-900 mb-1 cursor-pointer line-clamp-2 hover:text-blue-600"
+                    onClick={() => setSelected(project)}
+                  >
+                    {project.title}
+                  </h3>
+
+                  {/* Author */}
+                  <span
+                    className="text-xs text-gray-600 truncate cursor-pointer block"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goToAuthorProfile(getAuthorDetails(project.author).userType, getAuthorDetails(project.author).id);
+                    }}
+                  >
+                    {getAuthorDetails(project.author).name}
+                  </span>
+
+                  {/* Rating - smaller on mobile */}
+                  <div className="flex items-center my-1">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-2 h-2 ${i < Math.floor(project.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-500 ml-1">({project.reviews})</span>
+                  </div>
+
+                  {/* Price - single line */}
+                  <div className="mb-1">
+                    <span className="text-sm font-bold text-gray-900">&#8377;{project.price}</span>
+                    {project.originalPrice && (
+                      <span className="text-xs text-gray-500 line-through ml-1">&#8377;{project.originalPrice}</span>
+                    )}
+                  </div>
+
+                  {/* Category badge - smaller */}
+                  <div className="mb-1">
+                    <span className="inline-block bg-gray-100 text-gray-800 text-xs px-1.5 py-0.5 rounded">
+                      {project.category}
+                    </span>
+                  </div>
+
+                  {/* Action Buttons - stacked vertically */}
+                  <div className="flex gap-1.5 mt-1">
+                    <button
+                      className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 rounded-lg shadow-sm flex"
+                      onClick={() => handleAddToCart(project.id)}
+                    >
+                      <ShoppingCartIcon className="w-4 h-4 text-white"></ShoppingCartIcon>
+                    </button>
+                    <button
+                      className="text-xs bg-white border border-gray-300 text-gray-800 px-2 py-2 rounded-lg shadow-sm flex-1"
+                      onClick={() => handleViewDetails(project.id)}
+                    >
+                      Buy Now
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
               <div
                 key={project.id}
                 className={`
-            bg-white p-4 border-b border-r border-gray-200 
-            hover:bg-gray-50 transition-colors duration-200
-            flex flex-col
-          `}
+          bg-white p-4 border-b border-r border-gray-200 
+          hover:bg-gray-50 transition-colors duration-200
+          flex flex-col
+        `}
               >
                 {/* Image Section */}
                 <div className="relative mb-3 flex justify-center">
@@ -700,13 +779,13 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                 {/* Action Buttons */}
                 <div className="mt-auto flex gap-2">
                   <button
-                    className="text-base bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl shadow-sm w-full"
+                    className="text-base bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl shadow-sm w-full mobile-text-xs font-bold"
                     onClick={() => handleAddToCart(project.id)}
                   >
                     Add to Cart
                   </button>
                   <button
-                    className="text-base bg-white text-black px-3 py-1.5 rounded-xl shadow-sm w-full"
+                    className="text-base bg-white text-black px-3 py-1.5 rounded-xl shadow-sm w-full mobile-text-base"
                     onClick={() => handleViewDetails(project.id)}
                   >
                     Buy Now
@@ -736,10 +815,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
             <div className="flex items-center gap-2">
               <Badge
                 className={`text-xs px-2 py-0.5 rounded ${selected.status === "Active"
-                    ? "bg-green-100 text-green-700"
-                    : selected.status === "New"
-                      ? "bg-blue-100 text-blue-700"
-                      : "bg-gray-100 text-gray-700"
+                  ? "bg-green-100 text-green-700"
+                  : selected.status === "New"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-700"
                   }`}
               >
                 {selected.status}

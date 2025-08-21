@@ -214,7 +214,7 @@ export const FeaturedProducts: React.FC = () => {
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-[92vw] relative z-10">
         {/* Header */}
         <div className="text-center mb-14">
-          <h1 className="text-[17px] sm:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight mobile-text-4xl">
+          <h1 className="sm:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight mobile-text-2xl">
             Discover <span className="text-blue-600">Game-Changing</span> Projects
           </h1>
           <p className="text-[12px] sm:text-base text-gray-600 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
@@ -349,7 +349,7 @@ export const FeaturedProducts: React.FC = () => {
                 {/* Content */}
                 <UICardContent className="flex flex-col flex-1 px-3">
                   
-                    <UICardTitle className="mt-2 mobile-text-2xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                    <UICardTitle className="mt-2 mobile-text-xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                       {p.title}
                     </UICardTitle>
                     <p className="mobile-text-base text-gray-500 mb-1">{p.subtitle}</p>
@@ -393,7 +393,7 @@ export const FeaturedProducts: React.FC = () => {
             onClick={() => navigate("/marketplace")}
             size="lg"
             variant="outline"
-            className="hover:scale-105 transition-all duration-300 border-blue-200 text-blue-700 font-bold rounded-lg mobile-text-2xl"
+            className="hover:scale-105 transition-all duration-300 border-blue-200 text-blue-700 font-bold rounded-lg mobile-text-xl"
           >
             <TrendingUp className="mr-2 w-5 h-5" />
             View All Projects

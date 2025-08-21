@@ -253,6 +253,13 @@ const Header = () => {
     const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
    
+    // Open MyProjects sidebar when a global event is dispatched (e.g., from Dashboard or Navigation)
+    useEffect(() => {
+        const handler = () => setShowMyProjects(true);
+        window.addEventListener('open-myprojects', handler);
+        return () => window.removeEventListener('open-myprojects', handler);
+    }, []);
+
     // Mock data for connections (replace with real data fetching as needed)
     const existingConnections: Array<any> = [
         {
@@ -852,8 +859,8 @@ const Header = () => {
                             </div>
                         </div>
                     )}
-
-                    {showProjectsSidebar && (
+                    {/* here we have sidebars for project, my favourites, calendar, connections, settings, profile */}
+                    {/* {showProjectsSidebar && (
                         <div className="fixed bottom-0 right-0 sm:right-[24rem] w-full sm:w-96 h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right z-[60]">
                             <div className="flex items-center justify-between p-3 sm:p-4 border-b">
                                 <h2 className="font-bold text-lg sm:text-xl text-gray-900">Projects</h2>
@@ -902,7 +909,7 @@ const Header = () => {
                             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     {showConnectionsSidebar && (
                         <div className="fixed bottom-0 right-0 sm:right-[24rem] w-full sm:w-[50rem] h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right z-50">
