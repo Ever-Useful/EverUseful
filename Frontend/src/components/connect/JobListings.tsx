@@ -98,7 +98,7 @@ const JobListings = () => {
       <section id="job-listings" className="py-8 sm:py-10 bg-olive-light">
         <div className="container mx-auto px-6">
           <div className="text-center mb-6">
-            <h2 className="heading-header font-bold text-white mb-2">
+            <h2 className="heading-header font-bold text-black mb-2">
               Open Positions
             </h2>
             <p className="text-base sm:text-lg text-white/90 max-w-xl mx-auto">

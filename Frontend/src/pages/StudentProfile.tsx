@@ -364,7 +364,7 @@ const Profile = () => {
             {/* Portfolio Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
-                                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="heading-card-2xl font-bold text-gray-900 flex items-center">
                       <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <Briefcase className="w-5 h-5 text-green-600" />
