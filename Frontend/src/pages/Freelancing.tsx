@@ -10,6 +10,7 @@ import noUserProfile from "../assets/images/no user profile.png";
 import ctaMeshBg from "../assets/images/cta-mesh-bg.svg";
 import { API_ENDPOINTS } from '../config/api';
 import { getUserAvatarUrl } from '@/utils/s3ImageUtils';
+import freelancerImage from "../assets/images/freelancer.jpg";
 
 // HERO SECTION DATA
 const heroFeatures = [
@@ -620,7 +621,7 @@ const Work: React.FC = () => {
 
             {/* Main Headline */}
           <motion.h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight"
+              className="text-4xl font-bold text-slate-900 leading-tight"
             variants={fadeUp}
             custom={2}
           >
@@ -629,7 +630,7 @@ const Work: React.FC = () => {
 
             {/* Sub-text */}
           <motion.p
-              className="text-lg sm:text-xl text-slate-600 leading-relaxed"
+              className="text-base text-slate-600 leading-relaxed"
             variants={fadeUp}
             custom={3}
           >
@@ -706,7 +707,7 @@ const Work: React.FC = () => {
               {/* Profile image (copyright-safe Unsplash) */}
               <div className="absolute inset-8 flex items-center justify-center">
                 <img
-                  src="https://images.unsplash.com/photo-1603415526960-f7e0328d13a0?auto=format&fit=crop&w=600&q=80"
+                  src={freelancerImage}
                   alt="Professional portrait"
                   className="w-full h-full object-cover rounded-full border-4 border-white shadow-lg"
                 />
@@ -790,7 +791,7 @@ const Work: React.FC = () => {
           Hire the Best Professionals
         </h2>
         
-        <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-base text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
           Check out professionals on <span className="font-bold text-blue-600">AMOGH</span>, with the skills you need for your next job.
         </p>
         
@@ -817,7 +818,7 @@ const Work: React.FC = () => {
             Freelance Research Experts
           </h2>
           
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
             {filtered.length} freelancers available for collaboration
           </p>
         </div>
@@ -974,7 +975,7 @@ const Work: React.FC = () => {
             Popular Skills & Expertise
           </h2>
           
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base text-slate-600 max-w-3xl mx-auto leading-relaxed">
             Discover top PhD experts across cutting-edge fields. From AI research to biotechnology, find the perfect match for your project.
           </p>
         </motion.div>
@@ -1030,7 +1031,7 @@ const Work: React.FC = () => {
             Featured Categories
           </h2>
           
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base text-slate-600 max-w-3xl mx-auto leading-relaxed">
             Explore our most popular research and development categories with thousands of successful projects completed.
           </p>
         </motion.div>
@@ -1102,7 +1103,7 @@ const Work: React.FC = () => {
             What Our Clients Say
           </h2>
           
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base text-slate-600 max-w-3xl mx-auto leading-relaxed">
             Real feedback from researchers, startups, and organizations who've found success with our PhD experts.
           </p>
         </motion.div>
@@ -1173,7 +1174,7 @@ const Work: React.FC = () => {
             Why We're Unique
           </h2>
           
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base text-slate-600 max-w-3xl mx-auto leading-relaxed">
             We connect you with the world's brightest PhD minds for research, mentorship, and innovation—delivered with integrity, personalization, and global reach.
           </p>
         </motion.div>
@@ -1221,7 +1222,7 @@ const Work: React.FC = () => {
             Success Stories
           </h2>
           
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed mb-8">
+          <p className="text-base text-slate-600 max-w-3xl mx-auto leading-relaxed mb-8">
             Real impact, real results. Explore how PhD experts have transformed research, innovation, and mentorship for clients worldwide.
           </p>
           
@@ -1344,7 +1345,7 @@ const Work: React.FC = () => {
             How it works
           </h2>
           
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base text-slate-600 max-w-3xl mx-auto leading-relaxed">
             Your journey to world-class research and mentorship starts here. Just follow these simple steps!
           </p>
         </div>
@@ -1572,7 +1573,7 @@ const Work: React.FC = () => {
             Ready to Accelerate Your Freelance Research Journey?
           </h2>
 
-          <p className="text-lg sm:text-xl text-slate-700 mb-8 max-w-3xl mx-auto leading-relaxed px-4">
+          <p className="text-base text-slate-700 mb-8 max-w-3xl mx-auto leading-relaxed px-4">
             Connect instantly with world-class PhD experts, get tailored guidance, and bring your R&D or academic vision to life as a freelancer or client.
             <br />
             <span className="font-semibold text-slate-900">It's free to get started!</span>

@@ -226,11 +226,11 @@ const FindExpert = () => {
                   <input
                     type="text"
                     placeholder="Search by PhD research field, university, or expertise..."
-                    className="w-full px-4 xs:px-5 py-3 xs:py-4 rounded-xl border-0 bg-white/10 backdrop-blur-sm text-white placeholder-indigo-200 focus:ring-2 focus:ring-amber-400 focus:outline-none shadow-lg text-xs xs:text-base"
+                    className="w-full px-4 xs:px-5 py-3 xs:py-4 rounded-xl border-0 bg-white/10 backdrop-blur-sm text-white placeholder-indigo-200 focus:ring-2 focus:ring-amber-400 focus:outline-none shadow-lg text-sm"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  <button className="absolute right-2 top-2 bg-amber-500 hover:bg-amber-600 text-white font-medium py-1.5 xs:py-2 px-4 xs:px-5 rounded-lg transition-colors text-xs xs:text-base">
+                  <button className="absolute right-2 top-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-5 rounded-lg transition-colors text-base">
                     Search
                   </button>
                 </div>
@@ -266,11 +266,11 @@ const FindExpert = () => {
                           />
                           <div className="ml-2">
                             <h3 className="text-white font-medium text-xs xs:text-sm">{user.profile?.firstName} {user.profile?.lastName}</h3>
-                            <p className="text-indigo-200 text-[10px] xs:text-xs">{user.profile?.title}</p>
+                            <p className="text-indigo-200 text-xs">{user.profile?.title}</p>
                           </div>
                         </div>
                         <button
-                          className="mt-2 w-full bg-amber-400 hover:bg-amber-500 text-white text-[10px] xs:text-xs font-semibold py-1 px-2 rounded"
+                          className="mt-2 w-full bg-amber-400 hover:bg-amber-500 text-white text-xs font-semibold py-1 px-2 rounded"
                           onClick={() => goToProfile(user.profile?.userType, user.customUserId)}
                         >
                           View Profile
@@ -291,10 +291,10 @@ const FindExpert = () => {
         </div>
       </div>
     {/* Stats Section */}
-    <div className="py-6 xs:py-10 bg-white">
+    <div className="py-12 md:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="grid grid-cols-2 xs:grid-cols-4 gap-3 xs:gap-5"
+          className="grid grid-cols-2 xs:grid-cols-4 gap-4 md:gap-6"
           initial="hidden"
           animate="visible"
           variants={containerVariants}
@@ -303,11 +303,11 @@ const FindExpert = () => {
             <motion.div
               key={stat.id}
               variants={itemVariants}
-              className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-3 xs:p-5 flex flex-col items-center justify-center text-center border border-gray-100 shadow-sm"
+              className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-4 md:p-6 flex flex-col items-center justify-center text-center border border-gray-100 shadow"
               whileHover={{ scale: 1.03, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
             >
               <div className="text-xl xs:text-3xl text-indigo-600 mb-1 xs:mb-2">{stat.icon}</div>
-              <div className="text-lg xs:text-2xl font-bold text-indigo-900">{stat.value}</div>
+              <div className="text-2xl font-bold text-indigo-900">{stat.value}</div>
               <div className="text-gray-600 text-xs xs:text-sm mt-1">{stat.label}</div>
             </motion.div>
           ))}
@@ -316,18 +316,18 @@ const FindExpert = () => {
     </div>
 
     {/* Domain Section */}
-    <div className="py-6 xs:py-10 bg-gray-50">
+    <div className="py-12 md:py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 xs:mb-6 text-center"
         >
-        <h2 className="text-3xl font-bold text-gray-900 mb-1 xs:mb-2 mobile-text-3xl">Browse Research Domains</h2>
-        <p className="text-xs xs:text-base text-gray-600 mobile-text-base">Find experts in specific academic disciplines</p>
+        <h2 className="heading-section font-bold text-gray-900 mb-1 xs:mb-2">Browse Research Domains</h2>
+        <p className="text-base text-gray-600">Find experts in specific academic disciplines</p>
         </motion.div>
         <motion.div
-          className="hidden sm:grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 xs:gap-3"
+          className="hidden sm:grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -339,12 +339,12 @@ const FindExpert = () => {
               whileHover={{ scale: 1.05, backgroundColor: "#4f46e5", color: "#fff" }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveCategory(category.id)}
-              className={`flex flex-col items-center justify-center p-2 xs:p-3 rounded-lg transition-all bg-white text-gray-700 shadow-sm border border-gray-200 ${
+              className={`flex flex-col items-center justify-center p-3 md:p-4 rounded-xl transition-all bg-white text-gray-700 shadow-sm border border-gray-200 ${
                 activeCategory === category.id ? "bg-indigo-600 text-white" : ""
               }`}
             >
               <span className="text-lg xs:text-2xl mb-0.5 xs:mb-1">{category.icon}</span>
-              <span className="font-medium text-[10px] xs:text-xs text-center">{category.name}</span>
+              <span className="font-medium text-xs text-center">{category.name}</span>
             </motion.button>
           ))}
         </motion.div>
@@ -352,13 +352,13 @@ const FindExpert = () => {
     </div>
 
     {/* Filter Bar */}
-    <div className="max-w-7xl mx-auto px-2 xs:px-4 py-6 xs:py-12 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-2 xs:px-4 py-10 md:py-14 sm:px-6 lg:px-8">
       <div className="hidden sm:block bg-white rounded-xl shadow-sm p-3 xs:p-4 mb-6 xs:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 xs:gap-4">
         <div>
-          <h2 className="text-base xs:text-xl font-bold text-gray-900">
+          <h2 className="text-3xl font-bold text-gray-900">
             PhD Research Experts
           </h2>
-          <p className="text-gray-600 text-xs xs:text-sm">
+          <p className="text-gray-600 text-base">
             {filteredExperts.length} PhD experts available for collaboration
           </p>
         </div>
@@ -367,7 +367,7 @@ const FindExpert = () => {
             <ArrowUpDown className="w-4 h-4 text-gray-400" />
             <span className="text-gray-500 text-xs font-medium">Sort by</span>
             <select
-              className="bg-white border border-gray-300 rounded-lg py-1.5 xs:py-2 px-2 xs:px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm w-full md:w-auto ml-1 text-xs xs:text-sm"
+              className="bg-white border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm w-full md:w-auto ml-1 text-sm"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
@@ -381,7 +381,7 @@ const FindExpert = () => {
             <input
               type="text"
               placeholder="Filter by PhD expertise..."
-              className="w-full px-3 xs:px-4 py-1.5 xs:py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm text-xs xs:text-sm"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -391,7 +391,7 @@ const FindExpert = () => {
 
       {/* Experts Grid */}
       <motion.div
-        className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 xs:gap-5"
+        className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -402,19 +402,19 @@ const FindExpert = () => {
               key={expert.id}
               variants={itemVariants}
               whileHover={{ y: -3 }}
-              className="rounded-xl overflow-hidden shadow-lg transition-all flex flex-col h-full bg-gradient-to-br from-blue-50 to-purple-50"
+              className="rounded-2xl overflow-hidden shadow-lg transition-all flex flex-col h-full bg-gradient-to-br from-blue-50 to-purple-50"
             >
               <div className="flex flex-col h-full">
-                <div className="p-3 xs:p-5 flex-1 flex flex-col">
+                <div className="p-4 md:p-6 flex-1 flex flex-col">
                   <div className="flex justify-center mb-2 xs:mb-3">
                     <img
                       src={expert.image}
                       alt={expert.name}
-                      className="w-14 xs:w-20 h-14 xs:h-20 rounded-full object-cover border-2 xs:border-3 border-white/80 shadow-lg"
+                      className="w-16 md:w-24 h-16 md:h-24 rounded-full object-cover border-2 md:border-[3px] border-white/80 shadow-lg"
                     />
                   </div>
                   <div className="text-center mb-2 xs:mb-3">
-                    <h3 className="text-base xs:text-lg font-bold text-black">{expert.name}</h3>
+                    <h3 className="text-lg md:text-xl font-bold text-black">{expert.name}</h3>
                     <p className="text-black font-medium text-xs xs:text-sm">{expert.title}</p>
                     <p className="text-black text-[10px] xs:text-xs mt-1">{expert.university}</p>
                   </div>
@@ -457,12 +457,12 @@ const FindExpert = () => {
                     </div>
                   </div>
                 </div>
-                <div className="px-3 xs:px-5 pb-3 xs:pb-4">
+                <div className="px-4 md:px-6 pb-4 md:pb-5">
                   <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => goToProfile(expert.profile?.userType, expert.customUserId)}
-                    className="w-full bg-white/90 hover:bg-white text-gray-900 font-medium py-1.5 xs:py-2 px-3 xs:px-4 rounded-lg shadow-md text-xs xs:text-sm"
+                    className="w-full bg-white/90 hover:bg-white text-gray-900 font-medium py-2 px-4 rounded-lg shadow-md text-sm"
                   >
                     View Profile
                   </motion.button>
