@@ -690,7 +690,7 @@ const Header = () => {
                     {/* Drawer */}
                     <div className="relative ml-auto w-72 max-w-[90vw] h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
                         <div className="flex items-center justify-between p-4 border-b">
-                            <h2 className="font-bold text-xl text-gray-900">Menu</h2>
+                            <h2 className="font-bold text-xl text-gray-900 mobile-text-lg">Menu</h2>
                             <button
                                 onClick={() => setShowMobileMenu(false)}
                                 className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
@@ -717,7 +717,7 @@ const Header = () => {
                                     {/* Cart */}
                                     <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                         <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Cart</span>
+                                        <span className="text-gray-700 font-medium mobile-text-base">Cart</span>
                                     </Link>
                                     {/* Messages */}
                                     <button
@@ -728,7 +728,7 @@ const Header = () => {
                                         }}
                                     >
                                         <MessageSquare className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Messages</span>
+                                        <span className="text-gray-700 font-medium mobile-text-base">Messages</span>
                                         {unreadMessageCount > 0 && (
                                             <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
                                                 {unreadMessageCount}
@@ -744,7 +744,7 @@ const Header = () => {
                                         }}
                                     >
                                         <Bell className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Notifications</span>
+                                        <span className="text-gray-700 font-medium mobile-text-base">Notifications</span>
                                         {unreadNotificationCount > 0 && (
                                             <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
                                                 {unreadNotificationCount}
@@ -774,7 +774,7 @@ const Header = () => {
                                         onClick={() => setShowMobileMenu(false)}
                                     >
                                         <User className="w-5 h-5 mr-3 text-gray-600" />
-                                        <span className="text-gray-700 font-medium">Sign In</span>
+                                        <span className="text-gray-700 font-medium mobile-text-base">Sign In</span>
                                     </Link>
                                 </>
                             )}

@@ -24,7 +24,7 @@ export const HeroSection = ({
           {/* Left Content */}
           <div className="space-y-8 text-center lg:text-left">
             <div className="space-y-6">
-              <h1 className="text-4xl font-bold leading-tight mobile-text-4xl">
+              <h1 className="text-4xl font-bold leading-tight mobile-text-2xl">
                 <span className="text-eco-green glow-text">Expert</span>{" "}
                 <span className="text-foreground">Consultation</span>{" "}
                 <span className="text-eco-blue glow-text">Services</span>

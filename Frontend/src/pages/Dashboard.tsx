@@ -664,7 +664,7 @@ const Dashboard = () => {
           <div className={`${mobileMenuOpen ? 'block' : 'hidden'} lg:block w-72 h-[calc(100vh-6rem)] bg-white/70 dark:bg-gray-900/80 glass-effect shadow-2xl rounded-2xl m-6 flex flex-col border border-mint/30 backdrop-blur-lg fixed top-24 left-6 z-30`}>
             <div className="flex flex-col items-center py-8 px-4">
               <div className="w-full">
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 pl-2">MENU</p>
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 pl-2 mobile-text-xs">MENU</p>
                 <nav className="space-y-2">
                   <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
                     <LayoutDashboard className="w-5 h-5" />
@@ -696,7 +696,7 @@ const Dashboard = () => {
                   </Button>
                 </nav>
                 <div className="my-8 border-t border-mint/20"></div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 pl-2">GENERAL</p>
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 pl-2 mobile-text-xs">GENERAL</p>
                 <div className="space-y-2">
                   <Button className="w-full justify-start gap-3 h-12 text-md font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-[#10b981] active:bg-[#10b981] hover:text-white active:text-white cursor-pointer text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 border-0">
                     <Settings className="w-5 h-5" />
@@ -724,7 +724,7 @@ const Dashboard = () => {
               />
               <div className="relative bg-white rounded-t-2xl shadow-2xl p-4 pb-6 w-full">
                 <div className="flex items-center justify-between pb-2">
-                  <span className="text-sm font-semibold text-gray-600">MENU</span>
+                  <span className="text-sm font-semibold text-gray-600 mobile-text-sm">MENU</span>
                   <button
                     className="p-2 rounded-full hover:bg-gray-100"
                     onClick={() => setMobileMenuOpen(false)}

@@ -176,7 +176,7 @@ const BecomeMentor: React.FC = () => {
             className="w-full py-8 xs:py-14 px-2 xs:px-4 flex flex-col items-center bg-[#f8fafc] border-t border-[#fa5954]/10"
           >
             <div className="max-w-3xl w-full mx-auto bg-white rounded-2xl shadow-xl p-4 xs:p-6 sm:p-8">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4 xs:mb-6 text-center mobile-text-4xl">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4 xs:mb-6 text-center mobile-text-2xl">
                 Mentor Application
               </h2>
               {submitted ? (
