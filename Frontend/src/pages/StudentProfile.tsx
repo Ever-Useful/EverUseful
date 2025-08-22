@@ -396,18 +396,15 @@ const Profile = () => {
             {/* Portfolio Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
-
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
-                    <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
-                      <Briefcase className="w-5 h-5 text-green-600" />
-                    </span>
-                    <span className="sm:hidden">Projects</span>
-                    <span className="hidden sm:inline">Research Projects & Commercial Work</span>
-                  </h2>
-                </div>
-                <div className="space-y-2 sm:space-y-4">
-
+                   <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 className="heading-card-2xl font-bold text-gray-900 flex items-center">
+                      <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
+                        <Briefcase className="w-5 h-5 text-green-600" />
+                      </span>
+                      Research Projects & Commercial Work
+                    </h3>
+                  </div>
+                <div className="space-y-3 sm:space-y-4">
                   {safePortfolioProjects.length > 0 ? (
                     safePortfolioProjects.map((project, index) => (
                       <Card

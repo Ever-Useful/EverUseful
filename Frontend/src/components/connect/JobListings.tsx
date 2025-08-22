@@ -95,10 +95,10 @@ const JobListings = () => {
 
   return (
     <>
-      <section id="job-listings" className="py-6 md:py-8 lg:py-10" style={{ backgroundColor: '#5A6B3F' }}>
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-6 md:mb-8 lg:mb-10">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 md:mb-3">
+      <section id="job-listings" className="py-8 sm:py-10 bg-olive-light">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-6">
+            <h2 className="heading-header font-bold text-black mb-2">
               Open Positions
             </h2>
             <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-4 md:mb-6 px-4">
