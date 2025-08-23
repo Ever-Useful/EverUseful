@@ -302,6 +302,7 @@ const Connections = () => {
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Sent Invitations</h2>
                 <p className="text-sm text-gray-600 mt-1">Manage your outgoing connection requests</p>
+
               </div>
               <Badge variant="secondary" className="bg-blue-100 text-blue-800 px-3 py-1 sm:self-start">
                 {suggestions.length} pending
@@ -332,11 +333,13 @@ const Connections = () => {
 
       case 'find':
         return (
+
           <div className="flex flex-col h-full">
             {/* Sticky header */}
             <div className="p-4 bg-white rounded-t-lg border border-b-0 border-gray-200 sticky top-0 z-10">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Find Connections</h2>
               <div className="relative">
+
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search by name, title, or company..."

@@ -98,6 +98,28 @@
   scroll-behavior: smooth;
 }
 
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
 /* Optimize hover effects */
 .hover-optimized {
   transition: all 0.2s ease-out;
@@ -886,27 +908,27 @@ html {
     font-size: 10px !important;
   }
   .mobile-text-base {
-    font-size: 0.875rem;
+    font-size: 12px !important;
     line-height: 1.25rem;
   }
   .mobile-text-lg {
-    font-size: 1.125rem;
+    font-size: 13px !important;
     line-height: 1.75rem;
   }
   .mobile-text-xl {
-    font-size: 1.25rem;
+    font-size: 14px !important;
     line-height: 1.75rem;
   }
   .mobile-text-2xl {
-    font-size: 1.5rem;
+    font-size: 15px !important;
     line-height: 2rem;
   }
   .mobile-text-3xl {
-    font-size: 1.875rem;
+    font-size: 16px !important;
     line-height: 2.25rem;
   }
   .mobile-text-4xl {
-    font-size: 2.25rem;
+    font-size: 17px !important;
     line-height: 2.5rem;
   }
   

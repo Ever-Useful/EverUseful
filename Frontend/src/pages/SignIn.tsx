@@ -831,7 +831,7 @@ const SignIn = () => {
                 </Link>
               </div>
               <div className="text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-2 xs:mb-4 lg:mb-4 leading-tight mobile-text-4xl">
+                <h1 className="text-4xl font-bold text-gray-900 mb-2 xs:mb-4 lg:mb-4 leading-tight mobile-text-2xl">
                   Welcome Back to
                   <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Innovation

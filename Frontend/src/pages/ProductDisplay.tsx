@@ -332,7 +332,7 @@ const ProductDisplay = () => {
                 {project.category}
               </Badge>
               
-              <h1 className="text-4xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight mobile-text-4xl">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight mobile-text-2xl">
                 {project.title}
               </h1>
               
