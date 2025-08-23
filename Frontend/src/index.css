@@ -617,6 +617,87 @@ html {
     70% { transform: scale(1); }
   }
 
+  /* AI-specific keyframes */
+  @keyframes ai-thinking {
+    0%, 100% { 
+      transform: scale(1) rotate(0deg);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    }
+    25% { 
+      transform: scale(1.05) rotate(2deg);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+    }
+    50% { 
+      transform: scale(1.1) rotate(-1deg);
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.7);
+    }
+    75% { 
+      transform: scale(1.05) rotate(1deg);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+    }
+  }
+
+  @keyframes ai-processing {
+    0%, 100% { 
+      background: linear-gradient(45deg, #8b5cf6, #ec4899);
+      transform: scale(1);
+    }
+    50% { 
+      background: linear-gradient(45deg, #ec4899, #3b82f6);
+      transform: scale(1.02);
+    }
+  }
+
+  @keyframes ai-typing {
+    0%, 100% { 
+      transform: translateY(0);
+      opacity: 1;
+    }
+    25% { 
+      transform: translateY(-2px);
+      opacity: 0.8;
+    }
+    50% { 
+      transform: translateY(-4px);
+      opacity: 0.6;
+    }
+    75% { 
+      transform: translateY(-2px);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes ai-glow {
+    0%, 100% { 
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+      filter: brightness(1);
+    }
+    50% { 
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+      filter: brightness(1.1);
+    }
+  }
+
+  @keyframes ai-pulse {
+    0%, 100% { 
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% { 
+      transform: scale(1.05);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes ai-shimmer {
+    0% { 
+      background-position: -200% 0;
+    }
+    100% { 
+      background-position: 200% 0;
+    }
+  }
+
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
@@ -676,6 +757,31 @@ html {
 
   .animate-heartbeat {
     animation: heartbeat 2s ease-in-out infinite;
+  }
+
+  /* AI-specific animations */
+  .animate-ai-thinking {
+    animation: ai-thinking 2s ease-in-out infinite;
+  }
+
+  .animate-ai-processing {
+    animation: ai-processing 1.5s ease-in-out infinite;
+  }
+
+  .animate-ai-typing {
+    animation: ai-typing 0.8s ease-in-out infinite;
+  }
+
+  .animate-ai-glow {
+    animation: ai-glow 3s ease-in-out infinite;
+  }
+
+  .animate-ai-pulse {
+    animation: ai-pulse 4s ease-in-out infinite;
+  }
+
+  .animate-ai-shimmer {
+    animation: ai-shimmer 2.5s ease-in-out infinite;
   }
   
   .hover-lift:hover {
