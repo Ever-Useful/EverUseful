@@ -49,6 +49,7 @@ import Connections from '@/components/Connections';
 import { EditProfile } from '../components/EditProfile';
 import { MyProjects } from '@/components/MyProjects';
 import { Input } from '@/components/ui/input';
+import { clearAllCookies } from '@/utils/cookieUtils';
 
 const mockNotifications = [
     {
@@ -382,6 +383,9 @@ const Header = () => {
 
             // Clear localStorage
             localStorage.removeItem("isLoggedIn");
+
+            // Clear all cookies
+            clearAllCookies();
 
             // Sign out from Firebase
             await auth.signOut();
