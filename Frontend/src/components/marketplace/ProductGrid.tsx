@@ -620,6 +620,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
         }>
           {projects.map((project, idx) => (
             isMobile ? (
+
               <div key={project.id} className="flex items-center gap-3 p-3 cursor-pointer bg-white w-full">
                 {/* Image on left - fixed size and centered */}
                 <div className="relative flex-shrink-0 w-24 h-24 flex items-center justify-center">

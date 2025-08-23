@@ -126,23 +126,25 @@ const Profile = () => {
       const storedEmail = localStorage.getItem("userEmail");
       const storedPhone = localStorage.getItem("userPhone");
 
-      // Resolve avatar URL - use direct S3 URL since bucket is public
+      // Resolve avatar: prefer full URL; if S3 key, construct public URL
       let resolvedAvatarUrl = userProfileData?.avatar || '';
-      console.log('Profile - Raw avatar URL from database:', resolvedAvatarUrl);
-      if (resolvedAvatarUrl && resolvedAvatarUrl.includes('amazonaws.com/')) {
-        // Since bucket is public, use direct URL with cache busting
+      console.log('Profile - Raw avatar value from database:', resolvedAvatarUrl);
+      if (resolvedAvatarUrl && !resolvedAvatarUrl.includes('amazonaws.com/')) {
+        resolvedAvatarUrl = `https://amogh-assets.s3.ap-south-1.amazonaws.com/${resolvedAvatarUrl}`;
+      }
+      if (resolvedAvatarUrl) {
         resolvedAvatarUrl = `${resolvedAvatarUrl}${resolvedAvatarUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
-        console.log('Profile - Final avatar URL with cache busting:', resolvedAvatarUrl);
       }
       setResolvedAvatar(resolvedAvatarUrl);
 
-      // Resolve background URL - use direct S3 URL since bucket is public
+      // Resolve background: prefer full URL; if S3 key, construct public URL
       let resolvedBackgroundUrl = userProfileData?.backgroundImage || backgroundImage;
-      console.log('Profile - Raw background URL from database:', resolvedBackgroundUrl);
-      if (resolvedBackgroundUrl && resolvedBackgroundUrl.includes('amazonaws.com/')) {
-        // Since bucket is public, use direct URL with cache busting
-        resolvedBackgroundUrl = `${resolvedBackgroundUrl}${resolvedBackgroundUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
-        console.log('Profile - Final background URL with cache busting:', resolvedBackgroundUrl);
+      console.log('Profile - Raw background value from database:', resolvedBackgroundUrl);
+      if (resolvedBackgroundUrl && !String(resolvedBackgroundUrl).includes('amazonaws.com/')) {
+        resolvedBackgroundUrl = `https://amogh-assets.s3.ap-south-1.amazonaws.com/${resolvedBackgroundUrl}`;
+      }
+      if (resolvedBackgroundUrl) {
+        resolvedBackgroundUrl = `${resolvedBackgroundUrl}${String(resolvedBackgroundUrl).includes('?') ? '&' : '?'}t=${Date.now()}`;
       }
       setResolvedBackground(resolvedBackgroundUrl);
       setBackgroundImage(resolvedBackgroundUrl || backgroundImage);
@@ -495,12 +497,12 @@ const Profile = () => {
                       </div>
                       
                       {/* Hover overlay - Desktop only */}
-                      <div className="hidden md:block absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      {/* <div className="hidden md:block absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <div className="text-white text-center">
                           <Camera className="w-8 h-8 mx-auto mb-1" />
                           <span className="text-xs font-medium">Change photo</span>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   }
                 />
@@ -603,6 +605,7 @@ const Profile = () => {
 
             {/* About Section - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
+
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
                   <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
@@ -613,6 +616,7 @@ const Profile = () => {
                   </h2>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('About'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
                     <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
+
                   </Button>
                 </div>
                 <div>
@@ -628,6 +632,7 @@ const Profile = () => {
 
             {/* Academic Background - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
+
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
@@ -637,7 +642,7 @@ const Profile = () => {
                     Education
                   </h2>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('Education'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
-                    <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
+
                   </Button>
                 </div>
                 <div className="space-y-4 sm:space-y-6">
@@ -662,6 +667,7 @@ const Profile = () => {
 
             {/* Work Experience Section - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
+
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
@@ -672,6 +678,7 @@ const Profile = () => {
                   </h2>
                   <Button variant="ghost" size="sm" onClick={() => { setEditSection('Work Experience'); setShowEditProfile(true); }} className="-translate-y-[15px] translate-x-[15px] text-purple-600 text-xs sm:text-sm hover:text-purple-700 hover:bg-purple-50">
                     <Edit className="w-2 h-2 mr-1" /><span className="hidden sm:inline">Edit</span>
+
                   </Button>
                 </div>
                 <div className="space-y-4 sm:space-y-6">
@@ -696,6 +703,7 @@ const Profile = () => {
 
             {/* Portfolio Section - LinkedIn Mobile Style */}
             <Card className="bg-white shadow-lg rounded-xl">
+
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h2 className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 flex items-center">
@@ -704,6 +712,7 @@ const Profile = () => {
                     </span>
                     Projects
                   </h2>
+
                   <Button
                     variant="ghost"
                     size="sm"

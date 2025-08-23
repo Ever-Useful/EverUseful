@@ -33,6 +33,13 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
             categories: [
                 { id: 'explore', label: 'Projects', href: '/marketplace' },
                 ...(isLoggedIn ? [{ id: 'new project', label: 'Add New Project', href: '/profile#projects' }] : []),
+                ...(isLoggedIn ? [{ id: 'newproject', label: 'Add New Project', href: '#' }] : []),
+                // { id: 'datasets', label: 'Datasets', href: '/marketplace/datasets' },
+                // { id: 'algorithms', label: 'Algorithms', href: '/marketplace/algorithms' },
+                // { id: 'models', label: 'AI Models', href: '/marketplace/models' },
+                // { id: 'tools', label: 'Development Tools', href: '/marketplace/tools' },
+                // { id: 'templates', label: 'Templates', href: '/marketplace/templates' },
+                // { id: 'apis', label: 'APIs', href: '/services#apis' },
             ],
             content: {
                 explore: {
@@ -494,19 +501,28 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                     <div className="col-span-3 bg-gray-50 border-r border-gray-200">
                         <div className="p-4">
                             <div className="space-y-1">
-                                {menuData.categories.map((category) => (
-                                    <Link
-                                        key={category.id}
-                                        to={category.href}
-                                        className={`flex items-center px-3 py-3 text-sm cursor-pointer transition-all duration-200 rounded-md ${activeCategory === category.id
-                                                ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
-                                                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                            }`}
-                                        onMouseEnter={() => setActiveCategory(category.id)}
-                                    >
-                                        <span className="font-medium text-sm">{category.label}</span>
-                                    </Link>
-                                ))}
+                                {menuData.categories.map((category) => {
+                                    const isAddNew = category.id === 'newproject';
+                                    return (
+                                        <a
+                                            key={category.id}
+                                            href={category.href}
+                                            onClick={(e) => {
+                                                if (isAddNew) {
+                                                    e.preventDefault();
+                                                    window.dispatchEvent(new CustomEvent('open-myprojects'));
+                                                }
+                                            }}
+                                            className={`flex items-center px-3 py-3 text-sm cursor-pointer transition-all duration-200 rounded-md ${activeCategory === category.id
+                                                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
+                                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                                }`}
+                                            onMouseEnter={() => setActiveCategory(category.id)}
+                                        >
+                                            <span className="font-medium text-sm">{category.label}</span>
+                                        </a>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -515,15 +531,31 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                     <div className="col-span-5 border-r border-gray-200">
                         <div className="p-4">
                             <div className="grid grid-cols-2 gap-2">
-                                {currentContent?.subcategories?.map((subcategory, index) => (
-                                    <Link
-                                        key={index}
-                                        to={subcategory.href}
-                                        className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer rounded-md transition-colors duration-150"
-                                    >
-                                        {subcategory.name}
-                                    </Link>
-                                ))}
+                                {currentContent?.subcategories?.map((subcategory: any, index: number) => {
+                                    const isWorkMenu = menuKey === 'Work';
+                                    const commonClasses = "px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer rounded-md transition-colors duration-150";
+                                    if (isWorkMenu || !subcategory?.href) {
+                                        return (
+                                            <a
+                                                key={index}
+                                                href="#"
+                                                onClick={(e) => e.preventDefault()}
+                                                className={commonClasses}
+                                            >
+                                                {subcategory.name}
+                                            </a>
+                                        );
+                                    }
+                                    return (
+                                        <Link
+                                            key={index}
+                                            to={subcategory.href}
+                                            className={commonClasses}
+                                        >
+                                            {subcategory.name}
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

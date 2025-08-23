@@ -92,7 +92,7 @@ const handlers = useSwipeable({
 
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">Upcoming Events & Speaker Talks</h2>
+          <h2 className="heading-section font-bold mb-6 text-white">Upcoming Events & Speaker Talks</h2>
           <p className="text-indigo-100 text-lg max-w-3xl mx-auto mb-8 leading-relaxed">
             Join industry leaders and innovators at our exclusive events.
           </p>

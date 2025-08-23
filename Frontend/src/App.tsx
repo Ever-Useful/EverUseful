@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { useEffect } from "react";
+import CookieConsent from "@/components/CookieConsent";
 
 
 // Lazy load all pages for code splitting
@@ -94,6 +95,9 @@ const App = () => (
             }}
           >
             <GlobalScrollToTop />
+            
+            {/* Cookie Consent Banner */}
+            <CookieConsent />
             
              <Routes>
             <Route path="/" element={
