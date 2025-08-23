@@ -383,7 +383,7 @@ const Cart = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-2">
           <div className="flex items-center gap-2">
             <ShoppingCart className="h-7 w-7 text-blue-600" />
-            <h2 className="text-4xl font-bold text-gray-900 mobile-text-4xl">
+            <h2 className="heading-section font-bold text-gray-900 mobile-text-4xl">
               Your Cart
             </h2>
             <span className="ml-2 bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded-full">

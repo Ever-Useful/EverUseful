@@ -87,12 +87,11 @@ export const GlobalCollaborations: React.FC = () => {
         background: 'linear-gradient(135deg, #f8fcff 0%, #e6f0fa 100%)'
       }}
     >
-      {/* Inject marquee keyframes and CTA mobile CSS */}
       <div className="max-w-7xl mx-auto px-4">
         {/* Header with image */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-8">
           <div className="flex-1 text-left">
-            <h2 className="text-[17px] sm:text-4xl font-extrabold text-slate-800 mb-2 md:mb-3 tracking-tight mobile-text-4xl">
+            <h2 className="sm:text-4xl font-extrabold text-slate-800 mb-2 md:mb-3 tracking-tight mobile-text-2xl">
               Our <span className="text-cyan-500">Trusted Partners</span>
             </h2>
             <p className="text-base text-slate-600 max-w-xl mobile-text-base">
@@ -180,7 +179,7 @@ export const GlobalCollaborations: React.FC = () => {
         >
           {/* Hide this on mobile */}
           <div className="flex-1 cta-mobile-hide">
-            <h2 className="text-3xl font-bold text-white mb-2 mobile-text-3xl">Ready to Collaborate?</h2>
+            <h2 className="text-3xl font-bold text-white mb-2 mobile-text-2xl">Ready to Collaborate?</h2>
             <ul className="space-y-1 text-cyan-100 text-base mb-2 mobile-text-base">
               <li>• Access global expertise and innovation</li>
               <li>• Work with industry leaders</li>

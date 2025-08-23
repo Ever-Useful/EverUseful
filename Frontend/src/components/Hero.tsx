@@ -80,7 +80,7 @@ export const Hero = () => {
             {/* LEFT: Text + Button */}
 
             <div className="w-full lg:w-1/3 text-center lg:text-left mb-10 lg:mb-0">
-              <h1 className="text-[17px] sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight mobile-text-4xl">
+              <h1 className="sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight mobile-text-2xl">
                 Connect{" "}
 
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
@@ -91,7 +91,7 @@ export const Hero = () => {
                   Opportunity
                 </span>
               </h1>
-              <p className="text-[12px] sm:text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
+              <p className="sm:text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
                 A platform where students, PhD holders, professors, and
                 businesses collaborate to transform ideas into real-world impact.
                 Join the future of collaborative innovation today.
