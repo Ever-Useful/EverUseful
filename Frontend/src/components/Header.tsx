@@ -49,6 +49,7 @@ import Connections from '@/components/Connections';
 import { EditProfile } from '../components/EditProfile';
 import { MyProjects } from '@/components/MyProjects';
 import { Input } from '@/components/ui/input';
+import { clearAllCookies } from '@/utils/cookieUtils';
 
 const mockNotifications = [
     {
@@ -382,6 +383,9 @@ const Header = () => {
 
             // Clear localStorage
             localStorage.removeItem("isLoggedIn");
+
+            // Clear all cookies
+            clearAllCookies();
 
             // Sign out from Firebase
             await auth.signOut();
@@ -982,30 +986,59 @@ const Header = () => {
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 <div className="flex flex-col items-center text-center">
+                                    {/* Debug info - remove in production */}
+                                    {/* {process.env.NODE_ENV === 'development' && (
+                                        // <div className="text-xs text-gray-500 mb-2">
+                                        //     Avatar: {profileData.avatar || 'No avatar'}
+                                        //     <button 
+                                        //         onClick={() => refreshProfile()} 
+                                        //         className="ml-2 text-blue-500 underline"
+                                        //     >
+                                        //         Refresh
+                                        //     </button>
+                                        // </div>
+                                    )} */}
+                                    
+                                    {/* Profile Photo with proper error handling */}
                                     {profileData.avatar ? (
                                         <img 
                                             src={profileData.avatar} 
                                             alt={`${profileData.firstName} ${profileData.lastName}`}
                                             className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
                                             onError={(e) => {
+                                                console.log('Avatar image failed to load, falling back to initials');
                                                 e.currentTarget.style.display = 'none';
-                                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                                const initialsAvatar = e.currentTarget.nextElementSibling;
+                                                if (initialsAvatar) {
+                                                    initialsAvatar.classList.remove('hidden');
+                                                }
                                             }}
                                         />
                                     ) : null}
+                                    
+                                    {/* Fallback to Initials Avatar */}
                                     <InitialsAvatar 
                                         firstName={profileData.firstName} 
                                         lastName={profileData.lastName} 
                                         size={80} 
                                         className={`sm:w-24 sm:h-24 ${profileData.avatar ? 'hidden' : ''}`} 
                                     />
-                                    <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">{profileData.firstName} {profileData.lastName}</h3>
-                                    <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
-                                        View Profile &gt;
-                                    </Link>
+                                    
+                                    <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">
+                                        {profileData.firstName && profileData.lastName 
+                                            ? `${profileData.firstName} ${profileData.lastName}`
+                                            : 'User Profile'
+                                        }
+                                    </h3>
+                                    
+                                    {profileData.firstName && profileData.lastName && (
+                                        <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
+                                            View Profile &gt;
+                                        </Link>
+                                    )}
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
+                                {/* <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
                                     <div className="p-2 rounded-lg bg-gray-50">
                                         <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-green-500 mb-1" />
                                         <p className="font-bold text-xs sm:text-sm text-gray-900">111452</p>
@@ -1018,7 +1051,7 @@ const Header = () => {
                                         <Shield className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-blue-500 mb-1" />
                                         <p className="font-bold text-xs sm:text-sm text-gray-900">528</p>
                                     </div>
-                                </div>
+                                </div> */}
                                 <div>
                                     <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">USER</h4>
                                     <nav className="space-y-1">

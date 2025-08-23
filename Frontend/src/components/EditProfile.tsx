@@ -209,7 +209,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           department: professorInfo?.department || '',
           designation: professorInfo?.designation || '',
           researchInterests: professorInfo?.researchInterests || '',
-          skills: (freelancerInfo?.skills && Array.isArray(freelancerInfo.skills) ? freelancerInfo.skills : []).join(','),
+          skills: '', // We'll handle skills separately through the skills state
           experience: freelancerInfo?.experience || '',
           portfolio: freelancerInfo?.portfolio || '',
           hourlyRate: freelancerInfo?.hourlyRate || '',
@@ -345,6 +345,10 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         
       } else if (activeSection === 'About') {
         await userService.updateProfile({ bio: profileData.bio });
+      } else if (activeSection === 'Skills') {
+        // Skills are handled individually through addSkill/deleteSkill methods
+        // No bulk save needed for skills section
+        toast.success('Skills section - use the Add/Remove buttons to manage skills');
       } else if (activeSection === 'Education') {
         await userService.updateStudentData({
           college: profileData.college,
@@ -422,6 +426,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         category: 'general'
       });
       setSkills(prev => [...prev, trimmedSkill]);
+      setSkillInput(''); // Clear input after successful add
       toast.success('Skill added successfully!');
     } catch (error) {
       console.error('Failed to add skill:', error);
@@ -438,7 +443,8 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
     
     try {
       await userService.deleteSkill(skillToRemove);
-      setSkills(prev => prev.filter(skill => skill !== skillToRemove));
+      const updatedSkills = skills.filter(skill => skill !== skillToRemove);
+      setSkills(updatedSkills);
       toast.success('Skill removed successfully');
     } catch (error) {
       console.error('Failed to remove skill:', error);
@@ -626,7 +632,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                             <li key={index} className="flex-shrink-0 sm:flex-shrink">
                                 <button
                                   onClick={() => setActiveSection(step.name)}
-                                  className={`whitespace-nowrap sm:whitespace-normal flex items-center p-2 sm:p-3 my-1 rounded-md text-xs sm:text-sm font-medium transition-colors text-left ${activeSection === step.name ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500' : 'hover:bg-slate-200 text-slate-700'}`}
+                                  className={`whitespace-nowrap sm:whitespace-normal w-full flex items-center p-2 sm:p-3 my-1 rounded-md text-xs sm:text-sm font-medium transition-colors text-left ${activeSection === step.name ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500' : 'hover:bg-slate-200 text-slate-700'}`}
                                 >
                                     <span>{step.name}</span>
                                 </button>
@@ -874,14 +880,69 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Skills</h3>
                   <div className="space-y-4 sm:space-y-6">
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-gray-700">Skills (comma-separated)</label>
-                      <textarea
-                        name="skills"
-                        value={profileData.skills ?? ''}
-                        onChange={handleInputChange}
-                        className="mt-1 w-full h-32 sm:h-40 p-3 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-                        placeholder="e.g. JavaScript, React, Node.js, Python..."
-                      />
+                      <label className="text-xs sm:text-sm font-medium text-gray-700">Add Skills</label>
+                      <div className="flex gap-2 mt-1">
+                        <Input
+                          value={skillInput}
+                          onChange={handleSkillInputChange}
+                          onKeyDown={handleSkillInputKeyDown}
+                          placeholder="Enter a skill and press Enter"
+                          className="flex-1 h-10 sm:h-11 text-xs sm:text-sm"
+                        />
+                        <Button
+                          onClick={() => handleAddSkill(skillInput)}
+                          disabled={!skillInput.trim()}
+                          className="h-10 sm:h-11 px-4"
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs sm:text-sm font-medium text-gray-700">Your Skills</label>
+                      <div className="mt-2 space-y-2">
+                        {skills.length === 0 ? (
+                          <p className="text-gray-500 text-sm">No skills added yet. Start adding skills above.</p>
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            {skills.map((skill, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-2 rounded-full text-sm"
+                              >
+                                <span>{skill}</span>
+                                <button
+                                  onClick={() => handleRemoveSkill(skill)}
+                                  className="text-blue-600 hover:text-blue-800"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs sm:text-sm font-medium text-gray-700">Suggested Skills</label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {suggestedSkills.map((skill) => (
+                          <button
+                            key={skill}
+                            onClick={() => handleAddSkill(skill)}
+                            disabled={skills.includes(skill)}
+                            className={`px-3 py-2 rounded-full text-sm border transition-colors ${
+                              skills.includes(skill)
+                                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {skill}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </>

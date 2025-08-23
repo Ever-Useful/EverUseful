@@ -212,7 +212,7 @@ const FindExpert = () => {
                 <h1 className="heading-section mb-4 xs:mb-6 leading-tight">
                   Connect with <span className="text-amber-400">PhD Experts</span> for Research & Mentorship
                 </h1>
-                <p className="text-base text-indigo-100 mb-5 xs:mb-8 max-w-xl mobile-text-base">
+                <p className="body-base text-indigo-100 mb-5 xs:mb-8 max-w-xl">
                   Access specialized knowledge from verified PhD researchers and academics. Collaborate on research projects, receive expert mentorship, and accelerate your R&D initiatives with qualified doctoral experts.
                 </p>
               </motion.div>
@@ -226,11 +226,11 @@ const FindExpert = () => {
                   <input
                     type="text"
                     placeholder="Search by PhD research field, university, or expertise..."
-                    className="w-full px-4 xs:px-5 py-3 xs:py-4 rounded-xl border-0 bg-white/10 backdrop-blur-sm text-white placeholder-indigo-200 focus:ring-2 focus:ring-amber-400 focus:outline-none shadow-lg text-xs xs:text-base"
+                    className="w-full px-4 xs:px-5 py-3 xs:py-4 rounded-xl border-0 bg-white/10 backdrop-blur-sm text-white placeholder-indigo-200 focus:ring-2 focus:ring-amber-400 focus:outline-none shadow-lg meta-sm"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  <button className="absolute right-2 top-2 bg-amber-500 hover:bg-amber-600 text-white font-medium py-1.5 xs:py-2 px-4 xs:px-5 rounded-lg transition-colors text-xs xs:text-base">
+                  <button className="absolute right-2 top-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-5 rounded-lg transition-colors body-base">
                     Search
                   </button>
                 </div>
@@ -247,7 +247,7 @@ const FindExpert = () => {
                 <div className="relative bg-white/10 backdrop-blur-lg rounded-2xl xs:rounded-3xl border border-white/20 p-4 xs:p-6 shadow-2xl">
                   <div className="flex items-center mb-3 xs:mb-4">
                     <div className="bg-green-500 w-2.5 h-2.5 xs:w-3 xs:h-3 rounded-full mr-2"></div>
-                    <span className="text-green-400 text-xs xs:text-sm">Online Researchers</span>
+                    <span className="text-green-400 meta-xs">Online Researchers</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 xs:gap-4">
                     {phdExperts.slice(0, 4).map((user, index) => (
@@ -265,12 +265,12 @@ const FindExpert = () => {
                             className="w-8 h-8 xs:w-10 xs:h-10 rounded-full object-cover border-2 border-white/30"
                           />
                           <div className="ml-2">
-                            <h3 className="text-white font-medium text-xs xs:text-sm">{user.profile?.firstName} {user.profile?.lastName}</h3>
-                            <p className="text-indigo-200 text-[10px] xs:text-xs">{user.profile?.title}</p>
+                            <h3 className="text-white font-medium meta-sm">{user.profile?.firstName} {user.profile?.lastName}</h3>
+                            <p className="text-indigo-200 meta-xs">{user.profile?.title}</p>
                           </div>
                         </div>
                         <button
-                          className="mt-2 w-full bg-amber-400 hover:bg-amber-500 text-white text-[10px] xs:text-xs font-semibold py-1 px-2 rounded"
+                          className="mt-2 w-full bg-amber-400 hover:bg-amber-500 text-white meta-xs font-semibold py-1 px-2 rounded"
                           onClick={() => goToProfile(user.profile?.userType, user.customUserId)}
                         >
                           View Profile
@@ -279,7 +279,7 @@ const FindExpert = () => {
                     ))}
                   </div>
                   <div className="mt-4 xs:mt-6 text-center">
-                    <div className="inline-flex items-center bg-indigo-700/50 px-3 xs:px-4 py-1.5 xs:py-2 rounded-full text-xs xs:text-sm">
+                    <div className="inline-flex items-center bg-indigo-700/50 px-3 xs:px-4 py-1.5 xs:py-2 rounded-full meta-sm">
                       <span className="text-amber-400 mr-2">★</span>
                       <span>4.8 average rating from academic clients</span>
                     </div>
@@ -291,10 +291,10 @@ const FindExpert = () => {
         </div>
       </div>
     {/* Stats Section */}
-    <div className="py-6 xs:py-10 bg-white">
+    <div className="py-12 md:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="grid grid-cols-2 xs:grid-cols-4 gap-3 xs:gap-5"
+          className="grid grid-cols-2 xs:grid-cols-4 gap-4 md:gap-6"
           initial="hidden"
           animate="visible"
           variants={containerVariants}
@@ -303,12 +303,12 @@ const FindExpert = () => {
             <motion.div
               key={stat.id}
               variants={itemVariants}
-              className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-3 xs:p-5 flex flex-col items-center justify-center text-center border border-gray-100 shadow-sm"
+              className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-4 md:p-6 flex flex-col items-center justify-center text-center border border-gray-100 shadow"
               whileHover={{ scale: 1.03, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
             >
               <div className="text-xl xs:text-3xl text-indigo-600 mb-1 xs:mb-2">{stat.icon}</div>
-              <div className="text-lg xs:text-2xl font-bold text-indigo-900">{stat.value}</div>
-              <div className="text-gray-600 text-xs xs:text-sm mt-1">{stat.label}</div>
+              <div className="heading-card-2xl font-bold text-indigo-900">{stat.value}</div>
+              <div className="text-gray-600 meta-sm mt-1">{stat.label}</div>
             </motion.div>
           ))}
         </motion.div>
@@ -316,18 +316,18 @@ const FindExpert = () => {
     </div>
 
     {/* Domain Section */}
-    <div className="py-6 xs:py-10 bg-gray-50">
+    <div className="py-12 md:py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 xs:mb-6 text-center"
         >
-        <h2 className="text-3xl font-bold text-gray-900 mb-1 xs:mb-2 mobile-text-3xl">Browse Research Domains</h2>
-        <p className="text-xs xs:text-base text-gray-600 mobile-text-base">Find experts in specific academic disciplines</p>
+        <h2 className="heading-section font-bold text-gray-900 mb-1 xs:mb-2">Browse Research Domains</h2>
+        <p className="body-base text-gray-600">Find experts in specific academic disciplines</p>
         </motion.div>
         <motion.div
-          className="hidden sm:grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 xs:gap-3"
+          className="hidden sm:grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -339,12 +339,12 @@ const FindExpert = () => {
               whileHover={{ scale: 1.05, backgroundColor: "#4f46e5", color: "#fff" }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveCategory(category.id)}
-              className={`flex flex-col items-center justify-center p-2 xs:p-3 rounded-lg transition-all bg-white text-gray-700 shadow-sm border border-gray-200 ${
+              className={`flex flex-col items-center justify-center p-3 md:p-4 rounded-xl transition-all bg-white text-gray-700 shadow-sm border border-gray-200 ${
                 activeCategory === category.id ? "bg-indigo-600 text-white" : ""
               }`}
             >
               <span className="text-lg xs:text-2xl mb-0.5 xs:mb-1">{category.icon}</span>
-              <span className="font-medium text-[10px] xs:text-xs text-center">{category.name}</span>
+              <span className="font-medium meta-xs text-center">{category.name}</span>
             </motion.button>
           ))}
         </motion.div>
@@ -352,22 +352,22 @@ const FindExpert = () => {
     </div>
 
     {/* Filter Bar */}
-    <div className="max-w-7xl mx-auto px-2 xs:px-4 py-6 xs:py-12 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-2 xs:px-4 py-10 md:py-14 sm:px-6 lg:px-8">
       <div className="hidden sm:block bg-white rounded-xl shadow-sm p-3 xs:p-4 mb-6 xs:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 xs:gap-4">
         <div>
-          <h2 className="text-base xs:text-xl font-bold text-gray-900">
+          <h2 className="heading-header font-bold text-gray-900">
             PhD Research Experts
           </h2>
-          <p className="text-gray-600 text-xs xs:text-sm">
+          <p className="body-base text-gray-600">
             {filteredExperts.length} PhD experts available for collaboration
           </p>
         </div>
         <div className="flex flex-col md:flex-row gap-3 xs:gap-4 w-full md:w-auto">
           <div className="flex items-center w-full md:w-auto gap-2">
             <ArrowUpDown className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-500 text-xs font-medium">Sort by</span>
+            <span className="text-gray-500 meta-xs font-medium">Sort by</span>
             <select
-              className="bg-white border border-gray-300 rounded-lg py-1.5 xs:py-2 px-2 xs:px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm w-full md:w-auto ml-1 text-xs xs:text-sm"
+              className="bg-white border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm w-full md:w-auto ml-1 meta-sm"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
@@ -381,7 +381,7 @@ const FindExpert = () => {
             <input
               type="text"
               placeholder="Filter by PhD expertise..."
-              className="w-full px-3 xs:px-4 py-1.5 xs:py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm text-xs xs:text-sm"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm meta-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -391,7 +391,7 @@ const FindExpert = () => {
 
       {/* Experts Grid */}
       <motion.div
-        className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 xs:gap-5"
+        className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -402,21 +402,21 @@ const FindExpert = () => {
               key={expert.id}
               variants={itemVariants}
               whileHover={{ y: -3 }}
-              className="rounded-xl overflow-hidden shadow-lg transition-all flex flex-col h-full bg-gradient-to-br from-blue-50 to-purple-50"
+              className="rounded-2xl overflow-hidden shadow-lg transition-all flex flex-col h-full bg-gradient-to-br from-blue-50 to-purple-50"
             >
               <div className="flex flex-col h-full">
-                <div className="p-3 xs:p-5 flex-1 flex flex-col">
+                <div className="p-4 md:p-6 flex-1 flex flex-col">
                   <div className="flex justify-center mb-2 xs:mb-3">
                     <img
                       src={expert.image}
                       alt={expert.name}
-                      className="w-14 xs:w-20 h-14 xs:h-20 rounded-full object-cover border-2 xs:border-3 border-white/80 shadow-lg"
+                      className="w-16 md:w-24 h-16 md:h-24 rounded-full object-cover border-2 md:border-[3px] border-white/80 shadow-lg"
                     />
                   </div>
                   <div className="text-center mb-2 xs:mb-3">
-                    <h3 className="text-base xs:text-lg font-bold text-black">{expert.name}</h3>
-                    <p className="text-black font-medium text-xs xs:text-sm">{expert.title}</p>
-                    <p className="text-black text-[10px] xs:text-xs mt-1">{expert.university}</p>
+                    <h3 className="heading-card-xl font-bold text-black">{expert.name}</h3>
+                    <p className="heading-card-lg text-black font-medium">{expert.title}</p>
+                    <p className="meta-sm text-black mt-1">{expert.university}</p>
                   </div>
                   <div className="flex justify-center mb-2 xs:mb-3">
                     <div className="flex text-amber-200">
@@ -436,33 +436,33 @@ const FindExpert = () => {
                         </svg>
                       ))}
                     </div>
-                    <span className="ml-1 text-black text-xs xs:text-sm">
+                    <span className="ml-1 text-black meta-sm">
                       {expert.rating} ({expert.completedProjects})
                     </span>
                   </div>
                   <div className="mb-2 xs:mb-3 text-center">
-                    <h4 className="text-[10px] xs:text-xs font-semibold text-black mb-1">Research Focus</h4>
-                    <p className="text-black text-xs xs:text-sm">{expert.researchFocus}</p>
+                    <h4 className="meta-xs font-semibold text-black mb-1">Research Focus</h4>
+                    <p className="meta-sm text-black">{expert.researchFocus}</p>
                   </div>
                   <div className="mt-auto pt-2 xs:pt-3 flex justify-between items-center border-t border-white/30">
-                    <div className="flex items-center text-white/80 text-[10px] xs:text-xs">
+                    <div className="flex items-center text-white/80 meta-xs">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 xs:h-4 xs:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                       {expert.location}
                     </div>
-                    <div className="bg-white/20 text-white text-[10px] xs:text-xs font-medium px-2 py-1 rounded">
+                    <div className="bg-white/20 text-white meta-xs font-medium px-2 py-1 rounded">
                       {expert.rate}
                     </div>
                   </div>
                 </div>
-                <div className="px-3 xs:px-5 pb-3 xs:pb-4">
+                <div className="px-4 md:px-6 pb-4 md:pb-5">
                   <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => goToProfile(expert.profile?.userType, expert.customUserId)}
-                    className="w-full bg-white/90 hover:bg-white text-gray-900 font-medium py-1.5 xs:py-2 px-3 xs:px-4 rounded-lg shadow-md text-xs xs:text-sm"
+                    className="w-full bg-white/90 hover:bg-white text-gray-900 font-medium py-2 px-4 rounded-lg shadow-md meta-sm"
                   >
                     View Profile
                   </motion.button>
@@ -485,8 +485,8 @@ const FindExpert = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 className="text-base xs:text-xl font-medium text-gray-900 mb-2">No experts found</h3>
-          <p className="text-gray-600 max-w-md mx-auto text-xs xs:text-base">
+          <h3 className="heading-card-xl font-medium text-gray-900 mb-2">No experts found</h3>
+          <p className="body-base text-gray-600 max-w-md mx-auto">
             We couldn't find any experts matching your search. Try adjusting your filters or search terms.
           </p>
         </motion.div>
@@ -498,7 +498,7 @@ const FindExpert = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 xs:py-2.5 xs:px-6 rounded-lg shadow-sm transition-all text-xs xs:text-base"
+            className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 xs:py-2.5 xs:px-6 rounded-lg shadow-sm transition-all meta-sm"
           >
             Load More Experts
           </motion.button>
@@ -511,7 +511,7 @@ const FindExpert = () => {
       <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 xs:mb-12">
           <motion.h2 
-                            className="text-2xl font-bold text-gray-900 mb-2 xs:mb-4"
+            className="heading-header font-bold text-gray-900 mb-2 xs:mb-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -519,7 +519,7 @@ const FindExpert = () => {
             Explore Our Academic Ecosystem
           </motion.h2>
           <motion.p 
-            className="text-xs xs:text-base text-gray-600 max-w-2xl mx-auto"
+            className="body-base text-gray-600 max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -544,9 +544,9 @@ const FindExpert = () => {
               className="w-full h-full object-cover"
             />
             <div className="absolute bottom-0 left-0 p-4 xs:p-6 z-20">
-              <h3 className="text-base xs:text-xl font-bold text-white mb-1 xs:mb-2">Academic Community</h3>
-              <p className="text-indigo-100 mb-2 xs:mb-4 text-xs xs:text-base">Connect with fellow researchers and academics</p>
-              <a href="#" className="text-white font-medium flex items-center group text-xs xs:text-base">
+              <h3 className="heading-card-xl font-bold text-white mb-1 xs:mb-2">Academic Community</h3>
+              <p className="text-indigo-100 mb-2 xs:mb-4 body-base">Connect with fellow researchers and academics</p>
+              <a href="#" className="text-white font-medium flex items-center group meta-sm">
                 Join Community
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 xs:h-5 xs:w-5 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -570,9 +570,9 @@ const FindExpert = () => {
               className="w-full h-full object-cover"
             />
             <div className="absolute bottom-0 left-0 p-4 xs:p-6 z-20">
-              <h3 className="text-base xs:text-xl font-bold text-white mb-1 xs:mb-2">Research Careers</h3>
-              <p className="text-purple-100 mb-2 xs:mb-4 text-xs xs:text-base">Opportunities for PhDs in academia and industry</p>
-              <a href="#" className="text-white font-medium flex items-center group text-xs xs:text-base">
+              <h3 className="heading-card-xl font-bold text-white mb-1 xs:mb-2">Research Careers</h3>
+              <p className="text-purple-100 mb-2 xs:mb-4 body-base">Opportunities for PhDs in academia and industry</p>
+              <a href="#" className="text-white font-medium flex items-center group meta-sm">
                 Browse Careers
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 xs:h-5 xs:w-5 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -596,9 +596,9 @@ const FindExpert = () => {
               className="w-full h-full object-cover"
             />
             <div className="absolute bottom-0 left-0 p-4 xs:p-6 z-20">
-              <h3 className="text-base xs:text-xl font-bold text-white mb-1 xs:mb-2">Research Marketplace</h3>
-              <p className="text-amber-100 mb-2 xs:mb-4 text-xs xs:text-base">Tools, equipment, and research services</p>
-              <a href="#" className="text-white font-medium flex items-center group text-xs xs:text-base">
+              <h3 className="heading-card-xl font-bold text-white mb-1 xs:mb-2">Research Marketplace</h3>
+              <p className="text-amber-100 mb-2 xs:mb-4 body-base">Tools, equipment, and research services</p>
+              <a href="#" className="text-white font-medium flex items-center group meta-sm">
                 Visit Marketplace
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 xs:h-5 xs:w-5 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
