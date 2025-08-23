@@ -680,8 +680,8 @@ AMOGH is a curated platform where innovation meets opportunity. We bring togethe
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-20 right-4 z-50 w-80 h-[500px] md:w-96 md:h-[600px]">
-      <Card className="w-full h-full bg-white border border-gray-200 shadow-lg relative overflow-hidden">
+    <div className="fixed top-14 left-0 right-0 bottom-0 md:bottom-20 md:right-4 md:inset-auto md:top-auto md:left-auto z-50 w-full h-[calc(100vh-64px)] md:w-96 md:h-[600px]">
+      <Card className="w-full h-full bg-white border-0 md:border md:border-gray-200 shadow-lg md:shadow-xl relative overflow-hidden rounded-none md:rounded-lg">
         {/* Professional header */}
         <CardHeader className="flex flex-row items-center justify-between p-3 md:p-4 bg-gray-50 border-b border-gray-200">
           <CardTitle className="text-gray-800 flex items-center">
@@ -689,21 +689,21 @@ AMOGH is a curated platform where innovation meets opportunity. We bring togethe
               <Brain className="w-3 h-3 md:w-4 md:h-4 text-white" />
             </div>
             <div>
-              <div className="font-semibold text-sm md:text-base">AMOGH Assistant</div>
-              <div className="text-xs text-gray-500">AI-powered support</div>
+              <div className="font-semibold text-xs md:text-base">AMOGH Assistant</div>
+              <div className="text-xs text-gray-500 hidden md:block">AI-powered support</div>
             </div>
           </CardTitle>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 h-6 w-6 md:h-8 md:w-8 p-0 rounded-full"
+            className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 h-8 w-8 md:h-8 md:w-8 p-0 rounded-full"
           >
-            <X className="w-3 h-3 md:w-4 md:h-4" />
+            <X className="w-4 h-4 md:w-4 md:h-4" />
           </Button>
         </CardHeader>
         
-        <CardContent className="p-0 flex flex-col h-[calc(500px-60px)] md:h-[calc(600px-80px)] relative">
+        <CardContent className="p-0 flex flex-col h-[calc(100vh-120px)] md:h-[calc(600px-80px)] relative">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 md:space-y-3 bg-gray-50">
             {messages.slice(-20).map((message) => (
@@ -712,10 +712,10 @@ AMOGH is a curated platform where innovation meets opportunity. We bring togethe
                 className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] p-2 md:p-3 rounded-lg ${
+                  className={`max-w-[90%] md:max-w-[85%] p-2 md:p-3 rounded-lg ${
                     message.sender === "user"
-                      ? "bg-blue-600 text-white ml-2 md:ml-4"
-                      : "bg-white text-gray-800 mr-2 md:mr-4 border border-gray-200"
+                      ? "bg-blue-600 text-white ml-1 md:ml-4"
+                      : "bg-white text-gray-800 mr-1 md:mr-4 border border-gray-200"
                   } shadow-sm`}
                 >
                   <div className="flex items-start space-x-2">
@@ -745,7 +745,7 @@ AMOGH is a curated platform where innovation meets opportunity. We bring togethe
                            {message.text}
                          </Markdown>
                        </div>
-                       <span className="text-xs opacity-70 mt-1 md:mt-2 block">
+                       <span className="text-xs opacity-70 mt-2 md:mt-2 block">
                          {message.timestamp.toLocaleTimeString([], { 
                            hour: '2-digit', 
                            minute: '2-digit' 
@@ -760,7 +760,7 @@ AMOGH is a curated platform where innovation meets opportunity. We bring togethe
             {/* Typing indicator */}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-white p-2 md:p-3 rounded-lg mr-2 md:mr-4 border border-gray-200">
+                <div className="bg-white p-2 md:p-3 rounded-lg mr-1 md:mr-4 border border-gray-200">
                   <div className="flex items-center space-x-2">
                     <div className="w-5 h-5 md:w-6 md:h-6 bg-blue-600 rounded-full flex items-center justify-center">
                       <Brain className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" />
@@ -768,9 +768,9 @@ AMOGH is a curated platform where innovation meets opportunity. We bring togethe
                     <div className="flex items-center space-x-2">
                       <div className="text-xs md:text-sm text-gray-600">AI is thinking</div>
                       <div className="flex space-x-1">
-                        <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                        <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 md:w-2 md:h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 md:w-2 md:h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 md:w-2 md:h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                       </div>
                     </div>
                   </div>
@@ -783,42 +783,42 @@ AMOGH is a curated platform where innovation meets opportunity. We bring togethe
           {/* Quick Actions */}
           {messages.length === 1 && (
             <div className="px-3 md:px-4 py-2 md:py-3 border-t border-gray-200 bg-gray-50">
-              <div className="text-xs text-gray-600 mb-2 md:mb-3 font-medium">Quick actions:</div>
-              <div className="grid grid-cols-2 gap-1.5 md:gap-2">
+              <div className="text-xs text-gray-600 mb-3 md:mb-3 font-medium">Quick actions:</div>
+              <div className="grid grid-cols-2 gap-2 md:gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs bg-white border-gray-200 text-gray-700 hover:bg-gray-50 h-8 md:h-9"
+                  className="text-xs bg-white border-gray-200 text-gray-700 hover:bg-gray-50 h-10 md:h-9"
                   onClick={() => handleQuickReply("Tell me about AMOGH projects")}
                 >
-                  <Briefcase className="w-3 h-3 mr-1 md:mr-2" />
+                  <Briefcase className="w-4 h-4 mr-2 md:mr-2" />
                   Projects
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs bg-white border-gray-200 text-gray-700 hover:bg-gray-50 h-8 md:h-9"
+                  className="text-xs bg-white border-gray-200 text-gray-700 hover:bg-gray-50 h-10 md:h-9"
                   onClick={() => handleQuickReply("How to join the community?")}
                 >
-                  <Users className="w-3 h-3 mr-1 md:mr-2" />
+                  <Users className="w-4 h-4 mr-2 md:mr-2" />
                   Community
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs bg-white border-gray-200 text-gray-700 hover:bg-gray-50 h-8 md:h-9"
+                  className="text-xs bg-white border-gray-200 text-gray-700 hover:bg-gray-50 h-10 md:h-9"
                   onClick={() => handleQuickReply("What career opportunities are available?")}
                 >
-                  <Target className="w-3 h-3 mr-1 md:mr-2" />
+                  <Target className="w-4 h-4 mr-2 md:mr-2" />
                   Careers
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs bg-white border-gray-200 text-gray-700 hover:bg-gray-50 h-8 md:h-9"
+                  className="text-xs bg-white border-gray-200 text-gray-700 hover:bg-gray-50 h-10 md:h-9"
                   onClick={() => handleQuickReply("Tell me about sustainable projects")}
                 >
-                  <Leaf className="w-3 h-3 mr-1 md:mr-2" />
+                  <Leaf className="w-4 h-4 mr-2 md:mr-2" />
                   Sustainability
                 </Button>
               </div>
@@ -826,20 +826,20 @@ AMOGH is a curated platform where innovation meets opportunity. We bring togethe
           )}
 
           {/* Input */}
-          <div className="p-3 md:p-4 border-t border-gray-200 bg-white">
-            <div className="flex space-x-2">
+          <div className="p-4 md:p-4 border-t border-gray-200 bg-white">
+            <div className="flex space-x-3">
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                placeholder="Ask about AMOGH Connect..."
-                className="bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-500 text-xs md:text-sm"
+                placeholder="Ask about AMOGH..."
+                className="bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-500 text-xs md:text-sm h-10 md:h-9"
               />
               <Button
                 onClick={handleSendMessage}
-                className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm px-2 md:px-3"
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm px-4 md:px-3 h-10 md:h-9"
               >
-                <Send className="w-3 h-3 md:w-4 md:h-4" />
+                <Send className="w-4 h-4 md:w-4 md:h-4" />
               </Button>
             </div>
           </div>
