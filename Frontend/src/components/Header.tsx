@@ -49,6 +49,7 @@ import Connections from '@/components/Connections';
 import { EditProfile } from '../components/EditProfile';
 import { MyProjects } from '@/components/MyProjects';
 import { Input } from '@/components/ui/input';
+import { clearAllCookies } from '@/utils/cookieUtils';
 
 const mockNotifications = [
     {
@@ -250,7 +251,7 @@ const Header = () => {
     const [showProjectsSidebar, setShowProjectsSidebar] = useState(false);
     const [showFavouritesSidebar, setShowFavouritesSidebar] = useState(false);
     const [showCalendarSidebar, setShowCalendarSidebar] = useState(false);
-    const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
+    // const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
    
     // Open MyProjects sidebar when a global event is dispatched (e.g., from Dashboard or Navigation)
@@ -382,6 +383,9 @@ const Header = () => {
 
             // Clear localStorage
             localStorage.removeItem("isLoggedIn");
+
+            // Clear all cookies
+            clearAllCookies();
 
             // Sign out from Firebase
             await auth.signOut();
@@ -793,7 +797,7 @@ const Header = () => {
                             setShowSettingsSidebar(false);
                             setShowCalendarSidebar(false);
                             setShowFavouritesSidebar(false);
-                            setShowConnectionsSidebar(false);
+                            // setShowConnectionsSidebar(false);
                             setShowProjectsSidebar(false);
                         }}
                     />
@@ -911,7 +915,7 @@ const Header = () => {
                         </div>
                     )} */}
 
-                    {showConnectionsSidebar && (
+                    {/* {showConnectionsSidebar && (
                         <div className="fixed bottom-0 right-0 sm:right-[24rem] w-full sm:w-[50rem] h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right z-50">
                             <div className="flex items-center justify-between p-3 sm:p-4 border-b">
                                 <h2 className="font-bold text-lg sm:text-xl text-gray-900">Connections</h2>
@@ -967,7 +971,7 @@ const Header = () => {
                                 </Tabs>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     {showProfileSidebar && (
                         <div className="relative w-full sm:w-96 max-w-[90vw] h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
@@ -1055,15 +1059,7 @@ const Header = () => {
                                             <LayoutGrid className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
                                             <span className="text-sm sm:text-base text-gray-700 font-medium">Dashboard</span>
                                         </Link>
-                                        <Link to="#"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setShowConnectionsSidebar(true);
-                                                setShowProjectsSidebar(false);
-                                                setShowSettingsSidebar(false);
-                                                setShowCalendarSidebar(false);
-                                                setShowFavouritesSidebar(false);
-                                            }}
+                                        <Link to="/connections"
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
                                             <span className="text-sm sm:text-base text-gray-700 font-medium">My Connections</span>
@@ -1079,7 +1075,7 @@ const Header = () => {
                                                 setShowSettingsSidebar(false);
                                                 setShowCalendarSidebar(false);
                                                 setShowFavouritesSidebar(false);
-                                                setShowConnectionsSidebar(false);
+                                                // setShowConnectionsSidebar(false);
                                             }}
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <List className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
@@ -1091,7 +1087,7 @@ const Header = () => {
                                                 setShowFavouritesSidebar(true);
                                                 setShowProjectsSidebar(false);
                                                 setShowSettingsSidebar(false);
-                                                setShowConnectionsSidebar(false);
+                                                // setShowConnectionsSidebar(false);
                                                 setShowCalendarSidebar(false);
                                             }}
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
@@ -1108,7 +1104,7 @@ const Header = () => {
                                                 setShowCalendarSidebar(true);
                                                 setShowFavouritesSidebar(false);
                                                 setShowProjectsSidebar(false);
-                                                setShowConnectionsSidebar(false);
+                                                // setShowConnectionsSidebar(false);
                                                 setShowSettingsSidebar(false);
                                             }}
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
@@ -1128,7 +1124,7 @@ const Header = () => {
                                                 setShowSettingsSidebar(true);
                                                 setShowCalendarSidebar(false);
                                                 setShowFavouritesSidebar(false);
-                                                setShowConnectionsSidebar(false);
+                                                // setShowConnectionsSidebar(false);
                                                 setShowProjectsSidebar(false);
                                             }}
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100"
