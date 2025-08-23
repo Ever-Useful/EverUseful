@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import userService from '@/services/userService';
+import { setAuthCookie, getAuthCookie, deleteAuthCookie, setFirebaseRefreshCookie, getFirebaseRefreshCookie, deleteFirebaseRefreshCookie } from '@/utils/cookieUtils';
 
 interface UserProfile {
   firstName: string;
@@ -50,7 +51,12 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
   });
   
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    // Check both localStorage (for backward compatibility) and cookies
+    const localLogin = localStorage.getItem("isLoggedIn") === "true";
+    const cookieLogin = getAuthCookie() !== null;
+    return localLogin || cookieLogin;
+  });
   const [hasRefreshed, setHasRefreshed] = useState(false);
   const [refreshTimeout, setRefreshTimeout] = useState<NodeJS.Timeout | null>(null);
 
@@ -111,6 +117,18 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
         setIsLoggedIn(true);
         localStorage.setItem("isLoggedIn", "true");
         
+        // Set authentication cookies
+        try {
+          const token = await user.getIdToken();
+          setAuthCookie(token);
+          
+          if (user.refreshToken) {
+            setFirebaseRefreshCookie(user.refreshToken);
+          }
+        } catch (error) {
+          console.error('Error setting auth cookies:', error);
+        }
+        
         // Check if we have cached profile data
         const cachedProfile = localStorage.getItem("userProfile");
         if (cachedProfile) {
@@ -131,6 +149,8 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
       } else {
         setIsLoggedIn(false);
         localStorage.removeItem("isLoggedIn");
+        deleteAuthCookie();
+        deleteFirebaseRefreshCookie();
         clearProfile();
         setHasRefreshed(false);
       }
