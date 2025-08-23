@@ -435,7 +435,7 @@ const ProductDisplay = () => {
               <TabsContent value="overview" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-3xl">Project Overview</CardTitle>
+                    <CardTitle className="text-gray-900">Project Overview</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <p className="text-gray-700 leading-relaxed text-xs xs:text-sm sm:text-base lg:text-lg">
@@ -453,7 +453,7 @@ const ProductDisplay = () => {
               <TabsContent value="features" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-3xl">Key Features</CardTitle>
+                    <CardTitle className="text-gray-900">Key Features</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="grid grid-cols-1 gap-1 xs:gap-2 sm:gap-3">
@@ -475,7 +475,7 @@ const ProductDisplay = () => {
               <TabsContent value="tech" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-3xl">Technology Stack</CardTitle>
+                    <CardTitle className="text-gray-900">Technology Stack</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-1 xs:gap-2 sm:gap-3 lg:gap-4">
@@ -497,7 +497,7 @@ const ProductDisplay = () => {
               <TabsContent value="deliverables" className="mt-3 xs:mt-4 sm:mt-6">
                 <Card className="border-gray-200 bg-white shadow-sm">
                   <CardHeader className="pb-2 xs:pb-3 sm:pb-6 px-3 xs:px-4 sm:px-6">
-                    <CardTitle className="text-gray-900 text-3xl">What You'll Get</CardTitle>
+                    <CardTitle className="text-gray-900">What You'll Get</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 px-3 xs:px-4 sm:px-6">
                     <div className="space-y-1 xs:space-y-2 sm:space-y-3">

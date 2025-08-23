@@ -1,3 +1,4 @@
+/* stylelint-disable at-rule-no-unknown */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 /* Tailwind CSS directives - these are processed by PostCSS */
@@ -251,12 +252,14 @@
 
 /* Custom styles using @apply */
 .btn-primary {
+  /* stylelint-disable-next-line at-rule-no-unknown */
   @apply bg-blue-500 text-white font-bold py-2 px-4 rounded;
 }
 
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
 
+/* stylelint-disable-next-line at-rule-no-unknown */
 @layer base {
    * {
     @apply border-border;
@@ -279,6 +282,13 @@
     font-family: 'Inter', sans-serif;
     font-weight: 700;
   }
+  h1 { @apply text-4xl sm:text-5xl tracking-tight; }
+  h2 { @apply text-3xl tracking-tight; }
+  h3 { @apply text-2xl; }
+  h4 { @apply text-xl; }
+  h5 { @apply text-lg; }
+  p  { @apply text-base leading-relaxed; }
+  small { @apply text-xs; }
   :root {
     --background: 240 10% 98%;
     --foreground: 220 20% 15%;
@@ -382,6 +392,7 @@
     --sidebar-ring: 158 70% 55%;
   }
 }
+/* stylelint-disable-next-line at-rule-no-unknown */
 @layer components {
   .galaxy-bg {
   background: radial-gradient(ellipse at top, hsl(var(--eco-purple) / 0.2), transparent),
@@ -455,7 +466,21 @@ html {
 
 
 
+/* stylelint-disable-next-line at-rule-no-unknown */
 @layer utilities {
+  /* Typography utilities for consistent hierarchy */
+  .heading-section { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-4xl sm:text-5xl font-bold tracking-tight; }
+  .heading-header { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-3xl font-bold tracking-tight; }
+  .heading-card-2xl { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-2xl font-bold; }
+  .heading-card-xl { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-xl font-semibold; }
+  .heading-card-lg { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-lg font-semibold; }
+  .body-base { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-base leading-relaxed; }
+  .meta-sm { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-sm; }
+  .meta-xs { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-xs; }
+
+  /* Consistent card media sizing */
+  .card-media { /* stylelint-disable-next-line at-rule-no-unknown */ @apply w-full aspect-[3/2] object-cover; }
+
   /* Enhanced Creative Animations */
   @keyframes float {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -467,6 +492,14 @@ html {
   @keyframes pulse-slow {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.7; transform: scale(1.05); }
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
   }
   
   @keyframes wiggle {

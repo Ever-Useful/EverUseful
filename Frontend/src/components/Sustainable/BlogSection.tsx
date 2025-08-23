@@ -108,7 +108,7 @@ export const BlogSection = () => {
             <p className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 sm:mb-4">
               SUSTAINABLE INSIGHTS
             </p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 sm:mb-4">
+            <h2 className="heading-section font-bold text-gray-900 mb-2 sm:mb-4">
               Latest Articles on Sustainable Solutions
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl leading-relaxed">
@@ -173,7 +173,7 @@ export const BlogSection = () => {
                   <img 
                     src={article.image}
                     alt={article.title}
-                    className="w-full h-40 sm:h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="card-media group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-green-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs font-semibold">
                     {article.category}

@@ -66,7 +66,7 @@ export const ImpactMotive = () => {
         <div className="absolute inset-0 bg-white/60 backdrop-blur-xs"></div>
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 max-w-[85vw]">
           <div className="text-center mb-8 sm:mb-16">
-            <h2 className="text-[17px] sm:text-4xl font-bold text-gray-800 mb-2 sm:mb-4 mobile-text-3xl">
+            <h2 className="sm:text-4xl font-bold text-gray-800 mb-2 sm:mb-4 mobile-text-2xl">
               Transforming Ideas into Reality
             </h2>
             <p className="text-base text-gray-600 max-w-5xl mx-auto mobile-text-base">

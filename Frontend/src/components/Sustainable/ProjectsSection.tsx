@@ -122,7 +122,7 @@ export const ProjectsSection = () => {
             </p>
             
 
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+            <h2 className="heading-section font-bold text-gray-900">
               Sustainable Project Types
             </h2>
           </div>
@@ -184,7 +184,7 @@ export const ProjectsSection = () => {
                     <img
                       src={project.image}
                       alt={project.title}
-                      className="w-full aspect-[3/2] object-cover group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-500"
+                      className="card-media group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-500"
                     />
 
                     {/* Category Badge */}
