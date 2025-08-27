@@ -668,7 +668,7 @@ const Work: React.FC = () => {
             custom={1}
           >
             <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-            <span className="text-slate-700 text-xs sm:text-sm font-semibold">World-Class PhD Experts</span>
+            <span className="text-slate-700 text-xs sm:text-sm font-semibold">Hire Trusted Freelancers</span>
           </motion.div>
 
             {/* Main Headline */}
@@ -677,7 +677,7 @@ const Work: React.FC = () => {
             variants={fadeUp}
             custom={2}
           >
-              Connect with World-Class <span className="text-[#fa5954]">PhD Experts</span> for R&D and Mentorship
+              Find Top <span className="text-[#fa5954]">Freelancers</span> for Your Next Project
           </motion.h1>
 
             {/* Sub-text */}
@@ -686,7 +686,7 @@ const Work: React.FC = () => {
             variants={fadeUp}
             custom={3}
           >
-            Unlock global innovation by collaborating with top PhD scholars and graduates. Access cutting-edge research, personalized mentorship, and specialized consulting—anytime, anywhere.
+            Work with skilled professionals across design, development, data, AI, writing, marketing and more. Post your requirements or browse profiles to hire fast—on your terms, on any device.
           </motion.p>
 
             {/* Search removed per request */}
@@ -936,13 +936,15 @@ const Work: React.FC = () => {
                   </p>
 
                   {/* Rate & Response */}
-                  <div className="flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-2 md:gap-3 mb-3 sm:mb-4">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1 bg-emerald-100 text-emerald-700 text-xs sm:text-sm font-medium rounded-full">
-                      ${f.freelancerData?.hourlyRate || '50'}/hr
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1 bg-blue-100 text-blue-700 text-xs sm:text-sm font-medium rounded-full">
-                      {f.freelancerData?.avgResponseTime || '2'}h response
-                    </span>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 py-2 sm:py-2.5">
+                      <div className="text-[10px] sm:text-xs uppercase tracking-wide">Rate</div>
+                      <div className="text-sm sm:text-base font-semibold">${f.freelancerData?.hourlyRate || '50'}/hr</div>
+                    </div>
+                    <div className="rounded-lg border border-blue-200 bg-blue-50 text-blue-700 py-2 sm:py-2.5">
+                      <div className="text-[10px] sm:text-xs uppercase tracking-wide">Response</div>
+                      <div className="text-sm sm:text-base font-semibold">{f.freelancerData?.avgResponseTime || '2'}h</div>
+                    </div>
                   </div>
 
                   {/* Skills */}

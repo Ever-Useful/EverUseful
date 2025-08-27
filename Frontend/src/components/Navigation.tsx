@@ -63,7 +63,7 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
         Work: {
             categories: [
                 { id: 'freelance', label: 'Find Freelancers', href: '/freelancing' },
-                { id: 'mentorship', label: 'Find Expert', href: '/findexpert' },
+                { id: 'mentorship', label: 'Become a Mentor', href: '/become-mentor' },
                 ...(isLoggedIn ? [
                     { id: 'dashboard', label: 'My Dashboard', href: '/dashboard' },
                     { id: 'profile', label: 'My Profile', href: '/profile' },
@@ -461,7 +461,29 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                          >
                              {menuKey}
                          </Button>
-                                                 {isOpen && (
+                        {menuKey === 'Work' && (
+                            <>
+                                <Link to="/findexpert">
+                                    <Button
+                                        variant="ghost"
+                                        size='sm'
+                                        className="px-6 py-2 font-medium transition-all duration-200 hover:bg-transparent hover:text-gray-900 text-gray-700 shadow-none"
+                                    >
+                                        PhD Expert
+                                    </Button>
+                                </Link>
+                                <Link to="/aiagents">
+                                    <Button
+                                        variant="ghost"
+                                        size='sm'
+                                        className="px-6 py-2 font-medium rounded-full bg-white text-gray-900 hover:bg-white shadow-none"
+                                    >
+                                        AI Agent
+                                    </Button>
+                                </Link>
+                            </>
+                        )}
+                                                  {isOpen && (
                              <div
                                  className="mega-menu-container fixed left-1/2 top-14 z-[100] w-[90vw] max-w-6xl p-0 border-0 shadow-none bg-transparent -translate-x-1/2 rounded-lg"
                                  style={{ pointerEvents: 'auto' }}
