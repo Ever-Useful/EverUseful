@@ -504,13 +504,6 @@ const Header = () => {
                                     </div>
                                     {/* Desktop: All header actions */}
                                     <div className="hidden md:flex items-center space-x-2 sm:space-x-3">
-                                        {/* Quick Access Buttons */}
-                                        <Link to="/findexpert">
-                                            <Button variant="secondary" className="px-3 py-2 text-sm rounded-full">PhD Expert</Button>
-                                        </Link>
-                                        <Link to="/aiagents">
-                                            <Button variant="default" className="px-3 py-2 text-sm rounded-full">AI Agent</Button>
-                                        </Link>
                                         {/* Cart Button */}
                                         <Button variant="ghost" size="icon" className="hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300" asChild>
                                             <Link to="/cart">
