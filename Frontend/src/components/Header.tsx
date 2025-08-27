@@ -243,7 +243,7 @@ const Header = () => {
     const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
     const [notifications, setNotifications] = useState(mockNotifications);
     const unreadNotificationCount = notifications.filter(n => n.unread).length;
-    const { profileData, isLoggedIn, refreshProfile } = useUserProfile();
+    const { profileData, isLoggedIn, refreshProfile, isLoading } = useUserProfile();
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
@@ -354,6 +354,14 @@ const Header = () => {
         });
         return () => unsubscribe();
     }, [needsUserData, refreshProfile]);
+
+    // Ensure header greeting and sidebar get data quickly after login
+    useEffect(() => {
+        if (isLoggedIn && !profileData.firstName && !isLoading) {
+            // Fetch profile if names are missing
+            refreshProfile();
+        }
+    }, [isLoggedIn, profileData.firstName, isLoading, refreshProfile]);
 
     // Function to refresh profile data - only called when explicitly needed
     const refreshProfileData = async () => {
@@ -513,11 +521,9 @@ const Header = () => {
                                         {/* Profile Button with User Name */}
                                         <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
                                             <User className="h-5 w-5 text-gray-600" />
-                                            {profileData.firstName && (
-                                                <span className="hidden sm:inline text-sm font-medium">
-                                                    Hi, {profileData.firstName}
-                                                </span>
-                                            )}
+                                            <span className="hidden sm:inline text-sm font-medium">
+                                                Hi, {profileData.firstName || 'there'}
+                                            </span>
                                         </Button>
                                     </div>
                                 </>
@@ -883,43 +889,42 @@ const Header = () => {
                                         // </div>
                                     )} */}
                                     
-                                    {/* Profile Photo with proper error handling */}
-                                    {profileData.avatar ? (
-                                        <img 
-                                            src={profileData.avatar} 
-                                            alt={`${profileData.firstName} ${profileData.lastName}`}
-                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
-                                            onError={(e) => {
-                                                console.log('Avatar image failed to load, falling back to initials');
-                                                e.currentTarget.style.display = 'none';
-                                                const initialsAvatar = e.currentTarget.nextElementSibling;
-                                                if (initialsAvatar) {
-                                                    initialsAvatar.classList.remove('hidden');
-                                                }
-                                            }}
-                                        />
-                                    ) : null}
-                                    
-                                    {/* Fallback to Initials Avatar */}
-                                    <InitialsAvatar 
-                                        firstName={profileData.firstName} 
-                                        lastName={profileData.lastName} 
-                                        size={80} 
-                                        className={`sm:w-24 sm:h-24 ${profileData.avatar ? 'hidden' : ''}`} 
-                                    />
+                                    {/* Profile Photo with proper error handling, fallback to initials immediately */}
+                                    <div className="relative">
+                                        {profileData.avatar && (
+                                            <img 
+                                                src={profileData.avatar} 
+                                                alt={`${profileData.firstName || 'User'} ${profileData.lastName || ''}`}
+                                                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display = 'none';
+                                                    const initialsAvatar = e.currentTarget.nextElementSibling as HTMLElement | null;
+                                                    if (initialsAvatar) {
+                                                        initialsAvatar.classList.remove('hidden');
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                        <div className={`${profileData.avatar ? 'hidden' : ''}`}>
+                                            <InitialsAvatar 
+                                                firstName={profileData.firstName || 'U'} 
+                                                lastName={profileData.lastName || ''} 
+                                                size={80} 
+                                                className={`sm:w-24 sm:h-24`} 
+                                            />
+                                        </div>
+                                    </div>
                                     
                                     <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">
-                                        {profileData.firstName && profileData.lastName 
-                                            ? `${profileData.firstName} ${profileData.lastName}`
+                                        {(profileData.firstName || profileData.lastName) 
+                                            ? `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim()
                                             : 'User Profile'
                                         }
                                     </h3>
                                     
-                                    {profileData.firstName && profileData.lastName && (
-                                        <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
-                                            View Profile &gt;
-                                        </Link>
-                                    )}
+                                    <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
+                                        View Profile &gt;
+                                    </Link>
                                 </div>
 
                                 {/* <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
