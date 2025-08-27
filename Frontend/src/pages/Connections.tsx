@@ -255,7 +255,7 @@ const Connections = () => {
         {person.isConnected && (
           <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
             <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Message
+            <span className="hidden sm:inline">Message</span>
           </Button>
         )}
       </div>
@@ -409,6 +409,47 @@ const Connections = () => {
       {/* Main Container */}
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8 mt-14">
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 relative">
+          {/* Mobile Navigation Tabs */}
+          <div className="lg:hidden w-full order-1 mb-4">
+            <div className="bg-white rounded-lg shadow-sm p-2">
+              <div className="flex space-x-1">
+                <button
+                  onClick={() => setActiveTab('received')}
+                  className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'received'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Users className="h-4 w-4" />
+                  <span>Received</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('sent')}
+                  className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'sent'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  <span>Sent</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('find')}
+                  className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'find'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Search className="h-4 w-4" />
+                  <span>Find</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Left: Main Content (renderTabContent) */}
           <div className="flex-1 order-2 lg:order-1 min-h-[70vh] h-[70vh] lg:h-[80vh]">
             <div className="h-[70vh] lg:h-[80vh] overflow-y-auto pr-1 scrollbar-hide">
@@ -416,7 +457,8 @@ const Connections = () => {
             </div>
           </div>
 
-          <div className="w-full lg:w-80 order-1 lg:order-2 flex flex-col h-[80vh]">
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:flex w-80 order-1 lg:order-2 flex-col h-[80vh]">
             <div className="lg:top-8 z-20">
               <Card className="border-0 shadow-sm mb-4 lg:mb-0">
                 <CardHeader className="pb-3">

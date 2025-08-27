@@ -33,7 +33,6 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
             categories: [
                 { id: 'explore', label: 'Projects', href: '/marketplace' },
                 ...(isLoggedIn ? [{ id: 'new project', label: 'Add New Project', href: '/profile#projects' }] : []),
-                ...(isLoggedIn ? [{ id: 'newproject', label: 'Add New Project', href: '#' }] : []),
                 // { id: 'datasets', label: 'Datasets', href: '/marketplace/datasets' },
                 // { id: 'algorithms', label: 'Algorithms', href: '/marketplace/algorithms' },
                 // { id: 'models', label: 'AI Models', href: '/marketplace/models' },
