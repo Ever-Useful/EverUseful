@@ -33,7 +33,6 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
             categories: [
                 { id: 'explore', label: 'Projects', href: '/marketplace' },
                 ...(isLoggedIn ? [{ id: 'new project', label: 'Add New Project', href: '/profile#projects' }] : []),
-                ...(isLoggedIn ? [{ id: 'newproject', label: 'Add New Project', href: '#' }] : []),
                 // { id: 'datasets', label: 'Datasets', href: '/marketplace/datasets' },
                 // { id: 'algorithms', label: 'Algorithms', href: '/marketplace/algorithms' },
                 // { id: 'models', label: 'AI Models', href: '/marketplace/models' },
@@ -64,7 +63,7 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
         Work: {
             categories: [
                 { id: 'freelance', label: 'Find Freelancers', href: '/freelancing' },
-                { id: 'mentorship', label: 'Find Expert', href: '/findexpert' },
+                { id: 'mentorship', label: 'Become a Mentor', href: '/become-mentor' },
                 ...(isLoggedIn ? [
                     { id: 'dashboard', label: 'My Dashboard', href: '/dashboard' },
                     { id: 'profile', label: 'My Profile', href: '/profile' },
@@ -300,6 +299,19 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         Home
                     </Link>
                 )}
+                {/* Quick links above Marketplace (match other items) */}
+                <Link
+                    to="/findexpert"
+                    className="flex items-center w-full px-4 py-3 rounded-lg bg-gray-50 text-gray-800 font-semibold text-base hover:bg-blue-50 transition"
+                >
+                    PhD Expert
+                </Link>
+                <Link
+                    to="/aiagents"
+                    className="flex items-center w-full px-4 py-3 rounded-lg bg-gray-50 text-gray-800 font-semibold text-base hover:bg-blue-50 transition"
+                >
+                    AI Agent
+                </Link>
                 {Object.keys(megaMenuData).map((menuKey) => {
                     const menuData = megaMenuData[menuKey];
                     const isNavOpen = activeDropdown === menuKey;
@@ -394,21 +406,32 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                     </Button>
                 </Link>
             )}
+            {/* Quick buttons before Marketplace */}
+            <Link to="/findexpert">
+                <Button
+                    variant="ghost"
+                    size='sm'
+                    className="px-6 py-2 font-medium transition-all duration-200 hover:bg-transparent hover:text-gray-900 text-gray-700 shadow-none"
+                >
+                    PhD Expert
+                </Button>
+            </Link>
+            <Link to="/aiagents">
+                <Button
+                    variant="ghost"
+                    size='sm'
+                    className="px-6 py-2 font-medium rounded-full bg-white text-gray-900 hover:bg-white shadow-none"
+                >
+                    <span className="transition-all hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-500 hover:via-yellow-400 hover:to-cyan-500">AI Agent</span>
+                </Button>
+            </Link>
             {Object.keys(megaMenuData).map((menuKey) => {
                 const isOpen = activeDropdown === menuKey;
                 return (
                                          <div
-                         key={menuKey}
-                         className="relative"
-                         onMouseLeave={() => {
-                             setTimeout(() => {
-                                 if (!document.querySelector('.mega-menu-container:hover')) {
-                                     setActiveDropdown(null);
-                                     setActiveCategory(null);
-                                 }
-                             }, 100);
-                         }}
-                     >
+                          key={menuKey}
+                             className="relative"
+                         >
                                                  <Button
                              variant="ghost"
                              size='sm'
@@ -462,7 +485,7 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                          >
                              {menuKey}
                          </Button>
-                                                 {isOpen && (
+                        {isOpen && (
                              <div
                                  className="mega-menu-container fixed left-1/2 top-14 z-[100] w-[90vw] max-w-6xl p-0 border-0 shadow-none bg-transparent -translate-x-1/2 rounded-lg"
                                  style={{ pointerEvents: 'auto' }}

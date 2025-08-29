@@ -21,6 +21,7 @@ import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { API_ENDPOINTS } from '../config/api';
 import { PhotoUpload } from '@/components/PhotoUpload';
+import ConnectionsPopup from '@/components/ConnectionsPopup';
 // import GlobeLoader from '@/components/GlobeLoader';
 
 
@@ -98,6 +99,7 @@ const Profile = () => {
   const [showAddProjectSidebar, setShowAddProjectSidebar] = useState(false);
   const [showEditProjectSidebar, setShowEditProjectSidebar] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
+  const [showConnectionsPopup, setShowConnectionsPopup] = useState(false);
 
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
@@ -560,11 +562,19 @@ const Profile = () => {
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-lg sm:rounded-xl">
-            <CardContent className="p-3 sm:p-4 text-center">
+          <Card 
+            className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-lg sm:rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 group"
+            onClick={() => setShowConnectionsPopup(true)}
+          >
+            <CardContent className="p-3 sm:p-4 text-center relative">
               <UserPlus className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2" />
               <div className="text-base sm:text-lg md:text-2xl font-bold">{stats.connections}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="bg-white/20 rounded-full p-1">
+                  <Users className="w-3 h-3 text-white" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -838,6 +848,13 @@ const Profile = () => {
       {showEditProjectSidebar && editingProject && (
         <MyProjects onClose={() => { setShowEditProjectSidebar(false); setEditingProject(null); }} editMode={true} projectToEdit={editingProject} onProjectCreated={fetchUserData} />
       )}
+      
+      {/* Connections Popup */}
+      <ConnectionsPopup 
+        isOpen={showConnectionsPopup}
+        onClose={() => setShowConnectionsPopup(false)}
+        connectionCount={stats.connections}
+      />
     </div>
   );
 };

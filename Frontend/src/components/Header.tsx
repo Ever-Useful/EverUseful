@@ -243,7 +243,7 @@ const Header = () => {
     const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
     const [notifications, setNotifications] = useState(mockNotifications);
     const unreadNotificationCount = notifications.filter(n => n.unread).length;
-    const { profileData, isLoggedIn, refreshProfile } = useUserProfile();
+    const { profileData, isLoggedIn, refreshProfile, isLoading } = useUserProfile();
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
@@ -354,6 +354,14 @@ const Header = () => {
         });
         return () => unsubscribe();
     }, [needsUserData, refreshProfile]);
+
+    // Ensure header greeting and sidebar get data quickly after login
+    useEffect(() => {
+        if (isLoggedIn && !profileData.firstName && !isLoading) {
+            // Fetch profile if names are missing
+            refreshProfile();
+        }
+    }, [isLoggedIn, profileData.firstName, isLoading, refreshProfile]);
 
     // Function to refresh profile data - only called when explicitly needed
     const refreshProfileData = async () => {
@@ -510,130 +518,12 @@ const Header = () => {
                                                 <ShoppingCart className="h-5 w-5 text-gray-600" />
                                             </Link>
                                         </Button>
-                                        {/* Messages Button */}
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
-                                                    <MessageSquare className="h-5 w-5 text-gray-600" />
-                                                    {unreadMessageCount > 0 && (
-                                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
-                                                            {unreadMessageCount}
-                                                        </Badge>
-                                                    )}
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
-                                                <div className="p-3 border-b border-gray-200">
-                                                    <h3 className="font-semibold text-slate-800">Recent Messages</h3>
-                                                </div>
-                                                <div className="max-h-64 overflow-y-auto">
-                                                    {messages.slice(0, 3).map((message) => (
-                                                        <DropdownMenuItem
-                                                            key={message.id}
-                                                            className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
-                                                            onClick={() => handleMessageClick(message.id)}
-                                                        >
-                                                            <div className="flex items-start justify-between w-full">
-                                                                <div className="flex items-start gap-3 flex-1">
-                                                                    <span className="text-2xl">{message.avatar}</span>
-                                                                    <div className="flex-1">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <p className="font-medium text-sm text-slate-800">
-                                                                                {message.sender}
-                                                                            </p>
-                                                                            {message.unread && (
-                                                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                                            )}
-                                                                        </div>
-                                                                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                                                            {message.message}
-                                                                        </p>
-                                                                        <p className="text-xs text-slate-400 mt-1">
-                                                                            {message.time}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </DropdownMenuItem>
-                                                    ))}
-                                                    {messages.length === 0 && (
-                                                        <div className="p-4 text-center text-slate-500">
-                                                            No messages yet
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem onClick={() => setShowMessagesSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-green-600 font-medium hover:bg-green-50">
-                                                    See All Messages
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                        {/* Notifications Button */}
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
-                                                    <Bell className="h-5 w-5 text-gray-600" />
-                                                    {unreadNotificationCount > 0 && (
-                                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
-                                                            {unreadNotificationCount}
-                                                        </Badge>
-                                                    )}
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
-                                                <div className="p-3 border-b border-gray-200">
-                                                    <h3 className="font-semibold text-slate-800">Recent Notifications</h3>
-                                                </div>
-                                                <div className="max-h-64 overflow-y-auto">
-                                                    {notifications.slice(0, 3).map((notification) => (
-                                                        <DropdownMenuItem
-                                                            key={notification.id}
-                                                            className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
-                                                            onClick={() => handleNotificationClick(notification.id)}
-                                                        >
-                                                            <div className="flex items-start justify-between w-full">
-                                                                <div className="flex items-start gap-3 flex-1">
-                                                                    <span className="text-lg">{getNotificationIcon(notification.type)}</span>
-                                                                    <div className="flex-1">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <p className="font-medium text-sm text-slate-800">
-                                                                                {notification.title}
-                                                                            </p>
-                                                                            {notification.unread && (
-                                                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                                            )}
-                                                                        </div>
-                                                                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                                                            {notification.message}
-                                                                        </p>
-                                                                        <p className="text-xs text-slate-400 mt-1">
-                                                                            {notification.time}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </DropdownMenuItem>
-                                                    ))}
-                                                    {notifications.length === 0 && (
-                                                        <div className="p-4 text-center text-slate-500">
-                                                            No notifications yet
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem onClick={() => setShowNotificationsSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-blue-600 font-medium hover:bg-blue-50">
-                                                    See All Notifications
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
                                         {/* Profile Button with User Name */}
                                         <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
                                             <User className="h-5 w-5 text-gray-600" />
-                                            {profileData.firstName && (
-                                                <span className="hidden sm:inline text-sm font-medium">
-                                                    Hi, {profileData.firstName}
-                                                </span>
-                                            )}
+                                            <span className="hidden sm:inline text-sm font-medium">
+                                                Hi, {profileData.firstName || 'there'}
+                                            </span>
                                         </Button>
                                     </div>
                                 </>
@@ -999,43 +889,42 @@ const Header = () => {
                                         // </div>
                                     )} */}
                                     
-                                    {/* Profile Photo with proper error handling */}
-                                    {profileData.avatar ? (
-                                        <img 
-                                            src={profileData.avatar} 
-                                            alt={`${profileData.firstName} ${profileData.lastName}`}
-                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
-                                            onError={(e) => {
-                                                console.log('Avatar image failed to load, falling back to initials');
-                                                e.currentTarget.style.display = 'none';
-                                                const initialsAvatar = e.currentTarget.nextElementSibling;
-                                                if (initialsAvatar) {
-                                                    initialsAvatar.classList.remove('hidden');
-                                                }
-                                            }}
-                                        />
-                                    ) : null}
-                                    
-                                    {/* Fallback to Initials Avatar */}
-                                    <InitialsAvatar 
-                                        firstName={profileData.firstName} 
-                                        lastName={profileData.lastName} 
-                                        size={80} 
-                                        className={`sm:w-24 sm:h-24 ${profileData.avatar ? 'hidden' : ''}`} 
-                                    />
+                                    {/* Profile Photo with proper error handling, fallback to initials immediately */}
+                                    <div className="relative">
+                                        {profileData.avatar && (
+                                            <img 
+                                                src={profileData.avatar} 
+                                                alt={`${profileData.firstName || 'User'} ${profileData.lastName || ''}`}
+                                                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display = 'none';
+                                                    const initialsAvatar = e.currentTarget.nextElementSibling as HTMLElement | null;
+                                                    if (initialsAvatar) {
+                                                        initialsAvatar.classList.remove('hidden');
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                        <div className={`${profileData.avatar ? 'hidden' : ''}`}>
+                                            <InitialsAvatar 
+                                                firstName={profileData.firstName || 'U'} 
+                                                lastName={profileData.lastName || ''} 
+                                                size={80} 
+                                                className={`sm:w-24 sm:h-24`} 
+                                            />
+                                        </div>
+                                    </div>
                                     
                                     <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">
-                                        {profileData.firstName && profileData.lastName 
-                                            ? `${profileData.firstName} ${profileData.lastName}`
+                                        {(profileData.firstName || profileData.lastName) 
+                                            ? `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim()
                                             : 'User Profile'
                                         }
                                     </h3>
                                     
-                                    {profileData.firstName && profileData.lastName && (
-                                        <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
-                                            View Profile &gt;
-                                        </Link>
-                                    )}
+                                    <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
+                                        View Profile &gt;
+                                    </Link>
                                 </div>
 
                                 {/* <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
