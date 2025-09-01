@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { Search, Users, UserPlus, TrendingUp, MessageCircle, MapPin, Building, Settings, Filter, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,6 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
 import {Footer} from '@/components/Footer';
 import Logo from '@/assets/Logo/Logo Main.png'; 
+// import UserService from '@/services/userService';
+import UserService, { UserSearchResult } from "@/services/userService";
+
 type Connection = {
   id: string;
   name: string;
@@ -173,9 +178,26 @@ type TabType = 'received' | 'sent' | 'find';
 
 const Connections = () => {
   const [activeTab, setActiveTab] = useState<TabType>('received');
-  const [searchQuery, setSearchQuery] = useState('');
+  
   const [connections, setConnections] = useState(mockConnections);
   const [suggestions, setSuggestions] = useState(mockSuggestions);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
+  const navigate = useNavigate();
+
+
+useEffect(() => {
+  const fetchResults = async () => {
+    if (!searchQuery) {
+      setSearchResults([]);
+      return;
+    }
+    const results = await UserService.searchUsers(searchQuery);
+    setSearchResults(results);
+  };
+  fetchResults();
+}, [searchQuery]);
+
 
   const handleConnect = (personId: string) => {
     setSuggestions(prev => 
@@ -186,6 +208,24 @@ const Connections = () => {
       )
     );
   };
+
+  const handleCardClick = (user: UserSearchResult) => {
+  const id = user.customUserId;
+  const type = user.profile.userType?.toLowerCase();
+
+  if (type === "student") {
+    navigate(`/studentprofile/${id}`);
+  } else if (type === "business") {
+    navigate(`/businessprofile/${id}`);
+  } else if (type === "freelancer") {
+    navigate(`/freelancerprofile/${id}`);
+  } else {
+    console.warn("Unknown userType:", type, " — defaulting to student");
+    navigate(`/studentprofile/${id}`);
+  }
+
+};
+
 
   const handleWithdraw = (personId: string) => {
     setSuggestions(prev => 
@@ -360,10 +400,30 @@ const Connections = () => {
             {/* Scrollable cards */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
               <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
-                {searchQuery ? (
-                  filteredSearchResults.length > 0 ? (
-                    filteredSearchResults.map(person => (
-                      <ConnectionItem key={person.id} person={person} showConnectButton />
+                  {searchQuery ? (
+                    searchResults.length > 0 ? (
+                      searchResults.map(user => (
+                        <div
+                          key={user.customUserId}
+                          onClick={() => handleCardClick(user)}
+                          className="cursor-pointer hover:bg-gray-50 transition"
+                        >
+                        <ConnectionItem
+                          key={user.customUserId}
+                          person={{
+                          id: user.customUserId,
+                          name: `${user.profile.firstName} ${user.profile.lastName}`,
+                          title: user.profile.userType,
+                          company: user.profile.username,
+                          avatar: user.profile.avatar,
+                          location: "",
+                          mutualConnections: 0,
+                          isConnected: false,
+                          skills: []
+                      }}
+                   showConnectButton
+                  />
+                </div>
                     ))
                   ) : (
                     <Card className="text-center py-12 shadow-none border-none">
