@@ -72,7 +72,7 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
   };
 
   const refreshProfile = async () => {
-    if (!isLoggedIn || hasRefreshed) return;
+    if (!isLoggedIn || hasRefreshed || isLoading) return;
     
     // Clear any existing timeout
     if (refreshTimeout) {
@@ -81,28 +81,48 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
     
     // Set a new timeout to debounce rapid calls
     const timeout = setTimeout(async () => {
+      if (hasRefreshed) return; // Double-check to prevent multiple calls
+      
       setIsLoading(true);
       try {
         const userProfile = await userService.getUserProfile();
-        console.log('UserProfileContext - Raw userProfile:', userProfile);
         
+        // Safely access nested properties with null checks
         const newProfileData = {
-          firstName: userProfile.data?.auth?.firstName || '',
-          lastName: userProfile.data?.auth?.lastName || '',
-          avatar: userProfile.data?.profile?.avatar || '',
-          customUserId: userProfile.data?.customUserId,
-          userType: userProfile.data?.auth?.userType,
-          email: userProfile.data?.auth?.email,
+          firstName: userProfile?.data?.auth?.firstName || userProfile?.auth?.firstName || '',
+          lastName: userProfile?.data?.auth?.lastName || userProfile?.auth?.lastName || '',
+          avatar: userProfile?.data?.profile?.avatar || userProfile?.profile?.avatar || '',
+          customUserId: userProfile?.data?.customUserId || userProfile?.customUserId,
+          userType: userProfile?.data?.auth?.userType || userProfile?.auth?.userType,
+          email: userProfile?.data?.auth?.email || userProfile?.auth?.email,
         };
         
-        console.log('UserProfileContext - Processed profile data:', newProfileData);
-        console.log('UserProfileContext - Avatar from backend:', userProfile.data?.profile?.avatar);
+        // Only log once to avoid spam
+        if (!hasRefreshed) {
+          console.log('UserProfileContext - Profile data loaded:', {
+            firstName: newProfileData.firstName,
+            lastName: newProfileData.lastName,
+            customUserId: newProfileData.customUserId,
+            userType: newProfileData.userType
+          });
+        }
         
         setProfileData(newProfileData);
         localStorage.setItem("userProfile", JSON.stringify(newProfileData));
         setHasRefreshed(true);
       } catch (error) {
         console.error('Error refreshing profile:', error);
+        // Set default profile data on error to prevent undefined errors
+        const defaultProfile = {
+          firstName: '',
+          lastName: '',
+          avatar: '',
+          customUserId: undefined,
+          userType: undefined,
+          email: undefined,
+        };
+        setProfileData(defaultProfile);
+        localStorage.setItem("userProfile", JSON.stringify(defaultProfile));
       } finally {
         setIsLoading(false);
       }
@@ -163,7 +183,7 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
         clearTimeout(refreshTimeout);
       }
     };
-  }, [refreshTimeout]);
+  }, []); // Remove refreshTimeout from dependencies
 
   // Listen for storage changes (when user logs in/out in another tab)
   useEffect(() => {

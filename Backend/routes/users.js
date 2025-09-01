@@ -7,17 +7,13 @@ const userService = require('../services/userService');
 router.get('/profile', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    console.log('Profile endpoint - Firebase UID:', firebaseUid);
-    console.log('Profile endpoint - User from token:', req.user);
     
     // Fetch user from DynamoDB using Firebase UID
     let user = await userService.findUserByFirebaseUid(firebaseUid);
-    console.log('Profile endpoint - Found user:', user ? 'Yes' : 'No');
     
     if (!user) {
       // Create new user in DynamoDB
       const { name, email } = req.user;
-      console.log('Profile endpoint - Creating new user with data:', { name, email });
       
       // Parse firstName and lastName from name if available
       let firstName = '';
@@ -39,7 +35,6 @@ router.get('/profile', authorize, async (req, res) => {
         });
         
         user = await userService.findUserByFirebaseUid(firebaseUid);
-        console.log('Profile endpoint - New user created:', user.customUserId);
       } catch (createError) {
         console.error('Profile endpoint - Error creating user:', createError);
         return res.status(500).json({ success: false, message: 'Failed to create user' });
@@ -58,9 +53,6 @@ router.get('/profile', authorize, async (req, res) => {
       gender: profile.gender || '',
       username: profile.username || profile.email?.split('@')[0] || ''
     };
-    
-    console.log('Profile endpoint - Auth data being sent:', auth);
-    console.log('Profile endpoint - Profile data being sent:', profile);
     
     res.json({
       success: true,

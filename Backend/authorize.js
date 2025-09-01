@@ -1,30 +1,11 @@
 const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');
 
-console.log('Service Account Project ID:', serviceAccount.project_id);
-console.log('Full service account content:', JSON.stringify(serviceAccount, null, 2));
-
-// Force clear any existing Firebase apps
-try {
-  if (admin.apps.length > 0) {
-    admin.apps.forEach(app => {
-      if (app) {
-        console.log('Deleting existing Firebase app with project:', app.options.projectId);
-        app.delete();
-      }
-    });
-  }
-} catch (e) {
-  console.log('No existing Firebase apps to clear');
-}
-
-// Initialize with explicit project ID from service account
+// Initialize Firebase Admin (silent)
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  projectId: serviceAccount.project_id, // Force use this project ID
+  projectId: serviceAccount.project_id,
 });
-
-console.log('Firebase Admin initialized with forced project ID:', serviceAccount.project_id);
 
 const authorize = async (req, res, next) => {
   const authorization = req.headers.authorization;
