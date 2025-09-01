@@ -12,13 +12,13 @@ import { setAuthCookie, setFirebaseRefreshCookie, deleteAuthCookie, deleteFireba
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyAx1XlxKo6DtdIMAS-5T8hll11WgCdCXSU",
-  authDomain: "amogh-2a435.firebaseapp.com",
-  projectId: "amogh-2a435",
-  storageBucket: "amogh-2a435.firebasestorage.app",
-  messagingSenderId: "112791364084",
-  appId: "1:112791364084:web:ea167f2a8a4e33007b99a1",
-  measurementId: "G-LD19DYSZ75"
+  apiKey: "AIzaSyCgTOD0hI8J8-veGl7BFNCOTbIdp8Lgnlc",
+  authDomain: "amogh-887e2.firebaseapp.com",
+  projectId: "amogh-887e2",
+  storageBucket: "amogh-887e2.firebasestorage.app",
+  messagingSenderId: "554286104608",
+  appId: "1:554286104608:web:245facf8db2fe4c42e7c45",
+  measurementId: "G-JKKNWK1YX7"
 };
 
 // Initialize Firebase
