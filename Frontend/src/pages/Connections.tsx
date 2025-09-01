@@ -7,7 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
 import {Footer} from '@/components/Footer';
-import Logo from '@/assets/Logo/Logo Main.png'; 
+import Logo from '@/assets/Logo/Logo Main.png';
+import SearchFilterBar, { FilterTag } from '@/components/ui/SearchFilterBar'; 
 type Connection = {
   id: string;
   name: string;
@@ -176,6 +177,22 @@ const Connections = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [connections, setConnections] = useState(mockConnections);
   const [suggestions, setSuggestions] = useState(mockSuggestions);
+  const [activeFilter, setActiveFilter] = useState<string>('all');
+
+  // Filter tags for search
+  const filterTags: FilterTag[] = [
+    { id: 'all', label: 'All', active: activeFilter === 'all' },
+    { id: 'professor', label: 'Professor', active: activeFilter === 'professor' },
+    { id: 'student', label: 'Student', active: activeFilter === 'student' },
+    { id: 'enterprise', label: 'Enterprise', active: activeFilter === 'enterprise' },
+    { id: 'freelancer', label: 'Freelancer', active: activeFilter === 'freelancer' },
+    { id: 'experts', label: 'Experts', active: activeFilter === 'experts' },
+    { id: 'jobs', label: 'Jobs', active: activeFilter === 'jobs' }
+  ];
+
+  const handleFilterClick = (tagId: string) => {
+    setActiveFilter(tagId);
+  };
 
   const handleConnect = (personId: string) => {
     setSuggestions(prev => 
@@ -339,7 +356,6 @@ const Connections = () => {
             <div className="p-4 bg-white rounded-t-lg border border-b-0 border-gray-200 sticky top-0 z-10">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Find Connections</h2>
               <div className="relative">
-
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search by name, title, or company..."
@@ -355,6 +371,14 @@ const Connections = () => {
                     <X className="h-4 w-4" />
                   </button>
                 )}
+              </div>
+              {/* Filter Bar */}
+              <div className="mt-3 mb-1">
+                <SearchFilterBar 
+                  tags={filterTags}
+                  onTagClick={handleFilterClick}
+                  className="justify-start"
+                />
               </div>
             </div>
             {/* Scrollable cards */}
