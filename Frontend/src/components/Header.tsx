@@ -31,7 +31,7 @@ import {
     Globe,
     Palette,
     Database,
-    Lock, 
+    Lock,
     ShoppingCart,
     Menu
 } from 'lucide-react';
@@ -50,6 +50,7 @@ import { EditProfile } from '../components/EditProfile';
 import { MyProjects } from '@/components/MyProjects';
 import { Input } from '@/components/ui/input';
 import { clearAllCookies } from '@/utils/cookieUtils';
+import SearchFilterBar, { FilterTag } from '@/components/ui/SearchFilterBar';
 
 const mockNotifications = [
     {
@@ -95,7 +96,7 @@ const mockNotifications = [
     {
         id: 6,
         title: "Payment received",
-                        message: "₹250 payment received for your freelance work",
+        message: "₹250 payment received for your freelance work",
         time: "2 days ago",
         unread: false,
         type: "payment",
@@ -222,11 +223,11 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     // Check if current page needs user data (only pages that require authentication)
     const needsUserData = useMemo(() => {
         const authRequiredRoutes = [
-            '/dashboard', '/profile', '/marketplace', '/cart', '/chat', 
+            '/dashboard', '/profile', '/marketplace', '/cart', '/chat',
             '/connections', '/collaborators', '/freelancing', '/findexpert',
             '/freelancerprofile', '/studentprofile', '/businessprofile',
             '/new-project', '/schedule-meeting'
@@ -253,7 +254,36 @@ const Header = () => {
     const [showCalendarSidebar, setShowCalendarSidebar] = useState(false);
     // const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
-   
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activeFilter, setActiveFilter] = useState<string>('all');
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+    // Filter tags for search
+    const filterTags: FilterTag[] = [
+        { id: 'all', label: 'All', active: activeFilter === 'all' },
+        { id: 'professor', label: 'Professor', active: activeFilter === 'professor' },
+        { id: 'student', label: 'Student', active: activeFilter === 'student' },
+        { id: 'enterprise', label: 'Enterprise', active: activeFilter === 'enterprise' },
+        { id: 'freelancer', label: 'Freelancer', active: activeFilter === 'freelancer' },
+        { id: 'experts', label: 'Experts', active: activeFilter === 'experts' },
+        { id: 'jobs', label: 'Jobs', active: activeFilter === 'jobs' }
+    ];
+
+    const handleFilterClick = (tagId: string) => {
+        setActiveFilter(tagId);
+    };
+
+    const handleSearchFocus = () => {
+        setIsSearchFocused(true);
+    };
+
+    const handleSearchBlur = () => {
+        // Delay hiding the filter bar to allow for clicks on filter tags
+        setTimeout(() => {
+            setIsSearchFocused(false);
+        }, 200);
+    };
+
     // Open MyProjects sidebar when a global event is dispatched (e.g., from Dashboard or Navigation)
     useEffect(() => {
         const handler = () => setShowMyProjects(true);
@@ -343,7 +373,7 @@ const Header = () => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 localStorage.setItem("isLoggedIn", "true");
-                
+
                 // Only fetch user profile if the current page needs it AND we don't have cached data
                 if (needsUserData) {
                     await refreshProfile();
@@ -478,8 +508,24 @@ const Header = () => {
                                     <input
                                         type="text"
                                         placeholder="Search projects, services..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onFocus={handleSearchFocus}
+                                        onBlur={handleSearchBlur}
                                         className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                     />
+                                    {/* Filter Bar - Only show when search is focused */}
+                                    {isSearchFocused && (
+                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
+                                            <div className="p-3">
+                                                <SearchFilterBar
+                                                    tags={filterTags}
+                                                    onTagClick={handleFilterClick}
+                                                    className="justify-start"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <Navigation isLoggedIn={isLoggedIn} />
@@ -602,8 +648,24 @@ const Header = () => {
                                             <input
                                                 type="text"
                                                 placeholder="Search projects, services..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                onFocus={handleSearchFocus}
+                                                onBlur={handleSearchBlur}
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
+                                            {/* Filter Bar - Only show when search is focused */}
+                                            {isSearchFocused && (
+                                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
+                                                    <div className="p-3">
+                                                        <SearchFilterBar
+                                                            tags={filterTags}
+                                                            onTagClick={handleFilterClick}
+                                                            className="justify-start"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     {/* Navigation */}
@@ -655,15 +717,29 @@ const Header = () => {
                                             <input
                                                 type="text"
                                                 placeholder="Search projects, services..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                onFocus={handleSearchFocus}
+                                                onBlur={handleSearchBlur}
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
                                         </div>
+                                        {/* Filter Bar - Only show when search is focused */}
+                                        {isSearchFocused && (
+                                            <div className="mt-2 mb-1 animate-in slide-in-from-top-2 duration-200">
+                                                <SearchFilterBar
+                                                    tags={filterTags}
+                                                    onTagClick={handleFilterClick}
+                                                    className="justify-start"
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
                                     {/* Sign In Button */}
-                                    <Link 
-                                        to="/signin" 
+                                    <Link
+                                        to="/signin"
                                         className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors"
                                         onClick={() => setShowMobileMenu(false)}
                                     >
@@ -888,12 +964,12 @@ const Header = () => {
                                         //     </button>
                                         // </div>
                                     )} */}
-                                    
+
                                     {/* Profile Photo with proper error handling, fallback to initials immediately */}
                                     <div className="relative">
                                         {profileData.avatar && (
-                                            <img 
-                                                src={profileData.avatar} 
+                                            <img
+                                                src={profileData.avatar}
                                                 alt={`${profileData.firstName || 'User'} ${profileData.lastName || ''}`}
                                                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
                                                 onError={(e) => {
@@ -906,22 +982,22 @@ const Header = () => {
                                             />
                                         )}
                                         <div className={`${profileData.avatar ? 'hidden' : ''}`}>
-                                            <InitialsAvatar 
-                                                firstName={profileData.firstName || 'U'} 
-                                                lastName={profileData.lastName || ''} 
-                                                size={80} 
-                                                className={`sm:w-24 sm:h-24`} 
+                                            <InitialsAvatar
+                                                firstName={profileData.firstName || 'U'}
+                                                lastName={profileData.lastName || ''}
+                                                size={80}
+                                                className={`sm:w-24 sm:h-24`}
                                             />
                                         </div>
                                     </div>
-                                    
+
                                     <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">
-                                        {(profileData.firstName || profileData.lastName) 
+                                        {(profileData.firstName || profileData.lastName)
                                             ? `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim()
                                             : 'User Profile'
                                         }
                                     </h3>
-                                    
+
                                     <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
                                         View Profile &gt;
                                     </Link>
