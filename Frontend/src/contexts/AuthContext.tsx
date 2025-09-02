@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { auth } from '@/lib/firebase';
 import { User } from 'firebase/auth';
-
+import { socket } from '@/socket'; 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -25,9 +25,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
+    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+      setUser(firebaseUser);
       setLoading(false);
+
+      if (firebaseUser) {
+        // Register this user in socket.io backend
+        // If you store customUserId in Firestore/DynamoDB, fetch it here
+        const customUserId = firebaseUser.uid; // replace if you map uid -> customUserId
+        socket.emit("register", customUserId);
+        console.log("Registered user with socket:", customUserId);
+      }
     });
 
     return unsubscribe;
