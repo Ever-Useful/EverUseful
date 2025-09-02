@@ -9,9 +9,13 @@ const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
 const s3Routes = require('./routes/s3');
 const s3Service = require('./services/s3Service');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
 
+
+//server.listen(port, '0.0.0.0', () => console.log(`App running on :${port}`));
 app.use(cors({
   origin: [
     'https://amoghconnect.com',
@@ -23,6 +27,7 @@ app.use(cors({
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, 
 }));
 
 app.use(express.json({ limit: '25mb' }));
@@ -177,9 +182,38 @@ app.post('/token', authorize, async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 3000;
+// Socket.IO setup
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "http://localhost:8080",   // frontend dev server
+      "http://localhost:3000",   // if you test frontend also on 3000
+      "https://amoghconnect.com",
+      "https://www.amoghconnect.com"
+    ],
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 
-app.listen(port, '0.0.0.0', (error) => {
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  console.log("User connected", socket.id);
+
+  socket.on("register", (userId) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined room`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected", socket.id);
+  });
+});
+
+const port = process.env.PORT || 3000;
+server.listen(port, "0.0.0.0", (error) => {
   if (error) {
     console.log(`App Failed at port :${port}`);
   } else {
