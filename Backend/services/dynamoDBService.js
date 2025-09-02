@@ -246,6 +246,29 @@ class DynamoDBService {
     }
   }
 
+  async findUserByPhone(phoneNumber) {
+    try {
+      const params = {
+        TableName: this.usersTable,
+        FilterExpression: 'phoneNumber = :phone OR mobile = :phone',
+        ExpressionAttributeValues: {
+          ':phone': phoneNumber
+        }
+      };
+
+      const result = await dynamodb.scan(params).promise();
+      const user = result.Items[0] || null;
+      
+      if (user) {
+        return this.reconstructUserData(user);
+      }
+      return null;
+    } catch (error) {
+      console.error('Error finding user by phone:', error);
+      return null;
+    }
+  }
+
   // Reconstruct user data from flattened DynamoDB structure
   reconstructUserData(user) {
     const reconstructed = {

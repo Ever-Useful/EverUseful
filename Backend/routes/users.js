@@ -25,7 +25,7 @@ router.get('/profile', authorize, async (req, res) => {
       }
       
       try {
-        const newUser = await userService.createUser(firebaseUid, {
+        const newUser = await userService.createUserWithPhoneVerification(firebaseUid, {
           firstName: firstName,
           lastName: lastName,
           email: email || 'no-email@example.com',
@@ -647,6 +647,81 @@ router.get('/:customUserId', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching user by customUserId:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Phone verification endpoints
+router.post('/verify-phone', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { phoneNumber } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({ success: false, message: 'Phone number is required' });
+    }
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Check if phone number is already verified by another user
+    const existingUser = await userService.findUserByPhone(phoneNumber);
+    if (existingUser && existingUser.customUserId !== user.customUserId) {
+      return res.status(400).json({ success: false, message: 'Phone number already registered with another account' });
+    }
+    
+    // Update phone number and mark as verified
+    await userService.verifyPhoneNumber(user.customUserId, phoneNumber, true);
+    
+    res.json({ success: true, message: 'Phone number verified successfully' });
+  } catch (error) {
+    console.error('Error verifying phone number:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+router.post('/resend-phone-verification', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { phoneNumber } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({ success: false, message: 'Phone number is required' });
+    }
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Update phone number and mark as unverified
+    await userService.verifyPhoneNumber(user.customUserId, phoneNumber, false);
+    
+    res.json({ success: true, message: 'Phone verification code resent' });
+  } catch (error) {
+    console.error('Error resending phone verification:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Email verification endpoint
+router.post('/verify-email', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Mark email as verified
+    await userService.updateEmailVerificationStatus(user.customUserId, true);
+    
+    res.json({ success: true, message: 'Email verified successfully' });
+  } catch (error) {
+    console.error('Error verifying email:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });

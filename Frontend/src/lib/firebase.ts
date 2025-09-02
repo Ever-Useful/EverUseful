@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, GithubAuthProvider, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, GithubAuthProvider, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, signInWithPhoneNumber, RecaptchaVerifier, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 // Removed Firestore import - using DynamoDB now
 import { getStorage } from 'firebase/storage';
@@ -166,6 +166,76 @@ export const loginWithEmailPassword = async (email: string, password: string): P
     return idTokenResult.token;
   } catch (error: any) {
     console.error("Error signing in with email and password:", error.code, error.message);
+    throw error;
+  }
+};
+
+// Phone authentication functions
+export const sendPhoneOTP = async (phoneNumber: string, recaptchaVerifier: RecaptchaVerifier) => {
+  try {
+    console.log('Attempting to send OTP to:', phoneNumber);
+    console.log('reCAPTCHA verifier:', recaptchaVerifier);
+    console.log('Auth instance:', auth);
+    
+    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+    console.log('OTP sent successfully:', confirmationResult);
+    return confirmationResult;
+  } catch (error: any) {
+    console.error("Error sending phone OTP:", error.code, error.message);
+    console.error("Full error object:", error);
+    console.error("Error details:", {
+      code: error.code,
+      message: error.message,
+      stack: error.stack
+    });
+    
+    // Provide more specific error messages
+    if (error.code === 'auth/invalid-app-credential') {
+      throw new Error('App verification failed. Please check Firebase configuration and refresh the page.');
+    } else if (error.code === 'auth/captcha-check-failed') {
+      throw new Error('reCAPTCHA verification failed. Please try again.');
+    } else if (error.code === 'auth/invalid-phone-number') {
+      throw new Error('Invalid phone number format. Please check and try again.');
+    } else if (error.code === 'auth/quota-exceeded') {
+      throw new Error('Too many verification attempts. Please try again later.');
+    } else if (error.code === 'auth/too-many-requests') {
+      throw new Error('Too many requests. Please wait 5 minutes before trying again. This helps prevent abuse.');
+    } else if (error.code === 'auth/quota-exceeded') {
+      throw new Error('Daily quota exceeded. Please try again tomorrow.');
+    } else {
+      throw new Error(`Verification failed: ${error.message}`);
+    }
+  }
+};
+
+export const verifyPhoneOTP = async (confirmationResult: any, otp: string) => {
+  try {
+    const result = await confirmationResult.confirm(otp);
+    return result;
+  } catch (error: any) {
+    console.error("Error verifying phone OTP:", error.code, error.message);
+    throw error;
+  }
+};
+
+// Password reset function
+export const resetPassword = async (email: string) => {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    return true;
+  } catch (error: any) {
+    console.error("Error sending password reset email:", error.code, error.message);
+    throw error;
+  }
+};
+
+// Email verification function
+export const sendEmailVerificationLink = async (user: any) => {
+  try {
+    await sendEmailVerification(user);
+    return true;
+  } catch (error: any) {
+    console.error("Error sending email verification:", error.code, error.message);
     throw error;
   }
 };
