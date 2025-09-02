@@ -15,6 +15,8 @@ import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
 import { getUserAvatarUrl, getBackgroundImageUrl } from '@/utils/s3ImageUtils';
+import { useUserProfile } from "@/contexts/UserProfileContext";
+import { socket } from "@/socket.ts";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -29,6 +31,10 @@ const Profile = () => {
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
   const [error, setError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
+  const { profileData: currentUser } = useUserProfile(); 
+
+
 
 
   // Fetch user data by customUserId from userData.json
@@ -97,6 +103,189 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
+// useEffect(() => {
+//   const fetchConnectionStatus = async () => {
+//     try {
+//       const connections = await userService.getConnections();
+
+//       if (connections.sent.includes(id)) {
+//         setConnectionStatus("pending"); // request sent by me
+//       } else if (connections.received.includes(id)) {
+//         setConnectionStatus("pending"); // request received, still pending
+//       } else if (connections.connected.includes(id)) {
+//         setConnectionStatus("connected"); // already connected
+//       } else {
+//         setConnectionStatus("none"); // no relation
+//       }
+//     } catch (err) {
+//       console.error("Failed to fetch connection status:", err);
+//     }
+//   };
+
+//   if (currentUser?.customUserId && id) {
+//     fetchConnectionStatus();
+//   }
+// }, [currentUser, id]);
+
+
+// // Ye wala final hai
+// useEffect(() => {
+//   if (!currentUser?.customUserId || !id) return;
+
+//   (async () => {
+//     try {
+//       const resp = await userService.getConnections();
+//       const payload = resp?.data ?? resp; // support both shapes
+
+//       const sent: string[] = payload?.sent ?? [];
+//       const received: string[] = payload?.received ?? [];
+//       const connected: string[] = payload?.connected ?? [];
+
+//       if (connected.includes(id)) {
+//         setConnectionStatus('connected');
+//       } else if (sent.includes(id) || received.includes(id)) {
+//         setConnectionStatus('pending');
+//       } else {
+//         setConnectionStatus('none');
+//       }
+//     } catch (err) {
+//       console.error('Failed to fetch connection status:', err);
+//     }
+//   })();
+// }, [currentUser?.customUserId, id]);
+
+// 🔹 Fetch connection status on mount / refresh
+useEffect(() => {
+  const fetchConnectionStatus = async () => {
+    try {
+      const res = await userService.getConnections(); 
+      // NOTE: res is { success: true, data: { sent, received, connected } }
+      const connections = res.data;
+
+      if (connections.sent.includes(id)) {
+        setConnectionStatus("pending"); // request sent by me
+      } else if (connections.received.includes(id)) {
+        setConnectionStatus("pending"); // request received, still pending
+      } else if (connections.connected.includes(id)) {
+        setConnectionStatus("connected"); // already connected
+      } else {
+        setConnectionStatus("none");
+      }
+    } catch (err) {
+      console.error("Failed to fetch connection status:", err);
+    }
+  };
+
+  if (currentUser?.customUserId && id) {
+    fetchConnectionStatus();
+  }
+}, [currentUser, id]);
+
+
+
+
+  useEffect(() => {
+    if (currentUser?.customUserId) {
+      socket.emit("register", currentUser.customUserId);
+      console.log("Registered socket for user:", currentUser.customUserId);
+    }
+  }, [currentUser?.customUserId]);
+
+  useEffect(() => {
+  socket.on("connectionRequestReceived", (data) => {
+    console.log("New connection request received:", data);
+    alert(`${data.message}`);
+  });
+
+  return () => {
+    socket.off("connectionRequestReceived");
+  };
+}, []);
+
+
+
+
+
+// const handleConnect = async () => {
+//   if (!id) return;
+
+//   // Optimistic UI
+//   setConnectionStatus("pending");
+
+//   try {
+//     const response = await userService.sendConnectionRequest(id);
+
+//     if (response?.success === false) {
+//       setConnectionStatus("none"); // revert
+//       alert(`Failed to send request: ${response.message || "Unknown error"}`);
+//       return;
+//     }
+
+//     // Emit socket event (real-time notification)
+//     socket.emit("connectionRequest", {
+//       from: currentUser.customUserId,
+//       to: id,
+//       message: `${currentUser.firstName || "Someone"} sent you a connection request.`,
+//     });
+
+//     // Show notification/alert
+//     if ("Notification" in window && Notification.permission === "granted") {
+//       new Notification("Connection request sent!", {
+//         body: "Your request is now pending.",
+//         icon: "/favicon.ico",
+//       });
+//     } else {
+//       alert("Connection request sent!");
+//     }
+//   } catch (err: any) {
+//     setConnectionStatus("none"); // revert if error
+//     console.error("Error sending connection request:", err);
+
+//     const message =
+//       err?.response?.data?.message ||
+//       err?.message ||
+//       "Failed to send connection request due to an unknown error.";
+
+//     alert(`Connection request failed: ${message}`);
+//   }
+// };
+
+   
+
+// 🔹 Handle connect click
+const handleConnect = async () => {
+  try {
+    const response = await userService.sendConnectionRequest(id);
+
+    if (response?.success === false) {
+      alert(`Failed to send request: ${response.message || "Unknown error"}`);
+      return;
+    }
+
+    setConnectionStatus("pending"); // update UI immediately
+
+    socket.emit("connectionRequest", {
+      from: currentUser.customUserId,
+      to: id,
+      message: `${currentUser.firstName || "Someone"} sent you a connection request.`,
+    });
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Connection request sent!", {
+        body: "Your request is now pending.",
+        icon: "/favicon.ico",
+      });
+    } else {
+      alert("Connection request sent!");
+    }
+  } catch (err: any) {
+    console.error("Error sending connection request:", err);
+    alert(`Connection request failed: ${err.message || "Unknown error"}`);
+  }
+};
+
+
 
   const fetchProjectData = async (pid: string) => {
     try {
@@ -177,32 +366,7 @@ const Profile = () => {
       return;
     }
 
-  //   try {
-  //     const user = auth.currentUser;
-  //     if (!user) {
-  //       toast.error("You must be logged in to delete a project.");
-  //       return;
-  //     }
-  //     const token = await user.getIdToken();
-
-  //     const response = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}`, {
-  //       method: 'DELETE',
-  //       headers: {
-  //         'Authorization': `Bearer ${token}`
-  //       }
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.error || "Failed to delete project.");
-  //     }
-
-  //     toast.success("Project deleted successfully!");
-  //     fetchUserData(); // Refresh the project list
-  //   } catch (error) {
-  //     toast.error(error.message);
-  //     console.error("Error deleting project:", error);
-  //   }
+  
   };
 
   // Always use a safe array for rendering
@@ -215,6 +379,17 @@ const Profile = () => {
     safePortfolioProjects,
     safePortfolioProjectsLength: safePortfolioProjects.length
   });
+
+  // 🔹 Button rendering
+const isSelf = currentUser?.customUserId === id;
+const disabled = isSelf || connectionStatus !== "none";
+const label =
+  connectionStatus === "none"
+    ? "Connect"
+    : connectionStatus === "pending"
+    ? "Pending"
+    : "Connected";
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -248,10 +423,15 @@ const Profile = () => {
                 <p className="text-xs sm:text-sm text-slate-200 drop-shadow-md text-left">{(userData?.auth?.userType || '').charAt(0).toUpperCase() + (userData?.auth?.userType || '').slice(1) || profile.title}</p>
                 {/* Connect Button */}
                 <div className="flex flex-row items-center justify-start mt-2">
-                  <button className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm bg-gray-100/20 rounded-2xl px-3 py-1.5">
-                    <UserPlus className="w-5 h-5" />
-                    Connect
-                  </button>
+                  <button
+  onClick={handleConnect}
+  disabled={disabled}
+  className={`flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 ${
+    disabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+  }`}
+>
+  {label}
+</button>
                   <button className="ml-2 p-2 rounded-full bg-gray-100/20 text-white">
                     <Send className="w-4 h-4" />
                   </button>

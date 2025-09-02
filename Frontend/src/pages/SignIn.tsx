@@ -19,7 +19,7 @@ import Logo from '../assets/Logo/Logo Side.png'
 // Extend the Window interface to include confirmationResult
 declare global {
   interface Window {
-    confirmationResult: any; // You can specify a more precise type if needed
+    confirmationResult: any; 
     recaptchaVerifier: RecaptchaVerifier | null;
     recaptchaWidgetId: number;
   }

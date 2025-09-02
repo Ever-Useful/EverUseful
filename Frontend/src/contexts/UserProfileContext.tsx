@@ -13,6 +13,8 @@ interface UserProfile {
   email?: string;
 }
 
+
+
 interface UserProfileContextType {
   profileData: UserProfile;
   isLoading: boolean;

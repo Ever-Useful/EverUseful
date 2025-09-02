@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import userService from '@/services/userService';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import SearchFilterBar, { FilterTag } from '@/components/ui/SearchFilterBar';
 
 type Connection = {
   id: string;
@@ -31,7 +32,23 @@ const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopup
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<string>('all');
   const navigate = useNavigate();
+
+  // Filter tags for search
+  const filterTags: FilterTag[] = [
+    { id: 'all', label: 'All', active: activeFilter === 'all' },
+    { id: 'professor', label: 'Professor', active: activeFilter === 'professor' },
+    { id: 'student', label: 'Student', active: activeFilter === 'student' },
+    { id: 'enterprise', label: 'Enterprise', active: activeFilter === 'enterprise' },
+    { id: 'freelancer', label: 'Freelancer', active: activeFilter === 'freelancer' },
+    { id: 'experts', label: 'Experts', active: activeFilter === 'experts' },
+    { id: 'jobs', label: 'Jobs', active: activeFilter === 'jobs' }
+  ];
+
+  const handleFilterClick = (tagId: string) => {
+    setActiveFilter(tagId);
+  };
 
   // Mock data for now - replace with actual API call
   const mockConnections: Connection[] = [
@@ -146,6 +163,14 @@ const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopup
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-10 sm:h-12 text-sm sm:text-base"
+            />
+          </div>
+          {/* Filter Bar */}
+          <div className="mt-3 mb-1">
+            <SearchFilterBar 
+              tags={filterTags}
+              onTagClick={handleFilterClick}
+              className="justify-start"
             />
           </div>
         </div>
