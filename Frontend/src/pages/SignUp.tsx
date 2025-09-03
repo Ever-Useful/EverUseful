@@ -202,11 +202,11 @@ const SignUp = () => {
         try { (recaptchaVerifier as any).clear?.(); } catch {}
         setRecaptchaVerifier(null);
         setTimeout(() => {
-          const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': (response: any) => console.log('reCAPTCHA solved'),
-            'expired-callback': () => setRecaptchaVerifier(null)
-          });
+                  const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response: any) => console.log('reCAPTCHA solved'),
+          'expired-callback': () => setRecaptchaVerifier(null)
+        });
           verifier.render().then(() => {
             setRecaptchaVerifier(verifier);
             window.recaptchaVerifier = verifier;
@@ -222,11 +222,11 @@ const SignUp = () => {
         setRecaptchaVerifier(null);
         // Re-initialize after a short delay
         setTimeout(() => {
-          const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': (response: any) => console.log('reCAPTCHA solved'),
-            'expired-callback': () => setRecaptchaVerifier(null)
-          });
+                  const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response: any) => console.log('reCAPTCHA solved'),
+          'expired-callback': () => setRecaptchaVerifier(null)
+        });
           verifier.render().then(() => {
             setRecaptchaVerifier(verifier);
             window.recaptchaVerifier = verifier;
