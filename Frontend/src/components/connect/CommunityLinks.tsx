@@ -37,10 +37,10 @@ const CommunityLinks = () => {
     <section className="py-20 bg-white">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="heading-section font-bold text-olive-dark mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
             Join Our Community
           </h2>
-          <p className="text-xl text-olive max-w-3xl mx-auto">
+          <p className="text-base text-olive max-w-3xl mx-auto">
             Connect with passionate developers, contribute to open source, and grow together in our vibrant tech community.
           </p>
         </div>

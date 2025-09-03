@@ -31,7 +31,7 @@ export const CommunityConnect: React.FC = () => {
       {/* Centered Content */}
       <div className="flex flex-col items-center justify-center text-center px-4">
         <motion.h2
-          className="sm:text-4xl font-bold text-white drop-shadow-2xl mobile-text-2xl"
+          className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight px-2 sm:px-0"
           style={{ WebkitTextStroke: '1px rgba(255,255,255,0.9)' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

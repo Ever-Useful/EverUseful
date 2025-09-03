@@ -98,10 +98,10 @@ const JobListings = () => {
       <section id="job-listings" className="py-8 sm:py-10 bg-olive-light">
         <div className="container mx-auto px-6">
           <div className="text-center mb-6">
-            <h2 className="heading-header font-bold text-black mb-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
               Open Positions
             </h2>
-            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-4 md:mb-6 px-4">
+            <p className="text-base md:text-base text-white/90 max-w-2xl mx-auto mb-4 md:mb-6 px-4">
 
               Find your next opportunity and join our growing team of innovators.
             </p>

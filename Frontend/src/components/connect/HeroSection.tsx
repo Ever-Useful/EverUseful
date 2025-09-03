@@ -16,10 +16,10 @@ const HeroSection = () => {
           {/* Left Content */}
           <div className="space-y-8 animate-fade-in">
             <div className="space-y-4">
-              <h1 className="text-5xl lg:text-7xl font-bold text-olive-dark leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
                 Build Tomorrow, Together
               </h1>
-              <p className="text-xl lg:text-2xl text-olive leading-relaxed max-w-lg">
+              <p className="text-base lg:text-base text-olive leading-relaxed max-w-lg">
                 Shape the future of technology with passionate innovators who believe in making an impact together.
               </p>
             </div>

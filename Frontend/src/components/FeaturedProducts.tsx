@@ -214,7 +214,7 @@ export const FeaturedProducts: React.FC = () => {
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-[92vw] relative z-10">
         {/* Header */}
         <div className="text-center mb-14">
-          <h1 className="sm:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight mobile-text-2xl">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
             Discover <span className="text-blue-600">Game-Changing</span> Projects
           </h1>
           <p className="text-[12px] sm:text-base text-gray-600 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
@@ -349,7 +349,7 @@ export const FeaturedProducts: React.FC = () => {
                 {/* Content */}
                 <UICardContent className="flex flex-col flex-1 px-3">
                   
-                    <UICardTitle className="mt-2 mobile-text-xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                    <UICardTitle className="mt-2 mobile-text-2xl font-extrabold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                       {p.title}
                     </UICardTitle>
                     <p className="mobile-text-base text-gray-500 mb-1">{p.subtitle}</p>
