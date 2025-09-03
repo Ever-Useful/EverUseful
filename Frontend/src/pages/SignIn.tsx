@@ -15,6 +15,7 @@ import { auth, handleGithubAuth, handleGoogleAuth, loginWithEmailPassword, sendP
 import { RecaptchaVerifier } from "firebase/auth";
 import userService from '@/services/userService';
 import Logo from '../assets/Logo/Logo Side.png'
+import { API_ENDPOINTS } from "@/config/api";
 
 // Extend the Window interface to include confirmationResult
 declare global {
@@ -111,7 +112,8 @@ const SignIn = () => {
         const timeSinceLastRequest = now - lastOtpRequestTime;
         const remainingTime = Math.max(0, 60000 - timeSinceLastRequest);
         
-        if (remainingTime <= 0 && otpCountdown <= 0) {
+        // Stop countdown if mobile OTP is shown or if time is up
+        if (remainingTime <= 0 || showMobileOTP) {
           setOtpCountdown(0);
           clearInterval(timer);
         } else if (otpCountdown > 0) {
@@ -123,7 +125,29 @@ const SignIn = () => {
       
       return () => clearInterval(timer);
     }
-  }, [lastOtpRequestTime, otpCountdown]);
+  }, [lastOtpRequestTime, otpCountdown, showMobileOTP]);
+  
+  // Stop countdown when mobile OTP is shown
+  useEffect(() => {
+    if (showMobileOTP) {
+      setOtpCountdown(0);
+    }
+  }, [showMobileOTP]);
+  
+  // Stop countdown when user is logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    if (isLoggedIn) {
+      setOtpCountdown(0);
+    }
+  }, []);
+  
+  // Stop countdown when component unmounts
+  useEffect(() => {
+    return () => {
+      setOtpCountdown(0);
+    };
+  }, []);
 
   const userTypes = [
     {
@@ -198,14 +222,17 @@ const SignIn = () => {
 
       // User data is now saved in DynamoDB via backend
       const user = auth.currentUser;
-      if (user && backendUser) {
-        // User profile is now directly saved in DynamoDB via backend
+      
+      // Stop countdown when sign in is successful
+      setOtpCountdown(0);
+      
+      if (user) {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", user.email || "");
+        localStorage.setItem("userType", userType);
+        window.dispatchEvent(new Event("storage"));
+        navigate("/");
       }
-
-      // Set localStorage to indicate user is logged in
-      localStorage.setItem("isLoggedIn", "true");
-      window.dispatchEvent(new Event("storage"));
-      navigate('/profile'); // Navigate directly to profile
     } catch (error: any) {
       console.error("Login failed", error);
       if (error.code === 'auth/invalid-credential') {
@@ -253,7 +280,6 @@ const SignIn = () => {
     try {
       setIsLoading(true);
       setError(null);
-      setLastOtpRequestTime(now);
 
       // Clear any existing reCAPTCHA
       if (window.recaptchaVerifier) {
@@ -291,6 +317,8 @@ const SignIn = () => {
       setShowMobileOTP(true);
       setHasAttemptedOTP(true);
       setError(null); // Clear any previous errors
+      // Start cooldown only after successful send
+      setLastOtpRequestTime(Date.now());
     } catch (error: any) {
       console.error("Error in sendOtp:", error);
       setRecaptchaInitialized(false);
@@ -327,11 +355,64 @@ const SignIn = () => {
       setIsLoading(true);
       setError(null);
       const confirmationResult = window.confirmationResult;
-      await confirmationResult.confirm(mobileOTP);
-      console.log("OTP verified successfully");
-      localStorage.setItem("isLoggedIn", "true");
-      window.dispatchEvent(new Event("storage"));
-      navigate("/");
+      
+      if (!confirmationResult) {
+        setError("No verification session found. Please request a new OTP.");
+        return;
+      }
+
+      const result = await confirmationResult.confirm(mobileOTP);
+      console.log("OTP verified successfully", result);
+      
+      // Stop countdown when OTP is verified
+      setOtpCountdown(0);
+      
+      // Check if user exists in the system and hydrate profile for header/sidebar
+      try {
+        // Try to get user profile to see if they exist
+        const token = await result.user.getIdToken();
+        const backendUser = await userService.getUserProfile();
+        
+        // User exists, proceed with sign in
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userPhone", countryCode + mobileNumber);
+        
+        // Set user data from backend if available
+        if (backendUser?.data?.auth) {
+          const firstName = backendUser.data.auth.firstName || backendUser.data.profile?.firstName || '';
+          const lastName = backendUser.data.auth.lastName || backendUser.data.profile?.lastName || '';
+          localStorage.setItem("userType", backendUser.data.auth.userType || "");
+          localStorage.setItem("userName", `${firstName} ${lastName}`.trim());
+          localStorage.setItem("userFirstName", firstName);
+          localStorage.setItem("userLastName", lastName);
+          localStorage.setItem("userEmail", backendUser.data.auth.email || "");
+          // Cache normalized profile for header/UserProfileContext
+          const normalized = {
+            firstName,
+            lastName,
+            avatar: backendUser.data.profile?.avatar || '',
+            customUserId: backendUser.data.customUserId,
+            userType: backendUser.data.auth.userType,
+            email: backendUser.data.auth.email,
+          };
+          try { localStorage.setItem("userProfile", JSON.stringify(normalized)); } catch {}
+        }
+        
+        window.dispatchEvent(new Event("storage"));
+        navigate("/");
+      } catch (profileError: any) {
+        if (profileError.message === 'User not found') {
+          // User doesn't exist, redirect to signup
+          setError('No account found with this phone number. Please sign up first.');
+          setTimeout(() => {
+            navigate('/signup');
+          }, 2000);
+        } else {
+          // Other error, but OTP is verified
+          console.error("Error fetching user profile:", profileError);
+          setError("Phone verified but couldn't load profile. Please try signing in with email.");
+        }
+      }
     } catch (error: any) {
       console.error("Error verifying OTP:", error);
       if (error.code === 'auth/invalid-verification-code') {
@@ -363,6 +444,47 @@ const SignIn = () => {
     }
   };
 
+  // Function to switch authentication methods
+  const switchAuthMethod = (method: string) => {
+    setAuthMethod(method);
+    setError(null);
+    setMobileOTP('');
+    setShowMobileOTP(false);
+    setHasAttemptedOTP(false);
+    
+    // Clear any existing OTP countdown when switching methods
+    if (method === 'email') {
+      setOtpCountdown(0);
+      setLastOtpRequestTime(0);
+    }
+  };
+
+  // Check if phone number is already registered
+  const checkPhoneRegistration = async (phoneNumber: string) => {
+    try {
+      // Call backend to check if phone number is registered
+      const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/users/check-phone`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        return result.exists; // Backend should return { exists: true/false }
+      }
+      
+      // If backend check fails, assume phone exists to allow the flow
+      return true;
+    } catch (error) {
+      console.error("Error checking phone registration:", error);
+      // If check fails, assume phone exists to allow the flow
+      return true;
+    }
+  };
+
   const handleMobileSignIn = async () => {
     // Use the same rate limiting logic as sendOtp
     const now = Date.now();
@@ -383,7 +505,8 @@ const SignIn = () => {
     try {
       setIsLoading(true);
       setError(null);
-      setLastOtpRequestTime(now);
+
+      // Skip backend phone registration check; rely on Firebase Auth linking
 
       if (!recaptchaInitialized) {
         await sendOtp();
@@ -396,6 +519,8 @@ const SignIn = () => {
         setShowMobileOTP(true);
         setHasAttemptedOTP(true);
         setError(null); // Clear any previous errors
+        // Start cooldown only after successful send
+        setLastOtpRequestTime(Date.now());
       }
     } catch (error: any) {
       console.error("Error sending OTP:", error);
@@ -435,16 +560,22 @@ const SignIn = () => {
   const handleMFAVerify = () => {
     console.log("MFA verified:", mfaCode);
     // Handle successful sign in
+    // Stop countdown when MFA is verified
+    setOtpCountdown(0);
+    // Navigate to dashboard
+    navigate("/");
   };
 
   const handleForgotPasswordSubmit = async () => {
     try {
-              await resetPassword(forgotPasswordEmail);
+      await resetPassword(forgotPasswordEmail);
       // Show success message
       alert("Password reset link has been sent to your email. Please check your inbox.");
       // Reset the form
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
+      // Stop countdown when forgot password is successful
+      setOtpCountdown(0);
     } catch (error: any) {
       console.error("Error sending password reset email:", error);
       alert(error.message || "Failed to send password reset email. Please try again.");
@@ -456,6 +587,8 @@ const SignIn = () => {
     // Handle password reset
     if (newPassword === confirmPassword) {
       console.log("Password reset successful");
+      // Stop countdown when password reset is successful
+      setOtpCountdown(0);
       // Reset to initial state
       setShowForgotPassword(false);
       setShowForgotPasswordOTP(false);
@@ -463,6 +596,9 @@ const SignIn = () => {
       setForgotPasswordOTP("");
       setNewPassword("");
       setConfirmPassword("");
+      setError(null);
+    } else {
+      setError("Passwords do not match");
     }
   };
 
@@ -471,21 +607,49 @@ const SignIn = () => {
     setShowForgotPassword(false);
     setShowForgotPasswordOTP(false);
     setShowMobileOTP(false);
+    setMobileOTP("");
+    setMfaCode("");
     setForgotPasswordEmail("");
     setForgotPasswordOTP("");
     setNewPassword("");
     setConfirmPassword("");
-    setMfaCode("");
-    setMobileOTP("");
     setError(null);
-    setHasAttemptedOTP(false);
-    
-    // Clear reCAPTCHA
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
-      window.recaptchaVerifier = null;
+    // Stop countdown when form is reset
+    setOtpCountdown(0);
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Stop countdown when auth is successful
+      setOtpCountdown(0);
+      
+      await handleGoogleAuth(navigate, userType);
+    } catch (error: any) {
+      console.error("Google sign-in failed:", error);
+      setError("Google sign-in failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-    setRecaptchaInitialized(false);
+  };
+
+  const handleGithubSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Stop countdown when auth is successful
+      setOtpCountdown(0);
+      
+      await handleGithubAuth(navigate, userType);
+    } catch (error: any) {
+      console.error("GitHub sign-in failed:", error);
+      setError("GitHub sign-in failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -515,8 +679,7 @@ const SignIn = () => {
                       <RadioGroup
                         value={authMethod}
                         onValueChange={(value) => {
-                          setAuthMethod(value);
-                          setError(null); // Clear any existing errors when switching methods
+                          switchAuthMethod(value);
                         }}
                         className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6"
                       >
@@ -567,7 +730,7 @@ const SignIn = () => {
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                             >
-                              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                           </div>
                         </div>
@@ -976,7 +1139,7 @@ const SignIn = () => {
 
                     <div className="flex justify-center gap-3 lg:gap-4">
                       <Button
-                        onClick={() => handleGoogleAuth(navigate)}
+                        onClick={handleGoogleSignIn}
                         variant="outline"
                         className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center"
                       >
@@ -988,7 +1151,7 @@ const SignIn = () => {
                         </svg>
                       </Button>
                       <Button
-                        onClick={() => handleGithubAuth(navigate)}
+                        onClick={handleGithubSignIn}
                         variant="outline"
                         className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center"
                       >
@@ -996,9 +1159,9 @@ const SignIn = () => {
                       </Button>
                     </div>
 
-                    <div className="text-center text-sm text-gray-600">
+                    <div className="text-center text-xs lg:text-sm text-gray-600">
                       Don't have an account?{" "}
-                      <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                      <Link to="/signup" className="text-blue-600 hover:text-blue-700 transition-colors font-medium">
                         Sign up
                       </Link>
                     </div>

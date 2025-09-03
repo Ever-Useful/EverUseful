@@ -221,7 +221,11 @@ export const verifyPhoneOTP = async (confirmationResult: any, otp: string) => {
 // Password reset function
 export const resetPassword = async (email: string) => {
   try {
-    await sendPasswordResetEmail(auth, email);
+    const actionUrl = `${window.location.origin}/auth/action`;
+    await sendPasswordResetEmail(auth, email, {
+      url: actionUrl,
+      handleCodeInApp: true,
+    });
     return true;
   } catch (error: any) {
     console.error("Error sending password reset email:", error.code, error.message);
@@ -232,7 +236,11 @@ export const resetPassword = async (email: string) => {
 // Email verification function
 export const sendEmailVerificationLink = async (user: any) => {
   try {
-    await sendEmailVerification(user);
+    const actionUrl = `${window.location.origin}/auth/action`;
+    await sendEmailVerification(user, {
+      url: actionUrl,
+      handleCodeInApp: true,
+    } as any);
     return true;
   } catch (error: any) {
     console.error("Error sending email verification:", error.code, error.message);

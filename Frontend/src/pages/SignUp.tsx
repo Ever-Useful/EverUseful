@@ -14,11 +14,12 @@ import {
   OAuthProvider,
   GithubAuthProvider,
   FacebookAuthProvider,
-  sendEmailVerification,
   Auth,
   RecaptchaVerifier,
   ConfirmationResult,
-  signInWithPhoneNumber
+  signInWithPhoneNumber,
+  EmailAuthProvider,
+  linkWithCredential
 } from "firebase/auth";
 import { auth, handleGoogleAuth, handleGithubAuth, sendPhoneOTP, verifyPhoneOTP, sendEmailVerificationLink } from "../lib/firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -82,6 +83,7 @@ const SignUp = () => {
           'size': 'invisible',
           'callback': (response: any) => {
             console.log('reCAPTCHA solved');
+            setRecaptchaVerifier(verifier); // Set verifier when solved
           },
           'expired-callback': () => {
             console.log('reCAPTCHA expired');
@@ -91,22 +93,40 @@ const SignUp = () => {
 
         // Wait for reCAPTCHA to be ready
         await verifier.render();
-        setRecaptchaVerifier(verifier);
-        window.recaptchaVerifier = verifier;
+        console.log('reCAPTCHA rendered');
+        window.recaptchaVerifier = verifier; // Store globally for access in handleSendPhoneOTP
+        
+        // Fallback: If callback doesn't fire, set verifier after a short delay
+        setTimeout(() => {
+          if (recaptchaVerifier === null) {
+            console.log('Fallback: Setting reCAPTCHA verifier after delay');
+            setRecaptchaVerifier(verifier);
+          }
+        }, 2000); // 2 seconds delay
       } catch (error) {
         console.error('Error initializing reCAPTCHA:', error);
-        setPhoneVerificationError('Failed to initialize verification. Please refresh the page.');
+        setRecaptchaVerifier(null);
       }
     };
 
-    if (!window.recaptchaVerifier) {
+    // Only initialize if not already initialized
+    if (recaptchaVerifier === null) {
       initializeRecaptcha();
     }
-  }, []);
+
+    // Cleanup function
+    return () => {
+      if (window.recaptchaVerifier) {
+        console.log('Clearing reCAPTCHA on unmount');
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []); // Empty dependency array to run only once on mount
   
   // Handle OTP countdown timer
   useEffect(() => {
-    if (lastOtpRequestTime > 0) {
+    if (lastOtpRequestTime > 0 && phoneVerificationStep !== 'verified') {
       const timer = setInterval(() => {
         const now = Date.now();
         const timeSinceLastRequest = now - lastOtpRequestTime;
@@ -122,7 +142,29 @@ const SignUp = () => {
       
       return () => clearInterval(timer);
     }
-  }, [lastOtpRequestTime]);
+  }, [lastOtpRequestTime, phoneVerificationStep]);
+  
+  // Stop countdown when phone is verified
+  useEffect(() => {
+    if (phoneVerificationStep === 'verified') {
+      setOtpCountdown(0);
+    }
+  }, [phoneVerificationStep]);
+  
+  // Stop countdown when user is logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    if (isLoggedIn) {
+      setOtpCountdown(0);
+    }
+  }, []);
+  
+  // Stop countdown when component unmounts
+  useEffect(() => {
+    return () => {
+      setOtpCountdown(0);
+    };
+  }, []);
   
   // Phone verification functions
   const handleSendPhoneOTP = async () => {
@@ -141,18 +183,35 @@ const SignUp = () => {
     
     setIsPhoneVerifying(true);
     setPhoneVerificationError('');
-    setLastOtpRequestTime(now);
     
     try {
       const fullPhone = `${selectedCode}${formData.phone}`;
+      // Ensure we have a fresh reCAPTCHA token for this request
+      try { await (recaptchaVerifier as any).verify?.(); } catch {}
       const confirmationResult = await sendPhoneOTP(fullPhone, recaptchaVerifier);
       // Store the confirmation result for later use
       window.confirmationResult = confirmationResult;
       setPhoneVerificationStep('otp');
+      // Start cooldown only after successful send
+      setLastOtpRequestTime(Date.now());
     } catch (error: any) {
       console.error('Phone OTP error:', error);
       if (error.code === 'auth/invalid-app-credential') {
         setPhoneVerificationError('App verification failed. Please refresh and try again.');
+        // Recreate verifier to avoid stale tokens
+        try { (recaptchaVerifier as any).clear?.(); } catch {}
+        setRecaptchaVerifier(null);
+        setTimeout(() => {
+          const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': (response: any) => console.log('reCAPTCHA solved'),
+            'expired-callback': () => setRecaptchaVerifier(null)
+          });
+          verifier.render().then(() => {
+            setRecaptchaVerifier(verifier);
+            window.recaptchaVerifier = verifier;
+          });
+        }, 1000);
       } else if (error.code === 'auth/captcha-check-failed') {
         setPhoneVerificationError('Verification failed. Please try again.');
         // Re-initialize reCAPTCHA
@@ -173,6 +232,11 @@ const SignUp = () => {
             window.recaptchaVerifier = verifier;
           });
         }, 1000);
+      } else if (error.code === 'auth/too-many-requests') {
+        // Back off more aggressively on rate limit
+        setPhoneVerificationError('Too many requests. Please wait 2 minutes and try again.');
+        setLastOtpRequestTime(Date.now());
+        setOtpCountdown(120);
       } else {
         setPhoneVerificationError(error.message || 'Failed to send verification code');
       }
@@ -188,12 +252,28 @@ const SignUp = () => {
     setPhoneVerificationError('');
     
     try {
-      // For now, we'll just mark as verified since we can't store the confirmation result
-      // In a real implementation, you'd need to handle this differently
-      setPhoneVerificationStep('verified');
-      setPhoneVerificationError('');
+      // Actually verify the OTP with Firebase
+      const result = await window.confirmationResult.confirm(phoneOTP);
+      if (result.user) {
+        console.log('Phone verification successful:', result.user.phoneNumber);
+        setPhoneVerificationStep('verified');
+        setPhoneVerificationError('');
+        // Clear the OTP input
+        setPhoneOTP('');
+        // Stop countdown when phone is verified
+        setOtpCountdown(0);
+      } else {
+        throw new Error('Phone verification failed');
+      }
     } catch (error: any) {
-      setPhoneVerificationError(error.message);
+      console.error('Phone verification error:', error);
+      if (error.code === 'auth/invalid-verification-code') {
+        setPhoneVerificationError('Invalid OTP. Please check and try again.');
+      } else if (error.code === 'auth/code-expired') {
+        setPhoneVerificationError('OTP has expired. Please request a new one.');
+      } else {
+        setPhoneVerificationError('Verification failed. Please try again.');
+      }
     } finally {
       setIsPhoneVerifying(false);
     }
@@ -249,7 +329,8 @@ const SignUp = () => {
   // If you need to test with Firebase test phone numbers, set an explicit env flag
   // and only then disable app verification locally.
   useEffect(() => {
-    const useTestPhones = import.meta.env.VITE_USE_TEST_PHONE === 'true';
+    // Set to false to enable real phone number testing in both localhost and production
+    const useTestPhones = false; // import.meta.env.VITE_USE_TEST_PHONE === 'true';
     if (useTestPhones) {
       auth.settings.appVerificationDisabledForTesting = true;
     } else {
@@ -425,8 +506,8 @@ const SignUp = () => {
   const sendVerificationCode = async () => {
     try {
       const user = auth.currentUser;
-      if (user) {
-        await sendEmailVerification(user);
+      if (user && !user.emailVerified) {
+        await sendEmailVerificationLink(user);
         console.log("Verification code sent to user's email");
       } else {
         console.error("No user found");
@@ -444,11 +525,22 @@ const SignUp = () => {
         return;
       }
       
-      // First, create the Firebase account
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      const idToken = await userCredential.user.getIdToken();
+      // If the user is already signed in via phone, link email/password to the SAME UID
+      let firebaseUser = auth.currentUser;
+      if (firebaseUser) {
+        const emailCredential = EmailAuthProvider.credential(formData.email, formData.password);
+        await linkWithCredential(firebaseUser, emailCredential);
+        // Refresh current user after linking
+        firebaseUser = auth.currentUser;
+      } else {
+        // Fallback: create the Firebase account (this signs in)
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        firebaseUser = userCredential.user;
+      }
 
-      console.log('Firebase account created successfully:', userCredential.user.uid);
+      const idToken = await firebaseUser!.getIdToken();
+
+      console.log('Firebase account ready (linked or created) with UID:', firebaseUser!.uid);
       console.log('Sending user data to backend:', {
         userType: formData.userType,
         firstName: formData.firstName,
@@ -483,22 +575,53 @@ const SignUp = () => {
       const result = await response.json();
       console.log('User data saved successfully:', result);
       
-      // Set localStorage to indicate user is logged in and store user data
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userType", formData.userType);
-      localStorage.setItem("userName", `${formData.firstName} ${formData.lastName}`);
-      localStorage.setItem("userFirstName", formData.firstName);
-      localStorage.setItem("userLastName", formData.lastName);
-      localStorage.setItem("userEmail", formData.email);
-      localStorage.setItem("userPhone", "+91" + formData.phone);
-      localStorage.setItem("userUsername", formData.email.split('@')[0]); // Store username derived from email
-      localStorage.setItem("userDataSaved", "true");
+      // Link phone number to the email account for future phone OTP sign-in
+      try {
+        // Store phone number in user profile for linking
+        const phoneLinkResponse = await fetch(API_ENDPOINTS.USER_PROFILE, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            phoneNumber: selectedCode + formData.phone,
+            phoneVerified: true,
+          }),
+        });
+        
+        if (phoneLinkResponse.ok) {
+          console.log('Phone number linked to email account successfully');
+        }
+      } catch (phoneLinkError) {
+        console.error('Failed to link phone number:', phoneLinkError);
+        // Continue anyway as this is not critical
+      }
       
-      // Dispatch storage event to notify other components
-      window.dispatchEvent(new Event("storage"));
+      // Send email verification
+      try {
+        await sendEmailVerificationLink(firebaseUser);
+        console.log("Verification email sent successfully");
+        
+        // Set localStorage to indicate user is signed up but not verified
+        localStorage.setItem("isSignedUp", "true");
+        localStorage.setItem("userType", formData.userType);
+        localStorage.setItem("userName", `${formData.firstName} ${formData.lastName}`);
+        localStorage.setItem("userFirstName", formData.firstName);
+        localStorage.setItem("userLastName", formData.lastName);
+        localStorage.setItem("userEmail", formData.email);
+        localStorage.setItem("userPhone", selectedCode + formData.phone);
+        localStorage.setItem("userUsername", formData.email.split('@')[0]);
+        localStorage.setItem("userDataSaved", "true");
+        
+        // Navigate to email verification page instead of profile
+        navigate('/email-verification');
+      } catch (verificationError) {
+        console.error("Error sending verification email:", verificationError);
+        // Still navigate to verification page, user can request resend
+        navigate('/email-verification');
+      }
       
-      // Navigate to profile page
-      navigate('/profile');
     } catch (error: any) {
       console.error("Error creating account:", error);
       if (error.code === 'auth/email-already-in-use') {
@@ -538,6 +661,101 @@ const SignUp = () => {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  // Check if Send OTP button should be enabled
+  const isSendOtpEnabled = () => {
+    const enabled = formData.phone.length === 10 && 
+                   recaptchaVerifier !== null && 
+                   !isPhoneVerifying && 
+                   otpCountdown === 0;
+    
+    // Debug logging
+    if (formData.phone.length === 10) {
+      console.log('Send OTP Button State:', {
+        phoneLength: formData.phone.length,
+        recaptchaReady: recaptchaVerifier !== null,
+        notVerifying: !isPhoneVerifying,
+        countdownZero: otpCountdown === 0,
+        buttonEnabled: enabled
+      });
+    }
+    
+    return enabled;
+  };
+  
+  // Monitor reCAPTCHA state changes
+  useEffect(() => {
+    console.log('reCAPTCHA State Changed:', {
+      recaptchaVerifier: recaptchaVerifier !== null,
+      windowRecaptcha: window.recaptchaVerifier !== null
+    });
+  }, [recaptchaVerifier]);
+  
+  // Manual reCAPTCHA refresh function for troubleshooting
+  const refreshRecaptcha = async () => {
+    try {
+      console.log('Manually refreshing reCAPTCHA...');
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+      setRecaptchaVerifier(null);
+      
+      // Re-initialize after a short delay
+      setTimeout(async () => {
+        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response: any) => {
+            console.log('reCAPTCHA solved (manual refresh)');
+            setRecaptchaVerifier(verifier);
+          },
+          'expired-callback': () => {
+            console.log('reCAPTCHA expired (manual refresh)');
+            setRecaptchaVerifier(null);
+          }
+        });
+        
+        await verifier.render();
+        window.recaptchaVerifier = verifier;
+        console.log('reCAPTCHA manually refreshed');
+      }, 500);
+    } catch (error) {
+      console.error('Error manually refreshing reCAPTCHA:', error);
+    }
+  };
+  
+  // Add debug commands to console for troubleshooting
+  useEffect(() => {
+    (window as any).debugSignUp = {
+      refreshRecaptcha,
+      checkButtonState: () => {
+        console.log('Current Button State:', {
+          phoneLength: formData.phone.length,
+          recaptchaReady: recaptchaVerifier !== null,
+          notVerifying: !isPhoneVerifying,
+          countdownZero: otpCountdown === 0,
+          buttonEnabled: isSendOtpEnabled(),
+          recaptchaVerifier: recaptchaVerifier,
+          windowRecaptcha: window.recaptchaVerifier
+        });
+      },
+      forceEnableButton: () => {
+        if (formData.phone.length === 10) {
+          console.log('Forcing reCAPTCHA verifier...');
+          setRecaptchaVerifier(window.recaptchaVerifier);
+        }
+      }
+    };
+    
+    console.log('🔧 Debug commands available:');
+    console.log('  - debugSignUp.refreshRecaptcha() - Refresh reCAPTCHA');
+    console.log('  - debugSignUp.checkButtonState() - Check button state');
+    console.log('  - debugSignUp.forceEnableButton() - Force enable button');
+    
+    return () => {
+      delete (window as any).debugSignUp;
+    };
+  }, [formData.phone.length, recaptchaVerifier, isPhoneVerifying, otpCountdown]);
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white">
       {/* Back Button - Mobile optimized */}
@@ -728,11 +946,22 @@ const SignUp = () => {
                        <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</Label>
                      </div>
                      <div className="flex space-x-2">
-                       {/* Country Code - Fixed to +91 */}
-                       <div className="w-[80px] sm:w-[100px] h-12 flex items-center justify-center border-2 border-gray-200 rounded-md bg-gray-50 text-sm font-medium text-gray-700">
-                         +91
-                       </div>
-                       <Input
+                        {/* Country Code - Dropdown */}
+                        <Select value={selectedCode} onValueChange={setSelectedCode}>
+                          <SelectTrigger className="w-[70px] h-12 border-2 border-gray-200 focus:border-blue-500">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countryCodes.map((country) => (
+                              <SelectItem key={country.code} value={country.code}>
+                                <div className="flex items-center space-x-2">
+                                  <span>{country.code}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
                          id="phone"
                          type="tel"
                          placeholder="Enter your mobile number"
@@ -752,9 +981,9 @@ const SignUp = () => {
                        <Button
                          type="button"
                          onClick={handleSendPhoneOTP}
-                         disabled={isPhoneVerifying || !recaptchaVerifier || otpCountdown > 0 || formData.phone.length !== 10}
+                         disabled={!isSendOtpEnabled()}
                          className={`h-12 px-4 transition-all duration-300 transform hover:scale-[1.02] ${
-                           isPhoneVerifying || !recaptchaVerifier || otpCountdown > 0 || formData.phone.length !== 10
+                           !isSendOtpEnabled()
                              ? 'bg-gray-400 cursor-not-allowed opacity-50'
                              : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
                          } text-white font-semibold rounded-lg`}
@@ -763,11 +992,6 @@ const SignUp = () => {
                            <div className="flex items-center space-x-1">
                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                              <span className="text-xs">Sending...</span>
-                           </div>
-                         ) : !recaptchaVerifier ? (
-                           <div className="flex items-center space-x-1">
-                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                             <span className="text-xs">Init...</span>
                            </div>
                          ) : otpCountdown > 0 ? (
                            <div className="flex items-center space-x-1">
@@ -802,88 +1026,85 @@ const SignUp = () => {
                         <span>Valid mobile number</span>
                       </div>
                     )}
-                    
-                                                              {/* OTP Input Field - Only show when in OTP step */}
-                     {phoneVerificationStep === 'otp' && (
-                       <div className="space-y-4 mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 shadow-sm">
-                         <div className="flex items-center space-x-2">
-                           <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                           <p className="text-sm text-blue-800 font-medium">Enter verification code</p>
-                         </div>
-                         
-                         <div className="space-y-3">
-                           {/* OTP Input Fields */}
-                           <div className="flex justify-center space-x-2">
-                             {[0, 1, 2, 3, 4, 5].map((index) => (
-                               <input
-                                 key={index}
-                                 type="text"
-                                 maxLength={1}
-                                 value={phoneOTP[index] || ''}
-                                 onChange={(e) => {
-                                   const value = e.target.value.replace(/\D/g, '');
-                                   if (value.length <= 1) {
-                                     const newOTP = phoneOTP.split('');
-                                     newOTP[index] = value;
-                                     setPhoneOTP(newOTP.join(''));
-                                     
-                                     // Auto-focus next input
-                                     if (value && index < 5) {
-                                       const nextInput = document.querySelector(`input[data-index="${index + 1}"]`) as HTMLInputElement;
-                                       if (nextInput) nextInput.focus();
-                                     }
-                                   }
-                                 }}
-                                 onKeyDown={(e) => {
-                                   // Handle backspace
-                                   if (e.key === 'Backspace') {
-                                     if (!phoneOTP[index] && index > 0) {
-                                       // If current field is empty, go to previous field
-                                       const prevInput = document.querySelector(`input[data-index="${index - 1}"]`) as HTMLInputElement;
-                                       if (prevInput) prevInput.focus();
-                                     } else if (phoneOTP[index]) {
-                                       // If current field has value, clear it
-                                       const newOTP = phoneOTP.split('');
-                                       newOTP[index] = '';
-                                       setPhoneOTP(newOTP.join(''));
-                                     }
-                                   }
-                                 }}
-                                 data-index={index}
-                                 className="w-12 h-12 text-center text-lg font-semibold border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl bg-white shadow-sm transition-all duration-200 focus:scale-105 focus:shadow-md"
-                                 style={{
-                                   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                                 }}
-                               />
-                             ))}
-                           </div>
-                           
-                           {/* Verify Button */}
-                           <Button
-                             type="button"
-                             onClick={handleVerifyPhoneOTP}
-                             disabled={isPhoneVerifying || phoneOTP.length !== 6}
-                             className={`w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-[1.02] group shadow-lg hover:shadow-xl ${
-                               isPhoneVerifying || phoneOTP.length !== 6
-                                 ? 'opacity-50 cursor-not-allowed hover:scale-100'
-                                 : ''
-                             } text-white font-semibold py-3 rounded-lg`}
-                           >
-                             {isPhoneVerifying ? (
-                               <div className="flex items-center justify-center space-x-2">
-                                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                 <span>Verifying...</span>
-                               </div>
-                             ) : (
-                               <div className="flex items-center justify-center space-x-2">
-                                 <Check className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                 <span>Verify Code</span>
-                               </div>
-                             )}
-                           </Button>
-                         </div>
-                       </div>
-                     )}
+                                                                                  
+                      {/* OTP Input Field - Only show when in OTP step */}
+                      {phoneVerificationStep === 'otp' && (
+                        <div className="space-y-4 mt-4 bg-gradient-to-r rounded-xl shadow-sm">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                            <p className="text-sm text-blue-800 font-medium">Enter verification code</p>
+                          </div>
+                          
+                          <div className="flex items-center space-x-4">
+                            {/* OTP Input Fields */}
+                            <div className="flex space-x-2">
+                              {[0, 1, 2, 3, 4, 5].map((index) => (
+                                <input
+                                  key={index}
+                                  type="text"
+                                  maxLength={1}
+                                  value={phoneOTP[index] || ''}
+                                  onChange={(e) => {
+                                    const value = e.target.value.replace(/\D/g, '');
+                                    if (value.length <= 1) {
+                                      const newOTP = phoneOTP.split('');
+                                      newOTP[index] = value;
+                                      setPhoneOTP(newOTP.join(''));
+                                      
+                                      // Auto-focus next input
+                                      if (value && index < 5) {
+                                        const nextInput = document.querySelector(`input[data-index="${index + 1}"]`) as HTMLInputElement;
+                                        if (nextInput) nextInput.focus();
+                                      }
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    // Handle backspace
+                                    if (e.key === 'Backspace') {
+                                      if (!phoneOTP[index] && index > 0) {
+                                        // If current field is empty, go to previous field
+                                        const prevInput = document.querySelector(`input[data-index="${index - 1}"]`) as HTMLInputElement;
+                                        if (prevInput) prevInput.focus();
+                                      } else if (phoneOTP[index]) {
+                                        // If current field has value, clear it
+                                        const newOTP = phoneOTP.split('');
+                                        newOTP[index] = '';
+                                        setPhoneOTP(newOTP.join(''));
+                                      }
+                                    }
+                                  }}
+                                  data-index={index}
+                                  className="w-10 h-10 text-center text-lg font-semibold border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200 rounded-lg bg-white shadow-sm transition-all duration-200 focus:scale-105"
+                                />
+                              ))}
+                            </div>
+                            
+                            {/* Verify Button - Positioned on the right */}
+                            <Button
+                              type="button"
+                              onClick={handleVerifyPhoneOTP}
+                              disabled={isPhoneVerifying || phoneOTP.length !== 6}
+                              className={`h-10 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-[1.02] group shadow-lg hover:shadow-xl ${
+                                isPhoneVerifying || phoneOTP.length !== 6
+                                  ? 'opacity-50 cursor-not-allowed hover:scale-100'
+                                  : ''
+                              } text-white font-semibold rounded-lg`}
+                            >
+                              {isPhoneVerifying ? (
+                                <div className="flex items-center justify-center space-x-2">
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                  <span className="text-sm">Verifying...</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-center space-x-2">
+                                  <Check className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                  <span className="text-sm">Verify</span>
+                                </div>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     
                     {/* Verification Success */}
                     {phoneVerificationStep === 'verified' && (
@@ -929,9 +1150,8 @@ const SignUp = () => {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                        
                       >
-                        {/* {showPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />} */}
+                        {showPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />}
                       </button>
                     </div>
                     {fieldErrors.password && (
@@ -983,7 +1203,7 @@ const SignUp = () => {
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                         style={{ zIndex: 10 }}
                       >
-                        {/* {showConfirmPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />} */}
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />}
                       </button>
                     </div>
                     {fieldErrors.confirmPassword && (

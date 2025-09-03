@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authorize = require('../authorize');
 const userService = require('../services/userService');
+const dynamoDB = require('../services/dynamoDBService'); // Added for check-phone endpoint
 
 // Get user profile
 router.get('/profile', authorize, async (req, res) => {
@@ -723,6 +724,26 @@ router.post('/verify-email', authorize, async (req, res) => {
   } catch (error) {
     console.error('Error verifying email:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Check if phone number is registered
+router.post('/check-phone', async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+    
+    // Check if phone number exists in the database using the service layer
+    const existingUser = await userService.findUserByPhone(phoneNumber);
+    const exists = !!existingUser;
+    
+    res.json({ exists });
+  } catch (error) {
+    console.error('Error checking phone registration:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
