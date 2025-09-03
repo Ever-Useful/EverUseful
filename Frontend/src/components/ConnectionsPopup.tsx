@@ -8,16 +8,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import userService from '@/services/userService';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { auth } from "@/lib/firebase"; // make sure auth is imported
+import { useUserProfile } from "@/contexts/UserProfileContext";
+
+
 
 type Connection = {
   id: string;
   name: string;
-  title: string;
-  company: string;
-  location: string;
   avatar?: string;
-  mutualConnections: number;
-  isConnected: boolean;
+  userType: string;
+  username?: string;
+
+  // mark old fields as optional so TS won’t complain
+  title?: string;
+  company?: string;
+  location?: string;
+  mutualConnections?: number;
+  isConnected?: boolean;
   email?: string;
 };
 
@@ -32,66 +40,111 @@ const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopup
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const { profileData } = useUserProfile();
 
-  // Mock data for now - replace with actual API call
-  const mockConnections: Connection[] = [
-    {
-      id: '1',
-      name: 'Sarah Chen',
-      title: 'Senior Product Manager',
-      company: 'TechCorp',
-      location: 'San Francisco, CA',
-      mutualConnections: 15,
-      isConnected: true,
-    },
-    {
-      id: '2',
-      name: 'Marcus Johnson',
-      title: 'Lead Developer',
-      company: 'StartupXYZ',
-      location: 'New York, NY',
-      mutualConnections: 8,
-      isConnected: true,
-    },
-    {
-      id: '3',
-      name: 'Elena Rodriguez',
-      title: 'Marketing Director',
-      company: 'GrowthCo',
-      location: 'Austin, TX',
-      mutualConnections: 12,
-      isConnected: true,
-    },
-    {
-      id: '4',
-      name: 'David Kim',
-      title: 'UX Designer',
-      company: 'DesignStudio',
-      location: 'Seattle, WA',
-      mutualConnections: 5,
-      isConnected: true,
-    },
-    {
-      id: '5',
-      name: 'Lisa Wang',
-      title: 'Data Scientist',
-      company: 'DataTech',
-      location: 'Boston, MA',
-      mutualConnections: 3,
-      isConnected: true,
-    }
-  ];
 
-  useEffect(() => {
-    if (isOpen) {
-      setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setConnections(mockConnections);
-        setLoading(false);
-      }, 500);
+
+useEffect(() => {
+  const fetchConnectedProfiles = async () => {
+    if (!profileData?.customUserId) return;
+
+    try {
+      const connections = await userService.getConnectionsByUserId(profileData.customUserId);
+
+      const connectedProfiles = await Promise.all(
+        (connections.connected || []).map(async (id: string) => {
+          console.log("Fetching connected user with ID:", id);
+          try {
+            const user = await userService.getUserByCustomId(id);
+            console.log("Fetched user response:", user);
+            return user;
+          } catch {
+            console.warn(`User with ID ${id} not found, skipping...`);
+            return null;
+          }
+        })
+      );
+
+      setConnections(
+        connectedProfiles
+          .filter(Boolean)
+          .map((user: any) => ({
+            id: user.customUserId,
+            name: `${user.auth?.firstName || user.profile?.firstName || "User"} ${user.auth?.lastName || user.profile?.lastName || ""}`.trim(),
+            avatar: user.profile?.avatar || "",
+            userType: user.auth?.userType || "student",
+            username: user.auth?.username || user.profile?.username || "",
+          }))
+      );
+    } catch (err) {
+      console.error("Failed to fetch connected profiles:", err);
+      toast.error("Failed to load connections");
     }
-  }, [isOpen]);
+  };
+
+  fetchConnectedProfiles();
+}, [profileData?.customUserId]);
+
+
+  // // Mock data for now - replace with actual API call
+  // const mockConnections: Connection[] = [
+  //   {
+  //     id: '1',
+  //     name: 'Sarah Chen',
+  //     title: 'Senior Product Manager',
+  //     company: 'TechCorp',
+  //     location: 'San Francisco, CA',
+  //     mutualConnections: 15,
+  //     isConnected: true,
+  //   },
+  //   {
+  //     id: '2',
+  //     name: 'Marcus Johnson',
+  //     title: 'Lead Developer',
+  //     company: 'StartupXYZ',
+  //     location: 'New York, NY',
+  //     mutualConnections: 8,
+  //     isConnected: true,
+  //   },
+  //   {
+  //     id: '3',
+  //     name: 'Elena Rodriguez',
+  //     title: 'Marketing Director',
+  //     company: 'GrowthCo',
+  //     location: 'Austin, TX',
+  //     mutualConnections: 12,
+  //     isConnected: true,
+  //   },
+  //   {
+  //     id: '4',
+  //     name: 'David Kim',
+  //     title: 'UX Designer',
+  //     company: 'DesignStudio',
+  //     location: 'Seattle, WA',
+  //     mutualConnections: 5,
+  //     isConnected: true,
+  //   },
+  //   {
+  //     id: '5',
+  //     name: 'Lisa Wang',
+  //     title: 'Data Scientist',
+  //     company: 'DataTech',
+  //     location: 'Boston, MA',
+  //     mutualConnections: 3,
+  //     isConnected: true,
+  //   }
+  // ];
+
+  // useEffect(() => {
+  //   if (isOpen) {
+  //     setLoading(true);
+  //     // Simulate API call
+  //     setTimeout(() => {
+  //       setConnections(mockConnections);
+  //       setLoading(false);
+  //     }, 500);
+  //   }
+  // }, [isOpen]);
 
   const handleMessage = (connectionId: string) => {
     // Navigate to chat or open chat modal
@@ -168,31 +221,26 @@ const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopup
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                       {/* Avatar and Info */}
                       <div className="flex items-center gap-4 flex-1">
-                        <Avatar className="h-12 w-12 sm:h-16 sm:w-16">
-                          <AvatarImage src={connection.avatar} />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-sm sm:text-base">
-                            {connection.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
+<Avatar className="h-12 w-12 sm:h-16 sm:w-16">
+  <AvatarImage src={connection.avatar} />
+  <AvatarFallback>
+    {connection.name ? connection.name.split(" ").map(n => n[0]).join("") : "U"}
+  </AvatarFallback>
+</Avatar>
+
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
-                            {connection.name}
-                          </h3>
-                          <p className="text-gray-600 text-xs sm:text-sm truncate">
-                            {connection.title}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Building className="h-3 w-3 text-gray-400" />
-                            <p className="text-gray-500 text-xs truncate">
-                              {connection.company}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <MapPin className="h-3 w-3 text-gray-400" />
-                            <p className="text-gray-500 text-xs truncate">
-                              {connection.location}
-                            </p>
-                          </div>
+<h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+  {connection.name}
+</h3>
+
+{connection.username && (
+  <p className="text-gray-500 text-xs">@{connection.username}</p>
+)}
+
+<Badge variant="secondary" className="text-xs mt-1">
+  {connection.userType || "student"}
+</Badge>
+
                         </div>
                       </div>
 

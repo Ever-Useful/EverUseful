@@ -849,7 +849,7 @@ const Profile = () => {
         <MyProjects onClose={() => { setShowEditProjectSidebar(false); setEditingProject(null); }} editMode={true} projectToEdit={editingProject} onProjectCreated={fetchUserData} />
       )}
       
-      {/* Connections Popup */}
+      Connections Popup
       <ConnectionsPopup 
         isOpen={showConnectionsPopup}
         onClose={() => setShowConnectionsPopup(false)}

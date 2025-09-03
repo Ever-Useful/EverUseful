@@ -12,6 +12,9 @@ import {Footer} from '@/components/Footer';
 import Logo from '@/assets/Logo/Logo Main.png'; 
 // import UserService from '@/services/userService';
 import UserService, { UserSearchResult } from "@/services/userService";
+import { useUserProfile } from "@/contexts/UserProfileContext";
+
+
 
 type Connection = {
   id: string;
@@ -177,13 +180,22 @@ const mockSuggestions: Connection[] = [
 type TabType = 'received' | 'sent' | 'find';
 
 const Connections = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('received');
   
   const [connections, setConnections] = useState(mockConnections);
-  const [suggestions, setSuggestions] = useState(mockSuggestions);
+  // const [suggestions, setSuggestions] = useState(mockSuggestions);
+  const [suggestions, setSuggestions] = useState<UserSearchResult[]>([]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
-  const navigate = useNavigate();
+
+  const [sentUsers, setSentUsers] = useState<UserSearchResult[]>([]);
+  const [receivedUsers, setReceivedUsers] = useState<UserSearchResult[]>([]);
+  const [connectedUsers, setConnectedUsers] = useState<UserSearchResult[]>([]);
+  const { profileData } = useUserProfile();  // logged-in user
+  const loggedInUserId = profileData?.customUserId;
+
 
 
 useEffect(() => {
@@ -196,7 +208,147 @@ useEffect(() => {
     setSearchResults(results);
   };
   fetchResults();
-}, [searchQuery]);
+}, [searchQuery])
+
+// Fetch suggestions on mount
+useEffect(() => {
+  const fetchSuggestions = async () => {
+    try {
+      const result = await UserService.getSuggestedUsers();
+      setSuggestions(result);
+    } catch (err) {
+      console.error("Failed to fetch suggestions:", err);
+    }
+  };
+
+  fetchSuggestions();
+}, []);
+
+
+useEffect(() => {
+  const fetchReceivedProfiles = async () => {
+    if (!profileData.customUserId) return;
+
+    try {
+      // 1️⃣ Get logged-in user's connections (IDs)
+      const connections = await UserService.getConnectionsByUserId(profileData.customUserId);
+      console.log("Connections:", connections);
+
+      // 2️⃣ Take only "received" IDs
+      const receivedIds = connections.connections?.received || [];
+      if (receivedIds.length === 0) {
+        setReceivedUsers([]);
+        return;
+      }
+
+      // 3️⃣ Fetch full profiles for those IDs
+      const receivedProfiles = await Promise.all(
+        receivedIds.map(id => UserService.getUserByCustomId(id))
+      );
+
+      console.log("Received profiles:", receivedProfiles);
+
+      // 4️⃣ Store them in state
+      setReceivedUsers(receivedProfiles.filter(Boolean));
+    } catch (err) {
+      console.error("Failed to fetch received profiles:", err);
+    }
+  };
+
+  fetchReceivedProfiles();
+}, [profileData.customUserId]);
+
+useEffect(() => {
+  const fetchReceivedProfiles = async () => {
+    if (!profileData?.customUserId) return;
+
+    try {
+      // Get logged-in user's connections
+      const connections = await UserService.getConnectionsByUserId(profileData.customUserId);
+      console.log("Connections:", connections);
+
+      // Get full profiles for received connections with try/catch per ID
+      const receivedProfiles = await Promise.all(
+        (connections.connections?.received || []).map(async (id: string) => {
+          console.log("Fetching received user with ID:", id);
+          try {
+            const user = await UserService.getUserByCustomId(id);
+            console.log("Fetched user response:", user);
+            return user;
+          } catch {
+            console.warn(`User with ID ${id} not found, skipping...`);
+            return null;
+          }
+        })
+      );
+
+
+      setReceivedUsers(
+        receivedProfiles
+          .filter(Boolean)
+          .map((user: any) => ({
+            customUserId: user.customUserId,
+            profile: {
+              firstName: user.auth?.firstName || "User",
+              lastName: user.auth?.lastName || "",
+              avatar: user.profile?.avatar || "",
+              userType: user.auth?.userType || "student",
+              username: user.auth?.username || "",
+            },
+          }))
+      );
+    } catch (err) {
+      console.error("Failed to fetch received profiles:", err);
+    }
+  };
+
+  fetchReceivedProfiles();
+}, [profileData?.customUserId]);
+
+useEffect(() => {
+  const fetchSentProfiles = async () => {
+    if (!profileData?.customUserId) return;
+
+    try {
+      // Get logged-in user's connections
+      const connections = await UserService.getConnectionsByUserId(profileData.customUserId);
+
+
+const sentProfiles = await Promise.all(
+  (connections.connections?.sent || []).map(async (id: string) => {
+    console.log("Fetching sent user with ID:", id);
+    try {
+      const user = await UserService.getUserByCustomId(id);
+      console.log("Fetched user response:", user);
+      return user;
+    } catch {
+      console.warn(`User with ID ${id} not found, skipping...`);
+      return null;
+    }
+  })
+);
+      setSentUsers(
+        sentProfiles
+          .filter(Boolean)
+          .map((user: any) => ({
+            customUserId: user.customUserId,
+            profile: {
+              firstName: user.auth?.firstName || user.profile?.firstName || "User",
+              lastName: user.auth?.lastName || user.profile?.lastName || "",
+              avatar: user.profile?.avatar || "",
+              userType: user.auth?.userType || "student",
+              username: user.auth?.username || "",
+            },
+          }))
+      );
+    } catch (err) {
+      console.error("Failed to fetch sent profiles:", err);
+    }
+  };
+
+  fetchSentProfiles();
+}, [profileData?.customUserId]);
+
 
 
   const handleConnect = (personId: string) => {
@@ -233,22 +385,21 @@ useEffect(() => {
     );
   };
 
-  const filteredConnections = connections.filter(person =>
-    person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    person.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    person.company.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // const filteredConnections = connections.filter(person =>
+  //   person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //   person.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //   person.company.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
 
-  // For the 'find' tab, filter all connections and suggestions that are not already connected
-  const filteredSearchResults = [
-    ...connections.filter(person => !person.isConnected),
-    ...suggestions.filter(person => !person.isConnected)
-  ].filter(person =>
-    person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    person.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    person.company.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
+  // // For the 'find' tab, filter all connections and suggestions that are not already connected
+  // const filteredSearchResults = [
+  //   ...connections.filter(person => !person.isConnected),
+  //   ...suggestions.filter(person => !person.isConnected)
+  // ].filter(person =>
+  //   person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //   person.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //   person.company.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
   const ConnectionItem = ({ person, showWithdrawButton = false, showConnectButton = false }: { 
     person: Connection; 
     showWithdrawButton?: boolean;
@@ -305,34 +456,115 @@ useEffect(() => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'received':
-        return (
-          <div className="flex flex-col h-full">
-            {/* Sticky header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white rounded-t-lg border border-b-0 border-gray-200 sticky top-0 z-10">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">Connection Requests</h2>
-                <p className="text-sm text-gray-600 mt-1">Manage your incoming connection requests</p>
+  return (
+    <div className="flex flex-col h-full">
+      {/* Sticky header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white rounded-t-lg border border-b-0 border-gray-200 sticky top-0 z-10">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Connection Requests</h2>
+          <p className="text-sm text-gray-600 mt-1">Manage your incoming connection requests</p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm" className="flex items-center text-blue-800">
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+          <Button variant="outline" size="sm" className="text-blue-800">
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Scrollable cards */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
+          {receivedUsers.length > 0 ? (
+            receivedUsers.map(user => (
+              <div
+                key={user.customUserId}
+                onClick={() => handleCardClick(user)}
+                className="flex items-center justify-between p-3 hover:bg-gray-50 transition"
+              >
+                {/* Left side: user card */}
+                <ConnectionItem
+                  person={{
+                    id: user.customUserId,
+                    name: `${user.profile.firstName} ${user.profile.lastName}`,
+                    title: user.profile.userType,
+                    company: user.profile.username,
+                    avatar: user.profile.avatar,
+                    location: "",
+                    mutualConnections: 0,
+                    isConnected: false,
+                    skills: []
+                  }}
+                />
+
+
+
+                {/* Right side: action buttons */}
+                <div className="flex space-x-2 ml-4">
+      {/* Accept button */}
+      <Button
+        className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+        onClick={async () => {
+          try {
+            // Call backend accept
+            await UserService.acceptConnectionRequest(user.customUserId);
+
+            // ✅ Remove from received list → card disappears
+            setReceivedUsers(prev =>
+              prev.filter(u => u.customUserId !== user.customUserId)
+            );
+
+            // ✅ Add to connected list
+            setConnectedUsers(prev => [
+              ...prev,
+              {
+                customUserId: user.customUserId,
+                profile: user.profile,
+              },
+            ]);
+          } catch (err) {
+            console.error("Failed to accept request:", err);
+          }
+        }}
+      >
+        Accept
+                  </Button>
+        {/* Reject button */}
+        <button
+          className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+          onClick={async () => {
+            try {
+              await UserService.rejectConnectionRequest(user.customUserId);
+
+              // ✅ Remove from received only
+              setReceivedUsers(prev =>
+                prev.filter(u => u.customUserId !== user.customUserId)
+              );
+            } catch (err) {
+              console.error("Failed to reject request:", err);
+            }
+          }}
+        >
+          Reject
+        </button>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" className="flex items-center text-blue-800">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-                <Button variant="outline" size="sm" className="text-blue-800">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            {/* Scrollable cards */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-              <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
-                {connections.map(person => (
-                  <ConnectionItem key={person.id} person={person} />
-                ))}
-              </div>
-            </div>
-          </div>
-        );
+            ))
+          ) : (
+            <Card className="text-center py-12 shadow-none border-none">
+              <CardContent>
+                <h3 className="font-semibold text-gray-700">No connection requests</h3>
+                <p className="text-gray-500 mt-1">You don’t have any pending requests.</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 
       case 'sent':
         return (
@@ -349,13 +581,50 @@ useEffect(() => {
               </Badge>
             </div>
             {/* Scrollable cards */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-              <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
-                {suggestions.length > 0 ? (
-                  suggestions.map(person => (
-                    <ConnectionItem key={person.id} person={person} showWithdrawButton />
-                  ))
-                ) : (
+<div className="flex-1 overflow-y-auto scrollbar-hide">
+  <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
+    {sentUsers.length > 0 ? (
+      sentUsers.map(user => (
+        <div
+          key={user.customUserId}
+          className="flex items-center justify-between p-3 hover:bg-gray-50 transition"
+        >
+          {/* Left side: user card */}
+          <ConnectionItem
+            person={{
+              id: user.customUserId,
+              name: `${user.profile.firstName || "User"} ${user.profile.lastName || ""}`.trim(),
+              title: user.profile.userType || "Student",
+              company: user.profile.username || "N/A",
+              avatar: user.profile.avatar || "",
+              location: "",
+              mutualConnections: 0,
+              isConnected: false,
+              skills: []
+            }}
+          />
+
+          {/* Right side: Withdraw button */}
+          <button
+            onClick={async () => {
+              try {
+                await UserService.withdrawConnectionRequest(user.customUserId);
+
+                // Remove immediately from UI
+                setSentUsers(prev =>
+                  prev.filter(u => u.customUserId !== user.customUserId)
+                );
+              } catch (err) {
+                console.error("Failed to withdraw connection:", err);
+              }
+            }}
+            className="px-3 py-1 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
+          >
+            Withdraw
+          </button>
+        </div>
+      ))
+    ) : (
                   <Card className="text-center py-12 shadow-none border-none">
                     <CardContent>
                       <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -370,7 +639,6 @@ useEffect(() => {
             </div>
           </div>
         );
-
       case 'find':
         return (
 
@@ -448,9 +716,34 @@ useEffect(() => {
                       </CardHeader>
                       <CardContent>
                         <div className="divide-y divide-gray-100">
-                          {suggestions.map(person => (
-                            <ConnectionItem key={person.id} person={person} showConnectButton />
-                          ))}
+{suggestions.length > 0 ? (
+  suggestions.map(user => (
+    <div
+      key={user.customUserId}
+      onClick={() => handleCardClick(user)}
+      className="cursor-pointer hover:bg-gray-50 transition"
+    >
+      <ConnectionItem
+        key={user.customUserId}
+        person={{
+          id: user.customUserId,
+          name: `${user.profile.firstName} ${user.profile.lastName}`,
+          title: user.profile.userType,
+          company: user.profile.username,
+          avatar: user.profile.avatar,
+          location: user.profile.location || "",
+          mutualConnections: 0,
+          isConnected: false,
+          skills: []
+        }}
+        showConnectButton
+      />
+    </div>
+  ))
+) : (
+  <p className="text-gray-500 p-4">No suggestions right now</p>
+)}
+
                         </div>
                       </CardContent>
                     </Card>

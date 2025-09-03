@@ -86,6 +86,21 @@ router.get('/profile', authorize, async (req, res) => {
   }
 });
 
+// Get user connections (following list with profile data)
+router.get('/connections', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const connections = await userService.getUserConnections(user.customUserId);
+    res.json({ success: true, data: connections });
+  } catch (error) {
+    console.error('Error fetching connections:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // Get bulk users by custom user IDs (for marketplace author display)
 router.get('/bulk/:userIds', async (req, res) => {
   try {
@@ -612,6 +627,36 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// GET suggested users
+router.get('/suggestions', async (req, res) => {
+  try {
+    const users = await userService.getAllUsers();
+
+    // Keep only users with a non-empty firstName
+    const filtered = users.filter(user => {
+      const firstName = user?.profile?.firstName;
+      return firstName && firstName.trim() !== "";
+    });
+
+    const formatted = filtered.map(user => ({
+      customUserId: user.customUserId,
+      profile: {
+        firstName: user.profile.firstName,
+        lastName: user.profile.lastName || '',   // lastName can be empty
+        avatar: user.profile.avatar || null,
+        userType: user.profile.userType || '',
+        username: user.profile.username || '',
+      },
+    }));
+
+    res.json({ success: true, data: formatted });
+  } catch (error) {
+    console.error('Error fetching suggestions:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+
 // users.js
 router.get('/search', async (req, res) => {
   try {
@@ -699,12 +744,14 @@ router.post('/connections', authorize, async (req, res) => {
 
     const connection = await userService.sendConnectionRequest(user.customUserId, targetUserId);
 
-    // 🔴 Notify receiver in real-time
-    req.app.get('io').to(targetUserId).emit('connection_request', {
-      from: user.customUserId,
-      ...connection,
-    });
-
+        // ✅ Unified socket event
+    req.app.get('io')
+      .to(targetUserId)
+      .emit("connection_update", {
+        type: "sent",
+        from: user.customUserId,
+        to: targetUserId,
+      });
     res.json({ success: true, data: connection });
   } catch (err) {
     console.error("Error sending connection request:", err);
@@ -723,7 +770,10 @@ router.get('/connections', authorize, async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
     const connections = await userService.getConnections(user.customUserId);
+    console.log("📡 Sending connections:", connections);
+
     res.json({ success: true, data: connections });
+    
   } catch (err) {
     console.error("Error fetching connections:", err);
     res.status(500).json({ success: false, message: err.message });
@@ -743,11 +793,16 @@ router.put('/connections/:senderId/accept', authorize, async (req, res) => {
 
     const result = await userService.acceptConnectionRequest(receiver.customUserId, senderId);
 
-    // Notify both users
+    
+    // ✅ Unified socket event
     req.app.get('io')
       .to(receiver.customUserId)
       .to(senderId)
-      .emit('connection_update', result);
+      .emit("connection_update", {
+        type: "accepted",
+        from: senderId,
+        to: receiver.customUserId,
+      });
 
     res.json({ success: true, data: result });
   } catch (err) {
@@ -769,6 +824,16 @@ router.put('/connections/:senderId/reject', authorize, async (req, res) => {
 
     const result = await userService.rejectConnectionRequest(receiver.customUserId, senderId);
 
+    // ✅ Unified socket event
+    req.app.get('io')
+      .to(receiver.customUserId)
+      .to(senderId)
+      .emit("connection_update", {
+        type: "rejected",
+        from: senderId,
+        to: receiver.customUserId,
+      });
+
     res.json({ success: true, data: result });
   } catch (err) {
     console.error("Error rejecting connection:", err);
@@ -789,6 +854,16 @@ router.delete('/connections/:receiverId', authorize, async (req, res) => {
 
     const result = await userService.withdrawConnectionRequest(sender.customUserId, receiverId);
 
+    //Unified socket event
+    req.app.get('io')
+      .to(sender.customUserId)
+      .to(receiverId)
+      .emit("connection_update", {
+        type: "withdrawn",
+        from: sender.customUserId,
+        to: receiverId,
+      });
+
     res.json({ success: true, data: result });
   } catch (err) {
     console.error("Error withdrawing connection:", err);
@@ -797,6 +872,43 @@ router.delete('/connections/:receiverId', authorize, async (req, res) => {
 });
 
 
+// Get logged-in user's ID + connections
+router.get("/:id/connections", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = await userService.getUserConnectionsWithId(id);
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error("Error fetching user connections with ID:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// routes/users.js
+
+// ----------------------------
+// Get only received connections (by customUserId)
+// ----------------------------
+router.get('/connections/received/:userId', authorize, async (req, res) => {
+  try {
+    const { userId } = req.params; // this is customUserId (e.g. USER_000038)
+
+    const user = await userService.findUserByCustomId(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const connections = await userService.getConnections(user.customUserId);
+
+    res.json({
+      success: true,
+      data: connections.received || [],
+    });
+  } catch (err) {
+    console.error("Error fetching received connections:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 
 
 // Get user by customUserId (for public profile viewing)
@@ -837,7 +949,9 @@ router.get('/:customUserId', async (req, res) => {
         professorData: user.professorData || null,
         personalDetails: user.personalDetails || {},
         socialLinks: user.socialLinks || {},
-        projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 }
+        projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 },
+        connections: user.connections || { sent: [], received: [], pending: [] },
+        connected: user.social?.connected || []
       }
     });
   } catch (error) {
