@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
-export default function Navigation({ mobile = false }: { mobile?: boolean }) {
+export default function Navigation({ mobile = false, isLoggedIn = false }: { mobile?: boolean, isLoggedIn?: boolean }) {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
+    const location = useLocation();
+    const isHomePage = location.pathname === '/';
 
     // Handle clicking outside to close mega menu
     useEffect(() => {
@@ -30,152 +32,42 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
         Marketplace: {
             categories: [
                 { id: 'explore', label: 'Projects', href: '/marketplace' },
-                { id: 'new project', label: 'Add New Project', href: '/profile#projects' },
-                { id: 'datasets', label: 'Datasets', href: '/marketplace/datasets' },
-                { id: 'algorithms', label: 'Algorithms', href: '/marketplace/algorithms' },
-                { id: 'models', label: 'AI Models', href: '/marketplace/models' },
-                { id: 'tools', label: 'Development Tools', href: '/marketplace/tools' },
-                { id: 'templates', label: 'Templates', href: '/marketplace/templates' },
-                { id: 'apis', label: 'APIs', href: '/services#apis' },
+                ...(isLoggedIn ? [{ id: 'new project', label: 'Add New Project', href: '/profile#projects' }] : []),
+                // { id: 'datasets', label: 'Datasets', href: '/marketplace/datasets' },
+                // { id: 'algorithms', label: 'Algorithms', href: '/marketplace/algorithms' },
+                // { id: 'models', label: 'AI Models', href: '/marketplace/models' },
+                // { id: 'tools', label: 'Development Tools', href: '/marketplace/tools' },
+                // { id: 'templates', label: 'Templates', href: '/marketplace/templates' },
+                // { id: 'apis', label: 'APIs', href: '/services#apis' },
             ],
             content: {
                 explore: {
                     subcategories: [
-                        { name: 'AI & ML', href: '/marketplace' },
-                        { name: 'Data Science', href: '/marketplace' },
-                        { name: 'Sustainable', href: '/sustainable' },
-                        { name: 'FinTech', href: '/marketplace' },
-                        { name: 'HealthTech', href: '/marketplacelth' },
-                        { name: 'EdTech', href: '/marketplace' },
-                        { name: 'IoT', href: '/marketplace' },
-                        { name: 'BlockChain', href: '/marketplace' },
-                        { name: 'Mobile', href: '/marketplace' }
+                        { name: 'AI & ML'},
+                        { name: 'Data Science'},
+                        { name: 'Sustainable'},
+                        { name: 'FinTech'},
+                        { name: 'HealthTech'},
+                        { name: 'EdTech'},
+                        { name: 'IoT'},
+                        { name: 'BlockChain'},
+                        { name: 'Mobile'}
                     ],
                     featured: [
-                        { name: 'TensorFlow Starter Kit', image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=150&h=100&fit=crop', href: '/product/tensorflow-starter' },
-                        { name: 'React Dashboard Pro', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop', href: '/product/react-dashboard' }
+                        { name: 'TensorFlow Starter Kit', image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=150&h=100&fit=crop'},
+                        { name: 'React Dashboard Pro', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop'}
                     ]
                 },
-                research: {
-                    subcategories: [
-                        { name: 'Computer Science', href: '/marketplace/research/computer-science' },
-                        { name: 'Mathematics', href: '/marketplace/research/mathematics' },
-                        { name: 'Physics', href: '/marketplace/research/physics' },
-                        { name: 'Biology', href: '/marketplace/research/biology' },
-                        { name: 'Chemistry', href: '/marketplace/research/chemistry' },
-                        { name: 'Economics', href: '/marketplace/research/economics' },
-                        { name: 'Psychology', href: '/marketplace/research/psychology' },
-                        { name: 'Engineering', href: '/marketplace/research/engineering' }
-                    ],
-                    featured: [
-                        { name: 'Quantum Computing Papers', image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=150&h=100&fit=crop', href: '/product/quantum-computing-papers' },
-                        { name: 'AI Ethics Research', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=100&fit=crop', href: '/product/ai-ethics-research' }
-                    ]
-                },
-                datasets: {
-                    subcategories: [
-                        { name: 'Image Recognition', href: '/marketplace/datasets/image-recognition' },
-                        { name: 'Natural Language', href: '/marketplace/datasets/natural-language' },
-                        { name: 'Time Series', href: '/marketplace/datasets/time-series' },
-                        { name: 'Audio Processing', href: '/marketplace/datasets/audio-processing' },
-                        { name: 'Geospatial Data', href: '/marketplace/datasets/geospatial' },
-                        { name: 'Financial Data', href: '/marketplace/datasets/financial' },
-                        { name: 'Healthcare Data', href: '/marketplace/datasets/healthcare' },
-                        { name: 'Social Media', href: '/marketplace/datasets/social-media' }
-                    ],
-                    featured: [
-                        { name: 'ImageNet Dataset', image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=150&h=100&fit=crop', href: '/product/imagenet-dataset' },
-                        { name: 'COVID-19 Research Data', image: 'https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?w=150&h=100&fit=crop', href: '/product/covid19-data' }
-                    ]
-                },
-                algorithms: {
-                    subcategories: [
-                        { name: 'Sorting Algorithms', href: '/marketplace/algorithms/sorting' },
-                        { name: 'Graph Algorithms', href: '/marketplace/algorithms/graph' },
-                        { name: 'Dynamic Programming', href: '/marketplace/algorithms/dynamic-programming' },
-                        { name: 'Machine Learning', href: '/marketplace/algorithms/machine-learning' },
-                        { name: 'Optimization', href: '/marketplace/algorithms/optimization' },
-                        { name: 'Cryptography', href: '/marketplace/algorithms/cryptography' },
-                        { name: 'Image Processing', href: '/marketplace/algorithms/image-processing' },
-                        { name: 'Search Algorithms', href: '/marketplace/algorithms/search' }
-                    ],
-                    featured: [
-                        { name: 'Advanced Sorting Suite', image: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=150&h=100&fit=crop', href: '/product/sorting-suite' },
-                        { name: 'ML Algorithm Library', image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=150&h=100&fit=crop', href: '/product/ml-library' }
-                    ]
-                },
-                models: {
-                    subcategories: [
-                        { name: 'Language Models', href: '/marketplace/models/language' },
-                        { name: 'Computer Vision', href: '/marketplace/models/computer-vision' },
-                        { name: 'Reinforcement Learning', href: '/marketplace/models/reinforcement-learning' },
-                        { name: 'Generative Models', href: '/marketplace/models/generative' },
-                        { name: 'Classification', href: '/marketplace/models/classification' },
-                        { name: 'Regression', href: '/marketplace/models/regression' },
-                        { name: 'Clustering', href: '/marketplace/models/clustering' },
-                        { name: 'Neural Networks', href: '/marketplace/models/neural-networks' }
-                    ],
-                    featured: [
-                        { name: 'GPT-4 Fine-tuned', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=150&h=100&fit=crop', href: '/product/gpt4-finetuned' },
-                        { name: 'YOLO Object Detection', image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=150&h=100&fit=crop', href: '/product/yolo-detection' }
-                    ]
-                },
-                tools: {
-                    subcategories: [
-                        { name: 'IDEs & Editors', href: '/marketplace/tools/ides' },
-                        { name: 'Version Control', href: '/marketplace/tools/version-control' },
-                        { name: 'Testing Frameworks', href: '/marketplace/tools/testing' },
-                        { name: 'Deployment Tools', href: '/marketplace/tools/deployment' },
-                        { name: 'Monitoring', href: '/marketplace/tools/monitoring' },
-                        { name: 'Documentation', href: '/marketplace/tools/documentation' },
-                        { name: 'Code Analysis', href: '/marketplace/tools/code-analysis' },
-                        { name: 'Performance Tools', href: '/marketplace/tools/performance' }
-                    ],
-                    featured: [
-                        { name: 'Advanced Code Editor', image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=150&h=100&fit=crop', href: '/product/code-editor' },
-                        { name: 'CI/CD Pipeline Tool', image: 'https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=150&h=100&fit=crop', href: '/product/cicd-tool' }
-                    ]
-                },
-                templates: {
-                    subcategories: [
-                        { name: 'Web Templates', href: '/marketplace/templates/web' },
-                        { name: 'Mobile Templates', href: '/marketplace/templates/mobile' },
-                        { name: 'Documentation', href: '/marketplace/templates/documentation' },
-                        { name: 'Presentation', href: '/marketplace/templates/presentation' },
-                        { name: 'Email Templates', href: '/marketplace/templates/email' },
-                        { name: 'Dashboard', href: '/marketplace/templates/dashboard' },
-                        { name: 'Landing Pages', href: '/marketplace/templates/landing' },
-                        { name: 'Admin Panels', href: '/marketplace/templates/admin' }
-                    ],
-                    featured: [
-                        { name: 'Modern Dashboard', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop', href: '/product/dashboard-template' },
-                        { name: 'E-commerce Template', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=150&h=100&fit=crop', href: '/product/ecommerce-template' }
-                    ]
-                },
-                apis: {
-                    subcategories: [
-                        { name: 'REST APIs', href: '/marketplace/apis/rest' },
-                        { name: 'GraphQL', href: '/marketplace/apis/graphql' },
-                        { name: 'WebSocket', href: '/marketplace/apis/websocket' },
-                        { name: 'Payment APIs', href: '/marketplace/apis/payment' },
-                        { name: 'Social Media', href: '/marketplace/apis/social-media' },
-                        { name: 'Cloud Services', href: '/marketplace/apis/cloud' },
-                        { name: 'Machine Learning', href: '/marketplace/apis/machine-learning' },
-                        { name: 'Data Analytics', href: '/marketplace/apis/analytics' }
-                    ],
-                    featured: [
-                        { name: 'Payment Gateway API', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=150&h=100&fit=crop', href: '/product/payment-api' },
-                        { name: 'ML Prediction API', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&h=100&fit=crop', href: '/product/ml-prediction-api' }
-                    ]
-                }
             }
         },
         Work: {
             categories: [
                 { id: 'freelance', label: 'Find Freelancers', href: '/freelancing' },
-                { id: 'mentorship', label: 'Find Expert', href: '/findexpert' },
-                { id: 'dashboard', label: 'My Dashboard', href: '/dashboard' },
-                { id: 'profile', label: 'My Profile', href: '/profile' },
+                { id: 'mentorship', label: 'Become a Mentor', href: '/become-mentor' },
+                ...(isLoggedIn ? [
+                    { id: 'dashboard', label: 'My Dashboard', href: '/dashboard' },
+                    { id: 'profile', label: 'My Profile', href: '/profile' },
+                ] : []),
             ],
             content: {
                 freelance: {
@@ -236,88 +128,70 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
             categories: [
                 { id: 'greenprojects', label: 'Sustainable', href: '/sustainable' },
                 { id: 'consulting', label: 'Consulting', href: '/consulting' },
-                { id: 'review', label: 'Project Review', href: '/services/review' },
-                { id: 'impact', label: 'Impact Metrics', href: '/sustainable/impact' },
                 { id: 'agents', label: 'AI Agents', href: '/aiagents' },
+                { id: 'campus', label: 'Campus Ambassadors', href: '/campus-ambassador' }
             ],
             content: {
                 greenprojects: {
                     subcategories: [
-                        { name: 'Renewable Energy', href: '/sustainable/category/renewable-energy' },
-                        { name: 'Carbon Tracking', href: '/sustainable/category/carbon-tracking' },
-                        { name: 'Waste Management', href: '/sustainable/category/waste-management' },
-                        { name: 'Water Conservation', href: '/sustainable/category/water-conservation' },
-                        { name: 'Sustainable Agriculture', href: '/sustainable/category/agriculture' },
-                        { name: 'Green Transportation', href: '/sustainable/category/transportation' },
-                        { name: 'Eco-friendly Materials', href: '/sustainable/category/eco-materials' },
-                        { name: 'Climate Monitoring', href: '/sustainable/category/climate-monitoring' }
+                        { name: 'Renewable Energy'},
+                        { name: 'Carbon Tracking'},
+                        { name: 'Waste Management'},
+                        { name: 'Water Conservation'},
+                        { name: 'Sustainable Agriculture'},
+                        { name: 'Green Transportation'},
+                        { name: 'Eco-friendly Materials'},
+                        { name: 'Climate Monitoring'}
                     ],
                     featured: [
-                        { name: 'Solar Panel Optimizer', image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=150&h=100&fit=crop', href: '/product/solar-optimizer' },
-                        { name: 'Carbon Footprint Tracker', image: 'https://images.unsplash.com/photo-1569163139394-de44cb130c82?w=150&h=100&fit=crop', href: '/product/carbon-tracker' }
+                        { name: 'Solar Panel Optimizer', image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=150&h=100&fit=crop'},
+                        { name: 'Carbon Footprint Tracker', image: 'https://images.unsplash.com/photo-1569163139394-de44cb130c82?w=150&h=100&fit=crop'}
                     ]
                 },
                 consulting: {
                     subcategories: [
-                        { name: 'Technical Architecture', href: '/consulting/technical-architecture' },
-                        { name: 'Strategy Planning', href: '/consulting/strategy-planning' },
-                        { name: 'Digital Transformation', href: '/consulting/digital-transformation' },
-                        { name: 'AI Implementation', href: '/consulting/ai-implementation' },
-                        { name: 'Security Audit', href: '/consulting/security-audit' },
-                        { name: 'Performance Optimization', href: '/consulting/performance-optimization' },
-                        { name: 'Process Improvement', href: '/consulting/process-improvement' },
-                        { name: 'Technology Assessment', href: '/consulting/technology-assessment' }
+                        { name: 'Technical Architecture'},
+                        { name: 'Strategy Planning'},
+                        { name: 'Digital Transformation'},
+                        { name: 'AI Implementation'},
+                        { name: 'Security Audit'},
+                        { name: 'Performance Optimization'},
+                        { name: 'Process Improvement'},
+                        { name: 'Technology Assessment'}
                     ],
                     featured: [
-                        { name: 'Impact Dashboard Pro', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop', href: '/product/impact-dashboard' },
-                        { name: 'ESG Reporting Tool', image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=150&h=100&fit=crop', href: '/product/esg-reporting' }
-                    ]
-                },
-                review: {
-                    subcategories: [
-                        { name: 'Code Review', href: '/services/review/code' },
-                        { name: 'Architecture Review', href: '/services/review/architecture' },
-                        { name: 'Security Assessment', href: '/services/review/security' },
-                        { name: 'Performance Analysis', href: '/services/review/performance' },
-                        { name: 'Best Practices', href: '/services/review/best-practices' },
-                        { name: 'Documentation Review', href: '/services/review/documentation' },
-                        { name: 'Testing Strategy', href: '/services/review/testing' },
-                        { name: 'Deployment Review', href: '/services/review/deployment' }
-                    ],
-                    featured: [
-                        { name: 'Global Green Alliance', image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=150&h=100&fit=crop', href: '/partnerships/green-alliance' },
-                        { name: 'Sustainability Network', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=150&h=100&fit=crop', href: '/partnerships/sustainability-network' }
-                    ]
-                },
-                impact: {
-                    subcategories: [
-                        { name: 'Carbon Emissions', href: '/sustainable/impact/carbon-emissions' },
-                        { name: 'Energy Savings', href: '/sustainable/impact/energy-savings' },
-                        { name: 'Waste Reduction', href: '/sustainable/impact/waste-reduction' },
-                        { name: 'Water Usage', href: '/sustainable/impact/water-usage' },
-                        { name: 'Biodiversity Index', href: '/sustainable/impact/biodiversity' },
-                        { name: 'Sustainability Score', href: '/sustainable/impact/sustainability-score' },
-                        { name: 'ESG Metrics', href: '/sustainable/impact/esg-metrics' },
-                        { name: 'Environmental ROI', href: '/sustainable/impact/environmental-roi' }
-                    ],
-                    featured: [
-                        { name: 'Global Green Alliance', image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=150&h=100&fit=crop', href: '/partnerships/green-alliance' },
-                        { name: 'Sustainability Network', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=150&h=100&fit=crop', href: '/partnerships/sustainability-network' }
+                        { name: 'Impact Dashboard Pro', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop'},
+                        { name: 'ESG Reporting Tool', image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=150&h=100&fit=crop'}
                     ]
                 },
                 agents: {
                     subcategories: [
-                        { name: 'Agent Directories', href: '/aiagents' },
-                        { name: 'Agent Studio', href: '/aiagents' },
-                        { name: 'Custom Agents', href: '/aiagents' },
-                        { name: 'Integrations', href: '/aiagents' },
-                        { name: 'Analytics', href: '/aiagents' },
-                        { name: 'Use Cases', href: '/aiagents' },
-                        { name: 'Ethics & Safety', href: '/aiagents' },
+                        { name: 'Agent Directories'},
+                        { name: 'Agent Studio'},
+                        { name: 'Custom Agents'},
+                        { name: 'Integrations'},
+                        { name: 'Analytics'},
+                        { name: 'Use Cases'},
+                        { name: 'Ethics & Safety'},
                     ],
                     featured: [
-                        { name: 'Global Green Alliance', image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=150&h=100&fit=crop', href: '/partnerships/green-alliance' },
-                        { name: 'Sustainability Network', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=150&h=100&fit=crop', href: '/partnerships/sustainability-network' }
+                        { name: 'Global Green Alliance', image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=150&h=100&fit=crop'},
+                        { name: 'Sustainability Network', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=150&h=100&fit=crop'}
+                    ]
+                },
+                campus: {
+                    subcategories: [
+                        { name: 'Student Leaderboard'},
+                        { name: 'Competitions'},
+                        { name: 'Hackathons'},
+                        { name: 'Workshops'},
+                        { name: 'Awareness Campaigns'},
+                        { name: 'Sustainability Initiatives'},
+                        { name: 'Eco-Friendly Practices'},
+                    ],
+                    featured: [
+                        { name: 'Global Green Alliance', image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=150&h=100&fit=crop'},
+                        { name: 'Sustainability Network', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=150&h=100&fit=crop'}
                     ]
                 },
             }
@@ -332,60 +206,57 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
             content: {
                 aboutus: {
                     subcategories: [
-                        { name: 'Platform', href: '/aboutus' },
-                        { name: 'Team', href: '/about#team' },
-                        { name: 'Stories', href: '/aboutus#stroies' },
-                        { name: 'Team', href: '/aboutus#team' },
-                        { name: 'Community', href: '/aboutus' },
+                        { name: 'Platform'},
+                        { name: 'Stories'},
+                        { name: 'Team'},
+                        { name: 'Community'},
                     ],
                     featured: [
-                        { name: 'Complete API Guide', image: 'https://images.unsplash.com/photo-1481487196290-c152efe083f5?w=150&h=100&fit=crop', href: '/resources/docs/api-guide' },
-                        { name: 'Integration Handbook', image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=150&h=100&fit=crop', href: '/resources/docs/integration-handbook' }
+                        { name: 'Complete API Guide', image: 'https://images.unsplash.com/photo-1481487196290-c152efe083f5?w=150&h=100&fit=crop'},
+                        { name: 'Integration Handbook', image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=150&h=100&fit=crop'}
                     ]
                 },
                 connect: {
                     subcategories: [
-                        { name: 'Community Hub', href: '/connect' },
-                        { name: 'Events and Webinars', href: '/connect' },
-                        { name: 'Collab Spaces', href: '/connect' },
-                        { name: 'Mentorship', href: '/connect' },
-                        { name: 'Partner Network', href: '/connect' },
-                        { name: 'Showcase', href: '/connect' },
+                        { name: 'Community Hub'},
+                        { name: 'Events and Webinars'},
+                        { name: 'Collab Spaces'},
+                        { name: 'Mentorship'},
+                        { name: 'Partner Network'},
+                        { name: 'Showcase'},
                     ],
                     featured: [
-                        { name: 'ML Mastery Course', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&h=100&fit=crop', href: '/resources/tutorials/ml-mastery' },
-                        { name: 'Web Dev Bootcamp', image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=150&h=100&fit=crop', href: '/resources/tutorials/web-bootcamp' }
+                        { name: 'ML Mastery Course', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&h=100&fit=crop'},
+                        { name: 'Web Dev Bootcamp', image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=150&h=100&fit=crop'}
                     ]
                 },
                 legal: {
                     subcategories: [
-                        { name: 'Provacy Policy', href: '/privacy-policy' },
+                        { name: 'Privacy Policy', href: '/privacy-policy' },
                         { name: 'Cookie Policy', href: '/cookie-policy' },
                         { name: 'Refund Policy', href: '/refund-policy' },
                         { name: 'Accessibility', href: '/accessibility' },
                         { name: 'Delivery Policy', href: '/delivery-policy' },
-                        { name: 'GDPR Compliance', href: '/sustainable#' },
-                        { name: 'Security Practices', href: '/sustainable#' },
                     ],
                     featured: [
-                        { name: 'Global Developer Network', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=150&h=100&fit=crop', href: '/connect/global-network' },
-                        { name: 'Monthly Tech Meetup', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=150&h=100&fit=crop', href: '/connect/monthly-meetup' }
+                        { name: 'Global Developer Network', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=150&h=100&fit=crop'},
+                        { name: 'Monthly Tech Meetup', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=150&h=100&fit=crop'}
                     ]
                 },
                 feedback: {
                     subcategories: [
-                        { name: 'Submit Feedback', href: '/feedback' },
-                        { name: 'Feature Requests', href: '/feedback' },
-                        { name: 'Bug Reports', href: '/feedback' },
-                        { name: 'User Ratings', href: '/feedback' },
-                        { name: 'Community Polls', href: '/feedback' },
-                        { name: 'Feedback Dashboard', href: '/feedback' },
-                        { name: 'Response Timeline', href: '/feedback' },
-                        { name: 'Give Kudos', href: '/feedback' }
+                        { name: 'Submit Feedback'},
+                        { name: 'Feature Requests'},
+                        { name: 'Bug Reports'},
+                        { name: 'User Ratings'},
+                        { name: 'Community Polls'},
+                        { name: 'Feedback Dashboard'},
+                        { name: 'Response Timeline'},
+                        { name: 'Give Kudos'}
                     ],
                     featured: [
-                        { name: '24/7 Expert Support', image: 'https://images.unsplash.com/photo-1553484771-371a605b060b?w=150&h=100&fit=crop', href: '/support/24-7' },
-                        { name: 'Premium Support Plan', image: 'https://images.unsplash.com/photo-1556155092-8707de31f9c4?w=150&h=100&fit=crop', href: '/support/premium' }
+                        { name: '24/7 Expert Support', image: 'https://images.unsplash.com/photo-1553484771-371a605b060b?w=150&h=100&fit=crop'},
+                        { name: 'Premium Support Plan', image: 'https://images.unsplash.com/photo-1556155092-8707de31f9c4?w=150&h=100&fit=crop'}
                     ]
                 }
             }
@@ -419,6 +290,28 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
     if (mobile) {
         return (
             <nav className="flex flex-col w-full space-y-2">
+                {/* Home Button - Only show when not on home page */}
+                {!isHomePage && (
+                    <Link
+                        to="/"
+                        className="flex items-center w-full px-4 py-3 rounded-lg bg-blue-50 text-blue-700 font-semibold text-base hover:bg-blue-100 transition"
+                    >
+                        Home
+                    </Link>
+                )}
+                {/* Quick links above Marketplace (match other items) */}
+                <Link
+                    to="/findexpert"
+                    className="flex items-center w-full px-4 py-3 rounded-lg bg-gray-50 text-gray-800 font-semibold text-base hover:bg-blue-50 transition"
+                >
+                    PhD Expert
+                </Link>
+                <Link
+                    to="/aiagents"
+                    className="flex items-center w-full px-4 py-3 rounded-lg bg-gray-50 text-gray-800 font-semibold text-base hover:bg-blue-50 transition"
+                >
+                    AI Agent
+                </Link>
                 {Object.keys(megaMenuData).map((menuKey) => {
                     const menuData = megaMenuData[menuKey];
                     const isNavOpen = activeDropdown === menuKey;
@@ -501,54 +394,113 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
     // DESKTOP NAVIGATION
     return (
         <nav className="hidden md:flex items-center space-x-1 text-sm">
+            {/* Home Button - Only show when not on home page */}
+            {!isHomePage && (
+                <Link to="/">
+                    <Button
+                        variant="ghost"
+                        size='sm'
+                        className="px-6 py-2 font-medium transition-all duration-200 hover:bg-transparent hover:text-gray-900 text-gray-700 shadow-none"
+                    >
+                        Home
+                    </Button>
+                </Link>
+            )}
+            {/* Quick buttons before Marketplace */}
+            <Link to="/findexpert">
+                <Button
+                    variant="ghost"
+                    size='sm'
+                    className="px-6 py-2 font-medium transition-all duration-200 hover:bg-transparent hover:text-gray-900 text-gray-700 shadow-none"
+                >
+                    PhD Expert
+                </Button>
+            </Link>
+            <Link to="/aiagents">
+                <Button
+                    variant="ghost"
+                    size='sm'
+                    className="px-6 py-2 font-medium rounded-full bg-white text-gray-900 hover:bg-white shadow-none"
+                >
+                    <span className="transition-all hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-500 hover:via-yellow-400 hover:to-cyan-500">AI Agent</span>
+                </Button>
+            </Link>
             {Object.keys(megaMenuData).map((menuKey) => {
                 const isOpen = activeDropdown === menuKey;
                 return (
-                    <div
-                        key={menuKey}
-                        className="relative"
-                    >
-                        <Button
-                            variant="ghost"
-                            size='sm'
-                            className={`relative px-6 py-2 font-medium transition-all duration-200 hover:bg-transparent hover:text-gray-900 text-gray-700 ${isOpen ? 'text-blue-700' : ''}`}
-                            onClick={() => {
-                                // Toggle dropdown
-                                if (activeDropdown === menuKey) {
-                                    setActiveDropdown(null);
-                                    setActiveCategory(null);
-                                } else {
-                                    setActiveDropdown(menuKey);
-                                    // Set default active category for each menu
-                                    switch (menuKey) {
-                                        case 'Marketplace':
-                                            setActiveCategory('explore');
-                                            break;
-                                        case 'Work':
-                                            setActiveCategory('freelance');
-                                            break;
-                                        case 'Services':
-                                            setActiveCategory('greenprojects');
-                                            break;
-                                        case 'Community':
-                                            setActiveCategory('aboutus');
-                                            break;
-                                        default:
-                                            setActiveCategory('explore');
-                                    }
-                                }
-                            }}
-                        >
-                            {menuKey}
-                        </Button>
+                                         <div
+                          key={menuKey}
+                             className="relative"
+                         >
+                                                 <Button
+                             variant="ghost"
+                             size='sm'
+                             className={`relative px-6 py-2 font-medium transition-all duration-200 shadow-none hover:bg-transparent hover:text-gray-900 text-gray-700 ${isOpen ? 'text-blue-700' : ''}`}
+                             onMouseEnter={() => {
+                                 setActiveDropdown(menuKey);
+                                 // Set default active category for each menu
+                                 switch (menuKey) {
+                                     case 'Marketplace':
+                                         setActiveCategory('explore');
+                                         break;
+                                     case 'Work':
+                                         setActiveCategory('freelance');
+                                         break;
+                                     case 'Services':
+                                         setActiveCategory('greenprojects');
+                                         break;
+                                     case 'Community':
+                                         setActiveCategory('aboutus');
+                                         break;
+                                     default:
+                                         setActiveCategory('explore');
+                                 }
+                             }}
+                             onClick={() => {
+                                 // Toggle dropdown on click
+                                 if (activeDropdown === menuKey) {
+                                     setActiveDropdown(null);
+                                     setActiveCategory(null);
+                                 } else {
+                                     setActiveDropdown(menuKey);
+                                     // Set default active category for each menu
+                                     switch (menuKey) {
+                                         case 'Marketplace':
+                                             setActiveCategory('explore');
+                                             break;
+                                         case 'Work':
+                                             setActiveCategory('freelance');
+                                             break;
+                                         case 'Services':
+                                             setActiveCategory('greenprojects');
+                                             break;
+                                         case 'Community':
+                                             setActiveCategory('aboutus');
+                                             break;
+                                         default:
+                                             setActiveCategory('explore');
+                                     }
+                                 }
+                             }}
+                         >
+                             {menuKey}
+                         </Button>
                         {isOpen && (
-                            <div
-                                className="mega-menu-container fixed left-1/2 top-14 z-50 w-[90vw] max-w-6xl p-0 border-0 shadow-none bg-transparent -translate-x-1/2 rounded-lg"
-                                style={{ pointerEvents: 'auto' }}
-                            >
-                                {renderMegaMenu(menuKey as keyof typeof megaMenuData)}
-                            </div>
-                        )}
+                             <div
+                                 className="mega-menu-container fixed left-1/2 top-14 z-[100] w-[90vw] max-w-6xl p-0 border-0 shadow-none bg-transparent -translate-x-1/2 rounded-lg"
+                                 style={{ pointerEvents: 'auto' }}
+                                 onMouseEnter={() => {
+                                     // Keep menu open when hovering over the mega menu content
+                                 }}
+                                 onMouseLeave={() => {
+                                     // Close menu when mouse leaves the mega menu area
+                                     setActiveDropdown(null);
+                                     setActiveCategory(null);
+                                 }}
+                             >
+                                 {renderMegaMenu(menuKey as keyof typeof megaMenuData)}
+                             </div>
+                         )}
                     </div>
                 );
             })}
@@ -566,25 +518,34 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
             };
         }
         return (
-            <div className="w-screen max-w-6xl mx-auto bg-white border border-gray-200 shadow-2xl text-sm">
+            <div className="w-screen max-w-6xl mx-auto bg-white border border-gray-200 shadow-2xl text-sm relative z-[101]">
                 <div className="grid grid-cols-12 min-h-[400px]">
                     {/* Left Column - Categories */}
                     <div className="col-span-3 bg-gray-50 border-r border-gray-200">
                         <div className="p-4">
                             <div className="space-y-1">
-                                {menuData.categories.map((category) => (
-                                    <Link
-                                        key={category.id}
-                                        to={category.href}
-                                        className={`flex items-center px-3 py-3 text-sm cursor-pointer transition-all duration-200 rounded-md ${activeCategory === category.id
-                                                ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
-                                                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                            }`}
-                                        onMouseEnter={() => setActiveCategory(category.id)}
-                                    >
-                                        <span className="font-medium text-sm">{category.label}</span>
-                                    </Link>
-                                ))}
+                                {menuData.categories.map((category) => {
+                                    const isAddNew = category.id === 'newproject';
+                                    return (
+                                        <a
+                                            key={category.id}
+                                            href={category.href}
+                                            onClick={(e) => {
+                                                if (isAddNew) {
+                                                    e.preventDefault();
+                                                    window.dispatchEvent(new CustomEvent('open-myprojects'));
+                                                }
+                                            }}
+                                            className={`flex items-center px-3 py-3 text-sm cursor-pointer transition-all duration-200 rounded-md ${activeCategory === category.id
+                                                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
+                                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                                }`}
+                                            onMouseEnter={() => setActiveCategory(category.id)}
+                                        >
+                                            <span className="font-medium text-sm">{category.label}</span>
+                                        </a>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -593,15 +554,31 @@ export default function Navigation({ mobile = false }: { mobile?: boolean }) {
                     <div className="col-span-5 border-r border-gray-200">
                         <div className="p-4">
                             <div className="grid grid-cols-2 gap-2">
-                                {currentContent?.subcategories?.map((subcategory, index) => (
-                                    <Link
-                                        key={index}
-                                        to={subcategory.href}
-                                        className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer rounded-md transition-colors duration-150"
-                                    >
-                                        {subcategory.name}
-                                    </Link>
-                                ))}
+                                {currentContent?.subcategories?.map((subcategory: any, index: number) => {
+                                    const isWorkMenu = menuKey === 'Work';
+                                    const commonClasses = "px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer rounded-md transition-colors duration-150";
+                                    if (isWorkMenu || !subcategory?.href) {
+                                        return (
+                                            <a
+                                                key={index}
+                                                href="#"
+                                                onClick={(e) => e.preventDefault()}
+                                                className={commonClasses}
+                                            >
+                                                {subcategory.name}
+                                            </a>
+                                        );
+                                    }
+                                    return (
+                                        <Link
+                                            key={index}
+                                            to={subcategory.href}
+                                            className={commonClasses}
+                                        >
+                                            {subcategory.name}
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

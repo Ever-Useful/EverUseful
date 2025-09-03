@@ -1,9 +1,11 @@
 const dynamoDBService = require('./dynamoDBService');
+const s3Service = require('./s3Service');
 
 class UserService {
   constructor() {
     // Use DynamoDB service instead of JSON files
     this.dbService = dynamoDBService;
+    this.s3Service = s3Service;
   }
 
   // Generate custom user ID
@@ -13,11 +15,27 @@ class UserService {
 
   // Create new user
   async createUser(firebaseUid, userData) {
-    return await this.dbService.createUser(firebaseUid, userData);
+    const user = await this.dbService.createUser(firebaseUid, userData);
+    
+    // Create S3 folder structure for the new user
+    try {
+      await this.s3Service.createUserFolder(user.customUserId);
+      console.log(`Created S3 folder structure for user: ${user.customUserId}`);
+    } catch (error) {
+      console.error(`Failed to create S3 folder for user ${user.customUserId}:`, error);
+      // Don't fail user creation if S3 folder creation fails
+    }
+    
+    return user;
   }
 
   // Find user by Firebase UID
   async findUserByFirebaseUid(firebaseUid) {
+    return await this.dbService.findUserByFirebaseUid(firebaseUid);
+  }
+
+  // Alias for findUserByFirebaseUid (for dashboard compatibility)
+  async getUserByFirebaseUid(firebaseUid) {
     return await this.dbService.findUserByFirebaseUid(firebaseUid);
   }
 
@@ -82,6 +100,46 @@ class UserService {
     return await this.dbService.updateSocialLinks(customUserId, socialLinks);
   }
 
+  // Phone verification methods
+  async verifyPhoneNumber(customUserId, phoneNumber, isVerified = true) {
+    return await this.dbService.updateUserProfile(customUserId, {
+      phoneNumber: phoneNumber,
+      phoneVerified: isVerified,
+      phoneVerificationDate: isVerified ? new Date().toISOString() : null
+    });
+  }
+
+  async markPhoneAsVerified(customUserId) {
+    return await this.dbService.updateUserProfile(customUserId, {
+      phoneVerified: true,
+      phoneVerificationDate: new Date().toISOString()
+    });
+  }
+
+  async createUserWithPhoneVerification(firebaseUid, userData) {
+    // Add phone verification fields
+    const enhancedUserData = {
+      ...userData,
+      phoneVerified: false,
+      phoneVerificationDate: null,
+      emailVerified: false,
+      emailVerificationDate: null
+    };
+    
+    return await this.createUser(firebaseUid, enhancedUserData);
+  }
+
+  async findUserByPhone(phoneNumber) {
+    return await this.dbService.findUserByPhone(phoneNumber);
+  }
+
+  async updateEmailVerificationStatus(customUserId, isVerified = true) {
+    return await this.dbService.updateUserProfile(customUserId, {
+      emailVerified: isVerified,
+      emailVerificationDate: isVerified ? new Date().toISOString() : null
+    });
+  }
+
   // Update user auth info (Firestore fields)
   async updateUserAuthInfo(customUserId, authData) {
     return await this.dbService.updateUserProfile(customUserId, authData);
@@ -110,6 +168,11 @@ class UserService {
   // Add to cart
   async addToCart(customUserId, productData) {
     return await this.dbService.addToCart(customUserId, productData);
+  }
+
+  // Get user cart
+  async getUserCart(customUserId) {
+    return await this.dbService.getUserCart(customUserId);
   }
 
   // Remove from cart
@@ -151,6 +214,43 @@ class UserService {
   async trackProjectView(customUserId, projectId) {
     return await this.dbService.trackProjectView(customUserId, projectId);
   }
+
+  // userService.js
+  async searchUsers(query) {
+    return await this.dbService.searchUsersByName(query);
+}
+
+// Send connection request
+async sendConnectionRequest(senderId, receiverId) {
+  return await this.dbService.createConnectionRequest(senderId, receiverId);
+}
+
+// Accept connection request
+async acceptConnectionRequest(receiverId, senderId) {
+  return await this.dbService.acceptConnectionRequest(receiverId, senderId);
+}
+
+// Reject connection request
+async rejectConnectionRequest(receiverId, senderId) {
+  return await this.dbService.rejectConnectionRequest(receiverId, senderId);
+}
+
+// Withdraw (cancel) connection request
+async withdrawConnectionRequest(senderId, receiverId) {
+  return await this.dbService.withdrawConnectionRequest(senderId, receiverId);
+}
+
+// Get connections for a user (returns sent, received, connected)
+async getConnections(customUserId) {
+  const user = await this.dbService.findUserByCustomId(customUserId);
+  return {
+    sent: user.connections?.sent || [],
+    received: user.connections?.received || [],
+    connected: user.social?.connected || [],
+  };
+}
+
+
 }
 
 module.exports = new UserService(); 

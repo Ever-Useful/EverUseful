@@ -62,7 +62,7 @@ export const NewsletterSection = () => {
                 </div>
               </div>
               
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+              <h2 className="heading-section font-bold">
                 <span className="text-eco-green glow-text">Stay Updated</span>
               </h2>
               

@@ -141,7 +141,7 @@ const ProductManager = () => {
                   <Button variant="outline" size="sm" onClick={() => handleEdit(product)}>
                     Edit
                   </Button>
-                  <Button variant="destructive" size="sm" onClick={() => handleDelete(product.id)}>
+                  <Button variant="outline" size="sm" onClick={() => handleDelete(product.id)}>
                     Delete
                   </Button>
                 </div>

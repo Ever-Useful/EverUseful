@@ -36,7 +36,7 @@ const Checkout = () => {
       
       <div className="container mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         <div className="mb-6 sm:mb-8">
-                  <h1 className="text-4xl font-bold text-white mb-2 mobile-text-4xl">Checkout</h1>
+                  <h1 className="text-4xl font-bold text-white mb-2 mobile-text-2xl">Checkout</h1>
         <p className="text-gray-400 text-sm sm:text-base mobile-text-base">Complete your purchase securely</p>
         </div>
 

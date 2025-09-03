@@ -31,19 +31,22 @@ const projectDetails = [
 const features = [
   {
     icon: <FaLeaf className="text-green-600 text-lg md:text-3xl" />,
-    title: "Eco-Friendly",
+    title1: "Eco-",
+    title2: "Friendly",
     description: "Every project reduces carbon and supports green energy.",
     bg: "bg-green-50"
   },
   {
     icon: <FaSeedling className="text-green-500 text-lg md:text-3xl" />,
-    title: "Community Powered",
+    title1: "Community",
+    title2: "Powered",
     description: "Local impact, global change. You help shape the future.",
     bg: "bg-teal-50"
   },
   {
     icon: <FaSolarPanel className="text-teal-500 text-lg md:text-3xl" />,
-    title: "Next-Gen Tech",
+    title1: "Next-Gen",
+    title2: "Tech",
     description: "AI, IoT, and solar—tech that’s ready for tomorrow.",
     bg: "bg-emerald-50"
   },
@@ -134,21 +137,36 @@ const ProjectCards: React.FC = () => (
 
 // --- Features (smaller in mobile) ---
 const Features: React.FC = () => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 mt-4 md:mt-12">
-    {features.map((feature, idx) => (
-      <div
-        key={idx}
-        className={`flex flex-col items-center rounded-2xl shadow p-2 md:p-6 hover:shadow-lg transition min-h-[70px] md:min-h-[160px] ${feature.bg}`}
-      >
-        <div className="mb-1 md:mb-3">{feature.icon}</div>
-        <h4 className="text-xs md:text-lg font-semibold text-teal-800 mb-0.5 md:mb-1">{feature.title}</h4>
-        <p className="text-gray-600 text-[11px] md:text-sm text-center">{feature.description}</p>
-      </div>
-    ))}
-  </div>
+  <>
+    {/* Mobile: horizontal scroll */}
+    <div className="grid grid-cols-3 gap-2 px-2 mt-4 md:hidden">
+  {features.map((feature, idx) => (
+    <div
+      key={idx}
+      className={`flex flex-col items-center rounded-2xl shadow p-2 hover:shadow-lg transition min-h-[55px] ${feature.bg}`}
+    >
+      <div className="mb-1">{feature.icon}</div>
+      <h4 className="text-[10px] font-semibold text-teal-800 text-center">{feature.title1}</h4>
+      <h4 className="text-[10px] font-semibold text-teal-800 mb-0.5 text-center"> {feature.title2}</h4>
+    </div>
+  ))}
+</div>
+    {/* Desktop: grid */}
+    <div className="hidden md:grid grid-cols-3 gap-6 mt-12">
+      {features.map((feature, idx) => (
+        <div
+          key={idx}
+          className={`flex flex-col items-center rounded-2xl shadow p-6 hover:shadow-lg transition min-h-[160px] ${feature.bg}`}
+        >
+          <div className="mb-3">{feature.icon}</div>
+          <h4 className="md:text-lg font-semibold text-teal-800 mb-1">{feature.title1} {feature.title2}</h4>
+          <p className="text-gray-600 md:text-sm text-center">{feature.description}</p>
+        </div>
+      ))}
+    </div>
+  </>
 );
 
-// --- Pre-Book Form ---
 const PreJoinForm: React.FC = () => {
   const [form, setForm] = useState({ name: "", email: "" });
   const [submitted, setSubmitted] = useState(false);
@@ -176,14 +194,8 @@ const PreJoinForm: React.FC = () => {
         autoComplete="off"
       >
         <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1 md:mb-2">
-          <span className="inline-block bg-gradient-to-r from-teal-400 to-green-400 text-white px-2 py-1 rounded-full font-bold text-xs shadow uppercase tracking-wider">
-            Join Now
-          </span>
-          <span className="text-teal-600 font-bold text-xs md:text-sm animate-pulse">
-            Limited Early Access
-          </span>
         </div>
-        <h3 className="text-gray-900 text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
+        <h3 className="text-gray-900 text-[17px] sm:text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
           Register for Early Notifications.
         </h3>
         <p className="text-center text-gray-700 text-base mb-1 md:mb-2">
@@ -298,7 +310,7 @@ export const UpcomingPhase: React.FC = () => (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-24 items-center">
         {/* Left: Info, Form */}
         <div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight mobile-text-4xl">
+          <h2 className="sm:text-4xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight mobile-text-2xl">
             Sustainable Projects
             <br />
             for a Brighter Future
@@ -316,7 +328,10 @@ export const UpcomingPhase: React.FC = () => (
         </div>
         {/* Right: Zig-Zag Collage Cards */}
         <div className="flex flex-col items-center w-full">
-          <ProjectCards />
+          {/* Only show ProjectCards on md and up */}
+          <div className="hidden md:block w-full">
+            <ProjectCards />
+          </div>
           <div className="mt-4 md:mt-24 text-center text-gray-800 font-semibold text-base bg-white rounded-xl px-2 py-2 md:px-6 md:py-3 shadow mobile-text-base">
             <span className="text-teal-700 font-extrabold">
               Why these projects?
@@ -324,7 +339,7 @@ export const UpcomingPhase: React.FC = () => (
             <br />
             Each project is handpicked for its real-world impact, innovation, and the excitement it brings to our community.
             <span className="block mt-1 text-green-600">
-              By pre-booking, you’re joining a movement for a sustainable tomorrow.
+              By registering, you’re joining a movement for a sustainable tomorrow.
             </span>
           </div>
         </div>
@@ -346,7 +361,7 @@ export const UpcomingPhase: React.FC = () => (
         <Features />
         <div className="flex justify-center mt-4 md:mt-10">
           <span className="inline-block px-3 py-2 md:px-8 md:py-3 rounded-full bg-gradient-to-r from-teal-100 via-green-100 to-white text-teal-900 font-semibold text-xs md:text-base shadow animate-pulse mobile-text-xs">
-            🚀 Launching Summer 2025 — Secure Your Place Now!
+            🚀 Launching Later this Year — Secure Your Place Now!
           </span>
         </div>
       </div>

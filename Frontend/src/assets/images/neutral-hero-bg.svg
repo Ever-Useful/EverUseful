@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Neutral abstract pattern">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#F9FAFB" />
+      <stop offset="100%" stop-color="#EEF2F7" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#g)"/>
+  <circle cx="1200" cy="420" r="320" fill="url(#glow)"/>
+  <g stroke="#E5E7EB" fill="none" opacity="0.8">
+    <circle cx="300" cy="200" r="60"/>
+    <circle cx="380" cy="720" r="40"/>
+    <circle cx="820" cy="160" r="35"/>
+    <circle cx="1400" cy="740" r="45"/>
+  </g>
+</svg>
+

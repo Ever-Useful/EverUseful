@@ -1,3 +1,4 @@
+/* stylelint-disable at-rule-no-unknown */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 /* Tailwind CSS directives - these are processed by PostCSS */
@@ -5,14 +6,282 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Performance optimizations */
+* {
+  /* Optimize paint and layout */
+  box-sizing: border-box;
+}
+
+/* Hardware acceleration for animations */
+.animate-optimized {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Optimize transitions */
+.transition-optimized {
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Optimize mobile performance */
+@media (max-width: 768px) {
+  .mobile-optimized {
+    will-change: auto;
+    transform: none;
+  }
+  
+  /* Reduce blur effects on mobile for better performance */
+  .mobile-optimized-blur {
+    filter: blur(0);
+  }
+  
+  /* Ensure mobile cards are visible */
+  .mobile-cards-container {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    min-height: 200px !important;
+  }
+  
+  .mobile-card {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 160px !important;
+    background-color: var(--card-color, #6b7280) !important;
+    border-radius: 0.75rem !important;
+    padding: 1rem !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Optimize background images */
+.bg-optimized {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: auto;
+}
+
+/* Optimize text rendering */
+.text-optimized {
+  text-rendering: optimizeSpeed;
+  font-feature-settings: "kern" 1;
+  font-kerning: normal;
+}
+
+/* Optimize images */
+.img-optimized {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Optimize scroll performance */
+.scroll-optimized {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Optimize hover effects */
+.hover-optimized {
+  transition: all 0.2s ease-out;
+}
+
+.hover-optimized:hover {
+  transform: translateY(-2px);
+}
+
+/* Optimize focus states */
+.focus-optimized:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Optimize button interactions */
+.btn-optimized {
+  transition: all 0.2s ease-out;
+  will-change: transform;
+}
+
+.btn-optimized:active {
+  transform: scale(0.98);
+}
+
+/* Optimize card animations */
+.card-optimized {
+  transition: all 0.3s ease-out;
+  will-change: transform, box-shadow;
+}
+
+.card-optimized:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Optimize loading states */
+.loading-optimized {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Optimize grid layouts */
+.grid-optimized {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Optimize flexbox layouts */
+.flex-optimized {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Optimize responsive images */
+.responsive-img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Optimize video elements */
+.video-optimized {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  will-change: auto;
+}
+
+/* Optimize form elements */
+.form-optimized {
+  transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.form-optimized:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Optimize navigation */
+.nav-optimized {
+  transition: background-color 0.2s ease-out;
+}
+
+/* Optimize modal animations */
+.modal-optimized {
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  will-change: opacity, transform;
+}
+
+.modal-optimized.enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.modal-optimized.enter-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Optimize tooltip animations */
+.tooltip-optimized {
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  will-change: opacity, transform;
+}
+
+/* Optimize dropdown animations */
+.dropdown-optimized {
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  will-change: opacity, transform;
+}
+
+/* Optimize carousel animations */
+.carousel-optimized {
+  transition: transform 0.3s ease-out;
+  will-change: transform;
+}
+
+/* Optimize chart animations */
+.chart-optimized {
+  transition: opacity 0.3s ease-out;
+  will-change: opacity;
+}
+
+/* Optimize skeleton loading */
+.skeleton-optimized {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 /* Custom styles using @apply */
 .btn-primary {
+  /* stylelint-disable-next-line at-rule-no-unknown */
   @apply bg-blue-500 text-white font-bold py-2 px-4 rounded;
 }
 
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
 
+/* stylelint-disable-next-line at-rule-no-unknown */
 @layer base {
    * {
     @apply border-border;
@@ -35,6 +304,13 @@
     font-family: 'Inter', sans-serif;
     font-weight: 700;
   }
+  h1 { @apply text-4xl sm:text-5xl tracking-tight; }
+  h2 { @apply text-3xl tracking-tight; }
+  h3 { @apply text-2xl; }
+  h4 { @apply text-xl; }
+  h5 { @apply text-lg; }
+  p  { @apply text-base leading-relaxed; }
+  small { @apply text-xs; }
   :root {
     --background: 240 10% 98%;
     --foreground: 220 20% 15%;
@@ -138,6 +414,7 @@
     --sidebar-ring: 158 70% 55%;
   }
 }
+/* stylelint-disable-next-line at-rule-no-unknown */
 @layer components {
   .galaxy-bg {
   background: radial-gradient(ellipse at top, hsl(var(--eco-purple) / 0.2), transparent),
@@ -211,7 +488,21 @@ html {
 
 
 
+/* stylelint-disable-next-line at-rule-no-unknown */
 @layer utilities {
+  /* Typography utilities for consistent hierarchy */
+  .heading-section { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-4xl sm:text-5xl font-bold tracking-tight; }
+  .heading-header { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-3xl font-bold tracking-tight; }
+  .heading-card-2xl { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-2xl font-bold; }
+  .heading-card-xl { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-xl font-semibold; }
+  .heading-card-lg { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-lg font-semibold; }
+  .body-base { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-base leading-relaxed; }
+  .meta-sm { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-sm; }
+  .meta-xs { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-xs; }
+
+  /* Consistent card media sizing */
+  .card-media { /* stylelint-disable-next-line at-rule-no-unknown */ @apply w-full aspect-[3/2] object-cover; }
+
   /* Enhanced Creative Animations */
   @keyframes float {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -223,6 +514,14 @@ html {
   @keyframes pulse-slow {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.7; transform: scale(1.05); }
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
   }
   
   @keyframes wiggle {
@@ -373,6 +672,87 @@ html {
     70% { transform: scale(1); }
   }
 
+  /* AI-specific keyframes */
+  @keyframes ai-thinking {
+    0%, 100% { 
+      transform: scale(1) rotate(0deg);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    }
+    25% { 
+      transform: scale(1.05) rotate(2deg);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+    }
+    50% { 
+      transform: scale(1.1) rotate(-1deg);
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.7);
+    }
+    75% { 
+      transform: scale(1.05) rotate(1deg);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+    }
+  }
+
+  @keyframes ai-processing {
+    0%, 100% { 
+      background: linear-gradient(45deg, #8b5cf6, #ec4899);
+      transform: scale(1);
+    }
+    50% { 
+      background: linear-gradient(45deg, #ec4899, #3b82f6);
+      transform: scale(1.02);
+    }
+  }
+
+  @keyframes ai-typing {
+    0%, 100% { 
+      transform: translateY(0);
+      opacity: 1;
+    }
+    25% { 
+      transform: translateY(-2px);
+      opacity: 0.8;
+    }
+    50% { 
+      transform: translateY(-4px);
+      opacity: 0.6;
+    }
+    75% { 
+      transform: translateY(-2px);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes ai-glow {
+    0%, 100% { 
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+      filter: brightness(1);
+    }
+    50% { 
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+      filter: brightness(1.1);
+    }
+  }
+
+  @keyframes ai-pulse {
+    0%, 100% { 
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% { 
+      transform: scale(1.05);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes ai-shimmer {
+    0% { 
+      background-position: -200% 0;
+    }
+    100% { 
+      background-position: 200% 0;
+    }
+  }
+
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
@@ -433,6 +813,31 @@ html {
   .animate-heartbeat {
     animation: heartbeat 2s ease-in-out infinite;
   }
+
+  /* AI-specific animations */
+  .animate-ai-thinking {
+    animation: ai-thinking 2s ease-in-out infinite;
+  }
+
+  .animate-ai-processing {
+    animation: ai-processing 1.5s ease-in-out infinite;
+  }
+
+  .animate-ai-typing {
+    animation: ai-typing 0.8s ease-in-out infinite;
+  }
+
+  .animate-ai-glow {
+    animation: ai-glow 3s ease-in-out infinite;
+  }
+
+  .animate-ai-pulse {
+    animation: ai-pulse 4s ease-in-out infinite;
+  }
+
+  .animate-ai-shimmer {
+    animation: ai-shimmer 2.5s ease-in-out infinite;
+  }
   
   .hover-lift:hover {
     transform: translateY(-8px);
@@ -491,7 +896,7 @@ html {
   
   /* Header spacing utility */
   .header-spacer {
-    padding-top: 3.5rem; /* 56px - matches header height h-14 */
+    padding-top: 50px;
   }
 }
 
@@ -504,20 +909,31 @@ html {
   }
   .mobile-text-base {
     font-size: 12px !important;
+    line-height: 1.25rem;
   }
   .mobile-text-lg {
     font-size: 13px !important;
+    line-height: 1.75rem;
   }
   .mobile-text-xl {
     font-size: 14px !important;
+    line-height: 1.75rem;
   }
   .mobile-text-2xl {
     font-size: 15px !important;
+    line-height: 2rem;
   }
   .mobile-text-3xl {
     font-size: 16px !important;
+    line-height: 2.25rem;
   }
   .mobile-text-4xl {
     font-size: 17px !important;
+    line-height: 2.5rem;
+  }
+  
+  /* Mobile header spacing */
+  .header-spacer {
+    padding-top: 50px;
   }
 }

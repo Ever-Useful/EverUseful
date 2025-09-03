@@ -5,14 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Users, TrendingUp, DollarSign, Settings, LogOut, BarChart2, Megaphone, Shield, FileWarning, FolderKanban, CheckCircle2, AlertTriangle, UserPlus, UserX, Server, Activity } from "lucide-react";
-import { getAdminOverview } from "@/services/userService";
+import userService from "@/services/userService";
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Area } from "recharts";
 
 const Admin = () => {
   const [stats, setStats] = useState([
     { title: "Total Users", value: "-", change: "-", icon: Users },
     { title: "Total Projects", value: "-", change: "-", icon: TrendingUp },
-    { title: "Revenue", value: "$1.2M", change: "+15%", icon: DollarSign }
+            { title: "Revenue", value: "₹1.2M", change: "+15%", icon: DollarSign }
   ]);
   const [userGrowth, setUserGrowth] = useState<number[]>([0,0,0,0,0,0,0]);
   const [loading, setLoading] = useState(true);
@@ -52,11 +52,11 @@ const Admin = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getAdminOverview();
+        const data = await userService.getAdminOverview();
         setStats([
           { title: "Total Users", value: data.totalUsers, change: "+12%", icon: Users },
           { title: "Total Projects", value: data.totalProjects, change: "+8%", icon: TrendingUp },
-          { title: "Revenue", value: "$1.2M", change: "+15%", icon: DollarSign }
+          { title: "Revenue", value: "₹1.2M", change: "+15%", icon: DollarSign }
         ]);
         setUserGrowth(data.userGrowth || [0,0,0,0,0,0,0]);
       } catch (err: any) {

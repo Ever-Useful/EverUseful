@@ -1,24 +1,22 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { auth } from "../lib/firebase";
-// Removed Firestore imports - using DynamoDB now
-import { onAuthStateChanged } from "firebase/auth";
-import toast from "react-hot-toast";
-
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, MapPin, Globe, Mail, Phone, GraduationCap, Briefcase, Award, Users, Eye, Heart, Download, Share2, MessageCircle, Send, Linkedin, Github, Twitter, Instagram, Facebook, Youtube, Globe as GlobeIcon, UserPlus, BookOpen, Star } from 'lucide-react';
+import userService from '@/services/userService';
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Camera, DollarSign, Award, Clock, GraduationCap, UserPlus, BookOpen, Edit, Link, Briefcase, Trash2, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-import RecentActivity from "@/components/RecentActivity";
-import SkillsSection from "@/components/Skillssection";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ChatBox } from "@/components/ChatBox";
-import { userService } from "@/services/userService";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
+import { API_ENDPOINTS } from '../config/api';
+import { getUserAvatarUrl, getBackgroundImageUrl } from '@/utils/s3ImageUtils';
+import { useUserProfile } from "@/contexts/UserProfileContext";
+import { socket } from "@/socket.ts";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -26,72 +24,283 @@ const Profile = () => {
   const [userData, setUserData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
-  const [backgroundImage, setBackgroundImage] = useState(
-    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
-  );
+  const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [editSection, setEditSection] = useState('');
   const [showMyProjects, setShowMyProjects] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
+  const [error, setError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
+  const { profileData: currentUser } = useUserProfile(); 
+
+
 
 
   // Fetch user data by customUserId from userData.json
   const fetchUserData = async () => {
-    if (id) {
-      try {
-        console.log('Fetching student with ID:', id);
-        // Make direct fetch call to backend without authentication for public profile
-        const response = await fetch(`http://localhost:3000/api/users/${id}`);
-        console.log('Response status:', response.status);
+    try {
+      setLoading(true);
+      const response = await fetch(API_ENDPOINTS.USER_BY_ID(id));
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const data = await response.json();
+      console.log('StudentProfile - Raw API response:', data);
+      
+      if (data.success && data.data) {
+        setUserData(data.data);
+        setEducation(data.data.education || []);
+        setWorkExperience(data.data.workExperience || []);
         
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Student data received:', data);
-          console.log('Full data structure:', JSON.stringify(data, null, 2));
-          if (data.success && data.data) {
-            setUserData(data.data);
-            setEducation(data.data.education || []);
-            setWorkExperience(data.data.workExperience || []);
-            console.log('User data set:', data.data);
-            console.log('Projects object:', data.data.projects);
-            console.log('Projects.created:', data.data.projects?.created);
-            console.log('Is projects.created an array?', Array.isArray(data.data.projects?.created));
-            // Fetch full project details for each project ID
-            const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-            console.log('Project IDs found:', projectIds);
-            console.log('Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
-            if (projectIds.length > 0) {
-              const projectPromises = projectIds.map((pid) =>
-                fetch(`http://localhost:3000/api/marketplace/projects/${pid}`)
-                  .then(res => res.ok ? res.json() : null)
-                  .then(res => res && res.project ? res.project : null)
-                  .catch(() => null)
-              );
-              const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-              console.log('Full projects fetched:', fullProjects);
-              setPortfolioProjects(fullProjects);
-            } else {
-              console.log('No project IDs found');
-              setPortfolioProjects([]);
-            }
-          } else {
-            console.error('Invalid response format:', data);
-            setUserData({});
-            setPortfolioProjects([]);
-          }
+        // Set background image from user profile data
+        const userBackgroundImage = data.data.profile?.backgroundImage;
+        if (userBackgroundImage) {
+          setBackgroundImage(userBackgroundImage);
         } else {
-          console.error('Failed to fetch student:', response.status);
-          setUserData({});
+          // Fallback to default background
+          setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
+        }
+        console.log('StudentProfile - User data set:', data.data);
+        console.log('StudentProfile - Projects object:', data.data.projects);
+        console.log('StudentProfile - Projects.created:', data.data.projects?.created);
+        console.log('StudentProfile - Is projects.created an array?', Array.isArray(data.data.projects?.created));
+        
+        // Fetch full project details for each project ID
+        const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
+        console.log('StudentProfile - Project IDs found:', projectIds);
+        console.log('StudentProfile - Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
+        
+        if (projectIds.length > 0) {
+          console.log('StudentProfile - Attempting to fetch projects:', projectIds);
+          const projectPromises = projectIds.map((pid) =>
+            fetchProjectData(pid)
+          );
+          const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
+          console.log('StudentProfile - Full projects fetched:', fullProjects);
+          console.log('StudentProfile - Project details:', fullProjects.map(p => ({
+            id: p.id,
+            title: p.title,
+            image: p.image,
+            hasImage: !!p.image
+          })));
+          setPortfolioProjects(fullProjects);
+        } else {
+          console.log('StudentProfile - No project IDs found');
           setPortfolioProjects([]);
         }
-      } catch (err) {
-        console.error('Error fetching student:', err);
+      } else {
+        console.log('StudentProfile - No user data found or API error');
         setUserData({});
         setPortfolioProjects([]);
       }
+    } catch (error) {
+      console.error('StudentProfile - Error fetching user data:', error);
+      setError('Failed to load user profile');
+      setUserData({});
+      setPortfolioProjects([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+// useEffect(() => {
+//   const fetchConnectionStatus = async () => {
+//     try {
+//       const connections = await userService.getConnections();
+
+//       if (connections.sent.includes(id)) {
+//         setConnectionStatus("pending"); // request sent by me
+//       } else if (connections.received.includes(id)) {
+//         setConnectionStatus("pending"); // request received, still pending
+//       } else if (connections.connected.includes(id)) {
+//         setConnectionStatus("connected"); // already connected
+//       } else {
+//         setConnectionStatus("none"); // no relation
+//       }
+//     } catch (err) {
+//       console.error("Failed to fetch connection status:", err);
+//     }
+//   };
+
+//   if (currentUser?.customUserId && id) {
+//     fetchConnectionStatus();
+//   }
+// }, [currentUser, id]);
+
+
+// // Ye wala final hai
+// useEffect(() => {
+//   if (!currentUser?.customUserId || !id) return;
+
+//   (async () => {
+//     try {
+//       const resp = await userService.getConnections();
+//       const payload = resp?.data ?? resp; // support both shapes
+
+//       const sent: string[] = payload?.sent ?? [];
+//       const received: string[] = payload?.received ?? [];
+//       const connected: string[] = payload?.connected ?? [];
+
+//       if (connected.includes(id)) {
+//         setConnectionStatus('connected');
+//       } else if (sent.includes(id) || received.includes(id)) {
+//         setConnectionStatus('pending');
+//       } else {
+//         setConnectionStatus('none');
+//       }
+//     } catch (err) {
+//       console.error('Failed to fetch connection status:', err);
+//     }
+//   })();
+// }, [currentUser?.customUserId, id]);
+
+// 🔹 Fetch connection status on mount / refresh
+useEffect(() => {
+  const fetchConnectionStatus = async () => {
+    try {
+      const res = await userService.getConnections(); 
+      // NOTE: res is { success: true, data: { sent, received, connected } }
+      const connections = res.data;
+
+      if (connections.sent.includes(id)) {
+        setConnectionStatus("pending"); // request sent by me
+      } else if (connections.received.includes(id)) {
+        setConnectionStatus("pending"); // request received, still pending
+      } else if (connections.connected.includes(id)) {
+        setConnectionStatus("connected"); // already connected
+      } else {
+        setConnectionStatus("none");
+      }
+    } catch (err) {
+      console.error("Failed to fetch connection status:", err);
+    }
+  };
+
+  if (currentUser?.customUserId && id) {
+    fetchConnectionStatus();
+  }
+}, [currentUser, id]);
+
+
+
+
+  useEffect(() => {
+    if (currentUser?.customUserId) {
+      socket.emit("register", currentUser.customUserId);
+      console.log("Registered socket for user:", currentUser.customUserId);
+    }
+  }, [currentUser?.customUserId]);
+
+  useEffect(() => {
+  socket.on("connectionRequestReceived", (data) => {
+    console.log("New connection request received:", data);
+    alert(`${data.message}`);
+  });
+
+  return () => {
+    socket.off("connectionRequestReceived");
+  };
+}, []);
+
+
+
+
+
+// const handleConnect = async () => {
+//   if (!id) return;
+
+//   // Optimistic UI
+//   setConnectionStatus("pending");
+
+//   try {
+//     const response = await userService.sendConnectionRequest(id);
+
+//     if (response?.success === false) {
+//       setConnectionStatus("none"); // revert
+//       alert(`Failed to send request: ${response.message || "Unknown error"}`);
+//       return;
+//     }
+
+//     // Emit socket event (real-time notification)
+//     socket.emit("connectionRequest", {
+//       from: currentUser.customUserId,
+//       to: id,
+//       message: `${currentUser.firstName || "Someone"} sent you a connection request.`,
+//     });
+
+//     // Show notification/alert
+//     if ("Notification" in window && Notification.permission === "granted") {
+//       new Notification("Connection request sent!", {
+//         body: "Your request is now pending.",
+//         icon: "/favicon.ico",
+//       });
+//     } else {
+//       alert("Connection request sent!");
+//     }
+//   } catch (err: any) {
+//     setConnectionStatus("none"); // revert if error
+//     console.error("Error sending connection request:", err);
+
+//     const message =
+//       err?.response?.data?.message ||
+//       err?.message ||
+//       "Failed to send connection request due to an unknown error.";
+
+//     alert(`Connection request failed: ${message}`);
+//   }
+// };
+
+   
+
+// 🔹 Handle connect click
+const handleConnect = async () => {
+  try {
+    const response = await userService.sendConnectionRequest(id);
+
+    if (response?.success === false) {
+      alert(`Failed to send request: ${response.message || "Unknown error"}`);
+      return;
+    }
+
+    setConnectionStatus("pending"); // update UI immediately
+
+    socket.emit("connectionRequest", {
+      from: currentUser.customUserId,
+      to: id,
+      message: `${currentUser.firstName || "Someone"} sent you a connection request.`,
+    });
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Connection request sent!", {
+        body: "Your request is now pending.",
+        icon: "/favicon.ico",
+      });
+    } else {
+      alert("Connection request sent!");
+    }
+  } catch (err: any) {
+    console.error("Error sending connection request:", err);
+    alert(`Connection request failed: ${err.message || "Unknown error"}`);
+  }
+};
+
+
+
+  const fetchProjectData = async (pid: string) => {
+    try {
+      console.log(`StudentProfile - Fetching project ${pid}...`);
+      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
+      if (!response.ok) {
+        console.log(`StudentProfile - Project ${pid} not found (${response.status})`);
+        return null;
+      }
+      const data = await response.json();
+      return data && data.project ? data.project : null;
+    } catch (error) {
+      console.error(`StudentProfile - Error fetching project ${pid}:`, error);
+      return null;
+    }
   };
 
   useEffect(() => {
@@ -113,16 +322,16 @@ const Profile = () => {
 
   const profile = {
     name: fullName,
-    title: userData.profile?.title || "New Member",
-    bio: userData.profile?.bio || "This is a new profile. Update your bio!",
-    avatar: userData.profile?.avatar || NoUserProfile,
+    title: userData?.profile?.title || "New Member",
+    bio: userData?.profile?.bio || "This is a new profile. Update your bio!",
+    avatar: userData?.profile?.avatar || NoUserProfile,
     stats: {
-      followers: userData.social?.followersCount || 0,
-      following: userData.social?.followingCount || 0,
-      projects: userData.stats?.projectsCount || 0,
-      likes: userData.stats?.totalLikes || 0,
-      connections: userData.social?.connections?.length || 0,
-      skills: userData.skills || [],  
+      followers: userData?.social?.followersCount || 0,
+      following: userData?.social?.followingCount || 0,
+      projects: userData?.stats?.projectsCount || 0,
+      likes: userData?.stats?.totalLikes || 0,
+      connections: userData?.social?.connections?.length || 0,
+      skills: userData?.skills || [],  
     },
   };
 
@@ -157,32 +366,7 @@ const Profile = () => {
       return;
     }
 
-  //   try {
-  //     const user = auth.currentUser;
-  //     if (!user) {
-  //       toast.error("You must be logged in to delete a project.");
-  //       return;
-  //     }
-  //     const token = await user.getIdToken();
-
-  //     const response = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}`, {
-  //       method: 'DELETE',
-  //       headers: {
-  //         'Authorization': `Bearer ${token}`
-  //       }
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.error || "Failed to delete project.");
-  //     }
-
-  //     toast.success("Project deleted successfully!");
-  //     fetchUserData(); // Refresh the project list
-  //   } catch (error) {
-  //     toast.error(error.message);
-  //     console.error("Error deleting project:", error);
-  //   }
+  
   };
 
   // Always use a safe array for rendering
@@ -196,44 +380,61 @@ const Profile = () => {
     safePortfolioProjectsLength: safePortfolioProjects.length
   });
 
+  // 🔹 Button rendering
+const isSelf = currentUser?.customUserId === id;
+const disabled = isSelf || connectionStatus !== "none";
+const label =
+  connectionStatus === "none"
+    ? "Connect"
+    : connectionStatus === "pending"
+    ? "Pending"
+    : "Connected";
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Header />
       {/* Hero Section */}
       <div
         className="relative h-64 sm:h-80 md:h-96 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
+        style={{ 
+          backgroundImage: `url(${getBackgroundImageUrl(backgroundImage)})`,
+          backgroundColor: '#1e293b' // Fallback color if image fails to load
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-12 sm:my-[99px] py-6 sm:py-[34px] px-3 sm:px-[23px]">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-6 sm:my-[99px] py-4 sm:py-[34px] px-3 sm:px-[23px]">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 w-full">
-              <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0">
-                <Avatar className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg mx-auto md:mx-0">
+            <div className="flex items-end gap-3 md:gap-6 w-full">
+              <div className="relative flex justify-start w-auto mt-0">
+                <Avatar className="w-24 h-24 sm:w-36 sm:h-36 border-4 border-white shadow-lg mx-auto md:mx-0">
                   <AvatarImage
-                    src={profile.avatar}
-                    alt={profile.name}
+                    src={getUserAvatarUrl({ avatar: profile.avatar })}
+                    alt={fullName}
                     className="object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = NoUserProfile;
-                    }}
                   />
                   <AvatarFallback className="bg-slate-200 text-slate-600 font-bold text-2xl sm:text-3xl flex items-center justify-center">
                     {profile.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "NA"}
                   </AvatarFallback>
                 </Avatar>
               </div>
-              <div className="flex-1 text-white mt-4 md:mt-0 w-full">
-                        <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5 text-center md:text-left mobile-text-4xl">{profile.name}</h1>
-        <p className="text-base text-slate-200 drop-shadow-md text-center md:text-left mobile-text-base">{profile.title}</p>
+              <div className="flex-1 text-white mt-1 md:mt-0 w-full">
+                <h1 className="text-2xl sm:text-3xl font-bold drop-shadow-lg mb-1 text-left">{profile.name}</h1>
+                <p className="text-xs sm:text-sm text-slate-200 drop-shadow-md text-left">{(userData?.auth?.userType || '').charAt(0).toUpperCase() + (userData?.auth?.userType || '').slice(1) || profile.title}</p>
                 {/* Connect Button */}
-                <div className="flex flex-row items-center justify-center md:justify-start mt-4">
-                  <div className="flex flex-col w-full max-w-xs h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
-                    <button className="flex items-center gap-2 text-white drop-shadow-md text-base sm:text-lg">
-                      <UserPlus className="w-6 h-6" />
-                      Connect
-                    </button>
-                  </div>
+                <div className="flex flex-row items-center justify-start mt-2">
+                  <button
+  onClick={handleConnect}
+  disabled={disabled}
+  className={`flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 ${
+    disabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+  }`}
+>
+  {label}
+</button>
+                  <button className="ml-2 p-2 rounded-full bg-gray-100/20 text-white">
+                    <Send className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -264,21 +465,48 @@ const Profile = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Column */}
           <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-            {/* About Section */}
-            <Card className="bg-white shadow-lg rounded-xl">
+            {/* Skills Section - Mobile Only - Moved to top for mobile */}
+            <Card className="bg-white shadow-lg rounded-xl lg:hidden">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+                    <span className="bg-indigo-100 p-2 rounded-lg mr-2 sm:mr-3">
+                      <Star className="w-5 h-5 text-indigo-600" />
+                    </span>
+                    Skills
+                  </h3>
+                </div>
+                <div className="flex flex-wrap gap-2 sm:gap-3">
+                  {profile.stats.skills && profile.stats.skills.length > 0 ? (
+                    profile.stats.skills.map((skill: any, index: number) => (
+                      <Badge key={index} className="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-xs sm:text-sm">No skills added yet.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* About Section */}
+            <Card className="bg-white shadow-lg rounded-xl">
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex items-center justify-between mb-2 sm:mb-4">
+                  <h3 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+
                     <span className="bg-purple-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <GraduationCap className="w-5 h-5 text-purple-600" />
                     </span>
                     About
-                  </h2>
+                  </h3>
                 </div>
                 <div>
-                  <p className="text-gray-700 leading-relaxed">{displayedText}</p>
+                  <p className="text-gray-700 leading-relaxed text-xs sm:text-base">{displayedText}</p>
                   {shouldTruncate && (
-                    <button className="mt-2 text-blue-600 hover:underline text-sm" onClick={() => setIsExpanded(!isExpanded)}>
+                    <button className="mt-2 text-blue-600 hover:underline text-xs sm:text-sm" onClick={() => setIsExpanded(!isExpanded)}>
                       {isExpanded ? "Read Less" : "Read More"}
                     </button>
                   )}
@@ -290,14 +518,16 @@ const Profile = () => {
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+
+                    <h3 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+
                       <span className="bg-blue-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <BookOpen className="w-5 h-5 text-blue-600" />
                       </span>
                       Academic Background
-                    </h2>
+                    </h3>
                   </div>
-                  <div className="space-y-4 sm:space-y-6">
+                  <div className="space-y-3 sm:space-y-6">
                     {education.map((edu, idx) => (
                       <div key={idx} className="border rounded-lg p-3 sm:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 bg-white">
                         <div>
@@ -318,14 +548,16 @@ const Profile = () => {
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+
+                    <h3 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+
                       <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <Briefcase className="w-5 h-5 text-green-600" />
                       </span>
                       Work Experience
-                    </h2>
+                    </h3>
                   </div>
-                  <div className="space-y-4 sm:space-y-6">
+                  <div className="space-y-3 sm:space-y-6">
                     {workExperience.map((work, idx) => (
                       <div key={idx} className="border rounded-lg p-3 sm:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 bg-white">
                         <div>
@@ -344,24 +576,25 @@ const Profile = () => {
             {/* Portfolio Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
-                                  <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+                   <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 className="heading-card-2xl font-bold text-gray-900 flex items-center">
                       <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <Briefcase className="w-5 h-5 text-green-600" />
                       </span>
                       Research Projects & Commercial Work
-                    </h2>
+                    </h3>
                   </div>
                 <div className="space-y-3 sm:space-y-4">
                   {safePortfolioProjects.length > 0 ? (
                     safePortfolioProjects.map((project, index) => (
                       <Card
                         key={project.id || index}
-                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[120px] sm:min-h-[140px]"
+                        className="border border-gray-100 hover:shadow-md transition-shadow rounded-lg overflow-hidden flex flex-col md:flex-row items-stretch min-h-[120px] sm:min-h-[140px] cursor-pointer"
+                        onClick={() => navigate(`/product/${project.id}`)}
                       >
                         <div className="w-full md:w-40 lg:w-48 flex-shrink-0 h-28 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
-                            src={project.image}
+                            src={project.image || NoImageAvailable}
                             alt={project.title}
                             className="object-cover w-full h-full rounded-l-lg"
                             onError={e => { e.currentTarget.src = NoImageAvailable; }}
@@ -374,7 +607,9 @@ const Profile = () => {
                               <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{project.description}</p>
                               <div className="flex flex-wrap gap-2 mb-2">
                                 {(project.skills || []).map((skill, skillIndex) => (
-                                  <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">{skill}</Badge>
+                                  <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">
+                                    {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                                  </Badge>
                                 ))}
                               </div>
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-500">
@@ -404,20 +639,22 @@ const Profile = () => {
           {/* Sidebar */}
           <div className="space-y-4 sm:space-y-6">
             {/* Skills Section */}
-            <Card className="bg-white shadow-lg rounded-xl max-w-full">
-              <CardContent className="p-4 sm:p-6">
+            <Card className="bg-white shadow-lg rounded-xl max-w-full hidden lg:block">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+                  <h3 className="text-sm sm:text-lg font-semibold text-gray-900 flex items-center">
                     <span className="bg-indigo-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <Star className="w-5 h-5 text-indigo-600" />
                     </span>
-                    Research Skills & Technical Expertise
+                    Skills
                   </h3>
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   {profile.stats.skills && profile.stats.skills.length > 0 ? (
-                    profile.stats.skills.map((skill: string, index: number) => (
-                      <Badge key={index} className="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">{skill}</Badge>
+                    profile.stats.skills.map((skill: any, index: number) => (
+                      <Badge key={index} className="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                      </Badge>
                     ))
                   ) : (
                     <p className="text-gray-500 text-xs sm:text-sm">No skills added yet. Click edit to add your skills.</p>
@@ -425,10 +662,12 @@ const Profile = () => {
                 </div>
               </CardContent>
             </Card>
-            <ChatBox
-              freelancerName={profile.name}
-              freelancerImage={profile.avatar}
-            />
+            <div className="hidden md:block">
+              <ChatBox
+                freelancerName={profile.name}
+                freelancerImage={getUserAvatarUrl({ avatar: profile.avatar })}
+              />
+            </div>
           </div>
         </div>
       </div>
