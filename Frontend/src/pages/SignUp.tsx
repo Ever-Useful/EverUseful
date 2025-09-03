@@ -7,25 +7,27 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Check, Github, Linkedin, Shield, Smartphone, Mail, Phone } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Check, Github, Linkedin, Shield, Smartphone, Mail, Phone, Clock } from "lucide-react";
 import { 
   signInWithPopup, 
   GoogleAuthProvider, 
   OAuthProvider,
   GithubAuthProvider,
   FacebookAuthProvider,
-  sendEmailVerification,
   Auth,
   RecaptchaVerifier,
   ConfirmationResult,
-  signInWithPhoneNumber
+  signInWithPhoneNumber,
+  EmailAuthProvider,
+  linkWithCredential
 } from "firebase/auth";
-import { auth, handleGoogleAuth, handleGithubAuth } from "../lib/firebase"; 
+import { auth, handleGoogleAuth, handleGithubAuth, sendPhoneOTP, verifyPhoneOTP, sendEmailVerificationLink } from "../lib/firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 // Removed Firestore imports - using DynamoDB now
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { userService } from '@/services/userService';
+import userService from '@/services/userService';
 // Removed Firestore import - using DynamoDB now
+import { API_ENDPOINTS } from '../config/api';
 import Logo from '../assets/Logo/Logo Side.png'
 
 const SignUp = () => {
@@ -54,7 +56,229 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  
+  // Phone verification states
+  const [phoneVerificationStep, setPhoneVerificationStep] = useState<'input' | 'otp' | 'verified'>('input');
+  const [phoneOTP, setPhoneOTP] = useState('');
+  const [phoneVerificationError, setPhoneVerificationError] = useState('');
+  const [isPhoneVerifying, setIsPhoneVerifying] = useState(false);
+  const [lastOtpRequestTime, setLastOtpRequestTime] = useState(0);
+  const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  
   const navigate = useNavigate();
+  
+  // Initialize reCAPTCHA
+  useEffect(() => {
+    const initializeRecaptcha = async () => {
+      try {
+        // Clear any existing reCAPTCHA
+        if (window.recaptchaVerifier) {
+          window.recaptchaVerifier.clear();
+          window.recaptchaVerifier = null;
+        }
+
+        // Create a new reCAPTCHA verifier
+        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response: any) => {
+            console.log('reCAPTCHA solved');
+            setRecaptchaVerifier(verifier); // Set verifier when solved
+          },
+          'expired-callback': () => {
+            console.log('reCAPTCHA expired');
+            setRecaptchaVerifier(null);
+          }
+        });
+
+        // Wait for reCAPTCHA to be ready
+        await verifier.render();
+        console.log('reCAPTCHA rendered');
+        window.recaptchaVerifier = verifier; // Store globally for access in handleSendPhoneOTP
+        
+        // Fallback: If callback doesn't fire, set verifier after a short delay
+        setTimeout(() => {
+          if (recaptchaVerifier === null) {
+            console.log('Fallback: Setting reCAPTCHA verifier after delay');
+            setRecaptchaVerifier(verifier);
+          }
+        }, 2000); // 2 seconds delay
+      } catch (error) {
+        console.error('Error initializing reCAPTCHA:', error);
+        setRecaptchaVerifier(null);
+      }
+    };
+
+    // Only initialize if not already initialized
+    if (recaptchaVerifier === null) {
+      initializeRecaptcha();
+    }
+
+    // Cleanup function
+    return () => {
+      if (window.recaptchaVerifier) {
+        console.log('Clearing reCAPTCHA on unmount');
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []); // Empty dependency array to run only once on mount
+  
+  // Handle OTP countdown timer
+  useEffect(() => {
+    if (lastOtpRequestTime > 0 && phoneVerificationStep !== 'verified') {
+      const timer = setInterval(() => {
+        const now = Date.now();
+        const timeSinceLastRequest = now - lastOtpRequestTime;
+        const remainingTime = Math.max(0, 60000 - timeSinceLastRequest);
+        
+        if (remainingTime <= 0) {
+          setOtpCountdown(0);
+          clearInterval(timer);
+        } else {
+          setOtpCountdown(Math.ceil(remainingTime / 1000));
+        }
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [lastOtpRequestTime, phoneVerificationStep]);
+  
+  // Stop countdown when phone is verified
+  useEffect(() => {
+    if (phoneVerificationStep === 'verified') {
+      setOtpCountdown(0);
+    }
+  }, [phoneVerificationStep]);
+  
+  // Stop countdown when user is logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    if (isLoggedIn) {
+      setOtpCountdown(0);
+    }
+  }, []);
+  
+  // Stop countdown when component unmounts
+  useEffect(() => {
+    return () => {
+      setOtpCountdown(0);
+    };
+  }, []);
+  
+  // Phone verification functions
+  const handleSendPhoneOTP = async () => {
+    if (!formData.phone || !recaptchaVerifier) {
+      setPhoneVerificationError('Please wait for verification to initialize...');
+      return;
+    }
+    
+    // Rate limiting: prevent requests more frequently than every 60 seconds
+    const now = Date.now();
+    if (now - lastOtpRequestTime < 60000) {
+      const remainingTime = Math.ceil((60000 - (now - lastOtpRequestTime)) / 1000);
+      setPhoneVerificationError(`Please wait ${remainingTime} seconds before requesting another OTP.`);
+      return;
+    }
+    
+    setIsPhoneVerifying(true);
+    setPhoneVerificationError('');
+    
+    try {
+      const fullPhone = `${selectedCode}${formData.phone}`;
+      // Ensure we have a fresh reCAPTCHA token for this request
+      try { await (recaptchaVerifier as any).verify?.(); } catch {}
+      const confirmationResult = await sendPhoneOTP(fullPhone, recaptchaVerifier);
+      // Store the confirmation result for later use
+      window.confirmationResult = confirmationResult;
+      setPhoneVerificationStep('otp');
+      // Start cooldown only after successful send
+      setLastOtpRequestTime(Date.now());
+    } catch (error: any) {
+      console.error('Phone OTP error:', error);
+      if (error.code === 'auth/invalid-app-credential') {
+        setPhoneVerificationError('App verification failed. Please refresh and try again.');
+        // Recreate verifier to avoid stale tokens
+        try { (recaptchaVerifier as any).clear?.(); } catch {}
+        setRecaptchaVerifier(null);
+        setTimeout(() => {
+                  const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response: any) => console.log('reCAPTCHA solved'),
+          'expired-callback': () => setRecaptchaVerifier(null)
+        });
+          verifier.render().then(() => {
+            setRecaptchaVerifier(verifier);
+            window.recaptchaVerifier = verifier;
+          });
+        }, 1000);
+      } else if (error.code === 'auth/captcha-check-failed') {
+        setPhoneVerificationError('Verification failed. Please try again.');
+        // Re-initialize reCAPTCHA
+        if (window.recaptchaVerifier) {
+          window.recaptchaVerifier.clear();
+          window.recaptchaVerifier = null;
+        }
+        setRecaptchaVerifier(null);
+        // Re-initialize after a short delay
+        setTimeout(() => {
+                  const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response: any) => console.log('reCAPTCHA solved'),
+          'expired-callback': () => setRecaptchaVerifier(null)
+        });
+          verifier.render().then(() => {
+            setRecaptchaVerifier(verifier);
+            window.recaptchaVerifier = verifier;
+          });
+        }, 1000);
+      } else if (error.code === 'auth/too-many-requests') {
+        // Back off more aggressively on rate limit
+        setPhoneVerificationError('Too many requests. Please wait 2 minutes and try again.');
+        setLastOtpRequestTime(Date.now());
+        setOtpCountdown(120);
+      } else {
+        setPhoneVerificationError(error.message || 'Failed to send verification code');
+      }
+    } finally {
+      setIsPhoneVerifying(false);
+    }
+  };
+  
+  const handleVerifyPhoneOTP = async () => {
+    if (!phoneOTP || !window.confirmationResult) return;
+    
+    setIsPhoneVerifying(true);
+    setPhoneVerificationError('');
+    
+    try {
+      // Actually verify the OTP with Firebase
+      const result = await window.confirmationResult.confirm(phoneOTP);
+      if (result.user) {
+        console.log('Phone verification successful:', result.user.phoneNumber);
+        setPhoneVerificationStep('verified');
+        setPhoneVerificationError('');
+        // Clear the OTP input
+        setPhoneOTP('');
+        // Stop countdown when phone is verified
+        setOtpCountdown(0);
+      } else {
+        throw new Error('Phone verification failed');
+      }
+    } catch (error: any) {
+      console.error('Phone verification error:', error);
+      if (error.code === 'auth/invalid-verification-code') {
+        setPhoneVerificationError('Invalid OTP. Please check and try again.');
+      } else if (error.code === 'auth/code-expired') {
+        setPhoneVerificationError('OTP has expired. Please request a new one.');
+      } else {
+        setPhoneVerificationError('Verification failed. Please try again.');
+      }
+    } finally {
+      setIsPhoneVerifying(false);
+    }
+  };
+  
   const userTypes = [
     { 
       id: "student", 
@@ -101,9 +325,16 @@ const SignUp = () => {
   ];
 
   const currentUserType = userTypes.find(type => type.id === formData.userType);
+  // Do NOT disable app verification by default; this blocks sending real OTPs.
+  // If you need to test with Firebase test phone numbers, set an explicit env flag
+  // and only then disable app verification locally.
   useEffect(() => {
-    if (window.location.hostname === "localhost") {
+    // Set to false to enable real phone number testing in both localhost and production
+    const useTestPhones = false; // import.meta.env.VITE_USE_TEST_PHONE === 'true';
+    if (useTestPhones) {
       auth.settings.appVerificationDisabledForTesting = true;
+    } else {
+      auth.settings.appVerificationDisabledForTesting = false as any;
     }
   }, []);
 
@@ -193,38 +424,44 @@ const SignUp = () => {
     return Object.keys(errors).length === 0;
   };
 
-  // Check if all required fields are filled
-  const isFormValid = () => {
-    return formData.firstName.trim() && 
-           formData.lastName.trim() && 
-           formData.email.trim() && 
-           /\S+@\S+\.\S+/.test(formData.email) &&
-           formData.phone.trim() && 
-           formData.phone.length === 10 &&
-           formData.password && 
-           passwordStrength !== 'weak' &&
-           formData.confirmPassword && 
-           formData.password === formData.confirmPassword &&
-           formData.agreeToTerms;
-  };
+     // Check if all required fields are filled
+   const isFormValid = () => {
+     return formData.firstName.trim() && 
+            formData.lastName.trim() && 
+            formData.email.trim() && 
+            /\S+@\S+\.\S+/.test(formData.email) &&
+            formData.phone.trim() && 
+            formData.phone.length === 10 &&
+            phoneVerificationStep === 'verified' && // Require phone verification
+            formData.password && 
+            passwordStrength !== 'weak' &&
+            formData.confirmPassword && 
+            formData.password === formData.confirmPassword &&
+            formData.agreeToTerms;
+   };
 
-  const handleContinue = async () => {
-    // Validate all fields first
-    if (!validateFields()) {
-      return; // Stop if validation fails
-    }
-    
-    try {
-      setIsLoading(true);
-      setError(null);
-      await signUpWithEmailAndPassword();
-    } catch (error: any) {
-      // Error is already handled in signUpWithEmailAndPassword
-      console.error("Signup failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+     const handleContinue = async () => {
+     // Validate all fields first
+     if (!validateFields()) {
+       return; // Stop if validation fails
+     }
+     
+     // Double-check phone verification
+     if (phoneVerificationStep !== 'verified') {
+       setError("Please verify your phone number before creating an account.");
+       return;
+     }
+     
+     try {
+       setIsLoading(true);
+       setError(null);
+       await signUpWithEmailAndPassword();
+     } catch (error: any) {
+       // Error is already handled in signUpWithEmailAndPassword
+       console.error("Signup failed:", error);
+       // Don't set loading to false here as it's handled in signUpWithEmailAndPassword
+     }
+   };
 
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
@@ -232,32 +469,22 @@ const SignUp = () => {
   const sendOTP = async () => {
     try {
       console.log(selectedCode+formData.phone);
-      // Only create reCAPTCHA verifier if not in development
-      if (!recaptchaVerifierRef.current && !auth.settings.appVerificationDisabledForTesting) {
-        recaptchaVerifierRef.current = new RecaptchaVerifier(
-          auth, 
-          "recaptcha",
-          { 
-            size: "normal", // Changed from "invisible"
-            callback: () => {},
-            'expired-callback': () => {
-              recaptchaVerifierRef.current?.clear();
-            }
-          }
-        );
+      // Reuse the single invisible reCAPTCHA already initialized for this page
+      if (!recaptchaVerifier) {
+        throw new Error('Verification is not ready yet. Please wait a moment and try again.');
       }
 
-      const confirmation = await signInWithPhoneNumber(
-        auth,
-        selectedCode + formData.phone,
-        recaptchaVerifierRef.current || undefined
-      );
+      // Ensure reCAPTCHA has a fresh token before sending
+      try { await (recaptchaVerifier as any).verify?.(); } catch {}
+      const confirmation = await signInWithPhoneNumber(auth, selectedCode + formData.phone, recaptchaVerifier);
 
       setConfirmationResult(confirmation);
       setOtpValue("");
     } catch (err) {
       console.error("OTP Error:", err);
-      recaptchaVerifierRef.current?.clear();
+      if (recaptchaVerifier) {
+        try { (recaptchaVerifier as any).clear?.(); } catch {}
+      }
     }
   };
 
@@ -279,8 +506,8 @@ const SignUp = () => {
   const sendVerificationCode = async () => {
     try {
       const user = auth.currentUser;
-      if (user) {
-        await sendEmailVerification(user);
+      if (user && !user.emailVerified) {
+        await sendEmailVerificationLink(user);
         console.log("Verification code sent to user's email");
       } else {
         console.error("No user found");
@@ -292,42 +519,125 @@ const SignUp = () => {
 
   const signUpWithEmailAndPassword = async () => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      const idToken = await userCredential.user.getIdToken();
+      // Check if phone is verified
+      if (phoneVerificationStep !== 'verified') {
+        setError("Please verify your phone number first");
+        return;
+      }
+      
+      // If the user is already signed in via phone, link email/password to the SAME UID
+      let firebaseUser = auth.currentUser;
+      if (firebaseUser) {
+        const emailCredential = EmailAuthProvider.credential(formData.email, formData.password);
+        await linkWithCredential(firebaseUser, emailCredential);
+        // Refresh current user after linking
+        firebaseUser = auth.currentUser;
+      } else {
+        // Fallback: create the Firebase account (this signs in)
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        firebaseUser = userCredential.user;
+      }
 
-      // Save user data to DynamoDB via backend
-      const response = await fetch('http://localhost:3000/token', {
+      const idToken = await firebaseUser!.getIdToken();
+
+      console.log('Firebase account ready (linked or created) with UID:', firebaseUser!.uid);
+      console.log('Sending user data to backend:', {
+        userType: formData.userType,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: selectedCode + formData.phone,
+        email: formData.email,
+      });
+
+      // Save user data to DynamoDB via backend with all form data
+      const response = await fetch(API_ENDPOINTS.TOKEN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
+          'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({
+          userType: formData.userType,
           firstName: formData.firstName,
           lastName: formData.lastName,
-          phoneNumber: formData.phone,
-          userType: formData.userType,
+          phoneNumber: selectedCode + formData.phone,
+          email: formData.email,
+          username: formData.email.split('@')[0], // Send username derived from email
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save user data to backend');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Backend error response:', errorData);
+        throw new Error(errorData.error || `Failed to save user data to backend: ${response.status}`);
       }
 
       const result = await response.json();
       console.log('User data saved successfully:', result);
       
-      navigate('/signin');
+      // Link phone number to the email account for future phone OTP sign-in
+      try {
+        // Store phone number in user profile for linking
+        const phoneLinkResponse = await fetch(API_ENDPOINTS.USER_PROFILE, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            phoneNumber: selectedCode + formData.phone,
+            phoneVerified: true,
+          }),
+        });
+        
+        if (phoneLinkResponse.ok) {
+          console.log('Phone number linked to email account successfully');
+        }
+      } catch (phoneLinkError) {
+        console.error('Failed to link phone number:', phoneLinkError);
+        // Continue anyway as this is not critical
+      }
+      
+      // Send email verification
+      try {
+        await sendEmailVerificationLink(firebaseUser);
+        console.log("Verification email sent successfully");
+        
+        // Set localStorage to indicate user is signed up but not verified
+        localStorage.setItem("isSignedUp", "true");
+        localStorage.setItem("userType", formData.userType);
+        localStorage.setItem("userName", `${formData.firstName} ${formData.lastName}`);
+        localStorage.setItem("userFirstName", formData.firstName);
+        localStorage.setItem("userLastName", formData.lastName);
+        localStorage.setItem("userEmail", formData.email);
+        localStorage.setItem("userPhone", selectedCode + formData.phone);
+        localStorage.setItem("userUsername", formData.email.split('@')[0]);
+        localStorage.setItem("userDataSaved", "true");
+        
+        // Navigate to email verification page instead of profile
+        navigate('/email-verification');
+      } catch (verificationError) {
+        console.error("Error sending verification email:", verificationError);
+        // Still navigate to verification page, user can request resend
+        navigate('/email-verification');
+      }
+      
     } catch (error: any) {
       console.error("Error creating account:", error);
       if (error.code === 'auth/email-already-in-use') {
         setError("An account with this email already exists. Please sign in instead.");
+        // Add a link to signin page
+        setTimeout(() => {
+          navigate('/signin');
+        }, 3000);
       } else if (error.code === 'auth/invalid-email') {
         setError("Please enter a valid email address");
       } else if (error.code === 'auth/weak-password') {
         setError("Please use a stronger password");
       } else if (error.code === 'auth/network-request-failed') {
         setError("Network error. Please check your connection and try again.");
+      } else if (error.message.includes('Failed to save user data')) {
+        setError("Account created but failed to save profile. Please try signing in.");
       } else {
         setError("An error occurred while creating your account. Please try again.");
       }
@@ -351,6 +661,101 @@ const SignUp = () => {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  // Check if Send OTP button should be enabled
+  const isSendOtpEnabled = () => {
+    const enabled = formData.phone.length === 10 && 
+                   recaptchaVerifier !== null && 
+                   !isPhoneVerifying && 
+                   otpCountdown === 0;
+    
+    // Debug logging
+    if (formData.phone.length === 10) {
+      console.log('Send OTP Button State:', {
+        phoneLength: formData.phone.length,
+        recaptchaReady: recaptchaVerifier !== null,
+        notVerifying: !isPhoneVerifying,
+        countdownZero: otpCountdown === 0,
+        buttonEnabled: enabled
+      });
+    }
+    
+    return enabled;
+  };
+  
+  // Monitor reCAPTCHA state changes
+  useEffect(() => {
+    console.log('reCAPTCHA State Changed:', {
+      recaptchaVerifier: recaptchaVerifier !== null,
+      windowRecaptcha: window.recaptchaVerifier !== null
+    });
+  }, [recaptchaVerifier]);
+  
+  // Manual reCAPTCHA refresh function for troubleshooting
+  const refreshRecaptcha = async () => {
+    try {
+      console.log('Manually refreshing reCAPTCHA...');
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+      setRecaptchaVerifier(null);
+      
+      // Re-initialize after a short delay
+      setTimeout(async () => {
+        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response: any) => {
+            console.log('reCAPTCHA solved (manual refresh)');
+            setRecaptchaVerifier(verifier);
+          },
+          'expired-callback': () => {
+            console.log('reCAPTCHA expired (manual refresh)');
+            setRecaptchaVerifier(null);
+          }
+        });
+        
+        await verifier.render();
+        window.recaptchaVerifier = verifier;
+        console.log('reCAPTCHA manually refreshed');
+      }, 500);
+    } catch (error) {
+      console.error('Error manually refreshing reCAPTCHA:', error);
+    }
+  };
+  
+  // Add debug commands to console for troubleshooting
+  useEffect(() => {
+    (window as any).debugSignUp = {
+      refreshRecaptcha,
+      checkButtonState: () => {
+        console.log('Current Button State:', {
+          phoneLength: formData.phone.length,
+          recaptchaReady: recaptchaVerifier !== null,
+          notVerifying: !isPhoneVerifying,
+          countdownZero: otpCountdown === 0,
+          buttonEnabled: isSendOtpEnabled(),
+          recaptchaVerifier: recaptchaVerifier,
+          windowRecaptcha: window.recaptchaVerifier
+        });
+      },
+      forceEnableButton: () => {
+        if (formData.phone.length === 10) {
+          console.log('Forcing reCAPTCHA verifier...');
+          setRecaptchaVerifier(window.recaptchaVerifier);
+        }
+      }
+    };
+    
+    console.log('🔧 Debug commands available:');
+    console.log('  - debugSignUp.refreshRecaptcha() - Refresh reCAPTCHA');
+    console.log('  - debugSignUp.checkButtonState() - Check button state');
+    console.log('  - debugSignUp.forceEnableButton() - Force enable button');
+    
+    return () => {
+      delete (window as any).debugSignUp;
+    };
+  }, [formData.phone.length, recaptchaVerifier, isPhoneVerifying, otpCountdown]);
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white">
       {/* Back Button - Mobile optimized */}
@@ -376,14 +781,11 @@ const SignUp = () => {
             <div className="flex items-center space-x-1 flex-shrink-0">
               <Link to="/" className="flex items-center space-x-2 group">
                 <img src={Logo} alt="AMOGH" className="h-10 xs:h-14 w-auto md:h-8" />
-                <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
-                  beta
-                </div>
               </Link>
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 lg:mb-4 mobile-text-4xl">Join the Innovation Network</h1>
-          <p className="text-base text-gray-600 mb-2 xs:mb-3 lg:mb-4 mobile-text-base">Create your account and start building the future</p>
+                  <h1 className="text-4xl font-bold text-gray-900 mb-2 lg:mb-4 mobile-text-2xl">Join the Innovation Network</h1>
+        <p className="text-base text-gray-600 mb-2 xs:mb-3 lg:mb-4 mobile-text-base">Create your account and start building the future</p>
           <div className="flex items-center justify-center space-x-2 flex-wrap gap-2">
             <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:scale-105 transition-transform text-xs lg:text-sm">
               <Star className="w-3 h-3 mr-1" />
@@ -421,7 +823,7 @@ const SignUp = () => {
         {currentStep === 1 && (
           <div className="animate-scale-in delay-400 mb-5 xs:mb-6 lg:mb-8">
             <Label className="text-xs xs:text-sm font-medium text-gray-700 mb-3 xs:mb-4 block text-center">I am a:</Label>
-            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 xs:gap-3">
+            <div className="grid grid-cols-3 gap-2 xs:gap-3">
               {userTypes.map((type) => {
                 const IconComponent = type.icon;
                 return (
@@ -483,7 +885,7 @@ const SignUp = () => {
               {/* Sign Up Form */}
               <Card className="backdrop-blur-xl bg-white/90 border-0 shadow-2xl animate-scale-in delay-500">
                 <CardHeader className="text-center pb-4 lg:pb-6">
-                  <CardTitle className="text-3xl font-bold text-gray-900">Create Account</CardTitle>
+                  <CardTitle className="font-bold text-gray-900">Create Account</CardTitle>
                   <CardDescription className="text-gray-600 text-sm lg:text-base">
                     Fill in your information to get started
                   </CardDescription>
@@ -539,55 +941,192 @@ const SignUp = () => {
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-gray-700 font-medium text-sm">Phone Number</Label>
-                    <div className="flex space-x-2">
-                      <Select value={selectedCode} onValueChange={setSelectedCode}>
-                        <SelectTrigger className="w-[100px] sm:w-[120px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {countryCodes.map((country) => (
-                            <SelectItem key={country.code} value={country.code}>
-                              <div className="flex items-center space-x-2">
-                                <span>{country.flag}</span>
-                                <span className="hidden sm:inline">{country.code}</span>
-                                <span className="sm:hidden">{country.code}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="1234567890"
-                        value={formData.phone}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, '');
-                          if (value.length <= 10) {
-                            handleInputChange('phone', value);
-                          }
-                        }}
-                        maxLength={10}
-                        className={`flex-1 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 text-sm ${
-                          formData.phone.length === 10 ? 'border-green-500' : fieldErrors.phone ? 'border-red-500' : ''
-                        }`}
-                      />
-                    </div>
+                                     <div className="space-y-3">
+                     <div>
+                       <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</Label>
+                     </div>
+                     <div className="flex space-x-2">
+                        {/* Country Code - Dropdown */}
+                        <Select value={selectedCode} onValueChange={setSelectedCode}>
+                          <SelectTrigger className="w-[70px] h-12 border-2 border-gray-200 focus:border-blue-500">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countryCodes.map((country) => (
+                              <SelectItem key={country.code} value={country.code}>
+                                <div className="flex items-center space-x-2">
+                                  <span>{country.code}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                         id="phone"
+                         type="tel"
+                         placeholder="Enter your mobile number"
+                         value={formData.phone}
+                         onChange={(e) => {
+                           const value = e.target.value.replace(/\D/g, '');
+                           if (value.length <= 10) {
+                             handleInputChange('phone', value);
+                           }
+                         }}
+                         maxLength={10}
+                         className={`flex-1 h-12 text-base transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-2 border-gray-200 focus:border-blue-500 ${
+                           formData.phone.length === 10 ? 'border-green-500 bg-green-50' : fieldErrors.phone ? 'border-red-500' : ''
+                         }`}
+                       />
+                       {/* Send OTP Button */}
+                       <Button
+                         type="button"
+                         onClick={handleSendPhoneOTP}
+                         disabled={!isSendOtpEnabled()}
+                         className={`h-12 px-4 transition-all duration-300 transform hover:scale-[1.02] ${
+                           !isSendOtpEnabled()
+                             ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                             : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
+                         } text-white font-semibold rounded-lg`}
+                       >
+                         {isPhoneVerifying ? (
+                           <div className="flex items-center space-x-1">
+                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                             <span className="text-xs">Sending...</span>
+                           </div>
+                         ) : otpCountdown > 0 ? (
+                           <div className="flex items-center space-x-1">
+                             <Clock className="w-4 h-4" />
+                             <span className="text-xs">{otpCountdown}s</span>
+                           </div>
+                         ) : phoneVerificationStep === 'otp' || phoneVerificationStep === 'verified' ? (
+                           <div className="flex items-center space-x-1">
+                             <span className="text-xs">Resend</span>
+                           </div>
+                         ) : (
+                           <div className="flex items-center space-x-1">
+                             <span className="text-xs">Send OTP</span>
+                           </div>
+                         )}
+                       </Button>
+                     </div>
+                    
+                    {/* Validation Messages */}
                     {fieldErrors.phone && (
                       <p className="text-xs text-red-600">{fieldErrors.phone}</p>
                     )}
                     {formData.phone.length > 0 && formData.phone.length < 10 && !fieldErrors.phone && (
-                      <p className="text-xs text-amber-600 mt-1">
-                        Please enter a valid 10-digit mobile number
-                      </p>
+                      <div className="flex items-center space-x-1 text-xs text-amber-600">
+                        <span>⚠</span>
+                        <span>Please enter a valid 10-digit mobile number</span>
+                      </div>
                     )}
                     {formData.phone.length === 10 && !fieldErrors.phone && (
-                      <p className="text-xs text-green-600 mt-1">
-                        ✓ Valid mobile number
-                      </p>
+                      <div className="flex items-center space-x-1 text-xs text-green-600">
+                        <Check className="w-3 h-3" />
+                        <span>Valid mobile number</span>
+                      </div>
                     )}
+                                                                                  
+                      {/* OTP Input Field - Only show when in OTP step */}
+                      {phoneVerificationStep === 'otp' && (
+                        <div className="space-y-4 mt-4 bg-gradient-to-r rounded-xl shadow-sm">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                            <p className="text-sm text-blue-800 font-medium">Enter verification code</p>
+                          </div>
+                          
+                          <div className="flex items-center space-x-4">
+                            {/* OTP Input Fields */}
+                            <div className="flex space-x-2">
+                              {[0, 1, 2, 3, 4, 5].map((index) => (
+                                <input
+                                  key={index}
+                                  type="text"
+                                  maxLength={1}
+                                  value={phoneOTP[index] || ''}
+                                  onChange={(e) => {
+                                    const value = e.target.value.replace(/\D/g, '');
+                                    if (value.length <= 1) {
+                                      const newOTP = phoneOTP.split('');
+                                      newOTP[index] = value;
+                                      setPhoneOTP(newOTP.join(''));
+                                      
+                                      // Auto-focus next input
+                                      if (value && index < 5) {
+                                        const nextInput = document.querySelector(`input[data-index="${index + 1}"]`) as HTMLInputElement;
+                                        if (nextInput) nextInput.focus();
+                                      }
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    // Handle backspace
+                                    if (e.key === 'Backspace') {
+                                      if (!phoneOTP[index] && index > 0) {
+                                        // If current field is empty, go to previous field
+                                        const prevInput = document.querySelector(`input[data-index="${index - 1}"]`) as HTMLInputElement;
+                                        if (prevInput) prevInput.focus();
+                                      } else if (phoneOTP[index]) {
+                                        // If current field has value, clear it
+                                        const newOTP = phoneOTP.split('');
+                                        newOTP[index] = '';
+                                        setPhoneOTP(newOTP.join(''));
+                                      }
+                                    }
+                                  }}
+                                  data-index={index}
+                                  className="w-10 h-10 text-center text-lg font-semibold border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200 rounded-lg bg-white shadow-sm transition-all duration-200 focus:scale-105"
+                                />
+                              ))}
+                            </div>
+                            
+                            {/* Verify Button - Positioned on the right */}
+                            <Button
+                              type="button"
+                              onClick={handleVerifyPhoneOTP}
+                              disabled={isPhoneVerifying || phoneOTP.length !== 6}
+                              className={`h-10 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-[1.02] group shadow-lg hover:shadow-xl ${
+                                isPhoneVerifying || phoneOTP.length !== 6
+                                  ? 'opacity-50 cursor-not-allowed hover:scale-100'
+                                  : ''
+                              } text-white font-semibold rounded-lg`}
+                            >
+                              {isPhoneVerifying ? (
+                                <div className="flex items-center justify-center space-x-2">
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                  <span className="text-sm">Verifying...</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-center space-x-2">
+                                  <Check className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                  <span className="text-sm">Verify</span>
+                                </div>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    
+                    {/* Verification Success */}
+                    {phoneVerificationStep === 'verified' && (
+                      <div className="flex items-center space-x-2 text-green-700 bg-green-50 p-3 rounded-lg border border-green-200">
+                        <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-sm font-medium">Phone number verified ✓</span>
+                      </div>
+                    )}
+                    
+                    {/* Error Messages */}
+                    {phoneVerificationError && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-xs text-red-700 flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                          <span>{phoneVerificationError}</span>
+                        </p>
+                      </div>
+                    )}
+                    
+
                   </div>
                   
                   <div className="space-y-2">
@@ -611,9 +1150,8 @@ const SignUp = () => {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                        
                       >
-                        {/* {showPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />} */}
+                        {showPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />}
                       </button>
                     </div>
                     {fieldErrors.password && (
@@ -665,7 +1203,7 @@ const SignUp = () => {
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                         style={{ zIndex: 10 }}
                       >
-                        {/* {showConfirmPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />} */}
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Eye className="w-4 h-4 lg:w-5 lg:h-5" />}
                       </button>
                     </div>
                     {fieldErrors.confirmPassword && (
@@ -689,6 +1227,16 @@ const SignUp = () => {
                   {error && (
                     <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
                       <p className="text-sm text-red-600">{error}</p>
+                      {error.includes("already exists") && (
+                        <div className="mt-2">
+                          <Link 
+                            to="/signin" 
+                            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                          >
+                            Click here to sign in →
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -734,14 +1282,27 @@ const SignUp = () => {
                     </div>
                   </div>
 
-                  <Button 
-                    onClick={handleContinue}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    disabled={!isFormValid() || isLoading}
-                  >
-                    {isLoading ? "Creating Account..." : "Continue"}
-                    {!isLoading && <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />}
-                  </Button>
+                                     <Button 
+                     onClick={handleContinue}
+                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                     disabled={!isFormValid() || isLoading}
+                   >
+                     {isLoading ? (
+                       <div className="flex items-center">
+                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                         Creating Account...
+                       </div>
+                     ) : phoneVerificationStep !== 'verified' ? (
+                       <div className="flex items-center">
+                         <span>Please verify your phone number first</span>
+                       </div>
+                     ) : (
+                       <>
+                         Continue
+                         <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                       </>
+                     )}
+                   </Button>
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t border-gray-200" />
@@ -753,7 +1314,19 @@ const SignUp = () => {
 
                   <div className="flex justify-center gap-3 lg:gap-4">
                     <Button 
-                    onClick={() => handleGoogleAuth(navigate, formData.userType)}
+                    onClick={async () => {
+                      try {
+                        setIsLoading(true);
+                        setError(null);
+                        await handleGoogleAuth(navigate, formData.userType);
+                      } catch (error: any) {
+                        console.error("Google auth error:", error);
+                        setError("Google sign-in failed. Please try again.");
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }}
+                    disabled={isLoading}
                     variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
                       <svg className="w-4 h-4 lg:w-5 lg:h-5" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -763,7 +1336,19 @@ const SignUp = () => {
                       </svg>
                     </Button>
                     <Button 
-                    onClick={() => handleGithubAuth(navigate, formData.userType)}
+                    onClick={async () => {
+                      try {
+                        setIsLoading(true);
+                        setError(null);
+                        await handleGithubAuth(navigate, formData.userType);
+                      } catch (error: any) {
+                        console.error("GitHub auth error:", error);
+                        setError("GitHub sign-in failed. Please try again.");
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }}
+                    disabled={isLoading}
                     variant="outline" className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
                       <Github className="w-4 h-4 lg:w-5 lg:h-5" />
                     </Button>
@@ -786,7 +1371,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Mail className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-3xl font-bold text-gray-900">Verify Your Email</CardTitle>
+                <CardTitle className="font-bold text-gray-900">Verify Your Email</CardTitle>
                 <CardDescription className="text-gray-600">
                   We've sent a verification code to {formData.email}
                 </CardDescription>
@@ -835,7 +1420,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-3xl font-bold text-gray-900">Setup Multi-Factor Authentication</CardTitle>
+                <CardTitle className="font-bold text-gray-900">Setup Multi-Factor Authentication</CardTitle>
                 <CardDescription className="text-gray-600">
                   Choose your preferred authentication method for enhanced security
                 </CardDescription>
@@ -885,7 +1470,7 @@ const SignUp = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-3xl font-bold text-gray-900">Welcome to ProjectBridge!</CardTitle>
+                <CardTitle className="font-bold text-gray-900">Welcome to ProjectBridge!</CardTitle>
                 <CardDescription className="text-gray-600">
                   Your account has been created successfully
                 </CardDescription>
@@ -902,6 +1487,9 @@ const SignUp = () => {
             </Card>
           )}
         </div>
+        
+        {/* reCAPTCHA container */}
+        <div id="recaptcha-container"></div>
       </div>
     </div>
   );

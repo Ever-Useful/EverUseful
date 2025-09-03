@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
 import { auth } from '@/lib/firebase';
+import { API_ENDPOINTS } from '../config/api';
 
 interface User {
   id: string;
@@ -19,6 +20,7 @@ const Collaborators = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -26,32 +28,22 @@ const Collaborators = () => {
 
   const fetchUsers = async () => {
     try {
-      // Fetch users from backend API (DynamoDB)
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/users'}/all`);
-      if (!response.ok) throw new Error('Failed to fetch users');
+      setLoading(true);
+      const response = await fetch(API_ENDPOINTS.USERS + "/all");
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
       const data = await response.json();
-      
-      // Filter users by type (student, professor) and transform data
-      const filteredUsers = data.users
-        .filter((user: any) => ['student', 'professor'].includes(user.profile?.userType))
-        .map((user: any) => ({
-          id: user.customUserId,
-          name: `${user.profile?.firstName || ''} ${user.profile?.lastName || ''}`.trim() || 'Anonymous',
-          title: user.profile?.title || 'Member',
-          avatar: user.profile?.avatar || '/default-avatar.png',
-          skills: user.profile?.skills || []
-        }));
-
-      setUsers(filteredUsers);
+      setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error('Failed to load users');
+      setError('Failed to load users');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleConnect = async (userId: string) => {
+  const handleFollow = async (userId: string) => {
     const currentUser = auth.currentUser;
     if (!currentUser) {
       toast.error('Please sign in to connect with others');
@@ -59,8 +51,7 @@ const Collaborators = () => {
     }
 
     try {
-      // Send connection request to backend
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/users'}/follow`, {
+      const response = await fetch(API_ENDPOINTS.USER_FOLLOW, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,12 +60,16 @@ const Collaborators = () => {
         body: JSON.stringify({ targetUserId: userId })
       });
 
-      if (!response.ok) throw new Error('Failed to send connection request');
-      
-      toast.success('Connection request sent!');
+      if (!response.ok) {
+        throw new Error('Failed to follow user');
+      }
+
+      // Refresh users list
+      fetchUsers();
+      toast.success('User followed successfully!');
     } catch (error) {
-      console.error('Error connecting with user:', error);
-      toast.error('Failed to send connection request');
+      console.error('Error following user:', error);
+      toast.error('Failed to follow user');
     }
   };
 
@@ -139,7 +134,7 @@ const Collaborators = () => {
                     </div>
                   </div>
                   <Button
-                    onClick={() => handleConnect(user.id)}
+                    onClick={() => handleFollow(user.id)}
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   >
                     Connect

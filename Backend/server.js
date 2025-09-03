@@ -7,16 +7,31 @@ const userRoutes = require('./routes/users');
 const userService = require('./services/userService');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
+const s3Routes = require('./routes/s3');
+const s3Service = require('./services/s3Service');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
 
+
+//server.listen(port, '0.0.0.0', () => console.log(`App running on :${port}`));
 app.use(cors({
-  origin: '*', // In production, replace with your frontend domain
+  origin: [
+    'https://amoghconnect.com',
+    'https://www.amoghconnect.com',
+    'http://localhost:8080',
+    'http://localhost:3000',
+    // 'https://www.amoghconnect.com', // Uncomment if you use www subdomain
+    // Add more allowed origins as needed
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, 
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ limit: '25mb', extended: true }));
 
 // Test endpoint to check if server is running
 app.get('/api/test', (req, res) => {
@@ -29,11 +44,14 @@ app.use('/api/marketplace', marketplaceRoutes);
 // User routes
 app.use('/api/users', userRoutes);
 
+// S3 routes
+app.use('/api/s3', s3Routes);
+
 app.use('/api', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.get('/token', authorize, async (req, res) => {
-  const { uid, name, email, phone_number, firebase } = req.user;
+  const { uid, name, email, phone_number } = req.user;
 
   try {
     if (!uid) throw new Error("Missing UID from Firebase token");
@@ -46,8 +64,8 @@ app.get('/token', authorize, async (req, res) => {
       const customUserId = await userService.generateCustomUserId();
 
       // Parse firstName and lastName from name if available
-      let firstName = null;
-      let lastName = null;
+      let firstName = '';
+      let lastName = '';
       if (name) {
         const nameParts = name.split(' ');
         firstName = nameParts[0] || '';
@@ -55,18 +73,30 @@ app.get('/token', authorize, async (req, res) => {
       }
 
       // Create user in DynamoDB
-      await userService.createUser(uid, {
-        firstName: firstName ?? '',
-        lastName: lastName ?? '',
+      user = await userService.createUser(uid, {
+        firstName: firstName,
+        lastName: lastName,
         email: email ?? 'no-email@example.com',
         userType: 'student',
         mobile: phone_number ?? '',
         phoneNumber: phone_number ?? '',
       });
 
-      console.log("New user created with custom ID:", customUserId);
-    } else {
-      console.log("Existing user logged in:", email ?? uid);
+      console.log('New OAuth user created with data:', {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phoneNumber: phone_number
+      });
+    }
+
+    // Ensure S3 folder structure exists (idempotent)
+    if (user && user.customUserId) {
+      try {
+        await s3Service.createUserFolder(user.customUserId);
+      } catch (e) {
+        console.error('Failed to ensure S3 folder for user:', e.message);
+      }
     }
 
     return res.json({ redirectUrl: '/profile' });
@@ -93,14 +123,20 @@ app.post('/token', authorize, async (req, res) => {
       // Use provided firstName/lastName or parse from name
       let resolvedFirstName = firstName;
       let resolvedLastName = lastName;
-      if ((!firstName || !lastName) && name) {
+      
+      // If firstName/lastName are provided from signup form, use them
+      if (firstName && lastName) {
+        resolvedFirstName = firstName;
+        resolvedLastName = lastName;
+      } else if (name) {
+        // Parse from OAuth provider name
         const nameParts = name.split(' ');
         resolvedFirstName = resolvedFirstName || nameParts[0] || '';
         resolvedLastName = resolvedLastName || nameParts.slice(1).join(' ') || '';
       }
 
-      // Create user in DynamoDB
-      await userService.createUser(uid, {
+      // Create user in DynamoDB with all provided data
+      user = await userService.createUser(uid, {
         firstName: resolvedFirstName ?? '',
         lastName: resolvedLastName ?? '',
         email: email ?? 'no-email@example.com',
@@ -109,20 +145,33 @@ app.post('/token', authorize, async (req, res) => {
         phoneNumber: phoneNumber ?? phone_number ?? '',
       });
 
-      console.log("New user created with custom ID:", customUserId, "userType:", userType, "firstName:", resolvedFirstName, "lastName:", resolvedLastName);
+      console.log('New user created with data:', {
+        firstName: resolvedFirstName,
+        lastName: resolvedLastName,
+        email: email,
+        userType: userType,
+        phoneNumber: phoneNumber ?? phone_number
+      });
+
     } else {
       // Update existing user's profile if provided
       const updateFields = {};
-      if (userType) updateFields.userType = userType;
       if (firstName) updateFields.firstName = firstName;
       if (lastName) updateFields.lastName = lastName;
       if (phoneNumber) updateFields.phoneNumber = phoneNumber;
       
       if (Object.keys(updateFields).length > 0) {
         await userService.updateUserProfile(user.customUserId, updateFields);
-        console.log("Updated user fields for existing user:", email ?? uid, updateFields);
-      } else {
-        console.log("Existing user logged in:", email ?? uid);
+        console.log('Existing user updated with fields:', updateFields);
+      }
+    }
+
+    // Ensure S3 folder structure exists (idempotent)
+    if (user && user.customUserId) {
+      try {
+        await s3Service.createUserFolder(user.customUserId);
+      } catch (e) {
+        console.error('Failed to ensure S3 folder for user:', e.message);
       }
     }
 
@@ -133,13 +182,41 @@ app.post('/token', authorize, async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 3000;
-const host = process.env.HOST || 'localhost';
+// Socket.IO setup
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "http://localhost:8080",   // frontend dev server
+      "http://localhost:3000",   // if you test frontend also on 3000
+      "https://amoghconnect.com",
+      "https://www.amoghconnect.com"
+    ],
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 
-app.listen(port, host, (error) => {
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  console.log("User connected", socket.id);
+
+  socket.on("register", (userId) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined room`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected", socket.id);
+  });
+});
+
+const port = process.env.PORT || 3000;
+server.listen(port, "0.0.0.0", (error) => {
   if (error) {
     console.log(`App Failed at port :${port}`);
   } else {
-    console.log(`App running at http://${host}:${port}`);
+    console.log(`App running at http://0.0.0.0:${port}`);
   }
 });

@@ -17,7 +17,7 @@ const CookiePolicy = () => {
                 <Cookie className="w-8 h-8 text-orange-600" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="heading-section text-gray-900 mb-4">
               Cookie Policy
             </h1>
             <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
@@ -26,7 +26,7 @@ const CookiePolicy = () => {
             </p>
             <div className="flex items-center justify-center text-sm text-gray-500">
               <Calendar className="w-4 h-4 mr-2" />
-              Last Updated: February 4, 2025
+              Last Updated: June, 2025
             </div>
           </div>
         </div>
@@ -257,23 +257,23 @@ const CookiePolicy = () => {
                   <Mail className="w-5 h-5 text-blue-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-gray-900">Email</h4>
-                    <p className="text-gray-700">cookies@amoghedu.com</p>
+                    <p className="text-gray-700">amogheveruseful@gmail.com</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start">
+                {/* <div className="flex items-start">
                   <Phone className="w-5 h-5 text-green-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-gray-900">Phone</h4>
                     <p className="text-gray-700">+1 (555) 123-4567</p>
                   </div>
-                </div>
+                </div> */}
                 
                 <div className="flex items-start">
                   <MapPin className="w-5 h-5 text-red-600 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-gray-900">Address</h4>
-                    <p className="text-gray-700">123 Business Street, City, State 12345</p>
+                    <p className="text-gray-700">Connaught Place Delhi-110001, India</p>
                   </div>
                 </div>
               </div>

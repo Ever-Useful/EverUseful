@@ -10,42 +10,42 @@ const TermsConditions = () => {
       
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-green-50 to-emerald-100 border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <div className="bg-green-100 p-4 rounded-full">
-                <FileText className="w-8 h-8 text-green-600" />
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="bg-green-100 p-3 sm:p-4 rounded-full">
+                <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
               Terms & Conditions
             </h1>
-            <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-4 sm:mb-6 max-w-3xl mx-auto px-2">
               Please read these terms and conditions carefully before using our services. 
               By accessing our platform, you agree to be bound by these terms.
             </p>
-            <div className="flex items-center justify-center text-sm text-gray-500">
-              <Calendar className="w-4 h-4 mr-2" />
-              Last Updated: February 4, 2025
+            <div className="flex items-center justify-center text-xs sm:text-sm text-gray-500">
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+              Last Updated: June, 2025
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="prose prose-lg max-w-none">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none">
           
           {/* Acceptance of Terms */}
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">1. Acceptance of Terms</h2>
-            <div className="bg-green-50 border-l-4 border-green-400 p-6 rounded-r-lg mb-8">
-              <p className="text-gray-700 leading-relaxed">
+          <section className="mb-8 sm:mb-12">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">1. Acceptance of Terms</h2>
+            <div className="bg-green-50 border-l-4 border-green-400 p-4 sm:p-6 rounded-r-lg mb-6 sm:mb-8">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed">
                 By accessing and using this website, you accept and agree to be bound by the terms and provision 
                 of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
             </div>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed mb-4 sm:mb-6">
               These Terms and Conditions ("Terms") govern your use of the AMOGH platform and services. 
               By using our services, you acknowledge that you have read, understood, and agree to be bound 
               by these Terms. If you do not agree with any part of these Terms, you must not use our services.
@@ -54,7 +54,7 @@ const TermsConditions = () => {
 
           {/* Description of Service */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">2. Description of Service</h2>
+            <h2 className="heading-header text-gray-900 mb-6">2. Description of Service</h2>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
               <p className="text-gray-700 leading-relaxed mb-4">
                 AMOGH provides a comprehensive educational technology platform that includes:
@@ -77,7 +77,7 @@ const TermsConditions = () => {
 
           {/* User Accounts */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">3. User Accounts</h2>
+            <h2 className="heading-header text-gray-900 mb-6">3. User Accounts</h2>
             <p className="text-gray-700 mb-6">
               When you create an account with us, you must provide information that is accurate, complete, 
               and current at all times. You are responsible for:
@@ -108,7 +108,7 @@ const TermsConditions = () => {
 
           {/* Prohibited Uses */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">4. Prohibited Uses</h2>
+            <h2 className="heading-header text-gray-900 mb-6">4. Prohibited Uses</h2>
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
               <p className="text-gray-700 mb-4 font-semibold">You may not use our service for:</p>
               <ul className="text-gray-700 space-y-2">
@@ -126,7 +126,7 @@ const TermsConditions = () => {
 
           {/* Intellectual Property Rights */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">5. Intellectual Property Rights</h2>
+            <h2 className="heading-header text-gray-900 mb-6">5. Intellectual Property Rights</h2>
             <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-6">
               <p className="text-gray-700 leading-relaxed mb-4">
                 The service and its original content, features, and functionality are and will remain the exclusive 
@@ -158,7 +158,7 @@ const TermsConditions = () => {
 
           {/* User Content */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">6. User Content</h2>
+            <h2 className="heading-header text-gray-900 mb-6">6. User Content</h2>
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
               <p className="text-gray-700 leading-relaxed mb-4">
                 Our service may allow you to post, link, store, share and otherwise make available certain 
@@ -190,7 +190,7 @@ const TermsConditions = () => {
 
           {/* Privacy Policy */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">7. Privacy Policy</h2>
+            <h2 className="heading-header text-gray-900 mb-6">7. Privacy Policy</h2>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
               <p className="text-gray-700 leading-relaxed mb-4">
                 Your privacy is important to us. Please review our Privacy Policy, which also governs your 
@@ -208,7 +208,7 @@ const TermsConditions = () => {
 
           {/* Termination */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">8. Termination</h2>
+            <h2 className="heading-header text-gray-900 mb-6">8. Termination</h2>
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
               <p className="text-gray-700 leading-relaxed mb-4">
                 We may terminate or suspend your account and bar access to the service immediately, without 
@@ -240,7 +240,7 @@ const TermsConditions = () => {
 
           {/* Limitation of Liability */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">9. Limitation of Liability</h2>
+            <h2 className="heading-header text-gray-900 mb-6">9. Limitation of Liability</h2>
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
               <p className="text-gray-700 leading-relaxed">
                 In no event shall AMOGH Technologies, nor its directors, employees, partners, agents, suppliers, 
@@ -253,7 +253,7 @@ const TermsConditions = () => {
 
           {/* Governing Law */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">10. Governing Law</h2>
+            <h2 className="heading-header text-gray-900 mb-6">10. Governing Law</h2>
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
               <p className="text-gray-700 leading-relaxed">
                 These Terms shall be interpreted and governed by the laws of India, without regard to its 
@@ -265,7 +265,7 @@ const TermsConditions = () => {
 
           {/* Changes to Terms */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">11. Changes to Terms</h2>
+            <h2 className="heading-header text-gray-900 mb-6">11. Changes to Terms</h2>
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
               <p className="text-gray-700 leading-relaxed">
                 We reserve the right, at our sole discretion, to modify or replace these Terms at any time. 
@@ -277,7 +277,7 @@ const TermsConditions = () => {
 
           {/* Contact Information */}
           <section className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">12. Contact Us</h2>
+            <h2 className="heading-header text-gray-900 mb-6">12. Contact Us</h2>
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
               <p className="text-gray-700 mb-6">
                 If you have any questions about these Terms and Conditions, please contact us:
