@@ -1,6 +1,17 @@
 import { auth } from '../lib/firebase';
 import { API_ENDPOINTS, makeAuthenticatedRequest } from '../config/api';
 
+export interface UserSearchResult {
+  customUserId: string;
+  profile: {
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+    userType: string;
+    username: string;
+  };
+}
+
 interface UserProfile {
   avatar: string;
   backgroundImage?: string;
@@ -293,14 +304,14 @@ class UserService {
     return await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS);
   }
 
-  // Send connection request
-  async sendConnectionRequest(targetUserId: string): Promise<Connection> {
-    const response = await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS, {
-      method: 'POST',
-      body: JSON.stringify({ targetUserId }),
-    });
-    return response;
-  }
+  // // Send connection request
+  // async sendConnectionRequest(targetUserId: string): Promise<Connection> {
+  //   const response = await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS, {
+  //     method: 'POST',
+  //     body: JSON.stringify({ targetUserId }),
+  //   });
+  //   return response;
+  // }
 
   // Update auth info
   async updateAuthInfo(authData: any): Promise<void> {
@@ -449,6 +460,67 @@ class UserService {
     });
     return response;
   }
+
+
+  //  New: Search users
+  async searchUsers(query: string): Promise<UserSearchResult[]> {
+    try {
+      const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/search?q=${encodeURIComponent(query)}`);
+      if (response.success) {
+        return response.data;
+      }
+      return [];
+    } catch (err) {
+      console.error("Search users error:", err);
+      return [];
+    }
+  }
+
+  // ----------------------------
+  // Send connection request
+  // ----------------------------
+  async sendConnectionRequest(targetUserId: string) {
+    return await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS, {
+      method: "POST",
+      body: JSON.stringify({ targetUserId }),
+    });
+  }
+
+  // ----------------------------
+  // Get logged-in user’s connections
+  // ----------------------------
+  async getConnections() {
+    return await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS);
+  }
+
+  // ----------------------------
+  // Accept connection request
+  // ----------------------------
+  async acceptConnectionRequest(senderId: string) {
+    return await this.makeRequest(`${API_ENDPOINTS.USER_CONNECTIONS}/${senderId}/accept`, {
+      method: "PUT",
+    });
+  }
+
+  // ----------------------------
+  // Reject connection request
+  // ----------------------------
+  async rejectConnectionRequest(senderId: string) {
+    return await this.makeRequest(`${API_ENDPOINTS.USER_CONNECTIONS}/${senderId}/reject`, {
+      method: "PUT",
+    });
+  }
+
+  // ----------------------------
+  // Withdraw (cancel) connection request
+  // ----------------------------
+  async withdrawConnectionRequest(receiverId: string) {
+    return await this.makeRequest(`${API_ENDPOINTS.USER_CONNECTIONS}/${receiverId}`, {
+      method: "DELETE",
+    });
+  }
+
+  
 }
 
 export default new UserService();
