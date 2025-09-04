@@ -193,16 +193,31 @@ useEffect(() => {
   }, [currentUser?.customUserId]);
 
   useEffect(() => {
-  socket.on("connectionRequestReceived", (data) => {
+  socket.on("connection_request", (data) => {
     console.log("New connection request received:", data);
-    alert(`${data.message}`);
+
+    if (data.from === id) {
+      setConnectionStatus("pending"); // show immediately
+    }
+  });
+
+  socket.on("connection_update", (data) => {
+    console.log("Connection update:", data);
+
+    if (data.connected?.includes(id)) {
+      setConnectionStatus("connected");
+    } else {
+      setConnectionStatus("none");
+    }
   });
 
   return () => {
-    socket.off("connectionRequestReceived");
+    socket.off("connection_request");
+    socket.off("connection_update");
   };
-}, []);
+}, [id]);
 
+  
 
 
 

@@ -155,6 +155,11 @@ class UserService {
     return await this.dbService.followUser(followerId, followingId);
   }
 
+  // Get user connections (following list with profile data)
+  async getUserConnections(customUserId) {
+    return await this.dbService.getUserConnections(customUserId);
+  }
+
   // Get user statistics
   async getUserStats(customUserId) {
     return await this.dbService.getUserStats(customUserId);
@@ -200,15 +205,43 @@ async withdrawConnectionRequest(senderId, receiverId) {
   return await this.dbService.withdrawConnectionRequest(senderId, receiverId);
 }
 
-// Get connections for a user (returns sent, received, connected)
-async getConnections(customUserId) {
-  const user = await this.dbService.findUserByCustomId(customUserId);
-  return {
-    sent: user.connections?.sent || [],
-    received: user.connections?.received || [],
-    connected: user.social?.connected || [],
-  };
+async getConnections(userId) {
+  const user = await this.findUserByCustomId(userId);
+  if (!user) return { sent: [], received: [], connected: [] };
+
+  // Existing normalized structure
+  const connections = user.connections || { sent: [], received: [], connected: [] };
+
+  // Legacy social connections (array of objects)
+  const social = user.profile?.social?.connections || [];
+
+  // Merge legacy into normalized
+  social.forEach(c => {
+    if (c.status === "incoming" && !connections.received.includes(c.userId)) {
+      connections.received.push(c.userId);
+    }
+    if (c.status === "sent" && !connections.sent.includes(c.targetUserId)) {
+      connections.sent.push(c.targetUserId);
+    }
+    if (c.status === "connected" && !connections.connected.includes(c.targetUserId)) {
+      connections.connected.push(c.targetUserId);
+    }
+  });
+
+  console.log(" Final merged connections:", connections);
+  return connections;
 }
+
+// Get logged-in user's ID and connections
+async getUserConnectionsWithId(customUserId) {
+  return await this.dbService.getUserConnectionsWithId(customUserId);
+}
+
+  // ✅ New: get only received connections with profile data
+  async getReceivedConnectionsWithProfiles(customUserId) {
+    return await this.dbService.getReceivedConnectionsWithProfiles(customUserId);
+  }
+
 
 
 }
