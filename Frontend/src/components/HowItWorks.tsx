@@ -181,7 +181,7 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
 
         {/* Right: Steps/content with solid background */}
         <div className="md:w-1/2 w-full flex flex-col justify-center bg-slate-100 py-10 sm:py-16 px-4 sm:px-8">
-          <h3 className="text-[17px] sm:text-2xl md:text-4xl font-semibold text-gray-800 mb-3 sm:mb-4 mt-0 mobile-text-2xl md:mobile-text-4xl">
+          <h3 className="text-lg sm:text-2xl md:text-4xl font-semibold text-gray-800 mb-3 sm:mb-4 mt-0 mobile-text-2xl md:mobile-text-4xl">
             How you start here...
           </h3>
           <ol className="space-y-5 sm:space-y-7">

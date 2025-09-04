@@ -100,6 +100,46 @@ class UserService {
     return await this.dbService.updateSocialLinks(customUserId, socialLinks);
   }
 
+  // Phone verification methods
+  async verifyPhoneNumber(customUserId, phoneNumber, isVerified = true) {
+    return await this.dbService.updateUserProfile(customUserId, {
+      phoneNumber: phoneNumber,
+      phoneVerified: isVerified,
+      phoneVerificationDate: isVerified ? new Date().toISOString() : null
+    });
+  }
+
+  async markPhoneAsVerified(customUserId) {
+    return await this.dbService.updateUserProfile(customUserId, {
+      phoneVerified: true,
+      phoneVerificationDate: new Date().toISOString()
+    });
+  }
+
+  async createUserWithPhoneVerification(firebaseUid, userData) {
+    // Add phone verification fields
+    const enhancedUserData = {
+      ...userData,
+      phoneVerified: false,
+      phoneVerificationDate: null,
+      emailVerified: false,
+      emailVerificationDate: null
+    };
+    
+    return await this.createUser(firebaseUid, enhancedUserData);
+  }
+
+  async findUserByPhone(phoneNumber) {
+    return await this.dbService.findUserByPhone(phoneNumber);
+  }
+
+  async updateEmailVerificationStatus(customUserId, isVerified = true) {
+    return await this.dbService.updateUserProfile(customUserId, {
+      emailVerified: isVerified,
+      emailVerificationDate: isVerified ? new Date().toISOString() : null
+    });
+  }
+
   // Update user auth info (Firestore fields)
   async updateUserAuthInfo(customUserId, authData) {
     return await this.dbService.updateUserProfile(customUserId, authData);
@@ -174,6 +214,43 @@ class UserService {
   async trackProjectView(customUserId, projectId) {
     return await this.dbService.trackProjectView(customUserId, projectId);
   }
+
+  // userService.js
+  async searchUsers(query) {
+    return await this.dbService.searchUsersByName(query);
+}
+
+// Send connection request
+async sendConnectionRequest(senderId, receiverId) {
+  return await this.dbService.createConnectionRequest(senderId, receiverId);
+}
+
+// Accept connection request
+async acceptConnectionRequest(receiverId, senderId) {
+  return await this.dbService.acceptConnectionRequest(receiverId, senderId);
+}
+
+// Reject connection request
+async rejectConnectionRequest(receiverId, senderId) {
+  return await this.dbService.rejectConnectionRequest(receiverId, senderId);
+}
+
+// Withdraw (cancel) connection request
+async withdrawConnectionRequest(senderId, receiverId) {
+  return await this.dbService.withdrawConnectionRequest(senderId, receiverId);
+}
+
+// Get connections for a user (returns sent, received, connected)
+async getConnections(customUserId) {
+  const user = await this.dbService.findUserByCustomId(customUserId);
+  return {
+    sent: user.connections?.sent || [],
+    received: user.connections?.received || [],
+    connected: user.social?.connected || [],
+  };
+}
+
+
 }
 
 module.exports = new UserService(); 

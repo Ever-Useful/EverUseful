@@ -75,7 +75,7 @@ const clientTestimonials = [
     name: "Dr. Sarah Johnson",
     role: "Research Director",
     company: "TechCorp Labs",
-    content: "The PhD experts on this platform helped us develop breakthrough algorithms that reduced our processing time by 60%. Exceptional quality and professionalism.",
+    content: "The PhD experts on this platform helped us develop breakthrough algorithms that reduced our processing time by 60%. Exceptional quality and professionalism. Their deep understanding of machine learning algorithms and optimization techniques transformed our entire research pipeline. The collaboration was seamless from start to finish.",
     rating: 5,
     avatar: "https://randomuser.me/api/portraits/women/32.jpg",
   },
@@ -83,7 +83,7 @@ const clientTestimonials = [
     name: "Michael Chen",
     role: "Startup Founder",
     company: "InnovateAI",
-    content: "Found the perfect AI researcher for our startup. The collaboration was seamless, and the results exceeded our expectations. Highly recommended!",
+    content: "Found the perfect AI researcher for our startup. The collaboration was seamless, and the results exceeded our expectations. Highly recommended! The PhD expert not only delivered the technical solution but also provided strategic guidance that helped us pivot our business model successfully.",
     rating: 5,
     avatar: "https://randomuser.me/api/portraits/men/45.jpg",
   },
@@ -91,9 +91,57 @@ const clientTestimonials = [
     name: "Dr. Elena Rodriguez",
     role: "University Professor",
     company: "MIT",
-    content: "As an academic, I needed specialized expertise for my research. The platform connected me with brilliant minds from around the world.",
+    content: "As an academic, I needed specialized expertise for my research. The platform connected me with brilliant minds from around the world. The PhD expert I collaborated with brought fresh perspectives and cutting-edge methodologies that significantly enhanced my research outcomes and publication quality.",
     rating: 5,
     avatar: "https://randomuser.me/api/portraits/women/67.jpg",
+  },
+  {
+    name: "Dr. James Wilson",
+    role: "CTO",
+    company: "QuantumTech Solutions",
+    content: "Working with PhD experts transformed our quantum computing research. The depth of knowledge and innovative approaches exceeded all expectations. They helped us develop novel quantum algorithms that reduced computation time by 80% and opened new research directions we hadn't considered before.",
+    rating: 5,
+    avatar: "https://randomuser.me/api/portraits/men/28.jpg",
+  },
+  {
+    name: "Dr. Maria Garcia",
+    role: "Research Lead",
+    company: "BioInnovate",
+    content: "The platform's PhD experts provided invaluable insights for our biotechnology research. Their expertise accelerated our project timeline significantly. The mentor's deep understanding of molecular biology and computational modeling helped us identify key research gaps and develop more effective experimental protocols.",
+    rating: 5,
+    avatar: "https://randomuser.me/api/portraits/women/55.jpg",
+  },
+  {
+    name: "Dr. Alexander Kim",
+    role: "Senior Research Scientist",
+    company: "NeuralTech Innovations",
+    content: "The collaboration with PhD experts through this platform has been transformative for our research team. We've achieved breakthroughs in neural network optimization that would have taken years without their specialized knowledge. The quality of mentorship and technical guidance exceeded all our expectations. They helped us develop novel architectures that improved our model accuracy by 35% while reducing training time by 60%.",
+    rating: 5,
+    avatar: "https://randomuser.me/api/portraits/men/75.jpg",
+  },
+  {
+    name: "Dr. Priya Patel",
+    role: "Head of R&D",
+    company: "GreenEnergy Solutions",
+    content: "Our renewable energy research project benefited immensely from the PhD expertise available here. The mentors provided not just technical solutions but also strategic insights that helped us secure significant funding. The platform's ability to connect us with world-class researchers was invaluable. The expert's knowledge of sustainable energy systems and policy frameworks helped us develop a comprehensive research strategy that attracted major investors.",
+    rating: 5,
+    avatar: "https://randomuser.me/api/portraits/women/88.jpg",
+  },
+  {
+    name: "Dr. Robert Thompson",
+    role: "Chief Innovation Officer",
+    company: "FutureTech Industries",
+    content: "The PhD experts on this platform are truly exceptional. We've collaborated with multiple researchers across different domains, and each one has brought unique insights and methodologies that have revolutionized our approach to innovation. The platform's ability to match us with the right expertise has been game-changing for our R&D efforts.",
+    rating: 5,
+    avatar: "https://randomuser.me/api/portraits/men/92.jpg",
+  },
+  {
+    name: "Dr. Lisa Chang",
+    role: "Research Fellow",
+    company: "Stanford University",
+    content: "As a postdoctoral researcher, finding the right mentor was crucial for my career development. The platform connected me with a brilliant PhD expert who not only guided my research but also helped me navigate the academic landscape. Their mentorship has been invaluable in shaping my research trajectory and professional growth.",
+    rating: 5,
+    avatar: "https://randomuser.me/api/portraits/women/76.jpg",
   },
 ];
 
@@ -473,6 +521,10 @@ const Work: React.FC = () => {
   // Auto-sliding functionality
   const [isPaused, setIsPaused] = useState(false);
   
+  // Client testimonials state
+  const [showAllClients, setShowAllClients] = useState(false);
+  const [expandedClient, setExpandedClient] = useState<number | null>(null);
+  
   useEffect(() => {
     if (isPaused) return;
     
@@ -599,9 +651,9 @@ const Work: React.FC = () => {
     <main className="w-full min-h-screen bg-white">
     <Header />
     {/* HERO SECTION */}
-    <section className="relative py-16 sm:py-20 px-4 lg:px-8 min-h-[70vh] sm:min-h-[80vh] flex items-center overflow-hidden bg-white">
+    <section className="relative py-12 sm:py-16 md:py-20 px-4 lg:px-8 min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] flex items-center overflow-hidden bg-white">
       <div className="max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
           {/* Left Content Area */}
         <motion.div
           initial="hidden"
@@ -611,70 +663,70 @@ const Work: React.FC = () => {
         >
           {/* Badge */}
           <motion.div 
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-50 rounded-full border border-blue-200 shadow-sm"
+              className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-50 rounded-full border border-blue-200 shadow-sm"
             variants={fadeUp}
             custom={1}
           >
-            <Sparkles className="w-5 h-5 text-blue-600" />
-            <span className="text-slate-700 text-sm font-semibold">World-Class PhD Experts</span>
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            <span className="text-slate-700 text-xs sm:text-sm font-semibold">Hire Trusted Freelancers</span>
           </motion.div>
 
             {/* Main Headline */}
           <motion.h1
-              className="text-4xl font-bold text-slate-900 leading-tight"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 leading-tight"
             variants={fadeUp}
             custom={2}
           >
-              Connect with World-Class <span className="text-[#fa5954]">PhD Experts</span> for R&D and Mentorship
+              Find Top <span className="text-[#fa5954]">Freelancers</span> for Your Next Project
           </motion.h1>
 
             {/* Sub-text */}
           <motion.p
-              className="text-base text-slate-600 leading-relaxed"
+              className="text-sm sm:text-base text-slate-600 leading-relaxed"
             variants={fadeUp}
             custom={3}
           >
-            Unlock global innovation by collaborating with top PhD scholars and graduates. Access cutting-edge research, personalized mentorship, and specialized consulting—anytime, anywhere.
+            Work with skilled professionals across design, development, data, AI, writing, marketing and more. Post your requirements or browse profiles to hire fast—on your terms, on any device.
           </motion.p>
 
             {/* Search removed per request */}
 
             {/* Feature Tags */}
           <motion.div 
-              className="flex flex-wrap gap-3"
+              className="flex flex-wrap gap-2 sm:gap-3"
             variants={fadeUp}
               custom={5}
-            >
-              {heroFeatures.map((feature, index) => (
-                <span
-                  key={feature.text}
-                  className={`px-4 py-2 rounded-full font-semibold text-sm ${feature.color} shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105`}
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  {feature.text}
-                </span>
-              ))}
-            </motion.div>
+          >
+            {heroFeatures.map((feature, index) => (
+              <span
+                key={feature.text}
+                className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full font-semibold text-xs sm:text-sm ${feature.color} shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105`}
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                {feature.text}
+              </span>
+            ))}
+          </motion.div>
 
             {/* CTA Buttons */}
             <motion.div 
-              className="flex flex-col sm:flex-row gap-4"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4"
               variants={fadeUp}
               custom={6}
           >
             <Link
               to="/findexpert"
-              className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+              className="group inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               Find a PhD Expert
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               to="/become-mentor"
-              className="group inline-flex items-center gap-2 px-8 py-4 bg-white text-slate-700 font-semibold rounded-full border border-slate-200 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+              className="group inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white text-slate-700 font-semibold rounded-full border border-slate-200 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               Become a Mentor
-              <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
             </Link>
             </motion.div>
           </motion.div>
@@ -684,10 +736,10 @@ const Work: React.FC = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative flex justify-center lg:justify-end"
+            className="relative flex justify-center lg:justify-end mt-8 lg:mt-0"
           >
             {/* Large Circular Graphic */}
-            <div className="relative w-80 h-80 lg:w-96 lg:h-96">
+            <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96">
               {/* Main Circle Background */}
               <div className="absolute inset-0 bg-[#fa5954] rounded-full shadow-2xl"></div>
               
@@ -719,14 +771,14 @@ const Work: React.FC = () => {
                 initial={{ opacity: 0, y: -20, x: -20 }}
                 animate={{ opacity: 1, y: 0, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="absolute -top-6 -left-6 bg-white rounded-lg shadow-xl p-3 border border-slate-100"
+                className="absolute -top-4 sm:-top-6 -left-4 sm:-left-6 bg-white rounded-lg shadow-xl p-2 sm:p-3 border border-slate-100"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-slate-800">Top Rated</span>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="text-xs sm:text-sm font-semibold text-slate-800">Top Rated</span>
                   <div className="flex gap-1">
-                    <div className="w-6 h-6 bg-yellow-400 rounded-full border-2 border-white shadow-sm"></div>
-                    <div className="w-6 h-6 bg-blue-600 rounded-full border-2 border-white shadow-sm"></div>
-                    <div className="w-6 h-6 bg-purple-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center">
+                    <div className="w-4 h-4 sm:w-6 sm:h-6 bg-yellow-400 rounded-full border border-white sm:border-2 shadow-sm"></div>
+                    <div className="w-4 h-4 sm:w-6 sm:h-6 bg-blue-600 rounded-full border border-white sm:border-2 shadow-sm"></div>
+                    <div className="w-4 h-4 sm:w-6 sm:h-6 bg-purple-500 rounded-full border border-white sm:border-2 shadow-sm flex items-center justify-center">
                       <span className="text-white text-xs font-bold">T</span>
                     </div>
                   </div>
@@ -738,16 +790,16 @@ const Work: React.FC = () => {
                 initial={{ opacity: 0, y: 20, x: -20 }}
                 animate={{ opacity: 1, y: 0, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
-                className="absolute top-20 -left-8 bg-white rounded-lg shadow-xl p-4 border border-slate-100 min-w-[200px]"
+                className="absolute top-16 sm:top-20 -left-6 sm:-left-8 bg-white rounded-lg shadow-xl p-3 sm:p-4 border border-slate-100 min-w-[160px] sm:min-w-[200px] max-w-[180px] sm:max-w-[220px]"
               >
-                <div className="space-y-2">
-                  <h4 className="font-bold text-slate-800 text-sm">Jane Doe</h4>
-                  <p className="text-xs text-slate-600">Network & Security Engineer</p>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <h4 className="font-bold text-slate-800 text-xs sm:text-sm">Jane Doe</h4>
+                  <p className="text-xs text-slate-600 leading-tight">Network & Security Engineer</p>
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className="w-3 h-3 fill-yellow-400 text-yellow-400"
+                        className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-yellow-400 text-yellow-400"
                       />
                     ))}
                     <span className="text-xs text-slate-600 ml-1">5.0</span>
@@ -760,18 +812,18 @@ const Work: React.FC = () => {
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.7 }}
-                className="absolute -bottom-4 -right-4 w-16 h-16 bg-blue-100 rounded-full border-2 border-blue-200 flex items-center justify-center"
+                className="absolute -bottom-2 sm:-bottom-4 -right-2 sm:-right-4 w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full border border-blue-200 sm:border-2 flex items-center justify-center"
               >
-                <Globe className="w-8 h-8 text-blue-600" />
+                <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.9 }}
-                className="absolute top-1/2 -right-8 w-12 h-12 bg-green-100 rounded-full border-2 border-green-200 flex items-center justify-center"
+                className="absolute top-1/2 -right-6 sm:-right-8 w-8 h-8 sm:w-12 sm:h-12 bg-green-100 rounded-full border border-green-200 sm:border-2 flex items-center justify-center"
               >
-                <TrendingUp className="w-6 h-6 text-green-600" />
+                <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-green-600" />
         </motion.div>
             </div>
           </motion.div>
@@ -855,72 +907,74 @@ const Work: React.FC = () => {
         </Card>
 
         {/* Freelancer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
           {filtered.slice(0, showCount).map((f, idx) => (
-            <Card key={f.customUserId || idx} className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 shadow-lg bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30">
-              <CardContent className="p-6 h-full flex flex-col">
+            <Card key={f.customUserId || idx} className="group hover:shadow-xl transition-all duration-300 hover:scale-105 border-0 shadow-md bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30">
+              <CardContent className="p-3 sm:p-4 md:p-6 h-full flex flex-col">
                 {/* Avatar */}
-                <div className="flex justify-center mb-4">
+                <div className="flex justify-center mb-3 sm:mb-4">
                   <div className="relative">
                     <img
                       src={getUserAvatarUrl({ avatar: f.profile?.avatar }) || noUserProfile}
                       alt={f.profile?.firstName || 'Freelancer'}
-                      className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg group-hover:scale-110 transition-transform duration-300"
+                      className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full object-cover border-2 sm:border-4 border-white shadow-md sm:shadow-lg group-hover:scale-110 transition-transform duration-300"
                     />
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
+                    <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 md:w-6 md:h-6 bg-green-500 rounded-full border border-white sm:border-2"></div>
                   </div>
                 </div>
 
                 {/* Profile Info */}
-                <div className="text-center mb-4 flex-1">
-                  <h3 className="text-lg font-bold text-slate-800 mb-1">
+                <div className="text-center mb-3 sm:mb-4 flex-1">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-800 mb-1 line-clamp-1">
                     {f.auth?.firstName || f.profile?.firstName} {f.auth?.lastName || f.profile?.lastName}
                   </h3>
-                  <p className="text-slate-600 font-medium text-sm mb-2">
+                  <p className="text-slate-600 font-medium text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-1">
                     {f.profile?.title || 'Freelancer'}
                   </p>
-                  <p className="text-slate-500 text-sm mb-3">
+                  <p className="text-slate-500 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-1">
                     {f.profile?.location || 'Remote'}
                   </p>
 
                   {/* Rate & Response */}
-                  <div className="flex justify-center items-center gap-3 mb-4">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-medium rounded-full">
-                      ${f.freelancerData?.hourlyRate || '50'}/hr
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full">
-                      {f.freelancerData?.avgResponseTime || '2'}h response
-                    </span>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 py-2 sm:py-2.5">
+                      <div className="text-[10px] sm:text-xs uppercase tracking-wide">Rate</div>
+                      <div className="text-sm sm:text-base font-semibold">${f.freelancerData?.hourlyRate || '50'}/hr</div>
+                    </div>
+                    <div className="rounded-lg border border-blue-200 bg-blue-50 text-blue-700 py-2 sm:py-2.5">
+                      <div className="text-[10px] sm:text-xs uppercase tracking-wide">Response</div>
+                      <div className="text-sm sm:text-base font-semibold">{f.freelancerData?.avgResponseTime || '2'}h</div>
+                    </div>
                   </div>
 
                   {/* Skills */}
-                  <div className="flex flex-wrap justify-center gap-2 mb-4">
-                    {(f.skills || []).slice(0, 3).map((skill: any, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
+                  <div className="flex flex-wrap justify-center gap-1 sm:gap-2 mb-3 sm:mb-4">
+                    {(f.skills || []).slice(0, 2).map((skill: any, i: number) => (
+                      <span key={i} className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full line-clamp-1">
                         {typeof skill === 'string' ? skill : skill.name}
                       </span>
                     ))}
-                    {(f.skills || []).length > 3 && (
-                      <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
-                        +{(f.skills || []).length - 3}
+                    {(f.skills || []).length > 2 && (
+                      <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+                        +{(f.skills || []).length - 2}
                       </span>
                     )}
                   </div>
 
                   {/* Rating */}
-                  <div className="flex justify-center items-center gap-2 mb-4">
+                  <div className="flex justify-center items-center gap-1 sm:gap-2 mb-3 sm:mb-4">
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${i < Math.floor(f.stats?.rating || 4.5) 
+                          className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 ${i < Math.floor(f.stats?.rating || 4.5) 
                             ? 'fill-amber-400 text-amber-400' 
                             : 'fill-slate-200 text-slate-200'
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="text-slate-600 text-sm font-medium">
+                    <span className="text-slate-600 text-xs sm:text-sm font-medium">
                       {(f.stats?.rating || 4.5).toFixed(1)}
                     </span>
                   </div>
@@ -928,12 +982,12 @@ const Work: React.FC = () => {
 
                 {/* Action Button */}
                 <button
-                  className="w-full group/btn bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                  className="w-full group/btn bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 sm:py-2.5 md:py-3 px-3 sm:px-4 rounded-lg transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg text-xs sm:text-sm"
                   onClick={() => window.location.href = `/freelancerprofile/${f.customUserId}`}
                 >
-                  <span className="flex items-center justify-center gap-2">
+                  <span className="flex items-center justify-center gap-1 sm:gap-2">
                     View Profile
-                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </span>
                 </button>
               </CardContent>
@@ -941,15 +995,38 @@ const Work: React.FC = () => {
           ))}
         </div>
 
-        {/* Load More */}
+        {/* Load More / View All */}
         {filtered.length > showCount && (
           <div className="text-center mt-12">
+            {showCount < filtered.length ? (
+              <button
+                className="group inline-flex items-center gap-2 px-2 sm:px-8 py-3 sm:py-4 bg-white text-slate-700 font-semibold hover:border-blue-300  transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base"
+                onClick={() => setShowCount(showCount + 8)}
+              >
+                Load More Freelancers
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
+              </button>
+            ) : (
+              <button
+                className="group inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base"
+                onClick={() => setShowCount(4)}
+              >
+                Show Less
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform rotate-180" />
+              </button>
+            )}
+          </div>
+        )}
+        
+        {/* View All Button */}
+        {filtered.length > 8 && (
+          <div className="text-center mt-6">
             <button
-              className="group inline-flex items-center gap-2 px-8 py-4 bg-white text-slate-700 font-semibold rounded-full border border-slate-200 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-              onClick={() => setShowCount(showCount + 4)}
+              className="group inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold rounded-full hover:from-emerald-700 hover:to-green-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base"
+              onClick={() => setShowCount(filtered.length)}
             >
-              Load More Freelancers
-              <TrendingUp className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              View All {filtered.length} Freelancers
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         )}
@@ -1085,72 +1162,129 @@ const Work: React.FC = () => {
     </section>
 
     {/* CLIENT TESTIMONIALS SECTION */}
-    <section className="relative py-20 px-4 lg:px-8 bg-white">
+    <section className="relative py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-slate-50 rounded-full border border-slate-200 shadow-sm mb-6">
-            <Star className="w-5 h-5 text-amber-500" />
-            <span className="text-slate-700 text-sm font-semibold">Client Success Stories</span>
+          <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 rounded-full border border-slate-200 shadow-sm mb-4 sm:mb-6">
+            <Star className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
+            <span className="text-slate-700 text-xs sm:text-sm font-semibold">Client Success Stories</span>
           </div>
           
-          <h2 className="heading-section font-bold text-slate-800 mb-4">
+          <h2 className="heading-section font-bold text-slate-800 mb-3 sm:mb-4">
             What Our Clients Say
           </h2>
           
-          <p className="text-base text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-600 max-w-3xl mx-auto leading-relaxed px-4">
             Real feedback from researchers, startups, and organizations who've found success with our PhD experts.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {clientTestimonials.map((testimonial, idx) => (
-            <motion.div
-              key={testimonial.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: idx * 0.2, ease: "easeOut" }}
-            >
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 shadow-lg h-full bg-gradient-to-br from-white via-slate-50/30 to-blue-50/30">
-                <CardContent className="p-6 h-full flex flex-col">
-                  {/* Header with Avatar and Info */}
-                  <div className="flex items-center mb-6">
-                    <div className="relative">
-                      <img
-                        src={testimonial.avatar}
-                        alt={testimonial.name}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-lg group-hover:scale-110 transition-transform duration-300"
-                        onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(testimonial.name) + '&background=E0E7EF&color=374151&size=48'; }}
-                      />
-                    </div>
-                    <div className="ml-4">
-                      <h4 className="font-bold text-slate-800 text-base">{testimonial.name}</h4>
-                      <p className="text-sm text-slate-600 font-medium">{testimonial.role}</p>
-                      <p className="text-sm text-blue-600 font-medium">{testimonial.company}</p>
-                    </div>
-                  </div>
+                {/* Testimonials Grid with Side Button for Desktop */}
+        <div className="relative">
+          {/* Desktop: Side Button */}
+          <div className="hidden lg:block absolute -right-4 top-0">
+            {clientTestimonials.length > 3 && (
+              <div className="sticky top-8">
+                <button
+                  onClick={() => setShowAllClients(!showAllClients)}
+                  className="group inline-flex items-center gap-2 px-6 py-4  text-blue-600 font-semibold  transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-sm whitespace-nowrap"
+                >
+                  {showAllClients ? 'Show Less' : `View All`}
+                  <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${showAllClients ? 'rotate-180' : 'group-hover:translate-x-1'}`} />
+                </button>
+              </div>
+            )}
+          </div>
 
-                  {/* Rating */}
-                  <div className="flex mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
+          {/* Testimonials Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 lg:pr-32">
+            {(showAllClients ? clientTestimonials : clientTestimonials.slice(0, 3)).map((testimonial, idx) => (
+              <motion.div
+                key={testimonial.name}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.2, ease: "easeOut" }}
+              >
+                <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 shadow-lg h-full bg-gradient-to-br from-white via-slate-50/30 to-blue-50/30">
+                  <CardContent className="p-4 sm:p-5 lg:p-6 h-full flex flex-col">
+                    {/* Header with Avatar and Info */}
+                    <div className="flex items-center mb-3 sm:mb-4 lg:mb-6">
+                      <div className="relative">
+                        <img
+                          src={testimonial.avatar}
+                          alt={testimonial.name}
+                          className="w-10 h-10 sm:w-11 lg:w-12 sm:h-11 lg:h-12 rounded-full object-cover border-2 border-white shadow-lg group-hover:scale-110 transition-transform duration-300"
+                          onError={e => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(testimonial.name) + '&background=E0E7EF&color=374151&size=48'; }}
+                        />
+                      </div>
+                      <div className="ml-3 sm:ml-4">
+                        <h4 className="font-bold text-slate-800 text-sm sm:text-base">{testimonial.name}</h4>
+                        <p className="text-xs sm:text-sm text-slate-600 font-medium">{testimonial.role}</p>
+                        <p className="text-xs sm:text-sm text-blue-600 font-medium">{testimonial.company}</p>
+                      </div>
+                    </div>
 
-                  {/* Quote */}
-                  <CardDescription className="text-slate-700 italic text-base leading-relaxed flex-1">
-                    "{testimonial.content}"
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                    {/* Rating */}
+                    <div className="flex mb-2 sm:mb-3 lg:mb-4">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+
+                    {/* Quote */}
+                    <CardDescription className="text-slate-700 italic text-sm sm:text-base leading-relaxed flex-1">
+                      {expandedClient === idx ? (
+                        <span>"{testimonial.content}"</span>
+                      ) : (
+                        <div>
+                          <span className={`${testimonial.content.length > 140 ? 'line-clamp-2' : ''}`}>
+                            "{testimonial.content}"
+                          </span>
+                          {testimonial.content.length > 140 && (
+                            <button
+                              onClick={() => setExpandedClient(idx)}
+                              className="text-blue-600 hover:text-blue-700 font-medium text-sm mt-2 transition-colors hover:underline"
+                            >
+                              Read More
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </CardDescription>
+                     
+                    {expandedClient === idx && (
+                      <button
+                        onClick={() => setExpandedClient(null)}
+                        className="text-blue-600 hover:text-blue-700 font-medium text-sm mt-2 transition-colors self-start hover:underline"
+                      >
+                        Show Less
+                      </button>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+          
+          {/* Mobile: Bottom Button */}
+          {clientTestimonials.length > 3 && (
+            <div className="lg:hidden text-center mt-8 sm:mt-10">
+              <button
+                onClick={() => setShowAllClients(!showAllClients)}
+                className="group inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-full transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                {showAllClients ? 'Show Less' : `View All ${clientTestimonials.length} Clients`}
+                <ArrowRight className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 ${showAllClients ? 'rotate-180' : 'group-hover:translate-x-1'}`} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>

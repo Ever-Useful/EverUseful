@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { Search, Users, UserPlus, TrendingUp, MessageCircle, MapPin, Building, Settings, Filter, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
 import {Footer} from '@/components/Footer';
 import Logo from '@/assets/Logo/Logo Main.png'; 
+import UserService, { UserSearchResult } from "@/services/userService";
 type Connection = {
   id: string;
   name: string;
@@ -173,10 +176,25 @@ type TabType = 'received' | 'sent' | 'find';
 
 const Connections = () => {
   const [activeTab, setActiveTab] = useState<TabType>('received');
-  const [searchQuery, setSearchQuery] = useState('');
+  
   const [connections, setConnections] = useState(mockConnections);
   const [suggestions, setSuggestions] = useState(mockSuggestions);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
+  const navigate = useNavigate();
 
+
+useEffect(() => {
+  const fetchResults = async () => {
+    if (!searchQuery) {
+      setSearchResults([]);
+      return;
+    }
+    const results = await UserService.searchUsers(searchQuery);
+    setSearchResults(results);
+  };
+  fetchResults();
+}, [searchQuery])
   const handleConnect = (personId: string) => {
     setSuggestions(prev => 
       prev.map(person => 
@@ -186,6 +204,24 @@ const Connections = () => {
       )
     );
   };
+
+  const handleCardClick = (user: UserSearchResult) => {
+  const id = user.customUserId;
+  const type = user.profile.userType?.toLowerCase();
+
+  if (type === "student") {
+    navigate(`/studentprofile/${id}`);
+  } else if (type === "business") {
+    navigate(`/businessprofile/${id}`);
+  } else if (type === "freelancer") {
+    navigate(`/freelancerprofile/${id}`);
+  } else {
+    console.warn("Unknown userType:", type, " — defaulting to student");
+    navigate(`/studentprofile/${id}`);
+  }
+
+};
+
 
   const handleWithdraw = (personId: string) => {
     setSuggestions(prev => 
@@ -255,7 +291,7 @@ const Connections = () => {
         {person.isConnected && (
           <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
             <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Message
+            <span className="hidden sm:inline">Message</span>
           </Button>
         )}
       </div>
@@ -302,6 +338,7 @@ const Connections = () => {
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Sent Invitations</h2>
                 <p className="text-sm text-gray-600 mt-1">Manage your outgoing connection requests</p>
+
               </div>
               <Badge variant="secondary" className="bg-blue-100 text-blue-800 px-3 py-1 sm:self-start">
                 {suggestions.length} pending
@@ -332,6 +369,7 @@ const Connections = () => {
 
       case 'find':
         return (
+
           <div className="flex flex-col h-full">
             {/* Sticky header */}
             <div className="p-4 bg-white rounded-t-lg border border-b-0 border-gray-200 sticky top-0 z-10">
@@ -353,14 +391,42 @@ const Connections = () => {
                   </button>
                 )}
               </div>
+              {/* Filter Bar */}
+              <div className="mt-3 mb-1">
+                <SearchFilterBar 
+                  tags={filterTags}
+                  onTagClick={handleFilterClick}
+                  className="justify-start"
+                />
+              </div>
             </div>
             {/* Scrollable cards */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
               <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
-                {searchQuery ? (
-                  filteredSearchResults.length > 0 ? (
-                    filteredSearchResults.map(person => (
-                      <ConnectionItem key={person.id} person={person} showConnectButton />
+                  {searchQuery ? (
+                    searchResults.length > 0 ? (
+                      searchResults.map(user => (
+                        <div
+                          key={user.customUserId}
+                          onClick={() => handleCardClick(user)}
+                          className="cursor-pointer hover:bg-gray-50 transition"
+                        >
+                        <ConnectionItem
+                          key={user.customUserId}
+                          person={{
+                          id: user.customUserId,
+                          name: `${user.profile.firstName} ${user.profile.lastName}`,
+                          title: user.profile.userType,
+                          company: user.profile.username,
+                          avatar: user.profile.avatar,
+                          location: "",
+                          mutualConnections: 0,
+                          isConnected: false,
+                          skills: []
+                      }}
+                   showConnectButton
+                  />
+                </div>
                     ))
                   ) : (
                     <Card className="text-center py-12 shadow-none border-none">
@@ -406,6 +472,47 @@ const Connections = () => {
       {/* Main Container */}
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8 mt-14">
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 relative">
+          {/* Mobile Navigation Tabs */}
+          <div className="lg:hidden w-full order-1 mb-4">
+            <div className="bg-white rounded-lg shadow-sm p-2">
+              <div className="flex space-x-1">
+                <button
+                  onClick={() => setActiveTab('received')}
+                  className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'received'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Users className="h-4 w-4" />
+                  <span>Received</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('sent')}
+                  className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'sent'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  <span>Sent</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('find')}
+                  className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'find'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Search className="h-4 w-4" />
+                  <span>Find</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Left: Main Content (renderTabContent) */}
           <div className="flex-1 order-2 lg:order-1 min-h-[70vh] h-[70vh] lg:h-[80vh]">
             <div className="h-[70vh] lg:h-[80vh] overflow-y-auto pr-1 scrollbar-hide">
@@ -413,7 +520,8 @@ const Connections = () => {
             </div>
           </div>
 
-          <div className="w-full lg:w-80 order-1 lg:order-2 flex flex-col h-[80vh]">
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:flex w-80 order-1 lg:order-2 flex-col h-[80vh]">
             <div className="lg:top-8 z-20">
               <Card className="border-0 shadow-sm mb-4 lg:mb-0">
                 <CardHeader className="pb-3">
