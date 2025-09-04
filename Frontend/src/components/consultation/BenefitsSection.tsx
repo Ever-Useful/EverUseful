@@ -85,7 +85,7 @@ export const BenefitsSection = () => {
             <span className="text-slate-700 text-sm font-semibold">Why Choose Our Services</span>
           </div>
           
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold">
+          <h2 className="heading-section font-bold">
             <span className="text-slate-800">Transform Your Business with</span>
             <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
               Intelligent Solutions

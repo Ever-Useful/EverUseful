@@ -79,10 +79,9 @@ export const Hero = () => {
           <div className="flex flex-col lg:flex-row items-center gap-8">
             {/* LEFT: Text + Button */}
 
-            <div className="w-full lg:w-1/3 text-center lg:text-left mb-10 lg:mb-0">
-              <h1 className="text-[17px] sm:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight mobile-text-4xl">
+            <div className="w-full lg:w-1/3 text-center lg:text-left mb-8 sm:mb-10 lg:mb-0">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight px-2 sm:px-0">
                 Connect{" "}
-
                 <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-pink-400 bg-clip-text text-transparent">
                   Innovation
                 </span>{" "}
@@ -91,7 +90,7 @@ export const Hero = () => {
                   Opportunity
                 </span>
               </h1>
-              <p className="text-[12px] sm:text-base text-gray-300 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
+              <p className="text-sm sm:text-base text-gray-300 mb-6 sm:mb-8 md:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 px-4 sm:px-0">
                 A platform where students, PhD holders, professors, and
                 businesses collaborate to transform ideas into real-world impact.
                 Join the future of collaborative innovation today.
@@ -99,13 +98,13 @@ export const Hero = () => {
               <div className="flex justify-center lg:justify-start animate-fade-in delay-300">
                 <Button
                   size="lg"
-                  className="w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2 text-base font transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
+                  className="w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-4 sm:px-6 py-2 text-sm sm:text-base font transform transition-all duration-300 hover:scale-105 shadow-lg font-bold"
                   asChild
                 >
                   <Link to="/signup" className="font-bold flex items-center justify-center">
-                    <Rocket className="mr-2 w-5 h-5" />
+                    <Rocket className="mr-1 sm:mr-2 w-4 h-4 sm:w-5 sm:h-5" />
                     Get Started
-                    <ArrowRight className="ml-2 w-5 h-5" />
+                    <ArrowRight className="ml-1 sm:ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                   </Link>
                 </Button>
               </div>
@@ -215,12 +214,12 @@ export const Hero = () => {
 
               {/* Mobile: flexbox focusing on labels */}
               <div className="lg:hidden w-full">
-                <div className="grid grid-cols-2 gap-3 p-4">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 p-2 sm:p-4">
                   {OPTIONS.map((opt, index) => (
                     <div
                       key={opt.id}
                       className={`
-                        relative h-32 rounded-xl overflow-hidden
+                        relative h-24 sm:h-28 md:h-32 rounded-lg sm:rounded-xl overflow-hidden
                       `}
                     >
                       <img
@@ -229,8 +228,8 @@ export const Hero = () => {
                         className="absolute inset-0 w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-black/50" />
-                      <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white p-3">
-                        <div className="font-bold text-lg sm:text-xl mb-1 leading-tight">
+                      <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white p-2 sm:p-3">
+                        <div className="font-bold text-sm sm:text-base md:text-lg mb-1 leading-tight">
                           {opt.label}
                         </div>
                       </div>

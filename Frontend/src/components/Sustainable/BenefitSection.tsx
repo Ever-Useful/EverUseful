@@ -33,7 +33,7 @@ export const BenefitsSection = () => {
               WHY CHOOSE US
             </p>
 
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">Benefits</h2>
+            <h2 className="heading-section font-bold text-gray-900">Benefits</h2>
           </div>
           <div className="flex flex-1 items-start md:items-center w-full md:w-auto">
             <div className="flex flex-col flex-1">

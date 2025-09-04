@@ -120,10 +120,15 @@ class DynamoDBService {
         social: {
           followers: [],
           following: [],
-          connections: [],
+          connected: [],
           followersCount: 0,
           followingCount: 0
         },
+        connections: {
+        sent: [],      // requests this user sent
+        received: [],  // requests this user got
+        pending: []    // optional, you can use or skip
+      },
         activities: {
           recent: [],
           achievements: [],
@@ -246,6 +251,29 @@ class DynamoDBService {
     }
   }
 
+  async findUserByPhone(phoneNumber) {
+    try {
+      const params = {
+        TableName: this.usersTable,
+        FilterExpression: 'phoneNumber = :phone OR mobile = :phone',
+        ExpressionAttributeValues: {
+          ':phone': phoneNumber
+        }
+      };
+
+      const result = await dynamodb.scan(params).promise();
+      const user = result.Items[0] || null;
+      
+      if (user) {
+        return this.reconstructUserData(user);
+      }
+      return null;
+    } catch (error) {
+      console.error('Error finding user by phone:', error);
+      return null;
+    }
+  }
+
   // Reconstruct user data from flattened DynamoDB structure
   reconstructUserData(user) {
     const reconstructed = {
@@ -265,8 +293,11 @@ class DynamoDBService {
       activities: user.activities || {},
       preferences: user.preferences || {},
       marketplace: user.marketplace || {},
-      social: user.social || {}
+      social: user.social || {},
+      connections: user.connections || { sent: [], received: [], pending: [] }
     };
+        // ✅ Add connections back from DB
+     
 
     // Reconstruct profile from flattened keys
     Object.keys(user).forEach(key => {
@@ -1280,6 +1311,263 @@ class DynamoDBService {
       throw error;
     }
   }
+
+  // dynamoDBService.js
+async searchUsersByName(query) {
+  try {
+    const params = {
+      TableName: this.usersTable
+    };
+
+    const result = await dynamodb.scan(params).promise();
+    const lowerQ = (query || '').toLowerCase();
+
+    return (result.Items || [])
+      .map(user => {
+  const authMap = user.auth || {};
+  const profileMap = user.profile || {};
+
+  const firstName =
+    authMap.firstName ||
+    profileMap.firstName ||
+    user['profile.firstName'] ||
+    user.firstName ||
+    '';
+  const lastName =
+    authMap.lastName ||
+    profileMap.lastName ||
+    user['profile.lastName'] ||
+    user.lastName ||
+    '';
+  const avatar =
+    profileMap.avatar ||
+    user['profile.avatar'] ||
+    user.avatar ||
+    null;
+  
+  const userType =
+    authMap.userType ||  //  always prioritize auth
+    (profileMap.userType && profileMap.userType !== 'student' ? profileMap.userType : '') ||
+    user['profile.userType'] ||
+    user.userType ||
+    '';
+
+  const username =
+    authMap.username ||
+    profileMap.username ||
+    user['profile.username'] ||
+    user.username ||
+    '';
+
+  return {
+    customUserId: user.customUserId,
+    profile: { firstName, lastName, avatar, userType, username }
+  };
+})
+
+      .filter(u =>
+        (u.profile.firstName || '').toLowerCase().includes(lowerQ) ||
+        (u.profile.lastName || '').toLowerCase().includes(lowerQ) ||
+        (u.profile.username || '').toLowerCase().includes(lowerQ)
+      );
+  } catch (error) {
+    console.error("Error searching users:", error);
+    throw error;
+  }
+}
+
+// ==========================
+// Connection Requests
+// ==========================
+
+// Create a connection request
+// async createConnectionRequest(userId, targetUserId) {
+//   try {
+//     const connection = {
+//       id: Date.now().toString(),
+//       userId,
+//       targetUserId,
+//       status: 'pending',
+//       createdAt: new Date().toISOString()
+//     };
+
+//     // Add connection for requester
+//     const userConnections = await this.getUserConnections(userId);
+//     await this.updateUser(userId, {
+//       'social.connections': [...userConnections, connection]
+//     });
+
+//     // Add "incoming" connection for target
+//     const targetConnections = await this.getUserConnections(targetUserId);
+//     await this.updateUser(targetUserId, {
+//       'social.connections': [
+//         ...targetConnections,
+//         { ...connection, status: 'incoming' }
+//       ]
+//     });
+
+//     return connection;
+//   } catch (err) {
+//     console.error('Error creating connection request:', err);
+//     throw err;
+//   }
+// }
+
+// // Get all connections of a user
+// async getUserConnections(customUserId) {
+//   try {
+//     const user = await this.findUserByCustomId(customUserId);
+//     return (user.social && user.social.connections) || [];
+//   } catch (err) {
+//     console.error('Error fetching user connections:', err);
+//     return [];
+//   }
+// }
+
+// // Update connection request status (accept/reject)
+// async updateConnectionStatus(userId, targetUserId, status) {
+//   try {
+//     const user = await this.findUserByCustomId(userId);
+//     const targetUser = await this.findUserByCustomId(targetUserId);
+
+//     if (!user || !targetUser) throw new Error('User not found');
+
+//     // Update requester’s record
+//     const updatedUserConnections = (user.social.connections || []).map(conn =>
+//       (conn.targetUserId === targetUserId || conn.userId === targetUserId)
+//         ? { ...conn, status }
+//         : conn
+//     );
+
+//     // Update target’s record
+//     const updatedTargetConnections = (targetUser.social.connections || []).map(conn =>
+//       (conn.targetUserId === userId || conn.userId === userId)
+//         ? { ...conn, status }
+//         : conn
+//     );
+
+//     await this.updateUser(userId, { 'social.connections': updatedUserConnections });
+//     await this.updateUser(targetUserId, { 'social.connections': updatedTargetConnections });
+
+//     return { success: true, status };
+//   } catch (err) {
+//     console.error('Error updating connection status:', err);
+//     throw err;
+//   }
+// }
+
+
+// Send connection request
+async createConnectionRequest(senderId, receiverId) {
+  try {
+    const sender = await this.findUserByCustomId(senderId);
+    const receiver = await this.findUserByCustomId(receiverId);
+
+    if (!sender || !receiver) throw new Error("User not found");
+
+    // Prevent duplicate requests or already connected
+    if (
+      sender.connections?.sent?.includes(receiverId) ||
+      sender.social?.connected?.includes(receiverId)
+    ) {
+      throw new Error("Connection request already sent or already connected");
+    }
+
+    // Update sender (add to sent)
+    await this.updateUser(senderId, {
+      "connections.sent": [...(sender.connections?.sent || []), receiverId],
+    });
+
+    // Update receiver (add to received)
+    await this.updateUser(receiverId, {
+      "connections.received": [...(receiver.connections?.received || []), senderId],
+    });
+
+    return { success: true, message: "Connection request sent" };
+  } catch (err) {
+    console.error("Error creating connection request:", err);
+    throw err;
+  }
+}
+
+// Accept connection request
+async acceptConnectionRequest(receiverId, senderId) {
+  try {
+    const sender = await this.findUserByCustomId(senderId);
+    const receiver = await this.findUserByCustomId(receiverId);
+
+    if (!sender || !receiver) throw new Error("User not found");
+
+    // Remove from sent & received
+    const updatedSenderSent = (sender.connections?.sent || []).filter(id => id !== receiverId);
+    const updatedReceiverReceived = (receiver.connections?.received || []).filter(id => id !== senderId);
+
+    // Add each other to connected
+    const updatedSenderConnected = [...(sender.social?.connected || []), receiverId];
+    const updatedReceiverConnected = [...(receiver.social?.connected || []), senderId];
+
+    await this.updateUser(senderId, {
+      "connections.sent": updatedSenderSent,
+      "social.connected": updatedSenderConnected,
+    });
+
+    await this.updateUser(receiverId, {
+      "connections.received": updatedReceiverReceived,
+      "social.connected": updatedReceiverConnected,
+    });
+
+    return { success: true, message: "Connection request accepted" };
+  } catch (err) {
+    console.error("Error accepting connection request:", err);
+    throw err;
+  }
+}
+
+// Reject connection request
+async rejectConnectionRequest(receiverId, senderId) {
+  try {
+    const sender = await this.findUserByCustomId(senderId);
+    const receiver = await this.findUserByCustomId(receiverId);
+
+    if (!sender || !receiver) throw new Error("User not found");
+
+    // Remove from both sent and received
+    const updatedSenderSent = (sender.connections?.sent || []).filter(id => id !== receiverId);
+    const updatedReceiverReceived = (receiver.connections?.received || []).filter(id => id !== senderId);
+
+    await this.updateUser(senderId, { "connections.sent": updatedSenderSent });
+    await this.updateUser(receiverId, { "connections.received": updatedReceiverReceived });
+
+    return { success: true, message: "Connection request rejected" };
+  } catch (err) {
+    console.error("Error rejecting connection request:", err);
+    throw err;
+  }
+}
+
+// Withdraw (cancel) request by sender
+async withdrawConnectionRequest(senderId, receiverId) {
+  try {
+    const sender = await this.findUserByCustomId(senderId);
+    const receiver = await this.findUserByCustomId(receiverId);
+
+    if (!sender || !receiver) throw new Error("User not found");
+
+    const updatedSenderSent = (sender.connections?.sent || []).filter(id => id !== receiverId);
+    const updatedReceiverReceived = (receiver.connections?.received || []).filter(id => id !== senderId);
+
+    await this.updateUser(senderId, { "connections.sent": updatedSenderSent });
+    await this.updateUser(receiverId, { "connections.received": updatedReceiverReceived });
+
+    return { success: true, message: "Connection request withdrawn" };
+  } catch (err) {
+    console.error("Error withdrawing connection request:", err);
+    throw err;
+  }
+}
+
+
+
 }
 
 module.exports = new DynamoDBService(); 

@@ -310,7 +310,7 @@ export const UpcomingPhase: React.FC = () => (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-24 items-center">
         {/* Left: Info, Form */}
         <div>
-          <h2 className="text-[17px] sm:text-4xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight mobile-text-4xl">
+          <h2 className="sm:text-4xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight mobile-text-2xl">
             Sustainable Projects
             <br />
             for a Brighter Future

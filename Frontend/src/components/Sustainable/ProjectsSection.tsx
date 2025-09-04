@@ -122,7 +122,7 @@ export const ProjectsSection = () => {
             </p>
             
 
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+            <h2 className="heading-section font-bold text-gray-900">
               Sustainable Project Types
             </h2>
           </div>
@@ -184,7 +184,7 @@ export const ProjectsSection = () => {
                     <img
                       src={project.image}
                       alt={project.title}
-                      className="w-full aspect-[3/2] object-cover group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-500"
+                      className="card-media group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-500"
                     />
 
                     {/* Category Badge */}
@@ -205,17 +205,17 @@ export const ProjectsSection = () => {
                     </p>
                     
                     {/* Key Metrics */}
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="grid grid-cols-1 gap-2 sm:gap-3 mb-3 sm:mb-4">
                       <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center group-hover:bg-emerald-50 transition-colors">
                         <Target className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-600 mx-auto mb-1" />
                         <p className="text-[10px] sm:text-xs font-semibold text-gray-900">{project.impact}</p>
                         <p className="text-[9px] sm:text-xs text-gray-500">Impact</p>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center group-hover:bg-blue-50 transition-colors">
+                      {/* <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center group-hover:bg-blue-50 transition-colors">
                         <Users className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 mx-auto mb-1" />
                         <p className="text-[10px] sm:text-xs font-semibold text-gray-900">{project.teamSize}</p>
                         <p className="text-[9px] sm:text-xs text-gray-500">Team Size</p>
-                      </div>
+                      </div>*/}
                     </div>
                     
                     {/* Action Buttons - Always Visible on Mobile */}
@@ -228,7 +228,7 @@ export const ProjectsSection = () => {
                         <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
                         {watchlist.includes(project.id) ? "Watching" : "Watch"}
                       </Button>
-                      <Button 
+                      {/* <Button 
                         size="sm" 
                         className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] sm:text-xs h-6 sm:h-8 px-2 sm:px-3"
                         onClick={(e) => {
@@ -237,16 +237,9 @@ export const ProjectsSection = () => {
                         }}
                       >
                         <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                      </Button>
+                      </Button> */}
                     </div>
-                    
-                    {/* Funding Status - Always Visible */}
-                    <div className="pt-2 sm:pt-3 border-t border-gray-100">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] sm:text-xs text-gray-500">Funding:</span>
-                        <span className="text-[10px] sm:text-xs font-semibold text-gray-900">{project.fundingGoal}</span>
-                      </div>
-                    </div>
+
                   </div>
                 </div>
               </div>

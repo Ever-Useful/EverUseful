@@ -82,7 +82,7 @@ const ScheduleMeeting = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="max-w-2xl mx-auto p-6">
-        <h1 className="text-4xl font-bold text-slate-800 mb-6 mobile-text-4xl">Schedule Meeting</h1>
+        <h1 className="text-4xl font-bold text-slate-800 mb-6 mobile-text-2xl">Schedule Meeting</h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">

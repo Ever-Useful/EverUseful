@@ -61,7 +61,7 @@ const IndexHero = () => {
           {/* LEFT: Intro */}
           <div className="space-y-8 lg:pr-12">
             <div className="space-y-6">
-              <h1 className="text-[17px] sm:text-4xl font-bold text-gray-900 leading-tight mobile-text-4xl">
+              <h1 className="text-lg sm:text-4xl font-bold text-gray-900 leading-tight mobile-text-2xl">
                 Transform <span className="text-blue-600">Academic Projects</span> Into Commercial Success
               </h1>
               <p className="text-base text-gray-600 leading-relaxed mobile-text-base">

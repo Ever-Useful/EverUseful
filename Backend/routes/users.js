@@ -2,22 +2,19 @@ const express = require('express');
 const router = express.Router();
 const authorize = require('../authorize');
 const userService = require('../services/userService');
+const dynamoDB = require('../services/dynamoDBService'); // Added for check-phone endpoint
 
 // Get user profile
 router.get('/profile', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    console.log('Profile endpoint - Firebase UID:', firebaseUid);
-    console.log('Profile endpoint - User from token:', req.user);
     
     // Fetch user from DynamoDB using Firebase UID
     let user = await userService.findUserByFirebaseUid(firebaseUid);
-    console.log('Profile endpoint - Found user:', user ? 'Yes' : 'No');
     
     if (!user) {
       // Create new user in DynamoDB
       const { name, email } = req.user;
-      console.log('Profile endpoint - Creating new user with data:', { name, email });
       
       // Parse firstName and lastName from name if available
       let firstName = '';
@@ -29,7 +26,7 @@ router.get('/profile', authorize, async (req, res) => {
       }
       
       try {
-        const newUser = await userService.createUser(firebaseUid, {
+        const newUser = await userService.createUserWithPhoneVerification(firebaseUid, {
           firstName: firstName,
           lastName: lastName,
           email: email || 'no-email@example.com',
@@ -39,7 +36,6 @@ router.get('/profile', authorize, async (req, res) => {
         });
         
         user = await userService.findUserByFirebaseUid(firebaseUid);
-        console.log('Profile endpoint - New user created:', user.customUserId);
       } catch (createError) {
         console.error('Profile endpoint - Error creating user:', createError);
         return res.status(500).json({ success: false, message: 'Failed to create user' });
@@ -58,9 +54,6 @@ router.get('/profile', authorize, async (req, res) => {
       gender: profile.gender || '',
       username: profile.username || profile.email?.split('@')[0] || ''
     };
-    
-    console.log('Profile endpoint - Auth data being sent:', auth);
-    console.log('Profile endpoint - Profile data being sent:', profile);
     
     res.json({
       success: true,
@@ -612,6 +605,193 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// users.js
+router.get('/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) {
+      return res.status(400).json({ success: false, message: 'Search query required' });
+    }
+
+    const users = await userService.searchUsers(q);
+    res.json({ success: true, data: users });
+  } catch (error) {
+    console.error("Error searching users:", error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// // Send connection request
+// router.post('/connections', authorize, async (req, res) => {
+//   const firebaseUid = req.user.uid;
+//   const { targetUserId } = req.body;
+
+//   const user = await userService.findUserByFirebaseUid(firebaseUid);
+//   if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+//   const connection = await userService.sendConnectionRequest(user.customUserId, targetUserId);
+
+//   // 🔴 Emit socket event
+//   req.app.get('io').to(targetUserId).emit('connection_request', connection);
+
+//   res.json({ success: true, data: connection });
+// });
+
+// // Get all connections for logged-in user
+// router.get('/connections', authorize, async (req, res) => {
+//   const firebaseUid = req.user.uid;
+//   const user = await userService.findUserByFirebaseUid(firebaseUid);
+
+//   const connections = await userService.getConnections(user.customUserId);
+//   res.json({ success: true, data: connections });
+// });
+
+// // Accept/reject connection
+// router.put('/connections/:targetUserId', authorize, async (req, res) => {
+//   try {
+//     const firebaseUid = req.user.uid;
+//     const { targetUserId } = req.params;
+//     const { status } = req.body; // accepted | rejected
+
+//     const user = await userService.findUserByFirebaseUid(firebaseUid);
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: 'User not found' });
+//     }
+
+//     const updated = await userService.respondToConnection(
+//       user.customUserId,   // requester (logged-in user)
+//       targetUserId,        // the user they’re responding to
+//       status
+//     );
+
+//     //  Notify both users
+//     req.app.get('io')
+//       .to(user.customUserId)
+//       .to(targetUserId)
+//       .emit('connection_update', updated);
+
+//     res.json({ success: true, data: updated });
+//   } catch (error) {
+//     console.error("Error updating connection status:", error);
+//     res.status(500).json({ success: false, message: 'Internal server error' });
+//   }
+// });
+
+
+
+// ----------------------------
+// Send connection request
+// ----------------------------
+router.post('/connections', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { targetUserId } = req.body;
+
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const connection = await userService.sendConnectionRequest(user.customUserId, targetUserId);
+
+    // 🔴 Notify receiver in real-time
+    req.app.get('io').to(targetUserId).emit('connection_request', {
+      from: user.customUserId,
+      ...connection,
+    });
+
+    res.json({ success: true, data: connection });
+  } catch (err) {
+    console.error("Error sending connection request:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ----------------------------
+// Get all connections
+// ----------------------------
+router.get('/connections', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const connections = await userService.getConnections(user.customUserId);
+    res.json({ success: true, data: connections });
+  } catch (err) {
+    console.error("Error fetching connections:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ----------------------------
+// Accept a connection request
+// ----------------------------
+router.put('/connections/:senderId/accept', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { senderId } = req.params;
+
+    const receiver = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!receiver) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const result = await userService.acceptConnectionRequest(receiver.customUserId, senderId);
+
+    // Notify both users
+    req.app.get('io')
+      .to(receiver.customUserId)
+      .to(senderId)
+      .emit('connection_update', result);
+
+    res.json({ success: true, data: result });
+  } catch (err) {
+    console.error("Error accepting connection:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ----------------------------
+// Reject a connection request
+// ----------------------------
+router.put('/connections/:senderId/reject', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { senderId } = req.params;
+
+    const receiver = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!receiver) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const result = await userService.rejectConnectionRequest(receiver.customUserId, senderId);
+
+    res.json({ success: true, data: result });
+  } catch (err) {
+    console.error("Error rejecting connection:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ----------------------------
+// Withdraw (cancel) a request
+// ----------------------------
+router.delete('/connections/:receiverId', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { receiverId } = req.params;
+
+    const sender = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!sender) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const result = await userService.withdrawConnectionRequest(sender.customUserId, receiverId);
+
+    res.json({ success: true, data: result });
+  } catch (err) {
+    console.error("Error withdrawing connection:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+
+
+
 // Get user by customUserId (for public profile viewing)
 router.get('/:customUserId', async (req, res) => {
   try {
@@ -656,6 +836,101 @@ router.get('/:customUserId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching user by customUserId:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Phone verification endpoints
+router.post('/verify-phone', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { phoneNumber } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({ success: false, message: 'Phone number is required' });
+    }
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Check if phone number is already verified by another user
+    const existingUser = await userService.findUserByPhone(phoneNumber);
+    if (existingUser && existingUser.customUserId !== user.customUserId) {
+      return res.status(400).json({ success: false, message: 'Phone number already registered with another account' });
+    }
+    
+    // Update phone number and mark as verified
+    await userService.verifyPhoneNumber(user.customUserId, phoneNumber, true);
+    
+    res.json({ success: true, message: 'Phone number verified successfully' });
+  } catch (error) {
+    console.error('Error verifying phone number:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+router.post('/resend-phone-verification', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { phoneNumber } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({ success: false, message: 'Phone number is required' });
+    }
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Update phone number and mark as unverified
+    await userService.verifyPhoneNumber(user.customUserId, phoneNumber, false);
+    
+    res.json({ success: true, message: 'Phone verification code resent' });
+  } catch (error) {
+    console.error('Error resending phone verification:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Email verification endpoint
+router.post('/verify-email', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Mark email as verified
+    await userService.updateEmailVerificationStatus(user.customUserId, true);
+    
+    res.json({ success: true, message: 'Email verified successfully' });
+  } catch (error) {
+    console.error('Error verifying email:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Check if phone number is registered
+router.post('/check-phone', async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+    
+    // Check if phone number exists in the database using the service layer
+    const existingUser = await userService.findUserByPhone(phoneNumber);
+    const exists = !!existingUser;
+    
+    res.json({ exists });
+  } catch (error) {
+    console.error('Error checking phone registration:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

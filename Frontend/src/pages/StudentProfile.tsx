@@ -15,6 +15,8 @@ import NoUserProfile from "@/assets/images/no user profile.png";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
 import { getUserAvatarUrl, getBackgroundImageUrl } from '@/utils/s3ImageUtils';
+import { useUserProfile } from "@/contexts/UserProfileContext";
+import { socket } from "@/socket.ts";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -29,6 +31,10 @@ const Profile = () => {
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
   const [error, setError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
+  const { profileData: currentUser } = useUserProfile(); 
+
+
 
 
   // Fetch user data by customUserId from userData.json
@@ -97,6 +103,189 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
+// useEffect(() => {
+//   const fetchConnectionStatus = async () => {
+//     try {
+//       const connections = await userService.getConnections();
+
+//       if (connections.sent.includes(id)) {
+//         setConnectionStatus("pending"); // request sent by me
+//       } else if (connections.received.includes(id)) {
+//         setConnectionStatus("pending"); // request received, still pending
+//       } else if (connections.connected.includes(id)) {
+//         setConnectionStatus("connected"); // already connected
+//       } else {
+//         setConnectionStatus("none"); // no relation
+//       }
+//     } catch (err) {
+//       console.error("Failed to fetch connection status:", err);
+//     }
+//   };
+
+//   if (currentUser?.customUserId && id) {
+//     fetchConnectionStatus();
+//   }
+// }, [currentUser, id]);
+
+
+// // Ye wala final hai
+// useEffect(() => {
+//   if (!currentUser?.customUserId || !id) return;
+
+//   (async () => {
+//     try {
+//       const resp = await userService.getConnections();
+//       const payload = resp?.data ?? resp; // support both shapes
+
+//       const sent: string[] = payload?.sent ?? [];
+//       const received: string[] = payload?.received ?? [];
+//       const connected: string[] = payload?.connected ?? [];
+
+//       if (connected.includes(id)) {
+//         setConnectionStatus('connected');
+//       } else if (sent.includes(id) || received.includes(id)) {
+//         setConnectionStatus('pending');
+//       } else {
+//         setConnectionStatus('none');
+//       }
+//     } catch (err) {
+//       console.error('Failed to fetch connection status:', err);
+//     }
+//   })();
+// }, [currentUser?.customUserId, id]);
+
+// 🔹 Fetch connection status on mount / refresh
+useEffect(() => {
+  const fetchConnectionStatus = async () => {
+    try {
+      const res = await userService.getConnections(); 
+      // NOTE: res is { success: true, data: { sent, received, connected } }
+      const connections = res.data;
+
+      if (connections.sent.includes(id)) {
+        setConnectionStatus("pending"); // request sent by me
+      } else if (connections.received.includes(id)) {
+        setConnectionStatus("pending"); // request received, still pending
+      } else if (connections.connected.includes(id)) {
+        setConnectionStatus("connected"); // already connected
+      } else {
+        setConnectionStatus("none");
+      }
+    } catch (err) {
+      console.error("Failed to fetch connection status:", err);
+    }
+  };
+
+  if (currentUser?.customUserId && id) {
+    fetchConnectionStatus();
+  }
+}, [currentUser, id]);
+
+
+
+
+  useEffect(() => {
+    if (currentUser?.customUserId) {
+      socket.emit("register", currentUser.customUserId);
+      console.log("Registered socket for user:", currentUser.customUserId);
+    }
+  }, [currentUser?.customUserId]);
+
+  useEffect(() => {
+  socket.on("connectionRequestReceived", (data) => {
+    console.log("New connection request received:", data);
+    alert(`${data.message}`);
+  });
+
+  return () => {
+    socket.off("connectionRequestReceived");
+  };
+}, []);
+
+
+
+
+
+// const handleConnect = async () => {
+//   if (!id) return;
+
+//   // Optimistic UI
+//   setConnectionStatus("pending");
+
+//   try {
+//     const response = await userService.sendConnectionRequest(id);
+
+//     if (response?.success === false) {
+//       setConnectionStatus("none"); // revert
+//       alert(`Failed to send request: ${response.message || "Unknown error"}`);
+//       return;
+//     }
+
+//     // Emit socket event (real-time notification)
+//     socket.emit("connectionRequest", {
+//       from: currentUser.customUserId,
+//       to: id,
+//       message: `${currentUser.firstName || "Someone"} sent you a connection request.`,
+//     });
+
+//     // Show notification/alert
+//     if ("Notification" in window && Notification.permission === "granted") {
+//       new Notification("Connection request sent!", {
+//         body: "Your request is now pending.",
+//         icon: "/favicon.ico",
+//       });
+//     } else {
+//       alert("Connection request sent!");
+//     }
+//   } catch (err: any) {
+//     setConnectionStatus("none"); // revert if error
+//     console.error("Error sending connection request:", err);
+
+//     const message =
+//       err?.response?.data?.message ||
+//       err?.message ||
+//       "Failed to send connection request due to an unknown error.";
+
+//     alert(`Connection request failed: ${message}`);
+//   }
+// };
+
+   
+
+// 🔹 Handle connect click
+const handleConnect = async () => {
+  try {
+    const response = await userService.sendConnectionRequest(id);
+
+    if (response?.success === false) {
+      alert(`Failed to send request: ${response.message || "Unknown error"}`);
+      return;
+    }
+
+    setConnectionStatus("pending"); // update UI immediately
+
+    socket.emit("connectionRequest", {
+      from: currentUser.customUserId,
+      to: id,
+      message: `${currentUser.firstName || "Someone"} sent you a connection request.`,
+    });
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Connection request sent!", {
+        body: "Your request is now pending.",
+        icon: "/favicon.ico",
+      });
+    } else {
+      alert("Connection request sent!");
+    }
+  } catch (err: any) {
+    console.error("Error sending connection request:", err);
+    alert(`Connection request failed: ${err.message || "Unknown error"}`);
+  }
+};
+
+
 
   const fetchProjectData = async (pid: string) => {
     try {
@@ -177,32 +366,7 @@ const Profile = () => {
       return;
     }
 
-  //   try {
-  //     const user = auth.currentUser;
-  //     if (!user) {
-  //       toast.error("You must be logged in to delete a project.");
-  //       return;
-  //     }
-  //     const token = await user.getIdToken();
-
-  //     const response = await fetch(`http://localhost:3000/api/marketplace/projects/${projectId}`, {
-  //       method: 'DELETE',
-  //       headers: {
-  //         'Authorization': `Bearer ${token}`
-  //       }
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.error || "Failed to delete project.");
-  //     }
-
-  //     toast.success("Project deleted successfully!");
-  //     fetchUserData(); // Refresh the project list
-  //   } catch (error) {
-  //     toast.error(error.message);
-  //     console.error("Error deleting project:", error);
-  //   }
+  
   };
 
   // Always use a safe array for rendering
@@ -216,6 +380,17 @@ const Profile = () => {
     safePortfolioProjectsLength: safePortfolioProjects.length
   });
 
+  // 🔹 Button rendering
+const isSelf = currentUser?.customUserId === id;
+const disabled = isSelf || connectionStatus !== "none";
+const label =
+  connectionStatus === "none"
+    ? "Connect"
+    : connectionStatus === "pending"
+    ? "Pending"
+    : "Connected";
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Header />
@@ -228,11 +403,11 @@ const Profile = () => {
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-12 sm:my-[99px] py-6 sm:py-[34px] px-3 sm:px-[23px]">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 rounded-md bg-transparent my-6 sm:my-[99px] py-4 sm:py-[34px] px-3 sm:px-[23px]">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 w-full">
-              <div className="relative flex justify-center w-full md:w-auto mt-12 md:mt-0">
-                <Avatar className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-white shadow-lg mx-auto md:mx-0">
+            <div className="flex items-end gap-3 md:gap-6 w-full">
+              <div className="relative flex justify-start w-auto mt-0">
+                <Avatar className="w-24 h-24 sm:w-36 sm:h-36 border-4 border-white shadow-lg mx-auto md:mx-0">
                   <AvatarImage
                     src={getUserAvatarUrl({ avatar: profile.avatar })}
                     alt={fullName}
@@ -243,17 +418,23 @@ const Profile = () => {
                   </AvatarFallback>
                 </Avatar>
               </div>
-              <div className="flex-1 text-white mt-4 md:mt-0 w-full">
-                        <h1 className="text-4xl font-bold drop-shadow-lg mb-1.5 text-center md:text-left mobile-text-4xl">{profile.name}</h1>
-        <p className="text-base text-slate-200 drop-shadow-md text-center md:text-left mobile-text-base">{profile.title}</p>
+              <div className="flex-1 text-white mt-1 md:mt-0 w-full">
+                <h1 className="text-2xl sm:text-3xl font-bold drop-shadow-lg mb-1 text-left">{profile.name}</h1>
+                <p className="text-xs sm:text-sm text-slate-200 drop-shadow-md text-left">{(userData?.auth?.userType || '').charAt(0).toUpperCase() + (userData?.auth?.userType || '').slice(1) || profile.title}</p>
                 {/* Connect Button */}
-                <div className="flex flex-row items-center justify-center md:justify-start mt-4">
-                  <div className="flex flex-col w-full max-w-xs h-12 items-center justify-around gap-2 text-gray-200 bg-gray-100/20 rounded-2xl">
-                    <button className="flex items-center gap-2 text-white drop-shadow-md text-base sm:text-lg">
-                      <UserPlus className="w-6 h-6" />
-                      Connect
-                    </button>
-                  </div>
+                <div className="flex flex-row items-center justify-start mt-2">
+                  <button
+  onClick={handleConnect}
+  disabled={disabled}
+  className={`flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 ${
+    disabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+  }`}
+>
+  {label}
+</button>
+                  <button className="ml-2 p-2 rounded-full bg-gray-100/20 text-white">
+                    <Send className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -284,21 +465,48 @@ const Profile = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Column */}
           <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-            {/* About Section */}
-            <Card className="bg-white shadow-lg rounded-xl">
+            {/* Skills Section - Mobile Only - Moved to top for mobile */}
+            <Card className="bg-white shadow-lg rounded-xl lg:hidden">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+                    <span className="bg-indigo-100 p-2 rounded-lg mr-2 sm:mr-3">
+                      <Star className="w-5 h-5 text-indigo-600" />
+                    </span>
+                    Skills
+                  </h3>
+                </div>
+                <div className="flex flex-wrap gap-2 sm:gap-3">
+                  {profile.stats.skills && profile.stats.skills.length > 0 ? (
+                    profile.stats.skills.map((skill: any, index: number) => (
+                      <Badge key={index} className="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg">
+                        {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-xs sm:text-sm">No skills added yet.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* About Section */}
+            <Card className="bg-white shadow-lg rounded-xl">
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex items-center justify-between mb-2 sm:mb-4">
+                  <h3 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+
                     <span className="bg-purple-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <GraduationCap className="w-5 h-5 text-purple-600" />
                     </span>
                     About
-                  </h2>
+                  </h3>
                 </div>
                 <div>
-                  <p className="text-gray-700 leading-relaxed">{displayedText}</p>
+                  <p className="text-gray-700 leading-relaxed text-xs sm:text-base">{displayedText}</p>
                   {shouldTruncate && (
-                    <button className="mt-2 text-blue-600 hover:underline text-sm" onClick={() => setIsExpanded(!isExpanded)}>
+                    <button className="mt-2 text-blue-600 hover:underline text-xs sm:text-sm" onClick={() => setIsExpanded(!isExpanded)}>
                       {isExpanded ? "Read Less" : "Read More"}
                     </button>
                   )}
@@ -310,14 +518,16 @@ const Profile = () => {
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+
+                    <h3 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+
                       <span className="bg-blue-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <BookOpen className="w-5 h-5 text-blue-600" />
                       </span>
                       Academic Background
-                    </h2>
+                    </h3>
                   </div>
-                  <div className="space-y-4 sm:space-y-6">
+                  <div className="space-y-3 sm:space-y-6">
                     {education.map((edu, idx) => (
                       <div key={idx} className="border rounded-lg p-3 sm:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 bg-white">
                         <div>
@@ -338,14 +548,16 @@ const Profile = () => {
               <Card className="bg-white shadow-lg rounded-xl">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+
+                    <h3 className="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+
                       <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <Briefcase className="w-5 h-5 text-green-600" />
                       </span>
                       Work Experience
-                    </h2>
+                    </h3>
                   </div>
-                  <div className="space-y-4 sm:space-y-6">
+                  <div className="space-y-3 sm:space-y-6">
                     {workExperience.map((work, idx) => (
                       <div key={idx} className="border rounded-lg p-3 sm:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 bg-white">
                         <div>
@@ -364,13 +576,13 @@ const Profile = () => {
             {/* Portfolio Section */}
             <Card className="bg-white shadow-lg rounded-xl">
               <CardContent className="p-4 sm:p-6">
-                                  <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+                   <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 className="heading-card-2xl font-bold text-gray-900 flex items-center">
                       <span className="bg-green-100 p-2 rounded-lg mr-2 sm:mr-3">
                         <Briefcase className="w-5 h-5 text-green-600" />
                       </span>
                       Research Projects & Commercial Work
-                    </h2>
+                    </h3>
                   </div>
                 <div className="space-y-3 sm:space-y-4">
                   {safePortfolioProjects.length > 0 ? (
@@ -427,14 +639,14 @@ const Profile = () => {
           {/* Sidebar */}
           <div className="space-y-4 sm:space-y-6">
             {/* Skills Section */}
-            <Card className="bg-white shadow-lg rounded-xl max-w-full">
-              <CardContent className="p-4 sm:p-6">
+            <Card className="bg-white shadow-lg rounded-xl max-w-full hidden lg:block">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+                  <h3 className="text-sm sm:text-lg font-semibold text-gray-900 flex items-center">
                     <span className="bg-indigo-100 p-2 rounded-lg mr-2 sm:mr-3">
                       <Star className="w-5 h-5 text-indigo-600" />
                     </span>
-                    Research Skills & Technical Expertise
+                    Skills
                   </h3>
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -450,10 +662,12 @@ const Profile = () => {
                 </div>
               </CardContent>
             </Card>
-            <ChatBox
-              freelancerName={profile.name}
-              freelancerImage={getUserAvatarUrl({ avatar: profile.avatar })}
-            />
+            <div className="hidden md:block">
+              <ChatBox
+                freelancerName={profile.name}
+                freelancerImage={getUserAvatarUrl({ avatar: profile.avatar })}
+              />
+            </div>
           </div>
         </div>
       </div>

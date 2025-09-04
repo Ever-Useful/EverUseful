@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera, Upload, Image as ImageIcon, Edit3, Trash2, X, RotateCw, ZoomIn, ZoomOut, Eye, Frame, Crop, Filter, Settings, User } from 'lucide-react';
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { API_ENDPOINTS } from '../config/api';
 import s3Service from '@/services/s3Service';
 import userService from '@/services/userService';
 import toast from 'react-hot-toast';
+import NoUserProfile from '@/assets/images/no user profile.png';
 
 interface PhotoUploadProps {
   currentImage?: string;
@@ -139,28 +140,42 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
     try {
       setIsUploading(true);
+      // Capture previous S3 key from current image (if public S3 URL)
+      const previousKey = (currentImage && currentImage.includes('amazonaws.com/'))
+        ? currentImage.split('.amazonaws.com/')[1]?.split('?')[0] || ''
+        : '';
       const imageUrls = await s3Service.uploadProfileImage(selectedFile, type);
 
-      // Prefer medium for avatar, large for background
-      const chosen = type === 'avatar' ? imageUrls.medium.url : imageUrls.large.url;
+      // Use large for both to match required URL pattern
+      const chosen = imageUrls.large?.url || imageUrls.medium.url;
       
       // Since bucket is public, use direct URL with cache busting
       const cacheBusted = `${chosen}${chosen.includes('?') ? '&' : '?'}t=${Date.now()}`;
       
-      // Delete old image from S3 if it exists
-      if (currentImage && currentImage.includes('amazonaws.com/')) {
-        try {
-          const key = currentImage.split('.amazonaws.com/')[1]?.split('?')[0];
-          if (key) {
-            await s3Service.deleteImage(key);
-            console.log('Old image deleted successfully:', key);
-          }
-        } catch (deleteError) {
-          console.warn('Failed to delete old image, but continuing with upload:', deleteError);
+      // Delete prior image only if its key differs from the new uploaded keys
+      try {
+        const newKeys = [imageUrls.thumbnail?.key, imageUrls.small?.key, imageUrls.medium?.key, imageUrls.large?.key]
+          .filter(Boolean);
+        if (previousKey && !newKeys.includes(previousKey)) {
+          await s3Service.deleteImage(previousKey);
+          console.log('Old image deleted successfully (different key):', previousKey);
+        } else if (previousKey) {
+          console.log('Skipping delete since key appears unchanged/overwritten:', previousKey);
         }
+      } catch (deleteError) {
+        console.warn('Failed to delete old image (non-blocking):', deleteError);
       }
       
-      // Update the UI immediately
+      // Persist public URL to DynamoDB to ensure profile page picks it up
+      try {
+        const publicUrl = type === 'avatar' ? (imageUrls.large?.url || imageUrls.medium.url) : imageUrls.large.url;
+        if (type === 'avatar') await userService.updateUserProfile({ avatar: publicUrl });
+        else await userService.updateUserProfile({ backgroundImage: publicUrl });
+      } catch (err) {
+        console.warn('Failed to persist new image URL to DB:', err);
+      }
+
+      // Update UI with cache-busted public URL
       onImageUpload(cacheBusted);
 
       toast.success(`${type === 'avatar' ? 'Profile photo' : 'Cover photo'} updated successfully!`);
@@ -211,7 +226,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
     };
   };
 
-  // Profile Photo Modal (White Theme)
+  // Profile Photo Modal (White Theme) - LinkedIn Mobile Style
   if (type === 'avatar') {
     return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -220,200 +235,222 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
             {trigger}
           </div>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-white text-gray-900 border-gray-200 z-[60] max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="flex flex-row items-center justify-between pb-4">
-            <DialogTitle className="text-lg font-semibold">Profile photo</DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-              className="text-gray-600 hover:bg-gray-100"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+        <DialogContent className="max-w-md sm:max-w-lg bg-white text-gray-900 border-gray-200 z-[60] p-4 sm:p-6">
+          <DialogHeader className="flex flex-row items-center justify-between pb-4 sm:pb-6">
+            <DialogTitle className="text-lg sm:text-xl font-semibold">Profile photo</DialogTitle>
           </DialogHeader>
+          <DialogDescription className="sr-only">Upload or edit your profile photo</DialogDescription>
 
-          <div className="flex flex-col items-center space-y-4 py-2">
-            {/* Profile Photo Display */}
+          {/* Always-present hidden file input so Change/Upload buttons work regardless of tab/state */}
+          <Input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+
+          <div className="flex flex-col items-center space-y-4 sm:space-y-6 py-2 sm:py-4">
+            {/* Single preview at top */}
             <div className="relative">
-              {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="Profile preview"
-                  className="w-28 h-28 rounded-full object-cover border-4 border-gray-200 shadow-lg"
-                />
-              ) : currentImage ? (
-                <img
-                  src={currentImage}
-                  alt="Current profile"
-                  className="w-28 h-28 rounded-full object-cover border-4 border-gray-200 shadow-lg"
-                />
-              ) : (
-                <div className="w-28 h-28 rounded-full bg-gray-100 border-4 border-gray-200 flex items-center justify-center shadow-lg">
-                  <User className="w-14 h-14 text-gray-400" />
-                </div>
-              )}
+              <img
+                src={previewUrl || currentImage || NoUserProfile}
+                alt="Profile preview"
+                style={getImageStyle()}
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-gray-200 shadow-lg"
+              />
             </div>
 
             {/* Visibility Setting */}
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50 bg-white">
-                <Eye className="w-4 h-4 mr-2" />
+            {/* <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50 bg-white text-xs sm:text-sm px-3 sm:px-4 py-2">
+                <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 Anyone
               </Button>
-            </div>
-
-            {/* Upload Section */}
-            {!previewUrl && (
-              <div className="w-full space-y-4">
-                <div className="text-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors bg-gray-50">
-                  <Upload className="w-6 h-6 mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600 mb-2">Upload a new photo</p>
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    Choose File
-                  </Button>
-                  <Input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                </div>
-              </div>
+            </div> */}
+            {/* Optional helper when no image yet */}
+            {!previewUrl && !currentImage && (
+              <div className="text-xs sm:text-sm text-gray-600">Choose an image from the Upload tab to get started.</div>
             )}
           </div>
+          {/* Tabs below preview; compact */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
+            <TabsList className={`grid w-full ${(!currentImage && !previewUrl) ? 'grid-cols-2' : 'grid-cols-1'} mb-3`}>
+              {(!currentImage && !previewUrl) && (
+                <TabsTrigger value="upload" className="text-xs sm:text-sm">Upload</TabsTrigger>
+              )}
+              <TabsTrigger value="edit" className="text-xs sm:text-sm">Edit</TabsTrigger>
+            </TabsList>
 
-          {/* Action Buttons - Fixed layout */}
-          <div className="grid grid-cols-3 gap-1 pt-3 border-t border-gray-200">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setActiveTab('edit')}
-              disabled={!previewUrl}
-              className="text-gray-700 hover:bg-gray-100 text-xs px-2"
-            >
-              <Edit3 className="w-3 h-3 mr-1" />
-              Edit
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="text-gray-700 hover:bg-gray-100 text-xs px-2"
-            >
-              <Camera className="w-3 h-3 mr-1" />
-              Update
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={async () => {
-                try {
-                  // Attempt to delete from S3 if current image is an S3 URL and we can extract a key
-                  const img = currentImage || '';
-                  if (img.includes('amazonaws.com/')) {
-                    const key = img.split('.amazonaws.com/')[1]?.split('?')[0];
-                    if (key) {
-                      try { 
-                        await s3Service.deleteImage(key);
-                        console.log('S3 image deleted successfully:', key);
-                      } catch (s3Error) {
-                        console.warn('Failed to delete from S3, but continuing with profile update:', s3Error);
-                      }
-                    }
-                  }
-                  
-                  // Persist clear to backend profile
-                  await userService.updateUserProfile({ avatar: '' });
-                  
-                  // Clear on UI immediately
-                  onImageUpload('');
-                  toast.success('Profile photo removed successfully');
-                  resetState();
-                  setIsOpen(false);
-                } catch (e) {
-                  console.error('Delete photo failed:', e);
-                  toast.error('Failed to remove photo');
-                }
-              }}
-              disabled={!currentImage}
-              className="text-gray-700 hover:text-red-600 text-xs px-2"
-            >
-              <Trash2 className="w-3 h-3 mr-1" />
-              Delete
-            </Button>
-          </div>
+            {(!currentImage && !previewUrl) && (
+            <TabsContent value="upload" className="space-y-3">
+              <div className="text-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors bg-gray-50">
+                <Upload className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-400 mb-3 sm:mb-4" />
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">{currentImage ? 'Drag and drop to replace your photo, or click to browse' : 'Choose an image to set your profile photo'}</p>
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-4 py-2"
+                >
+                  Choose File
+                </Button>
+              </div>
+            </TabsContent>
+            )}
 
-          {/* Edit Section - Improved layout */}
-          {previewUrl && activeTab === 'edit' && (
-            <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="space-y-3">
+            <TabsContent value="edit" className="space-y-4 sm:space-y-6">
+              {(previewUrl || currentImage) && (
+                <div className="space-y-4 sm:space-y-6">
+                  {/* Preview is shown at the top; only controls below */}
+                  <div className="space-y-4 sm:space-y-6">
+                    <div>
+                      <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                        <RotateCw className="w-4 h-4" />
+                        Rotate
+                      </Label>
+                      <Slider
+                        value={[editOptions.rotate]}
+                        onValueChange={([value]) => handleEditOptionChange('rotate', value)}
+                        max={360}
+                        min={0}
+                        step={1}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                        <ZoomIn className="w-4 h-4" />
+                        Scale
+                      </Label>
+                      <Slider
+                        value={[editOptions.scale]}
+                        onValueChange={([value]) => handleEditOptionChange('scale', value)}
+                        max={200}
+                        min={50}
+                        step={1}
+                        className="mt-2"
+                      />
+                    </div>
                 <div>
-                  <Label className="text-xs text-gray-700 mb-1 block font-medium">Brightness</Label>
+                      <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                        <Filter className="w-4 h-4" />
+                        Brightness
+                      </Label>
                   <Slider
                     value={[editOptions.brightness]}
                     onValueChange={([value]) => handleEditOptionChange('brightness', value)}
                     max={200}
                     min={0}
                     step={1}
-                    className="mt-1"
-                    style={{
-                      '--slider-track-color': '#22c55e',
-                      '--slider-thumb-color': '#22c55e'
-                    } as React.CSSProperties}
+                        className="mt-2"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-700 mb-1 block font-medium">Contrast</Label>
+                      <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                        <Edit3 className="w-4 h-4" />
+                        Contrast
+                      </Label>
                   <Slider
                     value={[editOptions.contrast]}
                     onValueChange={([value]) => handleEditOptionChange('contrast', value)}
                     max={200}
                     min={0}
                     step={1}
-                    className="mt-1"
-                    style={{
-                      '--slider-track-color': '#22c55e',
-                      '--slider-thumb-color': '#22c55e'
-                    } as React.CSSProperties}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                        <ImageIcon className="w-4 h-4" />
+                        Saturation
+                      </Label>
+                      <Slider
+                        value={[editOptions.saturation]}
+                        onValueChange={([value]) => handleEditOptionChange('saturation', value)}
+                        max={200}
+                        min={0}
+                        step={1}
+                        className="mt-2"
                   />
                 </div>
               </div>
             </div>
           )}
+            </TabsContent>
 
-          {/* Bottom Action Buttons - Only show when editing */}
-          {previewUrl && activeTab === 'edit' && (
-            <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200">
+            <TabsContent value="gallery" className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
+                {galleryImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className="aspect-square bg-gray-200 rounded-lg cursor-pointer hover:opacity-75 transition-opacity"
+                    onClick={() => {
+                      setPreviewUrl(image);
+                      setActiveTab('edit');
+                    }}
+                  />
+                ))}
+            </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* Footer actions */}
+          <div className="flex flex-col sm:flex-row items-center justify-between pt-4 sm:pt-6 mt-2 sm:mt-4 border-t border-gray-200 gap-3 sm:gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                try {
+                  const img = currentImage || '';
+                  if (img.includes('amazonaws.com/')) {
+                    const key = img.split('.amazonaws.com/')[1]?.split('?')[0];
+                    if (key) {
+                      try {
+                        await s3Service.deleteImage(key);
+                      } catch (err) {
+                        console.warn('Failed to delete from S3:', err);
+                      }
+                    }
+                  }
+                  await userService.updateUserProfile({ avatar: '' });
+                  onImageUpload('');
+                  resetState();
+                  setActiveTab('upload');
+                  // keep dialog open so user can upload a new photo if they want
+                  toast.success('Profile photo removed successfully');
+                } catch (e) {
+                  console.error('Failed to remove avatar:', e);
+                  toast.error('Failed to remove photo');
+                }
+              }}
+              className="text-gray-600 hover:text-red-600 text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5"
+            >
+              Delete photo
+            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <Button
                 variant="outline"
-                onClick={resetState}
+                onClick={() => fileInputRef.current?.click()}
                 size="sm"
-                className="border-gray-300 text-gray-700 hover:bg-gray-50 text-xs px-3"
+                className="border-blue-600 text-blue-600 hover:bg-blue-50 text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 w-full sm:w-auto"
               >
-                Cancel
+                Change photo
               </Button>
               <Button
                 onClick={handleUpload}
-                disabled={isUploading}
+                disabled={isUploading || !selectedFile}
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 w-full sm:w-auto"
               >
-                {isUploading ? 'Uploading...' : 'Save'}
+                {isUploading ? 'Uploading...' : 'Apply'}
               </Button>
             </div>
-          )}
+          </div>
         </DialogContent>
       </Dialog>
     );
   }
 
-  // Cover Photo Modal (Light Theme)
+  // Cover Photo Modal (Light Theme) - LinkedIn Mobile Style
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -421,21 +458,31 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
           {trigger}
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white z-[60]">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="text-lg font-semibold text-gray-900">Cover image</DialogTitle>
-          <Button
+              <DialogContent className="max-w-4xl sm:max-w-5xl bg-white z-[60] p-4 sm:p-6">
+        <DialogHeader className="flex flex-row items-center justify-between pb-4 sm:pb-6">
+          <DialogTitle className="text-lg sm:text-xl font-semibold text-gray-900">Cover image</DialogTitle>
+          {/* <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsOpen(false)}
-            className="text-gray-600 hover:bg-gray-100"
+            className="text-gray-600 hover:bg-gray-100 h-8 w-8 sm:h-10 sm:w-10"
           >
-            <X className="w-4 h-4" />
-          </Button>
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+          </Button> */}
         </DialogHeader>
+        <DialogDescription className="sr-only">Upload or edit your cover image</DialogDescription>
 
-        <div className="space-y-4">
-          {/* Image Display */}
+        {/* Hidden file input for Change/Choose buttons in cover modal */}
+        <Input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+
+        <div className="space-y-4 sm:space-y-6">
+          {/* Image Display - LinkedIn Mobile Style */}
           <div className="relative">
             {previewUrl ? (
               <div className="relative border-2 border-gray-200 rounded-lg overflow-hidden">
@@ -443,7 +490,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                   src={previewUrl}
                   alt="Cover preview"
                   style={getImageStyle()}
-                  className="w-full max-h-96 object-cover"
+                  className="w-full max-h-64 sm:max-h-96 object-cover"
                 />
               </div>
             ) : currentImage ? (
@@ -451,30 +498,28 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 <img
                   src={currentImage}
                   alt="Current cover"
-                  className="w-full max-h-96 object-cover"
+                  className="w-full max-h-64 sm:max-h-96 object-cover"
                 />
               </div>
             ) : (
-              <div className="w-full h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+              <div className="w-full h-32 sm:h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                 <div className="text-center">
-                  <ImageIcon className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                  <p className="text-gray-600">No cover image selected</p>
+                  <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-400 mb-2 sm:mb-3" />
+                  <p className="text-xs sm:text-sm text-gray-600">No cover image selected</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Upload Section */}
-          {!previewUrl && (
-            <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
-              <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Upload cover image</h3>
-              <p className="text-gray-600 mb-4">
-                Choose an image from your device
-              </p>
+          {/* Upload Section - show only when no existing cover image */}
+          {!previewUrl && !currentImage && (
+            <div className="text-center p-6 sm:p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
+              <Upload className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-400 mb-3 sm:mb-4" />
+              <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Upload cover image</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">Choose a high-quality image that represents your profile</p>
               <Button
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5"
               >
                 Choose File
               </Button>
@@ -488,35 +533,32 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
             </div>
           )}
 
-          {/* Edit Tools */}
+          {/* Edit Section - LinkedIn Mobile Style */}
           {previewUrl && (
-            <div className="space-y-4">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-gray-50 p-1 rounded-lg">
-                  <TabsTrigger value="crop" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                    <Crop className="w-4 h-4 mr-2" />
-                    Crop
-                  </TabsTrigger>
-                  <TabsTrigger value="filters" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filters
-                  </TabsTrigger>
-                  <TabsTrigger value="adjust" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Adjust
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="crop" className="space-y-4">
-                  <div className="space-y-4">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div>
+                  <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                    <RotateCw className="w-4 h-4" />
+                    Rotate
+                  </Label>
+                  <Slider
+                    value={[editOptions.rotate]}
+                    onValueChange={([value]) => handleEditOptionChange('rotate', value)}
+                    max={360}
+                    min={0}
+                    step={1}
+                    className="mt-2"
+                  />
+                </div>
                     <div>
-                      <Label className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2 text-xs sm:text-sm">
                         <ZoomIn className="w-4 h-4" />
-                        Zoom
+                    Scale
                       </Label>
                       <Slider
-                        value={[editOptions.zoom]}
-                        onValueChange={([value]) => handleEditOptionChange('zoom', value)}
+                    value={[editOptions.scale]}
+                    onValueChange={([value]) => handleEditOptionChange('scale', value)}
                         max={200}
                         min={50}
                         step={1}
@@ -524,47 +566,8 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="flex items-center gap-2">
-                        <RotateCw className="w-4 h-4" />
-                        Straighten
-                      </Label>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditOptionChange('straighten', editOptions.straighten - 1)}
-                        >
-                          -
-                        </Button>
-                        <Slider
-                          value={[editOptions.straighten]}
-                          onValueChange={([value]) => handleEditOptionChange('straighten', value)}
-                          max={45}
-                          min={-45}
-                          step={1}
-                          className="flex-1"
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditOptionChange('straighten', editOptions.straighten + 1)}
-                        >
-                          +
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="filters" className="space-y-4">
-                  <p className="text-gray-600">Filter options coming soon...</p>
-                </TabsContent>
-
-                <TabsContent value="adjust" className="space-y-4">
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="flex items-center gap-2">
-                        <ZoomIn className="w-4 h-4" />
+                  <Label className="flex items-center gap-2 text-xs sm:text-sm">
+                    <Filter className="w-4 h-4" />
                         Brightness
                       </Label>
                       <Slider
@@ -577,7 +580,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2 text-xs sm:text-sm">
                         <Edit3 className="w-4 h-4" />
                         Contrast
                       </Label>
@@ -591,7 +594,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2 text-xs sm:text-sm">
                         <ImageIcon className="w-4 h-4" />
                         Saturation
                       </Label>
@@ -605,14 +608,12 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                       />
                     </div>
                   </div>
-                </TabsContent>
-              </Tabs>
             </div>
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-200">
+        {/* Action Buttons - compact */}
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-4 mt-2 border-t border-gray-200 gap-3">
           <Button
             variant="ghost"
             onClick={async () => {
@@ -639,31 +640,31 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 onImageUpload('');
                 toast.success('Cover photo removed successfully');
                 resetState();
-                setIsOpen(false);
+                setActiveTab('upload');
               } catch (e) {
                 console.error('Delete photo failed:', e);
                 toast.error('Failed to remove photo');
               }
             }}
             size="sm"
-            className="text-gray-600 hover:text-red-600"
+            className="text-gray-600 hover:text-red-600 text-xs sm:text-sm px-3 py-2"
           >
             Delete photo
           </Button>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               size="sm"
-              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              className="border-blue-600 text-blue-600 hover:bg-blue-50 text-xs sm:text-sm px-3 py-2 w-full sm:w-auto"
             >
               Change photo
             </Button>
             <Button
               onClick={handleUpload}
-              disabled={isUploading}
+              disabled={isUploading || !selectedFile}
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-3 py-2 w-full sm:w-auto"
             >
               {isUploading ? 'Uploading...' : 'Apply'}
             </Button>

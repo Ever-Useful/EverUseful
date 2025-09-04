@@ -7,12 +7,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { useEffect } from "react";
+import CookieConsent from "@/components/CookieConsent";
 
 
 // Lazy load all pages for code splitting
 const Index = React.lazy(() => import("@/pages/Index"));
 const SignIn = React.lazy(() => import("@/pages/SignIn"));
 const SignUp = React.lazy(() => import("@/pages/SignUp"));
+const EmailVerification = React.lazy(() => import("@/pages/EmailVerification"));
+const AuthAction = React.lazy(() => import("@/pages/AuthAction"));
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const Profile = React.lazy(() => import("@/pages/Profile"));
 const Marketplace = React.lazy(() => import("@/pages/Marketplace"));
@@ -38,6 +41,7 @@ const Sustainable = React.lazy(() => import("@/pages/Sustainable"));
 const AiAgents = React.lazy(() => import("@/pages/AiAgents"));
 const Admin = React.lazy(() => import("@/pages/Admin"));
 const NotFound = React.lazy(() => import("@/pages/NotFound"));
+const CampusAmbassadorPage = React.lazy(() => import("@/pages/CampusAmbassadorPage"));
 
 // Policy pages
 const PrivacyPolicy = React.lazy(() => import("@/pages/Policy/PrivacyPolicy"));
@@ -94,6 +98,9 @@ const App = () => (
           >
             <GlobalScrollToTop />
             
+            {/* Cookie Consent Banner */}
+            <CookieConsent />
+            
              <Routes>
             <Route path="/" element={
               <Suspense fallback={null}>
@@ -108,6 +115,16 @@ const App = () => (
             <Route path="/signup" element={
               <Suspense fallback={<PageLoader />}>
                 <SignUp />
+              </Suspense>
+            } />
+            <Route path="/email-verification" element={
+              <Suspense fallback={<PageLoader />}>
+                <EmailVerification />
+              </Suspense>
+            } />
+            <Route path="/auth/action" element={
+              <Suspense fallback={<PageLoader />}>
+                <AuthAction />
               </Suspense>
             } />
             <Route path="/dashboard" element={
@@ -275,6 +292,12 @@ const App = () => (
             <Route path="/sendfeedback" element={
               <Suspense fallback={<PageLoader />}>
                 <SendFeedback />
+              </Suspense>
+            } />
+            
+            <Route path="/campus-ambassador" element={
+              <Suspense fallback={<PageLoader />}>
+                <CampusAmbassadorPage />
               </Suspense>
             } />
             
