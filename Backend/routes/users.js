@@ -2,22 +2,19 @@ const express = require('express');
 const router = express.Router();
 const authorize = require('../authorize');
 const userService = require('../services/userService');
+const dynamoDB = require('../services/dynamoDBService'); // Added for check-phone endpoint
 
 // Get user profile
 router.get('/profile', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
-    console.log('Profile endpoint - Firebase UID:', firebaseUid);
-    console.log('Profile endpoint - User from token:', req.user);
     
     // Fetch user from DynamoDB using Firebase UID
     let user = await userService.findUserByFirebaseUid(firebaseUid);
-    console.log('Profile endpoint - Found user:', user ? 'Yes' : 'No');
     
     if (!user) {
       // Create new user in DynamoDB
       const { name, email } = req.user;
-      console.log('Profile endpoint - Creating new user with data:', { name, email });
       
       // Parse firstName and lastName from name if available
       let firstName = '';
@@ -29,7 +26,7 @@ router.get('/profile', authorize, async (req, res) => {
       }
       
       try {
-        const newUser = await userService.createUser(firebaseUid, {
+        const newUser = await userService.createUserWithPhoneVerification(firebaseUid, {
           firstName: firstName,
           lastName: lastName,
           email: email || 'no-email@example.com',
@@ -39,7 +36,6 @@ router.get('/profile', authorize, async (req, res) => {
         });
         
         user = await userService.findUserByFirebaseUid(firebaseUid);
-        console.log('Profile endpoint - New user created:', user.customUserId);
       } catch (createError) {
         console.error('Profile endpoint - Error creating user:', createError);
         return res.status(500).json({ success: false, message: 'Failed to create user' });
@@ -58,9 +54,6 @@ router.get('/profile', authorize, async (req, res) => {
       gender: profile.gender || '',
       username: profile.username || profile.email?.split('@')[0] || ''
     };
-    
-    console.log('Profile endpoint - Auth data being sent:', auth);
-    console.log('Profile endpoint - Profile data being sent:', profile);
     
     res.json({
       success: true,
@@ -957,6 +950,101 @@ router.get('/:customUserId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching user by customUserId:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Phone verification endpoints
+router.post('/verify-phone', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { phoneNumber } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({ success: false, message: 'Phone number is required' });
+    }
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Check if phone number is already verified by another user
+    const existingUser = await userService.findUserByPhone(phoneNumber);
+    if (existingUser && existingUser.customUserId !== user.customUserId) {
+      return res.status(400).json({ success: false, message: 'Phone number already registered with another account' });
+    }
+    
+    // Update phone number and mark as verified
+    await userService.verifyPhoneNumber(user.customUserId, phoneNumber, true);
+    
+    res.json({ success: true, message: 'Phone number verified successfully' });
+  } catch (error) {
+    console.error('Error verifying phone number:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+router.post('/resend-phone-verification', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    const { phoneNumber } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({ success: false, message: 'Phone number is required' });
+    }
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Update phone number and mark as unverified
+    await userService.verifyPhoneNumber(user.customUserId, phoneNumber, false);
+    
+    res.json({ success: true, message: 'Phone verification code resent' });
+  } catch (error) {
+    console.error('Error resending phone verification:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Email verification endpoint
+router.post('/verify-email', authorize, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+    
+    const user = await userService.findUserByFirebaseUid(firebaseUid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Mark email as verified
+    await userService.updateEmailVerificationStatus(user.customUserId, true);
+    
+    res.json({ success: true, message: 'Email verified successfully' });
+  } catch (error) {
+    console.error('Error verifying email:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Check if phone number is registered
+router.post('/check-phone', async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+    
+    // Check if phone number exists in the database using the service layer
+    const existingUser = await userService.findUserByPhone(phoneNumber);
+    const exists = !!existingUser;
+    
+    res.json({ exists });
+  } catch (error) {
+    console.error('Error checking phone registration:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import userService from '@/services/userService';
 import { setAuthCookie, getAuthCookie, deleteAuthCookie, setFirebaseRefreshCookie, getFirebaseRefreshCookie, deleteFirebaseRefreshCookie } from '@/utils/cookieUtils';
+import { API_ENDPOINTS } from '@/config/api';
 
 interface UserProfile {
   firstName: string;
@@ -73,45 +74,72 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
     localStorage.removeItem("userProfile");
   };
 
-  const refreshProfile = async () => {
-    if (!isLoggedIn || hasRefreshed) return;
+  const refreshProfile = useCallback(async () => {
+    // Prevent multiple simultaneous refreshes
+    if (isLoading) return;
     
     // Clear any existing timeout
     if (refreshTimeout) {
       clearTimeout(refreshTimeout);
     }
     
-    // Set a new timeout to debounce rapid calls
     const timeout = setTimeout(async () => {
-      setIsLoading(true);
       try {
-        const userProfile = await userService.getUserProfile();
-        console.log('UserProfileContext - Raw userProfile:', userProfile);
+        setIsLoading(true);
+        const user = auth.currentUser;
         
-        const newProfileData = {
-          firstName: userProfile.data?.auth?.firstName || '',
-          lastName: userProfile.data?.auth?.lastName || '',
-          avatar: userProfile.data?.profile?.avatar || '',
-          customUserId: userProfile.data?.customUserId,
-          userType: userProfile.data?.auth?.userType,
-          email: userProfile.data?.auth?.email,
-        };
-        
-        console.log('UserProfileContext - Processed profile data:', newProfileData);
-        console.log('UserProfileContext - Avatar from backend:', userProfile.data?.profile?.avatar);
-        
-        setProfileData(newProfileData);
-        localStorage.setItem("userProfile", JSON.stringify(newProfileData));
-        setHasRefreshed(true);
+        if (!user) {
+          console.log('No user found, clearing profile');
+          clearProfile();
+          return;
+        }
+
+        const token = await user.getIdToken();
+        const response = await fetch(API_ENDPOINTS.USER_PROFILE, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const raw = await response.json();
+          console.log('UserProfileContext - Profile data loaded:', raw);
+
+          // Normalize to the shape Header expects
+          const normalized = {
+            firstName: raw?.data?.auth?.firstName || raw?.data?.profile?.firstName || '',
+            lastName: raw?.data?.auth?.lastName || raw?.data?.profile?.lastName || '',
+            avatar: raw?.data?.profile?.avatar || '',
+            customUserId: raw?.data?.customUserId,
+            userType: raw?.data?.auth?.userType,
+            email: raw?.data?.auth?.email,
+          };
+
+          // Only update if data actually changed
+          setProfileData(prevData => {
+            if (JSON.stringify(prevData) !== JSON.stringify(normalized)) {
+              return normalized;
+            }
+            return prevData;
+          });
+
+          // Cache the normalized profile data
+          localStorage.setItem("userProfile", JSON.stringify(normalized));
+          setHasRefreshed(true);
+        } else {
+          console.error('Failed to fetch profile:', response.status);
+          // Don't clear profile on fetch failure, keep existing data
+        }
       } catch (error) {
         console.error('Error refreshing profile:', error);
+        // Don't clear profile on error, keep existing data
       } finally {
         setIsLoading(false);
       }
     }, 1000); // 1 second debounce
     
     setRefreshTimeout(timeout);
-  };
+  }, [isLoading]); // Only depend on isLoading
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -165,7 +193,7 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
         clearTimeout(refreshTimeout);
       }
     };
-  }, [refreshTimeout]);
+  }, []); // Remove refreshTimeout from dependencies
 
   // Listen for storage changes (when user logs in/out in another tab)
   useEffect(() => {
