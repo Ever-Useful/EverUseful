@@ -32,6 +32,11 @@ export const API_ENDPOINTS = {
   USER_BULK: (ids: string) => getApiUrl(`/api/users/bulk/${ids}`),
   get USER_FOLLOW() { return getApiUrl('/api/users/follow'); },
   
+  // Phone verification endpoints
+  get VERIFY_PHONE() { return getApiUrl('/api/users/verify-phone'); },
+  get RESEND_PHONE_VERIFICATION() { return getApiUrl('/api/users/resend-phone-verification'); },
+  get VERIFY_EMAIL() { return getApiUrl('/api/users/verify-email'); },
+  
   // S3 endpoints
   get S3_UPLOAD_PROFILE_IMAGE() { return getApiUrl('/api/s3/upload-profile-image'); },
   get S3_UPLOAD_PROJECT_IMAGES() { return getApiUrl('/api/s3/upload-project-images'); },

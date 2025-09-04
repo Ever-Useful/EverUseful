@@ -377,7 +377,7 @@ const Header = () => {
                 localStorage.setItem("isLoggedIn", "true");
 
                 // Only fetch user profile if the current page needs it AND we don't have cached data
-                if (needsUserData) {
+                if (needsUserData && !profileData.firstName) {
                     await refreshProfile();
                 }
             } else {
@@ -385,15 +385,15 @@ const Header = () => {
             }
         });
         return () => unsubscribe();
-    }, [needsUserData, refreshProfile]);
+    }, [needsUserData, profileData.firstName]); // Remove refreshProfile from dependencies
 
     // Ensure header greeting and sidebar get data quickly after login
     useEffect(() => {
-        if (isLoggedIn && !profileData.firstName && !isLoading) {
-            // Fetch profile if names are missing
+        if (isLoggedIn && !profileData.firstName && !isLoading && needsUserData) {
+            // Fetch profile if names are missing and we need user data
             refreshProfile();
         }
-    }, [isLoggedIn, profileData.firstName, isLoading, refreshProfile]);
+    }, [isLoggedIn, profileData.firstName, isLoading, needsUserData]); // Remove refreshProfile from dependencies
 
     // Function to refresh profile data - only called when explicitly needed
     const refreshProfileData = async () => {

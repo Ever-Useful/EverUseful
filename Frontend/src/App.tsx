@@ -14,6 +14,8 @@ import CookieConsent from "@/components/CookieConsent";
 const Index = React.lazy(() => import("@/pages/Index"));
 const SignIn = React.lazy(() => import("@/pages/SignIn"));
 const SignUp = React.lazy(() => import("@/pages/SignUp"));
+const EmailVerification = React.lazy(() => import("@/pages/EmailVerification"));
+const AuthAction = React.lazy(() => import("@/pages/AuthAction"));
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const Profile = React.lazy(() => import("@/pages/Profile"));
 const Marketplace = React.lazy(() => import("@/pages/Marketplace"));
@@ -113,6 +115,16 @@ const App = () => (
             <Route path="/signup" element={
               <Suspense fallback={<PageLoader />}>
                 <SignUp />
+              </Suspense>
+            } />
+            <Route path="/email-verification" element={
+              <Suspense fallback={<PageLoader />}>
+                <EmailVerification />
+              </Suspense>
+            } />
+            <Route path="/auth/action" element={
+              <Suspense fallback={<PageLoader />}>
+                <AuthAction />
               </Suspense>
             } />
             <Route path="/dashboard" element={
