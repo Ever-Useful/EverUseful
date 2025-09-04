@@ -276,6 +276,21 @@ const Profile = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        // Check if email is verified
+        if (!user.emailVerified) {
+          // Redirect to email verification page
+          navigate('/email-verification');
+          return;
+        }
+        
+        // Check if user is signed up but not verified
+        const isSignedUp = localStorage.getItem('isSignedUp');
+        if (isSignedUp === 'true') {
+          // Redirect to email verification page
+          navigate('/email-verification');
+          return;
+        }
+        
         fetchUserData();
       } else {
         setLoading(false);
