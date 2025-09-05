@@ -11,6 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 const ScheduleMeeting = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const ScheduleMeeting = () => {
       };
 
       // Send meeting data to backend API (DynamoDB)
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/users'}/meetings`, {
+      const response = await fetch(API_ENDPOINTS.USER_MEETINGS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +82,7 @@ const ScheduleMeeting = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="max-w-2xl mx-auto p-6">
-        <h1 className="text-4xl font-bold text-slate-800 mb-6 mobile-text-4xl">Schedule Meeting</h1>
+        <h1 className="text-4xl font-bold text-slate-800 mb-6 mobile-text-2xl">Schedule Meeting</h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">

@@ -4,6 +4,15 @@ const authorize = require('../authorize');
 const dynamoDBService = require('../services/dynamoDBService');
 const userService = require('../services/userService');
 
+// Safely import S3 service
+let s3Service;
+try {
+  s3Service = require('../services/s3Service');
+} catch (error) {
+  console.warn('S3 service not available, S3 deletion will be skipped:', error.message);
+  s3Service = null;
+}
+
 // Get all projects with optional search and filters
 router.get('/projects', async (req, res) => {
   try {
@@ -15,66 +24,78 @@ router.get('/projects', async (req, res) => {
     if (search) {
       const searchLower = search.toLowerCase();
       filteredProjects = filteredProjects.filter(project => 
-        project.title.toLowerCase().includes(searchLower) ||
-        project.description.toLowerCase().includes(searchLower) ||
-        project.tags.some(tag => tag.toLowerCase().includes(searchLower))
+        project.title?.toLowerCase().includes(searchLower) ||
+        project.description?.toLowerCase().includes(searchLower) ||
+        (Array.isArray(project.tags) && project.tags.some(tag => tag.toLowerCase().includes(searchLower)))
       );
     }
 
     // Apply category filter
     if (category) {
-      filteredProjects = filteredProjects.filter(project => project.category === category);
+      filteredProjects = filteredProjects.filter(project => project.category && project.category === category);
     }
 
     // Apply price range filter
     if (minPrice || maxPrice) {
       filteredProjects = filteredProjects.filter(project => {
-        if (minPrice && project.price < parseInt(minPrice)) return false;
-        if (maxPrice && project.price > parseInt(maxPrice)) return false;
+        if (minPrice && (!project.price || project.price < parseInt(minPrice))) return false;
+        if (maxPrice && (!project.price || project.price > parseInt(maxPrice))) return false;
         return true;
       });
     }
 
     // Apply rating filter
     if (minRating) {
-      filteredProjects = filteredProjects.filter(project => project.rating >= parseFloat(minRating));
+      filteredProjects = filteredProjects.filter(project => project.rating && project.rating >= parseFloat(minRating));
     }
 
     // Apply skills filter
     if (skills) {
       const skillsList = skills.split(',');
       filteredProjects = filteredProjects.filter(project =>
-        skillsList.some(skill => project.skills.includes(skill))
+        Array.isArray(project.skills) && skillsList.some(skill => project.skills.includes(skill))
       );
     }
 
     // Apply duration filter
     if (duration) {
-      filteredProjects = filteredProjects.filter(project => project.duration === duration);
+      filteredProjects = filteredProjects.filter(project => project.duration && project.duration === duration);
     }
 
     // Apply sorting
     if (sort) {
       switch (sort) {
         case 'recent':
-          filteredProjects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
+          filteredProjects.sort((a, b) => {
+            const dateA = a.posted ? new Date(a.posted).getTime() : 0;
+            const dateB = b.posted ? new Date(b.posted).getTime() : 0;
+            return dateB - dateA;
+          });
           break;
         case 'rating':
-          filteredProjects.sort((a, b) => b.rating - a.rating);
+          filteredProjects.sort((a, b) => (b.rating || 0) - (a.rating || 0));
           break;
         case 'price_asc':
-          filteredProjects.sort((a, b) => a.price - b.price);
+          filteredProjects.sort((a, b) => (a.price || 0) - (b.price || 0));
           break;
         case 'price_desc':
-          filteredProjects.sort((a, b) => b.price - a.price);
+          filteredProjects.sort((a, b) => (b.price || 0) - (a.price || 0));
           break;
         default:
           // Default to most recent if sort is invalid
-          filteredProjects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
+          filteredProjects.sort((a, b) => {
+            const dateA = a.posted ? new Date(a.posted).getTime() : 0;
+            const dateB = b.posted ? new Date(b.posted).getTime() : 0;
+            return dateB - dateA;
+          });
       }
     } else {
       // Default to most recent if no sort specified
-      filteredProjects.sort((a, b) => new Date(b.posted).getTime() - new Date(a.posted).getTime());
+      filteredProjects.sort((a, b) => {
+        const dateA = a.posted ? new Date(a.posted).getTime() : 0;
+        const dateB = b.posted ? new Date(b.posted).getTime() : 0;
+        return dateB - dateA;
+      });
     }
 
     // Calculate pagination
@@ -85,8 +106,8 @@ router.get('/projects', async (req, res) => {
     const startIndex = (pageNum - 1) * limitNum;
     const endIndex = startIndex + limitNum;
     const paginatedProjects = filteredProjects.slice(startIndex, endIndex).map(project => {
-      // Only return author as customUserId
-      return { ...project, author: project.author };
+      // Only return author as customUserId, ensure author exists
+      return { ...project, author: project.author || '' };
     });
     res.json({ 
       projects: paginatedProjects,
@@ -271,29 +292,153 @@ router.post('/projects', authorize, async (req, res) => {
 router.delete('/projects/:id', authorize, async (req, res) => {
   try {
     const { id } = req.params;
-    const firebaseUid = req.user.uid;
+    const firebaseUid = req.user?.uid || req.user?.user_id || req.user?.sub;
+    
+    if (!firebaseUid) {
+      return res.status(400).json({ error: 'User authentication failed - no UID found' });
+    }
     
     const project = await dynamoDBService.getMarketplaceItem(id);
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
     }
 
-    // Verify that the user deleting the project is the author
-    const user = await userService.findUserByFirebaseUid(firebaseUid);
-    if (!user || user.customUserId !== project.author) {
-      return res.status(403).json({ error: 'You are not authorized to delete this project' });
+    // Validate project structure
+    if (!project.author) {
+      return res.status(400).json({ error: 'Project data is corrupted - missing author information' });
     }
 
+    // Verify that the user deleting the project is the author
+    let user;
+    try {
+      user = await userService.findUserByFirebaseUid(firebaseUid);
+      
+      if (!user) {
+        // Check if we can still proceed if project.author matches firebaseUid
+        if (project.author === firebaseUid) {
+          user = { customUserId: firebaseUid }; // Create a minimal user object
+        } else {
+          return res.status(404).json({ error: 'User not found' });
+        }
+      }
+      
+      if (user.customUserId !== project.author) {
+        // Check if project.author might be the firebaseUid instead
+        if (firebaseUid === project.author) {
+          // Proceed with deletion
+        } else {
+          return res.status(403).json({ error: 'You are not authorized to delete this project' });
+        }
+      }
+    } catch (userError) {
+      // Check if we can still proceed if project.author matches firebaseUid
+      if (project.author === firebaseUid) {
+        user = { customUserId: firebaseUid }; // Create a minimal user object
+      } else {
+        return res.status(500).json({ 
+          error: 'Failed to verify user authorization',
+          errorMessage: userError.message
+        });
+      }
+    }
+
+    // Delete all images associated with the project from S3
+    if (s3Service) {
+      try {
+        // Delete main project image
+        if (project.image && project.image.includes('amazonaws.com/')) {
+          try {
+            const key = project.image.split('.amazonaws.com/')[1]?.split('?')[0];
+            if (key) {
+              await s3Service.deleteImage(key);
+            }
+          } catch (imgError) {
+            console.warn('Failed to delete main project image:', imgError.message);
+          }
+        }
+        
+        // Delete project images array
+        if (project.images && Array.isArray(project.images)) {
+          for (const imageUrl of project.images) {
+            if (imageUrl && imageUrl.includes('amazonaws.com/')) {
+              try {
+                const key = imageUrl.split('.amazonaws.com/')[1]?.split('?')[0];
+                if (key) {
+                  await s3Service.deleteImage(key);
+                }
+              } catch (imgError) {
+                console.warn('Failed to delete project image:', imgError.message);
+              }
+            }
+          }
+        }
+        
+        // Delete attachments if they exist
+        if (project.attachments && Array.isArray(project.attachments)) {
+          for (const attachment of project.attachments) {
+            if (attachment.url && attachment.url.includes('amazonaws.com/')) {
+              try {
+                const key = attachment.url.split('.amazonaws.com/')[1]?.split('?')[0];
+                if (key) {
+                  await s3Service.deleteImage(key);
+                }
+              } catch (imgError) {
+                console.warn('Failed to delete project attachment:', imgError.message);
+              }
+            }
+          }
+        }
+      } catch (s3Error) {
+        console.warn('Failed to delete some S3 images, but continuing with project deletion:', s3Error.message);
+      }
+    }
+    
     // Delete project from DynamoDB
-    await dynamoDBService.deleteMarketplaceItem(id);
+    try {
+      await dynamoDBService.deleteMarketplaceItem(id);
+    } catch (dbError) {
+      console.error('Failed to delete project from DynamoDB:', dbError);
+      return res.status(500).json({ 
+        error: 'Failed to delete project from database',
+        errorMessage: dbError.message
+      });
+    }
 
     // Remove project from user's created list
-    await userService.removeUserProject(user.customUserId, id);
+    try {
+      if (user && user.customUserId) {
+        await userService.removeUserProject(user.customUserId, id);
+      }
+    } catch (userError) {
+      console.warn('Failed to remove project from user\'s created list:', userError.message);
+      // Don't fail the entire operation for this
+    }
 
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
     console.error('Error deleting project:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    
+    // Provide more specific error messages
+    if (error.name === 'ConditionalCheckFailedException') {
+      return res.status(404).json({ error: 'Project not found or already deleted' });
+    }
+    
+    if (error.name === 'ResourceNotFoundException') {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    // Check if it's an S3 permission error
+    if (error.message && error.message.includes('AccessDenied')) {
+      return res.status(500).json({ 
+        error: 'S3 access denied - check IAM permissions',
+        errorMessage: error.message
+      });
+    }
+    
+    res.status(500).json({ 
+      error: 'Internal server error',
+      errorMessage: error.message || null
+    });
   }
 });
 
@@ -338,7 +483,7 @@ router.put('/projects/:id', authorize, async (req, res) => {
 
     // Update allowed fields only
     const allowedFields = [
-      'title', 'description', 'category', 'price', 'duration', 'status', 'tags', 'skills', 'image', 'attachments'
+      'title', 'description', 'category', 'price', 'duration', 'status', 'tags', 'skills', 'image', 'images', 'attachments', 'features', 'techStack', 'deliverables'
     ];
     
     const updateData = {};

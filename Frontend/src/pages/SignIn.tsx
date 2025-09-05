@@ -10,16 +10,17 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Github, Linkedin, Shield, Smartphone, Mail, Check, Phone } from "lucide-react";
-import { auth, handleGithubAuth, handleGoogleAuth, loginWithEmailPassword } from "@/lib/firebase";
-import { sendEmailVerification, RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail } from "firebase/auth";
-import { userService } from '@/services/userService';
+import { Eye, EyeOff, ArrowRight, Sparkles, Star, Users, BookOpen, Building2, Github, Linkedin, Shield, Smartphone, Mail, Check, Phone, Clock } from "lucide-react";
+import { auth, handleGithubAuth, handleGoogleAuth, loginWithEmailPassword, sendPhoneOTP, verifyPhoneOTP, resetPassword } from "@/lib/firebase";
+import { RecaptchaVerifier } from "firebase/auth";
+import userService from '@/services/userService';
 import Logo from '../assets/Logo/Logo Side.png'
+import { API_ENDPOINTS } from "@/config/api";
 
 // Extend the Window interface to include confirmationResult
 declare global {
   interface Window {
-    confirmationResult: any; // You can specify a more precise type if needed
+    confirmationResult: any; 
     recaptchaVerifier: RecaptchaVerifier | null;
     recaptchaWidgetId: number;
   }
@@ -44,12 +45,28 @@ const SignIn = () => {
 
   // New states for mobile authentication
   const [authMethod, setAuthMethod] = useState("email");
-  const [countryCode, setCountryCode] = useState("+1");
+  const [countryCode, setCountryCode] = useState("+91");
   const [mobileNumber, setMobileNumber] = useState("");
   const [showMobileOTP, setShowMobileOTP] = useState(false);
   const [mobileOTP, setMobileOTP] = useState("");
+  const [hasAttemptedOTP, setHasAttemptedOTP] = useState(false);
 
   const [recaptchaInitialized, setRecaptchaInitialized] = useState(false);
+
+  // Helper function to handle Firebase rate limiting errors
+  const handleFirebaseRateLimitError = (error: any, now: number) => {
+    if (error.code === 'auth/too-many-requests') {
+      setLastOtpRequestTime(now);
+      setOtpCountdown(300); // 5 minutes cooldown for Firebase rate limiting
+      setError('Too many requests. Please wait 5 minutes before trying again.');
+    } else if (error.code === 'auth/quota-exceeded') {
+      setError('Daily quota exceeded. Please try again tomorrow.');
+    } else {
+      setError(error.message || "Failed to send OTP. Please try again.");
+    }
+  };
+  const [lastOtpRequestTime, setLastOtpRequestTime] = useState(0);
+  const [otpCountdown, setOtpCountdown] = useState(0);
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +76,16 @@ const SignIn = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Control Firebase phone test mode via env, do not disable in production
+  useEffect(() => {
+    const useTestPhones = import.meta.env.VITE_USE_TEST_PHONE === 'true';
+    if (useTestPhones) {
+      auth.settings.appVerificationDisabledForTesting = true;
+    } else {
+      auth.settings.appVerificationDisabledForTesting = false as any;
+    }
+  }, []);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -75,6 +102,51 @@ const SignIn = () => {
     }, 3000);
 
     return () => clearInterval(interval);
+  }, []);
+  
+  // Handle OTP countdown timer
+  useEffect(() => {
+    if (lastOtpRequestTime > 0 || otpCountdown > 0) {
+      const timer = setInterval(() => {
+        const now = Date.now();
+        const timeSinceLastRequest = now - lastOtpRequestTime;
+        const remainingTime = Math.max(0, 60000 - timeSinceLastRequest);
+        
+        // Stop countdown if mobile OTP is shown or if time is up
+        if (remainingTime <= 0 || showMobileOTP) {
+          setOtpCountdown(0);
+          clearInterval(timer);
+        } else if (otpCountdown > 0) {
+          setOtpCountdown(prev => Math.max(0, prev - 1));
+        } else {
+          setOtpCountdown(Math.ceil(remainingTime / 1000));
+        }
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [lastOtpRequestTime, otpCountdown, showMobileOTP]);
+  
+  // Stop countdown when mobile OTP is shown
+  useEffect(() => {
+    if (showMobileOTP) {
+      setOtpCountdown(0);
+    }
+  }, [showMobileOTP]);
+  
+  // Stop countdown when user is logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    if (isLoggedIn) {
+      setOtpCountdown(0);
+    }
+  }, []);
+  
+  // Stop countdown when component unmounts
+  useEffect(() => {
+    return () => {
+      setOtpCountdown(0);
+    };
   }, []);
 
   const userTypes = [
@@ -116,9 +188,9 @@ const SignIn = () => {
   ];
 
   const countryCodes = [
+    { code: "+91", country: "IN", flag: "🇮🇳" },
     { code: "+1", country: "US/CA", flag: "🇺🇸" },
     { code: "+44", country: "UK", flag: "🇬🇧" },
-    { code: "+91", country: "IN", flag: "🇮🇳" },
     { code: "+86", country: "CN", flag: "🇨🇳" },
     { code: "+49", country: "DE", flag: "🇩🇪" },
     { code: "+33", country: "FR", flag: "🇫🇷" },
@@ -150,14 +222,17 @@ const SignIn = () => {
 
       // User data is now saved in DynamoDB via backend
       const user = auth.currentUser;
-      if (user && backendUser) {
-        // User profile is now directly saved in DynamoDB via backend
+      
+      // Stop countdown when sign in is successful
+      setOtpCountdown(0);
+      
+      if (user) {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", user.email || "");
+        localStorage.setItem("userType", userType);
+        window.dispatchEvent(new Event("storage"));
+        navigate("/");
       }
-
-      // Set localStorage to indicate user is logged in
-      localStorage.setItem("isLoggedIn", "true");
-      window.dispatchEvent(new Event("storage"));
-      navigate('/profile'); // Navigate directly to profile
     } catch (error: any) {
       console.error("Login failed", error);
       if (error.code === 'auth/invalid-credential') {
@@ -179,6 +254,29 @@ const SignIn = () => {
   };
 
   const sendOtp = async () => {
+    // Enhanced rate limiting: prevent requests more frequently than every 60 seconds
+    const now = Date.now();
+    const timeSinceLastRequest = now - lastOtpRequestTime;
+    const minInterval = 60000; // 60 seconds
+    
+    if (timeSinceLastRequest < minInterval) {
+      const remainingTime = Math.ceil((minInterval - timeSinceLastRequest) / 1000);
+      setError(`Please wait ${remainingTime} seconds before requesting another OTP.`);
+      return;
+    }
+
+    // Additional check for Firebase rate limiting
+    if (otpCountdown > 0) {
+      setError(`Please wait ${otpCountdown} seconds before requesting another OTP.`);
+      return;
+    }
+
+    // Check if mobile number is valid
+    if (!mobileNumber || mobileNumber.length < 10) {
+      setError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -198,24 +296,55 @@ const SignIn = () => {
         'expired-callback': () => {
           console.log("reCAPTCHA expired");
           setRecaptchaInitialized(false);
+        },
+        'error-callback': () => {
+          console.log("reCAPTCHA error");
+          setRecaptchaInitialized(false);
         }
       });
 
       window.recaptchaVerifier = verifier;
 
-      // Wait for reCAPTCHA to be ready
+      // Wait for reCAPTCHA to be ready and verify to get a fresh token
       await verifier.render();
+      await verifier.verify();
       setRecaptchaInitialized(true);
 
-      // Send OTP
-      const confirmationResult = await signInWithPhoneNumber(auth, countryCode + mobileNumber, verifier);
+      // Send OTP using the verified app verifier
+      const confirmationResult = await sendPhoneOTP(countryCode + mobileNumber, verifier);
       window.confirmationResult = confirmationResult;
       console.log("OTP sent successfully");
       setShowMobileOTP(true);
+      setHasAttemptedOTP(true);
+      setError(null); // Clear any previous errors
+      // Start cooldown only after successful send
+      setLastOtpRequestTime(Date.now());
     } catch (error: any) {
       console.error("Error in sendOtp:", error);
       setRecaptchaInitialized(false);
-      console.log(error); setError(error.message || "Failed to send OTP. Please try again.");
+      
+      if (error.code === 'auth/invalid-app-credential') {
+        setError('App verification failed. Please refresh and try again.');
+      } else if (error.code === 'auth/captcha-check-failed') {
+        setError('Verification failed. Please try again.');
+        // Re-initialize reCAPTCHA after a delay
+        setTimeout(() => {
+          if (window.recaptchaVerifier) {
+            window.recaptchaVerifier.clear();
+            window.recaptchaVerifier = null;
+          }
+          setRecaptchaInitialized(false);
+        }, 1000);
+      } else if (error.code === 'auth/too-many-requests') {
+        // Set a longer cooldown for too-many-requests error
+        setLastOtpRequestTime(now);
+        setOtpCountdown(120); // 2 minutes cooldown
+        setError('Too many requests. Please wait 2 minutes before trying again.');
+      } else if (error.code === 'auth/quota-exceeded') {
+        setError('Daily quota exceeded. Please try again tomorrow.');
+      } else {
+        setError(error.message || "Failed to send OTP. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -226,11 +355,64 @@ const SignIn = () => {
       setIsLoading(true);
       setError(null);
       const confirmationResult = window.confirmationResult;
-      await confirmationResult.confirm(mobileOTP);
-      console.log("OTP verified successfully");
-      localStorage.setItem("isLoggedIn", "true");
-      window.dispatchEvent(new Event("storage"));
-      navigate("/");
+      
+      if (!confirmationResult) {
+        setError("No verification session found. Please request a new OTP.");
+        return;
+      }
+
+      const result = await confirmationResult.confirm(mobileOTP);
+      console.log("OTP verified successfully", result);
+      
+      // Stop countdown when OTP is verified
+      setOtpCountdown(0);
+      
+      // Check if user exists in the system and hydrate profile for header/sidebar
+      try {
+        // Try to get user profile to see if they exist
+        const token = await result.user.getIdToken();
+        const backendUser = await userService.getUserProfile();
+        
+        // User exists, proceed with sign in
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userPhone", countryCode + mobileNumber);
+        
+        // Set user data from backend if available
+        if (backendUser?.data?.auth) {
+          const firstName = backendUser.data.auth.firstName || backendUser.data.profile?.firstName || '';
+          const lastName = backendUser.data.auth.lastName || backendUser.data.profile?.lastName || '';
+          localStorage.setItem("userType", backendUser.data.auth.userType || "");
+          localStorage.setItem("userName", `${firstName} ${lastName}`.trim());
+          localStorage.setItem("userFirstName", firstName);
+          localStorage.setItem("userLastName", lastName);
+          localStorage.setItem("userEmail", backendUser.data.auth.email || "");
+          // Cache normalized profile for header/UserProfileContext
+          const normalized = {
+            firstName,
+            lastName,
+            avatar: backendUser.data.profile?.avatar || '',
+            customUserId: backendUser.data.customUserId,
+            userType: backendUser.data.auth.userType,
+            email: backendUser.data.auth.email,
+          };
+          try { localStorage.setItem("userProfile", JSON.stringify(normalized)); } catch {}
+        }
+        
+        window.dispatchEvent(new Event("storage"));
+        navigate("/");
+      } catch (profileError: any) {
+        if (profileError.message === 'User not found') {
+          // User doesn't exist, redirect to signup
+          setError('No account found with this phone number. Please sign up first.');
+          setTimeout(() => {
+            navigate('/signup');
+          }, 2000);
+        } else {
+          // Other error, but OTP is verified
+          console.error("Error fetching user profile:", profileError);
+          setError("Phone verified but couldn't load profile. Please try signing in with email.");
+        }
+      }
     } catch (error: any) {
       console.error("Error verifying OTP:", error);
       if (error.code === 'auth/invalid-verification-code') {
@@ -249,7 +431,8 @@ const SignIn = () => {
     try {
       const user = auth.currentUser;
       if (user && !user.emailVerified) {
-        await sendEmailVerification(user);
+        // Email verification will be handled by the backend
+        console.log("User signed in successfully");
         console.log("Verification code sent to user's email");
       } else if (!user) {
         console.error("No user found");
@@ -261,23 +444,110 @@ const SignIn = () => {
     }
   };
 
+  // Function to switch authentication methods
+  const switchAuthMethod = (method: string) => {
+    setAuthMethod(method);
+    setError(null);
+    setMobileOTP('');
+    setShowMobileOTP(false);
+    setHasAttemptedOTP(false);
+    
+    // Clear any existing OTP countdown when switching methods
+    if (method === 'email') {
+      setOtpCountdown(0);
+      setLastOtpRequestTime(0);
+    }
+  };
+
+  // Check if phone number is already registered
+  const checkPhoneRegistration = async (phoneNumber: string) => {
+    try {
+      // Call backend to check if phone number is registered
+      const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/users/check-phone`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        return result.exists; // Backend should return { exists: true/false }
+      }
+      
+      // If backend check fails, assume phone exists to allow the flow
+      return true;
+    } catch (error) {
+      console.error("Error checking phone registration:", error);
+      // If check fails, assume phone exists to allow the flow
+      return true;
+    }
+  };
+
   const handleMobileSignIn = async () => {
+    // Use the same rate limiting logic as sendOtp
+    const now = Date.now();
+    const timeSinceLastRequest = now - lastOtpRequestTime;
+    const minInterval = 60000; // 60 seconds
+    
+    if (timeSinceLastRequest < minInterval) {
+      const remainingTime = Math.ceil((minInterval - timeSinceLastRequest) / 1000);
+      setError(`Please wait ${remainingTime} seconds before requesting another OTP.`);
+      return;
+    }
+
+    if (otpCountdown > 0) {
+      setError(`Please wait ${otpCountdown} seconds before requesting another OTP.`);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
 
+      // Skip backend phone registration check; rely on Firebase Auth linking
+
       if (!recaptchaInitialized) {
         await sendOtp();
       } else {
-        const confirmationResult = await signInWithPhoneNumber(auth, countryCode + mobileNumber, window.recaptchaVerifier!);
+        // Ensure existing verifier has a fresh token
+        try { await window.recaptchaVerifier!.verify(); } catch {}
+        const confirmationResult = await sendPhoneOTP(countryCode + mobileNumber, window.recaptchaVerifier!);
         window.confirmationResult = confirmationResult;
         console.log("OTP sent successfully");
         setShowMobileOTP(true);
+        setHasAttemptedOTP(true);
+        setError(null); // Clear any previous errors
+        // Start cooldown only after successful send
+        setLastOtpRequestTime(Date.now());
       }
     } catch (error: any) {
       console.error("Error sending OTP:", error);
       setRecaptchaInitialized(false);
-      setError(error.message || "Failed to send OTP. Please try again.");
+      
+      if (error.code === 'auth/invalid-app-credential') {
+        setError('App verification failed. Please refresh and try again.');
+      } else if (error.code === 'auth/captcha-check-failed') {
+        setError('Verification failed. Please try again.');
+        // Re-initialize reCAPTCHA after a delay
+        setTimeout(() => {
+          if (window.recaptchaVerifier) {
+            window.recaptchaVerifier.clear();
+            window.recaptchaVerifier = null;
+          }
+          setRecaptchaInitialized(false);
+        }, 1000);
+      } else if (error.code === 'auth/too-many-requests') {
+        // Set a longer cooldown for too-many-requests error
+        setLastOtpRequestTime(now);
+        setOtpCountdown(120); // 2 minutes cooldown
+        setError('Too many requests. Please wait 2 minutes before trying again.');
+      } else if (error.code === 'auth/quota-exceeded') {
+        setError('Daily quota exceeded. Please try again tomorrow.');
+      } else {
+        setError(error.message || "Failed to send OTP. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -290,16 +560,22 @@ const SignIn = () => {
   const handleMFAVerify = () => {
     console.log("MFA verified:", mfaCode);
     // Handle successful sign in
+    // Stop countdown when MFA is verified
+    setOtpCountdown(0);
+    // Navigate to dashboard
+    navigate("/");
   };
 
   const handleForgotPasswordSubmit = async () => {
     try {
-      await sendPasswordResetEmail(auth, forgotPasswordEmail);
+      await resetPassword(forgotPasswordEmail);
       // Show success message
       alert("Password reset link has been sent to your email. Please check your inbox.");
       // Reset the form
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
+      // Stop countdown when forgot password is successful
+      setOtpCountdown(0);
     } catch (error: any) {
       console.error("Error sending password reset email:", error);
       alert(error.message || "Failed to send password reset email. Please try again.");
@@ -311,6 +587,8 @@ const SignIn = () => {
     // Handle password reset
     if (newPassword === confirmPassword) {
       console.log("Password reset successful");
+      // Stop countdown when password reset is successful
+      setOtpCountdown(0);
       // Reset to initial state
       setShowForgotPassword(false);
       setShowForgotPasswordOTP(false);
@@ -318,6 +596,9 @@ const SignIn = () => {
       setForgotPasswordOTP("");
       setNewPassword("");
       setConfirmPassword("");
+      setError(null);
+    } else {
+      setError("Passwords do not match");
     }
   };
 
@@ -325,23 +606,61 @@ const SignIn = () => {
     setShowMFA(false);
     setShowForgotPassword(false);
     setShowForgotPasswordOTP(false);
+    setShowMobileOTP(false);
+    setMobileOTP("");
+    setMfaCode("");
     setForgotPasswordEmail("");
     setForgotPasswordOTP("");
     setNewPassword("");
     setConfirmPassword("");
-    setMfaCode("");
+    setError(null);
+    // Stop countdown when form is reset
+    setOtpCountdown(0);
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Stop countdown when auth is successful
+      setOtpCountdown(0);
+      
+      await handleGoogleAuth(navigate, userType);
+    } catch (error: any) {
+      console.error("Google sign-in failed:", error);
+      setError("Google sign-in failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGithubSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Stop countdown when auth is successful
+      setOtpCountdown(0);
+      
+      await handleGithubAuth(navigate, userType);
+    } catch (error: any) {
+      console.error("GitHub sign-in failed:", error);
+      setError("GitHub sign-in failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-200 to-purple-200 flex items-center justify-center p-2 xs:p-4 relative overflow-hidden">
-      <div id="recaptcha-container" className="fixed bottom-0 right-0 opacity-0"></div>
       <div className="w-full max-w-7xl relative z-10">
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 xs:gap-8">
           {/* Left side - Sign in form */}
           <div className="order-2 lg:order-1 w-full">
             <Card className="backdrop-blur-xl bg-white/90 border-0 shadow-2xl animate-scale-in delay-300">
               <CardHeader className="text-center pb-4 xs:pb-6">
-                <CardTitle className="text-lg xs:text-xl lg:text-2xl font-bold text-gray-900">
+                <CardTitle className="font-bold text-gray-900">
                   {showForgotPassword ? "Reset Password" : "Sign In"}
                 </CardTitle>
                 <CardDescription className="text-xs xs:text-sm lg:text-base text-gray-600">
@@ -360,8 +679,7 @@ const SignIn = () => {
                       <RadioGroup
                         value={authMethod}
                         onValueChange={(value) => {
-                          setAuthMethod(value);
-                          setError(null); // Clear any existing errors when switching methods
+                          switchAuthMethod(value);
                         }}
                         className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6"
                       >
@@ -412,7 +730,7 @@ const SignIn = () => {
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                             >
-                              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                           </div>
                         </div>
@@ -449,18 +767,20 @@ const SignIn = () => {
                       </>
                     ) : (
                       <>
-                        <div className="space-y-2">
-                          <Label htmlFor="mobile" className="text-gray-700 font-medium">Mobile Number</Label>
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor="mobile" className="text-sm font-medium text-gray-700">Mobile Number</Label>
+                            <p className="text-xs text-gray-500 mt-1">We'll send you a verification code</p>
+                          </div>
                           <div className="flex space-x-2">
                             <Select value={countryCode} onValueChange={setCountryCode}>
-                              <SelectTrigger className="w-[100px] sm:w-[120px]">
+                              <SelectTrigger className="w-[60px] sm:w-[80px] h-12 border-2 border-gray-200 focus:border-blue-500">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
                                 {countryCodes.map((country) => (
                                   <SelectItem key={country.code} value={country.code}>
                                     <div className="flex items-center space-x-2">
-                                      <span>{country.flag}</span>
                                       <span className="hidden sm:inline">{country.code}</span>
                                       <span className="sm:hidden">{country.code}</span>
                                     </div>
@@ -471,7 +791,7 @@ const SignIn = () => {
                             <Input
                               id="mobile"
                               type="tel"
-                              placeholder="1234567890"
+                              placeholder="Enter your mobile number"
                               value={mobileNumber}
                               onChange={(e) => {
                                 const value = e.target.value.replace(/\D/g, '');
@@ -480,8 +800,9 @@ const SignIn = () => {
                                 }
                               }}
                               maxLength={10}
-                              className={`flex-1 transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-gray-200 focus:border-blue-500 ${mobileNumber.length === 10 ? 'border-green-500' : ''
-                                }`}
+                              className={`flex-1 h-12 text-base transition-all duration-300 focus:scale-[1.02] focus:shadow-lg border-2 border-gray-200 focus:border-blue-500 ${
+                                mobileNumber.length === 10 ? 'border-green-500 bg-green-50' : ''
+                              }`}
                             />
                           </div>
                           {mobileNumber.length > 0 && mobileNumber.length < 10 && (
@@ -490,9 +811,10 @@ const SignIn = () => {
                             </p>
                           )}
                           {mobileNumber.length === 10 && (
-                            <p className="text-xs text-green-600 mt-1">
-                              ✓ Valid mobile number
-                            </p>
+                            <div className="flex items-center space-x-1 text-xs text-green-600">
+                              <Check className="w-3 h-3" />
+                              <span>Valid mobile number</span>
+                            </div>
                           )}
                         </div>
 
@@ -504,80 +826,108 @@ const SignIn = () => {
 
                         <Button
                           onClick={handleMobileSignIn}
-                          className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-500 hover:scale-105 group shadow-lg hover:shadow-xl"
-                          disabled={!mobileNumber || mobileNumber.length < 10 || isLoading}
+                          className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-300 hover:scale-[1.02] group shadow-lg h-12 text-base font-semibold"
+                          disabled={!mobileNumber || mobileNumber.length < 10 || isLoading || otpCountdown > 0}
                         >
                           {isLoading ? (
                             <div className="flex items-center">
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                              Sending...
+                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                              Sending verification code...
+                            </div>
+                          ) : otpCountdown > 0 ? (
+                            <div className="flex items-center">
+                              <Clock className="w-5 h-5 mr-2" />
+                              Wait {otpCountdown} seconds
                             </div>
                           ) : (
                             <>
-                              Send OTP
-                              <Phone className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
+                              {hasAttemptedOTP ? 'Resend Code' : 'Send Verification Code'}
+                              <Phone className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
                             </>
                           )}
                         </Button>
+                        
                       </>
                     )}
                   </>
                 ) : showMobileOTP ? (
-                  <div className="space-y-4 lg:space-y-6 animate-fade-in">
-                    <div className="text-center">
-                      <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-3 lg:mb-4">
-                        <Phone className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
+                  <div className="space-y-6 animate-fade-in">
+                    {/* Header Section */}
+                    <div className="text-center space-y-3">
+                      <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                        <Phone className="w-8 h-8 text-white" />
                       </div>
-                      <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-2">Enter OTP</h3>
-                      <p className="text-sm text-gray-600">Code sent to {countryCode} {mobileNumber}</p>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-1">Enter Verification Code</h3>
+                        <p className="text-sm font-medium text-gray-800">{countryCode} {mobileNumber}</p>
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-gray-700 font-medium">Enter 6-digit OTP</Label>
-                      <InputOTP
-                        maxLength={6}
-                        value={mobileOTP}
-                        onChange={(value) => setMobileOTP(value)}
-                        className="justify-center"
+                    {/* OTP Input Section */}
+                    <div className="space-y-4">
+                      <div className="space-y-3 flex flex-col items-center">
+                        <InputOTP
+                          maxLength={6}
+                          value={mobileOTP}
+                          onChange={(value) => setMobileOTP(value)}
+                          className="justify-center gap-2"
+                        >
+                          <InputOTPGroup className="gap-2">
+                            <InputOTPSlot index={0} className="w-12 h-12 text-lg font-semibold border-2 border-gray-200 focus:border-blue-500 rounded-lg" />
+                            <InputOTPSlot index={1} className="w-12 h-12 text-lg font-semibold border-2 border-gray-200 focus:border-blue-500 rounded-lg" />
+                            <InputOTPSlot index={2} className="w-12 h-12 text-lg font-semibold border-2 border-gray-200 focus:border-blue-500 rounded-lg" />
+                            <InputOTPSlot index={3} className="w-12 h-12 text-lg font-semibold border-2 border-gray-200 focus:border-blue-500 rounded-lg" />
+                            <InputOTPSlot index={4} className="w-12 h-12 text-lg font-semibold border-2 border-gray-200 focus:border-blue-500 rounded-lg" />
+                            <InputOTPSlot index={5} className="w-12 h-12 text-lg font-semibold border-2 border-gray-200 focus:border-blue-500 rounded-lg" />
+                          </InputOTPGroup>
+                        </InputOTP>
+                      </div>
+
+                      {/* Resend Section */}
+                      <div className="text-center space-y-2">
+                        <div className="flex items-center justify-center space-x-1 text-sm">
+                          <span className="text-gray-600">Didn't receive the code?</span>
+                          <button
+                            onClick={handleMobileSignIn}
+                            disabled={otpCountdown > 0}
+                            className={`font-medium transition-colors ${
+                              otpCountdown > 0 
+                                ? 'text-gray-400 cursor-not-allowed' 
+                                : 'text-blue-600 hover:text-blue-700'
+                            }`}
+                          >
+                            {otpCountdown > 0 ? `Resend in ${otpCountdown}s` : 'Resend OTP'}
+                          </button>
+                        </div>
+                      
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="space-y-3">
+                      <Button
+                        onClick={handleMobileOTPVerify}
+                        className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-300 hover:scale-[1.02] group shadow-lg h-12 text-base font-semibold"
+                        disabled={mobileOTP.length !== 6}
                       >
-                        <InputOTPGroup>
-                          <InputOTPSlot index={0} />
-                          <InputOTPSlot index={1} />
-                          <InputOTPSlot index={2} />
-                          <InputOTPSlot index={3} />
-                          <InputOTPSlot index={4} />
-                          <InputOTPSlot index={5} />
-                        </InputOTPGroup>
-                      </InputOTP>
-                    </div>
+                        {mobileOTP.length === 6 ? (
+                          <>
+                            Verify & Sign In
+                            <Check className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
+                          </>
+                        ) : (
+                          'Enter 6-digit code'
+                        )}
+                      </Button>
 
-
-                    <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                      <span>Didn't receive the code?</span>
-                      <button
-                        onClick={handleMobileSignIn}
-                        className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                      <Button
+                        variant="ghost"
+                        onClick={resetToSignIn}
+                        className="w-full text-gray-600 hover:text-gray-800 hover:bg-gray-50 h-10"
                       >
-                        Resend OTP
-                      </button>
+                        ← Back to Sign In
+                      </Button>
                     </div>
-
-                    <Button
-                      onClick={handleMobileOTPVerify}
-                      className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-500 hover:scale-105 group shadow-lg"
-                      disabled={mobileOTP.length !== 6}
-                    >
-                      Verify & Sign In
-                      <Check className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      onClick={resetToSignIn}
-                      className="w-full"
-                    >
-                      Back to Sign In
-                    </Button>
                   </div>
                 ) : showForgotPassword ? (
                   <div className="space-y-4 lg:space-y-6 animate-fade-in">
@@ -604,7 +954,7 @@ const SignIn = () => {
                         </div>
 
                         <Button
-                          // onClick={handleForgotPasswordSubmit} will put it when added logic
+                          onClick={handleForgotPasswordSubmit}
                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-500 hover:scale-105 group shadow-lg"
                           disabled={!forgotPasswordEmail}
                         >
@@ -789,7 +1139,7 @@ const SignIn = () => {
 
                     <div className="flex justify-center gap-3 lg:gap-4">
                       <Button
-                        onClick={() => handleGoogleAuth(navigate)}
+                        onClick={handleGoogleSignIn}
                         variant="outline"
                         className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center"
                       >
@@ -801,7 +1151,7 @@ const SignIn = () => {
                         </svg>
                       </Button>
                       <Button
-                        onClick={() => handleGithubAuth(navigate)}
+                        onClick={handleGithubSignIn}
                         variant="outline"
                         className="hover:scale-110 transition-all duration-300 hover:shadow-md p-2 w-10 h-10 flex items-center justify-center"
                       >
@@ -809,9 +1159,9 @@ const SignIn = () => {
                       </Button>
                     </div>
 
-                    <div className="text-center text-sm text-gray-600">
+                    <div className="text-center text-xs lg:text-sm text-gray-600">
                       Don't have an account?{" "}
-                      <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                      <Link to="/signup" className="text-blue-600 hover:text-blue-700 transition-colors font-medium">
                         Sign up
                       </Link>
                     </div>
@@ -828,13 +1178,10 @@ const SignIn = () => {
               <div className="flex items-center space-x-1 flex-shrink-0">
                 <Link to="/" className="flex items-center space-x-2 group">
                   <img src={Logo} alt="AMOGH" className="h-10 xs:h-14 w-auto md:h-8" />
-                  <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
-                    beta
-                  </div>
                 </Link>
               </div>
               <div className="text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-2 xs:mb-4 lg:mb-4 leading-tight mobile-text-4xl">
+                <h1 className="text-4xl font-bold text-gray-900 mb-2 xs:mb-4 lg:mb-4 leading-tight mobile-text-2xl">
                   Welcome Back to
                   <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Innovation
@@ -888,6 +1235,9 @@ const SignIn = () => {
             )}
           </div>
         </div>
+        
+        {/* reCAPTCHA container */}
+        <div id="recaptcha-container"></div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+
 import {
   UserPlus,
   Search,
@@ -23,51 +24,53 @@ type Step = {
   bgColor: string;
 };
 
-const steps: Step[] = [
-  {
-    icon: UserPlus,
-    title: "Create Profile",
-    subtitle: "Tell us who you are and what you're looking for.",
-    iconColor: "text-blue-600",
-    bgColor: "bg-blue-100",
-  },
-  {
-    icon: Search,
-    title: "Browse Opportunities",
-    subtitle: "Find projects, teams, or businesses that match your skills.",
-    iconColor: "text-purple-600",
-    bgColor: "bg-purple-100",
-  },
-  {
-    icon: Handshake,
-    title: "Connect & Collaborate",
-    subtitle: "Reach out, chat, and form your dream team.",
-    iconColor: "text-green-600",
-    bgColor: "bg-green-100",
-  },
-  {
-    icon: Rocket,
-    title: "Launch Your Project",
-    subtitle: "Build, deploy, and grow with our support.",
-    iconColor: "text-yellow-600",
-    bgColor: "bg-yellow-100",
-  },
-  {
-    icon: Star,
-    title: "Earn & Showcase",
-    subtitle: "Get recognized and rewarded for your achievements.",
-    iconColor: "text-pink-600",
-    bgColor: "bg-pink-100",
-  },
-];
-
 export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = false }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
   const [playVideo, setPlayVideo] = useState(!deferVideo);
 
+  // Memoize steps array to prevent recreation
+  const steps = useMemo<Step[]>(() => [
+    {
+      icon: UserPlus,
+      title: "Create Profile",
+      subtitle: "Tell us who you are and what you're looking for.",
+      iconColor: "text-blue-600",
+      bgColor: "bg-blue-100",
+    },
+    {
+      icon: Search,
+      title: "Browse Opportunities",
+      subtitle: "Find projects, teams, or businesses that match your skills.",
+      iconColor: "text-purple-600",
+      bgColor: "bg-purple-100",
+    },
+    {
+      icon: Handshake,
+      title: "Connect & Collaborate",
+      subtitle: "Reach out, chat, and form your dream team.",
+      iconColor: "text-green-600",
+      bgColor: "bg-green-100",
+    },
+    {
+      icon: Rocket,
+      title: "Launch Your Project",
+      subtitle: "Build, deploy, and grow with our support.",
+      iconColor: "text-yellow-600",
+      bgColor: "bg-yellow-100",
+    },
+    {
+      icon: Star,
+      title: "Earn & Showcase",
+      subtitle: "Get recognized and rewarded for your achievements.",
+      iconColor: "text-pink-600",
+      bgColor: "bg-pink-100",
+    },
+  ], []);
+
   useEffect(() => {
     if (!deferVideo) return;
+    
     const observer = new window.IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -75,22 +78,24 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
           observer.disconnect();
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.1 } // Reduced threshold for better performance
     );
+    
     if (videoRef.current) {
       observer.observe(videoRef.current);
     }
+    
     return () => observer.disconnect();
   }, [deferVideo]);
 
-  const handleMuteToggle = () => {
+  const handleMuteToggle = useCallback(() => {
     setMuted((prev) => {
       if (videoRef.current) {
         videoRef.current.muted = !prev;
       }
       return !prev;
     });
-  };
+  }, []);
 
   return (
     <section className="relative py-0 px-0 overflow-hidden">
@@ -116,11 +121,11 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
             filter: blur(2.5px);
           }
           .realistic-mute-btn {
-            transition: background 0.2s cubic-bezier(.4,0,.2,1), transform 0.2s cubic-bezier(.4,0,.2,1);
+            transition: background 0.2s ease-out, transform 0.2s ease-out;
           }
           .realistic-mute-btn:hover {
             background: rgba(30,64,175,0.8);
-            transform: scale(1.1);
+            transform: scale(1.05);
           }
         `}
       </style>
@@ -146,6 +151,7 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
                 loop
                 muted={muted}
                 playsInline
+                preload="metadata"
                 className="w-full h-44 sm:h-64 md:h-[320px] object-cover bg-black rounded-2xl relative z-10"
                 style={{ background: "#000" }}
               />
@@ -165,9 +171,9 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
             <Link to="/consulting" className="mt-6 sm:mt-8 flex justify-center w-full">
               <Button
                 size="lg"
-                className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg bg-white text-black hover:bg-blue-600 hover:text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out flex items-center font-semibold rounded-full mobile-text-base"
+                className="w-auto sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg bg-white text-black hover:bg-blue-600 hover:text-white shadow-lg hover:shadow-xl transition-all duration-200 ease-out flex items-center font-semibold rounded-full mobile-text-base"
               >
-                consult... <ArrowRight className="ml-1 w-4 h-4" />
+                Consult
               </Button>
             </Link>
           </div>
@@ -175,14 +181,14 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
 
         {/* Right: Steps/content with solid background */}
         <div className="md:w-1/2 w-full flex flex-col justify-center bg-slate-100 py-10 sm:py-16 px-4 sm:px-8">
-          <h3 className="text-2xl md:text-4xl font-semibold text-gray-800 mb-3 sm:mb-4 mt-0 mobile-text-2xl md:mobile-text-4xl">
+          <h3 className="text-lg sm:text-2xl md:text-4xl font-semibold text-gray-800 mb-3 sm:mb-4 mt-0 mobile-text-2xl md:mobile-text-4xl">
             How you start here...
           </h3>
           <ol className="space-y-5 sm:space-y-7">
             {steps.map((step, idx) => (
               <li key={idx} className="flex items-start group">
                 <span className="flex-shrink-0 mt-1 mr-3 sm:mr-4">
-                  <span className={`inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full ${step.bgColor} ${step.iconColor} shadow-md group-hover:scale-110 transition-transform`}>
+                  <span className={`inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full ${step.bgColor} ${step.iconColor} shadow-md group-hover:scale-105 transition-transform duration-200`}>
                     <step.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${step.iconColor}`} />
                   </span>
                 </span>

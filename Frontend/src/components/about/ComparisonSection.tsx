@@ -84,7 +84,7 @@ const ComparisonSection = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16 animate-fade-in">
           <Star className="w-8 h-8 text-yellow-500 mx-auto mb-4 animate-spin" />
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          <h2 className="heading-section font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
             Why Choose Amogh?
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">Experience the future of collaborative innovation</p>
@@ -97,10 +97,11 @@ const ComparisonSection = () => {
               {/* Animated background effects */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-1000"></div>
               
-              <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-orange-400 text-blue-900 px-4 py-2 text-sm md:text-base font-bold rounded-bl-2xl shadow-lg">
+              <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-orange-400 text-blue-900 px-3 py-1 md:px-4 md:py-2 text-xs md:text-sm lg:text-base font-bold rounded-bl-2xl shadow-lg z-20">
                 <div className="flex items-center gap-1">
-                  <Zap className="w-4 h-4" />
-                  PREMIUM CHOICE
+                  <Zap className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">PREMIUM CHOICE</span>
+                  <span className="sm:hidden">PREMIUM</span>
                 </div>
               </div>
               
@@ -134,26 +135,6 @@ const ComparisonSection = () => {
                       <span className="text-sm md:text-base lg:text-lg font-semibold leading-relaxed">{feature}</span>
                     </div>
                   ))}
-                  
-                  {/* Expandable section for mobile */}
-                  <div className="md:hidden col-span-1">
-                    <button
-                      onClick={() => setIsAmoghExpanded(!isAmoghExpanded)}
-                      className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all duration-300 border border-white/20 text-white font-semibold"
-                    >
-                      {isAmoghExpanded ? (
-                        <>
-                          <ChevronUp className="w-4 h-4" />
-                          Show Less
-                        </>
-                      ) : (
-                        <>
-                          <ChevronDown className="w-4 h-4" />
-                          Show More Features ({amoghFeatures.length - 2})
-                        </>
-                      )}
-                    </button>
-                  </div>
                   
                   {/* Expanded features for mobile */}
                   {isAmoghExpanded && (
@@ -192,6 +173,26 @@ const ComparisonSection = () => {
                       <span className="text-base lg:text-lg font-semibold leading-relaxed">{feature}</span>
                     </div>
                   ))}
+                </div>
+                
+                {/* Expandable button for mobile - positioned at bottom */}
+                <div className="md:hidden mt-4">
+                  <button
+                    onClick={() => setIsAmoghExpanded(!isAmoghExpanded)}
+                    className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all duration-300 border border-white/20 text-white font-semibold"
+                  >
+                    {isAmoghExpanded ? (
+                      <>
+                        <ChevronUp className="w-4 h-4" />
+                        Show Less
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-4 h-4" />
+                        Show More Features ({amoghFeatures.length - 2})
+                      </>
+                    )}
+                  </button>
                 </div>
               </CardContent>
             </Card>

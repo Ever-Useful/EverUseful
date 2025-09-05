@@ -18,13 +18,13 @@ export const HeroSection = ({
     navigate('/aboutus');
   };
 
-  return <section className="min-h-screen galaxy-bg py-20 px-4 lg:px-8">
+  return <section className="py-20 px-4 lg:px-8 galaxy-bg">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Content */}
           <div className="space-y-8 text-center lg:text-left">
             <div className="space-y-6">
-              <h1 className="text-4xl font-bold leading-tight mobile-text-4xl">
+              <h1 className="text-4xl font-bold leading-tight mobile-text-2xl">
                 <span className="text-eco-green glow-text">Expert</span>{" "}
                 <span className="text-foreground">Consultation</span>{" "}
                 <span className="text-eco-blue glow-text">Services</span>
@@ -40,7 +40,7 @@ export const HeroSection = ({
             <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
               <div className="flex items-center gap-2 text-eco-green">
                 <Leaf className="h-5 w-5" />
-                <span>Carbon Neutral Solutions</span>
+                <span>Sustainable Projects</span>
               </div>
               <div className="flex items-center gap-2 text-eco-blue">
                 <Zap className="h-5 w-5" />
@@ -54,15 +54,16 @@ export const HeroSection = ({
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button size="lg" className="eco-gradient hover:shadow-[var(--shadow-glow)] transition-all duration-300 group" onClick={onBookConsultation}>
-                Book Free Consultation
+                Free Business Consultation
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
                 className="border-eco-green text-eco-green hover:bg-eco-green hover:text-background transition-all duration-300"
-                onClick={handleLearnMore}
-              >
+                onClick={handleLearnMore} 
+                >
+              
                 Learn More
               </Button>
             </div>

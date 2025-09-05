@@ -1,12 +1,18 @@
-require('dotenv').config();
+require('dotenv').config({ path: './.env' });
 const AWS = require('aws-sdk');
 
-// Configure AWS
-AWS.config.update({
-  region: process.env.AWS_REGION || 'us-east-1',
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-});
+// Configure AWS with conditional credentials
+const awsConfig = {
+  region: process.env.AWS_REGION || 'ap-south-1'
+};
+
+// Only add access keys if they are provided (for localhost development)
+if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+  awsConfig.accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  awsConfig.secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+}
+
+AWS.config.update(awsConfig);
 
 const dynamodb = new AWS.DynamoDB();
 

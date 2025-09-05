@@ -1,101 +1,323 @@
+import React, { Suspense } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
-import Marketplace from "./pages/Marketplace";
-import Freelancing from "./pages/Freelancing";
-import Connect from "./pages/Connect";
-import Admin from "./pages/Admin";
-import Checkout from "./pages/Checkout";
-import FreelancerProfile from "./pages/FreelancerProfile";
-import StudentProfile from "./pages/StudentProfile";
-import Cart from "./pages/Cart";
-import NotFound from "./pages/NotFound";
-import Profile from "./pages/Profile";
-import ProductDisplay from "./pages/ProductDisplay";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import NewProject from '@/pages/NewProject';
-import Collaborators from '@/pages/Collaborators';
-import ScheduleMeeting from '@/pages/ScheduleMeeting';
-import { AuthProvider } from '@/contexts/AuthContext';
-import About from '@/pages/AboutUs';
-import Dashboard from "./pages/Dashboard";
-import AiAgents from "./pages/AiAgents";
-import FindExpert from "./pages/FindExpert";
-import SendFeedback from "./pages/Policy/SendFeedback";
-import Chat from "./pages/Chat";
-import Sustainable from "./pages/Sustainable";
-import Connections from "./pages/Connections";
-import Consulting from "./pages/Consultation";
-import BussinessProfile from "./pages/bussinessprofile";
-// Import new policy pages
-import PrivacyPolicy from "./pages/Policy/PrivacyPolicy";
-import TermsConditions from "./pages/Policy/TermsConditions";
-import CookiePolicy from "./pages/Policy/CookiePolicy";
-import DeliveryPolicy from "./pages/Policy/DeliveryPolicy";
-import RefundPolicy from "./pages/Policy/RefundPolicy";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { UserProfileProvider } from "@/contexts/UserProfileContext";
+import { useEffect } from "react";
+import CookieConsent from "@/components/CookieConsent";
 
-import BecomeAMentor from "./pages/BecomeAMentor";
-import BecomeMentor from "./pages/BecomeAMentor";
-//test
 
-const queryClient = new QueryClient();
+// Lazy load all pages for code splitting
+const Index = React.lazy(() => import("@/pages/Index"));
+const SignIn = React.lazy(() => import("@/pages/SignIn"));
+const SignUp = React.lazy(() => import("@/pages/SignUp"));
+const EmailVerification = React.lazy(() => import("@/pages/EmailVerification"));
+const AuthAction = React.lazy(() => import("@/pages/AuthAction"));
+const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
+const Profile = React.lazy(() => import("@/pages/Profile"));
+const Marketplace = React.lazy(() => import("@/pages/Marketplace"));
+const ProductDisplay = React.lazy(() => import("@/pages/ProductDisplay"));
+const Cart = React.lazy(() => import("@/pages/Cart"));
+const Checkout = React.lazy(() => import("@/pages/Checkout"));
+const PaymentSuccess = React.lazy(() => import("@/pages/PaymentSuccess"));
+const Chat = React.lazy(() => import("@/pages/Chat"));
+const Connections = React.lazy(() => import("@/pages/Connections"));
+const Collaborators = React.lazy(() => import("@/pages/Collaborators"));
+const Consultation = React.lazy(() => import("@/pages/Consultation"));
+const Connect = React.lazy(() => import("@/pages/Connect"));
+const Freelancing = React.lazy(() => import("@/pages/Freelancing"));
+const FreelancerProfile = React.lazy(() => import("@/pages/FreelancerProfile"));
+const StudentProfile = React.lazy(() => import("@/pages/StudentProfile"));
+const BussinessProfile = React.lazy(() => import("@/pages/bussinessprofile"));
+const BecomeAMentor = React.lazy(() => import("@/pages/BecomeAMentor"));
+const FindExpert = React.lazy(() => import("@/pages/FindExpert"));
+const NewProject = React.lazy(() => import("@/pages/NewProject"));
+const ScheduleMeeting = React.lazy(() => import("@/pages/ScheduleMeeting"));
+const AboutUs = React.lazy(() => import("@/pages/AboutUs"));
+const Sustainable = React.lazy(() => import("@/pages/Sustainable"));
+const AiAgents = React.lazy(() => import("@/pages/AiAgents"));
+const AIAgentDetail = React.lazy(() => import("@/pages/AIAgentDetail"));
+const Admin = React.lazy(() => import("@/pages/Admin"));
+const NotFound = React.lazy(() => import("@/pages/NotFound"));
+const CampusAmbassadorPage = React.lazy(() => import("@/pages/CampusAmbassadorPage"));
 
-const App = () => (  
+// Policy pages
+const PrivacyPolicy = React.lazy(() => import("@/pages/Policy/PrivacyPolicy"));
+const TermsConditions = React.lazy(() => import("@/pages/Policy/TermsConditions"));
+const CookiePolicy = React.lazy(() => import("@/pages/Policy/CookiePolicy"));
+const RefundPolicy = React.lazy(() => import("@/pages/Policy/RefundPolicy"));
+const DeliveryPolicy = React.lazy(() => import("@/pages/Policy/DeliveryPolicy"));
+const SendFeedback = React.lazy(() => import("@/pages/Policy/SendFeedback"));
+
+// Loading component for better UX
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-slate-100">
+    <div className="text-xl font-semibold text-slate-700 animate-pulse">
+      Loading...
+    </div>
+  </div>
+);
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (replaces cacheTime)
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// Global scroll restoration component
+const GlobalScrollToTop = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+  
+  return null;
+};
+
+const App = () => (
   <AuthProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/aiagents" element={<AiAgents />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/freelancing" element={<Freelancing />} />
-            <Route path="/product/:id" element={<ProductDisplay />} />
-            <Route path="/connect" element={<Connect />} />
-            <Route path="/consulting" element={<Consulting />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/studentprofile" element={<StudentProfile />} />
-            <Route path="/bussinessprofile" element={<BussinessProfile />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/freelancerprofile/:id" element={<FreelancerProfile />} />
-            <Route path="/projects/new" element={<NewProject />} />
-            <Route path="/collaborators" element={<Collaborators />} />
-            <Route path="/meetings/schedule" element={<ScheduleMeeting />} />
-            <Route path="/paymentSuccess" element={<PaymentSuccess />} />
-            <Route path="/aboutus" element={<About />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/findexpert" element={<FindExpert />} />
-            <Route path="/sendfeedback" element={<SendFeedback />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/sustainable" element={<Sustainable />} />
-            <Route path="/connection" element={<Connections />} />
-            <Route path="/studentprofile/:id" element={<StudentProfile />} />
-            <Route path="/become-mentor" element={<BecomeMentor />} />
-            <Route path="/green" element={<Sustainable/>} />
+    <UserProfileProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          
+          <Sonner />
+          <BrowserRouter 
+            future={{ 
+              v7_startTransition: true, 
+              v7_relativeSplatPath: true 
+            }}
+          >
+            <GlobalScrollToTop />
+            
+            {/* Cookie Consent Banner */}
+            <CookieConsent />
+            
+             <Routes>
+            <Route path="/" element={
+              <Suspense fallback={null}>
+                <Index />
+              </Suspense>
+            } />
+            <Route path="/signin" element={
+              <Suspense fallback={<PageLoader />}>
+                <SignIn />
+              </Suspense>
+            } />
+            <Route path="/signup" element={
+              <Suspense fallback={<PageLoader />}>
+                <SignUp />
+              </Suspense>
+            } />
+            <Route path="/email-verification" element={
+              <Suspense fallback={<PageLoader />}>
+                <EmailVerification />
+              </Suspense>
+            } />
+            <Route path="/auth/action" element={
+              <Suspense fallback={<PageLoader />}>
+                <AuthAction />
+              </Suspense>
+            } />
+            <Route path="/dashboard" element={
+              <Suspense fallback={<PageLoader />}>
+                <Dashboard />
+              </Suspense>
+            } />
+            <Route path="/profile" element={
+              <Suspense fallback={<PageLoader />}>
+                <Profile />
+              </Suspense>
+            } />
+            <Route path="/marketplace" element={
+              <Suspense fallback={<PageLoader />}>
+                <Marketplace />
+              </Suspense>
+            } />
+            <Route path="/product/:id" element={
+              <Suspense fallback={<PageLoader />}>
+                <ProductDisplay />
+              </Suspense>
+            } />
+            <Route path="/cart" element={
+              <Suspense fallback={<PageLoader />}>
+                <Cart />
+              </Suspense>
+            } />
+            <Route path="/checkout" element={
+              <Suspense fallback={<PageLoader />}>
+                <Checkout />
+              </Suspense>
+            } />
+            <Route path="/payment-success" element={
+              <Suspense fallback={<PageLoader />}>
+                <PaymentSuccess />
+              </Suspense>
+            } />
+            <Route path="/chat" element={
+              <Suspense fallback={<PageLoader />}>
+                <Chat />
+              </Suspense>
+            } />
+            <Route path="/connections" element={
+              <Suspense fallback={<PageLoader />}>
+                <Connections />
+              </Suspense>
+            } />
+            <Route path="/collaborators" element={
+              <Suspense fallback={<PageLoader />}>
+                <Collaborators />
+              </Suspense>
+            } />
+            <Route path="/consulting" element={
+              <Suspense fallback={<PageLoader />}>
+                <Consultation />
+              </Suspense>
+            } />
+            <Route path="/connect" element={
+              <Suspense fallback={<PageLoader />}>
+                <Connect />
+              </Suspense>
+            } />
+            <Route path="/freelancing" element={
+              <Suspense fallback={<PageLoader />}>
+                <Freelancing />
+              </Suspense>
+            } />
+            <Route path="/freelancerprofile" element={
+              <Suspense fallback={<PageLoader />}>
+                <FreelancerProfile />
+              </Suspense>
+            } />
+            <Route path="/freelancerprofile/:id" element={
+              <Suspense fallback={<PageLoader />}>
+                <FreelancerProfile />
+              </Suspense>
+            } />
+            <Route path="/studentprofile" element={
+              <Suspense fallback={<PageLoader />}>
+                <StudentProfile />
+              </Suspense>
+            } />
+            <Route path="/studentprofile/:id" element={
+              <Suspense fallback={<PageLoader />}>
+                <StudentProfile />
+              </Suspense>
+            } />
+            <Route path="/businessprofile" element={
+              <Suspense fallback={<PageLoader />}>
+                <BussinessProfile />
+              </Suspense>
+            } />
+            <Route path="/businessprofile/:id" element={
+              <Suspense fallback={<PageLoader />}>
+                <BussinessProfile />
+              </Suspense>
+            } />
+            <Route path="/become-mentor" element={
+              <Suspense fallback={<PageLoader />}>
+                <BecomeAMentor />
+              </Suspense>
+            } />
+            <Route path="/findexpert" element={
+              <Suspense fallback={<PageLoader />}>
+                <FindExpert />
+              </Suspense>
+            } />
+            <Route path="/new-project" element={
+              <Suspense fallback={<PageLoader />}>
+                <NewProject />
+              </Suspense>
+            } />
+            <Route path="/schedule-meeting" element={
+              <Suspense fallback={<PageLoader />}>
+                <ScheduleMeeting />
+              </Suspense>
+            } />
+            <Route path="/aboutus" element={
+              <Suspense fallback={<PageLoader />}>
+                <AboutUs />
+              </Suspense>
+            } />
+            <Route path="/sustainable" element={
+              <Suspense fallback={<PageLoader />}>
+                <Sustainable />
+              </Suspense>
+            } />
+            <Route path="/aiagents" element={
+              <Suspense fallback={<PageLoader />}>
+                <AiAgents />
+              </Suspense>
+            } />
+            <Route path="/ai-agent/:id" element={
+              <Suspense fallback={<PageLoader />}>
+                <AIAgentDetail />
+              </Suspense>
+            } />
+            <Route path="/admin" element={
+              <Suspense fallback={<PageLoader />}>
+                <Admin />
+              </Suspense>
+            } />
+            
             {/* Policy Routes */}
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-conditions" element={<TermsConditions />} />
-            <Route path="/cookie-policy" element={<CookiePolicy />} />
-            <Route path="/delivery-policy" element={<DeliveryPolicy />} />
-            <Route path="/refund-policy" element={<RefundPolicy />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="/privacy-policy" element={
+              <Suspense fallback={<PageLoader />}>
+                <PrivacyPolicy />
+              </Suspense>
+            } />
+            <Route path="/terms-conditions" element={
+              <Suspense fallback={<PageLoader />}>
+                <TermsConditions />
+              </Suspense>
+            } />
+            <Route path="/cookie-policy" element={
+              <Suspense fallback={<PageLoader />}>
+                <CookiePolicy />
+              </Suspense>
+            } />
+            <Route path="/refund-policy" element={
+              <Suspense fallback={<PageLoader />}>
+                <RefundPolicy />
+              </Suspense>
+            } />
+            <Route path="/delivery-policy" element={
+              <Suspense fallback={<PageLoader />}>
+                <DeliveryPolicy />
+              </Suspense>
+            } />
+            <Route path="/sendfeedback" element={
+              <Suspense fallback={<PageLoader />}>
+                <SendFeedback />
+              </Suspense>
+            } />
+            
+            <Route path="/campus-ambassador" element={
+              <Suspense fallback={<PageLoader />}>
+                <CampusAmbassadorPage />
+              </Suspense>
+            } />
+            
+            <Route path="*" element={
+              <Suspense fallback={<PageLoader />}>
+                <NotFound />
+              </Suspense>
+            } />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+    </UserProfileProvider>
   </AuthProvider>
 );
-//testing
+
 export default App;

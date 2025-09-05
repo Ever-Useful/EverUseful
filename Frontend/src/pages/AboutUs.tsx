@@ -11,29 +11,7 @@ import FAQSection from "@/components/about/FAQSection";
 // import TestimonialsSection from "@/components/about/TestimonialsSection";
 import CTASection from "@/components/about/CTASection";
 import { Footer } from "@/components/Footer";
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Users,
-  Globe,
-  Lightbulb,
-  Target,
-  Heart,
-  Zap,
-  Award,
-  MapPin,
-  Play,
-  ArrowRight,
-  Edit,
-  Save,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  Info,
-} from "lucide-react"
+
 
 const About = () => {
   return (
@@ -45,7 +23,7 @@ const About = () => {
       <ComparisonSection />
       <TeamSection />
       {/* <UpcomingPhaseSection /> */}
-      {/* <EventsSection /> */}
+      <EventsSection />
         <FAQSection /> 
       {/* <TestimonialsSection />  */}
        <CTASection />

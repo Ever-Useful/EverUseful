@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Shield, ShoppingCart, Bookmark, Download, Star, GraduationCap } from 'lucide-react';
 import { CartItem as CartItemType } from './types';
 import { getCategoryIcon,  getLicenseColor } from '@/components/cart/utils';
+import NoImageAvailable from '@/assets/images/no image available.png';
 
 interface CartItemProps {
   item: CartItemType;
@@ -19,9 +20,10 @@ const CartItem = ({ item, onRemove, onSave, onBuyNow }: CartItemProps) => {
       <div className="w-full lg:w-48 xl:w-56 flex-shrink-0">
         <div className="w-full h-32 lg:h-[180px] bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg border border-gray-200 overflow-hidden">
           <img 
-            src={item.image || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop&crop=center'}
+            src={item.image || NoImageAvailable}
             alt={item.name}
             className="w-full h-full object-cover"
+            onError={e => { e.currentTarget.src = NoImageAvailable; }}
           />
         </div>
       </div>
