@@ -9,6 +9,8 @@ import { BsLightningCharge } from 'react-icons/bs';
 import Header from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Link } from 'react-router-dom';
+import PublishAgentSidebar from '@/components/PublishAgentSidebar';
+import AIAgentCard from '@/components/AIAgentCard';
 
 const Artificial = () => {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -17,6 +19,8 @@ const Artificial = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [heroText, setHeroText] = useState('Intelligent AI Agents');
+  const [showPublishSidebar, setShowPublishSidebar] = useState(false);
+  const [publishedAgents, setPublishedAgents] = useState<any[]>([]);
   const agentsRef = useRef<HTMLDivElement>(null);
 
   // Section refs for highlighting
@@ -214,14 +218,25 @@ const Artificial = () => {
 
     window.addEventListener('scroll', handleScroll);
 
-    // Simulate loading time
-    const timer = setTimeout(() => {
+    // Check if loading has been shown before
+    const hasLoadedBefore = localStorage.getItem('aiAgentsLoaded');
+    if (hasLoadedBefore) {
       setIsLoading(false);
-    }, 3500);
+    } else {
+      // Simulate loading time only on first visit
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+        localStorage.setItem('aiAgentsLoaded', 'true');
+      }, 3500);
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        clearTimeout(timer);
+      };
+    }
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      clearTimeout(timer);
     };
   }, []);
 
@@ -519,16 +534,15 @@ const Artificial = () => {
                     <span>Explore Agents</span>
                     <IoRocketSharp className="ml-1.5 sm:ml-2" />
                   </motion.button>
-                  <Link to="/notfound" className="flex-1">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex-1 w-full px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-gray-800/70 border border-gray-700 rounded-xl font-medium hover:bg-gray-700/50 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
-                    >
-                      <span>Publish Agent</span>
-                      <TbHexagon3D className="ml-1.5 sm:ml-2" />
-                    </motion.button>
-                  </Link>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowPublishSidebar(true)}
+                    className="flex-1 w-full px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-gray-800/70 border border-gray-700 rounded-xl font-medium hover:bg-gray-700/50 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
+                  >
+                    <span>Publish Agent</span>
+                    <TbHexagon3D className="ml-1.5 sm:ml-2" />
+                  </motion.button>
                 </div>
               </div>
             </motion.div>
@@ -777,81 +791,99 @@ const Artificial = () => {
         {/* Tube light effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
 
-        <div className="max-w-7xl mx-auto relative">
-          {/* Blur overlay for the entire marketplace section */}
-          <div className="absolute inset-0 backdrop-blur-md bg-gray-900/20 rounded-3xl z-10"></div>
-
-          {/* Coming Soon Poster */}
-          <div className=" inset-0 relative z-20 flex items-center justify-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 border-2 border-cyan-500/30 rounded-3xl p-6 sm:p-8 md:p-12 backdrop-blur-sm shadow-2xl shadow-cyan-500/20 max-w-2xl mx-auto text-center"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
             >
-              {/* Animated icon */}
+              AI Agents <span className="text-cyan-400">Marketplace</span>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base"
+            >
+              Discover and download cutting-edge AI agents created by our community
+            </motion.p>
+          </div>
 
-              {/* Coming Soon Badge */}
-              <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 mb-4 sm:mb-6">
-                <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></div>
-                <span className="text-xs sm:text-sm font-medium text-cyan-300">COMING SOON</span>
+          {/* Search and Filter */}
+          <div className="mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="relative flex-1 max-w-md">
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search AI agents..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                />
               </div>
-
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">
-                AI Agents Marketplace
-              </h2>
-
-              <p className="text-gray-300 text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed">
-                We're building the most advanced marketplace for AI agents. Get ready to discover,
-                deploy, and monetize cutting-edge AI solutions that will transform your business.
-              </p>
-
-              {/* Notification signup */}
-              <div className="bg-gray-800/30 rounded-2xl p-4 sm:p-6 border border-gray-700">
-                <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">Get Early Access</h3>
-                <p className="text-gray-400 text-xs sm:text-sm mb-3 sm:mb-4">
-                  Be the first to know when our marketplace launches
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-white placeholder-gray-400 text-sm"
-                  />
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20 flex items-center justify-center text-sm"
+              
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setActiveCategory(category.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                      activeCategory === category.id
+                        ? 'bg-cyan-600 text-white'
+                        : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-600'
+                    }`}
                   >
-                    <span>Notify Me</span>
-                    <IoRocketSharp className="ml-2" />
-                  </motion.button>
-                </div>
+                    {category.icon}
+                    {category.name}
+                  </button>
+                ))}
               </div>
+            </div>
+          </div>
 
-              {/* Progress indicator */}
-              {/* <div className="mt-6 sm:mt-8">
-                <div className="flex justify-between text-xs sm:text-sm text-gray-400 mb-2">
-                  <span>Development Progress</span>
-                  <span>85%</span>
-                </div>
-                <div className="w-full bg-gray-700 rounded-full h-1.5 sm:h-2 overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-gradient-to-r from-cyan-500 to-indigo-600 rounded-full"
-                    initial={{ width: 0 }}
-                    whileInView={{ width: "85%" }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 2, ease: "easeOut" }}
-                  />
-                </div>
-              </div> */}
+          {/* Agents Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAgents.map((agent) => (
+              <AIAgentCard
+                key={agent.id}
+                agent={{
+                  ...agent,
+                  downloads: Math.floor(Math.random() * 1000) + 100,
+                  version: '1.0.0'
+                }}
+                onAgentClick={(agent) => {
+                  // Navigate to agent detail page
+                  window.location.href = `/ai-agent/${agent.id}`;
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Empty State */}
+          {filteredAgents.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-12"
+            >
+              <TbRobot className="text-6xl text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-300 mb-2">No agents found</h3>
+              <p className="text-gray-400 mb-6">Try adjusting your search or filter criteria</p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowPublishSidebar(true)}
+                className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20 flex items-center gap-2 mx-auto"
+              >
+                <TbHexagon3D className="w-5 h-5" />
+                <span>Publish First Agent</span>
+              </motion.button>
             </motion.div>
-          </div>
-
-          {/* Blurred content underneath */}
-          <div className="opacity-30 pointer-events-none">
-          </div>
+          )}
         </div>
       </section>
 
@@ -1196,6 +1228,30 @@ const Artificial = () => {
       </section>
 
       <Footer />
+
+      {/* Publish Agent Sidebar */}
+      {showPublishSidebar && (
+        <PublishAgentSidebar
+          onClose={() => setShowPublishSidebar(false)}
+          onAgentCreated={() => {
+            // Add the new agent to the list
+            const newAgent = {
+              id: Date.now(),
+              name: 'New AI Agent',
+              creator: 'You',
+              price: 99.99,
+              rating: 5.0,
+              description: 'A newly published AI agent',
+              tags: ['new', 'ai', 'agent'],
+              category: 'business',
+              sales: 0,
+              downloads: 0,
+              version: '1.0.0'
+            };
+            setPublishedAgents(prev => [...prev, newAgent]);
+          }}
+        />
+      )}
 
       {/* Scoped CSS for mobile horizontal scroll */}
       <style>{`
