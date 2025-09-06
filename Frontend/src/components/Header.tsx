@@ -670,6 +670,11 @@ const Header = () => {
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    <Link to="/leaderboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                        <TrendingUp className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium mobile-text-base">Leaderboard</span>
+                                    </Link> {/* <-- ADD THIS LINK */}
+
                                     {/* Cart */}
                                     <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                         <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
@@ -1024,6 +1029,11 @@ const Header = () => {
                                             <LayoutGrid className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
                                             <span className="text-sm sm:text-base text-gray-700 font-medium">Dashboard</span>
                                         </Link>
+                                        {/* LEADERBOARD LINK FOR PROFILE SIDEBAR */}
+                                        <Link to="/leaderboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
+                                            <span className="text-sm sm:text-base text-gray-700 font-medium">Leaderboard</span>
+                                        </Link> 
                                         <Link to="/connections"
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
