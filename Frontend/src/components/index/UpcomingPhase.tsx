@@ -9,7 +9,7 @@ import {
   FaSeedling,
   FaSolarPanel,
 } from "react-icons/fa";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 import { Leaf } from "lucide-react";
 import backdropImage from '@/assets/images/green.jpg';
 

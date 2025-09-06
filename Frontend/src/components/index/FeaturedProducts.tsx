@@ -1,17 +1,9 @@
 "use client";
-
 import React, { useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Star,
-  TrendingUp,
-  Users,
-  ArrowRight,
-  ExternalLink,
-  X,
-} from "lucide-react";
+import { Star, TrendingUp, Users, ArrowRight, ExternalLink, X } from "lucide-react";
 import {
   Card as UICard,
   CardHeader as UICardHeader,
@@ -99,11 +91,11 @@ export const FeaturedProducts: React.FC = () => {
   const ProjectModal = ({ project }: { project: typeof featuredProjects[0] }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={() => setExpanded(null)}
       />
-      
+
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl max-w-[95vw] lg:max-w-4xl w-full h-[400px] sm:h-[380px] overflow-hidden animate-in slide-in-from-bottom-2 duration-300">
         {/* Close button */}
@@ -114,7 +106,7 @@ export const FeaturedProducts: React.FC = () => {
         >
           <X className="w-5 h-5 text-gray-700" />
         </button>
-        
+
         <div className="flex flex-col lg:flex-row h-full">
           {/* Image Section - Full height, no white space */}
           <div className="w-full lg:w-2/5 h-32 sm:h-48 lg:h-full relative overflow-hidden">
@@ -129,14 +121,14 @@ export const FeaturedProducts: React.FC = () => {
               }}
             />
             <div className={`absolute inset-0 bg-gradient-to-t ${project.gradient} opacity-20`} />
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className="absolute top-2 left-2 lg:top-3 lg:left-3 bg-white/95 text-gray-800 border-0 shadow-sm text-xs lg:text-sm px-2 py-1 lg:px-3 lg:py-1.5"
             >
               {project.category}
             </Badge>
           </div>
-          
+
           {/* Content Section */}
           <div className="w-full lg:w-3/5 p-4 sm:p-6 lg:p-8 flex flex-col">
             {/* Header */}
@@ -151,7 +143,7 @@ export const FeaturedProducts: React.FC = () => {
                 {project.description}
               </p>
             </div>
-            
+
             {/* Tags */}
             <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6">
               {project.tags.map((tag) => (
@@ -164,7 +156,7 @@ export const FeaturedProducts: React.FC = () => {
                 </Badge>
               ))}
             </div>
-            
+
             {/* Project Stats */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mb-4 sm:mb-6 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center gap-2">
@@ -179,10 +171,10 @@ export const FeaturedProducts: React.FC = () => {
                 by {project.author}
               </div>
             </div>
-            
+
             {/* Action Buttons */}
             <div className="space-y-2 sm:space-y-3">
-              <Button 
+              <Button
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 sm:py-3 rounded-lg transition-colors duration-200 hover:shadow-lg text-sm sm:text-base"
                 onClick={() => {
                   window.open(project.href, "_blank", "noopener,noreferrer");
@@ -199,31 +191,28 @@ export const FeaturedProducts: React.FC = () => {
   );
 
   return (
-    <section
-      id="featured" className="relative py-14 bg-gradient-to-br from-gray-100 via-gray-50 to-white overflow-hidden  will-change-transform transform-gpu">
-      {/* Overlay for blur/dim */}
-      <Overlay />
+    <>
+      <div className="relative py-14 bg-gradient-to-br from-gray-100 via-gray-50 to-white">
+        <Overlay />
+        {/* Project Modal */}
+        {expanded !== null && (
+          <ProjectModal
+            project={featuredProjects.find((p) => p.id === expanded)!}
+          />
+        )}
 
-      {/* Project Modal */}
-      {expanded !== null && (
-        <ProjectModal
-          project={featuredProjects.find((p) => p.id === expanded)!}
-        />
-      )}
+        <div className="mx-auto px-4 max-w-[92vw] z-10">
+          {/* Header */}
+          <div className="text-center mb-14">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
+              Discover <span className="text-blue-600">Game-Changing</span> Projects
+            </h1>
+            <p className="text-base text-gray-600 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
+              Explore innovative solutions from our talented community.
+            </p>
+          </div>
 
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-[92vw] relative z-10">
-        {/* Header */}
-        <div className="text-center mb-14">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
-            Discover <span className="text-blue-600">Game-Changing</span> Projects
-          </h1>
-          <p className="text-[12px] sm:text-base text-gray-600 mb-8 sm:mb-16 max-w-full sm:max-w-sm lg:max-w-full leading-relaxed animate-fade-in delay-200 mobile-text-base">
-            Explore innovative solutions from our talented community.
-          </p>
-        </div>
-
-        {/* Desktop Grid */}
-        <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {featuredProjects.map((p) => (
             <UICard
               key={p.id}
@@ -300,6 +289,7 @@ export const FeaturedProducts: React.FC = () => {
               </UICardContent>
             </UICard>
           ))}
+        </div>
         </div>
 
         {/* Mobile Horizontal Scroll */}
@@ -399,36 +389,9 @@ export const FeaturedProducts: React.FC = () => {
             View All Projects
             <ExternalLink className="ml-2 w-4 h-4" />
           </Button>
-        </div>
+        </div>     
       </div>
-
-      {/* Scoped CSS for animations and mobile font sizes */}
-      <style>{`
-        @keyframes slide-in-from-bottom-2 {
-          0% { 
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-          }
-          100% { 
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        
-        .animate-in {
-          animation: slide-in-from-bottom-2 0.3s ease-out;
-        }
-        
-        /* Hide scrollbar for horizontal scroll on mobile */
-        .overflow-x-auto::-webkit-scrollbar {
-          display: none;
-        }
-        .overflow-x-auto {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
-    </section>
+    </>
   );
 };
 

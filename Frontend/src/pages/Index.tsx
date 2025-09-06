@@ -1,86 +1,66 @@
-import Header from "@/components/Header";
-import { Hero } from "@/components/Hero";
-import { FeaturedProducts } from "@/components/FeaturedProducts";
-import { ImpactMotive } from "@/components/ImpactMotive";
-import { HowItWorks } from "@/components/HowItWorks";
-import { CommunityConnect } from "@/components/CommunityConnect";
+import Header from '@/components/Header';
+import {Footer} from '@/components/Footer';
 import { lazy, Suspense, useMemo, useCallback } from "react";
+import React from 'react';
 
-// Lazy load heavy components with better chunking
-const LazyGlobalCollaborations = lazy(() => 
-  import("@/components/GlobalCollaborations").then(module => ({ 
-    default: module.GlobalCollaborations 
-  }))
-);
-const LazyWhatWeProvide = lazy(() => 
-  import("@/components/WhatWeProvide").then(module => ({ 
-    default: module.WhatWeProvide 
-  }))
-);
-const LazyUpcomingPhase = lazy(() => 
-  import("@/components/UpcomingPhase").then(module => ({ 
-    default: module.UpcomingPhase 
-  }))
-);
-const LazyFooter = lazy(() => 
-  import("@/components/Footer").then(module => ({ 
-    default: module.Footer 
-  }))
-);
-const LazyChatbot = lazy(() => 
-  import("@/components/Chatbot").then(module => ({ 
-    default: module.Chatbot 
-  }))
-);
-
-// Performance-optimized loading fallback
-const OptimizedFallback = () => (
-  <div className="min-h-[200px] flex items-center justify-center">
-    <div className="animate-pulse text-gray-400">Loading...</div>
-  </div>
-);
+const Hero = React.lazy(() => 
+    import('@/components/index/Hero').then(module => ({ 
+        default: module.Hero 
+    }))
+); 
+const FeaturedProducts = React.lazy(() => 
+    import('@/components/index/FeaturedProducts').then(module => ({ 
+        default: module.FeaturedProducts 
+    }))
+); 
+const ImpactMotive = React.lazy(() => 
+    import('@/components/index/ImpactMotive').then(module => ({ 
+        default: module.ImpactMotive 
+    }))
+); 
+const HowItWorks = React.lazy(() => 
+    import('@/components/index/HowItWorks').then(module => ({ 
+        default: module.HowItWorks 
+    }))
+); 
+const CommunityConnect = React.lazy(() => 
+    import('@/components/index/CommunityConnect').then(module => ({ 
+        default: module.CommunityConnect 
+    }))
+); 
+const GlobalCollaborations = React.lazy(() => 
+    import('@/components/index/GlobalCollaborations').then(module => ({ 
+        default: module.GlobalCollaborations 
+    }))
+); 
+const UpcomingPhase = React.lazy(() => 
+    import('@/components/index/UpcomingPhase').then(module => ({ 
+        default: module.UpcomingPhase 
+    }))
+); 
+const WhatWeProvide = React.lazy(() => 
+    import('@/components/index/WhatWeProvide').then(module => ({ 
+        default: module.WhatWeProvide 
+    }))
+); 
 
 const Index = () => {
-  // Memoize components to prevent unnecessary re-renders
-  const MemoHeader = useMemo(() => <Header />, []);
-  const MemoHero = useMemo(() => <Hero />, []);
-  const MemoFeaturedProducts = useMemo(() => <FeaturedProducts />, []);
-  const MemoImpactMotive = useMemo(() => <ImpactMotive />, []);
-  const MemoHowItWorks = useMemo(() => <HowItWorks deferVideo={true} />, []);
-  const MemoCommunityConnect = useMemo(() => <CommunityConnect />, []);
-
-  // Optimize lazy loading with better suspense boundaries
-  const renderLazyComponents = useCallback(() => (
-    <>
-      <Suspense fallback={<OptimizedFallback />}>
-        <LazyGlobalCollaborations />
-      </Suspense>
-      <Suspense fallback={<OptimizedFallback />}>
-        <LazyUpcomingPhase />
-      </Suspense>
-      <Suspense fallback={<OptimizedFallback />}>
-        <LazyWhatWeProvide />
-      </Suspense>
-      <Suspense fallback={<OptimizedFallback />}>
-        <LazyFooter />
-      </Suspense>
-      <Suspense fallback={null}>
-        <LazyChatbot />
-      </Suspense>
-    </>
-  ), []);
-
-  return (
-    <div className="relative min-h-screen overflow-hidden header-spacer">
-      {MemoHeader}
-      {MemoHero}
-      {MemoFeaturedProducts}
-      {MemoImpactMotive}
-      {MemoHowItWorks}
-      {MemoCommunityConnect}
-      {renderLazyComponents()}
-    </div>
-  );
-};
+    return (
+        <>
+            <Header />
+            <Suspense fallback={<div>Loading...</div>}>
+                <Hero />
+                <FeaturedProducts />
+                <ImpactMotive />
+                <HowItWorks deferVideo={true} />
+                <CommunityConnect />
+                <GlobalCollaborations />
+                <UpcomingPhase />
+                <WhatWeProvide />
+            </Suspense>
+            <Footer />
+        </>
+    )
+}
 
 export default Index;

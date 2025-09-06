@@ -3,10 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
-import Students from "../assets/images/Students.jpeg";
-import PhD from "../assets/images/phdscholars.jpeg";
-import Professors from "../assets/images/professors.jpeg";
-import Business from "../assets/images/Business.jpeg";
+import Students from "../../assets/images/Students.jpeg";
+import PhD from "../../assets/images/phdscholars.jpeg";
+import Professors from "../../assets/images/professors.jpeg";
+import Business from "../../assets/images/Business.jpeg";
 
 
 type Option = {
