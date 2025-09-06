@@ -40,6 +40,7 @@ const ScheduleMeeting = React.lazy(() => import("@/pages/ScheduleMeeting"));
 const AboutUs = React.lazy(() => import("@/pages/AboutUs"));
 const Sustainable = React.lazy(() => import("@/pages/Sustainable"));
 const AiAgents = React.lazy(() => import("@/pages/AiAgents"));
+const AIAgentDetail = React.lazy(() => import("@/pages/AIAgentDetail"));
 const Admin = React.lazy(() => import("@/pages/Admin"));
 const NotFound = React.lazy(() => import("@/pages/NotFound"));
 const CampusAmbassadorPage = React.lazy(() => import("@/pages/CampusAmbassadorPage"));
@@ -257,6 +258,11 @@ const App = () => (
             <Route path="/aiagents" element={
               <Suspense fallback={<PageLoader />}>
                 <AiAgents />
+              </Suspense>
+            } />
+            <Route path="/ai-agent/:id" element={
+              <Suspense fallback={<PageLoader />}>
+                <AIAgentDetail />
               </Suspense>
             } />
             <Route path="/admin" element={
