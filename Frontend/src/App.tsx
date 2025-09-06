@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { useEffect } from "react";
 import CookieConsent from "@/components/CookieConsent";
+import Leaderboard from './pages/Leaderboard';
 
 
 // Lazy load all pages for code splitting
@@ -42,6 +43,7 @@ const AiAgents = React.lazy(() => import("@/pages/AiAgents"));
 const Admin = React.lazy(() => import("@/pages/Admin"));
 const NotFound = React.lazy(() => import("@/pages/NotFound"));
 const CampusAmbassadorPage = React.lazy(() => import("@/pages/CampusAmbassadorPage"));
+
 
 // Policy pages
 const PrivacyPolicy = React.lazy(() => import("@/pages/Policy/PrivacyPolicy"));
@@ -300,6 +302,11 @@ const App = () => (
                 <CampusAmbassadorPage />
               </Suspense>
             } />
+            <Route path="/leaderboard" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Leaderboard />
+                </Suspense>
+              } />
             
             <Route path="*" element={
               <Suspense fallback={<PageLoader />}>
