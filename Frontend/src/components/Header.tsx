@@ -257,6 +257,8 @@ const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState<string>('all');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const unreadNotifications = notifications.filter(n => n.unread);
+    const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
 
     // Filter tags for search
     const filterTags: FilterTag[] = [
@@ -497,9 +499,6 @@ const Header = () => {
                         <div className="flex items-center space-x-1 flex-shrink-0">
                             <Link to="/" className="flex items-center space-x-2 group">
                                 <img src={Logo} alt="AMOGH" className="h-10 w-auto md:h-8" />
-                                <div className="-translate-x-[10px] py-6 hidden w-4 pr-8 h-4 text-xs px-1 sm:inline-flex text-purple-700">
-                                    beta
-                                </div>
                             </Link>
                         </div>
 
@@ -567,6 +566,70 @@ const Header = () => {
                                                 <ShoppingCart className="h-5 w-5 text-gray-600" />
                                             </Link>
                                         </Button>
+                                        {/* Notifications Dropdown */}
+                                        <DropdownMenu open={isNotificationsMenuOpen} onOpenChange={setIsNotificationsMenuOpen}>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:scale-105 transition-all duration-300" aria-label="Notifications">
+                                                    <Bell className="h-5 w-5 text-gray-600" />
+                                                    {unreadNotificationCount > 0 && (
+                                                        <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-none">
+                                                            {unreadNotificationCount}
+                                                        </span>
+                                                    )}
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-80 p-0">
+                                                <div className="p-3 border-b">
+                                                    <div className="text-sm font-semibold text-gray-800">Notifications</div>
+                                                    <div className="text-xs text-gray-500">{unreadNotificationCount} unread</div>
+                                                </div>
+                                                {unreadNotifications.length === 0 ? (
+                                                    <div className="p-4 text-sm text-gray-500">You're all caught up.</div>
+                                                ) : (
+                                                    <div className="max-h-80 overflow-auto">
+                                                        {unreadNotifications.map((notification) => (
+                                                            <div
+                                                                key={notification.id}
+                                                                className="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-b last:border-b-0"
+                                                                onClick={() => handleNotificationClick(notification.id)}
+                                                            >
+                                                                <div className="flex items-start gap-3">
+                                                                    <span className="text-xl">{getNotificationIcon(notification.type)}</span>
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <h4 className="font-medium text-gray-900 text-sm truncate">{notification.title}</h4>
+                                                                            <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                                                                        </div>
+                                                                        <p className="text-xs text-gray-600 line-clamp-2">{notification.message}</p>
+                                                                        <p className="text-[10px] text-gray-400 mt-1">{notification.time}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                <DropdownMenuSeparator />
+                                                <div className="p-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-center text-sm text-black"
+                                                        onClick={() => {
+                                                            setShowNotificationsSidebar(true);
+                                                            setIsNotificationsMenuOpen(false);
+                                                        }}
+                                                    >
+                                                        View all notifications
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-center text-sm text-black"
+                                                        onClick={() => setNotifications(prev => prev.map(n => ({ ...n, unread: false })))}
+                                                    >
+                                                        Mark all as read
+                                                    </Button>
+                                                </div>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                         {/* Profile Button with User Name */}
                                         <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
                                             <User className="h-5 w-5 text-gray-600" />
@@ -1173,7 +1236,7 @@ const Header = () => {
                     <div className="p-3 sm:p-4 border-t bg-slate-50">
                         <Button
                             variant="outline"
-                            className="w-full text-xs sm:text-sm"
+                            className="w-full justify-center text-sm text-black"
                             onClick={() => {
                                 setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
                             }}

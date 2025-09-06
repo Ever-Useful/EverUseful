@@ -2,19 +2,22 @@ const express = require('express');
 const router = express.Router();
 const authorize = require('../authorize');
 const userService = require('../services/userService');
-const dynamoDB = require('../services/dynamoDBService'); // Added for check-phone endpoint
 
 // Get user profile
 router.get('/profile', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
+    console.log('Profile endpoint - Firebase UID:', firebaseUid);
+    console.log('Profile endpoint - User from token:', req.user);
     
     // Fetch user from DynamoDB using Firebase UID
     let user = await userService.findUserByFirebaseUid(firebaseUid);
+    console.log('Profile endpoint - Found user:', user ? 'Yes' : 'No');
     
     if (!user) {
       // Create new user in DynamoDB
       const { name, email } = req.user;
+      console.log('Profile endpoint - Creating new user with data:', { name, email });
       
       // Parse firstName and lastName from name if available
       let firstName = '';
@@ -26,7 +29,7 @@ router.get('/profile', authorize, async (req, res) => {
       }
       
       try {
-        const newUser = await userService.createUserWithPhoneVerification(firebaseUid, {
+        const newUser = await userService.createUser(firebaseUid, {
           firstName: firstName,
           lastName: lastName,
           email: email || 'no-email@example.com',
@@ -36,6 +39,7 @@ router.get('/profile', authorize, async (req, res) => {
         });
         
         user = await userService.findUserByFirebaseUid(firebaseUid);
+        console.log('Profile endpoint - New user created:', user.customUserId);
       } catch (createError) {
         console.error('Profile endpoint - Error creating user:', createError);
         return res.status(500).json({ success: false, message: 'Failed to create user' });
@@ -54,6 +58,9 @@ router.get('/profile', authorize, async (req, res) => {
       gender: profile.gender || '',
       username: profile.username || profile.email?.split('@')[0] || ''
     };
+    
+    console.log('Profile endpoint - Auth data being sent:', auth);
+    console.log('Profile endpoint - Profile data being sent:', profile);
     
     res.json({
       success: true,
@@ -75,21 +82,6 @@ router.get('/profile', authorize, async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching user profile:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Get user connections (following list with profile data)
-router.get('/connections', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const user = await userService.findUserByFirebaseUid(firebaseUid);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    const connections = await userService.getUserConnections(user.customUserId);
-    res.json({ success: true, data: connections });
-  } catch (error) {
-    console.error('Error fetching connections:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
@@ -620,36 +612,6 @@ router.get('/all', async (req, res) => {
   }
 });
 
-// GET suggested users
-router.get('/suggestions', async (req, res) => {
-  try {
-    const users = await userService.getAllUsers();
-
-    // Keep only users with a non-empty firstName
-    const filtered = users.filter(user => {
-      const firstName = user?.profile?.firstName;
-      return firstName && firstName.trim() !== "";
-    });
-
-    const formatted = filtered.map(user => ({
-      customUserId: user.customUserId,
-      profile: {
-        firstName: user.profile.firstName,
-        lastName: user.profile.lastName || '',   // lastName can be empty
-        avatar: user.profile.avatar || null,
-        userType: user.profile.userType || '',
-        username: user.profile.username || '',
-      },
-    }));
-
-    res.json({ success: true, data: formatted });
-  } catch (error) {
-    console.error('Error fetching suggestions:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-
 // users.js
 router.get('/search', async (req, res) => {
   try {
@@ -737,14 +699,12 @@ router.post('/connections', authorize, async (req, res) => {
 
     const connection = await userService.sendConnectionRequest(user.customUserId, targetUserId);
 
-        // ✅ Unified socket event
-    req.app.get('io')
-      .to(targetUserId)
-      .emit("connection_update", {
-        type: "sent",
-        from: user.customUserId,
-        to: targetUserId,
-      });
+    // 🔴 Notify receiver in real-time
+    req.app.get('io').to(targetUserId).emit('connection_request', {
+      from: user.customUserId,
+      ...connection,
+    });
+
     res.json({ success: true, data: connection });
   } catch (err) {
     console.error("Error sending connection request:", err);
@@ -763,10 +723,7 @@ router.get('/connections', authorize, async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
     const connections = await userService.getConnections(user.customUserId);
-    console.log("📡 Sending connections:", connections);
-
     res.json({ success: true, data: connections });
-    
   } catch (err) {
     console.error("Error fetching connections:", err);
     res.status(500).json({ success: false, message: err.message });
@@ -786,16 +743,11 @@ router.put('/connections/:senderId/accept', authorize, async (req, res) => {
 
     const result = await userService.acceptConnectionRequest(receiver.customUserId, senderId);
 
-    
-    // ✅ Unified socket event
+    // Notify both users
     req.app.get('io')
       .to(receiver.customUserId)
       .to(senderId)
-      .emit("connection_update", {
-        type: "accepted",
-        from: senderId,
-        to: receiver.customUserId,
-      });
+      .emit('connection_update', result);
 
     res.json({ success: true, data: result });
   } catch (err) {
@@ -817,16 +769,6 @@ router.put('/connections/:senderId/reject', authorize, async (req, res) => {
 
     const result = await userService.rejectConnectionRequest(receiver.customUserId, senderId);
 
-    // ✅ Unified socket event
-    req.app.get('io')
-      .to(receiver.customUserId)
-      .to(senderId)
-      .emit("connection_update", {
-        type: "rejected",
-        from: senderId,
-        to: receiver.customUserId,
-      });
-
     res.json({ success: true, data: result });
   } catch (err) {
     console.error("Error rejecting connection:", err);
@@ -847,16 +789,6 @@ router.delete('/connections/:receiverId', authorize, async (req, res) => {
 
     const result = await userService.withdrawConnectionRequest(sender.customUserId, receiverId);
 
-    //Unified socket event
-    req.app.get('io')
-      .to(sender.customUserId)
-      .to(receiverId)
-      .emit("connection_update", {
-        type: "withdrawn",
-        from: sender.customUserId,
-        to: receiverId,
-      });
-
     res.json({ success: true, data: result });
   } catch (err) {
     console.error("Error withdrawing connection:", err);
@@ -865,43 +797,6 @@ router.delete('/connections/:receiverId', authorize, async (req, res) => {
 });
 
 
-// Get logged-in user's ID + connections
-router.get("/:id/connections", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const data = await userService.getUserConnectionsWithId(id);
-    res.json({ success: true, data });
-  } catch (error) {
-    console.error("Error fetching user connections with ID:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
-
-// routes/users.js
-
-// ----------------------------
-// Get only received connections (by customUserId)
-// ----------------------------
-router.get('/connections/received/:userId', authorize, async (req, res) => {
-  try {
-    const { userId } = req.params; // this is customUserId (e.g. USER_000038)
-
-    const user = await userService.findUserByCustomId(userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    const connections = await userService.getConnections(user.customUserId);
-
-    res.json({
-      success: true,
-      data: connections.received || [],
-    });
-  } catch (err) {
-    console.error("Error fetching received connections:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
 
 
 // Get user by customUserId (for public profile viewing)
@@ -942,109 +837,12 @@ router.get('/:customUserId', async (req, res) => {
         professorData: user.professorData || null,
         personalDetails: user.personalDetails || {},
         socialLinks: user.socialLinks || {},
-        projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 },
-        connections: user.connections || { sent: [], received: [], pending: [] },
-        connected: user.social?.connected || []
+        projects: user.projects || { created: [], collaborated: [], favorites: [], count: 0 }
       }
     });
   } catch (error) {
     console.error('Error fetching user by customUserId:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Phone verification endpoints
-router.post('/verify-phone', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const { phoneNumber } = req.body;
-    
-    if (!phoneNumber) {
-      return res.status(400).json({ success: false, message: 'Phone number is required' });
-    }
-    
-    const user = await userService.findUserByFirebaseUid(firebaseUid);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    // Check if phone number is already verified by another user
-    const existingUser = await userService.findUserByPhone(phoneNumber);
-    if (existingUser && existingUser.customUserId !== user.customUserId) {
-      return res.status(400).json({ success: false, message: 'Phone number already registered with another account' });
-    }
-    
-    // Update phone number and mark as verified
-    await userService.verifyPhoneNumber(user.customUserId, phoneNumber, true);
-    
-    res.json({ success: true, message: 'Phone number verified successfully' });
-  } catch (error) {
-    console.error('Error verifying phone number:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-router.post('/resend-phone-verification', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const { phoneNumber } = req.body;
-    
-    if (!phoneNumber) {
-      return res.status(400).json({ success: false, message: 'Phone number is required' });
-    }
-    
-    const user = await userService.findUserByFirebaseUid(firebaseUid);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    // Update phone number and mark as unverified
-    await userService.verifyPhoneNumber(user.customUserId, phoneNumber, false);
-    
-    res.json({ success: true, message: 'Phone verification code resent' });
-  } catch (error) {
-    console.error('Error resending phone verification:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Email verification endpoint
-router.post('/verify-email', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    
-    const user = await userService.findUserByFirebaseUid(firebaseUid);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    // Mark email as verified
-    await userService.updateEmailVerificationStatus(user.customUserId, true);
-    
-    res.json({ success: true, message: 'Email verified successfully' });
-  } catch (error) {
-    console.error('Error verifying email:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// Check if phone number is registered
-router.post('/check-phone', async (req, res) => {
-  try {
-    const { phoneNumber } = req.body;
-    
-    if (!phoneNumber) {
-      return res.status(400).json({ error: 'Phone number is required' });
-    }
-    
-    // Check if phone number exists in the database using the service layer
-    const existingUser = await userService.findUserByPhone(phoneNumber);
-    const exists = !!existingUser;
-    
-    res.json({ exists });
-  } catch (error) {
-    console.error('Error checking phone registration:', error);
-    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

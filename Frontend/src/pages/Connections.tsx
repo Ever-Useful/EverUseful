@@ -189,6 +189,12 @@ const Connections = () => {
   const [sentUsers, setSentUsers] = useState<UserSearchResult[]>([]);
   const [receivedUsers, setReceivedUsers] = useState<UserSearchResult[]>([]);
   const [connectedUsers, setConnectedUsers] = useState<UserSearchResult[]>([]);
+
+
+
+
+
+
   const { profileData } = useUserProfile();  // logged-in user
   const loggedInUserId = profileData?.customUserId;
 
@@ -205,6 +211,148 @@ useEffect(() => {
   };
   fetchResults();
 }, [searchQuery])
+
+// Fetch suggestions on mount
+useEffect(() => {
+  const fetchSuggestions = async () => {
+    try {
+      const result = await UserService.getSuggestedUsers();
+      setSuggestions(result);
+    } catch (err) {
+      console.error("Failed to fetch suggestions:", err);
+    }
+  };
+
+  fetchSuggestions();
+}, []);
+
+// useEffect(() => {
+//   const fetchReceivedProfiles = async () => {
+//     if (!profileData.customUserId) return;
+
+//     try {
+//       // 1️⃣ Get logged-in user's connections (IDs)
+//       const connections = await UserService.getConnectionsByUserId(profileData.customUserId);
+//       console.log("Connections:", connections);
+
+//       // 2️⃣ Take only "received" IDs
+//       const receivedIds = connections.connections?.received || [];
+//       if (receivedIds.length === 0) {
+//         setReceivedUsers([]);
+//         return;
+//       }
+
+//       // 3️⃣ Fetch full profiles for those IDs
+//       const receivedProfiles = await Promise.all(
+//         receivedIds.map(id => UserService.getUserByCustomId(id))
+//       );
+
+//       console.log("Received profiles:", receivedProfiles);
+
+//       // 4️⃣ Store them in state
+//       setReceivedUsers(receivedProfiles.filter(Boolean));
+//     } catch (err) {
+//       console.error("Failed to fetch received profiles:", err);
+//     }
+//   };
+
+//   fetchReceivedProfiles();
+// }, [profileData.customUserId]);
+
+useEffect(() => {
+  const fetchReceivedProfiles = async () => {
+    if (!profileData?.customUserId) return;
+
+    try {
+      // Get logged-in user's connections
+      const connections = await UserService.getConnectionsByUserId(profileData.customUserId);
+      console.log("Connections:", connections);
+
+      // Get full profiles for received connections with try/catch per ID
+      const receivedProfiles = await Promise.all(
+        (connections.connections?.received || []).map(async (id: string) => {
+          console.log("Fetching received user with ID:", id);
+          try {
+            const user = await UserService.getUserByCustomId(id);
+            console.log("Fetched user response:", user);
+            return user;
+          } catch {
+            console.warn(`User with ID ${id} not found, skipping...`);
+            return null;
+          }
+        })
+      );
+
+
+      setReceivedUsers(
+        receivedProfiles
+          .filter(Boolean)
+          .map((user: any) => ({
+            customUserId: user.customUserId,
+            profile: {
+              firstName: user.auth?.firstName || user.profile?.firstName || "User",
+              lastName: user.auth?.lastName || user.profile?.lastName || "",
+
+              avatar: user.profile?.avatar || "",
+              userType: user.auth?.userType || user.profile?.userType || "student",
+              username: user.auth?.username || "",
+            },
+          }))
+      );
+    } catch (err) {
+      console.error("Failed to fetch received profiles:", err);
+    }
+  };
+
+  fetchReceivedProfiles();
+}, [profileData?.customUserId]);
+
+useEffect(() => {
+  const fetchSentProfiles = async () => {
+    if (!profileData?.customUserId) return;
+
+    try {
+      // Get logged-in user's connections
+      const connections = await UserService.getConnectionsByUserId(profileData.customUserId);
+
+
+const sentProfiles = await Promise.all(
+  (connections.connections?.sent || []).map(async (id: string) => {
+    console.log("Fetching sent user with ID:", id);
+    try {
+      const user = await UserService.getUserByCustomId(id);
+      console.log("Fetched user response:", user);
+      return user;
+    } catch {
+      console.warn(`User with ID ${id} not found, skipping...`);
+      return null;
+    }
+  })
+);
+      setSentUsers(
+        sentProfiles
+          .filter(Boolean)
+          .map((user: any) => ({
+            customUserId: user.customUserId,
+            profile: {
+              firstName: user.auth?.firstName || user.profile?.firstName || "User",
+              lastName: user.auth?.lastName || user.profile?.lastName || "",
+              avatar: user.profile?.avatar || "",
+              userType: user.auth?.userType || "student",
+              username: user.auth?.username || "",
+            },
+          }))
+      );
+    } catch (err) {
+      console.error("Failed to fetch sent profiles:", err);
+    }
+  };
+
+  fetchSentProfiles();
+}, [profileData?.customUserId]);
+
+
+
   const handleConnect = (personId: string) => {
     setSuggestions(prev => 
       prev.map(person => 
@@ -307,7 +455,7 @@ useEffect(() => {
     </div>
   );
 
-  const renderTabContent = () => {
+    const renderTabContent = () => {
     switch (activeTab) {
       case 'received':
   return (
@@ -501,6 +649,7 @@ useEffect(() => {
             <div className="p-4 bg-white rounded-t-lg border border-b-0 border-gray-200 sticky top-0 z-10">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Find Connections</h2>
               <div className="relative">
+
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search by name, title, or company..."
@@ -516,14 +665,6 @@ useEffect(() => {
                     <X className="h-4 w-4" />
                   </button>
                 )}
-              </div>
-              {/* Filter Bar */}
-              <div className="mt-3 mb-1">
-                <SearchFilterBar 
-                  tags={filterTags}
-                  onTagClick={handleFilterClick}
-                  className="justify-start"
-                />
               </div>
             </div>
             {/* Scrollable cards */}
@@ -592,7 +733,7 @@ useEffect(() => {
           title: user.profile.userType,
           company: user.profile.username,
           avatar: user.profile.avatar,
-          //location: user.profile.location || "",
+          location: user.profile.location || "",
           mutualConnections: 0,
           isConnected: false,
           skills: []
@@ -615,6 +756,7 @@ useEffect(() => {
           </div>
         );
     }}
+
 
   return (
     <div className="min-h-screen bg-blue-100">

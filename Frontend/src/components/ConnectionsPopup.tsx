@@ -33,41 +33,48 @@ interface ConnectionsPopupProps {
   isOpen: boolean;
   onClose: () => void;
   connectionCount: number;
+  onFetchedCount?: (count: number) => void; // NEW: emit count back to Profile.tsx
 }
 
-const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopupProps) => {
+const ConnectionsPopup = ({ 
+  isOpen, 
+  onClose, 
+  connectionCount, 
+  onFetchedCount   
+}: ConnectionsPopupProps) => {
+
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const navigate = useNavigate();
   const { profileData } = useUserProfile();
+  
 
 
 
-useEffect(() => {
-  const fetchConnectedProfiles = async () => {
-    if (!profileData?.customUserId) return;
 
-    try {
-      const connections = await userService.getConnectionsByUserId(profileData.customUserId);
+  useEffect(() => {
+    const fetchConnectedProfiles = async () => {
+      if (!profileData?.customUserId) return;
 
-      const connectedProfiles = await Promise.all(
-        (connections.connected || []).map(async (id: string) => {
-          console.log("Fetching connected user with ID:", id);
-          try {
-            const user = await userService.getUserByCustomId(id);
-            console.log("Fetched user response:", user);
-            return user;
-          } catch {
-            console.warn(`User with ID ${id} not found, skipping...`);
-            return null;
-          }
-        })
-      );
+      try {
+        setLoading(true);
+        const connections = await userService.getConnectionsByUserId(profileData.customUserId);
 
-      setConnections(
-        connectedProfiles
+        const connectedProfiles = await Promise.all(
+          (connections.connected || []).map(async (id: string) => {
+            try {
+              const user = await userService.getUserByCustomId(id);
+              return user;
+            } catch {
+              console.warn(`User with ID ${id} not found, skipping...`);
+              return null;
+            }
+          })
+        );
+
+        const cleanedProfiles = connectedProfiles
           .filter(Boolean)
           .map((user: any) => ({
             id: user.customUserId,
@@ -75,77 +82,26 @@ useEffect(() => {
             avatar: user.profile?.avatar || "",
             userType: user.auth?.userType || "student",
             username: user.auth?.username || user.profile?.username || "",
-          }))
-      );
-    } catch (err) {
-      console.error("Failed to fetch connected profiles:", err);
-      toast.error("Failed to load connections");
-    }
-  };
+          }));
 
-  fetchConnectedProfiles();
-}, [profileData?.customUserId]);
+        setConnections(cleanedProfiles);
+
+        //  Emit the actual fetched count back up
+        onFetchedCount?.(cleanedProfiles.length);
+      } catch (err) {
+        console.error("Failed to fetch connected profiles:", err);
+        toast.error("Failed to load connections");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConnectedProfiles();
+  }, [profileData?.customUserId]);
 
 
-  // // Mock data for now - replace with actual API call
-  // const mockConnections: Connection[] = [
-  //   {
-  //     id: '1',
-  //     name: 'Sarah Chen',
-  //     title: 'Senior Product Manager',
-  //     company: 'TechCorp',
-  //     location: 'San Francisco, CA',
-  //     mutualConnections: 15,
-  //     isConnected: true,
-  //   },
-  //   {
-  //     id: '2',
-  //     name: 'Marcus Johnson',
-  //     title: 'Lead Developer',
-  //     company: 'StartupXYZ',
-  //     location: 'New York, NY',
-  //     mutualConnections: 8,
-  //     isConnected: true,
-  //   },
-  //   {
-  //     id: '3',
-  //     name: 'Elena Rodriguez',
-  //     title: 'Marketing Director',
-  //     company: 'GrowthCo',
-  //     location: 'Austin, TX',
-  //     mutualConnections: 12,
-  //     isConnected: true,
-  //   },
-  //   {
-  //     id: '4',
-  //     name: 'David Kim',
-  //     title: 'UX Designer',
-  //     company: 'DesignStudio',
-  //     location: 'Seattle, WA',
-  //     mutualConnections: 5,
-  //     isConnected: true,
-  //   },
-  //   {
-  //     id: '5',
-  //     name: 'Lisa Wang',
-  //     title: 'Data Scientist',
-  //     company: 'DataTech',
-  //     location: 'Boston, MA',
-  //     mutualConnections: 3,
-  //     isConnected: true,
-  //   }
-  // ];
 
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     setLoading(true);
-  //     // Simulate API call
-  //     setTimeout(() => {
-  //       setConnections(mockConnections);
-  //       setLoading(false);
-  //     }, 500);
-  //   }
-  // }, [isOpen]);
+  
 
   const handleMessage = (connectionId: string) => {
     // Navigate to chat or open chat modal
@@ -177,9 +133,23 @@ useEffect(() => {
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Connections</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              {connectionCount} connection{connectionCount !== 1 ? 's' : ''}
-            </p>
+<div className="flex items-center justify-between p-6 border-b border-gray-200">
+  <div>
+    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Connections</h2>
+    <p className="text-sm text-gray-600 mt-1">
+      {connections.length} connection{connections.length !== 1 ? 's' : ''}
+    </p>
+  </div>
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={onClose}
+    className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-gray-100 text-blue-800"
+  >
+    <X className="h-4 w-4 sm:h-5 sm:w-5" />
+  </Button>
+</div>
+
           </div>
           <Button
             variant="ghost"
@@ -202,14 +172,14 @@ useEffect(() => {
               className="pl-10 h-10 sm:h-12 text-sm sm:text-base"
             />
           </div>
-          {/* Filter Bar */}
-          <div className="mt-3 mb-1">
+          Filter Bar
+          {/* <div className="mt-3 mb-1">
             <SearchFilterBar 
               tags={filterTags}
               onTagClick={handleFilterClick}
               className="justify-start"
             />
-          </div>
+          </div> */}
         </div>
 
         {/* Content */}
@@ -265,8 +235,8 @@ useEffect(() => {
                           }}
                           className="text-blue-600 border-blue-600 hover:bg-blue-50 text-xs sm:text-sm"
                         >
-                          <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                          Message
+                          {/* <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> */}
+                          View Profile
                         </Button>
                       </div>
                     </div>
