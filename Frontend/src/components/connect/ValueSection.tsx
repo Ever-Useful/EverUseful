@@ -25,10 +25,10 @@ const ValuesSection = () => {
     <section className="py-20 bg-white">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="heading-section font-bold text-olive-dark mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
             Why Join Us?
           </h2>
-          <p className="text-xl text-olive max-w-2xl mx-auto">
+          <p className="text-base text-olive max-w-2xl mx-auto">
             Discover what makes our team special and why we're the perfect place to grow your career.
           </p>
         </div>
@@ -45,10 +45,10 @@ const ValuesSection = () => {
                     <value.icon className="w-8 h-8 text-olive group-hover:text-white transition-colors duration-300" />
                   </div>
                 </div>
-                <h3 className="text-2xl font-bold text-olive-dark mb-4">
+                <h3 className="text-xl sm:text-xl md:text-xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
                   {value.title}
                 </h3>
-                <p className="text-olive leading-relaxed">
+                <p className="text-olive leading-relaxed text-base">
                   {value.description}
                 </p>
               </CardContent>
