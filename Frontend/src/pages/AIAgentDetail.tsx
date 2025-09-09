@@ -9,6 +9,7 @@ import { Footer } from '@/components/Footer';
 import { API_ENDPOINTS } from '@/config/api';
 import { useAuthState } from '@/hooks/useAuthState';
 import { toast } from 'sonner';
+import userService from '@/services/userService';
 
 interface AIAgent {
   id: string;
@@ -177,10 +178,36 @@ const AIAgentDetail: React.FC = () => {
     }
   };
 
-  const handleAddToCart = () => {
-    // Add to cart functionality
-    console.log('Added to cart:', agent?.name);
-    toast.success('Added to cart!');
+  const handleAddToCart = async () => {
+    if (!user || !token) {
+      toast.error('You must be logged in to add items to cart.');
+      return;
+    }
+
+    try {
+      const userData = await userService.getUserProfile();
+      if (!userData) {
+        toast.error('User data not found');
+        return;
+      }
+
+      if (!agent) {
+        toast.error('Agent not found');
+        return;
+      }
+
+      // Add agent to cart
+      await userService.addToCart({
+        id: agent.id,
+        name: agent.name,
+        price: agent.price || 0,
+        quantity: 1
+      });
+      toast.success('Agent added to cart successfully');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add agent to cart');
+    }
   };
 
   if (loading) {
@@ -648,7 +675,7 @@ const AIAgentDetail: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Last Updated</span>
-                  <span className="text-white">{new Date(agent.lastUpdated).toLocaleDateString()}</span>
+                  <span className="text-white">{new Date(agent.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Category</span>

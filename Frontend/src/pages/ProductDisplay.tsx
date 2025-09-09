@@ -370,7 +370,7 @@ const ProductDisplay = () => {
               <div className="sm:mt-20 p-4 sm:p-6 mb-4 sm:mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                   <div className="mb-2 sm:mb-0">
-                    <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">${project.price}</span>
+                    <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">₹{project.price}</span>
                     <span className="text-base sm:text-lg text-gray-500 line-through ml-2">{project.originalPrice}</span>
                     <span className="text-base sm:text-lg text-green-600 ml-2 font-medium">{project.discount}</span>
                   </div>

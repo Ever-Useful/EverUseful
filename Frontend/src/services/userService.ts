@@ -139,6 +139,13 @@ interface CartItem {
   quantity: number;
 }
 
+interface AddToCartItem {
+  id?: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 interface Connection {
   id: string;
   userId: string;
@@ -272,17 +279,29 @@ class UserService {
   }
 
   // Add item to cart
-  async addToCart(item: Omit<CartItem, 'id'>): Promise<CartItem[]> {
-    const response = await this.makeRequest(API_ENDPOINTS.USER_CART, {
+  async addToCart(item: AddToCartItem): Promise<CartItem[]> {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart`, {
       method: 'POST',
-      body: JSON.stringify(item),
+      body: JSON.stringify({ productId: item.id || item.name, quantity: item.quantity }),
     });
     return response;
   }
 
   // Remove item from cart
   async removeFromCart(itemId: string): Promise<CartItem[]> {
-    const response = await this.makeRequest(`${API_ENDPOINTS.USER_CART}/${itemId}`, {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart/${itemId}`, {
       method: 'DELETE',
     });
     return response;
@@ -290,7 +309,13 @@ class UserService {
 
   // Clear cart
   async clearCart(): Promise<void> {
-    await this.makeRequest(API_ENDPOINTS.USER_CART, {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart`, {
       method: 'DELETE',
     });
   }

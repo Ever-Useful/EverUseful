@@ -499,7 +499,7 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
             </div>
             
             <div>
-              <Label htmlFor="price" className="text-sm font-medium text-gray-300">Price ($) <span className="text-red-400">*</span></Label>
+                <Label htmlFor="price" className="text-sm font-medium text-gray-300">Price (₹) <span className="text-red-400">*</span></Label>
               <Input 
                 id="price" 
                 name="price" 
@@ -650,7 +650,7 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
                 type="button"
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 font-medium rounded-lg transition-all duration-200"
+                className="flex items-center gap-2 border-gray-600 text-gray-700 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 font-medium rounded-lg transition-all duration-200"
               >
                 <Upload className="w-4 h-4" />
                 Select Files
@@ -730,7 +730,7 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
                 type="button"
                 variant="outline"
                 onClick={() => imageInputRef.current?.click()}
-                className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 font-medium rounded-lg transition-all duration-200"
+                className="flex items-center gap-2 border-gray-600 text-gray-700 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 font-medium rounded-lg transition-all duration-200"
               >
                 <ImageIcon className="w-4 h-4" />
                 Select Images
@@ -795,7 +795,7 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
                 type="button"
                 variant="outline"
                 onClick={() => videoInputRef.current?.click()}
-                className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 font-medium rounded-lg transition-all duration-200"
+                className="flex items-center gap-2 border-gray-600 text-gray-700 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 font-medium rounded-lg transition-all duration-200"
               >
                 <Video className="w-4 h-4" />
                 Select Video
@@ -834,7 +834,7 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
           <Button 
             variant="outline" 
             onClick={onClose} 
-            className="border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 font-medium rounded-lg transition-all duration-200"
+            className="border-gray-600 text-gray-700 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 font-medium rounded-lg transition-all duration-200"
           >
             Cancel
           </Button>

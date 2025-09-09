@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera, Upload, X, Image as ImageIcon, ShoppingCart } from "lucide-react";
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect, useRef } from "react";
@@ -228,23 +228,29 @@ const Profile = () => {
          if (projectsData && projectsData.success && projectsData.data) {
            // Handle the correct backend response structure
            const projects = projectsData.data.created || projectsData.data || [];
-           console.log('Profile - Projects found:', projects.length);
+           const projectCount = projectsData.data.count || projects.length;
+           console.log('Profile - Projects found:', projects.length, 'Count:', projectCount);
            setProjects(projects);
+           setStats(prev => ({ ...prev, projects: projectCount }));
          } else if (projectsData && Array.isArray(projectsData)) {
            // Handle direct array response (backward compatibility)
            console.log('Profile - Projects found in direct array:', projectsData.length);
            setProjects(projectsData);
+           setStats(prev => ({ ...prev, projects: projectsData.length }));
          } else if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
            // Handle nested created array
            console.log('Profile - Projects found in created array:', projectsData.created.length);
            setProjects(projectsData.created);
+           setStats(prev => ({ ...prev, projects: projectsData.created.length }));
          } else {
            console.log('Profile - No projects found in getUserProjects');
            setProjects([]);
+           setStats(prev => ({ ...prev, projects: 0 }));
          }
        } catch (error) {
          console.error('Profile - Error fetching projects from getUserProjects:', error);
          setProjects([]);
+         setStats(prev => ({ ...prev, projects: 0 }));
        }
 
       setEducation(educationArr || []);
@@ -422,6 +428,45 @@ const Profile = () => {
       }
     } else {
       await handleDeleteProject(item.id);
+    }
+  };
+
+  const handleAddToCart = async (item: any) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error('You must be logged in to add items to cart.');
+        return;
+      }
+
+      const userData = await userService.getUserProfile();
+      if (!userData) {
+        toast.error('User data not found');
+        return;
+      }
+
+      if (isAgentItem(item)) {
+        // Add agent to cart
+        await userService.addToCart({
+          id: item.id,
+          name: item.title,
+          price: item.price || 0,
+          quantity: 1
+        });
+        toast.success('Agent added to cart successfully');
+      } else {
+        // Add project to cart
+        await userService.addToCart({
+          id: item.id,
+          name: item.title,
+          price: item.price || 0,
+          quantity: 1
+        });
+        toast.success('Project added to cart successfully');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add item to cart');
     }
   };
 
@@ -838,7 +883,7 @@ const Profile = () => {
                               </div>
                             </div>
                             <div className="flex flex-col gap-1 sm:gap-2 items-end ml-2">
-                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700 h-8 w-8 sm:h-10 sm:w-10" onClick={() => handleEditItem(project)}>
+                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700 h-8 w-8 sm:h-10 sm:w-10" onClick={() => handleEditItem(project)} title="Edit">
                                 <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                               <Button
@@ -846,6 +891,7 @@ const Profile = () => {
                                 size="icon"
                                 className="text-red-500 bg-white hover:bg-red-500 hover:bg-opacity-80 hover:text-white transition-colors shadow-sm h-8 w-8 sm:h-10 sm:w-10"
                                 onClick={() => handleDeleteItem(project)}
+                                title="Delete"
                               >
                                 <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>

@@ -262,6 +262,13 @@ router.delete('/agents/:id', authorize, async (req, res) => {
 
     await dynamoDBService.deleteAgent(id);
     
+    // Remove agent from user's projects list and update count
+    try {
+      await userService.removeUserProject(user.customUserId, id);
+    } catch (userError) {
+      console.warn('Failed to remove agent from user\'s projects list:', userError.message);
+    }
+    
     res.json({ success: true, message: 'Agent deleted successfully' });
   } catch (error) {
     console.error('Error deleting agent:', error);

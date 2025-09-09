@@ -4,6 +4,9 @@ import { FiStar, FiShoppingCart, FiDownload, FiEye, FiHeart } from 'react-icons/
 import { TbRobot, TbHexagon3D, TbBrandOpenai } from 'react-icons/tb';
 import { GiProcessor } from 'react-icons/gi';
 import { Link } from 'react-router-dom';
+import { useAuthState } from '@/hooks/useAuthState';
+import userService from '@/services/userService';
+import { toast } from 'sonner';
 
 interface AIAgentCardProps {
   agent: {
@@ -32,6 +35,36 @@ interface AIAgentCardProps {
 const AIAgentCard: React.FC<AIAgentCardProps> = ({ agent, onAgentClick, onEditAgent, onDeleteAgent, currentUserId }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
+  const { user, token } = useAuthState();
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user || !token) {
+      toast.error('You must be logged in to add items to cart.');
+      return;
+    }
+
+    try {
+      const userData = await userService.getUserProfile();
+      if (!userData) {
+        toast.error('User data not found');
+        return;
+      }
+
+      // Add agent to cart
+      await userService.addToCart({
+        id: agent.id,
+        name: agent.name,
+        price: agent.price || 0,
+        quantity: 1
+      });
+      toast.success('Agent added to cart successfully');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add agent to cart');
+    }
+  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -228,10 +261,7 @@ const AIAgentCard: React.FC<AIAgentCardProps> = ({ agent, onAgentClick, onEditAg
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-sm flex items-center gap-2 hover:bg-gray-600/50 hover:border-gray-500 transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Add to cart functionality
-              }}
+              onClick={handleAddToCart}
             >
               <FiShoppingCart className="w-4 h-4" />
             </motion.button>
