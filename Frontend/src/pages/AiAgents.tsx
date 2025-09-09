@@ -48,10 +48,15 @@ const Artificial = () => {
   const fetchAgents = async () => {
     try {
       setLoadingAgents(true);
+      const headers: Record<string, string> = {};
+      
+      // Only add authorization header if token exists
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(API_ENDPOINTS.AGENTS, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers
       });
 
       if (!response.ok) {
@@ -70,10 +75,8 @@ const Artificial = () => {
 
   // Fetch agents on component mount
   useEffect(() => {
-    if (token) {
-      fetchAgents();
-    }
-  }, [token]);
+    fetchAgents();
+  }, []);
 
   // Fetch current user's customUserId
   useEffect(() => {

@@ -56,10 +56,15 @@ const AIAgentDetail: React.FC = () => {
       
       try {
         setLoading(true);
+        const headers: Record<string, string> = {};
+        
+        // Only add authorization header if token exists
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(API_ENDPOINTS.AGENT(id), {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers
         });
 
         if (!response.ok) {
@@ -76,9 +81,7 @@ const AIAgentDetail: React.FC = () => {
       }
     };
 
-    if (token) {
-      fetchAgent();
-    }
+    fetchAgent();
   }, [id, token]);
 
   // Fetch author details to display name instead of id and provide profile link

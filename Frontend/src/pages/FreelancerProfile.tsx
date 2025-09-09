@@ -39,7 +39,12 @@ const VisitingProfile = () => {
       }
       
       if (!response.ok) {
-        console.log(`FreelancerProfile - ${itemType} ${itemId} not found (${response.status})`);
+        // Silently handle 404s - project/agent may have been deleted
+        if (response.status === 404) {
+          console.log(`FreelancerProfile - ${itemType} ${itemId} not found (deleted or unpublished)`);
+        } else {
+          console.log(`FreelancerProfile - ${itemType} ${itemId} error (${response.status})`);
+        }
         return null;
       }
       
@@ -66,6 +71,29 @@ const VisitingProfile = () => {
     return fetchItemData(pid, 'project');
   };
 
+  // Fetch user agents directly from the agents API
+  const fetchUserAgents = async (userId: string) => {
+    try {
+      console.log(`FreelancerProfile - Fetching agents for user ${userId}...`);
+      const response = await fetch(`${API_ENDPOINTS.AGENTS}?author=${userId}`);
+      if (!response.ok) {
+        console.log(`FreelancerProfile - No agents found for user ${userId}`);
+        return [];
+      }
+      const data = await response.json();
+      const agents = data.agents || [];
+      console.log(`FreelancerProfile - Found ${agents.length} agents for user ${userId}`);
+      return agents.map(agent => ({
+        ...agent,
+        title: agent.name,
+        type: 'agent'
+      }));
+    } catch (error) {
+      console.error(`FreelancerProfile - Error fetching agents for user ${userId}:`, error);
+      return [];
+    }
+  };
+
   useEffect(() => {
     const fetchFreelancer = async () => {
       if (id) {
@@ -86,41 +114,41 @@ const VisitingProfile = () => {
                 // Fallback to default background
                 setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
               }
-              // Fetch projects using the same method as Profile.tsx to ensure consistency
+              // Use projects data from the user response (no authentication required)
               try {
-                const projectsData: any = await userService.getUserProjects();
-                console.log('FreelancerProfile - Projects data from getUserProjects:', projectsData);
+                const projects = data.data.projects?.created || [];
+                console.log('FreelancerProfile - Projects found:', projects.length);
                 
-                if (projectsData && projectsData.success && projectsData.data) {
-                  // Handle the correct backend response structure
-                  const projects = projectsData.data.created || projectsData.data || [];
-                  const projectCount = projectsData.data.count || projects.length;
-                  console.log('FreelancerProfile - Projects found:', projects.length, 'Count:', projectCount);
-                  setProjectsCount(projectCount);
-                  
-                  // Fetch full project and agent details for each ID
-                  if (projects.length > 0) {
-                    console.log('FreelancerProfile - Attempting to fetch projects and agents:', projects);
-                    const projectPromises = projects.map((item) => {
-                      // Handle both old format (string IDs) and new format (objects with id and type)
-                      const itemId = typeof item === 'string' ? item : item.id;
-                      const itemType = typeof item === 'object' ? item.type : 'project';
-                      return fetchItemData(itemId, itemType);
-                    });
-                    const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-                    console.log(`FreelancerProfile - Successfully loaded ${fullProjects.length} out of ${projects.length} projects and agents`);
-                    setPortfolioProjects(fullProjects);
-                  } else {
-                    console.log('FreelancerProfile - No project IDs found');
-                    setPortfolioProjects([]);
-                  }
-                } else {
-                  console.log('FreelancerProfile - No projects found in getUserProjects');
-                  setPortfolioProjects([]);
+                // Fetch both projects and agents
+                const allItems = [];
+                
+                // Fetch projects from the user's projects array
+                if (projects.length > 0) {
+                  console.log('FreelancerProfile - Attempting to fetch projects:', projects);
+                  const projectPromises = projects.map((item) => {
+                    // Handle both old format (string IDs) and new format (objects with id and type)
+                    const itemId = typeof item === 'string' ? item : item.id;
+                    const itemType = typeof item === 'object' ? item.type : 'project';
+                    return fetchItemData(itemId, itemType);
+                  });
+                  const fetchedProjects = (await Promise.all(projectPromises)).filter(Boolean);
+                  allItems.push(...fetchedProjects);
+                  console.log(`FreelancerProfile - Successfully loaded ${fetchedProjects.length} projects`);
                 }
+                
+                // Fetch user agents directly
+                const userAgents = await fetchUserAgents(id);
+                allItems.push(...userAgents);
+                console.log(`FreelancerProfile - Successfully loaded ${userAgents.length} agents`);
+                
+                console.log(`FreelancerProfile - Total items loaded: ${allItems.length}`);
+                setPortfolioProjects(allItems);
+                setProjectsCount(allItems.length);
+                
               } catch (error) {
-                console.error('FreelancerProfile - Error fetching projects from getUserProjects:', error);
+                console.error('FreelancerProfile - Error processing projects and agents:', error);
                 setPortfolioProjects([]);
+                setProjectsCount(0);
               }
             } else {
               setFreelancer(null);
