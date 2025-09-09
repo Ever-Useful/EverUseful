@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useInView } from "react-intersection-observer";
 
 import {
   UserPlus,
@@ -28,6 +29,10 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
   const [playVideo, setPlayVideo] = useState(!deferVideo);
+  const { ref: videoSectionRef, inView: videoInView } = useInView({ 
+    triggerOnce: true, 
+    threshold: 0.3 
+  });
 
   // Memoize steps array to prevent recreation
   const steps = useMemo<Step[]>(() => [
@@ -143,15 +148,16 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
           {/* Overlay for contrast */}
           <div className="absolute inset-0 bg-black/30 pointer-events-none" />
           <div className="relative z-10 w-full flex flex-col items-center justify-center py-8 sm:py-12 px-3 sm:px-6">
-            <div className="video-shadow-wrap w-full max-w-xs sm:max-w-xl mx-auto">
+            <div ref={videoSectionRef} className="video-shadow-wrap w-full max-w-xs sm:max-w-xl mx-auto">
               <video
                 ref={videoRef}
-                src={mainVideo}
-                autoPlay={playVideo}
+                src={videoInView ? mainVideo : undefined}
+                autoPlay={playVideo && videoInView}
                 loop
                 muted={muted}
                 playsInline
-                preload="metadata"
+                preload="none"
+                loading="lazy"
                 className="w-full h-44 sm:h-64 md:h-[320px] object-cover bg-black rounded-2xl relative z-10"
                 style={{ background: "#000" }}
               />
