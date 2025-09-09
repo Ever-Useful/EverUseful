@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LayoutDashboard, CheckSquare, Calendar, BarChart3, User, Settings, HelpCircle, LogOut, BookOpen, GraduationCap, Building, Sparkles, Moon, Sun, Search, Plus, Clock, Minus, Briefcase, List, Users, Bell, Menu, X } from "lucide-react";
 import { ThemeProvider, useTheme } from "@/components/dashboard/ThemeProvider";
+import LoadingAnimation from '@/components/LoadingAnimation';
 import StatsCard from "@/components/dashboard/StatsCards";
 import DetailedStatsSection from "@/components/dashboard/DetailedStatsSection";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell, Legend, LineChart, Line, Tooltip, CartesianGrid, Area, AreaChart } from "recharts";
@@ -137,9 +138,13 @@ const Dashboard = () => {
       console.log('Dashboard data loaded:', dashboardData);
       console.log('User projects loaded:', userProjects);
       
+      // Get project count from userProjects data (same as Profile.tsx) to ensure consistency
+      const projects = (userProjects as any)?.data?.created || (userProjects as any)?.created || [];
+      const projectCount = (userProjects as any)?.data?.count || projects.length;
+      
       // Update stats with real data from backend
       const stats = {
-        projectsPosted: dashboardData.projectCount || 0,
+        projectsPosted: projectCount,
         projectViews: dashboardData.totalViews || 0,
         projectFavourites: dashboardData.favourites || 0,
         connections: dashboardData.connections || 0,
@@ -147,10 +152,10 @@ const Dashboard = () => {
       };
 
       console.log('Setting user stats:', stats);
+      console.log('Project count from userProjects:', projectCount, 'vs dashboardData.projectCount:', dashboardData.projectCount);
       setUserStats(stats);
       setRecentActivity(dashboardData.activities || []);
       
-      const projects = (userProjects as any)?.data?.created || (userProjects as any)?.created || [];
       console.log('Projects for earnings calculation:', projects);
 
       // Calculate earnings based on actual project data
@@ -633,18 +638,7 @@ const Dashboard = () => {
   ];
 
   if (loading || profileLoading) {
-    return (
-      <ThemeProvider defaultTheme="light" storageKey="amogh-ui-theme">
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-300">
-              {profileLoading ? 'Loading profile...' : 'Loading dashboard...'}
-            </p>
-          </div>
-        </div>
-      </ThemeProvider>
-    );
+    return <LoadingAnimation fullScreen={true} />;
   }
 
   // Don't render dashboard if not authenticated

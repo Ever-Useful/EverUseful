@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FiStar, FiDownload, FiEye, FiHeart, FiShare2, FiArrowLeft, FiShoppingCart, FiCode, FiFileText, FiCpu, FiZap } from 'react-icons/fi';
 import { TbRobot, TbHexagon3D, TbBrandOpenai } from 'react-icons/tb';
 import { GiProcessor } from 'react-icons/gi';
 import Header from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { API_ENDPOINTS } from '@/config/api';
+import { useAuthState } from '@/hooks/useAuthState';
+import { toast } from 'sonner';
+import userService from '@/services/userService';
+import LoadingAnimation from '@/components/LoadingAnimation';
 
 interface AIAgent {
-  id: number;
+  id: string;
   name: string;
-  creator: string;
+  author: string;
   price: number;
   rating: number;
   description: string;
@@ -18,53 +23,88 @@ interface AIAgent {
   category: string;
   sales: number;
   downloads: number;
+  views: number;
   version: string;
   features: string[];
   capabilities: string;
   requirements: string;
   documentation: string;
   image?: string;
+  images?: string[];
+  video?: string;
+  files?: any[];
   createdAt: string;
-  lastUpdated: string;
+  updatedAt: string;
 }
 
 const AIAgentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { user, token } = useAuthState();
   const [agent, setAgent] = useState<AIAgent | null>(null);
+  const [authorDetails, setAuthorDetails] = useState<{ name: string; id: string; userType?: string } | null>(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const navigate = useNavigate();
 
-  // Mock data - in real app, fetch from API
+  // Fetch agent data from API
   useEffect(() => {
-    const mockAgent: AIAgent = {
-      id: parseInt(id || '1'),
-      name: 'SynthAnalytics Pro',
-      creator: 'NeuroTech AI',
-      price: 149.99,
-      rating: 4.9,
-      description: 'Advanced business intelligence agent for real-time market analysis and predictive forecasting. This AI agent combines machine learning algorithms with real-time data processing to provide accurate business insights and market predictions.',
-      tags: ['business', 'analytics', 'finance', 'machine learning', 'forecasting'],
-      category: 'business',
-      sales: 1242,
-      downloads: 892,
-      version: '2.1.0',
-      features: [
-        'Real-time market analysis',
-        'Predictive forecasting with 95% accuracy',
-        'Multi-currency support',
-        'Custom dashboard creation',
-        'API integration capabilities',
-        'Automated report generation'
-      ],
-      capabilities: 'This AI agent can analyze market trends, predict stock prices, generate business reports, and provide investment recommendations. It processes data from multiple sources including financial APIs, news feeds, and market indicators.',
-      requirements: 'Python 3.8+, TensorFlow 2.0+, 8GB RAM, 2GB GPU memory, Internet connection for real-time data',
-      documentation: 'Complete setup guide, API documentation, usage examples, and troubleshooting guide included.',
-      createdAt: '2024-01-15',
-      lastUpdated: '2024-06-10'
+    const fetchAgent = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        const response = await fetch(API_ENDPOINTS.AGENT(id), {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch agent');
+        }
+
+        const data = await response.json();
+        setAgent(data.agent);
+      } catch (error) {
+        console.error('Error fetching agent:', error);
+        toast.error('Failed to load agent details');
+      } finally {
+        setLoading(false);
+      }
     };
-    setAgent(mockAgent);
-  }, [id]);
+
+    if (token) {
+      fetchAgent();
+    }
+  }, [id, token]);
+
+  // Fetch author details to display name instead of id and provide profile link
+  useEffect(() => {
+    const fetchAuthor = async () => {
+      if (!agent?.author) return;
+      try {
+        const response = await fetch(API_ENDPOINTS.USER_BY_ID(agent.author));
+        if (response.ok) {
+          const userJson = await response.json();
+          const profile = userJson.profile || userJson.data?.profile || {};
+          const auth = userJson.auth || userJson.data?.auth || {};
+          const name = [profile.firstName || auth.firstName, profile.lastName || auth.lastName].filter(Boolean).join(' ')
+            || auth.username || profile.username || agent.author;
+          const userType = profile.userType || auth.userType || '';
+          const idVal = userJson.customUserId || userJson.data?.customUserId || agent.author;
+          setAuthorDetails({ name, id: idVal, userType });
+        } else {
+          setAuthorDetails({ name: agent.author, id: agent.author });
+        }
+      } catch (e) {
+        setAuthorDetails({ name: agent.author, id: agent.author });
+      }
+    };
+    fetchAuthor();
+  }, [agent?.author]);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -83,25 +123,141 @@ const AIAgentDetail: React.FC = () => {
     }
   };
 
-  const handleDownload = async () => {
-    setIsDownloading(true);
-    // Simulate download
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsDownloading(false);
-    // In real app, trigger actual download
+  const handleFavorite = async () => {
+    if (!agent || !token) return;
+    
+    try {
+      const response = await fetch(API_ENDPOINTS.AGENT_FAVORITE(agent.id), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsFavorited(data.isFavorited);
+        toast.success(data.isFavorited ? 'Added to favorites' : 'Removed from favorites');
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast.error('Failed to update favorites');
+    }
   };
 
-  const handleAddToCart = () => {
-    // Add to cart functionality
-    console.log('Added to cart:', agent?.name);
+  const handleDownload = async () => {
+    if (!agent) return;
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+    setIsDownloading(true);
+    try {
+      const filesArr = Array.isArray(agent.files) ? agent.files : [];
+      if (filesArr.length === 0) throw new Error('No files available');
+      const first = filesArr[0];
+      const url = (first && typeof first === 'object') ? (first.key || first.url) : first;
+      if (!url) throw new Error('Invalid file');
+      // If we stored a full URL, try to fetch and force a file download via blob
+      const response = await fetch(url, { mode: 'cors' });
+      if (!response.ok) throw new Error('Download request failed');
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = (first?.name || 'agent-file');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+      toast.success('Download started');
+    } catch (error) {
+      toast.error('Download failed');
+    } finally {
+      setIsDownloading(false);
+    }
   };
+
+  const handleAddToCart = async () => {
+    if (!user || !token) {
+      toast.error('You must be logged in to add items to cart.');
+      return;
+    }
+
+    try {
+      const userData = await userService.getUserProfile();
+      if (!userData) {
+        toast.error('User data not found');
+        return;
+      }
+
+      if (!agent) {
+        toast.error('Agent not found');
+        return;
+      }
+
+      // Add agent to cart
+      await userService.addToCart({
+        id: agent.id,
+        name: agent.name,
+        price: agent.price || 0,
+        quantity: 1
+      });
+      toast.success('Agent added to cart successfully');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add agent to cart');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!agent) return;
+
+    const shareData = {
+      title: agent.name,
+      text: agent.description,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      } catch (clipboardError) {
+        toast.error('Failed to share agent');
+      }
+    }
+  };
+
+  if (loading) {
+    return <LoadingAnimation fullScreen={true} />;
+  }
 
   if (!agent) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-indigo-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-indigo-950 text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading agent details...</p>
+          <TbRobot className="text-6xl text-gray-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-300 mb-2">Agent Not Found</h2>
+          <p className="text-gray-400 mb-6">The agent you're looking for doesn't exist or has been removed.</p>
+          <Link 
+            to="/ai-agents"
+            className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20 flex items-center gap-2 mx-auto w-fit"
+          >
+            <FiArrowLeft className="w-4 h-4" />
+            Back to Agents
+          </Link>
         </div>
       </div>
     );
@@ -117,65 +273,93 @@ const AIAgentDetail: React.FC = () => {
         <div className="absolute top-1/2 right-1/4 w-[600px] h-[600px] bg-cyan-700 rounded-full filter blur-[120px] opacity-15"></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Back Button */}
         <Link to="/ai-agents">
           <motion.button
             whileHover={{ x: -5 }}
-            className="flex items-center gap-2 text-gray-300 hover:text-white mb-8 transition-colors"
+            className="flex items-center gap-2 text-gray-300 hover:text-white mb-4 sm:mb-8 transition-colors"
           >
-            <FiArrowLeft className="w-5 h-5" />
-            <span>Back to AI Agents</span>
+            <FiArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base">Back to AI Agents</span>
           </motion.button>
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Agent Header */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-8"
+              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6 lg:p-8"
             >
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 flex items-center justify-center">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 sm:mb-6 gap-4">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-br from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
                     {getCategoryIcon(agent.category)}
                   </div>
-                  <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">{agent.name}</h1>
-                    <p className="text-gray-400">by {agent.creator}</p>
+                  <div className="min-w-0 flex-1">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2 break-words">{agent.name}</h1>
+                    <p className="text-gray-400">
+                      by {authorDetails ? (
+                        <button
+                          className="text-cyan-400 hover:underline"
+                          onClick={() => {
+                            const details = authorDetails;
+                            if (!details) return;
+                            const uid = details.id;
+                            const type = (details.userType || '').toLowerCase();
+                            // If current user's own profile
+                            // Note: backend may use customUserId; compare both
+                            const currentId = (user as any)?.customUserId || user?.uid;
+                            if (currentId && uid === currentId) {
+                              navigate('/profile');
+                              return;
+                            }
+                            if (type === 'freelancer') navigate(`/freelancerprofile/${uid}`);
+                            else navigate(`/studentprofile/${uid}`);
+                          }}
+                        >
+                          {authorDetails.name}
+                        </button>
+                      ) : (
+                        agent.author
+                      )}
+                    </p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-start sm:self-auto">
                   <button
-                    onClick={() => setIsFavorited(!isFavorited)}
-                    className={`p-3 rounded-lg transition-all duration-200 ${
+                    onClick={handleFavorite}
+                    className={`p-2 sm:p-3 rounded-lg transition-all duration-200 ${
                       isFavorited 
                         ? 'text-red-400 bg-red-400/10' 
                         : 'text-gray-400 hover:text-red-400 hover:bg-red-400/10'
                     }`}
                   >
-                    <FiHeart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
+                    <FiHeart className={`w-4 h-4 sm:w-5 sm:h-5 ${isFavorited ? 'fill-current' : ''}`} />
                   </button>
-                  <button className="p-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-all duration-200">
-                    <FiShare2 className="w-5 h-5" />
+                  <button 
+                    onClick={handleShare}
+                    className="p-2 sm:p-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-all duration-200"
+                  >
+                    <FiShare2 className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </div>
               </div>
 
-              <p className="text-gray-300 text-lg leading-relaxed mb-6">
+              <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-4 sm:mb-6">
                 {agent.description}
               </p>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
                 {agent.tags.map((tag, index) => (
                   <span 
                     key={index}
-                    className="px-3 py-1 bg-gray-700/50 text-sm rounded-full text-gray-300 border border-gray-600"
+                    className="px-2 sm:px-3 py-1 bg-gray-700/50 text-xs sm:text-sm rounded-full text-gray-300 border border-gray-600"
                   >
                     {tag}
                   </span>
@@ -183,7 +367,7 @@ const AIAgentDetail: React.FC = () => {
               </div>
 
               {/* Stats */}
-              <div className="flex items-center gap-6 text-sm text-gray-400">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-400">
                 <div className="flex items-center gap-1">
                   <FiStar className="w-4 h-4 text-yellow-400 fill-current" />
                   <span>{agent.rating} rating</span>
@@ -194,13 +378,109 @@ const AIAgentDetail: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   <FiEye className="w-4 h-4" />
-                  <span>{agent.sales} views</span>
+                  <span>{agent.views || 0} views</span>
                 </div>
                 <span className="bg-gray-700/50 px-2 py-1 rounded-full border border-gray-600">
                   v{agent.version}
                 </span>
               </div>
             </motion.div>
+
+            {/* Images and Video Section */}
+            {(agent.images && agent.images.length > 0) || agent.video ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6 lg:p-8"
+              >
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">Media Gallery</h3>
+                
+                {/* Prepare normalized media */}
+                {(() => {
+                  const normalizeUrl = (v: any) => {
+                    if (!v) return '';
+                    if (typeof v === 'string') return v;
+                    return v.url || v.main || v.large?.url || v.medium?.url || v.thumbnail?.url || '';
+                  };
+                  const normalizedImages = Array.isArray(agent.images) ? agent.images.map(normalizeUrl).filter(Boolean) : [];
+                  const normalizedVideo = normalizeUrl(agent.video);
+                  (agent as any).__normalizedImages = normalizedImages;
+                  (agent as any).__normalizedVideo = normalizedVideo;
+                  // Build a unified media list like ProductDisplay: video first (if present), then images
+                  const media: Array<{ kind: 'video' | 'image'; url: string }> = [];
+                  if (normalizedVideo) media.push({ kind: 'video', url: normalizedVideo });
+                  normalizedImages.forEach((u: string) => media.push({ kind: 'image', url: u }));
+                  (agent as any).__media = media;
+                  return null;
+                })()}
+
+                {/* Main Image/Video Display */}
+                <div className="mb-4 sm:mb-6">
+                  {(agent as any).__media && (agent as any).__media.length > 0 ? (
+                    (agent as any).__media[selectedImage]?.kind === 'video' ? (
+                      <div className="relative">
+                        <video
+                          src={(agent as any).__media[selectedImage].url}
+                          controls
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="w-full h-48 sm:h-64 md:h-80 object-cover rounded-xl border border-gray-600 bg-black"
+                        />
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <img
+                          src={(agent as any).__media[selectedImage].url}
+                          alt={`${agent.name} ${selectedImage + 1}`}
+                          className="w-full h-48 sm:h-64 md:h-80 object-cover rounded-xl border border-gray-600"
+                        />
+                      </div>
+                    )
+                  ) : null}
+                </div>
+
+                {/* Image Thumbnails */}
+                {(agent as any).__media && (agent as any).__media.length > 1 && (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
+                    {(agent as any).__media.map((m: any, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
+                        className={`relative overflow-hidden rounded-lg border-2 transition-all hover:scale-105 ${
+                          selectedImage === index ? 'border-cyan-500' : 'border-gray-600'
+                        }`}
+                        title={m.kind === 'video' ? 'Video' : 'Image'}
+                      >
+                        {m.kind === 'video' ? (
+                          <div className="relative w-full h-20 overflow-hidden bg-black rounded">
+                            <video
+                              src={m.url}
+                              muted
+                              playsInline
+                              preload="metadata"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-6 h-6 drop-shadow">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
+                          </div>
+                        ) : (
+                          <img 
+                            src={m.url} 
+                            alt={`${agent.name} ${index + 1}`}
+                            className="w-full h-20 object-cover"
+                          />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            ) : null}
 
             {/* Tabs */}
             <motion.div
@@ -330,36 +610,36 @@ const AIAgentDetail: React.FC = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Purchase Card */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 sticky top-8"
+              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6 sticky top-4 sm:top-8"
             >
-              <div className="text-center mb-6">
-                <div className="text-4xl font-bold text-white mb-2">${agent.price}</div>
-                <p className="text-gray-400">One-time purchase</p>
+              <div className="text-center mb-4 sm:mb-6">
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2">₹{agent.price}</div>
+                <p className="text-gray-400 text-sm sm:text-base">One-time purchase</p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleDownload}
                   disabled={isDownloading}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium flex items-center justify-center gap-2 hover:from-cyan-700 hover:to-indigo-800 transition-all duration-200 shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium flex items-center justify-center gap-2 hover:from-cyan-700 hover:to-indigo-800 transition-all duration-200 shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
                   {isDownloading ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Downloading...
+                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     </>
                   ) : (
                     <>
-                      <FiDownload className="w-5 h-5" />
-                      Download Agent
+                      <FiDownload className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span className="hidden sm:inline">Download Agent</span>
+                      <span className="sm:hidden">Download</span>
                     </>
                   )}
                 </motion.button>
@@ -368,10 +648,11 @@ const AIAgentDetail: React.FC = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCart}
-                  className="w-full px-6 py-4 bg-gray-700/50 border border-gray-600 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-600/50 hover:border-gray-500 transition-all duration-200"
+                  className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-gray-700/50 border border-gray-600 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-600/50 hover:border-gray-500 transition-all duration-200 text-sm sm:text-base"
                 >
-                  <FiShoppingCart className="w-5 h-5" />
-                  Add to Cart
+                  <FiShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Add to Cart</span>
+                  <span className="sm:hidden">Add to Cart</span>
                 </motion.button>
               </div>
 
@@ -403,7 +684,7 @@ const AIAgentDetail: React.FC = () => {
             </motion.div>
 
             {/* Agent Info */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
@@ -421,14 +702,14 @@ const AIAgentDetail: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Last Updated</span>
-                  <span className="text-white">{new Date(agent.lastUpdated).toLocaleDateString()}</span>
+                  <span className="text-white">{new Date(agent.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Category</span>
                   <span className="text-white capitalize">{agent.category}</span>
                 </div>
               </div>
-            </motion.div>
+            </motion.div> */}
           </div>
         </div>
       </div>

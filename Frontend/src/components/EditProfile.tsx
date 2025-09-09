@@ -9,6 +9,7 @@ import userService from '@/services/userService';
 import toast from 'react-hot-toast';
 import { DropdownWithOther } from './ui/dropdown-with-other';
 import { getDropdownOptions, getCountryCodeOptions, getDesignationOptions } from '../utils/dropdownUtils';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 
 interface EditProfileSidebarProps {
   onClose: () => void;
@@ -71,6 +72,7 @@ type WorkFormType = {
 
 export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initialSection = 'Basic Details', onProfileUpdated }) => {
   const [activeSection, setActiveSection] = useState(initialSection);
+  const { refreshProfile, updateProfile } = useUserProfile();
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
@@ -258,7 +260,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
 
   const handleSave = async () => {
     setIsSaving(true);
-    toast.loading('Saving...');
+        toast.loading('Saving');
     try {
       if (activeSection === 'Basic Details') {
         // Update auth info (backend fields)
@@ -270,20 +272,39 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
           phoneNumber: profileData.mobile,
         });
         
-        // Also update profile with mobile field (and username if provided)
+        // Persist userType through profile update as well (belt and suspenders)
+        await userService.updateProfile({
+          userType: denormalizeUserType(profileData.userType),
+        } as any);
+        
+        // Also sync userType to profile store/localStorage for immediate UI reflection
+        try {
+          const newRawType = denormalizeUserType(profileData.userType);
+          localStorage.setItem('userType', newRawType);
+          // Update cached userProfile blob to avoid stale context reads until refresh completes
+          const cached = localStorage.getItem('userProfile');
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached);
+              const updated = { ...parsed, userType: newRawType };
+              localStorage.setItem('userProfile', JSON.stringify(updated));
+            } catch {}
+          }
+          // Update context immediately
+          updateProfile({ userType: newRawType } as any);
+        } catch {}
+        
+        // Also update profile with basic fields
         await userService.updateProfile({
           mobile: profileData.mobile,
-          ...(profileData.username ? { username: profileData.username } : {})
-        });
-        
-        // Update profile info (userData.json fields)
-        await userService.updateProfile({
+          ...(!!profileData.username ? { username: profileData.username } : {}),
           gender: profileData.gender,
           domain: profileData.domain,
           purpose: profileData.purpose,
           role: profileData.role,
           location: profileData.location,
           dateOfBirth: profileData.dateOfBirth,
+          bio: profileData.bio,
         });
         
         // Update student data if user is a student
@@ -360,9 +381,18 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
       } else if (activeSection === 'Work Experience') {
         // No bulk save, handled by add/edit/delete
       } else if (activeSection === 'Personal Details') {
-        await userService.updatePersonalDetails(personalDetails);
+        await userService.updatePersonalDetails({
+          address1: personalDetails.address1,
+          address2: personalDetails.address2,
+          landmark: personalDetails.landmark,
+          pincode: personalDetails.pincode,
+          location: personalDetails.location,
+          hobbies: personalDetails.hobbies,
+        });
       } else if (activeSection === 'Social Links') {
-        await userService.updateSocialLinks(socialLinks);
+        await userService.updateSocialLinks({
+          ...socialLinks,
+        });
       }
       toast.dismiss();
       toast.success('Profile updated successfully!');
@@ -375,6 +405,15 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
       }
       if (onProfileUpdated) {
         onProfileUpdated();
+      }
+      // Signal parent to refresh profile data
+      if (onProfileUpdated) onProfileUpdated();
+      // Give backend a brief moment to persist before refresh
+      await new Promise(r => setTimeout(r, 500));
+      await refreshProfile();
+      const refreshed = await userService.getUserProfile();
+      if (refreshed?.data?.auth?.userType) {
+        setProfileData(prev => ({ ...prev, userType: normalizeUserType(refreshed.data.auth.userType) }));
       }
     } catch (error) {
       toast.dismiss();
@@ -1335,7 +1374,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg shadow-xl rounded-full"
               disabled={isSaving}
             >
-              {isSaving ? 'Saving...' : (steps.findIndex(s => s.name === activeSection) === steps.length - 1 ? 'Finish' : 'Save & Next')}
+                {isSaving ? 'Saving' : (steps.findIndex(s => s.name === activeSection) === steps.length - 1 ? 'Finish' : 'Save & Next')}
             </Button>
           </div>
         )}

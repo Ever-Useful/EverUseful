@@ -53,6 +53,13 @@ export const API_ENDPOINTS = {
   MARKETPLACE_FAVORITE: (id: string) => getApiUrl(`/api/marketplace/projects/${id}/favorite`),
   MARKETPLACE_VIEW: (id: string) => getApiUrl(`/api/marketplace/projects/${id}/view`),
   
+  // Agents endpoints
+  get AGENTS() { return getApiUrl('/api/agents'); },
+  AGENT: (id: string) => getApiUrl(`/api/agents/${id}`),
+  AGENTS_BY_AUTHOR: (authorId: string) => getApiUrl(`/api/agents/author/${authorId}`),
+  AGENTS_BY_CATEGORY: (category: string) => getApiUrl(`/api/agents/category/${category}`),
+  AGENT_FAVORITE: (id: string) => getApiUrl(`/api/agents/${id}/favorite`),
+  
   // Dashboard endpoints
   get DASHBOARD() { return getApiUrl('/api/dashboarddata'); },
   
