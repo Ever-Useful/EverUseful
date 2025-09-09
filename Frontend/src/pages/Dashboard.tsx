@@ -137,9 +137,13 @@ const Dashboard = () => {
       console.log('Dashboard data loaded:', dashboardData);
       console.log('User projects loaded:', userProjects);
       
+      // Get project count from userProjects data (same as Profile.tsx) to ensure consistency
+      const projects = (userProjects as any)?.data?.created || (userProjects as any)?.created || [];
+      const projectCount = (userProjects as any)?.data?.count || projects.length;
+      
       // Update stats with real data from backend
       const stats = {
-        projectsPosted: dashboardData.projectCount || 0,
+        projectsPosted: projectCount,
         projectViews: dashboardData.totalViews || 0,
         projectFavourites: dashboardData.favourites || 0,
         connections: dashboardData.connections || 0,
@@ -147,10 +151,10 @@ const Dashboard = () => {
       };
 
       console.log('Setting user stats:', stats);
+      console.log('Project count from userProjects:', projectCount, 'vs dashboardData.projectCount:', dashboardData.projectCount);
       setUserStats(stats);
       setRecentActivity(dashboardData.activities || []);
       
-      const projects = (userProjects as any)?.data?.created || (userProjects as any)?.created || [];
       console.log('Projects for earnings calculation:', projects);
 
       // Calculate earnings based on actual project data

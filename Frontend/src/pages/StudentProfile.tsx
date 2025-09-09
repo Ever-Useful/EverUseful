@@ -32,6 +32,7 @@ const Profile = () => {
   const [workExperience, setWorkExperience] = useState([]);
   const [error, setError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
+  const [projectsCount, setProjectsCount] = useState(0);
   const { profileData: currentUser } = useUserProfile(); 
 
 
@@ -66,30 +67,46 @@ const Profile = () => {
         console.log('StudentProfile - Projects.created:', data.data.projects?.created);
         console.log('StudentProfile - Is projects.created an array?', Array.isArray(data.data.projects?.created));
         
-        // Fetch full project and agent details for each ID
-        const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-        console.log('StudentProfile - Project IDs found:', projectIds);
-        console.log('StudentProfile - Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
-        
-        if (projectIds.length > 0) {
-          console.log('StudentProfile - Attempting to fetch projects and agents:', projectIds);
-          const projectPromises = projectIds.map((item) => {
-            // Handle both old format (string IDs) and new format (objects with id and type)
-            const itemId = typeof item === 'string' ? item : item.id;
-            const itemType = typeof item === 'object' ? item.type : 'project';
-            return fetchItemData(itemId, itemType);
-          });
-          const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-          console.log('StudentProfile - Full projects fetched:', fullProjects);
-          console.log('StudentProfile - Project details:', fullProjects.map(p => ({
-            id: p.id,
-            title: p.title || p.name,
-            image: p.image,
-            hasImage: !!p.image
-          })));
-          setPortfolioProjects(fullProjects);
-        } else {
-          console.log('StudentProfile - No project IDs found');
+        // Fetch projects using the same method as Profile.tsx to ensure consistency
+        try {
+          const projectsData: any = await userService.getUserProjects();
+          console.log('StudentProfile - Projects data from getUserProjects:', projectsData);
+          
+          if (projectsData && projectsData.success && projectsData.data) {
+            // Handle the correct backend response structure
+            const projects = projectsData.data.created || projectsData.data || [];
+            const projectCount = projectsData.data.count || projects.length;
+            console.log('StudentProfile - Projects found:', projects.length, 'Count:', projectCount);
+            setProjectsCount(projectCount);
+            
+            // Fetch full project and agent details for each ID
+            if (projects.length > 0) {
+              console.log('StudentProfile - Attempting to fetch projects and agents:', projects);
+              const projectPromises = projects.map((item) => {
+                // Handle both old format (string IDs) and new format (objects with id and type)
+                const itemId = typeof item === 'string' ? item : item.id;
+                const itemType = typeof item === 'object' ? item.type : 'project';
+                return fetchItemData(itemId, itemType);
+              });
+              const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
+              console.log('StudentProfile - Full projects fetched:', fullProjects);
+              console.log('StudentProfile - Project details:', fullProjects.map(p => ({
+                id: p.id,
+                title: p.title || p.name,
+                image: p.image,
+                hasImage: !!p.image
+              })));
+              setPortfolioProjects(fullProjects);
+            } else {
+              console.log('StudentProfile - No project IDs found');
+              setPortfolioProjects([]);
+            }
+          } else {
+            console.log('StudentProfile - No projects found in getUserProjects');
+            setPortfolioProjects([]);
+          }
+        } catch (error) {
+          console.error('StudentProfile - Error fetching projects from getUserProjects:', error);
           setPortfolioProjects([]);
         }
       } else {
@@ -474,7 +491,7 @@ const label =
           <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
             <CardContent className="p-3 sm:p-4 text-center">
               <Award className="w-6 h-6 mx-auto mb-2" />
-                                <div className="text-2xl font-bold">{profile.stats.projects}+</div>
+              <div className="text-2xl font-bold">{projectsCount}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
             </CardContent>
           </Card>
@@ -622,7 +639,7 @@ const label =
                         <div className="w-full md:w-40 lg:w-48 flex-shrink-0 h-28 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
                             src={project.image || NoImageAvailable}
-                            alt={project.title}
+                            alt={project.title || project.name}
                             className="object-cover w-full h-full rounded-l-lg"
                             onError={e => { e.currentTarget.src = NoImageAvailable; }}
                           />
@@ -630,10 +647,10 @@ const label =
                         <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 line-clamp-1">{project.title}</h3>
+                              <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 line-clamp-1">{project.title || project.name}</h3>
                               <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{project.description}</p>
                               <div className="flex flex-wrap gap-2 mb-2">
-                                {(project.skills || []).map((skill, skillIndex) => (
+                                {(project.skills || project.tags || []).map((skill, skillIndex) => (
                                   <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">
                                     {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                                   </Badge>

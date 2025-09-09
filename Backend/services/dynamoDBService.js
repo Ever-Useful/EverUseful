@@ -359,12 +359,19 @@ class DynamoDBService {
       const expressionAttributeValues = {};
 
       Object.keys(updateData).forEach((key, index) => {
-        const attrName = `#attr${index}`;
-        const attrValue = `:val${index}`;
-        
-        updateExpressions.push(`${attrName} = ${attrValue}`);
-        expressionAttributeNames[attrName] = key;
-        expressionAttributeValues[attrValue] = updateData[key];
+        const valuePlaceholder = `:val${index}`;
+        expressionAttributeValues[valuePlaceholder] = updateData[key];
+
+        // Support nested paths like "profile.userType" by splitting and mapping each segment
+        const segments = key.split('.');
+        const pathPlaceholders = segments.map((segment, segIndex) => {
+          const namePlaceholder = `#attr${index}_${segIndex}`;
+          expressionAttributeNames[namePlaceholder] = segment;
+          return namePlaceholder;
+        });
+
+        const pathExpression = pathPlaceholders.join('.');
+        updateExpressions.push(`${pathExpression} = ${valuePlaceholder}`);
       });
 
       const params = {
