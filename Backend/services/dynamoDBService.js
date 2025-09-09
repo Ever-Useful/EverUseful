@@ -4,6 +4,7 @@ class DynamoDBService {
   constructor() {
     this.usersTable = TABLES.USERS;
     this.marketplaceTable = TABLES.MARKETPLACE;
+    this.agentsTable = TABLES.AGENTS;
   }
 
   // User Operations
@@ -1566,7 +1567,162 @@ async withdrawConnectionRequest(senderId, receiverId) {
   }
 }
 
+  // ==========================
+  // Agents Operations
+  // ==========================
 
+  async getAllAgents() {
+    try {
+      const params = {
+        TableName: this.agentsTable
+      };
+      
+      const result = await dynamodb.scan(params).promise();
+      return result.Items || [];
+    } catch (error) {
+      console.error('Error getting all agents:', error);
+      throw error;
+    }
+  }
+
+  async getAgent(agentId) {
+    try {
+      const params = {
+        TableName: this.agentsTable,
+        Key: {
+          id: agentId
+        }
+      };
+
+      const result = await dynamodb.get(params).promise();
+      return result.Item || null;
+    } catch (error) {
+      console.error('Error getting agent:', error);
+      throw error;
+    }
+  }
+
+  async createAgent(agentData) {
+    try {
+      const agent = {
+        id: Date.now().toString(),
+        ...agentData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        rating: 0,
+        downloads: 0,
+        views: 0,
+        sales: 0,
+        favoritedBy: []
+      };
+
+      const params = {
+        TableName: this.agentsTable,
+        Item: agent
+      };
+
+      await dynamodb.put(params).promise();
+      return agent;
+    } catch (error) {
+      console.error('Error creating agent:', error);
+      throw error;
+    }
+  }
+
+  async updateAgent(agentId, updateData) {
+    try {
+      // Ensure files/images/video props persist as provided
+      const updateExpressions = [];
+      const expressionAttributeNames = {};
+      const expressionAttributeValues = {};
+
+      Object.keys(updateData).forEach((key, index) => {
+        const attrName = `#attr${index}`;
+        const attrValue = `:val${index}`;
+        
+        updateExpressions.push(`${attrName} = ${attrValue}`);
+        expressionAttributeNames[attrName] = key;
+        expressionAttributeValues[attrValue] = updateData[key];
+      });
+
+      // Add updatedAt
+      updateExpressions.push('#updatedAt = :updatedAt');
+      expressionAttributeNames['#updatedAt'] = 'updatedAt';
+      expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+
+      const params = {
+        TableName: this.agentsTable,
+        Key: {
+          id: agentId
+        },
+        UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ReturnValues: 'ALL_NEW'
+      };
+
+      const result = await dynamodb.update(params).promise();
+      return result.Attributes;
+    } catch (error) {
+      console.error('Error updating agent:', error);
+      throw error;
+    }
+  }
+
+  async deleteAgent(agentId) {
+    try {
+      const params = {
+        TableName: this.agentsTable,
+        Key: {
+          id: agentId
+        }
+      };
+
+      await dynamodb.delete(params).promise();
+      return { success: true, message: 'Agent deleted successfully' };
+    } catch (error) {
+      console.error('Error deleting agent:', error);
+      throw error;
+    }
+  }
+
+  async getAgentsByAuthor(authorId) {
+    try {
+      const params = {
+        TableName: this.agentsTable,
+        IndexName: 'AuthorIndex',
+        KeyConditionExpression: 'author = :author',
+        ExpressionAttributeValues: {
+          ':author': authorId
+        }
+      };
+
+      const result = await dynamodb.query(params).promise();
+      return result.Items || [];
+    } catch (error) {
+      console.error('Error getting agents by author:', error);
+      throw error;
+    }
+  }
+
+  async getAgentsByCategory(category) {
+    try {
+      const params = {
+        TableName: this.agentsTable,
+        IndexName: 'CategoryIndex',
+        KeyConditionExpression: 'category = :category',
+        ExpressionAttributeValues: {
+          ':category': category
+        }
+      };
+
+      const result = await dynamodb.query(params).promise();
+      return result.Items || [];
+    } catch (error) {
+      console.error('Error getting agents by category:', error);
+      throw error;
+    }
+  }
 
 }
 

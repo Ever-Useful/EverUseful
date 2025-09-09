@@ -214,26 +214,50 @@ router.get('/projects', authorize, async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
     
-    // Get marketplace data to fetch actual project details
+    // Gather authored marketplace projects and agents, and merge into a single list
     const dynamoDBService = require('../services/dynamoDBService');
-    const marketplace = await dynamoDBService.getMarketplaceData();
-    
-    // Find projects created by this user (same logic as dashboard)
     const customUserId = user.customUserId;
-    const userProjects = marketplace.projects.filter(p => 
-      p.author === customUserId || p.customUserId === customUserId
-    );
-    
 
-    
-    // Return the actual project data, not just IDs
+    // Marketplace projects by author
+    const marketplace = await dynamoDBService.getMarketplaceData();
+    const authoredProjects = marketplace.projects.filter(p => 
+      p.author === customUserId || p.customUserId === customUserId
+    ).map(p => ({ ...p, type: 'project' }));
+
+    // Agents by author, mapped to project-like entries
+    let authoredAgentsAsProjects = [];
+    try {
+      const agents = await dynamoDBService.getAgentsByAuthor(customUserId);
+      authoredAgentsAsProjects = (agents || []).map(agent => ({
+        id: agent.id,
+        title: agent.name,
+        description: agent.description,
+        category: agent.category,
+        tags: Array.isArray(agent.tags) ? agent.tags : [],
+        image: Array.isArray(agent.images) && agent.images.length > 0 ? (typeof agent.images[0] === 'string' ? agent.images[0] : (agent.images[0]?.url || agent.images[0]?.main || '')) : '',
+        projectLink: `/ai-agent/${agent.id}`,
+        price: agent.price,
+        duration: null,
+        status: 'Active',
+        posted: agent.createdAt || new Date().toISOString(),
+        createdAt: agent.createdAt,
+        author: customUserId,
+        type: 'agent'
+      }));
+    } catch (e) {
+      console.warn('Failed to include agents in user projects:', e?.message || e);
+    }
+
+    const mergedCreated = [...authoredProjects, ...authoredAgentsAsProjects];
+
+    // Return merged data
     res.json({ 
       success: true, 
       data: { 
-        created: userProjects,
+        created: mergedCreated,
         collaborated: [], // Can be implemented later
         favorites: [], // Can be implemented later
-        count: userProjects.length 
+        count: mergedCreated.length 
       } 
     });
   } catch (error) {

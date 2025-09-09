@@ -186,22 +186,23 @@ useEffect(() => {
 
 
   useEffect(() => {
-    if (currentUser?.customUserId) {
+    if (currentUser?.customUserId && socket) {
       socket.emit("register", currentUser.customUserId);
       console.log("Registered socket for user:", currentUser.customUserId);
     }
   }, [currentUser?.customUserId]);
 
   useEffect(() => {
-  socket.on("connectionRequestReceived", (data) => {
-    console.log("New connection request received:", data);
-    alert(`${data.message}`);
-  });
+    if (!socket) return;
+    socket.on("connectionRequestReceived", (data) => {
+      console.log("New connection request received:", data);
+      alert(`${data.message}`);
+    });
 
-  return () => {
-    socket.off("connectionRequestReceived");
-  };
-}, []);
+    return () => {
+      socket.off("connectionRequestReceived");
+    };
+  }, []);
 
 
 

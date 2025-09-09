@@ -105,10 +105,20 @@ interface Project {
   description: string;
   category: string;
   tags: string[];
-  status: 'planning' | 'in-progress' | 'completed';
-  collaborators: string[];
-  createdBy: string;
-  createdAt: string;
+  // Allow broader statuses and optional for mapped agent entries
+  status?: string;
+  collaborators?: string[];
+  createdBy?: string;
+  createdAt?: string;
+  // Optional fields to support marketplace/agent projections
+  image?: string;
+  images?: string[];
+  projectLink?: string;
+  price?: number;
+  duration?: string | number | null;
+  posted?: string;
+  dateAdded?: string;
+  author?: string;
 }
 
 interface Meeting {

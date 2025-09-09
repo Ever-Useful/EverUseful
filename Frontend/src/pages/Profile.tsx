@@ -14,12 +14,16 @@ import { EditProfile } from '@/components/EditProfile';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import toast from "react-hot-toast";
 import { MyProjects } from '@/components/MyProjects';
+import PublishAgentSidebar from '@/components/PublishAgentSidebar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import BackgroundUpload from '@/components/BackgroundUpload';
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { API_ENDPOINTS } from '../config/api';
+
+
+
 import { PhotoUpload } from '@/components/PhotoUpload';
 import ConnectionsPopup from '@/components/ConnectionsPopup';
 // import GlobeLoader from '@/components/GlobeLoader';
@@ -71,6 +75,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showMyProjects, setShowMyProjects] = useState(false);
+  const [showEditAgent, setShowEditAgent] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<any>(null);
   const [editSection, setEditSection] = useState('');
 
 
@@ -321,6 +327,8 @@ const Profile = () => {
     setShowMyProjects(true);
   };
 
+  // Agents are represented within projects list; no separate fetch needed
+
   const handleDeleteProject = async (projectId: string) => {
     try {
       const user = auth.currentUser;
@@ -369,6 +377,50 @@ const Profile = () => {
   const handleMyProjectsClose = () => {
     setShowMyProjects(false);
     fetchUserData(); // Refresh data after adding a project
+  };
+
+  const isAgentItem = (item: any) => item?.type === 'agent' || (typeof item?.projectLink === 'string' && item.projectLink.startsWith('/ai-agent/'));
+
+  const handleEditItem = async (item: any) => {
+    if (isAgentItem(item)) {
+      try {
+        const res = await fetch(API_ENDPOINTS.AGENT(item.id));
+        if (!res.ok) throw new Error('Failed to load agent');
+        const data = await res.json();
+        setEditingAgent(data.agent || { id: item.id, name: item.title, description: item.description });
+        setShowEditAgent(true);
+      } catch (e) {
+        toast.error('Failed to open agent editor');
+      }
+    } else {
+      setEditingProject(item);
+      setShowEditProjectSidebar(true);
+    }
+  };
+
+  const handleDeleteItem = async (item: any) => {
+    if (isAgentItem(item)) {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          toast.error('You must be logged in to delete an agent.');
+          return;
+        }
+        const token = await user.getIdToken();
+        const res = await fetch(API_ENDPOINTS.AGENT(item.id), {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to delete agent');
+        toast.success('Agent deleted');
+        setProjects(prev => prev.filter(p => p.id !== item.id));
+        setStats(prev => ({ ...prev, projects: Math.max(0, prev.projects - 1) }));
+      } catch (e) {
+        toast.error((e as any).message || 'Failed to delete agent');
+      }
+    } else {
+      await handleDeleteProject(item.id);
+    }
   };
 
   // Camera functionality handlers
@@ -784,14 +836,14 @@ const Profile = () => {
                               </div>
                             </div>
                             <div className="flex flex-col gap-1 sm:gap-2 items-end ml-2">
-                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700 h-8 w-8 sm:h-10 sm:w-10" onClick={() => { setEditingProject(project); setShowEditProjectSidebar(true); }}>
+                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700 h-8 w-8 sm:h-10 sm:w-10" onClick={() => handleEditItem(project)}>
                                 <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="text-red-500 bg-white hover:bg-red-500 hover:bg-opacity-80 hover:text-white transition-colors shadow-sm h-8 w-8 sm:h-10 sm:w-10"
-                                onClick={() => handleDeleteProject(project.id)}
+                                onClick={() => handleDeleteItem(project)}
                               >
                                 <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
@@ -810,6 +862,7 @@ const Profile = () => {
                 </div>
               </CardContent>
             </Card>
+            {/* Removed AI Agents section; agents now surface in Projects */}
           </div>
 
           {/* Sidebar - LinkedIn Mobile Style */}
@@ -860,9 +913,11 @@ const Profile = () => {
       {showMyProjects && (
         <MyProjects onClose={handleMyProjectsClose} onProjectCreated={fetchUserData} />
       )}
+      {/* Removed agent sidebars */}
       {showEditProjectSidebar && editingProject && (
         <MyProjects onClose={() => { setShowEditProjectSidebar(false); setEditingProject(null); }} editMode={true} projectToEdit={editingProject} onProjectCreated={fetchUserData} />
       )}
+      {/* Removed agent edit sidebar */}
       
       {/* Connections Popup */}
       <ConnectionsPopup 

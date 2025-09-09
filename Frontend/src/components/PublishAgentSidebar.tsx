@@ -3,16 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, X, Upload, FileText, AlertCircle, Download, Code, Brain, Zap } from 'lucide-react';
+import { ArrowLeft, X, Upload, FileText, AlertCircle, Download, Code, Brain, Zap, Image as ImageIcon, Video, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { TbRobot, TbHexagon3D, TbBrandOpenai } from 'react-icons/tb';
 import { FiTrendingUp, FiAward, FiZap } from 'react-icons/fi';
 import { GiProcessor } from 'react-icons/gi';
 import SuccessAnimation from './SuccessAnimation';
+import s3Service from '@/services/s3Service';
+import { API_ENDPOINTS } from '@/config/api';
+import { useAuthState } from '@/hooks/useAuthState';
+import { toast } from 'sonner';
 
 interface PublishAgentSidebarProps {
   onClose: () => void;
   onAgentCreated?: () => void;
+  editMode?: boolean;
+  agentToEdit?: any;
 }
 
 interface AgentFormData {
@@ -29,15 +35,29 @@ interface AgentFormData {
   modelFile: string;
   configFile: string;
   readmeFile: string;
+  image?: string;
+  images?: string[];
+  video?: string;
+  files?: any[];
 }
 
-const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAgentCreated }) => {
+const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAgentCreated, editMode = false, agentToEdit }) => {
+  const { user, token } = useAuthState();
   const [loading, setLoading] = useState(false);
   const [showAgentSuccess, setShowAgentSuccess] = useState(false);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+  const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string>('');
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedVideo, setUploadedVideo] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const [agentData, setAgentData] = useState<AgentFormData>({
     name: '',
@@ -53,7 +73,39 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
     modelFile: '',
     configFile: '',
     readmeFile: '',
+    image: '',
+    images: [],
+    video: '',
+    files: []
   });
+
+  // Pre-fill form if editing
+  React.useEffect(() => {
+    if (editMode && agentToEdit) {
+      setAgentData({
+        name: agentToEdit.name || '',
+        description: agentToEdit.description || '',
+        category: agentToEdit.category || '',
+        price: agentToEdit.price?.toString() || '',
+        version: agentToEdit.version || '1.0.0',
+        tags: Array.isArray(agentToEdit.tags) ? agentToEdit.tags.join(', ') : agentToEdit.tags || '',
+        features: Array.isArray(agentToEdit.features) ? agentToEdit.features.join(', ') : agentToEdit.features || '',
+        capabilities: agentToEdit.capabilities || '',
+        requirements: agentToEdit.requirements || '',
+        documentation: agentToEdit.documentation || '',
+        modelFile: agentToEdit.modelFile || '',
+        configFile: agentToEdit.configFile || '',
+        readmeFile: agentToEdit.readmeFile || '',
+        image: agentToEdit.image || '',
+        images: agentToEdit.images || [],
+        video: agentToEdit.video || '',
+        files: agentToEdit.files || []
+      });
+      setUploadedImages(agentToEdit.images || []);
+      setUploadedVideo(agentToEdit.video || '');
+      setUploadedFiles(agentToEdit.files || []);
+    }
+  }, [editMode, agentToEdit]);
 
   const categories = [
     { id: 'business', name: 'Business Intelligence', icon: <FiTrendingUp /> },
@@ -74,7 +126,7 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
     } else if (isNaN(Number(agentData.price)) || Number(agentData.price) < 0) {
       errors.price = 'Price must be a valid positive number';
     }
-    if (selectedFiles.length === 0) {
+    if (selectedFiles.length === 0 && uploadedFiles.length === 0) {
       errors.files = 'At least one file (model, config, or documentation) is required';
     }
     
@@ -125,6 +177,131 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
     setFilePreviewUrls(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    
+    // Validate files
+    const validFiles: File[] = [];
+    files.forEach(file => {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} is not an image file`);
+        return;
+      }
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast.error(`${file.name} is too large. Maximum file size is 10MB.`);
+        return;
+      }
+      validFiles.push(file);
+    });
+
+    if (validFiles.length > 0) {
+      setSelectedImages(prev => [...prev, ...validFiles]);
+      
+      // Create preview URLs
+      const newPreviewUrls = validFiles.map(file => URL.createObjectURL(file));
+      setImagePreviewUrls(prev => [...prev, ...newPreviewUrls]);
+      
+      // Clear the file input
+      if (event.target) {
+        event.target.value = '';
+      }
+    }
+  };
+
+  const handleVideoSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      toast.error('Please select a video file');
+      return;
+    }
+
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxSize) {
+      toast.error('Video file is too large. Maximum file size is 100MB.');
+      return;
+    }
+
+    setSelectedVideo(file);
+    setVideoPreviewUrl(URL.createObjectURL(file));
+    
+    // Clear the file input
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviewUrls(prev => {
+      const newUrls = prev.filter((_, i) => i !== index);
+      // Revoke the URL to free memory
+      URL.revokeObjectURL(prev[index]);
+      return newUrls;
+    });
+  };
+
+  const handleRemoveVideo = () => {
+    if (videoPreviewUrl) {
+      URL.revokeObjectURL(videoPreviewUrl);
+    }
+    setSelectedVideo(null);
+    setVideoPreviewUrl('');
+  };
+
+  const uploadFilesToS3 = async () => {
+    const uploadPromises = [];
+
+    // Upload selected files
+    if (selectedFiles.length > 0) {
+      const fileUploadPromise = s3Service.uploadAgentFiles(selectedFiles, user?.uid || 'anonymous');
+      uploadPromises.push(fileUploadPromise);
+    }
+
+    // Upload selected images
+    if (selectedImages.length > 0) {
+      const imageUploadPromise = s3Service.uploadAgentImages(selectedImages, user?.uid || 'anonymous');
+      uploadPromises.push(imageUploadPromise);
+    }
+
+    // Upload selected video
+    if (selectedVideo) {
+      const videoUploadPromise = s3Service.uploadAgentVideo(selectedVideo, user?.uid || 'anonymous');
+      uploadPromises.push(videoUploadPromise);
+    }
+
+    if (uploadPromises.length === 0) {
+      return { files: uploadedFiles, images: uploadedImages, video: uploadedVideo };
+    }
+
+    try {
+      const results = await Promise.all(uploadPromises);
+      
+      let newFiles = [...uploadedFiles];
+      let newImages = [...uploadedImages];
+      let newVideo = uploadedVideo;
+
+      results.forEach(result => {
+        if (result.files) {
+          newFiles = [...newFiles, ...result.files];
+        }
+        if (result.images) {
+          newImages = [...newImages, ...result.images];
+        }
+        if (result.video) {
+          newVideo = result.video;
+        }
+      });
+
+      return { files: newFiles, images: newImages, video: newVideo };
+    } catch (error) {
+      console.error('Error uploading files to S3:', error);
+      throw error;
+    }
+  };
+
   const getFileIcon = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase();
     switch (extension) {
@@ -153,13 +330,49 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
 
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Upload files to S3
+      const uploadResults = await uploadFilesToS3();
+      
+      // Prepare agent data
+      const agentPayload = {
+        name: agentData.name.trim(),
+        description: agentData.description.trim(),
+        category: agentData.category,
+        price: parseFloat(agentData.price),
+        version: agentData.version.trim(),
+        tags: agentData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        features: agentData.features.split(',').map(feature => feature.trim()).filter(feature => feature),
+        capabilities: agentData.capabilities.trim(),
+        requirements: agentData.requirements.trim(),
+        documentation: agentData.documentation.trim(),
+        image: uploadResults.images[0] || agentData.image,
+        images: uploadResults.images,
+        video: uploadResults.video || agentData.video,
+        files: uploadResults.files
+      };
+
+      // Make API call
+      const url = editMode ? API_ENDPOINTS.AGENT(agentToEdit.id) : API_ENDPOINTS.AGENTS;
+      const response = await fetch(url, {
+        method: editMode ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(agentPayload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save agent');
+      }
+
+      const result = await response.json();
       
       // Call the callback to refresh data
       if(onAgentCreated) onAgentCreated();
 
       setShowAgentSuccess(true);
+      toast.success(editMode ? 'Agent updated successfully!' : 'Agent published successfully!');
 
       setTimeout(() => {
         setShowAgentSuccess(false);
@@ -167,7 +380,8 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
       }, 2000);
 
     } catch (error) {
-      console.error('Error creating agent:', error);
+      console.error('Error saving agent:', error);
+      toast.error('Failed to save agent. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -181,8 +395,8 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
           <SuccessAnimation 
             isVisible={true} 
             onClose={() => {}} 
-            title="AI Agent Published!"
-            message="Your AI agent has been successfully published to the marketplace."
+            title={editMode ? "AI Agent Updated!" : "AI Agent Published!"}
+            message={editMode ? "Your AI agent has been successfully updated." : "Your AI agent has been successfully published to the marketplace."}
           />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -192,7 +406,7 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
           >
             <TbRobot className="text-cyan-400 text-4xl mx-auto mb-2" />
             <p className="text-xl font-semibold text-white">
-              Agent Published Successfully!
+              {editMode ? 'Agent Updated Successfully!' : 'Agent Published Successfully!'}
             </p>
           </motion.div>
         </div>
@@ -212,7 +426,9 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
             </Button>
             <div className="flex items-center gap-2">
               <TbRobot className="text-cyan-400 text-2xl" />
-              <h2 className="font-semibold text-xl text-white">Publish AI Agent</h2>
+              <h2 className="font-semibold text-xl text-white">
+                {editMode ? 'Edit AI Agent' : 'Publish AI Agent'}
+              </h2>
             </div>
           </div>
         </header>
@@ -417,6 +633,150 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
               className="hidden"
             />
           </div>
+
+          {/* Image Upload Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium text-gray-300">Agent Images</Label>
+              <span className="text-sm text-gray-400">
+                {selectedImages.length + uploadedImages.length} image{(selectedImages.length + uploadedImages.length) !== 1 ? 's' : ''} selected
+              </span>
+            </div>
+            
+            {/* Selected Images Display */}
+            {(selectedImages.length > 0 || uploadedImages.length > 0) && (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-400 mb-2">Selected Images:</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Uploaded images */}
+                  {uploadedImages.map((imageUrl, index) => (
+                    <div key={`uploaded-${index}`} className="relative group">
+                      <img
+                        src={imageUrl}
+                        alt={`Uploaded ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg border border-gray-600"
+                      />
+                      <button
+                        onClick={() => setUploadedImages(prev => prev.filter((_, i) => i !== index))}
+                        className="absolute top-2 right-2 p-1 bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove image"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  
+                  {/* Selected images */}
+                  {imagePreviewUrls.map((previewUrl, index) => (
+                    <div key={`selected-${index}`} className="relative group">
+                      <img
+                        src={previewUrl}
+                        alt={`Selected ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg border border-gray-600"
+                      />
+                      <button
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-2 right-2 p-1 bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove image"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Image Selection */}
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => imageInputRef.current?.click()}
+                className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 font-medium rounded-lg transition-all duration-200"
+              >
+                <ImageIcon className="w-4 h-4" />
+                Select Images
+              </Button>
+              <span className="text-sm text-gray-400">
+                Screenshots, demos, previews
+              </span>
+            </div>
+            
+            {/* Hidden image input */}
+            <input
+              ref={imageInputRef}
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImageSelect}
+              className="hidden"
+            />
+          </div>
+
+          {/* Video Upload Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium text-gray-300">Agent Video</Label>
+              <span className="text-sm text-gray-400">
+                {(selectedVideo || uploadedVideo) ? '1 video selected' : 'No video selected'}
+              </span>
+            </div>
+            
+            {/* Video Display */}
+            {(selectedVideo || uploadedVideo) && (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-400 mb-2">Selected Video:</p>
+                <div className="relative group">
+                  {selectedVideo ? (
+                    <video
+                      src={videoPreviewUrl}
+                      controls
+                      className="w-full h-48 object-cover rounded-lg border border-gray-600"
+                    />
+                  ) : (
+                    <video
+                      src={uploadedVideo}
+                      controls
+                      className="w-full h-48 object-cover rounded-lg border border-gray-600"
+                    />
+                  )}
+                  <button
+                    onClick={handleRemoveVideo}
+                    className="absolute top-2 right-2 p-2 bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Remove video"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Video Selection */}
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => videoInputRef.current?.click()}
+                className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 font-medium rounded-lg transition-all duration-200"
+              >
+                <Video className="w-4 h-4" />
+                Select Video
+              </Button>
+              <span className="text-sm text-gray-400">
+                Demo, tutorial, showcase
+              </span>
+            </div>
+            
+            {/* Hidden video input */}
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/*"
+              onChange={handleVideoSelect}
+              className="hidden"
+            />
+          </div>
           
           {/* Documentation */}
           <div>
@@ -449,12 +809,12 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
             {loading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Publishing...
+                {editMode ? 'Updating...' : 'Publishing...'}
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4" />
-                Publish Agent
+                {editMode ? 'Update Agent' : 'Publish Agent'}
               </div>
             )}
           </Button>
