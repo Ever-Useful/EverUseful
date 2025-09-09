@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, MapPin, Globe, Mail, Phone, GraduationCap, Briefcase, Award, Users, Eye, Heart, Download, Share2, MessageCircle, Send, Linkedin, Github, Twitter, Instagram, Facebook, Youtube, Globe as GlobeIcon, UserPlus, BookOpen, Star } from 'lucide-react';
 import userService from '@/services/userService';
+import LoadingAnimation from '@/components/LoadingAnimation';
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ChatBox } from "@/components/ChatBox";
@@ -351,15 +352,9 @@ const handleConnect = async () => {
     fetchUserData();
   }, [id]);
 
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-slate-100">
-  //       <div className="text-xl font-semibold text-slate-700 animate-pulse">
-  //         Loading your profile...
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (loading) {
+    return <LoadingAnimation fullScreen={true} />;
+  }
 
   const auth = userData?.auth || {};
   const fullName = `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User';

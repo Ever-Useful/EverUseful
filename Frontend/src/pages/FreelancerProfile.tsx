@@ -12,6 +12,7 @@ import NoUserProfile from "@/assets/images/no user profile.png";
 import { getUserAvatarUrl, getBackgroundImageUrl } from "@/utils/s3ImageUtils";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
+import LoadingAnimation from '@/components/LoadingAnimation';
 
 const VisitingProfile = () => {
   const { id } = useParams();
@@ -138,6 +139,11 @@ const VisitingProfile = () => {
     };
     fetchFreelancer();
   }, [id]);
+
+  // Loading state
+  if (loading) {
+    return <LoadingAnimation fullScreen={true} />;
+  }
 
   if (!freelancer) {
     return (

@@ -10,6 +10,7 @@ import { API_ENDPOINTS } from '@/config/api';
 import { useAuthState } from '@/hooks/useAuthState';
 import { toast } from 'sonner';
 import userService from '@/services/userService';
+import LoadingAnimation from '@/components/LoadingAnimation';
 
 interface AIAgent {
   id: string;
@@ -240,14 +241,7 @@ const AIAgentDetail: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-indigo-950 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading agent details...</p>
-        </div>
-      </div>
-    );
+    return <LoadingAnimation fullScreen={true} />;
   }
 
   if (!agent) {
@@ -639,9 +633,7 @@ const AIAgentDetail: React.FC = () => {
                 >
                   {isDownloading ? (
                     <>
-                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span className="hidden sm:inline">Downloading...</span>
-                      <span className="sm:hidden">Downloading</span>
+                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     </>
                   ) : (
                     <>

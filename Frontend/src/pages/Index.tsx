@@ -5,6 +5,7 @@ import { ImpactMotive } from "@/components/ImpactMotive";
 import { HowItWorks } from "@/components/HowItWorks";
 import { CommunityConnect } from "@/components/CommunityConnect";
 import { lazy, Suspense, useMemo, useCallback } from "react";
+import LoadingAnimation from '@/components/LoadingAnimation';
 
 // Lazy load heavy components with better chunking
 const LazyGlobalCollaborations = lazy(() => 
@@ -35,8 +36,8 @@ const LazyChatbot = lazy(() =>
 
 // Performance-optimized loading fallback
 const OptimizedFallback = () => (
-  <div className="min-h-[200px] flex items-center justify-center">
-    <div className="animate-pulse text-gray-400">Loading...</div>
+  <div className="min-h-[200px] flex items-center justify-center bg-black">
+        <LoadingAnimation size="custom" />
   </div>
 );
 

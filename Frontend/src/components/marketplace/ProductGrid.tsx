@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import LoadingAnimation from '@/components/LoadingAnimation';
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -608,7 +609,11 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
   };
 
   if (loading || authLoading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center bg-black py-8">
+        <LoadingAnimation size="custom" />
+      </div>
+    );
   }
 
   if (error) {

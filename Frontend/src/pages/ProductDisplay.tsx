@@ -132,7 +132,7 @@ const ProductDisplay = () => {
     
     if (!user) {
       return { 
-        name: authorsLoading ? 'Loading...' : 'username', 
+        name: 'username', 
         image: NoUserProfile, 
         userType: '', 
         id: authorId,

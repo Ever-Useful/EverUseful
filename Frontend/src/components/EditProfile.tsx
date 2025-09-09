@@ -260,7 +260,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
 
   const handleSave = async () => {
     setIsSaving(true);
-    toast.loading('Saving...');
+        toast.loading('Saving');
     try {
       if (activeSection === 'Basic Details') {
         // Update auth info (backend fields)
@@ -1374,7 +1374,7 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg shadow-xl rounded-full"
               disabled={isSaving}
             >
-              {isSaving ? 'Saving...' : (steps.findIndex(s => s.name === activeSection) === steps.length - 1 ? 'Finish' : 'Save & Next')}
+                {isSaving ? 'Saving' : (steps.findIndex(s => s.name === activeSection) === steps.length - 1 ? 'Finish' : 'Save & Next')}
             </Button>
           </div>
         )}
