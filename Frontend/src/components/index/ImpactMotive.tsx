@@ -3,11 +3,20 @@ import { Target, Globe, Lightbulb, TrendingUp, Users, Zap, Leaf, Heart } from "l
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import bgImage from "@/assets/images/bg1.jpg";
 
 export const ImpactMotive = () => {
   const { ref: impactRef, inView: impactInView } = useInView({ triggerOnce: true, threshold: 0.3 });
   const { ref: motiveRef, inView: motiveInView } = useInView({ triggerOnce: true, threshold: 0.3 });
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+
+  // Preload background image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setBackgroundLoaded(true);
+    img.src = bgImage;
+  }, []);
 
   const impacts = [
     {
@@ -61,7 +70,10 @@ export const ImpactMotive = () => {
       <section
         id="impact"
         className="relative py-10 bg-cover bg-center"
-        style={{ backgroundImage: `url(${bgImage})` }}
+        style={{ 
+          backgroundImage: backgroundLoaded ? `url(${bgImage})` : 'none',
+          backgroundColor: backgroundLoaded ? 'transparent' : '#f8fafc'
+        }}
       >
         <div className="absolute inset-0 bg-white/60 backdrop-blur-xs"></div>
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 max-w-[85vw]">
