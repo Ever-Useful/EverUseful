@@ -387,9 +387,10 @@ const Profile = () => {
         const res = await fetch(API_ENDPOINTS.AGENT(item.id));
         if (!res.ok) throw new Error('Failed to load agent');
         const data = await res.json();
-        setEditingAgent(data.agent || { id: item.id, name: item.title, description: item.description });
+        setEditingAgent(data.agent);
         setShowEditAgent(true);
       } catch (e) {
+        console.error('Error loading agent for edit:', e);
         toast.error('Failed to open agent editor');
       }
     } else {
@@ -413,9 +414,10 @@ const Profile = () => {
         });
         if (!res.ok) throw new Error('Failed to delete agent');
         toast.success('Agent deleted');
-        setProjects(prev => prev.filter(p => p.id !== item.id));
-        setStats(prev => ({ ...prev, projects: Math.max(0, prev.projects - 1) }));
+        // Refresh the projects list
+        fetchUserData();
       } catch (e) {
+        console.error('Error deleting agent:', e);
         toast.error((e as any).message || 'Failed to delete agent');
       }
     } else {
@@ -917,7 +919,18 @@ const Profile = () => {
       {showEditProjectSidebar && editingProject && (
         <MyProjects onClose={() => { setShowEditProjectSidebar(false); setEditingProject(null); }} editMode={true} projectToEdit={editingProject} onProjectCreated={fetchUserData} />
       )}
-      {/* Removed agent edit sidebar */}
+      {showEditAgent && editingAgent && (
+        <PublishAgentSidebar 
+          onClose={() => { setShowEditAgent(false); setEditingAgent(null); }} 
+          editMode={true} 
+          agentToEdit={editingAgent} 
+          onAgentCreated={() => { 
+            setShowEditAgent(false); 
+            setEditingAgent(null); 
+            fetchUserData(); 
+          }} 
+        />
+      )}
       
       {/* Connections Popup */}
       <ConnectionsPopup 

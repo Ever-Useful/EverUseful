@@ -140,19 +140,12 @@ router.post('/agents', authorize, async (req, res) => {
     // Save agent to DynamoDB
     const createdAgent = await dynamoDBService.createAgent(newAgent);
 
-    // Also append a minimal project-like entry to user's projects for profile display
+    // Store agent ID in user's projects for profile display
     try {
-      const projectLike = {
-        id: createdAgent.id || createdAgent.createdAt || Date.now().toString(),
-        title: createdAgent.name,
-        description: createdAgent.description,
-        category: createdAgent.category,
-        tags: Array.isArray(createdAgent.tags) ? createdAgent.tags : [],
-        image: Array.isArray(createdAgent.images) && createdAgent.images.length > 0 ? (typeof createdAgent.images[0] === 'string' ? createdAgent.images[0] : (createdAgent.images[0]?.url || createdAgent.images[0]?.main || '')) : '',
-        projectLink: `/ai-agent/${createdAgent.id}`,
+      await userService.addUserProject(user.customUserId, {
+        id: createdAgent.id,
         type: 'agent'
-      };
-      await userService.addUserProject(user.customUserId, projectLike);
+      });
     } catch (e) {
       console.warn('Non-fatal: failed to append agent to user.projects', e?.message || e);
     }

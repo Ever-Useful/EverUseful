@@ -177,6 +177,10 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
     setFilePreviewUrls(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleRemoveUploadedFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     
@@ -249,6 +253,14 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
     }
     setSelectedVideo(null);
     setVideoPreviewUrl('');
+  };
+
+  const handleRemoveUploadedVideo = () => {
+    setUploadedVideo('');
+  };
+
+  const handleRemoveUploadedImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const uploadFilesToS3 = async () => {
@@ -571,20 +583,45 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium text-gray-300">Agent Files</Label>
               <span className="text-sm text-gray-400">
-                {selectedFiles.length} file{selectedFiles.length !== 1 ? 's' : ''} selected
+                {selectedFiles.length + uploadedFiles.length} file{(selectedFiles.length + uploadedFiles.length) !== 1 ? 's' : ''} selected
               </span>
             </div>
             {formErrors.files && (
               <div className="text-red-400 text-sm">{formErrors.files}</div>
             )}
             
-            {/* Selected Files Display */}
-            {selectedFiles.length > 0 && (
+            {/* Files Display */}
+            {(selectedFiles.length > 0 || uploadedFiles.length > 0) && (
               <div className="space-y-3">
                 <p className="text-sm text-gray-400 mb-2">Selected Files:</p>
                 <div className="space-y-2">
+                  {/* Uploaded files */}
+                  {uploadedFiles.map((file, index) => (
+                    <div key={`uploaded-${index}`} className="flex items-center justify-between p-3 bg-gray-800/30 border border-gray-600 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="text-cyan-400">
+                          {getFileIcon(file.name || file.url || '')}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-white">{file.name || 'Uploaded File'}</p>
+                          <p className="text-xs text-gray-400">
+                            {file.size ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'Uploaded file'}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveUploadedFile(index)}
+                        className="text-red-400 hover:text-red-300 transition-colors"
+                        title="Remove file"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  
+                  {/* Selected files */}
                   {selectedFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-800/30 border border-gray-600 rounded-lg">
+                    <div key={`selected-${index}`} className="flex items-center justify-between p-3 bg-gray-800/30 border border-gray-600 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="text-cyan-400">
                           {getFileIcon(file.name)}
@@ -657,7 +694,7 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
                         className="w-full h-24 object-cover rounded-lg border border-gray-600"
                       />
                       <button
-                        onClick={() => setUploadedImages(prev => prev.filter((_, i) => i !== index))}
+                        onClick={() => handleRemoveUploadedImage(index)}
                         className="absolute top-2 right-2 p-1 bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Remove image"
                       >
@@ -742,7 +779,7 @@ const PublishAgentSidebar: React.FC<PublishAgentSidebarProps> = ({ onClose, onAg
                     />
                   )}
                   <button
-                    onClick={handleRemoveVideo}
+                    onClick={selectedVideo ? handleRemoveVideo : handleRemoveUploadedVideo}
                     className="absolute top-2 right-2 p-2 bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Remove video"
                   >

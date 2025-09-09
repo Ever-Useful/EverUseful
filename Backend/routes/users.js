@@ -214,50 +214,88 @@ router.get('/projects', authorize, async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
     
-    // Gather authored marketplace projects and agents, and merge into a single list
+    // Process user's projects.created array - all items should be IDs now
     const dynamoDBService = require('../services/dynamoDBService');
     const customUserId = user.customUserId;
-
-    // Marketplace projects by author
+    const projects = user.projects || { created: [], collaborated: [], favorites: [], count: 0 };
+    
+    const processedProjects = [];
+    
+    // Get all marketplace projects and agents for this user
     const marketplace = await dynamoDBService.getMarketplaceData();
-    const authoredProjects = marketplace.projects.filter(p => 
+    const userProjects = marketplace.projects.filter(p => 
       p.author === customUserId || p.customUserId === customUserId
-    ).map(p => ({ ...p, type: 'project' }));
-
-    // Agents by author, mapped to project-like entries
-    let authoredAgentsAsProjects = [];
+    );
+    
+    let userAgents = [];
     try {
-      const agents = await dynamoDBService.getAgentsByAuthor(customUserId);
-      authoredAgentsAsProjects = (agents || []).map(agent => ({
-        id: agent.id,
-        title: agent.name,
-        description: agent.description,
-        category: agent.category,
-        tags: Array.isArray(agent.tags) ? agent.tags : [],
-        image: Array.isArray(agent.images) && agent.images.length > 0 ? (typeof agent.images[0] === 'string' ? agent.images[0] : (agent.images[0]?.url || agent.images[0]?.main || '')) : '',
-        projectLink: `/ai-agent/${agent.id}`,
-        price: agent.price,
-        duration: null,
-        status: 'Active',
-        posted: agent.createdAt || new Date().toISOString(),
-        createdAt: agent.createdAt,
-        author: customUserId,
-        type: 'agent'
-      }));
+      userAgents = await dynamoDBService.getAgentsByAuthor(customUserId);
     } catch (e) {
-      console.warn('Failed to include agents in user projects:', e?.message || e);
+      console.warn('Failed to fetch user agents:', e?.message || e);
     }
+    
+    // Process each ID in user.projects.created
+    console.log('Processing user projects:', { 
+      createdIds: projects.created, 
+      userProjectsCount: userProjects.length, 
+      userAgentsCount: userAgents.length 
+    });
+    
+    for (const itemId of projects.created || []) {
+      console.log(`Processing item ID: ${itemId}`);
+      
+      // Try to find in projects first
+      const project = userProjects.find(p => p.id === itemId);
+      if (project) {
+        console.log(`Found project: ${project.title}`);
+        // Ensure image field is properly mapped
+        const projectWithImage = {
+          ...project,
+          image: project.image || project.imageUrl || '',
+          type: 'project'
+        };
+        processedProjects.push(projectWithImage);
+        continue;
+      }
+      
+      // Try to find in agents
+      const agent = userAgents.find(a => a.id === itemId);
+      if (agent) {
+        console.log(`Found agent: ${agent.name}`);
+        processedProjects.push({
+          id: agent.id,
+          title: agent.name,
+          description: agent.description,
+          category: agent.category,
+          tags: Array.isArray(agent.tags) ? agent.tags : [],
+          image: Array.isArray(agent.images) && agent.images.length > 0 ? 
+            (typeof agent.images[0] === 'string' ? agent.images[0] : (agent.images[0]?.url || agent.images[0]?.main || '')) : '',
+          projectLink: `/ai-agent/${agent.id}`,
+          price: agent.price || 0,
+          duration: null,
+          status: 'Active',
+          posted: agent.createdAt || new Date().toISOString(),
+          createdAt: agent.createdAt,
+          author: customUserId,
+          type: 'agent'
+        });
+        continue;
+      }
+      
+      // If not found in either, log warning
+      console.warn(`Project/Agent with ID ${itemId} not found in marketplace or agents table`);
+    }
+    
+    console.log(`Processed ${processedProjects.length} items for user ${customUserId}`);
 
-    const mergedCreated = [...authoredProjects, ...authoredAgentsAsProjects];
-
-    // Return merged data
+    // Return processed data
     res.json({ 
       success: true, 
       data: { 
-        created: mergedCreated,
-        collaborated: [], // Can be implemented later
-        favorites: [], // Can be implemented later
-        count: mergedCreated.length 
+        created: processedProjects,
+        collaborated: projects.collaborated || [],
+        favorites: projects.favorites || [],
+        count: processedProjects.length 
       } 
     });
   } catch (error) {

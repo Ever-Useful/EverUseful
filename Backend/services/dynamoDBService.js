@@ -280,7 +280,7 @@ class DynamoDBService {
     const reconstructed = {
       customUserId: user.customUserId,
       firebaseUid: user.firebaseUid,
-      profile: {},
+      profile: user.profile || {},
       stats: user.stats || {},
       studentData: user.studentData || null,
       professorData: user.professorData || null,
@@ -297,19 +297,18 @@ class DynamoDBService {
       social: user.social || {},
       connections: user.connections || { sent: [], received: [], pending: [] }
     };
-        // ✅ Add connections back from DB
-     
 
-    // Reconstruct profile from flattened keys
-    Object.keys(user).forEach(key => {
-      if (key.startsWith('profile.')) {
-        const profileKey = key.replace('profile.', '');
-        reconstructed.profile[profileKey] = user[key];
-      }
-    });
+    // Only reconstruct from flattened keys if nested objects don't exist
+    if (!user.profile || Object.keys(user.profile).length === 0) {
+      Object.keys(user).forEach(key => {
+        if (key.startsWith('profile.')) {
+          const profileKey = key.replace('profile.', '');
+          reconstructed.profile[profileKey] = user[key];
+        }
+      });
+    }
 
-    // Reconstruct studentData from flattened keys
-    if (!reconstructed.studentData) {
+    if (!user.studentData || Object.keys(user.studentData).length === 0) {
       reconstructed.studentData = {};
       Object.keys(user).forEach(key => {
         if (key.startsWith('studentData.')) {
@@ -319,8 +318,7 @@ class DynamoDBService {
       });
     }
 
-    // Reconstruct professorData from flattened keys
-    if (!reconstructed.professorData) {
+    if (!user.professorData || Object.keys(user.professorData).length === 0) {
       reconstructed.professorData = {};
       Object.keys(user).forEach(key => {
         if (key.startsWith('professorData.')) {
@@ -329,8 +327,6 @@ class DynamoDBService {
         }
       });
     }
-
-    // Reconstruct freelancerData from flattened keys or use existing nested object
     if (!reconstructed.freelancerData || Object.keys(reconstructed.freelancerData).length === 0) {
       reconstructed.freelancerData = {};
       Object.keys(user).forEach(key => {
@@ -728,26 +724,10 @@ class DynamoDBService {
         };
       }
   
-      // Create project object with the correct structure
-      const project = {
-        projectId: projectData.id || Date.now().toString(),
-        title: projectData.title,
-        description: projectData.description,
-        category: projectData.category,
-        tags: Array.isArray(projectData.tags) ? projectData.tags : (projectData.tags ? projectData.tags.split(',').map(tag => tag.trim()) : []),
-        imageUrl: projectData.image || projectData.imageUrl || '',
-        projectLink: projectData.projectLink || '',
-        githubLink: projectData.githubLink || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        likes: 0,
-        views: 0,
-        downloads: 0
-      };
-  
-      // Store only the project ID in the user's projects.created array
-      const projectId = project.projectId;
-  
+      // Always store only the ID and type in user's projects.created array
+      const projectId = projectData.id || Date.now().toString();
+      const projectType = projectData.type || 'project';
+      
       const params = {
         TableName: this.usersTable,
         Key: {
@@ -767,7 +747,7 @@ class DynamoDBService {
       };
   
       const result = await dynamodb.update(params).promise();
-      return project;
+      return projectId;
     } catch (error) {
       console.error('Error adding user project:', error);
       throw error;
@@ -1688,16 +1668,16 @@ async withdrawConnectionRequest(senderId, receiverId) {
 
   async getAgentsByAuthor(authorId) {
     try {
+      // Since AuthorIndex doesn't exist, scan the table and filter by author
       const params = {
         TableName: this.agentsTable,
-        IndexName: 'AuthorIndex',
-        KeyConditionExpression: 'author = :author',
+        FilterExpression: 'author = :author',
         ExpressionAttributeValues: {
           ':author': authorId
         }
       };
 
-      const result = await dynamodb.query(params).promise();
+      const result = await dynamodb.scan(params).promise();
       return result.Items || [];
     } catch (error) {
       console.error('Error getting agents by author:', error);
