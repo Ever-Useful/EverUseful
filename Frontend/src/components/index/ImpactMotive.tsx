@@ -66,9 +66,9 @@ export const ImpactMotive = () => {
         <div className="absolute inset-0 bg-white/60 backdrop-blur-xs"></div>
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 max-w-[85vw]">
           <div className="text-center mb-8 sm:mb-16">
-            <h2 className="sm:text-4xl font-bold text-gray-800 mb-2 sm:mb-4 mobile-text-2xl">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
               Transforming Ideas into Reality
-            </h2>
+            </h1>
             <p className="text-base text-gray-600 max-w-5xl mx-auto mobile-text-base">
               Measuring our success through the positive change we create in the innovation ecosystem
             </p>
@@ -119,8 +119,8 @@ export const ImpactMotive = () => {
       <section id="mission" className="relative overflow-hidden py-14 sm:py-16 bg-[#002f48]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[85vw]">
           <div className="text-center mb-8 sm:mb-16">
-            <h2 className="text-lg sm:text-3xl font-bold text-gray-100 mb-2 sm:mb-4 mobile-text-xl">
-              Why <span className="text-indigo-400 font-extrabold mobile-text-3xl">AMOGH</span> Exists
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight px-2 sm:px-0">
+              Why <span className="text-indigo-400 font-extrabold">AMOGH</span> Exists
             </h2>
             <p className="text-base text-gray-200 max-w-5xl mx-auto mobile-text-base">
               Driven by the belief that innovation should know no boundaries, we're building a world where every idea has the potential to create positive impact
