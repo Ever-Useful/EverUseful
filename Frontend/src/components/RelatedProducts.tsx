@@ -184,8 +184,10 @@ export const RelatedProducts = () => {
 
   if (loading) {
     return (
-      <div className={`container mx-auto ${isMobile ? 'px-4' : 'px-6'} py-8 bg-black`}>
-        <LoadingAnimation size="custom" />
+      <div className={`container mx-auto ${isMobile ? 'px-4' : 'px-6'} py-8`}>
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     );
   }

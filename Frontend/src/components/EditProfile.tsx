@@ -343,11 +343,15 @@ export const EditProfile: React.FC<EditProfileSidebarProps> = ({ onClose, initia
         
         // Update professor data if user is a professor
         if (profileData.userType === 'Professors') {
-          await userService.updateProfessorData({
-            department: profileData.department,
-            designation: profileData.designation,
-            researchInterests: profileData.researchInterests,
-          });
+          const professorData = {};
+          if (profileData.department) professorData.department = profileData.department;
+          if (profileData.designation) professorData.designation = profileData.designation;
+          if (profileData.researchInterests) professorData.researchInterests = profileData.researchInterests;
+          
+          // Only update if there's actual data to update
+          if (Object.keys(professorData).length > 0) {
+            await userService.updateProfessorData(professorData);
+          }
         }
         
         // Clean up localStorage after successful save

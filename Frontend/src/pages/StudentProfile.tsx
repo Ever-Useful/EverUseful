@@ -34,7 +34,8 @@ const Profile = () => {
   const [error, setError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
   const [projectsCount, setProjectsCount] = useState(0);
-  const { profileData: currentUser } = useUserProfile(); 
+  const { profileData: currentUser } = useUserProfile();
+  const [isExpanded, setIsExpanded] = useState(false); 
 
 
 
@@ -68,47 +69,48 @@ const Profile = () => {
         console.log('StudentProfile - Projects.created:', data.data.projects?.created);
         console.log('StudentProfile - Is projects.created an array?', Array.isArray(data.data.projects?.created));
         
-        // Fetch projects using the same method as Profile.tsx to ensure consistency
+        // Use projects data from the user response (no authentication required)
         try {
-          const projectsData: any = await userService.getUserProjects();
-          console.log('StudentProfile - Projects data from getUserProjects:', projectsData);
+          const projects = data.data.projects?.created || [];
+          console.log('StudentProfile - Projects found:', projects.length);
           
-          if (projectsData && projectsData.success && projectsData.data) {
-            // Handle the correct backend response structure
-            const projects = projectsData.data.created || projectsData.data || [];
-            const projectCount = projectsData.data.count || projects.length;
-            console.log('StudentProfile - Projects found:', projects.length, 'Count:', projectCount);
-            setProjectsCount(projectCount);
-            
-            // Fetch full project and agent details for each ID
-            if (projects.length > 0) {
-              console.log('StudentProfile - Attempting to fetch projects and agents:', projects);
-              const projectPromises = projects.map((item) => {
-                // Handle both old format (string IDs) and new format (objects with id and type)
-                const itemId = typeof item === 'string' ? item : item.id;
-                const itemType = typeof item === 'object' ? item.type : 'project';
-                return fetchItemData(itemId, itemType);
-              });
-              const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-              console.log('StudentProfile - Full projects fetched:', fullProjects);
-              console.log('StudentProfile - Project details:', fullProjects.map(p => ({
-                id: p.id,
-                title: p.title || p.name,
-                image: p.image,
-                hasImage: !!p.image
-              })));
-              setPortfolioProjects(fullProjects);
-            } else {
-              console.log('StudentProfile - No project IDs found');
-              setPortfolioProjects([]);
-            }
-          } else {
-            console.log('StudentProfile - No projects found in getUserProjects');
-            setPortfolioProjects([]);
+          // Fetch both projects and agents
+          const allItems = [];
+          
+          // Fetch projects from the user's projects array
+          if (projects.length > 0) {
+            console.log('StudentProfile - Attempting to fetch projects:', projects);
+            const projectPromises = projects.map((item) => {
+              // Handle both old format (string IDs) and new format (objects with id and type)
+              const itemId = typeof item === 'string' ? item : item.id;
+              const itemType = typeof item === 'object' ? item.type : 'project';
+              return fetchItemData(itemId, itemType);
+            });
+            const fetchedProjects = (await Promise.all(projectPromises)).filter(Boolean);
+            allItems.push(...fetchedProjects);
+            console.log(`StudentProfile - Successfully loaded ${fetchedProjects.length} projects`);
           }
+          
+          // Fetch user agents directly
+          const userAgents = await fetchUserAgents(id);
+          allItems.push(...userAgents);
+          console.log(`StudentProfile - Successfully loaded ${userAgents.length} agents`);
+          
+          console.log('StudentProfile - Full items fetched:', allItems);
+          console.log('StudentProfile - Item details:', allItems.map(p => ({
+            id: p.id,
+            title: p.title || p.name,
+            image: p.image,
+            hasImage: !!p.image,
+            type: p.type
+          })));
+          setPortfolioProjects(allItems);
+          setProjectsCount(allItems.length);
+          
         } catch (error) {
-          console.error('StudentProfile - Error fetching projects from getUserProjects:', error);
+          console.error('StudentProfile - Error processing projects and agents:', error);
           setPortfolioProjects([]);
+          setProjectsCount(0);
         }
       } else {
         console.log('StudentProfile - No user data found or API error');
@@ -321,7 +323,12 @@ const handleConnect = async () => {
       }
       
       if (!response.ok) {
-        console.log(`StudentProfile - ${itemType} ${itemId} not found (${response.status})`);
+        // Silently handle 404s - project/agent may have been deleted
+        if (response.status === 404) {
+          console.log(`StudentProfile - ${itemType} ${itemId} not found (deleted or unpublished)`);
+        } else {
+          console.log(`StudentProfile - ${itemType} ${itemId} error (${response.status})`);
+        }
         return null;
       }
       
@@ -346,6 +353,29 @@ const handleConnect = async () => {
 
   const fetchProjectData = async (pid: string) => {
     return fetchItemData(pid, 'project');
+  };
+
+  // Fetch user agents directly from the agents API
+  const fetchUserAgents = async (userId: string) => {
+    try {
+      console.log(`StudentProfile - Fetching agents for user ${userId}...`);
+      const response = await fetch(`${API_ENDPOINTS.AGENTS}?author=${userId}`);
+      if (!response.ok) {
+        console.log(`StudentProfile - No agents found for user ${userId}`);
+        return [];
+      }
+      const data = await response.json();
+      const agents = data.agents || [];
+      console.log(`StudentProfile - Found ${agents.length} agents for user ${userId}`);
+      return agents.map(agent => ({
+        ...agent,
+        title: agent.name,
+        type: 'agent'
+      }));
+    } catch (error) {
+      console.error(`StudentProfile - Error fetching agents for user ${userId}:`, error);
+      return [];
+    }
   };
 
   useEffect(() => {
@@ -375,7 +405,6 @@ const handleConnect = async () => {
   };
 
   const MAX_LENGTH = 200;
-  const [isExpanded, setIsExpanded] = useState(false);
   const shouldTruncate = profile.bio && profile.bio.length > MAX_LENGTH;
   const displayedText = shouldTruncate && !isExpanded
     ? profile.bio.slice(0, MAX_LENGTH) + "..."

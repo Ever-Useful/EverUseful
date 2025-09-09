@@ -608,10 +608,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     }
   };
 
-  if (loading || authLoading) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center bg-black py-8">
-        <LoadingAnimation size="custom" />
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
