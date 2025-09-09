@@ -547,6 +547,33 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     }
   };
 
+  const handleShare = async (project: any) => {
+    const shareData = {
+      title: project.title,
+      text: project.description,
+      url: `${window.location.origin}/product/${project.id}`
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareData.url);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        toast.success('Link copied to clipboard!');
+      } catch (clipboardError) {
+        toast.error('Failed to share project');
+      }
+    }
+  };
+
   // Helper: get 2 related projects (different from selected)
   const getRelated = (id: number) => projects.filter((p) => p.id !== id).slice(0, 2);
 
@@ -924,7 +951,12 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
             <p className="text-gray-700 text-sm mb-4">{selected.description}</p>
 
             <div className="flex gap-2 mb-6">
-              <Button size="sm" variant="outline" className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100"
+                onClick={() => handleShare(selected)}
+              >
                 <Share2 className="w-4 h-4" />
               </Button>
               <Button size="sm" variant="outline" className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100">

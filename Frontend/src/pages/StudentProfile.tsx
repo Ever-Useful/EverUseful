@@ -66,21 +66,24 @@ const Profile = () => {
         console.log('StudentProfile - Projects.created:', data.data.projects?.created);
         console.log('StudentProfile - Is projects.created an array?', Array.isArray(data.data.projects?.created));
         
-        // Fetch full project details for each project ID
+        // Fetch full project and agent details for each ID
         const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
         console.log('StudentProfile - Project IDs found:', projectIds);
         console.log('StudentProfile - Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
         
         if (projectIds.length > 0) {
-          console.log('StudentProfile - Attempting to fetch projects:', projectIds);
-          const projectPromises = projectIds.map((pid) =>
-            fetchProjectData(pid)
-          );
+          console.log('StudentProfile - Attempting to fetch projects and agents:', projectIds);
+          const projectPromises = projectIds.map((item) => {
+            // Handle both old format (string IDs) and new format (objects with id and type)
+            const itemId = typeof item === 'string' ? item : item.id;
+            const itemType = typeof item === 'object' ? item.type : 'project';
+            return fetchItemData(itemId, itemType);
+          });
           const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
           console.log('StudentProfile - Full projects fetched:', fullProjects);
           console.log('StudentProfile - Project details:', fullProjects.map(p => ({
             id: p.id,
-            title: p.title,
+            title: p.title || p.name,
             image: p.image,
             hasImage: !!p.image
           })));
@@ -288,20 +291,43 @@ const handleConnect = async () => {
 
 
 
-  const fetchProjectData = async (pid: string) => {
+  const fetchItemData = async (itemId: string, itemType: string = 'project') => {
     try {
-      console.log(`StudentProfile - Fetching project ${pid}...`);
-      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
+      console.log(`StudentProfile - Fetching ${itemType} ${itemId}...`);
+      
+      let response;
+      if (itemType === 'agent') {
+        response = await fetch(API_ENDPOINTS.AGENT(itemId));
+      } else {
+        response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(itemId));
+      }
+      
       if (!response.ok) {
-        console.log(`StudentProfile - Project ${pid} not found (${response.status})`);
+        console.log(`StudentProfile - ${itemType} ${itemId} not found (${response.status})`);
         return null;
       }
+      
       const data = await response.json();
-      return data && data.project ? data.project : null;
+      const item = itemType === 'agent' ? data.agent : data.project;
+      
+      if (item) {
+        // Normalize the item data to match the expected format
+        return {
+          ...item,
+          title: item.title || item.name,
+          type: itemType
+        };
+      }
+      
+      return null;
     } catch (error) {
-      console.error(`StudentProfile - Error fetching project ${pid}:`, error);
+      console.error(`StudentProfile - Error fetching ${itemType} ${itemId}:`, error);
       return null;
     }
+  };
+
+  const fetchProjectData = async (pid: string) => {
+    return fetchItemData(pid, 'project');
   };
 
   useEffect(() => {

@@ -210,6 +210,35 @@ const AIAgentDetail: React.FC = () => {
     }
   };
 
+  const handleShare = async () => {
+    if (!agent) return;
+
+    const shareData = {
+      title: agent.name,
+      text: agent.description,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      } catch (clipboardError) {
+        toast.error('Failed to share agent');
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-indigo-950 text-white flex items-center justify-center">
@@ -250,34 +279,34 @@ const AIAgentDetail: React.FC = () => {
         <div className="absolute top-1/2 right-1/4 w-[600px] h-[600px] bg-cyan-700 rounded-full filter blur-[120px] opacity-15"></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Back Button */}
         <Link to="/ai-agents">
           <motion.button
             whileHover={{ x: -5 }}
-            className="flex items-center gap-2 text-gray-300 hover:text-white mb-8 transition-colors"
+            className="flex items-center gap-2 text-gray-300 hover:text-white mb-4 sm:mb-8 transition-colors"
           >
-            <FiArrowLeft className="w-5 h-5" />
-            <span>Back to AI Agents</span>
+            <FiArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base">Back to AI Agents</span>
           </motion.button>
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Agent Header */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-8"
+              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6 lg:p-8"
             >
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 flex items-center justify-center">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 sm:mb-6 gap-4">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-br from-cyan-600/20 to-indigo-600/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
                     {getCategoryIcon(agent.category)}
                   </div>
-                  <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">{agent.name}</h1>
+                  <div className="min-w-0 flex-1">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2 break-words">{agent.name}</h1>
                     <p className="text-gray-400">
                       by {authorDetails ? (
                         <button
@@ -307,33 +336,36 @@ const AIAgentDetail: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-start sm:self-auto">
                   <button
                     onClick={handleFavorite}
-                    className={`p-3 rounded-lg transition-all duration-200 ${
+                    className={`p-2 sm:p-3 rounded-lg transition-all duration-200 ${
                       isFavorited 
                         ? 'text-red-400 bg-red-400/10' 
                         : 'text-gray-400 hover:text-red-400 hover:bg-red-400/10'
                     }`}
                   >
-                    <FiHeart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
+                    <FiHeart className={`w-4 h-4 sm:w-5 sm:h-5 ${isFavorited ? 'fill-current' : ''}`} />
                   </button>
-                  <button className="p-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-all duration-200">
-                    <FiShare2 className="w-5 h-5" />
+                  <button 
+                    onClick={handleShare}
+                    className="p-2 sm:p-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-all duration-200"
+                  >
+                    <FiShare2 className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </div>
               </div>
 
-              <p className="text-gray-300 text-lg leading-relaxed mb-6">
+              <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-4 sm:mb-6">
                 {agent.description}
               </p>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
                 {agent.tags.map((tag, index) => (
                   <span 
                     key={index}
-                    className="px-3 py-1 bg-gray-700/50 text-sm rounded-full text-gray-300 border border-gray-600"
+                    className="px-2 sm:px-3 py-1 bg-gray-700/50 text-xs sm:text-sm rounded-full text-gray-300 border border-gray-600"
                   >
                     {tag}
                   </span>
@@ -341,7 +373,7 @@ const AIAgentDetail: React.FC = () => {
               </div>
 
               {/* Stats */}
-              <div className="flex items-center gap-6 text-sm text-gray-400">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-400">
                 <div className="flex items-center gap-1">
                   <FiStar className="w-4 h-4 text-yellow-400 fill-current" />
                   <span>{agent.rating} rating</span>
@@ -366,9 +398,9 @@ const AIAgentDetail: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-8"
+                className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6 lg:p-8"
               >
-                <h3 className="text-xl font-semibold text-white mb-6">Media Gallery</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">Media Gallery</h3>
                 
                 {/* Prepare normalized media */}
                 {(() => {
@@ -390,7 +422,7 @@ const AIAgentDetail: React.FC = () => {
                 })()}
 
                 {/* Main Image/Video Display */}
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   {(agent as any).__media && (agent as any).__media.length > 0 ? (
                     (agent as any).__media[selectedImage]?.kind === 'video' ? (
                       <div className="relative">
@@ -400,7 +432,7 @@ const AIAgentDetail: React.FC = () => {
                           muted
                           playsInline
                           preload="metadata"
-                          className="w-full h-64 md:h-80 object-cover rounded-xl border border-gray-600 bg-black"
+                          className="w-full h-48 sm:h-64 md:h-80 object-cover rounded-xl border border-gray-600 bg-black"
                         />
                       </div>
                     ) : (
@@ -408,7 +440,7 @@ const AIAgentDetail: React.FC = () => {
                         <img
                           src={(agent as any).__media[selectedImage].url}
                           alt={`${agent.name} ${selectedImage + 1}`}
-                          className="w-full h-64 md:h-80 object-cover rounded-xl border border-gray-600"
+                          className="w-full h-48 sm:h-64 md:h-80 object-cover rounded-xl border border-gray-600"
                         />
                       </div>
                     )
@@ -417,7 +449,7 @@ const AIAgentDetail: React.FC = () => {
 
                 {/* Image Thumbnails */}
                 {(agent as any).__media && (agent as any).__media.length > 1 && (
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
                     {(agent as any).__media.map((m: any, index: number) => (
                       <button
                         key={index}
@@ -584,36 +616,38 @@ const AIAgentDetail: React.FC = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Purchase Card */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-6 sticky top-8"
+              className="bg-gradient-to-br from-gray-800/30 to-gray-900/50 border border-gray-700 rounded-2xl p-4 sm:p-6 sticky top-4 sm:top-8"
             >
-              <div className="text-center mb-6">
-                <div className="text-4xl font-bold text-white mb-2">${agent.price}</div>
-                <p className="text-gray-400">One-time purchase</p>
+              <div className="text-center mb-4 sm:mb-6">
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2">₹{agent.price}</div>
+                <p className="text-gray-400 text-sm sm:text-base">One-time purchase</p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleDownload}
                   disabled={isDownloading}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium flex items-center justify-center gap-2 hover:from-cyan-700 hover:to-indigo-800 transition-all duration-200 shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium flex items-center justify-center gap-2 hover:from-cyan-700 hover:to-indigo-800 transition-all duration-200 shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
                   {isDownloading ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Downloading...
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span className="hidden sm:inline">Downloading...</span>
+                      <span className="sm:hidden">Downloading</span>
                     </>
                   ) : (
                     <>
-                      <FiDownload className="w-5 h-5" />
-                      Download Agent
+                      <FiDownload className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span className="hidden sm:inline">Download Agent</span>
+                      <span className="sm:hidden">Download</span>
                     </>
                   )}
                 </motion.button>
@@ -622,10 +656,11 @@ const AIAgentDetail: React.FC = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCart}
-                  className="w-full px-6 py-4 bg-gray-700/50 border border-gray-600 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-600/50 hover:border-gray-500 transition-all duration-200"
+                  className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-gray-700/50 border border-gray-600 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-600/50 hover:border-gray-500 transition-all duration-200 text-sm sm:text-base"
                 >
-                  <FiShoppingCart className="w-5 h-5" />
-                  Add to Cart
+                  <FiShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Add to Cart</span>
+                  <span className="sm:hidden">Add to Cart</span>
                 </motion.button>
               </div>
 
@@ -657,7 +692,7 @@ const AIAgentDetail: React.FC = () => {
             </motion.div>
 
             {/* Agent Info */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
@@ -682,7 +717,7 @@ const AIAgentDetail: React.FC = () => {
                   <span className="text-white capitalize">{agent.category}</span>
                 </div>
               </div>
-            </motion.div>
+            </motion.div> */}
           </div>
         </div>
       </div>

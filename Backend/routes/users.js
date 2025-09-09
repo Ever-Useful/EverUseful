@@ -61,7 +61,10 @@ router.get('/profile', authorize, async (req, res) => {
         customUserId: user.customUserId,
         auth: auth,
         profile: profile,
-        stats: user.stats || {},
+        stats: {
+          ...user.stats,
+          projectsCount: user.projects?.count || 0
+        },
         studentData: user.studentData || null,
         education: user.education || [],
         workExperience: user.workExperience || [],

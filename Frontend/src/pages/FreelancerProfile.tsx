@@ -25,20 +25,43 @@ const VisitingProfile = () => {
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
 
-  const fetchProjectData = async (pid: string) => {
+  const fetchItemData = async (itemId: string, itemType: string = 'project') => {
     try {
-      console.log(`FreelancerProfile - Fetching project ${pid}...`);
-      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
+      console.log(`FreelancerProfile - Fetching ${itemType} ${itemId}...`);
+      
+      let response;
+      if (itemType === 'agent') {
+        response = await fetch(API_ENDPOINTS.AGENT(itemId));
+      } else {
+        response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(itemId));
+      }
+      
       if (!response.ok) {
-        console.log(`FreelancerProfile - Project ${pid} not found (${response.status})`);
+        console.log(`FreelancerProfile - ${itemType} ${itemId} not found (${response.status})`);
         return null;
       }
+      
       const data = await response.json();
-      return data && data.project ? data.project : null;
+      const item = itemType === 'agent' ? data.agent : data.project;
+      
+      if (item) {
+        // Normalize the item data to match the expected format
+        return {
+          ...item,
+          title: item.title || item.name,
+          type: itemType
+        };
+      }
+      
+      return null;
     } catch (error) {
-      console.error(`FreelancerProfile - Error fetching project ${pid}:`, error);
+      console.error(`FreelancerProfile - Error fetching ${itemType} ${itemId}:`, error);
       return null;
     }
+  };
+
+  const fetchProjectData = async (pid: string) => {
+    return fetchItemData(pid, 'project');
   };
 
   useEffect(() => {
@@ -61,13 +84,18 @@ const VisitingProfile = () => {
                 // Fallback to default background
                 setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
               }
-              // Fetch full project details for each project ID
+              // Fetch full project and agent details for each ID
               const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
               console.log('FreelancerProfile - Project IDs found:', projectIds);
               if (projectIds.length > 0) {
-                const projectPromises = projectIds.map((pid) => fetchProjectData(pid));
+                const projectPromises = projectIds.map((item) => {
+                  // Handle both old format (string IDs) and new format (objects with id and type)
+                  const itemId = typeof item === 'string' ? item : item.id;
+                  const itemType = typeof item === 'object' ? item.type : 'project';
+                  return fetchItemData(itemId, itemType);
+                });
                 const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-                console.log(`FreelancerProfile - Successfully loaded ${fullProjects.length} out of ${projectIds.length} projects`);
+                console.log(`FreelancerProfile - Successfully loaded ${fullProjects.length} out of ${projectIds.length} projects and agents`);
                 setPortfolioProjects(fullProjects);
               } else {
                 console.log('FreelancerProfile - No project IDs found');
