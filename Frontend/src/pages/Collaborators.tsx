@@ -110,7 +110,7 @@ const Collaborators = () => {
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center bg-black py-8">
+            <div className="flex items-center justify-center py-8">
               <LoadingAnimation size="custom" />
             </div>
           ) : (

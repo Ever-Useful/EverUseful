@@ -320,7 +320,7 @@ const Artificial = () => {
       <AnimatePresence>
         {isLoading && (
           <motion.div
-            className="fixed inset-0 bg-gray-950 z-50 flex flex-col items-center justify-center"
+            className="fixed inset-0 bg-transparent z-50 flex flex-col items-center justify-center"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8 } }}
           >
