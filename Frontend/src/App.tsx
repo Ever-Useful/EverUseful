@@ -57,7 +57,7 @@ const SendFeedback = React.lazy(() => import("@/pages/Policy/SendFeedback"));
 
 // Loading component for better UX
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-black">
+  <div className="min-h-screen flex items-center justify-center">
     <LoadingAnimation size="custom" />
   </div>
 );
