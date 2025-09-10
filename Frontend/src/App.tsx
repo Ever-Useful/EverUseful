@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+import LoadingAnimation from '@/components/LoadingAnimation';
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -8,12 +9,15 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { useEffect } from "react";
 import CookieConsent from "@/components/CookieConsent";
+import Leaderboard from './pages/Leaderboard';
 
 
 // Lazy load all pages for code splitting
 const Index = React.lazy(() => import("@/pages/Index"));
 const SignIn = React.lazy(() => import("@/pages/SignIn"));
 const SignUp = React.lazy(() => import("@/pages/SignUp"));
+const EmailVerification = React.lazy(() => import("@/pages/EmailVerification"));
+const AuthAction = React.lazy(() => import("@/pages/AuthAction"));
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const Profile = React.lazy(() => import("@/pages/Profile"));
 const Marketplace = React.lazy(() => import("@/pages/Marketplace"));
@@ -37,9 +41,11 @@ const ScheduleMeeting = React.lazy(() => import("@/pages/ScheduleMeeting"));
 const AboutUs = React.lazy(() => import("@/pages/AboutUs"));
 const Sustainable = React.lazy(() => import("@/pages/Sustainable"));
 const AiAgents = React.lazy(() => import("@/pages/AiAgents"));
+const AIAgentDetail = React.lazy(() => import("@/pages/AIAgentDetail"));
 const Admin = React.lazy(() => import("@/pages/Admin"));
 const NotFound = React.lazy(() => import("@/pages/NotFound"));
 const CampusAmbassadorPage = React.lazy(() => import("@/pages/CampusAmbassadorPage"));
+
 
 // Policy pages
 const PrivacyPolicy = React.lazy(() => import("@/pages/Policy/PrivacyPolicy"));
@@ -51,10 +57,8 @@ const SendFeedback = React.lazy(() => import("@/pages/Policy/SendFeedback"));
 
 // Loading component for better UX
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-slate-100">
-    <div className="text-xl font-semibold text-slate-700 animate-pulse">
-      Loading...
-    </div>
+  <div className="min-h-screen flex items-center justify-center">
+    <LoadingAnimation size="custom" />
   </div>
 );
 
@@ -113,6 +117,16 @@ const App = () => (
             <Route path="/signup" element={
               <Suspense fallback={<PageLoader />}>
                 <SignUp />
+              </Suspense>
+            } />
+            <Route path="/email-verification" element={
+              <Suspense fallback={<PageLoader />}>
+                <EmailVerification />
+              </Suspense>
+            } />
+            <Route path="/auth/action" element={
+              <Suspense fallback={<PageLoader />}>
+                <AuthAction />
               </Suspense>
             } />
             <Route path="/dashboard" element={
@@ -245,6 +259,11 @@ const App = () => (
                 <AiAgents />
               </Suspense>
             } />
+            <Route path="/ai-agent/:id" element={
+              <Suspense fallback={<PageLoader />}>
+                <AIAgentDetail />
+              </Suspense>
+            } />
             <Route path="/admin" element={
               <Suspense fallback={<PageLoader />}>
                 <Admin />
@@ -288,6 +307,11 @@ const App = () => (
                 <CampusAmbassadorPage />
               </Suspense>
             } />
+            <Route path="/leaderboard" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Leaderboard />
+                </Suspense>
+              } />
             
             <Route path="*" element={
               <Suspense fallback={<PageLoader />}>
