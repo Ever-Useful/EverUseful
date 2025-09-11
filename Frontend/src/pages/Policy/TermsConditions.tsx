@@ -38,14 +38,14 @@ const TermsConditions = () => {
           
           {/* Acceptance of Terms */}
           <section className="mb-8 sm:mb-12">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">1. Acceptance of Terms</h2>
-            <div className="bg-green-50 border-l-4 border-green-400 p-4 sm:p-6 rounded-r-lg mb-6 sm:mb-8">
-              <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed">
+            <h2 className="heading-header text-gray-900 mb-6">1. Acceptance of Terms</h2>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+              <p className="text-gray-700 leading-relaxed mb-4">
                 By accessing and using this website, you accept and agree to be bound by the terms and provision 
                 of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
             </div>
-            <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed mb-4 sm:mb-6">
+            <p className="text-gray-700 leading-relaxed">
               These Terms and Conditions ("Terms") govern your use of the AMOGH platform and services. 
               By using our services, you acknowledge that you have read, understood, and agree to be bound 
               by these Terms. If you do not agree with any part of these Terms, you must not use our services.

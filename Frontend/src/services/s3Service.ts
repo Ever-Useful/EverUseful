@@ -309,6 +309,106 @@ class S3Service {
 
     return { isValid: true };
   }
+
+  // Upload agent files (model, config, documentation)
+  async uploadAgentFiles(files: File[], userId: string): Promise<{ files: any[] }> {
+    try {
+      console.log('Uploading agent files:', files.length);
+      const token = await this.getAuthToken();
+      
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+      formData.append('userId', userId);
+      formData.append('type', 'agent-files');
+
+      const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/s3/upload-agent-files`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload agent files');
+      }
+
+      const result = await response.json();
+      return { files: result.files || [] };
+    } catch (error) {
+      console.error('Error uploading agent files:', error);
+      throw error;
+    }
+  }
+
+  // Upload agent images
+  async uploadAgentImages(files: File[], userId: string): Promise<{ images: string[] }> {
+    try {
+      console.log('Uploading agent images:', files.length);
+      const token = await this.getAuthToken();
+      
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('images', file);
+      });
+      formData.append('userId', userId);
+      formData.append('type', 'agent-images');
+
+      const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/s3/upload-agent-images`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload agent images');
+      }
+
+      const result = await response.json();
+      return { images: result.images || [] };
+    } catch (error) {
+      console.error('Error uploading agent images:', error);
+      throw error;
+    }
+  }
+
+  // Upload agent video
+  async uploadAgentVideo(file: File, userId: string): Promise<{ video: string }> {
+    try {
+      console.log('Uploading agent video:', file.name);
+      const token = await this.getAuthToken();
+      
+      const formData = new FormData();
+      formData.append('video', file);
+      formData.append('userId', userId);
+      formData.append('type', 'agent-video');
+
+      const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/s3/upload-agent-video`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload agent video');
+      }
+
+      const result = await response.json();
+      return { video: result.video || '' };
+    } catch (error) {
+      console.error('Error uploading agent video:', error);
+      throw error;
+    }
+  }
 }
 
 export default new S3Service(); 

@@ -12,6 +12,7 @@ import NoUserProfile from "@/assets/images/no user profile.png";
 import { getUserAvatarUrl, getBackgroundImageUrl } from "@/utils/s3ImageUtils";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
+import LoadingAnimation from '@/components/LoadingAnimation';
 
 const VisitingProfile = () => {
   const { id } = useParams();
@@ -24,20 +25,72 @@ const VisitingProfile = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
+  const [projectsCount, setProjectsCount] = useState(0);
 
-  const fetchProjectData = async (pid: string) => {
+  const fetchItemData = async (itemId: string, itemType: string = 'project') => {
     try {
-      console.log(`FreelancerProfile - Fetching project ${pid}...`);
-      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
+      console.log(`FreelancerProfile - Fetching ${itemType} ${itemId}...`);
+      
+      let response;
+      if (itemType === 'agent') {
+        response = await fetch(API_ENDPOINTS.AGENT(itemId));
+      } else {
+        response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(itemId));
+      }
+      
       if (!response.ok) {
-        console.log(`FreelancerProfile - Project ${pid} not found (${response.status})`);
+        // Silently handle 404s - project/agent may have been deleted
+        if (response.status === 404) {
+          console.log(`FreelancerProfile - ${itemType} ${itemId} not found (deleted or unpublished)`);
+        } else {
+          console.log(`FreelancerProfile - ${itemType} ${itemId} error (${response.status})`);
+        }
         return null;
       }
+      
       const data = await response.json();
-      return data && data.project ? data.project : null;
-    } catch (error) {
-      console.error(`FreelancerProfile - Error fetching project ${pid}:`, error);
+      const item = itemType === 'agent' ? data.agent : data.project;
+      
+      if (item) {
+        // Normalize the item data to match the expected format
+        return {
+          ...item,
+          title: item.title || item.name,
+          type: itemType
+        };
+      }
+      
       return null;
+    } catch (error) {
+      console.error(`FreelancerProfile - Error fetching ${itemType} ${itemId}:`, error);
+      return null;
+    }
+  };
+
+  const fetchProjectData = async (pid: string) => {
+    return fetchItemData(pid, 'project');
+  };
+
+  // Fetch user agents directly from the agents API
+  const fetchUserAgents = async (userId: string) => {
+    try {
+      console.log(`FreelancerProfile - Fetching agents for user ${userId}...`);
+      const response = await fetch(`${API_ENDPOINTS.AGENTS}?author=${userId}`);
+      if (!response.ok) {
+        console.log(`FreelancerProfile - No agents found for user ${userId}`);
+        return [];
+      }
+      const data = await response.json();
+      const agents = data.agents || [];
+      console.log(`FreelancerProfile - Found ${agents.length} agents for user ${userId}`);
+      return agents.map(agent => ({
+        ...agent,
+        title: agent.name,
+        type: 'agent'
+      }));
+    } catch (error) {
+      console.error(`FreelancerProfile - Error fetching agents for user ${userId}:`, error);
+      return [];
     }
   };
 
@@ -61,17 +114,41 @@ const VisitingProfile = () => {
                 // Fallback to default background
                 setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
               }
-              // Fetch full project details for each project ID
-              const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-              console.log('FreelancerProfile - Project IDs found:', projectIds);
-              if (projectIds.length > 0) {
-                const projectPromises = projectIds.map((pid) => fetchProjectData(pid));
-                const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-                console.log(`FreelancerProfile - Successfully loaded ${fullProjects.length} out of ${projectIds.length} projects`);
-                setPortfolioProjects(fullProjects);
-              } else {
-                console.log('FreelancerProfile - No project IDs found');
+              // Use projects data from the user response (no authentication required)
+              try {
+                const projects = data.data.projects?.created || [];
+                console.log('FreelancerProfile - Projects found:', projects.length);
+                
+                // Fetch both projects and agents
+                const allItems = [];
+                
+                // Fetch projects from the user's projects array
+                if (projects.length > 0) {
+                  console.log('FreelancerProfile - Attempting to fetch projects:', projects);
+                  const projectPromises = projects.map((item) => {
+                    // Handle both old format (string IDs) and new format (objects with id and type)
+                    const itemId = typeof item === 'string' ? item : item.id;
+                    const itemType = typeof item === 'object' ? item.type : 'project';
+                    return fetchItemData(itemId, itemType);
+                  });
+                  const fetchedProjects = (await Promise.all(projectPromises)).filter(Boolean);
+                  allItems.push(...fetchedProjects);
+                  console.log(`FreelancerProfile - Successfully loaded ${fetchedProjects.length} projects`);
+                }
+                
+                // Fetch user agents directly
+                const userAgents = await fetchUserAgents(id);
+                allItems.push(...userAgents);
+                console.log(`FreelancerProfile - Successfully loaded ${userAgents.length} agents`);
+                
+                console.log(`FreelancerProfile - Total items loaded: ${allItems.length}`);
+                setPortfolioProjects(allItems);
+                setProjectsCount(allItems.length);
+                
+              } catch (error) {
+                console.error('FreelancerProfile - Error processing projects and agents:', error);
                 setPortfolioProjects([]);
+                setProjectsCount(0);
               }
             } else {
               setFreelancer(null);
@@ -90,6 +167,11 @@ const VisitingProfile = () => {
     };
     fetchFreelancer();
   }, [id]);
+
+  // Loading state
+  if (loading) {
+    return <LoadingAnimation fullScreen={true} />;
+  }
 
   if (!freelancer) {
     return (
@@ -217,7 +299,7 @@ const VisitingProfile = () => {
             <CardContent className="p-3 sm:p-4 text-center">
               <Award className="w-6 h-6 mx-auto mb-2" />
               <div className="text-2xl font-bold">
-                {safePortfolioProjects.length > 0 ? safePortfolioProjects.length : 0}
+                {projectsCount}
               </div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
             </CardContent>
@@ -378,7 +460,7 @@ const VisitingProfile = () => {
                         <div className="w-full md:w-48 flex-shrink-0 h-28 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
                             src={project.image || NoImageAvailable}
-                            alt={project.title}
+                            alt={project.title || project.name}
                             className="object-cover w-full h-full rounded-l-lg"
                             onError={e => { e.currentTarget.src = NoImageAvailable; }}
                           />
@@ -386,10 +468,10 @@ const VisitingProfile = () => {
                         <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 line-clamp-1">{project.title}</h3>
+                              <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 line-clamp-1">{project.title || project.name}</h3>
                               <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{project.description}</p>
                               <div className="flex flex-wrap gap-2 mb-2">
-                                {(project.technologies || []).map((tech, techIndex) => (
+                                {(project.technologies || project.skills || project.tags || []).map((tech, techIndex) => (
                                   <Badge key={techIndex} variant="secondary" className="text-xs bg-gray-100">{tech}</Badge>
                                 ))}
                               </div>
