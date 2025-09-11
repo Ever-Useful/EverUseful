@@ -223,6 +223,7 @@ export const Footer = () => {
               <h4 className="text-white font-semibold text-xs lg:text-sm">Support</h4>
               <div className="space-y-1">
                 <a href="mailto:amogheveruseful@gmail.com" className="block text-gray-400 hover:text-white text-xs transition-colors">amogheveruseful@gmail.com</a>
+
                 {/* <a href="#" className="block text-gray-400 hover:text-white text-xs transition-colors">Live Chat</a>
                 <a href="#" className="block text-gray-400 hover:text-white text-xs transition-colors">Help Center</a> */}
               </div>
@@ -232,7 +233,11 @@ export const Footer = () => {
           {/* Bottom Bar */}
           <div className="border-t border-gray-700 pt-3">
             <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 text-xs text-gray-400">
+
+{/*               <div className="flex items-center space-x-4">
+=======
               {/* <div className="flex items-center space-x-4">
+
                 <span className="text-gray-300">Trusted by 850+ institutions and 1.2M+ learners worldwide</span>
               </div> */}
               
