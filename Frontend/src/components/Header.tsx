@@ -31,7 +31,7 @@ import {
     Globe,
     Palette,
     Database,
-    Lock, 
+    Lock,
     ShoppingCart,
     Menu
 } from 'lucide-react';
@@ -50,6 +50,7 @@ import { EditProfile } from '../components/EditProfile';
 import { MyProjects } from '@/components/MyProjects';
 import { Input } from '@/components/ui/input';
 import { clearAllCookies } from '@/utils/cookieUtils';
+import SearchFilterBar, { FilterTag } from '@/components/ui/SearchFilterBar';
 
 const mockNotifications = [
     {
@@ -95,7 +96,7 @@ const mockNotifications = [
     {
         id: 6,
         title: "Payment received",
-                        message: "₹250 payment received for your freelance work",
+        message: "₹250 payment received for your freelance work",
         time: "2 days ago",
         unread: false,
         type: "payment",
@@ -222,11 +223,11 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     // Check if current page needs user data (only pages that require authentication)
     const needsUserData = useMemo(() => {
         const authRequiredRoutes = [
-            '/dashboard', '/profile', '/marketplace', '/cart', '/chat', 
+            '/dashboard', '/profile', '/marketplace', '/cart', '/chat',
             '/connections', '/collaborators', '/freelancing', '/findexpert',
             '/freelancerprofile', '/studentprofile', '/businessprofile',
             '/new-project', '/schedule-meeting'
@@ -243,7 +244,7 @@ const Header = () => {
     const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
     const [notifications, setNotifications] = useState(mockNotifications);
     const unreadNotificationCount = notifications.filter(n => n.unread).length;
-    const { profileData, isLoggedIn, refreshProfile } = useUserProfile();
+    const { profileData, isLoggedIn, refreshProfile, isLoading } = useUserProfile();
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
@@ -253,7 +254,38 @@ const Header = () => {
     const [showCalendarSidebar, setShowCalendarSidebar] = useState(false);
     // const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
-   
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activeFilter, setActiveFilter] = useState<string>('all');
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const unreadNotifications = notifications.filter(n => n.unread);
+    const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
+
+    // Filter tags for search
+    const filterTags: FilterTag[] = [
+        { id: 'all', label: 'All', active: activeFilter === 'all' },
+        { id: 'professor', label: 'Professor', active: activeFilter === 'professor' },
+        { id: 'student', label: 'Student', active: activeFilter === 'student' },
+        { id: 'enterprise', label: 'Enterprise', active: activeFilter === 'enterprise' },
+        { id: 'freelancer', label: 'Freelancer', active: activeFilter === 'freelancer' },
+        { id: 'experts', label: 'Experts', active: activeFilter === 'experts' },
+        { id: 'jobs', label: 'Jobs', active: activeFilter === 'jobs' }
+    ];
+
+    const handleFilterClick = (tagId: string) => {
+        setActiveFilter(tagId);
+    };
+
+    const handleSearchFocus = () => {
+        setIsSearchFocused(true);
+    };
+
+    const handleSearchBlur = () => {
+        // Delay hiding the filter bar to allow for clicks on filter tags
+        setTimeout(() => {
+            setIsSearchFocused(false);
+        }, 200);
+    };
+
     // Open MyProjects sidebar when a global event is dispatched (e.g., from Dashboard or Navigation)
     useEffect(() => {
         const handler = () => setShowMyProjects(true);
@@ -343,9 +375,9 @@ const Header = () => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 localStorage.setItem("isLoggedIn", "true");
-                
+
                 // Only fetch user profile if the current page needs it AND we don't have cached data
-                if (needsUserData) {
+                if (needsUserData && !profileData.firstName) {
                     await refreshProfile();
                 }
             } else {
@@ -353,7 +385,15 @@ const Header = () => {
             }
         });
         return () => unsubscribe();
-    }, [needsUserData, refreshProfile]);
+    }, [needsUserData, profileData.firstName]); // Remove refreshProfile from dependencies
+
+    // Ensure header greeting and sidebar get data quickly after login
+    useEffect(() => {
+        if (isLoggedIn && !profileData.firstName && !isLoading && needsUserData) {
+            // Fetch profile if names are missing and we need user data
+            refreshProfile();
+        }
+    }, [isLoggedIn, profileData.firstName, isLoading, needsUserData]); // Remove refreshProfile from dependencies
 
     // Function to refresh profile data - only called when explicitly needed
     const refreshProfileData = async () => {
@@ -470,8 +510,24 @@ const Header = () => {
                                     <input
                                         type="text"
                                         placeholder="Search projects, services..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onFocus={handleSearchFocus}
+                                        onBlur={handleSearchBlur}
                                         className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                     />
+                                    {/* Filter Bar - Only show when search is focused */}
+                                    {isSearchFocused && (
+                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
+                                            <div className="p-3">
+                                                <SearchFilterBar
+                                                    tags={filterTags}
+                                                    onTagClick={handleFilterClick}
+                                                    className="justify-start"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <Navigation isLoggedIn={isLoggedIn} />
@@ -510,130 +566,76 @@ const Header = () => {
                                                 <ShoppingCart className="h-5 w-5 text-gray-600" />
                                             </Link>
                                         </Button>
-                                        {/* Messages Button */}
-                                        <DropdownMenu>
+                                        {/* Notifications Dropdown */}
+                                        <DropdownMenu open={isNotificationsMenuOpen} onOpenChange={setIsNotificationsMenuOpen}>
                                             <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
-                                                    <MessageSquare className="h-5 w-5 text-gray-600" />
-                                                    {unreadMessageCount > 0 && (
-                                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-500 hover:bg-green-500">
-                                                            {unreadMessageCount}
-                                                        </Badge>
-                                                    )}
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
-                                                <div className="p-3 border-b border-gray-200">
-                                                    <h3 className="font-semibold text-slate-800">Recent Messages</h3>
-                                                </div>
-                                                <div className="max-h-64 overflow-y-auto">
-                                                    {messages.slice(0, 3).map((message) => (
-                                                        <DropdownMenuItem
-                                                            key={message.id}
-                                                            className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
-                                                            onClick={() => handleMessageClick(message.id)}
-                                                        >
-                                                            <div className="flex items-start justify-between w-full">
-                                                                <div className="flex items-start gap-3 flex-1">
-                                                                    <span className="text-2xl">{message.avatar}</span>
-                                                                    <div className="flex-1">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <p className="font-medium text-sm text-slate-800">
-                                                                                {message.sender}
-                                                                            </p>
-                                                                            {message.unread && (
-                                                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                                            )}
-                                                                        </div>
-                                                                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                                                            {message.message}
-                                                                        </p>
-                                                                        <p className="text-xs text-slate-400 mt-1">
-                                                                            {message.time}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </DropdownMenuItem>
-                                                    ))}
-                                                    {messages.length === 0 && (
-                                                        <div className="p-4 text-center text-slate-500">
-                                                            No messages yet
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem onClick={() => setShowMessagesSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-green-600 font-medium hover:bg-green-50">
-                                                    See All Messages
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                        {/* Notifications Button */}
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:text-white hover:scale-105 transition-all duration-300">
+                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:scale-105 transition-all duration-300" aria-label="Notifications">
                                                     <Bell className="h-5 w-5 text-gray-600" />
                                                     {unreadNotificationCount > 0 && (
-                                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500">
+                                                        <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-none">
                                                             {unreadNotificationCount}
-                                                        </Badge>
+                                                        </span>
                                                     )}
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-80 border-0 shadow-xl bg-white/95 backdrop-blur-md border border-gray-200">
-                                                <div className="p-3 border-b border-gray-200">
-                                                    <h3 className="font-semibold text-slate-800">Recent Notifications</h3>
+                                            <DropdownMenuContent align="end" className="w-80 p-0">
+                                                <div className="p-3 border-b">
+                                                    <div className="text-sm font-semibold text-gray-800">Notifications</div>
+                                                    <div className="text-xs text-gray-500">{unreadNotificationCount} unread</div>
                                                 </div>
-                                                <div className="max-h-64 overflow-y-auto">
-                                                    {notifications.slice(0, 3).map((notification) => (
-                                                        <DropdownMenuItem
-                                                            key={notification.id}
-                                                            className="flex flex-col items-start p-3 cursor-pointer hover:bg-gray-50"
-                                                            onClick={() => handleNotificationClick(notification.id)}
-                                                        >
-                                                            <div className="flex items-start justify-between w-full">
-                                                                <div className="flex items-start gap-3 flex-1">
-                                                                    <span className="text-lg">{getNotificationIcon(notification.type)}</span>
-                                                                    <div className="flex-1">
+                                                {unreadNotifications.length === 0 ? (
+                                                    <div className="p-4 text-sm text-gray-500">You're all caught up.</div>
+                                                ) : (
+                                                    <div className="max-h-80 overflow-auto">
+                                                        {unreadNotifications.map((notification) => (
+                                                            <div
+                                                                key={notification.id}
+                                                                className="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-b last:border-b-0"
+                                                                onClick={() => handleNotificationClick(notification.id)}
+                                                            >
+                                                                <div className="flex items-start gap-3">
+                                                                    <span className="text-xl">{getNotificationIcon(notification.type)}</span>
+                                                                    <div className="min-w-0 flex-1">
                                                                         <div className="flex items-center gap-2">
-                                                                            <p className="font-medium text-sm text-slate-800">
-                                                                                {notification.title}
-                                                                            </p>
-                                                                            {notification.unread && (
-                                                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                                            )}
+                                                                            <h4 className="font-medium text-gray-900 text-sm truncate">{notification.title}</h4>
+                                                                            <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
                                                                         </div>
-                                                                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                                                                            {notification.message}
-                                                                        </p>
-                                                                        <p className="text-xs text-slate-400 mt-1">
-                                                                            {notification.time}
-                                                                        </p>
+                                                                        <p className="text-xs text-gray-600 line-clamp-2">{notification.message}</p>
+                                                                        <p className="text-[10px] text-gray-400 mt-1">{notification.time}</p>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </DropdownMenuItem>
-                                                    ))}
-                                                    {notifications.length === 0 && (
-                                                        <div className="p-4 text-center text-slate-500">
-                                                            No notifications yet
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                        ))}
+                                                    </div>
+                                                )}
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem onClick={() => setShowNotificationsSidebar(true)} className="flex items-center justify-center p-3 cursor-pointer text-blue-600 font-medium hover:bg-blue-50">
-                                                    See All Notifications
-                                                </DropdownMenuItem>
+                                                <div className="p-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-center text-sm text-black"
+                                                        onClick={() => {
+                                                            setShowNotificationsSidebar(true);
+                                                            setIsNotificationsMenuOpen(false);
+                                                        }}
+                                                    >
+                                                        View all notifications
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-center text-sm text-black"
+                                                        onClick={() => setNotifications(prev => prev.map(n => ({ ...n, unread: false })))}
+                                                    >
+                                                        Mark all as read
+                                                    </Button>
+                                                </div>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                         {/* Profile Button with User Name */}
                                         <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
                                             <User className="h-5 w-5 text-gray-600" />
-                                            {profileData.firstName && (
-                                                <span className="hidden sm:inline text-sm font-medium">
-                                                    Hi, {profileData.firstName}
-                                                </span>
-                                            )}
+                                            <span className="hidden sm:inline text-sm font-medium">
+                                                Hi, {profileData.firstName || 'there'}
+                                            </span>
                                         </Button>
                                     </div>
                                 </>
@@ -712,12 +714,33 @@ const Header = () => {
                                             <input
                                                 type="text"
                                                 placeholder="Search projects, services..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                onFocus={handleSearchFocus}
+                                                onBlur={handleSearchBlur}
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
+                                            {/* Filter Bar - Only show when search is focused */}
+                                            {isSearchFocused && (
+                                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
+                                                    <div className="p-3">
+                                                        <SearchFilterBar
+                                                            tags={filterTags}
+                                                            onTagClick={handleFilterClick}
+                                                            className="justify-start"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    <Link to="/leaderboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                        <TrendingUp className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium mobile-text-base">Leaderboard</span>
+                                    </Link> {/* <-- ADD THIS LINK */}
+
                                     {/* Cart */}
                                     <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                         <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
@@ -765,15 +788,29 @@ const Header = () => {
                                             <input
                                                 type="text"
                                                 placeholder="Search projects, services..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                onFocus={handleSearchFocus}
+                                                onBlur={handleSearchBlur}
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
                                         </div>
+                                        {/* Filter Bar - Only show when search is focused */}
+                                        {isSearchFocused && (
+                                            <div className="mt-2 mb-1 animate-in slide-in-from-top-2 duration-200">
+                                                <SearchFilterBar
+                                                    tags={filterTags}
+                                                    onTagClick={handleFilterClick}
+                                                    className="justify-start"
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
                                     {/* Sign In Button */}
-                                    <Link 
-                                        to="/signin" 
+                                    <Link
+                                        to="/signin"
                                         className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors"
                                         onClick={() => setShowMobileMenu(false)}
                                     >
@@ -998,44 +1035,43 @@ const Header = () => {
                                         //     </button>
                                         // </div>
                                     )} */}
-                                    
-                                    {/* Profile Photo with proper error handling */}
-                                    {profileData.avatar ? (
-                                        <img 
-                                            src={profileData.avatar} 
-                                            alt={`${profileData.firstName} ${profileData.lastName}`}
-                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
-                                            onError={(e) => {
-                                                console.log('Avatar image failed to load, falling back to initials');
-                                                e.currentTarget.style.display = 'none';
-                                                const initialsAvatar = e.currentTarget.nextElementSibling;
-                                                if (initialsAvatar) {
-                                                    initialsAvatar.classList.remove('hidden');
-                                                }
-                                            }}
-                                        />
-                                    ) : null}
-                                    
-                                    {/* Fallback to Initials Avatar */}
-                                    <InitialsAvatar 
-                                        firstName={profileData.firstName} 
-                                        lastName={profileData.lastName} 
-                                        size={80} 
-                                        className={`sm:w-24 sm:h-24 ${profileData.avatar ? 'hidden' : ''}`} 
-                                    />
-                                    
+
+                                    {/* Profile Photo with proper error handling, fallback to initials immediately */}
+                                    <div className="relative">
+                                        {profileData.avatar && (
+                                            <img
+                                                src={profileData.avatar}
+                                                alt={`${profileData.firstName || 'User'} ${profileData.lastName || ''}`}
+                                                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display = 'none';
+                                                    const initialsAvatar = e.currentTarget.nextElementSibling as HTMLElement | null;
+                                                    if (initialsAvatar) {
+                                                        initialsAvatar.classList.remove('hidden');
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                        <div className={`${profileData.avatar ? 'hidden' : ''}`}>
+                                            <InitialsAvatar
+                                                firstName={profileData.firstName || 'U'}
+                                                lastName={profileData.lastName || ''}
+                                                size={80}
+                                                className={`sm:w-24 sm:h-24`}
+                                            />
+                                        </div>
+                                    </div>
+
                                     <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">
-                                        {profileData.firstName && profileData.lastName 
-                                            ? `${profileData.firstName} ${profileData.lastName}`
+                                        {(profileData.firstName || profileData.lastName)
+                                            ? `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim()
                                             : 'User Profile'
                                         }
                                     </h3>
-                                    
-                                    {profileData.firstName && profileData.lastName && (
-                                        <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
-                                            View Profile &gt;
-                                        </Link>
-                                    )}
+
+                                    <Link to="/profile" className="text-xs sm:text-sm text-blue-600 hover:underline mt-1">
+                                        View Profile &gt;
+                                    </Link>
                                 </div>
 
                                 {/* <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
@@ -1059,6 +1095,11 @@ const Header = () => {
                                             <LayoutGrid className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
                                             <span className="text-sm sm:text-base text-gray-700 font-medium">Dashboard</span>
                                         </Link>
+                                        {/* LEADERBOARD LINK FOR PROFILE SIDEBAR */}
+                                        <Link to="/leaderboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
+                                            <span className="text-sm sm:text-base text-gray-700 font-medium">Leaderboard</span>
+                                        </Link> 
                                         <Link to="/connections"
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
@@ -1205,7 +1246,7 @@ const Header = () => {
                     <div className="p-3 sm:p-4 border-t bg-slate-50">
                         <Button
                             variant="outline"
-                            className="w-full text-xs sm:text-sm"
+                            className="w-full justify-center text-sm text-black"
                             onClick={() => {
                                 setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
                             }}

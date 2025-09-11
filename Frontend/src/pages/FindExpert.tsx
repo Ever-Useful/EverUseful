@@ -222,15 +222,15 @@ const FindExpert = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
-                <div className="relative">
+                <div className="flex items-stretch gap-2 xs:gap-3">
                   <input
                     type="text"
                     placeholder="Search by PhD research field, university, or expertise..."
-                    className="w-full px-4 xs:px-5 py-3 xs:py-4 rounded-xl border-0 bg-white/10 backdrop-blur-sm text-white placeholder-indigo-200 focus:ring-2 focus:ring-amber-400 focus:outline-none shadow-lg meta-sm"
+                    className="flex-1 px-4 xs:px-5 py-3 xs:py-4 rounded-xl border-0 bg-white/10 backdrop-blur-sm text-white placeholder-indigo-200 focus:ring-2 focus:ring-amber-400 focus:outline-none shadow-lg meta-sm"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  <button className="absolute right-2 top-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-5 rounded-lg transition-colors body-base">
+                  <button className="px-5 xs:px-6 py-3 xs:py-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold transition-colors meta-sm whitespace-nowrap">
                     Search
                   </button>
                 </div>
@@ -504,6 +504,21 @@ const FindExpert = () => {
           </motion.button>
         </div>
       )}
+    </div>
+
+    {/* Become a Mentor CTA (inserted above Academic Ecosystem) */}
+    <div className="py-10 xs:py-14 bg-gradient-to-br from-[#0a192f] to-[#800020]">
+      <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 p-6 xs:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white/10 backdrop-blur-md">
+          <div>
+            <h3 className="heading-header text-white mb-2">Are you a PhD or Industry Expert?</h3>
+            <p className="body-base text-indigo-100">Share your expertise and mentor the next generation.</p>
+          </div>
+          <a href="/become-mentor" className="inline-flex items-center bg-amber-400 hover:bg-amber-500 text-white font-semibold px-4 xs:px-6 py-2.5 rounded-lg shadow transition">
+            Become a Mentor
+          </a>
+        </div>
+      </div>
     </div>
 
     {/* Enhanced Additional Sections with Real Images */}

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera, Upload, X, Image as ImageIcon, ShoppingCart } from "lucide-react";
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect, useRef } from "react";
@@ -14,13 +14,19 @@ import { EditProfile } from '@/components/EditProfile';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import toast from "react-hot-toast";
 import { MyProjects } from '@/components/MyProjects';
+import PublishAgentSidebar from '@/components/PublishAgentSidebar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import BackgroundUpload from '@/components/BackgroundUpload';
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
+import LoadingAnimation from '@/components/LoadingAnimation';
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { API_ENDPOINTS } from '../config/api';
+
+
+
 import { PhotoUpload } from '@/components/PhotoUpload';
+import ConnectionsPopup from '@/components/ConnectionsPopup';
 // import GlobeLoader from '@/components/GlobeLoader';
 
 
@@ -70,6 +76,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showMyProjects, setShowMyProjects] = useState(false);
+  const [showEditAgent, setShowEditAgent] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<any>(null);
   const [editSection, setEditSection] = useState('');
 
 
@@ -98,6 +106,7 @@ const Profile = () => {
   const [showAddProjectSidebar, setShowAddProjectSidebar] = useState(false);
   const [showEditProjectSidebar, setShowEditProjectSidebar] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
+  const [showConnectionsPopup, setShowConnectionsPopup] = useState(false);
 
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
@@ -220,23 +229,29 @@ const Profile = () => {
          if (projectsData && projectsData.success && projectsData.data) {
            // Handle the correct backend response structure
            const projects = projectsData.data.created || projectsData.data || [];
-           console.log('Profile - Projects found:', projects.length);
+           const projectCount = projectsData.data.count || projects.length;
+           console.log('Profile - Projects found:', projects.length, 'Count:', projectCount);
            setProjects(projects);
+           setStats(prev => ({ ...prev, projects: projectCount }));
          } else if (projectsData && Array.isArray(projectsData)) {
            // Handle direct array response (backward compatibility)
            console.log('Profile - Projects found in direct array:', projectsData.length);
            setProjects(projectsData);
+           setStats(prev => ({ ...prev, projects: projectsData.length }));
          } else if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
            // Handle nested created array
            console.log('Profile - Projects found in created array:', projectsData.created.length);
            setProjects(projectsData.created);
+           setStats(prev => ({ ...prev, projects: projectsData.created.length }));
          } else {
            console.log('Profile - No projects found in getUserProjects');
            setProjects([]);
+           setStats(prev => ({ ...prev, projects: 0 }));
          }
        } catch (error) {
          console.error('Profile - Error fetching projects from getUserProjects:', error);
          setProjects([]);
+         setStats(prev => ({ ...prev, projects: 0 }));
        }
 
       setEducation(educationArr || []);
@@ -274,6 +289,21 @@ const Profile = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        // Check if email is verified
+        if (!user.emailVerified) {
+          // Redirect to email verification page
+          navigate('/email-verification');
+          return;
+        }
+        
+        // Check if user is signed up but not verified
+        const isSignedUp = localStorage.getItem('isSignedUp');
+        if (isSignedUp === 'true') {
+          // Redirect to email verification page
+          navigate('/email-verification');
+          return;
+        }
+        
         fetchUserData();
       } else {
         setLoading(false);
@@ -303,6 +333,8 @@ const Profile = () => {
   const handleAddProject = () => {
     setShowMyProjects(true);
   };
+
+  // Agents are represented within projects list; no separate fetch needed
 
   const handleDeleteProject = async (projectId: string) => {
     try {
@@ -352,6 +384,91 @@ const Profile = () => {
   const handleMyProjectsClose = () => {
     setShowMyProjects(false);
     fetchUserData(); // Refresh data after adding a project
+  };
+
+  const isAgentItem = (item: any) => item?.type === 'agent' || (typeof item?.projectLink === 'string' && item.projectLink.startsWith('/ai-agent/'));
+
+  const handleEditItem = async (item: any) => {
+    if (isAgentItem(item)) {
+      try {
+        const res = await fetch(API_ENDPOINTS.AGENT(item.id));
+        if (!res.ok) throw new Error('Failed to load agent');
+        const data = await res.json();
+        setEditingAgent(data.agent);
+        setShowEditAgent(true);
+      } catch (e) {
+        console.error('Error loading agent for edit:', e);
+        toast.error('Failed to open agent editor');
+      }
+    } else {
+      setEditingProject(item);
+      setShowEditProjectSidebar(true);
+    }
+  };
+
+  const handleDeleteItem = async (item: any) => {
+    if (isAgentItem(item)) {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          toast.error('You must be logged in to delete an agent.');
+          return;
+        }
+        const token = await user.getIdToken();
+        const res = await fetch(API_ENDPOINTS.AGENT(item.id), {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to delete agent');
+        toast.success('Agent deleted');
+        // Refresh the projects list
+        fetchUserData();
+      } catch (e) {
+        console.error('Error deleting agent:', e);
+        toast.error((e as any).message || 'Failed to delete agent');
+      }
+    } else {
+      await handleDeleteProject(item.id);
+    }
+  };
+
+  const handleAddToCart = async (item: any) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error('You must be logged in to add items to cart.');
+        return;
+      }
+
+      const userData = await userService.getUserProfile();
+      if (!userData) {
+        toast.error('User data not found');
+        return;
+      }
+
+      if (isAgentItem(item)) {
+        // Add agent to cart
+        await userService.addToCart({
+          id: item.id,
+          name: item.title,
+          price: item.price || 0,
+          quantity: 1
+        });
+        toast.success('Agent added to cart successfully');
+      } else {
+        // Add project to cart
+        await userService.addToCart({
+          id: item.id,
+          name: item.title,
+          price: item.price || 0,
+          quantity: 1
+        });
+        toast.success('Project added to cart successfully');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add item to cart');
+    }
   };
 
   // Camera functionality handlers
@@ -416,11 +533,7 @@ const Profile = () => {
 
   // Conditional rendering based on userType
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
-      </div>
-    );
+    return <LoadingAnimation fullScreen={true} />;
   }
 
   return (
@@ -560,11 +673,19 @@ const Profile = () => {
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-lg sm:rounded-xl">
-            <CardContent className="p-3 sm:p-4 text-center">
+          <Card 
+            className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-lg sm:rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 group"
+            onClick={() => setShowConnectionsPopup(true)}
+          >
+            <CardContent className="p-3 sm:p-4 text-center relative">
               <UserPlus className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2" />
               <div className="text-base sm:text-lg md:text-2xl font-bold">{stats.connections}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="bg-white/20 rounded-full p-1">
+                  <Users className="w-3 h-3 text-white" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -759,14 +880,15 @@ const Profile = () => {
                               </div>
                             </div>
                             <div className="flex flex-col gap-1 sm:gap-2 items-end ml-2">
-                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700 h-8 w-8 sm:h-10 sm:w-10" onClick={() => { setEditingProject(project); setShowEditProjectSidebar(true); }}>
+                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700 h-8 w-8 sm:h-10 sm:w-10" onClick={() => handleEditItem(project)} title="Edit">
                                 <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="text-red-500 bg-white hover:bg-red-500 hover:bg-opacity-80 hover:text-white transition-colors shadow-sm h-8 w-8 sm:h-10 sm:w-10"
-                                onClick={() => handleDeleteProject(project.id)}
+                                onClick={() => handleDeleteItem(project)}
+                                title="Delete"
                               >
                                 <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
@@ -785,6 +907,7 @@ const Profile = () => {
                 </div>
               </CardContent>
             </Card>
+            {/* Removed AI Agents section; agents now surface in Projects */}
           </div>
 
           {/* Sidebar - LinkedIn Mobile Style */}
@@ -835,9 +958,29 @@ const Profile = () => {
       {showMyProjects && (
         <MyProjects onClose={handleMyProjectsClose} onProjectCreated={fetchUserData} />
       )}
+      {/* Removed agent sidebars */}
       {showEditProjectSidebar && editingProject && (
         <MyProjects onClose={() => { setShowEditProjectSidebar(false); setEditingProject(null); }} editMode={true} projectToEdit={editingProject} onProjectCreated={fetchUserData} />
       )}
+      {showEditAgent && editingAgent && (
+        <PublishAgentSidebar 
+          onClose={() => { setShowEditAgent(false); setEditingAgent(null); }} 
+          editMode={true} 
+          agentToEdit={editingAgent} 
+          onAgentCreated={() => { 
+            setShowEditAgent(false); 
+            setEditingAgent(null); 
+            fetchUserData(); 
+          }} 
+        />
+      )}
+      
+      {/* Connections Popup */}
+      <ConnectionsPopup 
+        isOpen={showConnectionsPopup}
+        onClose={() => setShowConnectionsPopup(false)}
+        connectionCount={stats.connections}
+      />
     </div>
   );
 };

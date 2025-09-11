@@ -1,6 +1,17 @@
 import { auth } from '../lib/firebase';
 import { API_ENDPOINTS, makeAuthenticatedRequest } from '../config/api';
 
+export interface UserSearchResult {
+  customUserId: string;
+  profile: {
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+    userType: string;
+    username: string;
+  };
+}
+
 interface UserProfile {
   avatar: string;
   backgroundImage?: string;
@@ -94,10 +105,20 @@ interface Project {
   description: string;
   category: string;
   tags: string[];
-  status: 'planning' | 'in-progress' | 'completed';
-  collaborators: string[];
-  createdBy: string;
-  createdAt: string;
+  // Allow broader statuses and optional for mapped agent entries
+  status?: string;
+  collaborators?: string[];
+  createdBy?: string;
+  createdAt?: string;
+  // Optional fields to support marketplace/agent projections
+  image?: string;
+  images?: string[];
+  projectLink?: string;
+  price?: number;
+  duration?: string | number | null;
+  posted?: string;
+  dateAdded?: string;
+  author?: string;
 }
 
 interface Meeting {
@@ -113,6 +134,13 @@ interface Meeting {
 
 interface CartItem {
   id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+interface AddToCartItem {
+  id?: string;
   name: string;
   price: number;
   quantity: number;
@@ -251,17 +279,29 @@ class UserService {
   }
 
   // Add item to cart
-  async addToCart(item: Omit<CartItem, 'id'>): Promise<CartItem[]> {
-    const response = await this.makeRequest(API_ENDPOINTS.USER_CART, {
+  async addToCart(item: AddToCartItem): Promise<CartItem[]> {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart`, {
       method: 'POST',
-      body: JSON.stringify(item),
+      body: JSON.stringify({ productId: item.id || item.name, quantity: item.quantity }),
     });
     return response;
   }
 
   // Remove item from cart
   async removeFromCart(itemId: string): Promise<CartItem[]> {
-    const response = await this.makeRequest(`${API_ENDPOINTS.USER_CART}/${itemId}`, {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart/${itemId}`, {
       method: 'DELETE',
     });
     return response;
@@ -269,7 +309,13 @@ class UserService {
 
   // Clear cart
   async clearCart(): Promise<void> {
-    await this.makeRequest(API_ENDPOINTS.USER_CART, {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart`, {
       method: 'DELETE',
     });
   }
@@ -293,14 +339,14 @@ class UserService {
     return await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS);
   }
 
-  // Send connection request
-  async sendConnectionRequest(targetUserId: string): Promise<Connection> {
-    const response = await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS, {
-      method: 'POST',
-      body: JSON.stringify({ targetUserId }),
-    });
-    return response;
-  }
+  // // Send connection request
+  // async sendConnectionRequest(targetUserId: string): Promise<Connection> {
+  //   const response = await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS, {
+  //     method: 'POST',
+  //     body: JSON.stringify({ targetUserId }),
+  //   });
+  //   return response;
+  // }
 
   // Update auth info
   async updateAuthInfo(authData: any): Promise<void> {
@@ -449,6 +495,67 @@ class UserService {
     });
     return response;
   }
+
+
+  //  New: Search users
+  async searchUsers(query: string): Promise<UserSearchResult[]> {
+    try {
+      const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/search?q=${encodeURIComponent(query)}`);
+      if (response.success) {
+        return response.data;
+      }
+      return [];
+    } catch (err) {
+      console.error("Search users error:", err);
+      return [];
+    }
+  }
+
+  // ----------------------------
+  // Send connection request
+  // ----------------------------
+  async sendConnectionRequest(targetUserId: string) {
+    return await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS, {
+      method: "POST",
+      body: JSON.stringify({ targetUserId }),
+    });
+  }
+
+  // ----------------------------
+  // Get logged-in user’s connections
+  // ----------------------------
+  async getConnections() {
+    return await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS);
+  }
+
+  // ----------------------------
+  // Accept connection request
+  // ----------------------------
+  async acceptConnectionRequest(senderId: string) {
+    return await this.makeRequest(`${API_ENDPOINTS.USER_CONNECTIONS}/${senderId}/accept`, {
+      method: "PUT",
+    });
+  }
+
+  // ----------------------------
+  // Reject connection request
+  // ----------------------------
+  async rejectConnectionRequest(senderId: string) {
+    return await this.makeRequest(`${API_ENDPOINTS.USER_CONNECTIONS}/${senderId}/reject`, {
+      method: "PUT",
+    });
+  }
+
+  // ----------------------------
+  // Withdraw (cancel) connection request
+  // ----------------------------
+  async withdrawConnectionRequest(receiverId: string) {
+    return await this.makeRequest(`${API_ENDPOINTS.USER_CONNECTIONS}/${receiverId}`, {
+      method: "DELETE",
+    });
+  }
+
+  
 }
 
 export default new UserService();

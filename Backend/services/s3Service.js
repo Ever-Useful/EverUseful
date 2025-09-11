@@ -293,6 +293,141 @@ class S3Service {
       throw error;
     }
   }
+
+  // Upload agent files (model, config, documentation)
+  async uploadAgentFiles(files, customUserId) {
+    try {
+      console.log(`Uploading agent files for user ${customUserId}, count: ${files.length}`);
+      
+      const uploadPromises = files.map(async (file) => {
+        const fileBuffer = Buffer.from(await file.arrayBuffer());
+        const timestamp = Date.now();
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+        
+        const key = `ai-agents/${customUserId}/files/${fileName}-${timestamp}.${fileExtension}`;
+        
+        const params = {
+          Bucket: this.bucketName,
+          Key: key,
+          Body: fileBuffer,
+          ContentType: file.type,
+          CacheControl: 'public, max-age=31536000'
+        };
+
+        const result = await s3.upload(params).promise();
+        console.log(`Uploaded agent file: ${result.Location}`);
+        
+        return {
+          name: file.name,
+          url: result.Location,
+          key: result.Key,
+          size: fileBuffer.length,
+          type: file.type
+        };
+      });
+
+      const results = await Promise.all(uploadPromises);
+      return results;
+    } catch (error) {
+      console.error('Error uploading agent files:', error);
+      throw error;
+    }
+  }
+
+  // Upload agent images
+  async uploadAgentImages(files, customUserId) {
+    try {
+      console.log(`Uploading agent images for user ${customUserId}, count: ${files.length}`);
+      
+      const uploadPromises = files.map(async (file) => {
+        const fileBuffer = Buffer.from(await file.arrayBuffer());
+        const timestamp = Date.now();
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        const fileName = file.name.replace(/\.[^/.]+$/, "");
+
+        try {
+          // Try optimized multi-size uploads
+          const imageSizes = await this.generateImageSizes(fileBuffer);
+          const sizeUploadPromises = Object.entries(imageSizes).map(async ([size, buffer]) => {
+            const key = `ai-agents/${customUserId}/images/${fileName}-${size}-${timestamp}.${fileExtension}`;
+            const params = {
+              Bucket: this.bucketName,
+              Key: key,
+              Body: buffer,
+              ContentType: file.type,
+              CacheControl: 'public, max-age=31536000'
+            };
+            const result = await s3.upload(params).promise();
+            return { size, url: result.Location, key: result.Key };
+          });
+          const sizeResults = await Promise.all(sizeUploadPromises);
+          const urls = {};
+          sizeResults.forEach(({ size, url, key }) => { urls[size] = { url, key }; });
+          return {
+            name: file.name,
+            urls,
+            main: urls.medium?.url || urls.large?.url,
+            thumbnail: urls.thumbnail?.url || urls.small?.url
+          };
+        } catch (err) {
+          console.warn('Image optimization failed, uploading original only:', err?.message);
+          const key = `ai-agents/${customUserId}/images/${fileName}-${timestamp}.${fileExtension}`;
+          const params = {
+            Bucket: this.bucketName,
+            Key: key,
+            Body: fileBuffer,
+            ContentType: file.type,
+            CacheControl: 'public, max-age=31536000'
+          };
+          const result = await s3.upload(params).promise();
+          return { name: file.name, urls: { original: { url: result.Location, key: result.Key } }, main: result.Location, thumbnail: result.Location };
+        }
+      });
+
+      const results = await Promise.all(uploadPromises);
+      return results.map(result => result.main);
+    } catch (error) {
+      console.error('Error uploading agent images:', error);
+      throw error;
+    }
+  }
+
+  // Upload agent video
+  async uploadAgentVideo(file, customUserId) {
+    try {
+      console.log(`Uploading agent video for user ${customUserId}: ${file.name}`);
+      
+      const fileBuffer = Buffer.from(await file.arrayBuffer());
+      const timestamp = Date.now();
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+      
+      const key = `ai-agents/${customUserId}/videos/${fileName}-${timestamp}.${fileExtension}`;
+      
+      const params = {
+        Bucket: this.bucketName,
+        Key: key,
+        Body: fileBuffer,
+        ContentType: file.type,
+        CacheControl: 'public, max-age=31536000'
+      };
+
+      const result = await s3.upload(params).promise();
+      console.log(`Uploaded agent video: ${result.Location}`);
+      
+      return {
+        name: file.name,
+        url: result.Location,
+        key: result.Key,
+        size: fileBuffer.length,
+        type: file.type
+      };
+    } catch (error) {
+      console.error('Error uploading agent video:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new S3Service(); 
