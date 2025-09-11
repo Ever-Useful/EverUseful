@@ -145,57 +145,78 @@ const Cart = () => {
         return;
       }
       
-      // Fetch project details from marketplace for each cart item
+      // Fetch project/agent details for each cart item
       const transformedCartItems: CartItemType[] = (await Promise.all(
         cartData.map(async (item: BackendCartItem) => {
           try {
-            // Fetch project details from marketplace
-            const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(item.productId));
-            console.log(`Fetching project ${item.productId}, status: ${response.status}`);
+            let projectData: any = null;
+            let isAgent = false;
             
-            if (!response.ok) {
-              if (response.status === 404) {
-                console.warn(`Project ${item.productId} not found in marketplace - will be removed from cart`);
-                // Automatically remove invalid item from cart
-                try {
-                  await userService.removeFromCart(item.productId);
-                  console.log(`Removed invalid project ${item.productId} from cart`);
-                } catch (removeError) {
-                  console.error(`Failed to remove invalid project ${item.productId} from cart:`, removeError);
-                }
-                return null; // Skip this item
+            // First try to fetch from marketplace
+            try {
+              const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(item.productId));
+              console.log(`Fetching project ${item.productId}, status: ${response.status}`);
+              
+              if (response.ok) {
+                const data = await response.json();
+                projectData = data.project;
+                console.log(`Project data for ${item.productId}:`, projectData);
               }
-              throw new Error(`Failed to fetch project ${item.productId} - Status: ${response.status}`);
-            }
-            const projectData = await response.json();
-            console.log(`Project data for ${item.productId}:`, projectData);
-            const project = projectData.project;
-            
-            if (!project) {
-              throw new Error(`No project data returned for ${item.productId}`);
+            } catch (projectError) {
+              console.log(`Project ${item.productId} not found in marketplace, trying agents...`);
             }
             
-            console.log(`Project details for ${item.productId}:`, {
-              title: project.title,
-              price: project.price,
-              description: project.description,
-              category: project.category
+            // If not found in marketplace, try agents
+            if (!projectData) {
+              try {
+                const response = await fetch(API_ENDPOINTS.AGENT(item.productId));
+                console.log(`Fetching agent ${item.productId}, status: ${response.status}`);
+                
+                if (response.ok) {
+                  const data = await response.json();
+                  projectData = data.agent;
+                  isAgent = true;
+                  console.log(`Agent data for ${item.productId}:`, projectData);
+                }
+              } catch (agentError) {
+                console.log(`Agent ${item.productId} not found either`);
+              }
+            }
+            
+            // If neither found, remove from cart
+            if (!projectData) {
+              console.warn(`Item ${item.productId} not found in marketplace or agents - will be removed from cart`);
+              try {
+                await userService.removeFromCart(item.productId);
+                console.log(`Removed invalid item ${item.productId} from cart`);
+              } catch (removeError) {
+                console.error(`Failed to remove invalid item ${item.productId} from cart:`, removeError);
+              }
+              return null; // Skip this item
+            }
+            
+            console.log(`Item details for ${item.productId}:`, {
+              title: projectData.title || projectData.name,
+              price: projectData.price,
+              description: projectData.description,
+              category: projectData.category,
+              isAgent
             });
             
             return {
               id: item.productId,
-              name: project.title || `Project ${item.productId}`,
-              description: project.description || 'No description available',
-              price: project.price || 0,
-              category: (project.category || 'software').toLowerCase() as 'software' | 'idea' | 'design' | 'algorithm',
-              studentName: typeof project.author === 'string' ? 'Unknown' : (project.author?.name || 'Unknown'),
+              name: projectData.title || projectData.name || `Item ${item.productId}`,
+              description: projectData.description || 'No description available',
+              price: projectData.price || 0,
+              category: (projectData.category || 'software').toLowerCase() as 'software' | 'idea' | 'design' | 'algorithm',
+              studentName: typeof projectData.author === 'string' ? 'Unknown' : (projectData.author?.name || 'Unknown'),
               university: 'University', // You can add university field to marketplace if needed
-              rating: project.rating || 0,
+              rating: projectData.rating || 0,
               downloadable: true,
               licenseType: 'commercial' as const,
-              tags: project.tags || ['Unknown'],
+              tags: projectData.tags || ['Unknown'],
               quantity: item.quantity,
-              image: project.image || NoImageAvailable
+              image: projectData.image || (Array.isArray(projectData.images) && projectData.images.length > 0 ? projectData.images[0] : NoImageAvailable)
             };
           } catch (error) {
             console.error(`Error fetching project ${item.productId}:`, error);

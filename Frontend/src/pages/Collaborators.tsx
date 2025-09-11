@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import LoadingAnimation from '@/components/LoadingAnimation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -109,7 +110,9 @@ const Collaborators = () => {
           </div>
 
           {loading ? (
-            <div className="text-center py-8">Loading...</div>
+            <div className="flex items-center justify-center py-8">
+              <LoadingAnimation size="custom" />
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredUsers.map(user => (
