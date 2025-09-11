@@ -1,11 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import bgImage from '@/assets/images/community.jpg';
 import { Link } from "react-router-dom";
 
 export const CommunityConnect: React.FC = () => {
-   const scrollToTop = () => {
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+
+  // Preload background image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setBackgroundLoaded(true);
+    img.src = bgImage;
+  }, []);
+
+  const scrollToTop = () => {
     window.scrollTo({
       top: 0,
       left: 0,
@@ -22,7 +32,10 @@ export const CommunityConnect: React.FC = () => {
       <div className="absolute inset-0 -z-20">
         <div
           className="w-full h-full bg-cover bg-center filter blur-xs"
-          style={{ backgroundImage: `url(${bgImage})` }}
+          style={{ 
+            backgroundImage: backgroundLoaded ? `url(${bgImage})` : 'none',
+            backgroundColor: backgroundLoaded ? 'transparent' : '#1f2937'
+          }}
         />
       </div>
       {/* Dark Overlay */}

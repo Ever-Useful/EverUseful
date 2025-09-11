@@ -114,6 +114,8 @@ export const FeaturedProducts: React.FC = () => {
               src={project.image}
               alt={project.title}
               className="w-full h-full object-cover object-center"
+              loading="lazy"
+              decoding="async"
               style={{
                 width: '100%',
                 height: '100%',
@@ -241,6 +243,8 @@ export const FeaturedProducts: React.FC = () => {
                   src={p.image}
                   alt={p.title}
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   style={{
                     objectFit: "cover",
                     width: "100%",
@@ -328,6 +332,8 @@ export const FeaturedProducts: React.FC = () => {
                     src={p.image}
                     alt={p.title}
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div
                     className={`absolute inset-0 bg-gradient-to-t ${p.gradient} opacity-20`}

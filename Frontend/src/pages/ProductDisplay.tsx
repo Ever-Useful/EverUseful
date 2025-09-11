@@ -132,7 +132,7 @@ const ProductDisplay = () => {
     
     if (!user) {
       return { 
-        name: authorsLoading ? 'Loading...' : 'username', 
+        name: 'username', 
         image: NoUserProfile, 
         userType: '', 
         id: authorId,
@@ -253,6 +253,7 @@ const ProductDisplay = () => {
         return;
       }
       await userService.addToCart({
+        id: project.id,
         name: project.title,
         price: project.price || 0,
         quantity: 1
@@ -261,6 +262,35 @@ const ProductDisplay = () => {
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error('Failed to add project to cart');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!project) return;
+
+    const shareData = {
+      title: project.title,
+      text: project.description,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      } catch (clipboardError) {
+        toast.error('Failed to share project');
+      }
     }
   };
 
@@ -370,7 +400,7 @@ const ProductDisplay = () => {
               <div className="sm:mt-20 p-4 sm:p-6 mb-4 sm:mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                   <div className="mb-2 sm:mb-0">
-                    <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">${project.price}</span>
+                    <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">₹{project.price}</span>
                     <span className="text-base sm:text-lg text-gray-500 line-through ml-2">{project.originalPrice}</span>
                     <span className="text-base sm:text-lg text-green-600 ml-2 font-medium">{project.discount}</span>
                   </div>
@@ -394,7 +424,12 @@ const ProductDisplay = () => {
                     <ShoppingCart className="w-4 h-4" />
                     <span className="hidden sm:inline">&nbsp;Add to Cart</span>
                   </Button>
-                  <Button variant="outline" size="icon" className="flex-none hover:bg-gray-50 transition-colors">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="flex-none hover:bg-gray-50 transition-colors"
+                    onClick={handleShare}
+                  >
                     <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
