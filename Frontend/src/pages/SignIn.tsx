@@ -1217,7 +1217,7 @@ const SignIn = () => {
                     </div>
                     <div className="transition-all duration-500">
                       <CardTitle className="text-xs xs:text-base lg:text-lg text-gray-900 transition-all duration-500">{currentUserType.label} Dashboard</CardTitle>
-                      <p className="text-[10px] xs:text-xs lg:text-sm text-gray-600 transition-all duration-500">{currentUserType.description}</p>
+                      <p className="meta-xs-small xs:text-xs lg:text-sm text-gray-600 transition-all duration-500">{currentUserType.description}</p>
                     </div>
                   </div>
                 </CardHeader>

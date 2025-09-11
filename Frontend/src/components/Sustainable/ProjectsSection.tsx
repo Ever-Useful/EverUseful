@@ -189,7 +189,7 @@ export const ProjectsSection = () => {
 
                     {/* Category Badge */}
                     <div className="absolute top-2 right-2 sm:top-3 sm:right-3 lg:top-4 lg:right-4">
-                      <span className="bg-white/95 backdrop-blur-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium text-gray-800">
+                      <span className="bg-white/95 backdrop-blur-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full meta-xs-small sm:text-xs font-medium text-gray-800">
                         {project.category}
                       </span>
                     </div>
@@ -208,13 +208,13 @@ export const ProjectsSection = () => {
                     <div className="grid grid-cols-1 gap-2 sm:gap-3 mb-3 sm:mb-4">
                       <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center group-hover:bg-emerald-50 transition-colors">
                         <Target className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-600 mx-auto mb-1" />
-                        <p className="text-[10px] sm:text-xs font-semibold text-gray-900">{project.impact}</p>
-                        <p className="text-[9px] sm:text-xs text-gray-500">Impact</p>
+                        <p className="meta-xs-small sm:text-xs font-semibold text-gray-900">{project.impact}</p>
+                        <p className="meta-xs-small sm:text-xs text-gray-500">Impact</p>
                       </div>
                       {/* <div className="bg-gray-50 rounded-lg p-2 sm:p-3 text-center group-hover:bg-blue-50 transition-colors">
                         <Users className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 mx-auto mb-1" />
-                        <p className="text-[10px] sm:text-xs font-semibold text-gray-900">{project.teamSize}</p>
-                        <p className="text-[9px] sm:text-xs text-gray-500">Team Size</p>
+                        <p className="meta-xs-small sm:text-xs font-semibold text-gray-900">{project.teamSize}</p>
+                        <p className="meta-xs-small sm:text-xs text-gray-500">Team Size</p>
                       </div>*/}
                     </div>
                     
@@ -222,7 +222,7 @@ export const ProjectsSection = () => {
                     <div className="flex gap-2 mb-3 sm:mb-4">
                       <Button 
                         size="sm" 
-                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] sm:text-xs h-6 sm:h-8"
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white meta-xs-small sm:text-xs h-6 sm:h-8"
                         onClick={() => toggleWatchlist(project.id)}
                       >
                         <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
@@ -230,7 +230,7 @@ export const ProjectsSection = () => {
                       </Button>
                       {/* <Button 
                         size="sm" 
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] sm:text-xs h-6 sm:h-8 px-2 sm:px-3"
+                        className="bg-blue-600 hover:bg-blue-700 text-white meta-xs-small sm:text-xs h-6 sm:h-8 px-2 sm:px-3"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleBrowseAllProjects();

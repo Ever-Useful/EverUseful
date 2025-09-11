@@ -920,7 +920,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               </div>
             </div>
 
-            <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 text-[10px] rounded shadow mb-4">
+            <Badge className="bg-gray-900/90 text-white font-semibold px-2 py-0.5 meta-xs-small rounded shadow mb-4">
               {selected.category}
             </Badge>
 
@@ -930,7 +930,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                 <Badge
                   key={idx}
                   variant="outline"
-                  className="text-[10px] border-gray-200 text-gray-600 bg-gray-100 font-medium"
+                  className="meta-xs-small border-gray-200 text-gray-600 bg-gray-100 font-medium"
                 >
                   {typeof skill === 'string' ? skill : skill.name || skill.expertise || 'Unknown Skill'}
                 </Badge>
@@ -938,7 +938,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
             </div>
             <div className="flex flex-wrap gap-1 mb-3">
               {selected.tags && selected.tags.map((tag, idx) => (
-                <Badge key={idx} className="bg-blue-50 text-blue-700 text-[10px] font-medium rounded">
+                <Badge key={idx} className="bg-blue-50 text-blue-700 meta-xs-small font-medium rounded">
                   #{tag}
                 </Badge>
               ))}
@@ -985,7 +985,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     <img src={rel.image || NoImageAvailable} alt={rel.title} className="w-12 h-12 object-cover rounded" onError={e => { e.currentTarget.src = NoImageAvailable; }} />
                     <div className="flex-1">
                       <div className="font-semibold text-xs text-gray-700">{rel.title}</div>
-                      <div className="flex items-center gap-2 text-[11px] text-gray-500">
+                      <div className="flex items-center gap-2 meta-xs-large text-gray-500">
                         <DollarSign className="w-3 h-3" />
                         ${rel.price}
                         <Clock className="w-3 h-3 ml-2" />

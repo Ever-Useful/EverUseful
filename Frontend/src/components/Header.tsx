@@ -572,7 +572,7 @@ const Header = () => {
                                                 <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:scale-105 transition-all duration-300" aria-label="Notifications">
                                                     <Bell className="h-5 w-5 text-gray-600" />
                                                     {unreadNotificationCount > 0 && (
-                                                        <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-none">
+                                                        <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-red-500 text-white meta-xs-small leading-none">
                                                             {unreadNotificationCount}
                                                         </span>
                                                     )}
@@ -601,7 +601,7 @@ const Header = () => {
                                                                             <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
                                                                         </div>
                                                                         <p className="text-xs text-gray-600 line-clamp-2">{notification.message}</p>
-                                                                        <p className="text-[10px] text-gray-400 mt-1">{notification.time}</p>
+                                                                        <p className="meta-xs-small text-gray-400 mt-1">{notification.time}</p>
                                                                     </div>
                                                                 </div>
                                                             </div>

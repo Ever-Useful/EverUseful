@@ -276,7 +276,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
                     {/* </div>
                     <div className="flex items-center space-x-2 sm:space-x-3 mb-1 sm:mb-2">
                       {renderStars(review.rating, false, "w-3 h-3 sm:w-4 sm:h-4")}
-                      <span className="text-[10px] sm:text-sm text-gray-500">
+                      <span className="meta-xs-small sm:text-sm text-gray-500">
                         {formatDate(review.date)}
                       </span>
                     </div>

@@ -224,7 +224,7 @@ export const RelatedProducts = () => {
                       className="w-full h-32 xs:h-36 object-cover rounded-t-lg"
                       onError={e => { e.currentTarget.src = NoImageAvailable; }}
                     />
-                    <Badge className="absolute top-2 right-2 bg-blue-600 text-white text-[10px] px-2 py-0.5">
+                    <Badge className="absolute top-2 right-2 bg-blue-600 text-white meta-xs-small px-2 py-0.5">
                       {project.category}
                     </Badge>
                   </div>
@@ -302,7 +302,7 @@ export const RelatedProducts = () => {
                         className="w-full h-28 md:h-32 lg:h-36 object-cover rounded-t-lg"
                         onError={e => { e.currentTarget.src = NoImageAvailable; }}
                       />
-                      <Badge className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5">
+                      <Badge className="absolute top-2 right-2 bg-blue-100 text-blue-800 meta-xs-small px-2 py-0.5">
                         {project.category}
                       </Badge>
                     </div>

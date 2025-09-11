@@ -496,9 +496,14 @@ html {
   .heading-card-2xl { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-2xl font-bold; }
   .heading-card-xl { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-xl font-semibold; }
   .heading-card-lg { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-lg font-semibold; }
+  .heading-hero { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-[90px] font-extralight tracking-tight leading-[1]; }
   .body-base { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-base leading-relaxed; }
+  .body-large { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-[17px] sm:text-3xl sm:text-4xl font-bold leading-tight; }
   .meta-sm { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-sm; }
   .meta-xs { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-xs; }
+  .meta-xs-small { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-[10px]; }
+  .meta-xs-large { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-[11px]; }
+  .meta-calendar { /* stylelint-disable-next-line at-rule-no-unknown */ @apply text-[0.8rem]; }
 
   /* Consistent card media sizing */
   .card-media { /* stylelint-disable-next-line at-rule-no-unknown */ @apply w-full aspect-[3/2] object-cover; }

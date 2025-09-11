@@ -468,7 +468,7 @@ const Cart = () => {
                         <p className="text-xs xs:text-sm text-gray-600 mb-1 line-clamp-2">{item.description}</p>
                         <div className="flex flex-wrap gap-1 mb-1">
                           {item.tags?.map((tag, i) => (
-                            <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-500">{tag}</span>
+                            <span key={i} className="meta-xs-small px-2 py-0.5 rounded bg-gray-100 text-gray-500">{tag}</span>
                           ))}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-500">

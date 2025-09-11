@@ -146,8 +146,8 @@ const Features: React.FC = () => (
       className={`flex flex-col items-center rounded-2xl shadow p-2 hover:shadow-lg transition min-h-[55px] ${feature.bg}`}
     >
       <div className="mb-1">{feature.icon}</div>
-      <h4 className="text-[10px] font-semibold text-teal-800 text-center">{feature.title1}</h4>
-      <h4 className="text-[10px] font-semibold text-teal-800 mb-0.5 text-center"> {feature.title2}</h4>
+      <h4 className="meta-xs-small font-semibold text-teal-800 text-center">{feature.title1}</h4>
+      <h4 className="meta-xs-small font-semibold text-teal-800 mb-0.5 text-center"> {feature.title2}</h4>
     </div>
   ))}
 </div>
@@ -195,7 +195,7 @@ const PreJoinForm: React.FC = () => {
       >
         <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1 md:mb-2">
         </div>
-        <h3 className="text-gray-900 text-[17px] sm:text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
+        <h3 className="text-gray-900 body-large sm:text-2xl font-extrabold mb-1 md:mb-2 text-center drop-shadow-lg">
           Register for Early Notifications.
         </h3>
         <p className="text-center text-gray-700 text-base mb-1 md:mb-2">

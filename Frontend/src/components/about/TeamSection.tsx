@@ -179,7 +179,7 @@ const TeamSection = () => {
           <div className="flex flex-row items-center gap-8">
             {/* Left side - Heading */}
             <div className="w-1/3 flex flex-col items-start justify-center">
-            <h2 className="text-[90px] font-extralight tracking-tight text-white mb-6 leading-[1] font-sans" style={{letterSpacing: '-0.04em'}}>Technical Team</h2>
+            <h2 className="heading-hero text-white mb-6 font-sans" style={{letterSpacing: '-0.04em'}}>Technical Team</h2>
             </div>
             {/* Right side - Card with Tech Team */}
             <div className="w-2/3">
@@ -212,7 +212,7 @@ const TeamSection = () => {
           <div className="flex flex-row items-center gap-8">
             {/* Left side - Heading */}
             <div className="w-1/3 flex flex-col items-start justify-center">
-            <h2 className="text-[90px] font-extralight tracking-tight text-white mb-6 leading-[1] font-sans" style={{letterSpacing: '-0.04em'}}>Management Team</h2>
+            <h2 className="heading-hero text-white mb-6 font-sans" style={{letterSpacing: '-0.04em'}}>Management Team</h2>
             </div>
             {/* Right side - Card with Management Team */}
             <div className="w-2/5 ml-auto">

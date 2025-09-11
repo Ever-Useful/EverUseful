@@ -88,7 +88,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
                   ? 'text-green-600 dark:text-green-400' 
                   : 'text-gray-500 dark:text-gray-400'
             }`} />
-            <span className={`text-[10px] sm:text-xs ${
+            <span className={`meta-xs-small sm:text-xs ${
               primary 
                 ? 'text-white' 
                 : status 
