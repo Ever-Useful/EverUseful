@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, MapPin, Globe, Mail, Phone, GraduationCap, Briefcase, Award, Users, Eye, Heart, Download, Share2, MessageCircle, Send, Linkedin, Github, Twitter, Instagram, Facebook, Youtube, Globe as GlobeIcon, UserPlus, BookOpen, Star } from 'lucide-react';
 import userService from '@/services/userService';
+import relationService from '@/services/relationService';
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ChatBox } from "@/components/ChatBox";
@@ -31,7 +32,7 @@ const Profile = () => {
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
   const [error, setError] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
+  const [relationStatus, setRelationStatus] = useState<'NONE' | 'PENDING_OUT' | 'PENDING_IN' | 'CONNECTED' | 'BLOCKED'>('NONE');
   const { profileData: currentUser } = useUserProfile(); 
 
 
@@ -104,81 +105,23 @@ const Profile = () => {
     }
   };
 
-// useEffect(() => {
-//   const fetchConnectionStatus = async () => {
-//     try {
-//       const connections = await userService.getConnections();
-
-//       if (connections.sent.includes(id)) {
-//         setConnectionStatus("pending"); // request sent by me
-//       } else if (connections.received.includes(id)) {
-//         setConnectionStatus("pending"); // request received, still pending
-//       } else if (connections.connected.includes(id)) {
-//         setConnectionStatus("connected"); // already connected
-//       } else {
-//         setConnectionStatus("none"); // no relation
-//       }
-//     } catch (err) {
-//       console.error("Failed to fetch connection status:", err);
-//     }
-//   };
-
-//   if (currentUser?.customUserId && id) {
-//     fetchConnectionStatus();
-//   }
-// }, [currentUser, id]);
 
 
-// // Ye wala final hai
-// useEffect(() => {
-//   if (!currentUser?.customUserId || !id) return;
-
-//   (async () => {
-//     try {
-//       const resp = await userService.getConnections();
-//       const payload = resp?.data ?? resp; // support both shapes
-
-//       const sent: string[] = payload?.sent ?? [];
-//       const received: string[] = payload?.received ?? [];
-//       const connected: string[] = payload?.connected ?? [];
-
-//       if (connected.includes(id)) {
-//         setConnectionStatus('connected');
-//       } else if (sent.includes(id) || received.includes(id)) {
-//         setConnectionStatus('pending');
-//       } else {
-//         setConnectionStatus('none');
-//       }
-//     } catch (err) {
-//       console.error('Failed to fetch connection status:', err);
-//     }
-//   })();
-// }, [currentUser?.customUserId, id]);
-
-// 🔹 Fetch connection status on mount / refresh
 useEffect(() => {
-  const fetchConnectionStatus = async () => {
+  const fetchRelationStatus = async () => {
     try {
-      const res = await userService.getConnections(); 
-      // NOTE: res is { success: true, data: { sent, received, connected } }
-      const connections = res.data;
-
-      if (connections.sent.includes(id)) {
-        setConnectionStatus("pending"); // request sent by me
-      } else if (connections.received.includes(id)) {
-        setConnectionStatus("pending"); // request received, still pending
-      } else if (connections.connected.includes(id)) {
-        setConnectionStatus("connected"); // already connected
-      } else {
-        setConnectionStatus("none");
-      }
+      if (!id) return;
+      const res = await relationService.getStatus(id);
+      const status = (res?.data?.relation || res?.relation || 'NONE') as any;
+      setRelationStatus(status);
     } catch (err) {
-      console.error("Failed to fetch connection status:", err);
+      console.error('Failed to fetch relation status:', err);
+      setRelationStatus('NONE');
     }
   };
 
   if (currentUser?.customUserId && id) {
-    fetchConnectionStatus();
+    fetchRelationStatus();
   }
 }, [currentUser, id]);
 
@@ -193,27 +136,23 @@ useEffect(() => {
   }, [currentUser?.customUserId]);
 
   useEffect(() => {
-  socket.on("connection_request", (data) => {
-    console.log("New connection request received:", data);
-
-    if (data.from === id) {
-      setConnectionStatus("pending"); // show immediately
+  socket.on('relation_request_received', (data: any) => {
+    console.log('Relation request received:', data);
+    if (data?.from === id) {
+      setRelationStatus('PENDING_IN');
     }
   });
 
-  socket.on("connection_update", (data) => {
-    console.log("Connection update:", data);
-
-    if (data.connected?.includes(id)) {
-      setConnectionStatus("connected");
-    } else {
-      setConnectionStatus("none");
+  socket.on('relation_update', (data: any) => {
+    console.log('Relation update:', data);
+    if (data?.type === 'ACCEPTED' && data?.between?.includes(id)) {
+      setRelationStatus('CONNECTED');
     }
   });
 
   return () => {
-    socket.off("connection_request");
-    socket.off("connection_update");
+    socket.off('relation_request_received');
+    socket.off('relation_update');
   };
 }, [id]);
 
@@ -222,81 +161,99 @@ useEffect(() => {
 
 
 
-// const handleConnect = async () => {
-//   if (!id) return;
-
-//   // Optimistic UI
-//   setConnectionStatus("pending");
-
-//   try {
-//     const response = await userService.sendConnectionRequest(id);
-
-//     if (response?.success === false) {
-//       setConnectionStatus("none"); // revert
-//       alert(`Failed to send request: ${response.message || "Unknown error"}`);
-//       return;
-//     }
-
-//     // Emit socket event (real-time notification)
-//     socket.emit("connectionRequest", {
-//       from: currentUser.customUserId,
-//       to: id,
-//       message: `${currentUser.firstName || "Someone"} sent you a connection request.`,
-//     });
-
-//     // Show notification/alert
-//     if ("Notification" in window && Notification.permission === "granted") {
-//       new Notification("Connection request sent!", {
-//         body: "Your request is now pending.",
-//         icon: "/favicon.ico",
-//       });
-//     } else {
-//       alert("Connection request sent!");
-//     }
-//   } catch (err: any) {
-//     setConnectionStatus("none"); // revert if error
-//     console.error("Error sending connection request:", err);
-
-//     const message =
-//       err?.response?.data?.message ||
-//       err?.message ||
-//       "Failed to send connection request due to an unknown error.";
-
-//     alert(`Connection request failed: ${message}`);
-//   }
-// };
 
    
 
-// 🔹 Handle connect click
+// 🔹 Relation actions
+// const handleConnect = async () => {
+//   try {
+//     if (!id) return;
+//     await relationService.send(id);
+//     setRelationStatus('PENDING_OUT');
+//   } catch (err: any) {
+//     console.error('Error sending relation request:', err);
+//     alert(err?.message || 'Failed to send request');
+//   }
+// };
+
+// ...existing code...
 const handleConnect = async () => {
   try {
-    const response = await userService.sendConnectionRequest(id);
-
-    if (response?.success === false) {
-      alert(`Failed to send request: ${response.message || "Unknown error"}`);
-      return;
+    if (!currentUser?.customUserId || !id) {
+      throw new Error("Missing user IDs");
     }
-
-    setConnectionStatus("pending"); // update UI immediately
-
-    socket.emit("connectionRequest", {
-      from: currentUser.customUserId,
-      to: id,
-      message: `${currentUser.firstName || "Someone"} sent you a connection request.`,
-    });
-
-    if ("Notification" in window && Notification.permission === "granted") {
-      new Notification("Connection request sent!", {
-        body: "Your request is now pending.",
-        icon: "/favicon.ico",
-      });
-    } else {
-      alert("Connection request sent!");
-    }
+    await relationService.sendRelationRequest(currentUser.customUserId, id);
+    setRelationStatus('PENDING_OUT');
   } catch (err: any) {
-    console.error("Error sending connection request:", err);
-    alert(`Connection request failed: ${err.message || "Unknown error"}`);
+    console.error('Error sending relation request:', err);
+    setError(err?.message || 'Failed to send request');
+  }
+};
+
+
+const handleAccept = async () => {
+  try {
+    if (!id) return;
+    await relationService.accept(id);
+    setRelationStatus('CONNECTED');
+  } catch (err: any) {
+    console.error('Error accepting request:', err);
+    alert(err?.message || 'Failed to accept request');
+  }
+};
+
+const handleDecline = async () => {
+  try {
+    if (!id) return;
+    await relationService.decline(id);
+    setRelationStatus('NONE');
+  } catch (err: any) {
+    console.error('Error declining request:', err);
+    alert(err?.message || 'Failed to decline request');
+  }
+};
+
+const handleCancel = async () => {
+  try {
+    if (!id) return;
+    await relationService.cancel(id);
+    setRelationStatus('NONE');
+  } catch (err: any) {
+    console.error('Error cancelling request:', err);
+    alert(err?.message || 'Failed to cancel request');
+  }
+};
+
+const handleRemoveConnection = async () => {
+  try {
+    if (!id) return;
+    await relationService.removeConnection(id);
+    setRelationStatus('NONE');
+  } catch (err: any) {
+    console.error('Error removing connection:', err);
+    alert(err?.message || 'Failed to remove connection');
+  }
+};
+
+const handleBlock = async () => {
+  try {
+    if (!id) return;
+    await relationService.block(id);
+    setRelationStatus('BLOCKED');
+  } catch (err: any) {
+    console.error('Error blocking user:', err);
+    alert(err?.message || 'Failed to block user');
+  }
+};
+
+const handleUnblock = async () => {
+  try {
+    if (!id) return;
+    await relationService.unblock(id);
+    setRelationStatus('NONE');
+  } catch (err: any) {
+    console.error('Error unblocking user:', err);
+    alert(err?.message || 'Failed to unblock user');
   }
 };
 
@@ -395,15 +352,13 @@ const handleConnect = async () => {
     safePortfolioProjectsLength: safePortfolioProjects.length
   });
 
-  // 🔹 Button rendering
+  // 🔹 Relation button rendering
 const isSelf = currentUser?.customUserId === id;
-const disabled = isSelf || connectionStatus !== "none";
-const label =
-  connectionStatus === "none"
-    ? "Connect"
-    : connectionStatus === "pending"
-    ? "Pending"
-    : "Connected";
+const showConnect = !isSelf && relationStatus === 'NONE';
+const showPendingOut = !isSelf && relationStatus === 'PENDING_OUT';
+const showPendingIn = !isSelf && relationStatus === 'PENDING_IN';
+const showConnected = !isSelf && relationStatus === 'CONNECTED';
+const isBlocked = !isSelf && relationStatus === 'BLOCKED';
 
 
   return (
@@ -436,17 +391,72 @@ const label =
               <div className="flex-1 text-white mt-1 md:mt-0 w-full">
                 <h1 className="text-2xl sm:text-3xl font-bold drop-shadow-lg mb-1 text-left">{profile.name}</h1>
                 <p className="text-xs sm:text-sm text-slate-200 drop-shadow-md text-left">{(userData?.auth?.userType || '').charAt(0).toUpperCase() + (userData?.auth?.userType || '').slice(1) || profile.title}</p>
-                {/* Connect Button */}
+                {/* Relation Actions */}
                 <div className="flex flex-row items-center justify-start mt-2">
-                  <button
-  onClick={handleConnect}
-  disabled={disabled}
-  className={`flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 ${
-    disabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-  }`}
->
-  {label}
-</button>
+                  {showConnect && (
+                    <button
+                      onClick={handleConnect}
+                      className={`flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-blue-600 hover:bg-blue-700`}
+                    >
+                      Connect
+                    </button>
+                  )}
+                  {showPendingOut && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        disabled
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-gray-400 cursor-not-allowed"
+                      >
+                        Pending
+                      </button>
+                      <button
+                        onClick={handleCancel}
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-amber-600 hover:bg-amber-700"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                  {showPendingIn && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleAccept}
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-green-600 hover:bg-green-700"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={handleDecline}
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-red-600 hover:bg-red-700"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  )}
+                  {showConnected && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        disabled
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-emerald-600"
+                      >
+                        Connected
+                      </button>
+                      <button
+                        onClick={handleRemoveConnection}
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-slate-600 hover:bg-slate-700"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                  {!isSelf && (
+                    <button
+                      onClick={isBlocked ? handleUnblock : handleBlock}
+                      className={`ml-2 flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 ${isBlocked ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-700 hover:bg-gray-800'}`}
+                    >
+                      {isBlocked ? 'Unblock' : 'Block'}
+                    </button>
+                  )}
                   <button className="ml-2 p-2 rounded-full bg-gray-100/20 text-white">
                     <Send className="w-4 h-4" />
                   </button>

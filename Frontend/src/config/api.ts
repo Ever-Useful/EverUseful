@@ -60,6 +60,18 @@ export const API_ENDPOINTS = {
   get ADMIN() { return getApiUrl('/api/admin'); },
   get ADMIN_OVERVIEW() { return getApiUrl('/api/admin/overview'); },
   
+  // Relations endpoints
+  get RELATIONS() { return getApiUrl('/api/relations'); },
+  get RELATIONS_SEND() { return getApiUrl('/api/relations/send'); },
+  get RELATIONS_ACCEPT() { return getApiUrl('/api/relations/accept'); },
+  get RELATIONS_DECLINE() { return getApiUrl('/api/relations/decline'); },
+  get RELATIONS_CANCEL() { return getApiUrl('/api/relations/cancel'); },
+  get RELATIONS_REMOVE_CONNECTION() { return getApiUrl('/api/relations/remove-connection'); },
+  get RELATIONS_BLOCK() { return getApiUrl('/api/relations/block'); },
+  get RELATIONS_UNBLOCK() { return getApiUrl('/api/relations/unblock'); },
+  get RELATIONS_ME() { return getApiUrl('/api/relations/me'); },
+  get RELATIONS_STATUS() { return getApiUrl('/api/relations/status'); },
+  
   // Health check
   get HEALTH() { return getApiUrl('/api/test'); },
 };

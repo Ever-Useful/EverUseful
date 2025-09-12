@@ -9,6 +9,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
 const s3Routes = require('./routes/s3');
 const s3Service = require('./services/s3Service');
+const relationsRouter = require('./routes/relations');
 const http = require('http');
 const { Server } = require('socket.io');
 
@@ -49,6 +50,9 @@ app.use('/api/s3', s3Routes);
 
 app.use('/api', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Relations routes
+app.use('/api/relations', relationsRouter);
 
 app.get('/token', authorize, async (req, res) => {
   const { uid, name, email, phone_number } = req.user;

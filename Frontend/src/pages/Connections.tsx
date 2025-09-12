@@ -11,6 +11,8 @@ import Header from '@/components/Header';
 import {Footer} from '@/components/Footer';
 import Logo from '@/assets/Logo/Logo Main.png'; 
 import UserService, { UserSearchResult } from "@/services/userService";
+import relationService from "@/services/relationService";
+import { socket } from "@/socket.ts";
 import { useUserProfile } from '@/contexts/UserProfileContext';
 type Connection = {
   id: string;
@@ -264,25 +266,23 @@ useEffect(() => {
     if (!profileData?.customUserId) return;
 
     try {
-      // Get logged-in user's connections
-      const connections = await UserService.getConnectionsByUserId(profileData.customUserId);
-      console.log("Connections:", connections);
+      // Pull my relations doc, then hydrate received with full profiles
+      const myRelations = await relationService.getMyRelations();
+      const receivedIds: string[] = myRelations?.data?.requestsReceived
+        ? Object.keys(myRelations.data.requestsReceived)
+            .filter((fromId) => myRelations.data.requestsReceived[fromId]?.status === 'PENDING')
+        : [];
 
-      // Get full profiles for received connections with try/catch per ID
       const receivedProfiles = await Promise.all(
-        (connections.connections?.received || []).map(async (id: string) => {
-          console.log("Fetching received user with ID:", id);
+        receivedIds.map(async (id: string) => {
           try {
             const user = await UserService.getUserByCustomId(id);
-            console.log("Fetched user response:", user);
             return user;
           } catch {
-            console.warn(`User with ID ${id} not found, skipping...`);
             return null;
           }
         })
       );
-
 
       setReceivedUsers(
         receivedProfiles
@@ -292,7 +292,6 @@ useEffect(() => {
             profile: {
               firstName: user.auth?.firstName || user.profile?.firstName || "User",
               lastName: user.auth?.lastName || user.profile?.lastName || "",
-
               avatar: user.profile?.avatar || "",
               userType: user.auth?.userType || user.profile?.userType || "student",
               username: user.auth?.username || "",
@@ -307,44 +306,135 @@ useEffect(() => {
   fetchReceivedProfiles();
 }, [profileData?.customUserId]);
 
+// Realtime socket updates for received/sent
+useEffect(() => {
+  if (!socket || !profileData?.customUserId) return;
+
+  // ensure this user is registered for targeted room updates
+  socket.emit('register', profileData.customUserId);
+
+  const onRelationRequestReceived = async (data: { from: string }) => {
+    try {
+      const fromId = data?.from;
+      if (!fromId) return;
+      // Avoid duplicates
+      if (receivedUsers.some(u => u.customUserId === fromId)) return;
+      const user = await UserService.getUserByCustomId(fromId);
+      if (!user) return;
+      setReceivedUsers(prev => [
+        {
+          customUserId: user.customUserId,
+          profile: {
+            firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+            lastName: user.auth?.lastName || user.profile?.lastName || '',
+            avatar: user.profile?.avatar || '',
+            userType: user.auth?.userType || user.profile?.userType || 'student',
+            username: user.auth?.username || '',
+          },
+        },
+        ...prev,
+      ]);
+    } catch (err) {
+      console.error('socket relation_request_received hydrate failed:', err);
+    }
+  };
+
+  const onRelationUpdate = async (data: { type: string; between?: string[] }) => {
+    try {
+      const type = data?.type;
+      const between = data?.between || [];
+      if (!type || between.length < 2) return;
+      const myId = profileData.customUserId;
+      if (!between.includes(myId)) return; // unrelated pair
+      const otherId = between.find(id => id !== myId)!;
+
+      if (type === 'ACCEPTED') {
+        // Remove from received/sent and add to connected
+        setReceivedUsers(prev => prev.filter(u => u.customUserId !== otherId));
+        setSentUsers(prev => prev.filter(u => u.customUserId !== otherId));
+
+        // Hydrate if not already present, then add to connectedUsers
+        const existing = connectedUsers.some(u => u.customUserId === otherId);
+        if (!existing) {
+          try {
+            const user = await UserService.getUserByCustomId(otherId);
+            if (user) {
+              setConnectedUsers(prev => ([
+                ...prev,
+                {
+                  customUserId: user.customUserId,
+                  profile: {
+                    firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+                    lastName: user.auth?.lastName || user.profile?.lastName || '',
+                    avatar: user.profile?.avatar || '',
+                    userType: user.auth?.userType || user.profile?.userType || 'student',
+                    username: user.auth?.username || '',
+                  },
+                }
+              ]));
+            }
+          } catch {}
+        }
+      }
+
+      // Handle declines/cancellations if backend emits them later
+      if (type === 'DECLINED' || type === 'CANCELLED') {
+        setReceivedUsers(prev => prev.filter(u => u.customUserId !== otherId));
+        setSentUsers(prev => prev.filter(u => u.customUserId !== otherId));
+      }
+    } catch (err) {
+      console.error('socket relation_update handling failed:', err);
+    }
+  };
+
+  socket.on('relation_request_received', onRelationRequestReceived);
+  socket.on('relation_update', onRelationUpdate);
+
+  return () => {
+    socket.off('relation_request_received', onRelationRequestReceived);
+    socket.off('relation_update', onRelationUpdate);
+  };
+}, [socket, profileData?.customUserId, receivedUsers, connectedUsers]);
+
 useEffect(() => {
   const fetchSentProfiles = async () => {
     if (!profileData?.customUserId) return;
 
     try {
-      // Get logged-in user's connections
-      const connections = await UserService.getConnectionsByUserId(profileData.customUserId);
+      // Use relations: pick requestsSent with status REQUESTED
+      const myRelations = await relationService.getMyRelations();
+      const sentIds: string[] = myRelations?.data?.requestsSent
+        ? Object.keys(myRelations.data.requestsSent)
+            .filter((toId) => myRelations.data.requestsSent[toId]?.status === 'REQUESTED')
+        : [];
 
+      const sentProfiles = await Promise.all(
+        sentIds.map(async (id: string) => {
+          try {
+            const user = await UserService.getUserByCustomId(id);
+            return user;
+          } catch {
+            return null;
+          }
+        })
+      );
 
-const sentProfiles = await Promise.all(
-  (connections.connections?.sent || []).map(async (id: string) => {
-    console.log("Fetching sent user with ID:", id);
-    try {
-      const user = await UserService.getUserByCustomId(id);
-      console.log("Fetched user response:", user);
-      return user;
-    } catch {
-      console.warn(`User with ID ${id} not found, skipping...`);
-      return null;
-    }
-  })
-);
       setSentUsers(
         sentProfiles
           .filter(Boolean)
           .map((user: any) => ({
             customUserId: user.customUserId,
             profile: {
-              firstName: user.auth?.firstName || user.profile?.firstName || "User",
-              lastName: user.auth?.lastName || user.profile?.lastName || "",
-              avatar: user.profile?.avatar || "",
-              userType: user.auth?.userType || "student",
-              username: user.auth?.username || "",
+              firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+              lastName: user.auth?.lastName || user.profile?.lastName || '',
+              avatar: user.profile?.avatar || '',
+              userType: user.auth?.userType || user.profile?.userType || 'student',
+              username: user.auth?.username || '',
             },
           }))
       );
     } catch (err) {
-      console.error("Failed to fetch sent profiles:", err);
+      console.error('Failed to fetch sent profiles:', err);
     }
   };
 
@@ -356,8 +446,8 @@ const sentProfiles = await Promise.all(
   const handleConnect = (personId: string) => {
     setSuggestions(prev => 
       prev.map(person => 
-        person.id === personId 
-          ? { ...person, isConnected: true }
+        person.customUserId === personId
+          ? { ...person, isConnected: true } as any
           : person
       )
     );
@@ -383,7 +473,7 @@ const sentProfiles = await Promise.all(
 
   const handleWithdraw = (personId: string) => {
     setSuggestions(prev => 
-      prev.filter(person => person.id !== personId)
+      prev.filter(person => person.customUserId !== personId)
     );
   };
 
@@ -492,7 +582,7 @@ const sentProfiles = await Promise.all(
                   person={{
                     id: user.customUserId,
                     name: `${user.profile.firstName} ${user.profile.lastName}`,
-                    title: user.profile.userType,
+                    title: user.profile.userType || 'student',
                     company: user.profile.username,
                     avatar: user.profile.avatar,
                     location: "",
@@ -511,8 +601,7 @@ const sentProfiles = await Promise.all(
         className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
         onClick={async () => {
           try {
-            // Call backend accept
-            await UserService.acceptConnectionRequest(user.customUserId);
+            await relationService.accept(user.customUserId);
 
             // ✅ Remove from received list → card disappears
             setReceivedUsers(prev =>
@@ -539,7 +628,7 @@ const sentProfiles = await Promise.all(
           className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
           onClick={async () => {
             try {
-              await UserService.rejectConnectionRequest(user.customUserId);
+              await relationService.decline(user.customUserId);
 
               // ✅ Remove from received only
               setReceivedUsers(prev =>
@@ -583,50 +672,49 @@ const sentProfiles = await Promise.all(
               </Badge>
             </div>
             {/* Scrollable cards */}
-<div className="flex-1 overflow-y-auto scrollbar-hide">
-  <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
-    {sentUsers.length > 0 ? (
-      sentUsers.map(user => (
-        <div
-          key={user.customUserId}
-          className="flex items-center justify-between p-3 hover:bg-gray-50 transition"
-        >
-          {/* Left side: user card */}
-          <ConnectionItem
-            person={{
-              id: user.customUserId,
-              name: `${user.profile.firstName || "User"} ${user.profile.lastName || ""}`.trim(),
-              title: user.profile.userType || "Student",
-              company: user.profile.username || "N/A",
-              avatar: user.profile.avatar || "",
-              location: "",
-              mutualConnections: 0,
-              isConnected: false,
-              skills: []
-            }}
-          />
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+              <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
+                {sentUsers.length > 0 ? (
+                  sentUsers.map(user => (
+                    <div
+                      key={user.customUserId}
+                      className="flex items-center justify-between p-3 hover:bg-gray-50 transition"
+                    >
+                      {/* Left side: user card */}
+                      <ConnectionItem
+                        person={{
+                          id: user.customUserId,
+                          name: `${user.profile.firstName || 'User'} ${user.profile.lastName || ''}`.trim(),
+                          title: user.profile.userType || 'Student',
+                          company: user.profile.username || 'N/A',
+                          avatar: user.profile.avatar || '',
+                          location: '',
+                          mutualConnections: 0,
+                          isConnected: false,
+                          skills: []
+                        }}
+                      />
 
-          {/* Right side: Withdraw button */}
-          <button
-            onClick={async () => {
-              try {
-                await UserService.withdrawConnectionRequest(user.customUserId);
-
-                // Remove immediately from UI
-                setSentUsers(prev =>
-                  prev.filter(u => u.customUserId !== user.customUserId)
-                );
-              } catch (err) {
-                console.error("Failed to withdraw connection:", err);
-              }
-            }}
-            className="px-3 py-1 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
-          >
-            Withdraw
-          </button>
-        </div>
-      ))
-    ) : (
+                      {/* Right side: Status + Withdraw */}
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700 border border-amber-200">Requested</span>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await relationService.cancel(user.customUserId);
+                              setSentUsers(prev => prev.filter(u => u.customUserId !== user.customUserId));
+                            } catch (err) {
+                              console.error('Failed to withdraw connection:', err);
+                            }
+                          }}
+                          className="px-3 py-1 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
+                        >
+                          Withdraw
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
                   <Card className="text-center py-12 shadow-none border-none">
                     <CardContent>
                       <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -733,7 +821,7 @@ const sentProfiles = await Promise.all(
           title: user.profile.userType,
           company: user.profile.username,
           avatar: user.profile.avatar,
-          location: user.profile.location || "",
+          location: "",
           mutualConnections: 0,
           isConnected: false,
           skills: []

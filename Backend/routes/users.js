@@ -628,173 +628,118 @@ router.get('/search', async (req, res) => {
   }
 });
 
+
+
+
+// // ----------------------------
 // // Send connection request
+// // ----------------------------
 // router.post('/connections', authorize, async (req, res) => {
-//   const firebaseUid = req.user.uid;
-//   const { targetUserId } = req.body;
-
-//   const user = await userService.findUserByFirebaseUid(firebaseUid);
-//   if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-//   const connection = await userService.sendConnectionRequest(user.customUserId, targetUserId);
-
-//   // 🔴 Emit socket event
-//   req.app.get('io').to(targetUserId).emit('connection_request', connection);
-
-//   res.json({ success: true, data: connection });
-// });
-
-// // Get all connections for logged-in user
-// router.get('/connections', authorize, async (req, res) => {
-//   const firebaseUid = req.user.uid;
-//   const user = await userService.findUserByFirebaseUid(firebaseUid);
-
-//   const connections = await userService.getConnections(user.customUserId);
-//   res.json({ success: true, data: connections });
-// });
-
-// // Accept/reject connection
-// router.put('/connections/:targetUserId', authorize, async (req, res) => {
 //   try {
 //     const firebaseUid = req.user.uid;
-//     const { targetUserId } = req.params;
-//     const { status } = req.body; // accepted | rejected
+//     const { targetUserId } = req.body;
 
 //     const user = await userService.findUserByFirebaseUid(firebaseUid);
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: 'User not found' });
-//     }
+//     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-//     const updated = await userService.respondToConnection(
-//       user.customUserId,   // requester (logged-in user)
-//       targetUserId,        // the user they’re responding to
-//       status
-//     );
+//     const connection = await userService.sendConnectionRequest(user.customUserId, targetUserId);
 
-//     //  Notify both users
-//     req.app.get('io')
-//       .to(user.customUserId)
-//       .to(targetUserId)
-//       .emit('connection_update', updated);
+//     // 🔴 Notify receiver in real-time
+//     req.app.get('io').to(targetUserId).emit('connection_request', {
+//       from: user.customUserId,
+//       ...connection,
+//     });
 
-//     res.json({ success: true, data: updated });
-//   } catch (error) {
-//     console.error("Error updating connection status:", error);
-//     res.status(500).json({ success: false, message: 'Internal server error' });
+//     res.json({ success: true, data: connection });
+//   } catch (err) {
+//     console.error("Error sending connection request:", err);
+//     res.status(500).json({ success: false, message: err.message });
 //   }
 // });
 
+// // ----------------------------
+// // Get all connections
+// // ----------------------------
+// router.get('/connections', authorize, async (req, res) => {
+//   try {
+//     const firebaseUid = req.user.uid;
+//     const user = await userService.findUserByFirebaseUid(firebaseUid);
 
+//     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-// ----------------------------
-// Send connection request
-// ----------------------------
-router.post('/connections', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const { targetUserId } = req.body;
+//     const connections = await userService.getConnections(user.customUserId);
+//     res.json({ success: true, data: connections });
+//   } catch (err) {
+//     console.error("Error fetching connections:", err);
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// });
 
-    const user = await userService.findUserByFirebaseUid(firebaseUid);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+// // ----------------------------
+// // Accept a connection request
+// // ----------------------------
+// router.put('/connections/:senderId/accept', authorize, async (req, res) => {
+//   try {
+//     const firebaseUid = req.user.uid;
+//     const { senderId } = req.params;
 
-    const connection = await userService.sendConnectionRequest(user.customUserId, targetUserId);
+//     const receiver = await userService.findUserByFirebaseUid(firebaseUid);
+//     if (!receiver) return res.status(404).json({ success: false, message: 'User not found' });
 
-    // 🔴 Notify receiver in real-time
-    req.app.get('io').to(targetUserId).emit('connection_request', {
-      from: user.customUserId,
-      ...connection,
-    });
+//     const result = await userService.acceptConnectionRequest(receiver.customUserId, senderId);
 
-    res.json({ success: true, data: connection });
-  } catch (err) {
-    console.error("Error sending connection request:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
+//     // Notify both users
+//     req.app.get('io')
+//       .to(receiver.customUserId)
+//       .to(senderId)
+//       .emit('connection_update', result);
 
-// ----------------------------
-// Get all connections
-// ----------------------------
-router.get('/connections', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const user = await userService.findUserByFirebaseUid(firebaseUid);
+//     res.json({ success: true, data: result });
+//   } catch (err) {
+//     console.error("Error accepting connection:", err);
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// });
 
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+// // ----------------------------
+// // Reject a connection request
+// // ----------------------------
+// router.put('/connections/:senderId/reject', authorize, async (req, res) => {
+//   try {
+//     const firebaseUid = req.user.uid;
+//     const { senderId } = req.params;
 
-    const connections = await userService.getConnections(user.customUserId);
-    res.json({ success: true, data: connections });
-  } catch (err) {
-    console.error("Error fetching connections:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
+//     const receiver = await userService.findUserByFirebaseUid(firebaseUid);
+//     if (!receiver) return res.status(404).json({ success: false, message: 'User not found' });
 
-// ----------------------------
-// Accept a connection request
-// ----------------------------
-router.put('/connections/:senderId/accept', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const { senderId } = req.params;
+//     const result = await userService.rejectConnectionRequest(receiver.customUserId, senderId);
 
-    const receiver = await userService.findUserByFirebaseUid(firebaseUid);
-    if (!receiver) return res.status(404).json({ success: false, message: 'User not found' });
+//     res.json({ success: true, data: result });
+//   } catch (err) {
+//     console.error("Error rejecting connection:", err);
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// });
 
-    const result = await userService.acceptConnectionRequest(receiver.customUserId, senderId);
+// // ----------------------------
+// // Withdraw (cancel) a request
+// // ----------------------------
+// router.delete('/connections/:receiverId', authorize, async (req, res) => {
+//   try {
+//     const firebaseUid = req.user.uid;
+//     const { receiverId } = req.params;
 
-    // Notify both users
-    req.app.get('io')
-      .to(receiver.customUserId)
-      .to(senderId)
-      .emit('connection_update', result);
+//     const sender = await userService.findUserByFirebaseUid(firebaseUid);
+//     if (!sender) return res.status(404).json({ success: false, message: 'User not found' });
 
-    res.json({ success: true, data: result });
-  } catch (err) {
-    console.error("Error accepting connection:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
+//     const result = await userService.withdrawConnectionRequest(sender.customUserId, receiverId);
 
-// ----------------------------
-// Reject a connection request
-// ----------------------------
-router.put('/connections/:senderId/reject', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const { senderId } = req.params;
-
-    const receiver = await userService.findUserByFirebaseUid(firebaseUid);
-    if (!receiver) return res.status(404).json({ success: false, message: 'User not found' });
-
-    const result = await userService.rejectConnectionRequest(receiver.customUserId, senderId);
-
-    res.json({ success: true, data: result });
-  } catch (err) {
-    console.error("Error rejecting connection:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-// ----------------------------
-// Withdraw (cancel) a request
-// ----------------------------
-router.delete('/connections/:receiverId', authorize, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid;
-    const { receiverId } = req.params;
-
-    const sender = await userService.findUserByFirebaseUid(firebaseUid);
-    if (!sender) return res.status(404).json({ success: false, message: 'User not found' });
-
-    const result = await userService.withdrawConnectionRequest(sender.customUserId, receiverId);
-
-    res.json({ success: true, data: result });
-  } catch (err) {
-    console.error("Error withdrawing connection:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
+//     res.json({ success: true, data: result });
+//   } catch (err) {
+//     console.error("Error withdrawing connection:", err);
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// });
 
 
 
