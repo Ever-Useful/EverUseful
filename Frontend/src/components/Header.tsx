@@ -255,25 +255,10 @@ const Header = () => {
     // const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeFilter, setActiveFilter] = useState<string>('all');
+    // const [activeFilter, setActiveFilter] = useState<string>('all');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const unreadNotifications = notifications.filter(n => n.unread);
     const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
-
-    // Filter tags for search
-    const filterTags: FilterTag[] = [
-        { id: 'all', label: 'All', active: activeFilter === 'all' },
-        { id: 'professor', label: 'Professor', active: activeFilter === 'professor' },
-        { id: 'student', label: 'Student', active: activeFilter === 'student' },
-        { id: 'enterprise', label: 'Enterprise', active: activeFilter === 'enterprise' },
-        { id: 'freelancer', label: 'Freelancer', active: activeFilter === 'freelancer' },
-        { id: 'experts', label: 'Experts', active: activeFilter === 'experts' },
-        { id: 'jobs', label: 'Jobs', active: activeFilter === 'jobs' }
-    ];
-
-    const handleFilterClick = (tagId: string) => {
-        setActiveFilter(tagId);
-    };
 
     const handleSearchFocus = () => {
         setIsSearchFocused(true);
@@ -516,18 +501,6 @@ const Header = () => {
                                         onBlur={handleSearchBlur}
                                         className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                     />
-                                    {/* Filter Bar - Only show when search is focused */}
-                                    {isSearchFocused && (
-                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
-                                            <div className="p-3">
-                                                <SearchFilterBar
-                                                    tags={filterTags}
-                                                    onTagClick={handleFilterClick}
-                                                    className="justify-start"
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                             <Navigation isLoggedIn={isLoggedIn} />
@@ -720,18 +693,6 @@ const Header = () => {
                                                 onBlur={handleSearchBlur}
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
-                                            {/* Filter Bar - Only show when search is focused */}
-                                            {isSearchFocused && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
-                                                    <div className="p-3">
-                                                        <SearchFilterBar
-                                                            tags={filterTags}
-                                                            onTagClick={handleFilterClick}
-                                                            className="justify-start"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                     {/* Navigation */}
@@ -795,16 +756,6 @@ const Header = () => {
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
                                         </div>
-                                        {/* Filter Bar - Only show when search is focused */}
-                                        {isSearchFocused && (
-                                            <div className="mt-2 mb-1 animate-in slide-in-from-top-2 duration-200">
-                                                <SearchFilterBar
-                                                    tags={filterTags}
-                                                    onTagClick={handleFilterClick}
-                                                    className="justify-start"
-                                                />
-                                            </div>
-                                        )}
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />

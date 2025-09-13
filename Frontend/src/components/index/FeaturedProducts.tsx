@@ -194,7 +194,7 @@ export const FeaturedProducts: React.FC = () => {
 
   return (
     <>
-      <div className="relative py-14 bg-gradient-to-br from-gray-100 via-gray-50 to-white">
+      <div className="relative py-14 bg-gradient-to-br from-gray-100 via-gray-50 to-white overflow-x-hidden">
         <Overlay />
         {/* Project Modal */}
         {expanded !== null && (
@@ -298,13 +298,16 @@ export const FeaturedProducts: React.FC = () => {
 
         {/* Mobile Horizontal Scroll */}
         <div className="sm:hidden">
-          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory">
+          <div
+            className="flex gap-4 overflow-x-auto pb-2 mx-4 px-4 snap-x snap-mandatory max-w-full hide-scrollbar"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
             {featuredProjects.map((p) => (
               <UICard
                 key={p.id}
                 className={`
                   flex-shrink-0 snap-start
-                  w-[80vw] max-w-xs
+                  w-full max-w-xs
                   transition-transform duration-300
                   rounded-2xl border border-gray-200 bg-white/90 shadow
                   group flex flex-col cursor-pointer
@@ -402,3 +405,5 @@ export const FeaturedProducts: React.FC = () => {
 };
 
 export default FeaturedProducts;
+/* Hide scrollbar utility for mobile horizontal scroll */
+import '@/styles/hide-scrollbar.css';

@@ -12,7 +12,7 @@ import {
 import { Badge } from "../ui/badge";
 import { Leaf } from "lucide-react";
 import backdropImage from '@/assets/images/green.jpg';
-
+/**comment*/
 const projectDetails = [
   {
     title: "Solar Community Grid",
