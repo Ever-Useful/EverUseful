@@ -278,8 +278,11 @@ router.post('/projects', authorize, async (req, res) => {
     // Save project to DynamoDB
     await dynamoDBService.createMarketplaceItem(newProject);
     
-    // Update user's project list
-    await userService.addUserProject(user.customUserId, newProject);
+    // Store only project ID in user's project list
+    await userService.addUserProject(user.customUserId, {
+      id: newProject.id,
+      type: 'project'
+    });
     
     res.status(201).json({ project: newProject });
   } catch (error) {

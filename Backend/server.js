@@ -8,6 +8,7 @@ const userService = require('./services/userService');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
 const s3Routes = require('./routes/s3');
+const agentsRoutes = require('./routes/agents');
 const s3Service = require('./services/s3Service');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -40,6 +41,9 @@ app.get('/api/test', (req, res) => {
 
 // Marketplace routes
 app.use('/api/marketplace', marketplaceRoutes);
+
+// Agents routes
+app.use('/api', agentsRoutes);
 
 // User routes
 app.use('/api/users', userRoutes);

@@ -4,6 +4,7 @@ class DynamoDBService {
   constructor() {
     this.usersTable = TABLES.USERS;
     this.marketplaceTable = TABLES.MARKETPLACE;
+    this.agentsTable = TABLES.AGENTS;
   }
 
   // User Operations
@@ -279,7 +280,7 @@ class DynamoDBService {
     const reconstructed = {
       customUserId: user.customUserId,
       firebaseUid: user.firebaseUid,
-      profile: {},
+      profile: user.profile || {},
       stats: user.stats || {},
       studentData: user.studentData || null,
       professorData: user.professorData || null,
@@ -296,19 +297,18 @@ class DynamoDBService {
       social: user.social || {},
       connections: user.connections || { sent: [], received: [], pending: [] }
     };
-        // ✅ Add connections back from DB
-     
 
-    // Reconstruct profile from flattened keys
-    Object.keys(user).forEach(key => {
-      if (key.startsWith('profile.')) {
-        const profileKey = key.replace('profile.', '');
-        reconstructed.profile[profileKey] = user[key];
-      }
-    });
+    // Only reconstruct from flattened keys if nested objects don't exist
+    if (!user.profile || Object.keys(user.profile).length === 0) {
+      Object.keys(user).forEach(key => {
+        if (key.startsWith('profile.')) {
+          const profileKey = key.replace('profile.', '');
+          reconstructed.profile[profileKey] = user[key];
+        }
+      });
+    }
 
-    // Reconstruct studentData from flattened keys
-    if (!reconstructed.studentData) {
+    if (!user.studentData || Object.keys(user.studentData).length === 0) {
       reconstructed.studentData = {};
       Object.keys(user).forEach(key => {
         if (key.startsWith('studentData.')) {
@@ -318,8 +318,7 @@ class DynamoDBService {
       });
     }
 
-    // Reconstruct professorData from flattened keys
-    if (!reconstructed.professorData) {
+    if (!user.professorData || Object.keys(user.professorData).length === 0) {
       reconstructed.professorData = {};
       Object.keys(user).forEach(key => {
         if (key.startsWith('professorData.')) {
@@ -328,8 +327,6 @@ class DynamoDBService {
         }
       });
     }
-
-    // Reconstruct freelancerData from flattened keys or use existing nested object
     if (!reconstructed.freelancerData || Object.keys(reconstructed.freelancerData).length === 0) {
       reconstructed.freelancerData = {};
       Object.keys(user).forEach(key => {
@@ -362,12 +359,19 @@ class DynamoDBService {
       const expressionAttributeValues = {};
 
       Object.keys(updateData).forEach((key, index) => {
-        const attrName = `#attr${index}`;
-        const attrValue = `:val${index}`;
-        
-        updateExpressions.push(`${attrName} = ${attrValue}`);
-        expressionAttributeNames[attrName] = key;
-        expressionAttributeValues[attrValue] = updateData[key];
+        const valuePlaceholder = `:val${index}`;
+        expressionAttributeValues[valuePlaceholder] = updateData[key];
+
+        // Support nested paths like "profile.userType" by splitting and mapping each segment
+        const segments = key.split('.');
+        const pathPlaceholders = segments.map((segment, segIndex) => {
+          const namePlaceholder = `#attr${index}_${segIndex}`;
+          expressionAttributeNames[namePlaceholder] = segment;
+          return namePlaceholder;
+        });
+
+        const pathExpression = pathPlaceholders.join('.');
+        updateExpressions.push(`${pathExpression} = ${valuePlaceholder}`);
       });
 
       const params = {
@@ -727,26 +731,10 @@ class DynamoDBService {
         };
       }
   
-      // Create project object with the correct structure
-      const project = {
-        projectId: projectData.id || Date.now().toString(),
-        title: projectData.title,
-        description: projectData.description,
-        category: projectData.category,
-        tags: Array.isArray(projectData.tags) ? projectData.tags : (projectData.tags ? projectData.tags.split(',').map(tag => tag.trim()) : []),
-        imageUrl: projectData.image || projectData.imageUrl || '',
-        projectLink: projectData.projectLink || '',
-        githubLink: projectData.githubLink || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        likes: 0,
-        views: 0,
-        downloads: 0
-      };
-  
-      // Store only the project ID in the user's projects.created array
-      const projectId = project.projectId;
-  
+      // Always store only the ID and type in user's projects.created array
+      const projectId = projectData.id || Date.now().toString();
+      const projectType = projectData.type || 'project';
+      
       const params = {
         TableName: this.usersTable,
         Key: {
@@ -766,7 +754,7 @@ class DynamoDBService {
       };
   
       const result = await dynamodb.update(params).promise();
-      return project;
+      return projectId;
     } catch (error) {
       console.error('Error adding user project:', error);
       throw error;
@@ -1566,7 +1554,162 @@ async withdrawConnectionRequest(senderId, receiverId) {
   }
 }
 
+  // ==========================
+  // Agents Operations
+  // ==========================
 
+  async getAllAgents() {
+    try {
+      const params = {
+        TableName: this.agentsTable
+      };
+      
+      const result = await dynamodb.scan(params).promise();
+      return result.Items || [];
+    } catch (error) {
+      console.error('Error getting all agents:', error);
+      throw error;
+    }
+  }
+
+  async getAgent(agentId) {
+    try {
+      const params = {
+        TableName: this.agentsTable,
+        Key: {
+          id: agentId
+        }
+      };
+
+      const result = await dynamodb.get(params).promise();
+      return result.Item || null;
+    } catch (error) {
+      console.error('Error getting agent:', error);
+      throw error;
+    }
+  }
+
+  async createAgent(agentData) {
+    try {
+      const agent = {
+        id: Date.now().toString(),
+        ...agentData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        rating: 0,
+        downloads: 0,
+        views: 0,
+        sales: 0,
+        favoritedBy: []
+      };
+
+      const params = {
+        TableName: this.agentsTable,
+        Item: agent
+      };
+
+      await dynamodb.put(params).promise();
+      return agent;
+    } catch (error) {
+      console.error('Error creating agent:', error);
+      throw error;
+    }
+  }
+
+  async updateAgent(agentId, updateData) {
+    try {
+      // Ensure files/images/video props persist as provided
+      const updateExpressions = [];
+      const expressionAttributeNames = {};
+      const expressionAttributeValues = {};
+
+      Object.keys(updateData).forEach((key, index) => {
+        const attrName = `#attr${index}`;
+        const attrValue = `:val${index}`;
+        
+        updateExpressions.push(`${attrName} = ${attrValue}`);
+        expressionAttributeNames[attrName] = key;
+        expressionAttributeValues[attrValue] = updateData[key];
+      });
+
+      // Add updatedAt
+      updateExpressions.push('#updatedAt = :updatedAt');
+      expressionAttributeNames['#updatedAt'] = 'updatedAt';
+      expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+
+      const params = {
+        TableName: this.agentsTable,
+        Key: {
+          id: agentId
+        },
+        UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ReturnValues: 'ALL_NEW'
+      };
+
+      const result = await dynamodb.update(params).promise();
+      return result.Attributes;
+    } catch (error) {
+      console.error('Error updating agent:', error);
+      throw error;
+    }
+  }
+
+  async deleteAgent(agentId) {
+    try {
+      const params = {
+        TableName: this.agentsTable,
+        Key: {
+          id: agentId
+        }
+      };
+
+      await dynamodb.delete(params).promise();
+      return { success: true, message: 'Agent deleted successfully' };
+    } catch (error) {
+      console.error('Error deleting agent:', error);
+      throw error;
+    }
+  }
+
+  async getAgentsByAuthor(authorId) {
+    try {
+      // Since AuthorIndex doesn't exist, scan the table and filter by author
+      const params = {
+        TableName: this.agentsTable,
+        FilterExpression: 'author = :author',
+        ExpressionAttributeValues: {
+          ':author': authorId
+        }
+      };
+
+      const result = await dynamodb.scan(params).promise();
+      return result.Items || [];
+    } catch (error) {
+      console.error('Error getting agents by author:', error);
+      throw error;
+    }
+  }
+
+  async getAgentsByCategory(category) {
+    try {
+      const params = {
+        TableName: this.agentsTable,
+        IndexName: 'CategoryIndex',
+        KeyConditionExpression: 'category = :category',
+        ExpressionAttributeValues: {
+          ':category': category
+        }
+      };
+
+      const result = await dynamodb.query(params).promise();
+      return result.Items || [];
+    } catch (error) {
+      console.error('Error getting agents by category:', error);
+      throw error;
+    }
+  }
 
 }
 

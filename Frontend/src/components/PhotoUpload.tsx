@@ -441,7 +441,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 w-full sm:w-auto"
               >
-                {isUploading ? 'Uploading...' : 'Apply'}
+                {isUploading ? 'Uploading' : 'Apply'}
               </Button>
             </div>
           </div>
@@ -666,7 +666,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-3 py-2 w-full sm:w-auto"
             >
-              {isUploading ? 'Uploading...' : 'Apply'}
+                {isUploading ? 'Uploading' : 'Apply'}
             </Button>
           </div>
         </div>
