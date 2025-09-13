@@ -255,23 +255,10 @@ const Header = () => {
     // const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeFilter, setActiveFilter] = useState<string>('all');
+    // const [activeFilter, setActiveFilter] = useState<string>('all');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
-
-    // Filter tags for search
-    const filterTags: FilterTag[] = [
-        { id: 'all', label: 'All', active: activeFilter === 'all' },
-        { id: 'professor', label: 'Professor', active: activeFilter === 'professor' },
-        { id: 'student', label: 'Student', active: activeFilter === 'student' },
-        { id: 'enterprise', label: 'Enterprise', active: activeFilter === 'enterprise' },
-        { id: 'freelancer', label: 'Freelancer', active: activeFilter === 'freelancer' },
-        { id: 'experts', label: 'Experts', active: activeFilter === 'experts' },
-        { id: 'jobs', label: 'Jobs', active: activeFilter === 'jobs' }
-    ];
-
-    const handleFilterClick = (tagId: string) => {
-        setActiveFilter(tagId);
-    };
+    const unreadNotifications = notifications.filter(n => n.unread);
+    const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
 
     const handleSearchFocus = () => {
         setIsSearchFocused(true);
@@ -514,18 +501,6 @@ const Header = () => {
                                         onBlur={handleSearchBlur}
                                         className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                     />
-                                    {/* Filter Bar - Only show when search is focused */}
-                                    {isSearchFocused && (
-                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
-                                            <div className="p-3">
-                                                <SearchFilterBar
-                                                    tags={filterTags}
-                                                    onTagClick={handleFilterClick}
-                                                    className="justify-start"
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                             <Navigation isLoggedIn={isLoggedIn} />
@@ -564,6 +539,70 @@ const Header = () => {
                                                 <ShoppingCart className="h-5 w-5 text-gray-600" />
                                             </Link>
                                         </Button>
+                                        {/* Notifications Dropdown */}
+                                        <DropdownMenu open={isNotificationsMenuOpen} onOpenChange={setIsNotificationsMenuOpen}>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:scale-105 transition-all duration-300" aria-label="Notifications">
+                                                    <Bell className="h-5 w-5 text-gray-600" />
+                                                    {unreadNotificationCount > 0 && (
+                                                        <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-none">
+                                                            {unreadNotificationCount}
+                                                        </span>
+                                                    )}
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-80 p-0">
+                                                <div className="p-3 border-b">
+                                                    <div className="text-sm font-semibold text-gray-800">Notifications</div>
+                                                    <div className="text-xs text-gray-500">{unreadNotificationCount} unread</div>
+                                                </div>
+                                                {unreadNotifications.length === 0 ? (
+                                                    <div className="p-4 text-sm text-gray-500">You're all caught up.</div>
+                                                ) : (
+                                                    <div className="max-h-80 overflow-auto">
+                                                        {unreadNotifications.map((notification) => (
+                                                            <div
+                                                                key={notification.id}
+                                                                className="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-b last:border-b-0"
+                                                                onClick={() => handleNotificationClick(notification.id)}
+                                                            >
+                                                                <div className="flex items-start gap-3">
+                                                                    <span className="text-xl">{getNotificationIcon(notification.type)}</span>
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <h4 className="font-medium text-gray-900 text-sm truncate">{notification.title}</h4>
+                                                                            <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                                                                        </div>
+                                                                        <p className="text-xs text-gray-600 line-clamp-2">{notification.message}</p>
+                                                                        <p className="text-[10px] text-gray-400 mt-1">{notification.time}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                <DropdownMenuSeparator />
+                                                <div className="p-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-center text-sm text-black"
+                                                        onClick={() => {
+                                                            setShowNotificationsSidebar(true);
+                                                            setIsNotificationsMenuOpen(false);
+                                                        }}
+                                                    >
+                                                        View all notifications
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-center text-sm text-black"
+                                                        onClick={() => setNotifications(prev => prev.map(n => ({ ...n, unread: false })))}
+                                                    >
+                                                        Mark all as read
+                                                    </Button>
+                                                </div>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                         {/* Profile Button with User Name */}
                                         <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
                                             <User className="h-5 w-5 text-gray-600" />
@@ -654,22 +693,15 @@ const Header = () => {
                                                 onBlur={handleSearchBlur}
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
-                                            {/* Filter Bar - Only show when search is focused */}
-                                            {isSearchFocused && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
-                                                    <div className="p-3">
-                                                        <SearchFilterBar
-                                                            tags={filterTags}
-                                                            onTagClick={handleFilterClick}
-                                                            className="justify-start"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    <Link to="/leaderboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                        <TrendingUp className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium mobile-text-base">Leaderboard</span>
+                                    </Link> {/* <-- ADD THIS LINK */}
+
                                     {/* Cart */}
                                     <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                         <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
@@ -724,16 +756,6 @@ const Header = () => {
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
                                         </div>
-                                        {/* Filter Bar - Only show when search is focused */}
-                                        {isSearchFocused && (
-                                            <div className="mt-2 mb-1 animate-in slide-in-from-top-2 duration-200">
-                                                <SearchFilterBar
-                                                    tags={filterTags}
-                                                    onTagClick={handleFilterClick}
-                                                    className="justify-start"
-                                                />
-                                            </div>
-                                        )}
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
@@ -1024,6 +1046,11 @@ const Header = () => {
                                             <LayoutGrid className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
                                             <span className="text-sm sm:text-base text-gray-700 font-medium">Dashboard</span>
                                         </Link>
+                                        {/* LEADERBOARD LINK FOR PROFILE SIDEBAR */}
+                                        <Link to="/leaderboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
+                                            <span className="text-sm sm:text-base text-gray-700 font-medium">Leaderboard</span>
+                                        </Link> 
                                         <Link to="/connections"
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
@@ -1170,7 +1197,7 @@ const Header = () => {
                     <div className="p-3 sm:p-4 border-t bg-slate-50">
                         <Button
                             variant="outline"
-                            className="w-full text-xs sm:text-sm"
+                            className="w-full justify-center text-sm text-black"
                             onClick={() => {
                                 setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
                             }}

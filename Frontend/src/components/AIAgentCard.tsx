@@ -4,12 +4,17 @@ import { FiStar, FiShoppingCart, FiDownload, FiEye, FiHeart } from 'react-icons/
 import { TbRobot, TbHexagon3D, TbBrandOpenai } from 'react-icons/tb';
 import { GiProcessor } from 'react-icons/gi';
 import { Link } from 'react-router-dom';
+import { useAuthState } from '@/hooks/useAuthState';
+import userService from '@/services/userService';
+import { toast } from 'sonner';
 
 interface AIAgentCardProps {
   agent: {
-    id: number;
+    id: string;
     name: string;
-    creator: string;
+    author: string;
+    authorName?: string;
+    authorUserType?: string;
     price: number;
     rating: number;
     description: string;
@@ -19,13 +24,47 @@ interface AIAgentCardProps {
     downloads: number;
     version: string;
     image?: string;
+    createdBy?: string;
   };
   onAgentClick?: (agent: any) => void;
+  onEditAgent?: (agent: any) => void;
+  onDeleteAgent?: (agentId: string) => void;
+  currentUserId?: string;
 }
 
-const AIAgentCard: React.FC<AIAgentCardProps> = ({ agent, onAgentClick }) => {
+const AIAgentCard: React.FC<AIAgentCardProps> = ({ agent, onAgentClick, onEditAgent, onDeleteAgent, currentUserId }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
+  const { user, token } = useAuthState();
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user || !token) {
+      toast.error('You must be logged in to add items to cart.');
+      return;
+    }
+
+    try {
+      const userData = await userService.getUserProfile();
+      if (!userData) {
+        toast.error('User data not found');
+        return;
+      }
+
+      // Add agent to cart
+      await userService.addToCart({
+        id: agent.id,
+        name: agent.name,
+        price: agent.price || 0,
+        quantity: 1
+      });
+      toast.success('Agent added to cart successfully');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add agent to cart');
+    }
+  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -88,23 +127,72 @@ const AIAgentCard: React.FC<AIAgentCardProps> = ({ agent, onAgentClick }) => {
               <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
                 {agent.name}
               </h3>
-              <p className="text-sm text-gray-400">by {agent.creator}</p>
+              <p className="text-sm text-gray-400">
+                by <button
+                  className="text-cyan-400 hover:underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const authorId = (agent as any).author;
+                    const authorType = (agent as any).authorUserType || '';
+                    if (currentUserId && (authorId === currentUserId)) {
+                      window.location.href = '/profile';
+                      return;
+                    }
+                    const type = (authorType || '').toLowerCase();
+                    if (type === 'freelancer') window.location.href = `/freelancerprofile/${authorId}`;
+                    else window.location.href = `/studentprofile/${authorId}`;
+                  }}
+                >{agent.authorName || agent.author}</button>
+              </p>
             </div>
           </div>
           
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsFavorited(!isFavorited);
-            }}
-            className={`p-2 rounded-lg transition-all duration-200 ${
-              isFavorited 
-                ? 'text-red-400 bg-red-400/10' 
-                : 'text-gray-400 hover:text-red-400 hover:bg-red-400/10'
-            }`}
-          >
-            <FiHeart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
-          </button>
+          {/* Only favorite button on explore; edit/delete will be hidden unless explicitly allowed by parent through props */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsFavorited(!isFavorited);
+              }}
+              className={`p-2 rounded-lg transition-all duration-200 ${
+                isFavorited 
+                  ? 'text-red-400 bg-red-400/10' 
+                  : 'text-gray-400 hover:text-red-400 hover:bg-red-400/10'
+              }`}
+            >
+              <FiHeart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
+            </button>
+            
+            {/* Edit and Delete buttons - only show for current user's agents */}
+            {onEditAgent && onDeleteAgent && currentUserId && agent.createdBy === currentUserId && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onEditAgent) onEditAgent(agent);
+                  }}
+                  className="p-2 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-blue-400/10 transition-all duration-200"
+                  title="Edit agent"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onDeleteAgent) onDeleteAgent(agent.id);
+                  }}
+                  className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200"
+                  title="Delete agent"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Description */}
@@ -173,10 +261,7 @@ const AIAgentCard: React.FC<AIAgentCardProps> = ({ agent, onAgentClick }) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-sm flex items-center gap-2 hover:bg-gray-600/50 hover:border-gray-500 transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Add to cart functionality
-              }}
+              onClick={handleAddToCart}
             >
               <FiShoppingCart className="w-4 h-4" />
             </motion.button>

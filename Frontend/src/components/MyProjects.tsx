@@ -801,7 +801,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             disabled={loading} 
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 sm:px-6 py-2 sm:py-2.5 transition-all duration-200 hover:shadow-md border-0 text-xs sm:text-sm order-1 sm:order-2"
           >
-            {loading ? (editMode ? 'Saving...' : 'Creating...') : (editMode ? 'Save Changes' : 'Create Project')}
+                {loading ? (editMode ? 'Saving' : 'Creating') : (editMode ? 'Save Changes' : 'Create Project')}
           </Button>
         </footer>
       </div>

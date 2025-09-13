@@ -9,10 +9,10 @@ import {
   FaSeedling,
   FaSolarPanel,
 } from "react-icons/fa";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 import { Leaf } from "lucide-react";
 import backdropImage from '@/assets/images/green.jpg';
-
+/**comment*/
 const projectDetails = [
   {
     title: "Solar Community Grid",
@@ -310,7 +310,7 @@ export const UpcomingPhase: React.FC = () => (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-24 items-center">
         {/* Left: Info, Form */}
         <div>
-          <h2 className="sm:text-4xl font-bold text-gray-900 mb-2 md:mb-4 drop-shadow-lg leading-tight mobile-text-2xl">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
             Sustainable Projects
             <br />
             for a Brighter Future

@@ -97,7 +97,7 @@ const BackgroundUpload = ({ onBackgroundChange }: BackgroundUploadProps) => {
           size="sm"
         >
           <Upload className="w-4 h-4 mr-2 text-xs" />
-          {isUploading ? 'Uploading...' : 'Upload Image'}
+                {isUploading ? 'Uploading' : 'Upload Image'}
         </Button>
         
         <input

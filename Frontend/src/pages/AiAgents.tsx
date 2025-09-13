@@ -11,8 +11,13 @@ import { Footer } from '@/components/Footer';
 import { Link } from 'react-router-dom';
 import PublishAgentSidebar from '@/components/PublishAgentSidebar';
 import AIAgentCard from '@/components/AIAgentCard';
+import { API_ENDPOINTS } from '@/config/api';
+import { useAuthState } from '@/hooks/useAuthState';
+import userService from '@/services/userService';
+import { toast } from 'sonner';
 
 const Artificial = () => {
+  const { user, token } = useAuthState();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredAgent, setHoveredAgent] = useState<number | null>(null);
@@ -20,7 +25,13 @@ const Artificial = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [heroText, setHeroText] = useState('Intelligent AI Agents');
   const [showPublishSidebar, setShowPublishSidebar] = useState(false);
+  const [showEditSidebar, setShowEditSidebar] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<any>(null);
   const [publishedAgents, setPublishedAgents] = useState<any[]>([]);
+  const [agents, setAgents] = useState<any[]>([]);
+  const [authorCache, setAuthorCache] = useState<Record<string, any>>({});
+  const [currentUserCustomId, setCurrentUserCustomId] = useState<string | null>(null);
+  const [loadingAgents, setLoadingAgents] = useState(false);
   const agentsRef = useRef<HTMLDivElement>(null);
 
   // Section refs for highlighting
@@ -33,7 +44,110 @@ const Artificial = () => {
     cta: useRef<HTMLDivElement>(null),
   };
 
-  // Mock data
+  // Fetch agents from API
+  const fetchAgents = async () => {
+    try {
+      setLoadingAgents(true);
+      const headers: Record<string, string> = {};
+      
+      // Only add authorization header if token exists
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(API_ENDPOINTS.AGENTS, {
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch agents');
+      }
+
+      const data = await response.json();
+      setAgents(data.agents || []);
+    } catch (error) {
+      console.error('Error fetching agents:', error);
+      toast.error('Failed to load agents');
+    } finally {
+      setLoadingAgents(false);
+    }
+  };
+
+  // Fetch agents on component mount
+  useEffect(() => {
+    fetchAgents();
+  }, []);
+
+  // Fetch current user's customUserId
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (!user) return;
+      try {
+        const data = await userService.getUserProfile();
+        if (data && (data as any).customUserId) setCurrentUserCustomId((data as any).customUserId);
+      } catch (e) {}
+    };
+    fetchCurrentUser();
+  }, [user]);
+
+  // Fetch author names for agents (cache like ProductGrid)
+  useEffect(() => {
+    const fetchAuthors = async () => {
+      const missing = Array.from(new Set((agents || []).map((a: any) => a.author).filter(Boolean)))
+        .filter((id: string) => !authorCache[id]);
+      if (missing.length === 0) return;
+      const updates: Record<string, any> = {};
+      await Promise.all(missing.map(async (id: string) => {
+        try {
+          const res = await fetch(API_ENDPOINTS.USER_BY_ID(id));
+          if (res.ok) {
+            const userJson = await res.json();
+            const profile = userJson.profile || userJson.data?.profile || {};
+            const auth = userJson.auth || userJson.data?.auth || {};
+            const name = [profile.firstName || auth.firstName, profile.lastName || auth.lastName].filter(Boolean).join(' ')
+              || auth.username || profile.username || id;
+            const userType = profile.userType || auth.userType || '';
+            const customId = userJson.customUserId || userJson.data?.customUserId || id;
+            updates[id] = { name, userType, id: customId };
+          }
+        } catch {}
+      }));
+      if (Object.keys(updates).length) setAuthorCache((prev) => ({ ...prev, ...updates }));
+    };
+    fetchAuthors();
+  }, [agents]);
+
+  // Handle edit agent
+  const handleEditAgent = (agent: any) => {
+    setEditingAgent(agent);
+    setShowEditSidebar(true);
+  };
+
+  // Handle delete agent
+  const handleDeleteAgent = async (agentId: string) => {
+    if (!confirm('Are you sure you want to delete this agent?')) return;
+    
+    try {
+      const response = await fetch(API_ENDPOINTS.AGENT(agentId), {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        toast.success('Agent deleted successfully');
+        fetchAgents(); // Refresh the list
+      } else {
+        throw new Error('Failed to delete agent');
+      }
+    } catch (error) {
+      console.error('Error deleting agent:', error);
+      toast.error('Failed to delete agent');
+    }
+  };
+
+  // Categories
   const categories = [
     { id: 'all', name: 'All Agents' },
     { id: 'business', name: 'Business', icon: <FiTrendingUp /> },
@@ -43,74 +157,6 @@ const Artificial = () => {
     { id: 'healthcare', name: 'Healthcare', icon: <GiProcessor /> },
   ];
 
-  const agents = [
-    {
-      id: 1,
-      name: 'SynthAnalytics Pro',
-      creator: 'NeuroTech AI',
-      price: 149.99,
-      rating: 4.9,
-      description: 'Advanced business intelligence agent for real-time market analysis and predictive forecasting',
-      tags: ['business', 'analytics', 'finance'],
-      category: 'business',
-      sales: 1242,
-    },
-    {
-      id: 2,
-      name: 'EduMentor AI',
-      creator: 'LearnSphere',
-      price: 89.99,
-      rating: 4.7,
-      description: 'Personalized learning assistant that adapts to student performance and learning styles',
-      tags: ['education', 'tutoring', 'adaptive'],
-      category: 'education',
-      sales: 876,
-    },
-    {
-      id: 3,
-      name: 'Artisynth Creative',
-      creator: 'Creative Labs',
-      price: 129.99,
-      rating: 4.8,
-      description: 'AI-powered creative assistant for designers and artists with generative capabilities',
-      tags: ['creative', 'design', 'generative'],
-      category: 'creative',
-      sales: 541,
-    },
-    {
-      id: 4,
-      name: 'ProductiBot',
-      creator: 'FlowTech',
-      price: 79.99,
-      rating: 4.6,
-      description: 'Automate repetitive tasks and optimize workflows with intelligent task management',
-      tags: ['productivity', 'automation', 'workflow'],
-      category: 'productivity',
-      sales: 932,
-    },
-    {
-      id: 5,
-      name: 'MediScan AI',
-      creator: 'HealthTech Labs',
-      price: 199.99,
-      rating: 4.9,
-      description: 'Medical diagnosis support system with 98% accuracy in preliminary assessments',
-      tags: ['healthcare', 'diagnostics', 'medical'],
-      category: 'healthcare',
-      sales: 1103,
-    },
-    {
-      id: 6,
-      name: 'LangBridge AI',
-      creator: 'GlobalComm',
-      price: 119.99,
-      rating: 4.7,
-      description: 'Real-time multilingual translation agent with cultural context awareness',
-      tags: ['communication', 'translation', 'nlp'],
-      category: 'productivity',
-      sales: 754,
-    },
-  ];
 
   const researchNews = [
     {
@@ -190,11 +236,11 @@ const Artificial = () => {
   ];
 
   // Filter agents based on category and search query
-  const filteredAgents = agents.filter(agent => {
+  const filteredAgents = (agents || []).filter(agent => {
     const matchesCategory = activeCategory === 'all' || agent.category === activeCategory;
-    const matchesSearch = agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      agent.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      agent.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = agent.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agent.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (Array.isArray(agent.tags) && agent.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())));
     return matchesCategory && matchesSearch;
   });
 
@@ -274,7 +320,7 @@ const Artificial = () => {
       <AnimatePresence>
         {isLoading && (
           <motion.div
-            className="fixed inset-0 bg-gray-950 z-50 flex flex-col items-center justify-center"
+            className="fixed inset-0 bg-transparent z-50 flex flex-col items-center justify-center"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8 } }}
           >
@@ -846,25 +892,59 @@ const Artificial = () => {
           </div>
 
           {/* Agents Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAgents.map((agent) => (
-              <AIAgentCard
-                key={agent.id}
-                agent={{
-                  ...agent,
-                  downloads: Math.floor(Math.random() * 1000) + 100,
-                  version: '1.0.0'
-                }}
-                onAgentClick={(agent) => {
-                  // Navigate to agent detail page
-                  window.location.href = `/ai-agent/${agent.id}`;
-                }}
-              />
-            ))}
-          </div>
+          {loadingAgents ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-gray-800/30 border border-gray-700 rounded-2xl p-6 animate-pulse">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gray-700 rounded-xl"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-700 rounded w-32"></div>
+                      <div className="h-3 bg-gray-700 rounded w-24"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-2 mb-4">
+                    <div className="h-3 bg-gray-700 rounded w-full"></div>
+                    <div className="h-3 bg-gray-700 rounded w-3/4"></div>
+                  </div>
+                  <div className="flex gap-2 mb-4">
+                    <div className="h-6 bg-gray-700 rounded-full w-16"></div>
+                    <div className="h-6 bg-gray-700 rounded-full w-20"></div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-6 bg-gray-700 rounded w-16"></div>
+                    <div className="h-8 bg-gray-700 rounded w-20"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredAgents.map((agent) => (
+                <AIAgentCard
+                  key={agent.id}
+                  agent={{
+                    ...agent,
+                    downloads: agent.downloads || Math.floor(Math.random() * 1000) + 100,
+                    version: agent.version || '1.0.0',
+                    sales: agent.sales || 0,
+                    rating: agent.rating || 0,
+                    authorName: authorCache[agent.author]?.name || agent.author,
+                    authorUserType: authorCache[agent.author]?.userType
+                  }}
+                  onAgentClick={(agent) => {
+                    // Navigate to agent detail page
+                    window.location.href = `/ai-agent/${agent.id}`;
+                  }}
+                  // Edit actions are intentionally not passed here to keep edit-only on profile page
+                  currentUserId={currentUserCustomId || user?.uid}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Empty State */}
-          {filteredAgents.length === 0 && (
+          {!loadingAgents && filteredAgents.length === 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -876,7 +956,13 @@ const Artificial = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowPublishSidebar(true)}
+                onClick={() => {
+                  if (!token) {
+                    window.location.href = '/signin';
+                    return;
+                  }
+                  setShowPublishSidebar(true);
+                }}
                 className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-indigo-700 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-cyan-500/20 flex items-center gap-2 mx-auto"
               >
                 <TbHexagon3D className="w-5 h-5" />
@@ -1234,21 +1320,26 @@ const Artificial = () => {
         <PublishAgentSidebar
           onClose={() => setShowPublishSidebar(false)}
           onAgentCreated={() => {
-            // Add the new agent to the list
-            const newAgent = {
-              id: Date.now(),
-              name: 'New AI Agent',
-              creator: 'You',
-              price: 99.99,
-              rating: 5.0,
-              description: 'A newly published AI agent',
-              tags: ['new', 'ai', 'agent'],
-              category: 'business',
-              sales: 0,
-              downloads: 0,
-              version: '1.0.0'
-            };
-            setPublishedAgents(prev => [...prev, newAgent]);
+            // Refresh the agents list from the API
+            fetchAgents();
+          }}
+        />
+      )}
+
+      {/* Edit Agent Sidebar */}
+      {showEditSidebar && editingAgent && (
+        <PublishAgentSidebar
+          editMode={true}
+          agentToEdit={editingAgent}
+          onClose={() => {
+            setShowEditSidebar(false);
+            setEditingAgent(null);
+          }}
+          onAgentCreated={() => {
+            // Refresh the agents list from the API
+            fetchAgents();
+            setShowEditSidebar(false);
+            setEditingAgent(null);
           }}
         />
       )}

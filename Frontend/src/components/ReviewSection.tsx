@@ -236,7 +236,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
       </div>
 
       {/* Reviews List */}
-      <Card className="border-gray-200 bg-white">
+      {/* <Card className="border-gray-200 bg-white">
         <CardHeader className="flex flex-row items-center justify-between px-2 py-2 sm:px-4 sm:py-4">
           <CardTitle className="text-gray-900 text-base sm:text-lg">Customer Reviews</CardTitle>
           <select
@@ -273,7 +273,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
                       {/* <Badge variant="outline" className="text-[10px] sm:text-xs">
                         Verified Purchase
                       </Badge> */}
-                    </div>
+                    {/* </div>
                     <div className="flex items-center space-x-2 sm:space-x-3 mb-1 sm:mb-2">
                       {renderStars(review.rating, false, "w-3 h-3 sm:w-4 sm:h-4")}
                       <span className="text-[10px] sm:text-sm text-gray-500">
@@ -337,7 +337,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 };
