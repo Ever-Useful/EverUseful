@@ -34,7 +34,7 @@ export const TrustedByLeaders: React.FC = () => {
       name: "Prof. Michael Rodriguez",
       position: "Dean of Engineering, MIT",
       image:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+        "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1472099645785-5658abf4ff4e_11zon.jpg",
       quote:
         "The quality of research and innovation happening on AMOGH is unprecedented. It's the future of academic collaboration.",
       company: "MIT",
@@ -44,7 +44,7 @@ export const TrustedByLeaders: React.FC = () => {
       name: "Lisa Johnson",
       position: "Chief Technology Officer, Tesla",
       image:
-        "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+        "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1580489944761-15a19d654956_11zon.jpg",
       quote:
         "AMOGH's sustainable innovation focus aligns perfectly with our mission. We've found amazing talent here.",
       company: "Tesla",
@@ -54,7 +54,7 @@ export const TrustedByLeaders: React.FC = () => {
       name: "Dr. Raj Patel",
       position: "Head of AI Research, Microsoft",
       image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+        "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1507003211169-0a1dd7228f2d_11zon.jpg",
       quote:
         "The AI-powered matching system on AMOGH has connected us with brilliant minds we never would have found otherwise.",
       company: "Microsoft",

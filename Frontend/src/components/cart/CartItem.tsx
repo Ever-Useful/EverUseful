@@ -20,10 +20,10 @@ const CartItem = ({ item, onRemove, onSave, onBuyNow }: CartItemProps) => {
       <div className="w-full lg:w-48 xl:w-56 flex-shrink-0">
         <div className="w-full h-32 lg:h-[180px] bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg border border-gray-200 overflow-hidden">
           <img 
-            src={item.image || NoImageAvailable}
+            src={item.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
             alt={item.name}
             className="w-full h-full object-cover"
-            onError={e => { e.currentTarget.src = NoImageAvailable; }}
+            onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }}
           />
         </div>
       </div>

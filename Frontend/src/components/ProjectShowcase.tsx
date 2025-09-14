@@ -15,7 +15,7 @@ export const ProjectShowcase = () => {
       university: "MIT",
       rating: 4.9,
       likes: 234,
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=300&h=200&fit=crop",
+      image: "hhttps://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1581091226825-a6a2a5aee158_11zon.jpg",
       tags: ["AI", "Environment", "Mobile App"]
     },
     {
@@ -27,7 +27,7 @@ export const ProjectShowcase = () => {
       university: "Stanford",
       rating: 4.8,
       likes: 187,
-      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=300&h=200&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1498050108023-c5249f4df085+(1)_11zon.jpg",
       tags: ["Platform", "Agriculture", "Local Business"]
     },
     {
@@ -39,7 +39,7 @@ export const ProjectShowcase = () => {
       university: "Harvard",
       rating: 4.9,
       likes: 312,
-      image: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=300&h=200&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1487058792275-0ad4aaf24ca7_11zon.jpg",
       tags: ["VR", "Mental Health", "Therapy"]
     },
     {
@@ -51,7 +51,7 @@ export const ProjectShowcase = () => {
       university: "Berkeley",
       rating: 4.7,
       likes: 156,
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=200&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1461749280684-dccba630e2f6_11zon.jpg",
       tags: ["AI", "Education", "Programming"]
     }
   ];

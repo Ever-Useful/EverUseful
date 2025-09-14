@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 export const TeamSection = () => {
   const teamMembers = [
     {
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1507003211169-0a1dd7228f2d_11zon.jpg",
       name: "Alex Johnson",
       role: "Sustainability Director"
     },
@@ -14,12 +14,12 @@ export const TeamSection = () => {
       role: "Project Lead"
     },
     {
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1472099645785-5658abf4ff4e_11zon.jpg",
       name: "David Chen",
       role: "Green Tech Specialist"
     },
     {
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1438761681033-6461ffad8d80_11zon.jpg",
       name: "Sarah Wilson",
       role: "Environmental Analyst"
     }

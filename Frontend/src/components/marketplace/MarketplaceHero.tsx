@@ -36,7 +36,7 @@ export const MarketplaceHero = ({ searchQuery, onSearchChange }: MarketplaceHero
       <div
         className="absolute inset-0 w-full h-full z-0"
         style={{
-          background: `url(${marketplaceBackdrop}) center center / cover no-repeat`,
+          background: `url(https://amogh-assets.s3.ap-south-1.amazonaws.com/content/marketplace_11zon.jpg) center center / cover no-repeat`,
           filter: "blur(1.5px)",
           opacity: 0.9,
         }}

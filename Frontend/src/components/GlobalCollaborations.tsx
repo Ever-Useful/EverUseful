@@ -1,8 +1,6 @@
 import React, { useRef } from 'react';
-import partnersImage from '@/assets/images/team.png'; // Adjust path as needed
 import { Link } from 'react-router-dom';
-import cfLogo from '@/assets/images/chainfly.png';
-import rlLogo from '@/assets/images/reslink.jpg';
+
 
 type Partner = {
   id: number;
@@ -91,7 +89,7 @@ export const GlobalCollaborations: React.FC = () => {
         {/* Header with image */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-8">
           <div className="flex-1 text-left">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
+            <h2 className="sm:text-4xl font-extrabold text-slate-800 mb-2 md:mb-3 tracking-tight mobile-text-2xl">
               Our <span className="text-cyan-500">Trusted Partners</span>
             </h2>
             <p className="text-base text-slate-600 max-w-xl mobile-text-base">

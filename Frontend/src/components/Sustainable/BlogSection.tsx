@@ -13,7 +13,7 @@ export const BlogSection = () => {
       date: "Jul 2, 2024",
       title: "How Blockchain Is Powering Sustainable Supply Chains",
       excerpt: "Discover how blockchain technology is being used to track and verify sustainable practices in global supply chains, increasing transparency and reducing fraud...",
-      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&h=300&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1506744038136-46273834b3fb_11zon.jpg",
       readTime: "6 min read",
       articleUrl: "https://chainfly.ai/blog/blockchain-sustainable-supply-chains"
     },
@@ -23,7 +23,7 @@ export const BlogSection = () => {
       date: "Apr 15, 2024",
       title: "AI-Powered Precision Farming: Boosting Yields Sustainably",
       excerpt: "See how AI-driven analytics are helping farmers optimize crop yields, reduce resource use, and promote sustainable agriculture practices...",
-      image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1574323347407-f5e1ad6d020b_11zon.jpg",
       readTime: "6 min read",
       articleUrl: "https://chainfly.ai/blog/ai-precision-farming"
     },
@@ -33,7 +33,7 @@ export const BlogSection = () => {
       date: "May 28, 2024",
       title: "Zero Waste Manufacturing: Circular Economy in Action",
       excerpt: "Explore how manufacturers are adopting circular economy principles to minimize waste and maximize resource efficiency, creating a more sustainable future...",
-      image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400&h=300&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1532996122724-e3c354a0b15b_11zon.jpg",
       readTime: "7 min read",
       articleUrl: "https://ellenmacarthurfoundation.org/topics/circular-economy-introduction/overview"
     },
@@ -43,7 +43,7 @@ export const BlogSection = () => {
       date: "Mar 30, 2024",
       title: "Carbon Capture Innovation: Turning CO2 into Building Materials",
       excerpt: "Revolutionary carbon capture technologies are now converting atmospheric CO2 into concrete and construction materials, helping reduce emissions while creating sustainable building solutions...",
-      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1559827260-dc66d52bef19_11zon.jpg",
       readTime: "5 min read",
       articleUrl: "https://www.iea.org/reports/direct-air-capture"
     },
@@ -53,7 +53,7 @@ export const BlogSection = () => {
       date: "Feb 12, 2024",
       title: "How Reforestation Projects Are Reversing Climate Change",
       excerpt: "Large-scale reforestation initiatives are proving that nature-based solutions can sequester carbon, restore biodiversity, and provide sustainable livelihoods for local communities worldwide...",
-      image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1441974231531-c6227db76b6e_11zon.jpg",
       readTime: "8 min read",
       articleUrl: "https://www.worldwildlife.org/stories/how-reforestation-projects-are-helping-fight-climate-change"
     }

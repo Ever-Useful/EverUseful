@@ -78,7 +78,7 @@ const BussinessProfile = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" />
+                    <AvatarImage src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1472099645785-5658abf4ff4e_11zon.jpg" />
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
                   <span className="text-sm">John Doe</span>
@@ -103,7 +103,7 @@ const BussinessProfile = () => {
                     className="h-40 w-full bg-cover bg-center"
                     style={{
                       backgroundImage:
-                        "url('https://images.unsplash.com/photo-1557683316-973673baf926?w=800&auto=format&fit=crop&q=80')",
+                         "url('.s3.ap-souhttps://amogh-assetsth-1.amazonaws.com/content/photo-1557683316-973673baf926_11zon.jpg')",
                       backgroundBlendMode: "overlay",
                       backgroundColor: "rgba(17, 24, 39, 0.7)",
                     }}
@@ -125,7 +125,7 @@ const BussinessProfile = () => {
                     <div className="absolute -top-16 left-1/2 transform -translate-x-1/2">
                       <div className="relative">
                         <Avatar className="w-40 h-40 border-4 border-gray-800 shadow-lg">
-                          <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" />
+                          <AvatarImage src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1472099645785-5658abf4ff4e_11zon.jpg" />
                           <AvatarFallback className="text-3xl">JD</AvatarFallback>
                         </Avatar>
                       </div>

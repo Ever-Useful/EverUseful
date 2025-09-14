@@ -112,7 +112,7 @@ const VisitingProfile = () => {
                 setBackgroundImage(userBackgroundImage);
               } else {
                 // Fallback to default background
-                setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
+                setBackgroundImage("https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1470071459604-3b5ec3a7fe05_11zon.jpg");
               }
               // Use projects data from the user response (no authentication required)
               try {
@@ -193,7 +193,7 @@ const VisitingProfile = () => {
   const auth = freelancer.auth || {};
   const fullName = `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User';
   const about = profile.bio || 'No bio available';
-  const avatar = getUserAvatarUrl({ avatar: profile.avatar }) || NoUserProfile;
+  const avatar = getUserAvatarUrl({ avatar: profile.avatar }) || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png";
   const title = profile.title || '';
   const location = profile.location || '';
   const userType = auth.userType || '';
@@ -248,7 +248,7 @@ const VisitingProfile = () => {
                   alt={fullName}
                   className="w-20 h-20 sm:w-24 md:w-36 sm:h-24 md:h-36 rounded-full object-cover border-4 border-white shadow-lg"
                   onError={(e) => {
-                    e.currentTarget.src = NoUserProfile;
+                    e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png";
                   }}
                 />
                 <div className={`absolute -bottom-2 -right-2 w-6 h-6 sm:w-8 sm:h-8 rounded-full border-4 border-white flex items-center justify-center ${userType === "Available" ? "bg-green-500" : "bg-yellow-500"
@@ -459,10 +459,10 @@ const VisitingProfile = () => {
                       >
                         <div className="w-full md:w-48 flex-shrink-0 h-28 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
-                            src={project.image || NoImageAvailable}
+                            src={project.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
                             alt={project.title || project.name}
                             className="object-cover w-full h-full rounded-l-lg"
-                            onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                            onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }}
                           />
                         </div>
                         <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">

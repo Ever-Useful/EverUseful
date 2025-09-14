@@ -254,7 +254,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
             {/* Single preview at top */}
             <div className="relative">
               <img
-                src={previewUrl || currentImage || NoUserProfile}
+                src={previewUrl || currentImage || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"}
                 alt="Profile preview"
                 style={getImageStyle()}
                 className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-gray-200 shadow-lg"

@@ -942,7 +942,7 @@ const Work: React.FC = () => {
                     <div className="flex justify-center mb-3 sm:mb-4">
                       <div className="relative">
                         <img
-                          src={getUserAvatarUrl({ avatar: f.profile?.avatar }) || noUserProfile}
+                          src={getUserAvatarUrl({ avatar: f.profile?.avatar }) || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"}
                           alt={f.profile?.firstName || 'Freelancer'}
                           className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full object-cover border-2 sm:border-4 border-white shadow-md sm:shadow-lg group-hover:scale-110 transition-transform duration-300"
                         />
@@ -1676,7 +1676,7 @@ const Work: React.FC = () => {
     <section className="relative py-12 sm:py-16 px-4 lg:px-8 overflow-hidden -mt-6 md:-mt-10">
       {/* Enhanced Background with Mesh Gradient SVG */}
       <div className="absolute inset-0">
-        <img src={ctaMeshBg} alt="Soft mesh gradient background" className="w-full h-full object-cover" />
+        <img src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/cta-mesh-bg.svg" alt="Soft mesh gradient background" className="w-full h-full object-cover" />
       </div>
       
       {/* Animated Background Elements */}

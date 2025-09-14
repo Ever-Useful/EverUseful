@@ -54,8 +54,8 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Mobile'}
                     ],
                     featured: [
-                        { name: 'TensorFlow Starter Kit', image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=150&h=100&fit=crop'},
-                        { name: 'React Dashboard Pro', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop'}
+                        { name: 'TensorFlow Starter Kit', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1555949963-aa79dcee981c_11zon.jpg'},
+                        { name: 'React Dashboard Pro', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1551288049-bebda4e38f71_11zon.jpg'}
                     ]
                 },
             }
@@ -82,8 +82,8 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Business Strategy', href: '/freelancing/category/business-strategy' }
                     ],
                     featured: [
-                        { name: 'Top Rated Developers', image: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&h=100&fit=crop', href: '/findexpert' },
-                        { name: 'Enterprise Solutions', image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=150&h=100&fit=crop', href: '/services/enterprise' }
+                        { name: 'Top Rated Developers', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1522075469751-3a6694fb2f61_11zon.jpg', href: '/findexpert' },
+                        { name: 'Enterprise Solutions', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1560472354-b33ff0c44a43_11zon.jpg', href: '/services/enterprise' }
                     ]
                 },
                 mentorship: {
@@ -98,8 +98,8 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Grant Applications', href: '/mentorship/grant-applications' }
                     ],
                     featured: [
-                        { name: 'PhD Mentorship Program', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=100&fit=crop', href: '/mentorship/phd-program' },
-                        { name: 'Industry Expert Network', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=150&h=100&fit=crop', href: '/mentorship/expert-network' }
+                        { name: 'PhD Mentorship Program', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1507003211169-0a1dd7228f2d+(1)_11zon.jpg', href: '/mentorship/phd-program' },
+                        { name: 'Industry Expert Network', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1552664730-d307ca884978_11zon.jpg', href: '/mentorship/expert-network' }
                     ]
                 },
                 dashboard: {
@@ -110,16 +110,16 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'My Projects', href: '/dashboard' },
                     ],
                     featured: [
-                        { name: 'AI Strategy Consulting', image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=150&h=100&fit=crop', href: '/consulting/ai-strategy' },
-                        { name: 'Tech Architecture Review', image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=150&h=100&fit=crop', href: '/consulting/architecture-review' }
+                        { name: 'AI Strategy Consulting', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1551434678-e076c223a692_11zon.jpg', href: '/consulting/ai-strategy' },
+                        { name: 'Tech Architecture Review', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1559136555-9303baea8ebd_11zon.jpg', href: '/consulting/architecture-review' }
                     ]
                 },
                 review: {
                     subcategories: [
                     ],
                     featured: [
-                        { name: 'Expert Code Review', image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=150&h=100&fit=crop', href: '/services/review/expert-code' },
-                        { name: 'Security Audit Service', image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=150&h=100&fit=crop', href: '/services/review/security-audit' }
+                        { name: 'Expert Code Review', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1461749280684-dccba630e2f6_11zon.jpg', href: '/services/review/expert-code' },
+                        { name: 'Security Audit Service', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1555949963-aa79dcee981c+(1)_11zon.jpg', href: '/services/review/security-audit' }
                     ]
                 }
             }
@@ -144,7 +144,7 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Climate Monitoring'}
                     ],
                     featured: [
-                        { name: 'Solar Panel Optimizer', image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=150&h=100&fit=crop'},
+                        { name: 'Solar Panel Optimizer', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1508514177221-188b1cf16e9d_11zon.jpg'},
                         { name: 'Carbon Footprint Tracker', image: 'https://images.unsplash.com/photo-1569163139394-de44cb130c82?w=150&h=100&fit=crop'}
                     ]
                 },
@@ -160,8 +160,8 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Technology Assessment'}
                     ],
                     featured: [
-                        { name: 'Impact Dashboard Pro', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=150&h=100&fit=crop'},
-                        { name: 'ESG Reporting Tool', image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=150&h=100&fit=crop'}
+                        { name: 'Impact Dashboard Pro', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1551288049-bebda4e38f71+(1)_11zon.jpg'},
+                        { name: 'ESG Reporting Tool', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1460925895917-afdab827c52f_11zon.jpg'}
                     ]
                 },
                 agents: {
@@ -175,8 +175,8 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Ethics & Safety'},
                     ],
                     featured: [
-                        { name: 'Global Green Alliance', image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=150&h=100&fit=crop'},
-                        { name: 'Sustainability Network', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=150&h=100&fit=crop'}
+                        { name: 'Global Green Alliance', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1542601906990-b4d3fb778b09+(1)_11zon.jpg'},
+                        { name: 'Sustainability Network', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1552664730-d307ca884978+(1)_11zon.jpg'}
                     ]
                 },
                 campus: {
@@ -190,8 +190,8 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Eco-Friendly Practices'},
                     ],
                     featured: [
-                        { name: 'Global Green Alliance', image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=150&h=100&fit=crop'},
-                        { name: 'Sustainability Network', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=150&h=100&fit=crop'}
+                        { name: 'Global Green Alliance', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1542601906990-b4d3fb778b09+(1)_11zon.jpg'},
+                        { name: 'Sustainability Network', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1552664730-d307ca884978+(1)_11zon.jpg'}
                     ]
                 },
             }
@@ -212,8 +212,8 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Community'},
                     ],
                     featured: [
-                        { name: 'Complete API Guide', image: 'https://images.unsplash.com/photo-1481487196290-c152efe083f5?w=150&h=100&fit=crop'},
-                        { name: 'Integration Handbook', image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=150&h=100&fit=crop'}
+                        { name: 'Complete API Guide', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1481487196290-c152efe083f5_11zon.jpg'},
+                        { name: 'Integration Handbook', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1434030216411-0b793f4b4173_11zon.jpg'}
                     ]
                 },
                 connect: {
@@ -226,8 +226,8 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Showcase'},
                     ],
                     featured: [
-                        { name: 'ML Mastery Course', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&h=100&fit=crop'},
-                        { name: 'Web Dev Bootcamp', image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=150&h=100&fit=crop'}
+                        { name: 'ML Mastery Course', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1516321318423-f06f85e504b3_11zon.jpg'},
+                        { name: 'Web Dev Bootcamp', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1461749280684-dccba630e2f6+(1)_11zon.jpg'}
                     ]
                 },
                 legal: {
@@ -255,8 +255,8 @@ export default function Navigation({ mobile = false, isLoggedIn = false }: { mob
                         { name: 'Give Kudos'}
                     ],
                     featured: [
-                        { name: '24/7 Expert Support', image: 'https://images.unsplash.com/photo-1553484771-371a605b060b?w=150&h=100&fit=crop'},
-                        { name: 'Premium Support Plan', image: 'https://images.unsplash.com/photo-1556155092-8707de31f9c4?w=150&h=100&fit=crop'}
+                        { name: '24/7 Expert Support', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1553484771-371a605b060b_11zon.jpg'},
+                        { name: 'Premium Support Plan', image: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1556155092-8707de31f9c4_11zon.jpg'}
                     ]
                 }
             }

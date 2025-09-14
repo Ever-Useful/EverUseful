@@ -35,7 +35,7 @@ const MissionVisionSection = () => {
           {/* Image */}
           <div className="relative">
             <img 
-              src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+              src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1600880292203-757bb62b4baf_11zon.jpg" 
               alt="Modern workspace collaboration" 
               className="w-full h-64 lg:h-80 xl:h-96 object-cover rounded-2xl shadow-2xl"
             />

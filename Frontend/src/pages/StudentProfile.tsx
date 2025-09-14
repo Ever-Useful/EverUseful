@@ -62,7 +62,7 @@ const Profile = () => {
           setBackgroundImage(userBackgroundImage);
         } else {
           // Fallback to default background
-          setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
+          setBackgroundImage("https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1470071459604-3b5ec3a7fe05_11zon.jpg");
         }
         console.log('StudentProfile - User data set:', data.data);
         console.log('StudentProfile - Projects object:', data.data.projects);
@@ -393,7 +393,7 @@ const handleConnect = async () => {
     name: fullName,
     title: userData?.profile?.title || "New Member",
     bio: userData?.profile?.bio || "This is a new profile. Update your bio!",
-    avatar: userData?.profile?.avatar || NoUserProfile,
+    avatar: userData?.profile?.avatar || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png",
     stats: {
       followers: userData?.social?.followersCount || 0,
       following: userData?.social?.followingCount || 0,
@@ -662,10 +662,10 @@ const label =
                       >
                         <div className="w-full md:w-40 lg:w-48 flex-shrink-0 h-28 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
-                            src={project.image || NoImageAvailable}
+                            src={project.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
                             alt={project.title || project.name}
                             className="object-cover w-full h-full rounded-l-lg"
-                            onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                            onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }}
                           />
                         </div>
                         <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">
