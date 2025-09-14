@@ -50,7 +50,7 @@ export const Footer = () => {
           <div className="lg:col-span-3 space-y-2">
             <div className="flex items-center space-x-3">
               <Link to="#" onClick={scrollToTop} className="flex items-center space-x-2 group">
-                <img src={Logo} alt="AMOGH" className="h-20 w-auto" />
+                <img src= "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Logo+Main_11zon+(1).png" alt="AMOGH" className="h-20 w-auto" />
               </Link>
             </div>
             <p className="text-xs text-gray-400 mt-1">Future-Ready Education Solutions</p>

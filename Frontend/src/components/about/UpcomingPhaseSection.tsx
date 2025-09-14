@@ -8,7 +8,7 @@ const UpcomingPhaseSection = () => {
       {/* Background Image */}
       <div className="absolute inset-0">
         <img 
-          src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+          src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1581091226825-a6a2a5aee158_11zon.jpg" 
           alt="Sustainable Innovation Background" 
           className="w-full h-full object-cover"
         />
@@ -29,7 +29,7 @@ const UpcomingPhaseSection = () => {
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
               <div className="mb-6">
                 <img 
-                  src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                  src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1581092160562-40aa08e78837_11zon.jpg" 
                   alt="Innovation Support" 
                   className="w-full h-48 object-cover rounded-xl"
                 />
@@ -47,7 +47,7 @@ const UpcomingPhaseSection = () => {
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
               <div className="mb-6">
                 <img 
-                  src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                  src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1551836022-deb4988cc6c0_11zon.jpg" 
                   alt="Investment Matching" 
                   className="w-full h-48 object-cover rounded-xl"
                 />
@@ -65,7 +65,7 @@ const UpcomingPhaseSection = () => {
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
               <div className="mb-6">
                 <img 
-                  src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2015&q=80" 
+                  src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1460925895917-afdab827c52f.avif" 
                   alt="Impact Tracking" 
                   className="w-full h-48 object-cover rounded-xl"
                 />

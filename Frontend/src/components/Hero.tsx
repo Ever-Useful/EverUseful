@@ -3,10 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
-import Students from "../../assets/images/Students.jpeg";
-import PhD from "../../assets/images/phdscholars.jpeg";
-import Professors from "../../assets/images/professors.jpeg";
-import Business from "../../assets/images/Business.jpeg";
 
 
 type Option = {
@@ -226,8 +222,6 @@ export const Hero = () => {
                         src={opt.imageUrl}
                         alt={opt.label}
                         className="absolute inset-0 w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
                       />
                       <div className="absolute inset-0 bg-black/50" />
                       <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white p-2 sm:p-3">

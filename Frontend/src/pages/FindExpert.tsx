@@ -108,7 +108,7 @@ const FindExpert = () => {
       skills: user.skills || [],
       rate: user.freelancerData?.hourlyRate ? `$${user.freelancerData.hourlyRate}/hr` : 'N/A',
       experience: user.freelancerData?.experience ? `${user.freelancerData.experience} years` : 'N/A',
-      image: getUserAvatarUrl({ avatar: user.profile?.avatar }) || noUserProfile,
+      image: getUserAvatarUrl({ avatar: user.profile?.avatar }) || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png",
       rating: user.rating || 0,
       completedProjects: user.stats?.projectsCount || 0,
       isAvailable: true,
@@ -260,7 +260,7 @@ const FindExpert = () => {
                       >
                         <div className="flex items-center">
                           <img
-                            src={user.profile?.avatar || noUserProfile}
+                            src={user.profile?.avatar || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"}
                             alt={user.profile?.firstName || 'PhD'}
                             className="w-8 h-8 xs:w-10 xs:h-10 rounded-full object-cover border-2 border-white/30"
                           />
@@ -554,7 +554,7 @@ const FindExpert = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/80 to-transparent z-10"></div>
             <img 
-              src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+              src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1523580494863-6f3031224c94_11zon.jpg" 
               alt="Academic Community" 
               className="w-full h-full object-cover"
             />
@@ -580,7 +580,7 @@ const FindExpert = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-t from-purple-900/80 to-transparent z-10"></div>
             <img 
-              src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+              src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1454165804606-c3d57bc86b40_11zon.jpg" 
               alt="Research Careers" 
               className="w-full h-full object-cover"
             />
@@ -606,7 +606,7 @@ const FindExpert = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-t from-amber-900/80 to-transparent z-10"></div>
             <img 
-              src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+              src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1454165804606-c3d57bc86b40_11zon.jpg" 
               alt="Research Marketplace" 
               className="w-full h-full object-cover"
             />

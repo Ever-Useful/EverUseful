@@ -42,7 +42,7 @@ const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
 };
 
-const trophyImages = [goldenTrophy, silverTrophy, brownTrophy];
+const trophyImages = ["https://amogh-assets.s3.ap-south-1.amazonaws.com/content/goldenTrophy_11zon.png", "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/silverTrophy_11zon.png", "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/brownTrophy_11zon.png"];
 
 const Leaderboard = () => {
     const [activeMainFilter, setActiveMainFilter] = useState('Rank');

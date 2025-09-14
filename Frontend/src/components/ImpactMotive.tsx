@@ -3,20 +3,10 @@ import { Target, Globe, Lightbulb, TrendingUp, Users, Zap, Leaf, Heart } from "l
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import bgImage from "@/assets/images/bg1.jpg";
 
 export const ImpactMotive = () => {
   const { ref: impactRef, inView: impactInView } = useInView({ triggerOnce: true, threshold: 0.3 });
   const { ref: motiveRef, inView: motiveInView } = useInView({ triggerOnce: true, threshold: 0.3 });
-  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
-
-  // Preload background image
-  useEffect(() => {
-    const img = new Image();
-    img.onload = () => setBackgroundLoaded(true);
-    img.src = bgImage;
-  }, []);
 
   const impacts = [
     {
@@ -70,17 +60,14 @@ export const ImpactMotive = () => {
       <section
         id="impact"
         className="relative py-10 bg-cover bg-center"
-        style={{ 
-          backgroundImage: backgroundLoaded ? `url(https://amogh-assets.s3.ap-south-1.amazonaws.com/content/howitworks_11zon.jpg)` : 'none',
-          backgroundColor: backgroundLoaded ? 'transparent' : '#f8fafc'
-        }}
-      >
+        style={{ backgroundImage: `url(https://amogh-assets.s3.ap-south-1.amazonaws.com/content/howitworks_11zon.jpg)` }}
+        >
         <div className="absolute inset-0 bg-white/60 backdrop-blur-xs"></div>
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 max-w-[85vw]">
           <div className="text-center mb-8 sm:mb-16">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
+            <h2 className="sm:text-4xl font-bold text-gray-800 mb-2 sm:mb-4 mobile-text-2xl">
               Transforming Ideas into Reality
-            </h1>
+            </h2>
             <p className="text-base text-gray-600 max-w-5xl mx-auto mobile-text-base">
               Measuring our success through the positive change we create in the innovation ecosystem
             </p>
@@ -131,8 +118,8 @@ export const ImpactMotive = () => {
       <section id="mission" className="relative overflow-hidden py-14 sm:py-16 bg-[#002f48]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[85vw]">
           <div className="text-center mb-8 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight px-2 sm:px-0">
-              Why <span className="text-indigo-400 font-extrabold">AMOGH</span> Exists
+            <h2 className="text-lg sm:text-3xl font-bold text-gray-100 mb-2 sm:mb-4 mobile-text-xl">
+              Why <span className="text-indigo-400 font-extrabold mobile-text-3xl">AMOGH</span> Exists
             </h2>
             <p className="text-base text-gray-200 max-w-5xl mx-auto mobile-text-base">
               Driven by the belief that innovation should know no boundaries, we're building a world where every idea has the potential to create positive impact

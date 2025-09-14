@@ -13,7 +13,7 @@ export const StatsSection = () => {
       {/* Sustainable landscape background image */}
       <div className="absolute left-0 top-0 w-full sm:w-1/2 h-40 sm:h-48 md:h-full">
         <img
-          src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=800&h=600&fit=crop"
+          src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1518495973542-4542c06a5843_11zon.jpg"
           alt="Global sustainable initiatives"
           className="w-full h-full object-cover rounded-none sm:rounded-r-3xl opacity-90"
         />

@@ -133,7 +133,7 @@ const ProductDisplay = () => {
     if (!user) {
       return { 
         name: 'username', 
-        image: NoUserProfile, 
+        image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png", 
         userType: '', 
         id: authorId,
         isLoading: authorsLoading,
@@ -187,7 +187,7 @@ const ProductDisplay = () => {
     const userType = profile.userType || auth.userType || user.userType || '';
     
     // Get avatar with fallback
-    const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
+    const avatar = profile.avatar || auth.avatar || user.avatar || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png";
     
     // Get customUserId with fallback
     const customUserId = user.customUserId || user.data?.customUserId || authorId;
@@ -331,7 +331,7 @@ const ProductDisplay = () => {
                   )} 
                   alt={project.title}
                   className="w-full h-96 object-cover rounded-lg shadow-lg"
-                  onError={(e) => handleImageError(e, NoImageAvailable)}
+                  onError={(e) => handleImageError(e, "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png")}
                 />
               </div>
                   {project.images && Array.isArray(project.images) && project.images.length > 1 && (
@@ -348,7 +348,7 @@ const ProductDisplay = () => {
                         src={getS3ImageUrl(image, 'project', 'thumbnail')} 
                         alt={`${project.title} ${index + 1}`}
                         className="w-full h-10 xs:h-12 sm:h-16 lg:h-20 object-cover"
-                        onError={(e) => handleImageError(e, NoImageAvailable)}
+                        onError={(e) => handleImageError(e, "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png")}
                       />
                     </button>
                   ))}
@@ -624,7 +624,7 @@ const ProductDisplay = () => {
                       src={getUserAvatarUrl({ avatar: getAuthorDetails(project.author).image })} 
                       alt={getAuthorDetails(project.author).name}
                       className="w-16 h-16 rounded-full cursor-pointer"
-                      onError={e => { e.currentTarget.src = NoUserProfile; }}
+                      onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"; }}
                       onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                     />
                     <div>
@@ -681,7 +681,7 @@ const ProductDisplay = () => {
                     src={getUserAvatarUrl({ avatar: getAuthorDetails(project.author).image })} 
                     alt={getAuthorDetails(project.author).name}
                     className="w-12 h-12 rounded-full cursor-pointer transition-transform hover:scale-110"
-                    onError={e => { e.currentTarget.src = NoUserProfile; }}
+                    onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"; }}
                     onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                   />
                   <div className="flex-1">

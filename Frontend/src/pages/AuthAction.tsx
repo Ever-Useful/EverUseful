@@ -80,7 +80,7 @@ const AuthAction: React.FC = () => {
         <div className="bg-white/80 backdrop-blur rounded-2xl shadow-xl border border-white/60 p-6 sm:p-8">
           <div className="flex items-center justify-center mb-4">
             <Link to="/" className="flex items-center space-x-2 group">
-              <img src={Logo} alt="AMOGH" className="h-10 w-auto" />
+              <img src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Logo+Side.png" alt="AMOGH" className="h-10 w-auto" />
             </Link>
           </div>
           <h1 className="text-xl font-bold text-gray-900 text-center mb-1">Account Action</h1>

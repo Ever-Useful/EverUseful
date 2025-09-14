@@ -56,7 +56,7 @@ const CampusAmbassadorPage: React.FC = () => {
               <div className="relative z-10 mt-8 lg:mt-0">
                 <div className="rounded-xl w-full h-56 sm:h-96 lg:h-[500px] overflow-hidden shadow-2xl transform rotate-1 transition duration-700 hover:rotate-0">
                   <img
-                    src={campusImage}
+                    src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/campus.jpeg"
                     alt="Campus life and students"
                     className="w-full h-full object-cover"
                   />

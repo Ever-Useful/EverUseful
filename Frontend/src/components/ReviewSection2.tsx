@@ -44,7 +44,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
       id: 1,
       author: {
         name: "Alex Thompson",
-        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+        image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1472099645785-5658abf4ff4e_11zon.jpg",
         verified: true,
         initials: "AT"
       },
@@ -59,7 +59,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
       id: 2,
       author: {
         name: "Maria Rodriguez",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+        image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1438761681033-6461ffad8d80_11zon.jpg",
         verified: true,
         initials: "MR"
       },
@@ -74,7 +74,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
       id: 3,
       author: {
         name: "Dr. James Wilson",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+        image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1507003211169-0a1dd7228f2d_11zon.jpg",
         verified: true,
         initials: "JW"
       },
@@ -101,6 +101,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
       isHelpful: false
     }
   ];
+
 
   const ratingDistribution = [
     { stars: 5, count: 89, percentage: 70 },

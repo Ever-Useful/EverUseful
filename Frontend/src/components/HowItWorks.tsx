@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { useInView } from "react-intersection-observer";
 
 import {
   UserPlus,
@@ -14,7 +13,6 @@ import {
   VolumeX,
 } from "lucide-react";
 import mainVideo from "@/assets/videos/promotion.mp4";
-import bgImage from "@/assets/images/howitworks.jpg";
 import { Link } from 'react-router-dom';
 
 type Step = {
@@ -29,10 +27,6 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
   const [playVideo, setPlayVideo] = useState(!deferVideo);
-  const { ref: videoSectionRef, inView: videoInView } = useInView({ 
-    triggerOnce: true, 
-    threshold: 0.3 
-  });
 
   // Memoize steps array to prevent recreation
   const steps = useMemo<Step[]>(() => [
@@ -148,16 +142,15 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
           {/* Overlay for contrast */}
           <div className="absolute inset-0 bg-black/30 pointer-events-none" />
           <div className="relative z-10 w-full flex flex-col items-center justify-center py-8 sm:py-12 px-3 sm:px-6">
-            <div ref={videoSectionRef} className="video-shadow-wrap w-full max-w-xs sm:max-w-xl mx-auto">
+            <div className="video-shadow-wrap w-full max-w-xs sm:max-w-xl mx-auto">
               <video
                 ref={videoRef}
-                src={videoInView ? mainVideo : undefined}
-                autoPlay={playVideo && videoInView}
+                src={mainVideo}
+                autoPlay={playVideo}
                 loop
                 muted={muted}
                 playsInline
-                preload="none"
-                loading="lazy"
+                preload="metadata"
                 className="w-full h-44 sm:h-64 md:h-[320px] object-cover bg-black rounded-2xl relative z-10"
                 style={{ background: "#000" }}
               />
@@ -187,7 +180,7 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
 
         {/* Right: Steps/content with solid background */}
         <div className="md:w-1/2 w-full flex flex-col justify-center bg-slate-100 py-10 sm:py-16 px-4 sm:px-8">
-          <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-4 animate-fade-in leading-tight px-2 sm:px-0">
+          <h3 className="text-lg sm:text-2xl md:text-4xl font-semibold text-gray-800 mb-3 sm:mb-4 mt-0 mobile-text-2xl md:mobile-text-4xl">
             How you start here...
           </h3>
           <ol className="space-y-5 sm:space-y-7">

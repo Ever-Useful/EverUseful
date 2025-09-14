@@ -8,7 +8,6 @@ import {
   Headphones,
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
-import provideImg from "@/assets/images/provide-removebg-preview (1).png";
 
 export const WhatWeProvide = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -148,7 +147,7 @@ export const WhatWeProvide = () => {
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black   mb-4 animate-fade-in leading-tight px-2 sm:px-0">
+          <h2 className="mt-2 text-4xl font-bold text-gray-800 leading-tight mobile-text-2xl">
             Empowering Innovation with{" "}
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               Creative Technology
@@ -302,7 +301,7 @@ export const WhatWeProvide = () => {
             }}
             className="hidden sm:block"
           >
-            <img
+             <img
               src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/provide-removebg-preview.png"
               alt="What We Provide"
               className="w-full h-full object-cover object-bottom-right rounded-2xl shadow-lg"
