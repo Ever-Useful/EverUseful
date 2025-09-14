@@ -49,7 +49,7 @@ const HeroSection = () => {
           <div className="relative">
             <div className="rounded-2xl overflow-hidden shadow-2xl">
               <img 
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop&crop=center"
+                src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1522202176988-66273c2fd55f+(1)_11zon.jpg"
                 alt="Diverse team collaborating in modern workspace"
                 className="w-full h-[500px] object-cover"
               />

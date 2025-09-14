@@ -8,7 +8,7 @@ const projects = [
     id: 1,
     title: "Clean Water Access",
     description: "Revolutionary water purification and distribution systems for underserved communities worldwide.",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&h=400&fit=crop",
+    image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1506744038136-46273834b3fb_11zon+(1).jpg",
     category: "Water Solutions",
     impact: "50M+ people served",
 
@@ -18,7 +18,7 @@ const projects = [
     id: 2,
     title: "Renewable Energy Hubs",
     description: "Community-centered solar, wind, and hybrid energy solutions for sustainable power generation.",
-    image: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?w=600&h=400&fit=crop",
+    image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1482938289607-e9573fc25ebb_11zon.jpg",
     category: "Energy Solutions",
     impact: "75% emission reduction",
 
@@ -29,7 +29,7 @@ const projects = [
     id: 3,
     title: "Smart Agriculture",
     description: "AI-powered sustainable farming techniques and crop management systems for food security.",
-    image: "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=600&h=400&fit=crop",
+    image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1523712999610-f77fbcfc3843_11zon.jpg",
     category: "Food Security",
     impact: "40% yield increase",
 
@@ -39,7 +39,7 @@ const projects = [
     id: 4,
     title: "Waste Management",
     description: "Circular economy solutions for waste reduction and resource recovery in urban areas.",
-    image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=600&h=400&fit=crop",
+    image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1532996122724-e3c354a0b15b_11zon.jpg",
     category: "Circular Economy",
     impact: "90% waste reduction",
 
@@ -49,7 +49,7 @@ const projects = [
     id: 5,
     title: "Carbon Capture",
     description: "Innovative technologies for capturing and utilizing atmospheric carbon dioxide.",
-    image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=400&fit=crop",
+    image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1559827260-dc66d52bef19_11zon.jpg",
     category: "Climate Tech",
     impact: "1M+ tons CO2 captured",
     communities: "Industrial & Research"
@@ -58,13 +58,13 @@ const projects = [
     id: 6,
     title: "Biodiversity Conservation",
     description: "Ecosystem restoration and wildlife conservation through community-based initiatives.",
-    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=400&fit=crop",
+    image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1441974231531-c6227db76b6e_11zon.jpg",
     category: "Conservation",
     impact: "10K+ species protected",
 
     communities: "Forest & Marine"
   }
-];
+]
 
 export const ProjectsSection = () => {
   const [watchlist, setWatchlist] = useState<number[]>([]);

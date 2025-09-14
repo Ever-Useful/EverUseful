@@ -10,21 +10,21 @@ export const CommercialSection = () => {
             <div className="relative">
               {/* First image - main */}
               <img 
-                src="https://images.unsplash.com/photo-1615729947596-a598e5de0ab3?w=500&h=400&fit=crop" 
+                src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1615729947596-a598e5de0ab3_11zon.jpg" 
                 alt="Sustainable technology" 
                 className="rounded-xl sm:rounded-2xl w-full h-48 sm:h-56 md:h-72 lg:h-80 object-cover shadow-lg"
               />
               
               {/* Second image - overlapped top right */}
               <img 
-                src="https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=300&h=250&fit=crop" 
+                src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1523712999610-f77fbcfc3843_11zon.jpg" 
                 alt="Green innovation" 
                 className="hidden sm:block absolute -top-2 -right-2 sm:-top-4 sm:-right-4 md:-top-6 md:-right-6 rounded-lg sm:rounded-2xl w-20 h-16 sm:w-28 sm:h-20 md:w-48 md:h-36 object-cover shadow-xl border-2 sm:border-4 border-white"
               />
               
               {/* Third image - overlapped bottom left */}
               <img 
-                src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&h=250&fit=crop" 
+                src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1501854140801-50d01698950b_11zon.jpg" 
                 alt="Environmental solutions" 
                 className="hidden sm:block absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 md:-bottom-6 md:-left-6 rounded-lg sm:rounded-2xl w-20 h-16 sm:w-28 sm:h-20 md:w-48 md:h-36 object-cover shadow-xl border-2 sm:border-4 border-white"
               />

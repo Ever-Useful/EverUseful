@@ -21,13 +21,13 @@ export const SustainabilitySection = () => {
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex flex-col gap-4 flex-1">
                 <img
-                  src="https://images.unsplash.com/photo-1625301840055-7c1b7198cfc0?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1625301840055-7c1b7198cfc0.avif"
                   alt="Sustainable forest"
                   className="rounded-xl shadow-lg object-cover h-full min-h-[200px]"
                   loading="lazy"
                 />
                 <img
-                  src="https://images.unsplash.com/photo-1587291376001-b838207de820?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1587291376001-b838207de820_11zon+(1).jpg"
                   alt="Green energy"
                   className="rounded-xl shadow-lg object-cover h-full min-h-[200px]"
                   loading="lazy"
@@ -35,7 +35,7 @@ export const SustainabilitySection = () => {
               </div>
               <div className="flex-1">
                 <img
-                  src="https://images.unsplash.com/photo-1632103996718-4a47cf68b75e?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1632103996718-4a47cf68b75e_11zon+(1).jpg"
                   alt="Eco-friendly city"
                   className="rounded-xl shadow-lg object-cover h-full min-h-[424px]"
                   loading="lazy"

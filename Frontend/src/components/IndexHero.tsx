@@ -15,7 +15,7 @@ const OPTIONS: Option[] = [
   {
     id: 1,
     imageUrl:
-      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80", // student studying
+      "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1503676260728-1c00da094a0b_11zon.jpg", // student studying
     label: "Students",
     description: "Join peer communities & showcase projects",
     iconClass: "fas fa-user-graduate",
@@ -23,7 +23,7 @@ const OPTIONS: Option[] = [
   {
     id: 2,
     imageUrl:
-      "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?auto=format&fit=crop&w=800&q=80", // scientist in lab
+      "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1531746790731-6c087fecd65a_11zon.jpg", // scientist in lab
     label: "PhD Holders",
     description: "Collaborate on research & funding",
     iconClass: "fas fa-flask",
@@ -31,7 +31,7 @@ const OPTIONS: Option[] = [
   {
     id: 3,
     imageUrl:
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80", // professor lecturing
+      "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1519389950473-47ba0277781c_11zon+(1).jpg", // professor lecturing
     label: "Professors",
     description: "Share knowledge & mentor next gen",
     iconClass: "fas fa-chalkboard-teacher",
@@ -39,7 +39,7 @@ const OPTIONS: Option[] = [
   {
     id: 4,
     imageUrl:
-      "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80", // business meeting
+      "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1556761175-4b46a572b786_11zon.jpg", // business meeting
     label: "Business",
     description: "Discover solutions & partnerships",
     iconClass: "fas fa-briefcase",

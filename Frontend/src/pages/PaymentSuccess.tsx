@@ -38,7 +38,7 @@ const PaymentSuccess = () => {
     product: {
       title: "AI-Powered Climate Change Prediction Model",
       category: "AI & Sustainability",
-      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1451187580459-43490279c0fa+(1)_11zon.jpg",
       deliverables: [
         "Complete source code",
         "Documentation",

@@ -39,7 +39,7 @@ export const NewsletterSection = () => {
       {/* Background Image */}
       <div className="absolute inset-0">
         <img 
-          src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=2070&q=80" 
+          src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1473341304170-971dccb5ac1e_11zon.jpg" 
           alt="Background" 
           className="w-full h-full object-cover blur-sm"
         />

@@ -780,7 +780,7 @@ const SignUp = () => {
           <div className="bg-white rounded-xl px-3 xs:px-4 lg:px-6 items-center justify-around shadow-md w-fit mx-auto">
             <div className="flex items-center space-x-1 flex-shrink-0">
               <Link to="/" className="flex items-center space-x-2 group">
-                <img src={Logo} alt="AMOGH" className="h-10 xs:h-14 w-auto md:h-8" />
+                <img src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Logo+Side.png" alt="AMOGH" className="h-10 xs:h-14 w-auto md:h-8" />
               </Link>
             </div>
           </div>

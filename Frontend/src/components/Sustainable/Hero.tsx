@@ -32,7 +32,7 @@ export const Hero = () => {
           />
         ) : (
           <img
-            src={sustainableHeroImage}
+            src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/sustainable-hero_11zon.jpg"
             alt="Sustainable development and green innovation"
             className="h-full w-full object-cover"
           />
@@ -83,7 +83,7 @@ export const Hero = () => {
           ) : (
             <div className="relative">
               <img
-                src={sustainableHeroImage}
+                src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/sustainable-hero_11zon.jpg"
                 alt="Sustainable development and green innovation"
                 className="w-full h-48 sm:h-56 object-cover rounded-xl shadow-lg"
               />

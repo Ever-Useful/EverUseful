@@ -216,7 +216,7 @@ const Cart = () => {
               licenseType: 'commercial' as const,
               tags: projectData.tags || ['Unknown'],
               quantity: item.quantity,
-              image: projectData.image || (Array.isArray(projectData.images) && projectData.images.length > 0 ? projectData.images[0] : NoImageAvailable)
+              image: projectData.image || (Array.isArray(projectData.images) && projectData.images.length > 0 ? projectData.images[0] : "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png")
             };
           } catch (error) {
             console.error(`Error fetching project ${item.productId}:`, error);
@@ -234,7 +234,7 @@ const Cart = () => {
               licenseType: 'commercial' as const,
               tags: ['Unknown'],
               quantity: item.quantity,
-              image: NoImageAvailable
+              image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"
             };
           }
         }))
@@ -448,10 +448,10 @@ const Cart = () => {
                   <div key={item.id} className="rounded-xl bg-white shadow-md hover:shadow-lg transition-all border border-gray-100 p-3 xs:p-4 flex flex-col sm:flex-row gap-4">
                     <div className="flex-shrink-0 flex items-center justify-center w-full sm:w-32">
                       <img
-                        src={item.image || NoImageAvailable}
+                        src={item.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
                         alt={item.name}
                         className="w-24 h-24 object-cover rounded-lg border border-gray-200 bg-gray-50"
-                        onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                        onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }}
                       />
                     </div>
                     <div className="flex-1 flex flex-col justify-between">

@@ -1,21 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import bgImage from '@/assets/images/community.jpg';
 import { Link } from "react-router-dom";
 
 export const CommunityConnect: React.FC = () => {
-  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
-
-  // Preload background image
-  useEffect(() => {
-    const img = new Image();
-    img.onload = () => setBackgroundLoaded(true);
-    img.src = bgImage;
-  }, []);
-
-  const scrollToTop = () => {
+   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
       left: 0,
@@ -32,10 +21,7 @@ export const CommunityConnect: React.FC = () => {
       <div className="absolute inset-0 -z-20">
         <div
           className="w-full h-full bg-cover bg-center filter blur-xs"
-          style={{ 
-            backgroundImage: backgroundLoaded ? `url(https://amogh-assets.s3.ap-south-1.amazonaws.com/content/community_11zon.jpg)` : 'none',
-            backgroundColor: backgroundLoaded ? 'transparent' : '#1f2937'
-          }}
+          style={{ backgroundImage: `url(https://amogh-assets.s3.ap-south-1.amazonaws.com/content/community_11zon.jpg)` }}
         />
       </div>
       {/* Dark Overlay */}
@@ -44,7 +30,7 @@ export const CommunityConnect: React.FC = () => {
       {/* Centered Content */}
       <div className="flex flex-col items-center justify-center text-center px-4">
         <motion.h2
-          className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight px-2 sm:px-0"
+          className="sm:text-4xl font-bold text-white drop-shadow-2xl mobile-text-2xl"
           style={{ WebkitTextStroke: '1px rgba(255,255,255,0.9)' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

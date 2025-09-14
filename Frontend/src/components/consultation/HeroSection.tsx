@@ -74,18 +74,18 @@ export const HeroSection = ({
             <div className="grid grid-cols-2 gap-6">
               {/* Main hero image */}
               <div className="col-span-2 relative group">
-                <img src={heroImage} alt="Sustainability consultation" className="w-full h-80 object-cover rounded-2xl shadow-[var(--shadow-card)] group-hover:scale-105 transition-transform duration-500" />
+                <img src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/image_11zon.png" alt="Sustainability consultation" className="w-full h-80 object-cover rounded-2xl shadow-[var(--shadow-card)] group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent rounded-2xl" />
               </div>
               
               {/* Overlapped smaller images */}
               <div className="relative group">
-                <img src={studentsImage} alt="Students working on renewable energy" className="w-full h-48 object-cover rounded-xl shadow-[var(--shadow-card)] group-hover:scale-105 transition-transform duration-500" />
+                <img src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/students-renewable_11zon.jpeg" alt="Students working on renewable energy" className="w-full h-48 object-cover rounded-xl shadow-[var(--shadow-card)] group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-eco-green/20 to-transparent rounded-xl" />
               </div>
               
               <div className="relative group -mt-12">
-                <img src={professorsImage} alt="Professors consulting on sustainability" className="w-full h-48 object-cover rounded-xl shadow-[var(--shadow-card)] group-hover:scale-105 transition-transform duration-500" />
+                <img src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/professors-consulting_11zon.jpg" alt="Professors consulting on sustainability" className="w-full h-48 object-cover rounded-xl shadow-[var(--shadow-card)] group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-eco-blue/20 to-transparent rounded-xl" />
               </div>
             </div>

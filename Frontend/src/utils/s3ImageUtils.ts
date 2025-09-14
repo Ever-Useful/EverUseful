@@ -17,7 +17,7 @@ export const getS3ImageUrl = (
   size: 'thumbnail' | 'small' | 'medium' | 'large' = 'medium'
 ): string => {
   if (!imageUrl) {
-    return type === 'avatar' ? NoUserProfile : NoImageAvailable;
+    return type === 'avatar' ? "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png" : "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png";
   }
 
   // If it's already a full URL, return as is

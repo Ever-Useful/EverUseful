@@ -50,7 +50,7 @@ export const ChatBox = ({ freelancerName, freelancerImage }: ChatBoxProps) => {
             alt={freelancerName}
             className="w-10 h-10 rounded-full object-cover"
             onError={(e) => {
-              e.currentTarget.src = NoUserProfile;
+             e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png";
             }}
           />
           <div className="flex-1">
