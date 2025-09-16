@@ -14,7 +14,8 @@ import UserService, { UserSearchResult } from "@/services/userService";
 import relationService from "@/services/relationService";
 import { socket } from "@/socket.ts";
 import { useUserProfile } from '@/contexts/UserProfileContext';
-type Connection = {
+
+type ConnectionItem = {
   id: string;
   name: string;
   title: string;
@@ -27,7 +28,7 @@ type Connection = {
   sentTime?: string;
 };
 
-const mockConnections: Connection[] = [
+const mockConnections: ConnectionItem[] = [
   {
     id: '1',
     name: 'Sarah Chen',
@@ -150,30 +151,30 @@ const mockConnections: Connection[] = [
   }
 ];
 
-const mockSuggestions: Connection[] = [
-  {
-    id: '4',
-    name: 'David Kim',
-    title: 'UX Designer',
-    company: 'DesignStudio',
-    location: 'Seattle, WA',
-    mutualConnections: 5,
-    isConnected: false,
-    skills: ['UI/UX', 'Figma', 'Design Systems'],
-    sentTime: 'Sent 2 weeks ago'
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    mutualConnections: 3,
-    isConnected: false,
-    skills: ['Machine Learning', 'Python', 'Statistics'],
-    sentTime: 'Sent 3 weeks ago'
-  }
-];
+// const mockSuggestions: Connection[] = [
+//   {
+//     id: '4',
+//     name: 'David Kim',
+//     title: 'UX Designer',
+//     company: 'DesignStudio',
+//     location: 'Seattle, WA',
+//     mutualConnections: 5,
+//     isConnected: false,
+//     skills: ['UI/UX', 'Figma', 'Design Systems'],
+//     sentTime: 'Sent 2 weeks ago'
+//   },
+//   {
+//     id: '5',
+//     name: 'Lisa Wang',
+//     title: 'Data Scientist',
+//     company: 'DataTech',
+//     location: 'Boston, MA',
+//     mutualConnections: 3,
+//     isConnected: false,
+//     skills: ['Machine Learning', 'Python', 'Statistics'],
+//     sentTime: 'Sent 3 weeks ago'
+//   }
+// ];
 
 type TabType = 'received' | 'sent' | 'find';
 
@@ -184,6 +185,7 @@ const Connections = () => {
   const [connections, setConnections] = useState(mockConnections);
   // const [suggestions, setSuggestions] = useState(mockSuggestions);
   const [suggestions, setSuggestions] = useState<UserSearchResult[]>([]);
+  // const [suggestions, setSuggestions] = useState<UserProfile[]>([]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
@@ -193,6 +195,7 @@ const Connections = () => {
   const [connectedUsers, setConnectedUsers] = useState<UserSearchResult[]>([]);
   const [allUsers, setAllUsers] = useState<UserSearchResult[]>([]);
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
+  const [myRelations, setMyRelations] = useState(null);
 
 
 
@@ -216,25 +219,79 @@ useEffect(() => {
   fetchResults();
 }, [searchQuery])
 
-// // Fetch suggestions on mount
-// useEffect(() => {
-//   const fetchSuggestions = async () => {
-//     try {
-//       const result = await UserService.getSuggestedUsers();
-//       setSuggestions(result);
-//     } catch (err) {
-//       console.error("Failed to fetch suggestions:", err);
-//     }
-//   };
+  // Fetch all users and set suggestions (except self)
+useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      const response = await UserService.getAllUsers();
+      // If response is the whole object, extract .users
+      const users = Array.isArray(response) ? response : response?.users || [];
+      setAllUsers(users);
+      console.log("Fetched users:", users);
+    } catch (err) {
+      console.error("Error fetching all users:", err);
+      setAllUsers([]);
+    }
+  };
+  fetchUsers();
+}, []);
 
-//   fetchSuggestions();
-// }, []);
+// Fetch my relations (connections) ONCE loggedInUserId is ready
+useEffect(() => {
+  if (!loggedInUserId) {
+    setMyRelations(null);
+    return;
+  }
+  (async () => {
+    try {
+      const res = await relationService.getMyRelations();
+      // FIX: set directly, don't unwrap `.data`
+      setMyRelations(res || null);
+      console.log("Fetched myRelations:", res);
+    } catch (err) {
+      console.error("Failed to fetch relations:", err);
+      setMyRelations(null);
+    }
+  })();
+}, [loggedInUserId]);
+
 
 useEffect(() => {
-  if (!allUsers.length) return;
-  // Show all users except yourself
-  setSuggestions(allUsers.filter(u => u.customUserId !== loggedInUserId));
-}, [allUsers, loggedInUserId]);
+  if (!loggedInUserId || !myRelations) {
+    setSuggestions([]);
+    return;
+  }
+
+  const connectedIds = Object.keys(myRelations.connections || {});
+  const sentIds = Object.keys(myRelations.requestsSent || {});
+  const receivedIds = Object.keys(myRelations.requestsReceived || {});
+  const blockedIds = Object.keys(myRelations.blockedUsers || {});
+
+  const excludeIds = new Set([
+    loggedInUserId,
+    ...connectedIds,
+    ...sentIds,
+    ...receivedIds,
+    ...blockedIds,
+  ]);
+
+  console.log("loggedInUserId:", loggedInUserId);
+  console.log("excludeIds:", Array.from(excludeIds));
+  console.log("first user:", allUsers[0]);
+
+  const filtered = allUsers.filter(u => {
+    const id = u.customUserId;
+    if (!id) {
+      console.warn("User without customUserId:", u);
+      return false;
+    }
+    return !excludeIds.has(id);
+  });
+
+  console.log("filtered suggestions:", filtered);
+  setSuggestions(filtered);
+}, [allUsers, loggedInUserId, myRelations]);
+
 
 
 
@@ -581,21 +638,7 @@ useEffect(() => {
     );
   };
 
-  // const filteredConnections = connections.filter(person =>
-  //   person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //   person.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //   person.company.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
-
-  // // For the 'find' tab, filter all connections and suggestions that are not already connected
-  // const filteredSearchResults = [
-  //   ...connections.filter(person => !person.isConnected),
-  //   ...suggestions.filter(person => !person.isConnected)
-  // ].filter(person =>
-  //   person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //   person.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //   person.company.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
+  
   const ConnectionItem = ({ person, showWithdrawButton = false, showConnectButton = false }: { 
     person: Connection; 
     showWithdrawButton?: boolean;
@@ -715,12 +758,12 @@ useEffect(() => {
           try {
             await relationService.accept(user.customUserId);
 
-            // ✅ Remove from received list → card disappears
+            //  Remove from received list → card disappears
             setReceivedUsers(prev =>
               prev.filter(u => u.customUserId !== user.customUserId)
             );
 
-            // ✅ Add to connected list
+            //  Add to connected list
             setConnectedUsers(prev => [
               ...prev,
               {
@@ -922,44 +965,46 @@ useEffect(() => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
+                        {/* Debug log for suggestions */}
+                        {console.log("Suggestions before render:", suggestions)}
                         <div className="divide-y divide-gray-100">
                           {suggestions.length > 0 ? (
-  suggestions.map(user => (
-    <div
-      key={user.customUserId}
-      onClick={() => handleSuggestionCardClick(user)}
-      className="cursor-pointer hover:bg-gray-50 transition flex items-center"
-    >
-      <ConnectionItem
-        person={{
-          id: user.customUserId,
-          name: `${user.profile.firstName || ""} ${user.profile.lastName || ""}`.trim(),
-          title: user.profile.userType || "student",
-          company: user.profile.username || "",
-          avatar: user.profile.avatar || "",
-          location: "",
-          mutualConnections: 0,
-          isConnected: false,
-          skills: []
-        }}
-        showConnectButton
-      />
-      <Button
-        size="sm"
-        className="ml-4 bg-blue-600 hover:bg-blue-700 text-white"
-        onClick={e => {
-          e.stopPropagation(); // prevent navigation
-          handleSuggestionConnect(user);
-        }}
-      >
-        <UserPlus className="h-4 w-4 mr-1" />
-        Connect
-      </Button>
-    </div>
-  ))
-) : (
-  <p className="text-gray-500 p-4">No suggestions right now</p>
-)}
+                            suggestions.map(user => (
+                              <div
+                                key={user.customUserId}
+                                onClick={() => handleSuggestionCardClick(user)}
+                                className="cursor-pointer hover:bg-gray-50 transition flex items-center"
+                              >
+                                <ConnectionItem
+                                  person={{
+                                    id: user.customUserId,
+                                    name: `${user.profile.firstName || ""} ${user.profile.lastName || ""}`.trim(),
+                                    title: user.profile.userType || "student",
+                                    company: user.profile.username || "",
+                                    avatar: user.profile.avatar || "",
+                                    location: "",
+                                    mutualConnections: 0,
+                                    isConnected: false,
+                                    skills: [],
+                                  }}
+                                  
+                                />
+                                {/* <Button
+                                  size="sm"
+                                  className="ml-4 bg-blue-600 hover:bg-blue-700 text-white"
+                                  onClick={e => {
+                                    e.stopPropagation(); // prevent navigation
+                                    handleSuggestionConnect(user);
+                                  }}
+                                >
+                                  <UserPlus className="h-4 w-4 mr-1" />
+                                  Connect
+                                </Button> */}
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-gray-500 p-4">No suggestions right now</p>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
