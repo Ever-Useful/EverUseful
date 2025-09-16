@@ -338,11 +338,10 @@ const Header = () => {
 // }, []);
 
 //     // Mark notification as read when clicked
-// const handleNotificationClick = async (id: string | number) => {
-//     await relationService.markNotificationAsRead(String(id));
-//     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-//     setUnreadNotificationCount(prev => Math.max(0, prev - 1));
-// };
+    // Route to connections page when any notification is clicked
+    const handleNotificationClick = (id: string | number) => {
+        navigate('/connections');
+    };
 
     // Mark all as read and clear all notifications
     // const handleMarkAllAsRead = () => {
@@ -635,11 +634,11 @@ useEffect(() => {
 
 // Mark all as read
 const handleMarkAllAsRead = async () => {
-  await relationService.clearNotifications();
-  setNotifications([]);
-  setUnreadNotificationCount(0);
-  localStorage.setItem('userNotifications', JSON.stringify([]));
-  localStorage.setItem('userNotificationsUnreadCount', '0');
+    await relationService.clearNotifications();
+    setNotifications([]);
+    setUnreadNotificationCount(0);
+    localStorage.setItem('userNotifications', JSON.stringify([]));
+    localStorage.setItem('userNotificationsUnreadCount', '0');
 };
     return (
         <>
@@ -771,13 +770,13 @@ const handleMarkAllAsRead = async () => {
                                                     >
                                                         View all notifications
                                                     </Button>
-<Button
+                                                    <Button
     variant="outline"
-    className="w-full justify-center text-sm text-black"
+                                                        className="w-full justify-center text-sm text-black"
     onClick={handleMarkAllAsRead}
 >
     Mark All as Read
-</Button>
+                                                    </Button>
                                                 </div>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -1240,7 +1239,7 @@ const handleMarkAllAsRead = async () => {
                                         <Link to="/dashboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <LayoutGrid className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
                                             <span className="text-sm sm:text-base text-gray-700 font-medium">Dashboard</span>
-                                        </Link>
+                                        </Link> 
                                         <Link to="/connections"
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
