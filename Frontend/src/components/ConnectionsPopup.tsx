@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import userService from '@/services/userService';
+import relationService from '@/services/relationService';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { auth } from "@/lib/firebase"; // make sure auth is imported
@@ -60,15 +61,26 @@ const ConnectionsPopup = ({
 
       try {
         setLoading(true);
-        const connections = await userService.getConnectionsByUserId(profileData.customUserId);
+        // Get relations data from backend
+        const relationsData = await relationService.getMyRelations();
+        console.log('ConnectionsPopup - Relations data:', relationsData);
+        
+        // Extract connections from the relations data
+        // Connections are stored as a map { userId: true, ... } so we need to get the keys
+        const connectionsMap = relationsData?.data?.connections || relationsData?.connections || {};
+        const connectionsList = Object.keys(connectionsMap);
+        console.log('ConnectionsPopup - Connections map:', connectionsMap);
+        console.log('ConnectionsPopup - Connections list:', connectionsList);
 
         const connectedProfiles = await Promise.all(
-          (connections.connected || []).map(async (id: string) => {
+          connectionsList.map(async (connectionId: string) => {
             try {
-              const user = await userService.getUserByCustomId(id);
+              console.log(`ConnectionsPopup - Fetching user details for ID: ${connectionId}`);
+              const user = await userService.getUserByCustomId(connectionId);
+              console.log(`ConnectionsPopup - User details for ${connectionId}:`, user);
               return user;
-            } catch {
-              console.warn(`User with ID ${id} not found, skipping...`);
+            } catch (error) {
+              console.warn(`User with ID ${connectionId} not found, skipping...`, error);
               return null;
             }
           })
@@ -84,9 +96,10 @@ const ConnectionsPopup = ({
             username: user.auth?.username || user.profile?.username || "",
           }));
 
+        console.log('ConnectionsPopup - Cleaned profiles:', cleanedProfiles);
         setConnections(cleanedProfiles);
 
-        //  Emit the actual fetched count back up
+        // Emit the actual fetched count back up
         onFetchedCount?.(cleanedProfiles.length);
       } catch (err) {
         console.error("Failed to fetch connected profiles:", err);
@@ -118,10 +131,29 @@ const ConnectionsPopup = ({
     onClose(); // Close the popup after navigation
   };
 
+  const handleViewProfile = (connection: Connection) => {
+  const id = connection.id;
+  const type = connection.userType?.toLowerCase();
+
+  if (type === "student") {
+    navigate(`/studentprofile/${id}`);
+  } else if (type === "business") {
+    navigate(`/businessprofile/${id}`);
+  } else if (type === "freelancer") {
+    navigate(`/freelancerprofile/${id}`);
+  } else {
+    console.warn("Unknown userType:", type, " — defaulting to student");
+    navigate(`/studentprofile/${id}`);
+  }
+
+  onClose();
+};
+
+
   const filteredConnections = connections.filter(connection =>
     connection.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    connection.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    connection.company.toLowerCase().includes(searchQuery.toLowerCase())
+    (connection.username && connection.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (connection.userType && connection.userType.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   if (!isOpen) return null;
@@ -133,23 +165,9 @@ const ConnectionsPopup = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Connections</h2>
-<div className="flex items-center justify-between p-6 border-b border-gray-200">
-  <div>
-    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Connections</h2>
-    <p className="text-sm text-gray-600 mt-1">
-      {connections.length} connection{connections.length !== 1 ? 's' : ''}
-    </p>
-  </div>
-  <Button
-    variant="ghost"
-    size="icon"
-    onClick={onClose}
-    className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-gray-100 text-blue-800"
-  >
-    <X className="h-4 w-4 sm:h-5 sm:w-5" />
-  </Button>
-</div>
-
+            <p className="text-sm text-gray-600 mt-1">
+              {connections.length} connection{connections.length !== 1 ? 's' : ''}
+            </p>
           </div>
           <Button
             variant="ghost"
@@ -172,14 +190,6 @@ const ConnectionsPopup = ({
               className="pl-10 h-10 sm:h-12 text-sm sm:text-base"
             />
           </div>
-          Filter Bar
-          {/* <div className="mt-3 mb-1">
-            <SearchFilterBar 
-              tags={filterTags}
-              onTagClick={handleFilterClick}
-              className="justify-start"
-            />
-          </div> */}
         </div>
 
         {/* Content */}
@@ -231,7 +241,7 @@ const ConnectionsPopup = ({
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation(); // Prevent card click
-                            handleMessage(connection.id);
+                            handleViewProfile(connection);
                           }}
                           className="text-blue-600 border-blue-600 hover:bg-blue-50 text-xs sm:text-sm"
                         >

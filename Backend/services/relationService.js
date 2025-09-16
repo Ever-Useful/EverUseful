@@ -10,33 +10,72 @@ class RelationService {
   constructor() {}
 
   // Ensure the per-user relations item exists (create if missing)
-  async ensureUserItem(userId) {
-    const params = {
-      TableName: TABLE,
-      Key: { userId },
-      UpdateExpression: `SET #sent = if_not_exists(#sent, :emptyMap), #recv = if_not_exists(#recv, :emptyMap), #blk = if_not_exists(#blk, :emptyMap), #conn = if_not_exists(#conn, :emptyMap), #c = if_not_exists(#c, :counters), updatedAt = if_not_exists(updatedAt, :now)`,
-      ExpressionAttributeNames: {
-        '#sent': 'requestsSent',
-        '#recv': 'requestsReceived',
-        '#blk': 'blockedUsers',
-        '#conn': 'connections',
-        '#c': 'counters'
-      },
-      ExpressionAttributeValues: {
-        ':emptyMap': {},
-        ':counters': {
-          totalConnections: 0,
-          pendingConnections: 0,
-          requestsSent: 0,
-          requestsReceived: 0
-        },
-        ':now': MAX_TIMESTAMP()
-      },
-      ReturnValues: 'NONE'
-    };
+  // async ensureUserItem(userId) {
+  //   const params = {
+  //     TableName: TABLE,
+  //     Key: { userId },
+  //     UpdateExpression: `SET #sent = if_not_exists(#sent, :emptyMap), #recv = if_not_exists(#recv, :emptyMap), #blk = if_not_exists(#blk, :emptyMap), #conn = if_not_exists(#conn, :emptyMap), #c = if_not_exists(#c, :counters), updatedAt = if_not_exists(updatedAt, :now)`,
+  //     ExpressionAttributeNames: {
+  //       '#sent': 'requestsSent',
+  //       '#recv': 'requestsReceived',
+  //       '#blk': 'blockedUsers',
+  //       '#conn': 'connections',
+  //       '#c': 'counters'
+  //     },
+  //     ExpressionAttributeValues: {
+  //       ':emptyMap': {},
+  //       ':counters': {
+  //         totalConnections: 0,
+  //         pendingConnections: 0,
+  //         requestsSent: 0,
+  //         requestsReceived: 0
+  //       },
+  //       ':now': MAX_TIMESTAMP()
+  //     },
+  //     ReturnValues: 'NONE'
+  //   };
 
-    await docClient.update(params).promise();
-  }
+  //   await docClient.update(params).promise();
+  // }
+
+  async ensureUserItem(userId) {
+  const params = {
+    TableName: TABLE,
+    Key: { userId },
+    UpdateExpression: `
+      SET 
+        #sent = if_not_exists(#sent, :emptyMap), 
+        #recv = if_not_exists(#recv, :emptyMap), 
+        #blk = if_not_exists(#blk, :emptyMap), 
+        #conn = if_not_exists(#conn, :emptyMap), 
+        #c = if_not_exists(#c, :counters), 
+        updatedAt = if_not_exists(updatedAt, :now),
+        notifications = if_not_exists(notifications, :emptyList),
+        unreadCount = if_not_exists(unreadCount, :zero)
+    `,
+    ExpressionAttributeNames: {
+      '#sent': 'requestsSent',
+      '#recv': 'requestsReceived',
+      '#blk': 'blockedUsers',
+      '#conn': 'connections',
+      '#c': 'counters'
+    },
+    ExpressionAttributeValues: {
+      ':emptyMap': {},
+      ':counters': {
+        totalConnections: 0,
+        pendingConnections: 0,
+        requestsSent: 0,
+        requestsReceived: 0
+      },
+      ':now': MAX_TIMESTAMP(),
+      ':emptyList': [],
+      ':zero': 0
+    },
+    ReturnValues: 'NONE'
+  };
+  await docClient.update(params).promise();
+}
 
   // Coerce structure: ensures attributes are maps (overwrites wrong types)
   async coerceMaps(userId) {
@@ -94,6 +133,34 @@ class RelationService {
       updatedAt: MAX_TIMESTAMP()
     };
   }
+
+//   //Helper: add notification logic
+//   async addNotification(userId, notification) {
+//   // Compose notification object
+//   const notif = {
+//     id: uuidv4(),
+//     ...notification,
+//     createdAt: Date.now(),
+//     read: false
+//   };
+
+//   const params = {
+//     TableName: TABLE,
+//     Key: { userId },
+//     UpdateExpression: 'SET notifications = list_append(if_not_exists(notifications, :emptyList), :notif), unreadCount = if_not_exists(unreadCount, :zero) + :inc, updatedAt = :now',
+//     ExpressionAttributeValues: {
+//       ':notif': [notif],
+//       ':emptyList': [],
+//       ':inc': 1,
+//       ':zero': 0,
+//       ':now': Date.now()
+//     }
+//   };
+//   await docClient.update(params).promise();
+//   return notif;
+// }
+
+
 
   // === SEND request A -> B ===
   // idempotent: if existing active status blocks send, throw
@@ -288,11 +355,20 @@ class RelationService {
     if (senderId === receiverId) throw new Error('Invalid operation');
 
     await Promise.all([this.ensureUserItem(senderId), this.ensureUserItem(receiverId)]);
+    
+    // Check preconditions
     const sender = await this.get(senderId);
-    const existing = sender.requestsSent && sender.requestsSent[receiverId];
-    if (!existing || (existing.status !== 'REQUESTED' && existing.status !== 'WITHDRAWN')) {
-      // nothing to cancel (idempotent)
-      return { success: true, message: 'No active request to cancel' };
+    const receiver = await this.get(receiverId);
+    
+    const existingSent = sender.requestsSent && sender.requestsSent[receiverId];
+    const existingReceived = receiver.requestsReceived && receiver.requestsReceived[senderId];
+    
+    if (!existingSent || existingSent.status !== 'REQUESTED') {
+      throw new Error('No active request to withdraw');
+    }
+    
+    if (!existingReceived || existingReceived.status !== 'PENDING') {
+      throw new Error('No pending request to withdraw');
     }
 
     const now = MAX_TIMESTAMP();
@@ -306,7 +382,7 @@ class RelationService {
             UpdateExpression: `SET requestsSent.#to = :sentObj, counters.requestsSent = if_not_exists(counters.requestsSent, :zero) - :dec, updatedAt = :now`,
             ExpressionAttributeNames: { '#to': receiverId },
             ExpressionAttributeValues: {
-              ':sentObj': { toUserId: receiverId, status: 'CANCELLED', updatedAt: now },
+              ':sentObj': { toUserId: receiverId, status: 'WITHDRAWN', updatedAt: now },
               ':dec': 1,
               ':zero': 0,
               ':now': now
@@ -330,7 +406,7 @@ class RelationService {
     };
 
     await docClient.transactWrite(transactParams).promise();
-    return { success: true, message: 'Cancelled' };
+    return { success: true, message: 'Withdrawn' };
   }
 
   // === REMOVE connection (either side) ===
@@ -461,6 +537,68 @@ class RelationService {
 
     return { relation: 'NONE' };
   }
+
+  async addNotification(userId, notification) {
+  // Compose notification object
+  const notif = {
+    id: uuidv4(),
+    ...notification,
+    createdAt: Date.now(),
+    read: false
+  };
+
+  const params = {
+    TableName: TABLE,
+    Key: { userId },
+    UpdateExpression: 'SET notifications = list_append(if_not_exists(notifications, :emptyList), :notif), unreadCount = if_not_exists(unreadCount, :zero) + :inc, updatedAt = :now',
+    ExpressionAttributeValues: {
+      ':notif': [notif],
+      ':emptyList': [],
+      ':inc': 1,
+      ':zero': 0,
+      ':now': Date.now()
+    }
+  };
+  await docClient.update(params).promise();
+  return notif;
+}
+
+async markNotificationRead(userId, notificationId) {
+  // Fetch user
+  const user = await this.get(userId);
+  const notifications = user.notifications || [];
+  const updated = notifications.map(n => {
+    if (n.id === notificationId) return { ...n, read: true };
+    return n;
+  });
+  const unreadCount = Math.max(0, (user.unreadCount || 0) - 1);
+
+  const params = {
+    TableName: TABLE,
+    Key: { userId },
+    UpdateExpression: 'SET notifications = :updated, unreadCount = :count, updatedAt = :now',
+    ExpressionAttributeValues: {
+      ':updated': updated,
+      ':count': unreadCount,
+      ':now': Date.now()
+    }
+  };
+  await docClient.update(params).promise();
+}
+
+async clearNotifications(userId) {
+  const params = {
+    TableName: TABLE,
+    Key: { userId },
+    UpdateExpression: 'SET notifications = :emptyList, unreadCount = :zero, updatedAt = :now',
+    ExpressionAttributeValues: {
+      ':emptyList': [],
+      ':zero': 0,
+      ':now': Date.now()
+    }
+  };
+  await docClient.update(params).promise();
+}
 }
 
 module.exports = new RelationService();

@@ -128,69 +128,220 @@ useEffect(() => {
 
 
 
-  useEffect(() => {
-    if (currentUser?.customUserId) {
-      socket.emit("register", currentUser.customUserId);
-      console.log("Registered socket for user:", currentUser.customUserId);
-    }
-  }, [currentUser?.customUserId]);
+//   useEffect(() => {
+//     if (currentUser?.customUserId) {
+//       socket.emit("register", currentUser.customUserId);
+//       console.log("Registered socket for user:", currentUser.customUserId);
+//     }
+//   }, [currentUser?.customUserId]);
 
-  useEffect(() => {
-  socket.on('relation_request_received', (data: any) => {
+//   useEffect(() => {
+//   socket.on('relation_request_received', (data: any) => {
+//     console.log('Relation request received:', data);
+//     if (data?.from === id) {
+//       setRelationStatus('PENDING_IN');
+//     }
+//   });
+
+//   // socket.on('relation_update', (data: any) => {
+//   //   console.log('Relation update:', data);
+//   //   if (data?.type === 'ACCEPTED' && data?.between?.includes(id)) {
+//   //     setRelationStatus('CONNECTED');
+//   //   }
+//   // });
+
+//   useEffect(() => {
+//   // Listen for relation_update events
+//   socket.on('relation_update', (data: any) => {
+//     // Block notification
+//     if (data?.type === 'BLOCKED') {
+//       // Check Notification API
+//       if (typeof window !== 'undefined' && 'Notification' in window) {
+//         // Request permission if needed
+//         if (Notification.permission === 'default') {
+//           try { Notification.requestPermission(); } catch {}
+//         }
+//         // If permission granted, show notification
+//         if (Notification.permission === 'granted') {
+//           try {
+//             // Compose blocker name (current user)
+//             const blockerName = `${data.blockerFirstName || ""} ${data.blockerLastName || ""}`.trim() || "You";
+//             // Show browser notification
+//             new Notification("User Blocked", {
+//               body: `${blockerName}, you have blocked a user.`,
+//               icon: "/favicon.ico",
+//             });
+//           } catch {}
+//         }
+//       }
+//       // Optionally update UI
+//       setRelationStatus && setRelationStatus('BLOCKED');
+//     }
+
+//     // Unblock notification
+//     if (data?.type === 'UNBLOCKED') {
+//       // Check Notification API
+//       if (typeof window !== 'undefined' && 'Notification' in window) {
+//         // Request permission if needed
+//         if (Notification.permission === 'default') {
+//           try { Notification.requestPermission(); } catch {}
+//         }
+//         // If permission granted, show notification
+//         if (Notification.permission === 'granted') {
+//           try {
+//             // Compose unblocker name (current user)
+//             const unblockerName = `${data.unblockerFirstName || ""} ${data.unblockerLastName || ""}`.trim() || "You";
+//             // Show browser notification
+//             new Notification("User Unblocked", {
+//               body: `${unblockerName}, you have unblocked a user.`,
+//               icon: "/favicon.ico",
+//             });
+//           } catch {}
+//         }
+//       }
+//       // Optionally update UI
+//       setRelationStatus && setRelationStatus('NONE');
+//     }
+//   });
+
+//   // Cleanup on unmount
+//   return () => {
+//     socket.off('relation_update');
+//   };
+// }, [socket]);
+
+//   return () => {
+//     socket.off('relation_request_received');
+//     socket.off('relation_update');
+//   };
+// }, [id]);
+
+
+useEffect(() => {
+  if (currentUser?.customUserId) {
+    socket.emit("register", currentUser.customUserId);
+    console.log("Registered socket for user:", currentUser.customUserId);
+  }
+}, [currentUser?.customUserId]);
+
+useEffect(() => {
+  // --- relation_request_received ---
+  const onRelationRequestReceived = (data: any) => {
     console.log('Relation request received:', data);
     if (data?.from === id) {
       setRelationStatus('PENDING_IN');
     }
-  });
+  };
 
-  socket.on('relation_update', (data: any) => {
+  // --- relation_update ---
+  const onRelationUpdate = (data: any) => {
     console.log('Relation update:', data);
+
+    // Accept logic (if you want to keep it)
     if (data?.type === 'ACCEPTED' && data?.between?.includes(id)) {
       setRelationStatus('CONNECTED');
     }
-  });
 
-  return () => {
-    socket.off('relation_request_received');
-    socket.off('relation_update');
+// Block notification
+if (data?.type === 'BLOCKED') {
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    if (Notification.permission === 'default') {
+      try { Notification.requestPermission(); } catch {}
+    }
+    if (Notification.permission === 'granted') {
+      try {
+        // Blocked user's name
+        const blockedName = `${data.blockedFirstName || ""} ${data.blockedLastName || ""}`.trim() || "this user";
+        new Notification("User Blocked", {
+          body: `You have blocked ${blockedName}`,
+          icon: "/favicon.ico",
+        });
+      } catch {}
+    }
+  }
+  setRelationStatus && setRelationStatus('BLOCKED')
+}
+
+// Unblock notification
+if (data?.type === 'UNBLOCKED') {
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    if (Notification.permission === 'default') {
+      try { Notification.requestPermission(); } catch {}
+    }
+    if (Notification.permission === 'granted') {
+      try {
+        // Unblocked user's name
+        const unblockedName = `${data.blockedFirstName || ""} ${data.blockedLastName || ""}`.trim() || "this user";
+        new Notification("User Unblocked", {
+          body: `You have unblocked ${unblockedName}`,
+          icon: "/favicon.ico",
+        });
+      } catch {}
+    }
+  }
+  setRelationStatus && setRelationStatus('NONE');
+}
   };
-}, [id]);
 
-  
+  // Register listeners
+  socket.on('relation_request_received', onRelationRequestReceived);
+  socket.on('relation_update', onRelationUpdate);
 
-
-
-
+  // Cleanup on unmount
+  return () => {
+    socket.off('relation_request_received', onRelationRequestReceived);
+    socket.off('relation_update', onRelationUpdate);
+  };
+}, [id, socket]);
 
    
 
-// 🔹 Relation actions
-// const handleConnect = async () => {
-//   try {
-//     if (!id) return;
-//     await relationService.send(id);
-//     setRelationStatus('PENDING_OUT');
-//   } catch (err: any) {
-//     console.error('Error sending relation request:', err);
-//     alert(err?.message || 'Failed to send request');
-//   }
-// };
-
-// ...existing code...
+// ... (existing imports and code)
 const handleConnect = async () => {
   try {
-    if (!currentUser?.customUserId || !id) {
-      throw new Error("Missing user IDs");
-    }
-    await relationService.sendRelationRequest(currentUser.customUserId, id);
+    if (!id) return;
+    // Prevent duplicate sends if any relation already exists
+    if (relationStatus && relationStatus !== 'NONE') return;
+
+    await relationService.send(id);
     setRelationStatus('PENDING_OUT');
+
+    // Notify other parts of the app (Connections page) to update Sent list
+    try {
+      window.dispatchEvent(new CustomEvent('relations:sent', { detail: { toUserId: id } }));
+    } catch {}
+
+    // Console log for debugging
+    console.log('Connection request sent:', {
+      from: currentUser?.customUserId,
+      to: id,
+      timestamp: Date.now(),
+    });
+
+    // Browser notification
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        try { await Notification.requestPermission(); } catch {}
+      }
+      if (Notification.permission === 'granted') {
+        try {
+          // Get receiver's name (firstName + lastName)
+          const receiverFirstName = userData?.auth?.firstName || '';
+          const receiverLastName = userData?.auth?.lastName || '';
+          const receiverFullName = `${receiverFirstName} ${receiverLastName}`.trim() || 'User';
+
+          new Notification('Connection request sent', {
+            body: `Your notification to ${receiverFullName} is now pending.`,
+            icon: '/favicon.ico',
+          });
+        } catch {}
+      }
+    }
   } catch (err: any) {
     console.error('Error sending relation request:', err);
-    setError(err?.message || 'Failed to send request');
+    alert(err?.message || 'Failed to send request');
   }
 };
-
-
 const handleAccept = async () => {
   try {
     if (!id) return;

@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import userService from '@/services/userService';
+import relationService from '@/services/relationService';
 import s3Service from '@/services/s3Service';
 import { EditProfile } from '@/components/EditProfile';
 import InitialsAvatar from '@/components/InitialsAvatar';
@@ -101,6 +102,23 @@ const Profile = () => {
   const [editingProject, setEditingProject] = useState(null);
   const [showConnectionsPopup, setShowConnectionsPopup] = useState(false);
   const [connectionCount, setConnectionCount] = useState(0);
+
+  // Fetch connection count from relation service
+  const fetchConnectionCount = async () => {
+    try {
+      const relationsData = await relationService.getMyRelations();
+      // Connections are stored as a map { userId: true, ... } so we need to get the keys
+      const connectionsMap = relationsData?.data?.connections || relationsData?.connections || {};
+      const connections = Object.keys(connectionsMap);
+      const count = connections.length;
+      setConnectionCount(count);
+      setStats(prev => ({ ...prev, connections: count }));
+      return count;
+    } catch (error) {
+      console.error('Error fetching connection count:', error);
+      return 0;
+    }
+  };
 
 
   const [education, setEducation] = useState([]);
@@ -257,6 +275,9 @@ const Profile = () => {
         hourlyRate: freelancerData?.hourlyRate || '',
         avgResponseTime: freelancerData?.avgResponseTime || '',
       });
+
+      // Fetch connection count from relation service
+      await fetchConnectionCount();
 
     } catch (error) {
       console.error('Error fetching user profile:', error);

@@ -116,6 +116,25 @@ class RelationService {
     const url = `${API_ENDPOINTS.RELATIONS_STATUS}?otherUserId=${encodeURIComponent(otherUserId)}`;
     return this.request(url, { method: 'GET' });
   }
+
+    // GET /relations/notifications
+  async getNotifications(): Promise<{ notifications: any[]; unreadCount: number }> {
+    const data = await this.request('/relations/notifications', { method: 'GET' });
+    return {
+      notifications: data.notifications || [],
+      unreadCount: data.unreadCount || 0
+    };
+  }
+
+  // POST /relations/notifications/:notificationId/read
+  async markNotificationAsRead(notificationId: string): Promise<void> {
+    await this.request(`/relations/notifications/${notificationId}/read`, { method: 'POST' });
+  }
+
+  // POST /relations/notifications/clear
+async clearNotifications(): Promise<void> {
+  await this.request('/relations/notifications/clear', { method: 'POST' });
+}
 }
 
 export default new RelationService();

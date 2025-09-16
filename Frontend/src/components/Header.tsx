@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
+import { socket } from '@/socket';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -43,6 +44,7 @@ import Navigation from '@/components/Navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import userService from '@/services/userService';
+import relationService from '@/services/relationService';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Connections from '@/components/Connections';
@@ -242,8 +244,113 @@ const Header = () => {
     const [showNotificationsSidebar, setShowNotificationsSidebar] = useState(false);
     const [showProfileSidebar, setShowProfileSidebar] = useState(false);
     const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
-    const [notifications, setNotifications] = useState(mockNotifications);
-    const unreadNotificationCount = notifications.filter(n => n.unread).length;
+    const [notifications, setNotifications] = useState<any[]>([]);
+    // Store unread count
+    const [unreadNotificationCount, setUnreadNotificationCount] = useState<number>(0);
+    const unreadNotifications = notifications.filter(n => !n.read);
+
+    // --- Listen for relation notifications ---
+    // useEffect(() => {
+    //     // Handler for relation events
+    //     const handleRelationNotification = (data: any) => {
+    //         let notif = null;
+    //         if (data?.type === 'CONNECTION_REQUEST') {
+    //             notif = {
+    //                 id: Date.now() + Math.random(),
+    //                 type: 'CONNECTION_REQUEST',
+    //                 message: `${data.fromFirstName || ''} ${data.fromLastName || ''} sent you a connection request`,
+    //                 meta: { from: data.from },
+    //                 unread: true,
+    //                 createdAt: Date.now(),
+    //             };
+    //         } else if (data?.type === 'CONNECTION_ACCEPTED') {
+    //             notif = {
+    //                 id: Date.now() + Math.random(),
+    //                 type: 'CONNECTION_ACCEPTED',
+    //                 message: `${data.toFirstName || ''} ${data.toLastName || ''} accepted your connection request`,
+    //                 meta: { to: data.to },
+    //                 unread: true,
+    //                 createdAt: Date.now(),
+    //             };
+    //         } else if (data?.type === 'CONNECTION_DECLINED') {
+    //             notif = {
+    //                 id: Date.now() + Math.random(),
+    //                 type: 'CONNECTION_DECLINED',
+    //                 message: `${data.toFirstName || ''} ${data.toLastName || ''} declined your connection request`,
+    //                 meta: { to: data.to },
+    //                 unread: true,
+    //                 createdAt: Date.now(),
+    //             };
+    //         } else if (data?.type === 'BLOCKED') {
+    //             notif = {
+    //                 id: Date.now() + Math.random(),
+    //                 type: 'BLOCKED',
+    //                 message: `${data.blockerFirstName || ''} ${data.blockerLastName || ''} blocked a user.`,
+    //                 meta: { blockedUserId: data.blockedUserId },
+    //                 unread: true,
+    //                 createdAt: Date.now(),
+    //             };
+    //         } else if (data?.type === 'UNBLOCKED') {
+    //             notif = {
+    //                 id: Date.now() + Math.random(),
+    //                 type: 'UNBLOCKED',
+    //                 message: `${data.unblockerFirstName || ''} ${data.unblockerLastName || ''} unblocked a user.`,
+    //                 meta: { unblockedUserId: data.unblockedUserId },
+    //                 unread: true,
+    //                 createdAt: Date.now(),
+    //             };
+    //         }
+    //         if (notif) {
+    //             setNotifications(prev => [notif, ...prev]);
+    //             setUnreadNotificationCount(prev => prev + 1);
+    //         }
+    //     };
+
+    //     // Listen for socket events
+    //     const win = window as any;
+    //     if (win.socket) {
+    //         win.socket.on('relation_request_received', handleRelationNotification);
+    //         win.socket.on('relation_update', handleRelationNotification);
+    //     }
+    //     // Cleanup
+    //     return () => {
+    //         if (win.socket) {
+    //             win.socket.off('relation_request_received', handleRelationNotification);
+    //             win.socket.off('relation_update', handleRelationNotification);
+    //         }
+    //     };
+    // }, []);
+
+//     useEffect(() => {
+//     // Load notifications from backend on mount
+//     relationService.getNotifications().then(({ notifications, unreadCount }) => {
+//         setNotifications(notifications);
+//         setUnreadNotificationCount(unreadCount);
+//     });
+//     // Subscribe to socket events
+//     socket.on("user_notification", (notif: any) => {
+//         setNotifications(prev => [notif, ...prev]);
+//         setUnreadNotificationCount(prev => prev + 1);
+//     });
+//     return () => {
+//         socket.off("user_notification");
+//     };
+// }, []);
+
+//     // Mark notification as read when clicked
+// const handleNotificationClick = async (id: string | number) => {
+//     await relationService.markNotificationAsRead(String(id));
+//     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+//     setUnreadNotificationCount(prev => Math.max(0, prev - 1));
+// };
+
+    // Mark all as read and clear all notifications
+    // const handleMarkAllAsRead = () => {
+    //     setNotifications([]);
+    //     setUnreadNotificationCount(0);
+    //     localStorage.setItem('userNotifications', JSON.stringify([]));
+    //     localStorage.setItem('userNotificationsUnreadCount', '0');
+    // };
     const { profileData, isLoggedIn, refreshProfile, isLoading } = useUserProfile();
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -257,8 +364,9 @@ const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState<string>('all');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
-    const unreadNotifications = notifications.filter(n => n.unread);
+    //const unreadNotifications = notifications.filter(n => n.unread);
     const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
+    // Remove duplicate declaration
 
     // Filter tags for search
     const filterTags: FilterTag[] = [
@@ -285,6 +393,8 @@ const Header = () => {
             setIsSearchFocused(false);
         }, 200);
     };
+
+
 
     // Open MyProjects sidebar when a global event is dispatched (e.g., from Dashboard or Navigation)
     useEffect(() => {
@@ -407,11 +517,7 @@ const Header = () => {
         );
     };
 
-    const handleNotificationClick = (notificationId: number) => {
-        setNotifications(prev =>
-            prev.map(n => n.id === notificationId ? { ...n, unread: false } : n)
-        );
-    };
+    // Remove duplicate declaration
 
     const handleLogout = async () => {
         try {
@@ -488,8 +594,53 @@ const Header = () => {
         alert(`Connection request sent to user with ID: ${personId}`);
         // Optionally, update UI state to reflect the request was sent
         // Example: setSuggestedConnections(prev => prev.filter(p => p.id !== personId));
+
     }
 
+    // Whenever notifications change (new notification received, marked as read, etc)
+// Notification initialization (single useEffect)
+useEffect(() => {
+  const storedNotifs = localStorage.getItem('userNotifications');
+  const storedUnread = localStorage.getItem('userNotificationsUnreadCount');
+  if (storedNotifs) {
+    setNotifications(JSON.parse(storedNotifs));
+    setUnreadNotificationCount(Number(storedUnread || 0));
+  } else {
+    relationService.getNotifications().then(({ notifications, unreadCount }) => {
+      setNotifications(notifications);
+      setUnreadNotificationCount(unreadCount);
+    });
+  }
+
+  socket.on("user_notification", (notif) => {
+    setNotifications(prev => {
+      const updated = [notif, ...prev];
+      localStorage.setItem('userNotifications', JSON.stringify(updated));
+      localStorage.setItem('userNotificationsUnreadCount', String(updated.filter(n => !n.read).length));
+      return updated;
+    });
+    setUnreadNotificationCount(prev => prev + 1);
+  });
+
+  return () => {
+    socket.off("user_notification");
+  };
+}, []);
+
+// Persist notifications on change
+useEffect(() => {
+  localStorage.setItem('userNotifications', JSON.stringify(notifications));
+  localStorage.setItem('userNotificationsUnreadCount', String(unreadNotificationCount));
+}, [notifications, unreadNotificationCount]);
+
+// Mark all as read
+const handleMarkAllAsRead = async () => {
+  await relationService.clearNotifications();
+  setNotifications([]);
+  setUnreadNotificationCount(0);
+  localStorage.setItem('userNotifications', JSON.stringify([]));
+  localStorage.setItem('userNotificationsUnreadCount', '0');
+};
     return (
         <>
             <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-white shadow-sm">
@@ -620,13 +771,13 @@ const Header = () => {
                                                     >
                                                         View all notifications
                                                     </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        className="w-full justify-center text-sm text-black"
-                                                        onClick={() => setNotifications(prev => prev.map(n => ({ ...n, unread: false })))}
-                                                    >
-                                                        Mark all as read
-                                                    </Button>
+<Button
+    variant="outline"
+    className="w-full justify-center text-sm text-black"
+    onClick={handleMarkAllAsRead}
+>
+    Mark All as Read
+</Button>
                                                 </div>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -1237,9 +1388,7 @@ const Header = () => {
                         <Button
                             variant="outline"
                             className="w-full justify-center text-sm text-black"
-                            onClick={() => {
-                                setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-                            }}
+                            onClick={handleMarkAllAsRead}
                         >
                             Mark All as Read
                         </Button>

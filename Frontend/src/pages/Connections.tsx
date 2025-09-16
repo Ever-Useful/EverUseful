@@ -191,6 +191,8 @@ const Connections = () => {
   const [sentUsers, setSentUsers] = useState<UserSearchResult[]>([]);
   const [receivedUsers, setReceivedUsers] = useState<UserSearchResult[]>([]);
   const [connectedUsers, setConnectedUsers] = useState<UserSearchResult[]>([]);
+  const [allUsers, setAllUsers] = useState<UserSearchResult[]>([]);
+  const [connectedIds, setConnectedIds] = useState<string[]>([]);
 
 
 
@@ -214,52 +216,43 @@ useEffect(() => {
   fetchResults();
 }, [searchQuery])
 
-// Fetch suggestions on mount
-useEffect(() => {
-  const fetchSuggestions = async () => {
-    try {
-      const result = await UserService.getSuggestedUsers();
-      setSuggestions(result);
-    } catch (err) {
-      console.error("Failed to fetch suggestions:", err);
-    }
-  };
-
-  fetchSuggestions();
-}, []);
-
+// // Fetch suggestions on mount
 // useEffect(() => {
-//   const fetchReceivedProfiles = async () => {
-//     if (!profileData.customUserId) return;
-
+//   const fetchSuggestions = async () => {
 //     try {
-//       // 1️⃣ Get logged-in user's connections (IDs)
-//       const connections = await UserService.getConnectionsByUserId(profileData.customUserId);
-//       console.log("Connections:", connections);
-
-//       // 2️⃣ Take only "received" IDs
-//       const receivedIds = connections.connections?.received || [];
-//       if (receivedIds.length === 0) {
-//         setReceivedUsers([]);
-//         return;
-//       }
-
-//       // 3️⃣ Fetch full profiles for those IDs
-//       const receivedProfiles = await Promise.all(
-//         receivedIds.map(id => UserService.getUserByCustomId(id))
-//       );
-
-//       console.log("Received profiles:", receivedProfiles);
-
-//       // 4️⃣ Store them in state
-//       setReceivedUsers(receivedProfiles.filter(Boolean));
+//       const result = await UserService.getSuggestedUsers();
+//       setSuggestions(result);
 //     } catch (err) {
-//       console.error("Failed to fetch received profiles:", err);
+//       console.error("Failed to fetch suggestions:", err);
 //     }
 //   };
 
-//   fetchReceivedProfiles();
-// }, [profileData.customUserId]);
+//   fetchSuggestions();
+// }, []);
+
+useEffect(() => {
+  if (!allUsers.length) return;
+  // Show all users except yourself
+  setSuggestions(allUsers.filter(u => u.customUserId !== loggedInUserId));
+}, [allUsers, loggedInUserId]);
+
+
+
+  // Card click navigation (used in both search and suggestions)
+  const handleCardClick = (user: UserSearchResult) => {
+    const id = user.customUserId;
+    const type = user.profile.userType?.toLowerCase();
+
+    if (type === "student") {
+      navigate(`/studentprofile/${id}`);
+    } else if (type === "business") {
+      navigate(`/businessprofile/${id}`);
+    } else if (type === "freelancer") {
+      navigate(`/freelancerprofile/${id}`);
+    } else {
+      navigate(`/studentprofile/${id}`);
+    }
+  };
 
 useEffect(() => {
   const fetchReceivedProfiles = async () => {
@@ -313,10 +306,25 @@ useEffect(() => {
   // ensure this user is registered for targeted room updates
   socket.emit('register', profileData.customUserId);
 
-  const onRelationRequestReceived = async (data: { from: string }) => {
+  const onRelationRequestReceived = async (data: { from: string, firstName?: string, lastName?: string }) => {
     try {
       const fromId = data?.from;
       if (!fromId) return;
+      // Show browser notification
+      if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "default") {
+          try { await Notification.requestPermission(); } catch {}
+        }
+        if (Notification.permission === "granted") {
+          try {
+            const senderFullName = `${data.firstName || ""} ${data.lastName || ""}`.trim() || "User";
+            new Notification(`${senderFullName} sent you a connection request!`, {
+              body: "",
+              icon: "/favicon.ico",
+            });
+          } catch {}
+        }
+      }
       // Avoid duplicates
       if (receivedUsers.some(u => u.customUserId === fromId)) return;
       const user = await UserService.getUserByCustomId(fromId);
@@ -339,46 +347,112 @@ useEffect(() => {
     }
   };
 
-  const onRelationUpdate = async (data: { type: string; between?: string[] }) => {
-    try {
-      const type = data?.type;
-      const between = data?.between || [];
-      if (!type || between.length < 2) return;
-      const myId = profileData.customUserId;
-      if (!between.includes(myId)) return; // unrelated pair
-      const otherId = between.find(id => id !== myId)!;
+const onRelationUpdate = async (data: {
+  type: string;
+  between?: string[];
+  senderFirstName?: string;
+  senderLastName?: string;
+  receiverFirstName?: string;
+  receiverLastName?: string;
+  declinerFirstName?: string;
+  declinerLastName?: string;
+}) => {
+  try {
+    const type = data?.type;
+    const between = data?.between || [];
+    if (!type || between.length < 2) return;
+    const myId = profileData.customUserId;
+    if (!between.includes(myId)) return; // unrelated pair
+    const otherId = between.find(id => id !== myId)!;
 
-      if (type === 'ACCEPTED') {
-        // Remove from received/sent and add to connected
-        setReceivedUsers(prev => prev.filter(u => u.customUserId !== otherId));
-        setSentUsers(prev => prev.filter(u => u.customUserId !== otherId));
+    if (type === 'ACCEPTED') {
 
-        // Hydrate if not already present, then add to connectedUsers
-        const existing = connectedUsers.some(u => u.customUserId === otherId);
-        if (!existing) {
+      // Show browser notification for accepted
+      if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "default") {
+          try { await Notification.requestPermission(); } catch {}
+        }
+        if (Notification.permission === "granted") {
           try {
-            const user = await UserService.getUserByCustomId(otherId);
-            if (user) {
-              setConnectedUsers(prev => ([
-                ...prev,
-                {
-                  customUserId: user.customUserId,
-                  profile: {
-                    firstName: user.auth?.firstName || user.profile?.firstName || 'User',
-                    lastName: user.auth?.lastName || user.profile?.lastName || '',
-                    avatar: user.profile?.avatar || '',
-                    userType: user.auth?.userType || user.profile?.userType || 'student',
-                    username: user.auth?.username || '',
-                  },
-                }
-              ]));
+            let connectedName = "";
+            if (myId === between[0]) {
+              // me is receiver
+              connectedName = `${data.senderFirstName || ""} ${data.senderLastName || ""}`.trim() || "User";
+            } else {
+              // me is sender
+              connectedName = `${data.receiverFirstName || ""} ${data.receiverLastName || ""}`.trim() || "User";
             }
+            new Notification(`${connectedName} are now connected`, {
+              body: "",
+              icon: "/favicon.ico",
+            });
           } catch {}
         }
       }
 
-      // Handle declines/cancellations if backend emits them later
-      if (type === 'DECLINED' || type === 'CANCELLED') {
+      // Remove from received/sent and add to connected
+      setReceivedUsers(prev => prev.filter(u => u.customUserId !== otherId));
+      setSentUsers(prev => prev.filter(u => u.customUserId !== otherId));
+
+      // Hydrate if not already present, then add to connectedUsers
+      const existing = connectedUsers.some(u => u.customUserId === otherId);
+      if (!existing) {
+        try {
+          const user = await UserService.getUserByCustomId(otherId);
+          if (user) {
+            setConnectedUsers(prev => ([
+              ...prev,
+              {
+                customUserId: user.customUserId,
+                profile: {
+                  firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+                  lastName: user.auth?.lastName || user.profile?.lastName || '',
+                  avatar: user.profile?.avatar || '',
+                  userType: user.auth?.userType || user.profile?.userType || 'student',
+                  username: user.auth?.username || '',
+                },
+              }
+            ]));
+          }
+        } catch {}
+      }
+    }
+
+    if (type === 'DECLINED') {
+      // Show browser notification for decline
+      if (typeof window !== "undefined" && "Notification" in window) {
+      }
+
+      // Remove from received/sent and add to connected
+      setReceivedUsers(prev => prev.filter(u => u.customUserId !== otherId));
+      setSentUsers(prev => prev.filter(u => u.customUserId !== otherId));
+
+      // Hydrate if not already present, then add to connectedUsers
+      const existing = connectedUsers.some(u => u.customUserId === otherId);
+      if (!existing) {
+        try {
+          const user = await UserService.getUserByCustomId(otherId);
+          if (user) {
+            setConnectedUsers(prev => ([
+              ...prev,
+              {
+                customUserId: user.customUserId,
+                profile: {
+                  firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+                  lastName: user.auth?.lastName || user.profile?.lastName || '',
+                  avatar: user.profile?.avatar || '',
+                  userType: user.auth?.userType || user.profile?.userType || 'student',
+                  username: user.auth?.username || '',
+                },
+              }
+            ]));
+          }
+        } catch {}
+      }
+    }
+
+      // Handle declines/cancellations/withdrawals if backend emits them later
+      if (type === 'DECLINED' || type === 'CANCELLED' || type === 'WITHDRAWN') {
         setReceivedUsers(prev => prev.filter(u => u.customUserId !== otherId));
         setSentUsers(prev => prev.filter(u => u.customUserId !== otherId));
       }
@@ -408,16 +482,16 @@ useEffect(() => {
             .filter((toId) => myRelations.data.requestsSent[toId]?.status === 'REQUESTED')
         : [];
 
-      const sentProfiles = await Promise.all(
+const sentProfiles = await Promise.all(
         sentIds.map(async (id: string) => {
-          try {
-            const user = await UserService.getUserByCustomId(id);
-            return user;
-          } catch {
-            return null;
-          }
-        })
-      );
+    try {
+      const user = await UserService.getUserByCustomId(id);
+      return user;
+    } catch {
+      return null;
+    }
+  })
+);
 
       setSentUsers(
         sentProfiles
@@ -441,6 +515,36 @@ useEffect(() => {
   fetchSentProfiles();
 }, [profileData?.customUserId]);
 
+useEffect(() => {
+  const onSent = async (e: any) => {
+    try {
+      const toUserId = e?.detail?.toUserId;
+      if (!toUserId) return;
+      // Avoid duplicates
+      if (sentUsers.some(u => u.customUserId === toUserId)) return;
+      const user = await UserService.getUserByCustomId(toUserId);
+      if (!user) return;
+      setSentUsers(prev => ([
+        ...prev,
+        {
+          customUserId: user.customUserId,
+          profile: {
+            firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+            lastName: user.auth?.lastName || user.profile?.lastName || '',
+            avatar: user.profile?.avatar || '',
+            userType: user.auth?.userType || user.profile?.userType || 'student',
+            username: user.auth?.username || '',
+          },
+        }
+      ]));
+    } catch (err) {
+      console.error('Failed to hydrate newly-sent relation:', err);
+    }
+  };
+
+  window.addEventListener('relations:sent', onSent);
+  return () => window.removeEventListener('relations:sent', onSent);
+}, [sentUsers]);
 
 
   const handleConnect = (personId: string) => {
@@ -453,7 +557,7 @@ useEffect(() => {
     );
   };
 
-  const handleCardClick = (user: UserSearchResult) => {
+  const handleSuggestionCardClick = (user: UserSearchResult) => {
   const id = user.customUserId;
   const type = user.profile.userType?.toLowerCase();
 
@@ -544,6 +648,14 @@ useEffect(() => {
       </div>
     </div>
   );
+
+    // // Filter suggestions to exclude users already sent, received, or connected
+    // const filteredSuggestions = suggestions.filter(
+    //   user =>
+    //     !sentUsers.some(u => u.customUserId === user.customUserId) &&
+    //     !receivedUsers.some(u => u.customUserId === user.customUserId) &&
+    //     !connectedUsers.some(u => u.customUserId === user.customUserId)
+    // );
 
     const renderTabContent = () => {
     switch (activeTab) {
@@ -672,49 +784,49 @@ useEffect(() => {
               </Badge>
             </div>
             {/* Scrollable cards */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-              <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
-                {sentUsers.length > 0 ? (
-                  sentUsers.map(user => (
-                    <div
-                      key={user.customUserId}
-                      className="flex items-center justify-between p-3 hover:bg-gray-50 transition"
-                    >
-                      {/* Left side: user card */}
-                      <ConnectionItem
-                        person={{
-                          id: user.customUserId,
+<div className="flex-1 overflow-y-auto scrollbar-hide">
+  <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
+    {sentUsers.length > 0 ? (
+      sentUsers.map(user => (
+        <div
+          key={user.customUserId}
+          className="flex items-center justify-between p-3 hover:bg-gray-50 transition"
+        >
+          {/* Left side: user card */}
+          <ConnectionItem
+            person={{
+              id: user.customUserId,
                           name: `${user.profile.firstName || 'User'} ${user.profile.lastName || ''}`.trim(),
                           title: user.profile.userType || 'Student',
                           company: user.profile.username || 'N/A',
                           avatar: user.profile.avatar || '',
                           location: '',
-                          mutualConnections: 0,
-                          isConnected: false,
-                          skills: []
-                        }}
-                      />
+              mutualConnections: 0,
+              isConnected: false,
+              skills: []
+            }}
+          />
 
                       {/* Right side: Status + Withdraw */}
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700 border border-amber-200">Requested</span>
-                        <button
-                          onClick={async () => {
-                            try {
+          <button
+            onClick={async () => {
+              try {
                               await relationService.cancel(user.customUserId);
                               setSentUsers(prev => prev.filter(u => u.customUserId !== user.customUserId));
-                            } catch (err) {
+              } catch (err) {
                               console.error('Failed to withdraw connection:', err);
-                            }
-                          }}
-                          className="px-3 py-1 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
-                        >
-                          Withdraw
-                        </button>
+              }
+            }}
+            className="px-3 py-1 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
+          >
+            Withdraw
+          </button>
                       </div>
-                    </div>
-                  ))
-                ) : (
+        </div>
+      ))
+    ) : (
                   <Card className="text-center py-12 shadow-none border-none">
                     <CardContent>
                       <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -730,6 +842,10 @@ useEffect(() => {
           </div>
         );
       case 'find':
+        function handleSuggestionConnect(user: UserSearchResult) {
+          throw new Error("Function not implemented.");
+        }
+
         return (
 
           <div className="flex flex-col h-full">
@@ -797,6 +913,7 @@ useEffect(() => {
                   )
                 ) : (
                   <>
+                    {/* SUGGESTIONS LIST */}
                     <Card className="shadow-none border-none">
                       <CardHeader>
                         <CardTitle>Discover New Connections</CardTitle>
@@ -806,21 +923,20 @@ useEffect(() => {
                       </CardHeader>
                       <CardContent>
                         <div className="divide-y divide-gray-100">
-{suggestions.length > 0 ? (
+                          {suggestions.length > 0 ? (
   suggestions.map(user => (
     <div
       key={user.customUserId}
-      onClick={() => handleCardClick(user)}
-      className="cursor-pointer hover:bg-gray-50 transition"
+      onClick={() => handleSuggestionCardClick(user)}
+      className="cursor-pointer hover:bg-gray-50 transition flex items-center"
     >
       <ConnectionItem
-        key={user.customUserId}
         person={{
           id: user.customUserId,
-          name: `${user.profile.firstName} ${user.profile.lastName}`,
-          title: user.profile.userType,
-          company: user.profile.username,
-          avatar: user.profile.avatar,
+          name: `${user.profile.firstName || ""} ${user.profile.lastName || ""}`.trim(),
+          title: user.profile.userType || "student",
+          company: user.profile.username || "",
+          avatar: user.profile.avatar || "",
           location: "",
           mutualConnections: 0,
           isConnected: false,
@@ -828,12 +944,22 @@ useEffect(() => {
         }}
         showConnectButton
       />
+      <Button
+        size="sm"
+        className="ml-4 bg-blue-600 hover:bg-blue-700 text-white"
+        onClick={e => {
+          e.stopPropagation(); // prevent navigation
+          handleSuggestionConnect(user);
+        }}
+      >
+        <UserPlus className="h-4 w-4 mr-1" />
+        Connect
+      </Button>
     </div>
   ))
 ) : (
   <p className="text-gray-500 p-4">No suggestions right now</p>
 )}
-
                         </div>
                       </CardContent>
                     </Card>
@@ -843,6 +969,8 @@ useEffect(() => {
             </div>
           </div>
         );
+
+        
     }}
 
 
