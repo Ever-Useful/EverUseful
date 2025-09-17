@@ -6,19 +6,27 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import userService from '@/services/userService';
+import relationService from '@/services/relationService';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import SearchFilterBar, { FilterTag } from '@/components/ui/SearchFilterBar';
+import { auth } from "@/lib/firebase"; // make sure auth is imported
+import { useUserProfile } from "@/contexts/UserProfileContext";
+
+
 
 type Connection = {
   id: string;
   name: string;
-  title: string;
-  company: string;
-  location: string;
   avatar?: string;
-  mutualConnections: number;
-  isConnected: boolean;
+  userType: string;
+  username?: string;
+
+  // mark old fields as optional so TS won’t complain
+  title?: string;
+  company?: string;
+  location?: string;
+  mutualConnections?: number;
+  isConnected?: boolean;
   email?: string;
 };
 
@@ -26,89 +34,87 @@ interface ConnectionsPopupProps {
   isOpen: boolean;
   onClose: () => void;
   connectionCount: number;
+  onFetchedCount?: (count: number) => void; // NEW: emit count back to Profile.tsx
 }
 
-const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopupProps) => {
+const ConnectionsPopup = ({ 
+  isOpen, 
+  onClose, 
+  connectionCount, 
+  onFetchedCount   
+}: ConnectionsPopupProps) => {
+
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const navigate = useNavigate();
+  const { profileData } = useUserProfile();
+  
 
-  // Filter tags for search
-  const filterTags: FilterTag[] = [
-    { id: 'all', label: 'All', active: activeFilter === 'all' },
-    { id: 'professor', label: 'Professor', active: activeFilter === 'professor' },
-    { id: 'student', label: 'Student', active: activeFilter === 'student' },
-    { id: 'enterprise', label: 'Enterprise', active: activeFilter === 'enterprise' },
-    { id: 'freelancer', label: 'Freelancer', active: activeFilter === 'freelancer' },
-    { id: 'experts', label: 'Experts', active: activeFilter === 'experts' },
-    { id: 'jobs', label: 'Jobs', active: activeFilter === 'jobs' }
-  ];
 
-  const handleFilterClick = (tagId: string) => {
-    setActiveFilter(tagId);
-  };
 
-  // Mock data for now - replace with actual API call
-  const mockConnections: Connection[] = [
-    {
-      id: '1',
-      name: 'Sarah Chen',
-      title: 'Senior Product Manager',
-      company: 'TechCorp',
-      location: 'San Francisco, CA',
-      mutualConnections: 15,
-      isConnected: true,
-    },
-    {
-      id: '2',
-      name: 'Marcus Johnson',
-      title: 'Lead Developer',
-      company: 'StartupXYZ',
-      location: 'New York, NY',
-      mutualConnections: 8,
-      isConnected: true,
-    },
-    {
-      id: '3',
-      name: 'Elena Rodriguez',
-      title: 'Marketing Director',
-      company: 'GrowthCo',
-      location: 'Austin, TX',
-      mutualConnections: 12,
-      isConnected: true,
-    },
-    {
-      id: '4',
-      name: 'David Kim',
-      title: 'UX Designer',
-      company: 'DesignStudio',
-      location: 'Seattle, WA',
-      mutualConnections: 5,
-      isConnected: true,
-    },
-    {
-      id: '5',
-      name: 'Lisa Wang',
-      title: 'Data Scientist',
-      company: 'DataTech',
-      location: 'Boston, MA',
-      mutualConnections: 3,
-      isConnected: true,
-    }
-  ];
 
   useEffect(() => {
-    if (isOpen) {
-      setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setConnections(mockConnections);
+    const fetchConnectedProfiles = async () => {
+      if (!profileData?.customUserId) return;
+
+      try {
+        setLoading(true);
+        // Get relations data from backend
+        const relationsData = await relationService.getMyRelations();
+        console.log('ConnectionsPopup - Relations data:', relationsData);
+        
+        // Extract connections from the relations data
+        // Connections are stored as a map { userId: true, ... } so we need to get the keys
+        const connectionsMap = relationsData?.data?.connections || relationsData?.connections || {};
+        const connectionsList = Object.keys(connectionsMap);
+        console.log('ConnectionsPopup - Connections map:', connectionsMap);
+        console.log('ConnectionsPopup - Connections list:', connectionsList);
+
+        const connectedProfiles = await Promise.all(
+          connectionsList.map(async (connectionId: string) => {
+            try {
+              console.log(`ConnectionsPopup - Fetching user details for ID: ${connectionId}`);
+              const user = await userService.getUserByCustomId(connectionId);
+              console.log(`ConnectionsPopup - User details for ${connectionId}:`, user);
+              return user;
+            } catch (error) {
+              console.warn(`User with ID ${connectionId} not found, skipping...`, error);
+              return null;
+            }
+          })
+        );
+
+        const cleanedProfiles = connectedProfiles
+          .filter(Boolean)
+          .map((user: any) => ({
+            id: user.customUserId,
+            name: `${user.auth?.firstName || user.profile?.firstName || "User"} ${user.auth?.lastName || user.profile?.lastName || ""}`.trim(),
+            avatar: user.profile?.avatar || "",
+            userType: user.auth?.userType || "student",
+            username: user.auth?.username || user.profile?.username || "",
+          }));
+
+        console.log('ConnectionsPopup - Cleaned profiles:', cleanedProfiles);
+        setConnections(cleanedProfiles);
+
+        // Emit the actual fetched count back up
+        onFetchedCount?.(cleanedProfiles.length);
+      } catch (err) {
+        console.error("Failed to fetch connected profiles:", err);
+        toast.error("Failed to load connections");
+      } finally {
         setLoading(false);
-      }, 500);
-    }
-  }, [isOpen]);
+      }
+    };
+
+    fetchConnectedProfiles();
+  }, [profileData?.customUserId]);
+
+
+
+  
 
   const handleMessage = (connectionId: string) => {
     // Navigate to chat or open chat modal
@@ -125,10 +131,29 @@ const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopup
     onClose(); // Close the popup after navigation
   };
 
+  const handleViewProfile = (connection: Connection) => {
+  const id = connection.id;
+  const type = connection.userType?.toLowerCase();
+
+  if (type === "student") {
+    navigate(`/studentprofile/${id}`);
+  } else if (type === "business") {
+    navigate(`/businessprofile/${id}`);
+  } else if (type === "freelancer") {
+    navigate(`/freelancerprofile/${id}`);
+  } else {
+    console.warn("Unknown userType:", type, " — defaulting to student");
+    navigate(`/studentprofile/${id}`);
+  }
+
+  onClose();
+};
+
+
   const filteredConnections = connections.filter(connection =>
     connection.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    connection.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    connection.company.toLowerCase().includes(searchQuery.toLowerCase())
+    (connection.username && connection.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (connection.userType && connection.userType.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   if (!isOpen) return null;
@@ -141,7 +166,7 @@ const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopup
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Connections</h2>
             <p className="text-sm text-gray-600 mt-1">
-              {connectionCount} connection{connectionCount !== 1 ? 's' : ''}
+              {connections.length} connection{connections.length !== 1 ? 's' : ''}
             </p>
           </div>
           <Button
@@ -165,14 +190,6 @@ const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopup
               className="pl-10 h-10 sm:h-12 text-sm sm:text-base"
             />
           </div>
-          {/* Filter Bar */}
-          <div className="mt-3 mb-1">
-            <SearchFilterBar 
-              tags={filterTags}
-              onTagClick={handleFilterClick}
-              className="justify-start"
-            />
-          </div>
         </div>
 
         {/* Content */}
@@ -193,31 +210,26 @@ const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopup
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                       {/* Avatar and Info */}
                       <div className="flex items-center gap-4 flex-1">
-                        <Avatar className="h-12 w-12 sm:h-16 sm:w-16">
-                          <AvatarImage src={connection.avatar} />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-sm sm:text-base">
-                            {connection.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
+<Avatar className="h-12 w-12 sm:h-16 sm:w-16">
+  <AvatarImage src={connection.avatar} />
+  <AvatarFallback>
+    {connection.name ? connection.name.split(" ").map(n => n[0]).join("") : "U"}
+  </AvatarFallback>
+</Avatar>
+
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
-                            {connection.name}
-                          </h3>
-                          <p className="text-gray-600 text-xs sm:text-sm truncate">
-                            {connection.title}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Building className="h-3 w-3 text-gray-400" />
-                            <p className="text-gray-500 text-xs truncate">
-                              {connection.company}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <MapPin className="h-3 w-3 text-gray-400" />
-                            <p className="text-gray-500 text-xs truncate">
-                              {connection.location}
-                            </p>
-                          </div>
+<h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+  {connection.name}
+</h3>
+
+{connection.username && (
+  <p className="text-gray-500 text-xs">@{connection.username}</p>
+)}
+
+<Badge variant="secondary" className="text-xs mt-1">
+  {connection.userType || "student"}
+</Badge>
+
                         </div>
                       </div>
 
@@ -229,12 +241,12 @@ const ConnectionsPopup = ({ isOpen, onClose, connectionCount }: ConnectionsPopup
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation(); // Prevent card click
-                            handleMessage(connection.id);
+                            handleViewProfile(connection);
                           }}
                           className="text-blue-600 border-blue-600 hover:bg-blue-50 text-xs sm:text-sm"
                         >
-                          <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                          Message
+                          {/* <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> */}
+                          View Profile
                         </Button>
                       </div>
                     </div>
