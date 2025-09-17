@@ -6,36 +6,26 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import Header from '@/components/Header';
-import { Heart } from 'lucide-react'; // Import the Heart icon
+import { Heart, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '@/config/api';
 
 import goldenTrophy from '@/assets/images/goldenTrophy.png';
 import silverTrophy from '@/assets/images/silverTrophy.png';
 import brownTrophy from '@/assets/images/brownTrophy.png';
 
 
-// --- MOCK DATA ---
+// --- INTERFACES ---
 interface LeaderboardUser {
-    userId: string;
+    customUserId: string;
     name: string;
     profilePicture?: string;
+    userType: string;
     projects: number;
+    views: number;
     likes: number;
-    taken: number;
     points: number;
 }
-
-const mockLeaderboardData: LeaderboardUser[] = [
-    { userId: '1', name: 'BabyKnight', profilePicture: 'https://i.pravatar.cc/150?u=babyknight', projects: 42, likes: 1205, taken: 21, points: 1590 },
-    { userId: '2', name: 'Rootless', profilePicture: 'https://i.pravatar.cc/150?u=rootless', projects: 38, likes: 1100, taken: 19, points: 1420 },
-    { userId: '3', name: 'Teodorr2000', profilePicture: 'https://i.pravatar.cc/150?u=teodorr2000', projects: 35, likes: 980, taken: 15, points: 1350 },
-    { userId: '4', name: 'Rens', profilePicture: 'https://i.pravatar.cc/150?u=rens', projects: 32, likes: 950, taken: 14, points: 1210 },
-    { userId: '5', name: 'Edwin', profilePicture: 'https://i.pravatar.cc/150?u=edwin', projects: 30, likes: 900, taken: 12, points: 1100 },
-    { userId: '6', name: 'FlyWithMe', profilePicture: 'https://i.pravatar.cc/150?u=flywithme', projects: 28, likes: 850, taken: 11, points: 980 },
-    { userId: '7', name: 'BigBob007', profilePicture: 'https://i.pravatar.cc/150?u=bigbob007', projects: 25, likes: 800, taken: 10, points: 950 },
-    { userId: '8', name: 'Pudge', profilePicture: 'https://i.pravatar.cc/150?u=pudge', projects: 22, likes: 750, taken: 9, points: 890 },
-    { userId: '9', name: 'Anshika Gupta', profilePicture: 'https://github.com/anshika-gupta-2003.png', projects: 20, likes: 700, taken: 8, points: 850 }, // Current user
-    { userId: '10', name: 'Kimberly', profilePicture: 'https://i.pravatar.cc/150?u=kimberly', projects: 18, likes: 650, taken: 7, points: 820 },
-];
 
 const getInitials = (name: string) => {
     if (!name) return '';
@@ -48,6 +38,10 @@ const Leaderboard = () => {
     const [activeMainFilter, setActiveMainFilter] = useState('Rank');
     const [activeTimeFilter, setActiveTimeFilter] = useState('24h');
     const [isMounted, setIsMounted] = useState(false);
+    const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         // Trigger animations on component mount
@@ -55,20 +49,131 @@ const Leaderboard = () => {
         return () => clearTimeout(timer);
     }, []);
 
+    useEffect(() => {
+        fetchLeaderboardData();
+    }, []);
+
+    const fetchLeaderboardData = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const url = API_ENDPOINTS.USER_LEADERBOARD;
+            console.log('Fetching leaderboard data from:', url);
+            
+            const response = await fetch(url);
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            console.log('Leaderboard data received:', result);
+            
+            if (result.success) {
+                setLeaderboardData(result.data);
+            } else {
+                setError('Failed to fetch leaderboard data');
+            }
+        } catch (err) {
+            console.error('Error fetching leaderboard data:', err);
+            setError(`Failed to fetch leaderboard data: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const { profileData } = useUserProfile();
-    const currentUserId = (profileData as any)?.userId || (profileData as any)?.id || '9';
-    const currentUser = mockLeaderboardData.find(u => u.userId === currentUserId);
-    const currentUserRank = mockLeaderboardData.findIndex(u => u.userId === currentUserId) + 1;
+    const currentUserId = (profileData as any)?.customUserId || (profileData as any)?.userId || (profileData as any)?.id;
+    const currentUser = leaderboardData.find(u => u.customUserId === currentUserId);
+    const currentUserRank = leaderboardData.findIndex(u => u.customUserId === currentUserId) + 1;
 
-    const filteredLeaderboardData = mockLeaderboardData;
+    const handleUserClick = (user: LeaderboardUser) => {
+        if (user.customUserId === currentUserId) {
+            // Navigate to own profile
+            navigate('/profile');
+        } else {
+            // Navigate to user's profile based on userType
+            if (user.userType === 'freelancer') {
+                navigate(`/freelancer-profile/${user.customUserId}`);
+            } else {
+                navigate(`/student-profile/${user.customUserId}`);
+            }
+        }
+    };
+
+    const filteredLeaderboardData = React.useMemo(() => {
+        let filtered = [...leaderboardData];
+        
+        switch (activeMainFilter) {
+            case 'Projects':
+                filtered.sort((a, b) => b.projects - a.projects);
+                break;
+            case 'Views':
+                filtered.sort((a, b) => b.views - a.views);
+                break;
+            case 'Likes':
+                filtered.sort((a, b) => b.likes - a.likes);
+                break;
+            case 'Rank':
+            default:
+                // Already sorted by points (rank)
+                break;
+        }
+        
+        return filtered;
+    }, [leaderboardData, activeMainFilter]);
 
     const top3 = filteredLeaderboardData.slice(0, 3);
     const remainingUsers = filteredLeaderboardData.slice(3);
 
     const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
-    const getOriginalIndex = (userId: string) => top3.findIndex(u => u.userId === userId);
+    const getOriginalIndex = (customUserId: string) => top3.findIndex(u => u.customUserId === customUserId);
 
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-sky-100 to-blue-200">
+                <Header />
+                <div className="py-8 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-6xl mx-auto space-y-8 pt-16">
+                        <Card className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6">
+                            <div className="flex items-center justify-center h-64">
+                                <div className="text-center">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                                    <p className="text-slate-600">Loading leaderboard...</p>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-sky-100 to-blue-200">
+                <Header />
+                <div className="py-8 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-6xl mx-auto space-y-8 pt-16">
+                        <Card className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6">
+                            <div className="flex items-center justify-center h-64">
+                                <div className="text-center">
+                                    <p className="text-red-600 mb-4">{error}</p>
+                                    <Button onClick={fetchLeaderboardData} className="bg-blue-600 hover:bg-blue-700 text-white">
+                                        Try Again
+                                    </Button>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-sky-100 to-blue-200">
@@ -82,7 +187,7 @@ const Leaderboard = () => {
                             <div className="flex flex-wrap gap-2">
                                 <Tabs value={activeMainFilter} onValueChange={setActiveMainFilter}>
                                     <TabsList className="bg-slate-200 p-0.5 rounded-md">
-                                        {['Rank', 'Projects', 'Likes'].map(filter => ( 
+                                        {['Rank', 'Projects', 'Views', 'Likes'].map(filter => ( 
                                             <TabsTrigger key={filter} value={filter}
                                                 className={cn("px-4 py-2 text-sm font-medium rounded-md transition-colors",
                                                     activeMainFilter === filter ? "bg-white text-blue-600 shadow-sm" : "text-slate-600 hover:bg-slate-100")}>
@@ -113,14 +218,14 @@ const Leaderboard = () => {
                                 {podiumOrder.map((user) => {
                                     const maxPoints = top3[0]?.points || 1;
                                     const height = isMounted ? `${(user.points / maxPoints) * 100}%` : '0%';
-                                    const originalIndex = getOriginalIndex(user.userId);
+                                    const originalIndex = getOriginalIndex(user.customUserId);
                                     const barColors = ['bg-yellow-400', 'bg-slate-400', 'bg-amber-800'];
                                     const barColor = barColors[originalIndex];
 
                                     return (
-                                        <div key={user.userId} className="h-full flex flex-col justify-end items-center w-20">
+                                        <div key={user.customUserId} className="h-full flex flex-col justify-end items-center w-20">
                                             <div className="flex flex-col items-center w-full transition-all duration-1000 ease-in-out" style={{ height }}>
-                                                <Avatar className="w-12 h-12 border-2 border-white shadow-lg">
+                                                <Avatar className="w-12 h-12 border-2 border-white shadow-lg cursor-pointer" onClick={() => handleUserClick(user)}>
                                                     <AvatarImage src={user.profilePicture} alt={user.name} />
                                                     <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                                                 </Avatar>
@@ -132,8 +237,8 @@ const Leaderboard = () => {
                             </div>
                             <div className="flex justify-center mt-2">
                                 {podiumOrder.map(user => (
-                                    <div key={user.userId} className="w-20 text-center px-1">
-                                        <p className="font-semibold text-slate-800 text-xs truncate">{user.name}</p>
+                                    <div key={user.customUserId} className="w-20 text-center px-1">
+                                        <p className="font-semibold text-slate-800 text-xs truncate cursor-pointer hover:text-blue-600" onClick={() => handleUserClick(user)}>{user.name}</p>
                                         <p className="text-xs text-slate-600">{user.points} pts</p>
                                     </div>
                                 ))}
@@ -143,25 +248,27 @@ const Leaderboard = () => {
                         {/* Animated Top 3 Podium Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                             {top3.map((user, index) => (
-                                <Card key={user.userId}
+                                <Card key={user.customUserId}
                                     className={cn(
-                                        "p-4 bg-slate-50/80 shadow-sm rounded-lg flex items-center justify-between transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]",
+                                        "p-4 bg-slate-50/80 shadow-sm rounded-lg flex items-center justify-between transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] cursor-pointer",
                                         isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                                     )}
-                                    style={{ transitionDelay: `${index * 150}ms` }}>
+                                    style={{ transitionDelay: `${index * 150}ms` }}
+                                    onClick={() => handleUserClick(user)}>
                                     <div className="flex items-center gap-4">
                                         <Avatar className="w-16 h-16 border-2 border-blue-400">
                                             <AvatarImage src={user.profilePicture} alt={user.name} />
                                             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <h3 className="font-semibold text-lg text-slate-800">{user.name}</h3>
+                                            <h3 className="font-semibold text-lg text-slate-800 hover:text-blue-600">{user.name}</h3>
                                             <p className="text-sm text-slate-600">{user.points} Points</p>
                                             <div className="flex gap-4 mt-1 text-sm text-slate-700">
                                                 <span>Projects: {user.projects}</span>
+
                                                 <span className="flex items-center gap-1.5">
-                                                    <Heart className="w-4 h-4 text-red-500 fill-current" />
-                                                    {user.likes}
+                                                    <Eye className="w-4 h-4 text-blue-500" />
+                                                    {user.views}
                                                 </span>
                                             </div>
                                         </div>
@@ -179,20 +286,21 @@ const Leaderboard = () => {
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Rank</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Name</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Projects</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Views</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Likes</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Taken</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Points</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white/0">
                                     {remainingUsers.map((user, index) => (
-                                        <tr key={user.userId}
-                                            className={cn("transition-all duration-300 border-b border-slate-200/50",
-                                                user.userId === currentUserId ? 'bg-blue-100/50' : 'hover:bg-slate-100/50',
+                                        <tr key={user.customUserId}
+                                            className={cn("transition-all duration-300 border-b border-slate-200/50 cursor-pointer",
+                                                user.customUserId === currentUserId ? 'bg-blue-100/50' : 'hover:bg-slate-100/50',
                                                 isMounted ? "opacity-100" : "opacity-0",
                                                 "hover:!bg-slate-50/70 hover:shadow-md"
                                             )}
-                                            style={{ transitionDelay: `${index * 50}ms` }}>
+                                            style={{ transitionDelay: `${index * 50}ms` }}
+                                            onClick={() => handleUserClick(user)}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{index + 4}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
@@ -200,22 +308,27 @@ const Leaderboard = () => {
                                                         <AvatarImage src={user.profilePicture} alt={user.name} />
                                                         <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                                                     </Avatar>
-                                                    <span className="text-sm font-medium text-slate-900">{user.name}</span>
+                                                    <span className="text-sm font-medium text-slate-900 hover:text-blue-600">{user.name}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{user.projects}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
+                                                <div className="flex items-center gap-1.5">
+                                                     <Eye className="w-4 h-4 text-blue-500/80" />
+                                                     {user.views}
+                                                </div>
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
                                                 <div className="flex items-center gap-1.5">
                                                      <Heart className="w-4 h-4 text-red-500/80" />
                                                      {user.likes}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{user.taken}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-bold">{user.points}</td>
                                         </tr>
                                     ))}
                                     {currentUser && currentUserRank > 3 && (
-                                        <tr className="bg-blue-200/80 border-t-2 border-blue-300">
+                                        <tr className="bg-blue-200/80 border-t-2 border-blue-300 cursor-pointer" onClick={() => handleUserClick(currentUser)}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-800">{currentUserRank}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
@@ -223,17 +336,22 @@ const Leaderboard = () => {
                                                         <AvatarImage src={currentUser.profilePicture} alt={currentUser.name} />
                                                         <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
                                                     </Avatar>
-                                                    <span className="text-sm font-bold text-blue-800">{currentUser.name} (You)</span>
+                                                    <span className="text-sm font-bold text-blue-800 hover:text-blue-600">{currentUser.name} (You)</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-700">{currentUser.projects}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-700">
+                                                 <div className="flex items-center gap-1.5">
+                                                     <Eye className="w-4 h-4 text-blue-500" />
+                                                     {currentUser.views}
+                                                 </div>
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-700">
                                                  <div className="flex items-center gap-1.5">
                                                      <Heart className="w-4 h-4 text-red-500" />
                                                      {currentUser.likes}
                                                  </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-700">{currentUser.taken}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-700">{currentUser.points}</td>
                                         </tr>
                                     )}

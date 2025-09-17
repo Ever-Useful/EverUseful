@@ -307,6 +307,100 @@ router.get('/projects', authorize, async (req, res) => {
   }
 });
 
+// Get leaderboard data
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const dynamoDBService = require('../services/dynamoDBService');
+    
+    // Get all users from DynamoDB
+    const allUsers = await dynamoDBService.getAllUsers();
+    
+    // Get marketplace data to calculate project stats
+    const marketplace = await dynamoDBService.getMarketplaceData();
+    
+    // Process each user to calculate their leaderboard stats
+    const leaderboardData = [];
+    
+    for (const user of allUsers) {
+      try {
+        const customUserId = user.customUserId;
+        
+        // Get user's projects from marketplace
+        const userProjects = marketplace.projects.filter(p => 
+          p.author === customUserId || p.customUserId === customUserId
+        );
+        
+        // Get user's agents
+        let userAgents = [];
+        try {
+          userAgents = await dynamoDBService.getAgentsByAuthor(customUserId);
+        } catch (agentError) {
+          console.warn(`Failed to fetch agents for user ${customUserId}:`, agentError.message);
+        }
+        
+        // Calculate project count
+        let projectCount = 0;
+        if (user.projects && user.projects.count !== undefined) {
+          projectCount = user.projects.count;
+        } else {
+          projectCount = userProjects.length + userAgents.length;
+        }
+        
+        // Calculate total views
+        let totalViews = 0;
+        userProjects.forEach(project => {
+          totalViews += project.views || 0;
+        });
+        userAgents.forEach(agent => {
+          totalViews += agent.views || 0;
+        });
+        
+        // Calculate total likes
+        let totalLikes = 0;
+        userProjects.forEach(project => {
+          totalLikes += project.likes || 0;
+        });
+        userAgents.forEach(agent => {
+          totalLikes += agent.likes || 0;
+        });
+        
+        // Only include users who have at least one project or some activity
+        if (projectCount > 0 || totalViews > 0 || totalLikes > 0) {
+          leaderboardData.push({
+            customUserId: customUserId,
+            name: `${user.profile?.firstName || ''} ${user.profile?.lastName || ''}`.trim() || user.profile?.username || 'Unknown User',
+            profilePicture: user.profile?.avatar || null,
+            userType: user.profile?.userType || 'student',
+            projects: projectCount,
+            views: totalViews,
+            likes: totalLikes,
+            // Calculate points based on projects and views (you can adjust the formula)
+            points: (projectCount * 10) + (totalViews * 0.1) + (totalLikes * 2)
+          });
+        }
+      } catch (userError) {
+        console.warn(`Error processing user ${user.customUserId}:`, userError.message);
+        continue;
+      }
+    }
+    
+    // Sort by points (descending), then by projects, then by views
+    leaderboardData.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.projects !== a.projects) return b.projects - a.projects;
+      return b.views - a.views;
+    });
+    
+    res.json({
+      success: true,
+      data: leaderboardData
+    });
+  } catch (error) {
+    console.error('Error fetching leaderboard data:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // Update user profile
 router.put('/profile', authorize, async (req, res) => {
   try {
