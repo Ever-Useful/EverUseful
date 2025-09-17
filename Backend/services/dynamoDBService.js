@@ -252,29 +252,6 @@ class DynamoDBService {
     }
   }
 
-  async findUserByPhone(phoneNumber) {
-    try {
-      const params = {
-        TableName: this.usersTable,
-        FilterExpression: 'phoneNumber = :phone OR mobile = :phone',
-        ExpressionAttributeValues: {
-          ':phone': phoneNumber
-        }
-      };
-
-      const result = await dynamodb.scan(params).promise();
-      const user = result.Items[0] || null;
-      
-      if (user) {
-        return this.reconstructUserData(user);
-      }
-      return null;
-    } catch (error) {
-      console.error('Error finding user by phone:', error);
-      return null;
-    }
-  }
-
   // Reconstruct user data from flattened DynamoDB structure
   reconstructUserData(user) {
     const reconstructed = {
@@ -297,18 +274,47 @@ class DynamoDBService {
       social: user.social || {},
       connections: user.connections || { sent: [], received: [], pending: [] }
     };
+    
 
-    // Only reconstruct from flattened keys if nested objects don't exist
-    if (!user.profile || Object.keys(user.profile).length === 0) {
-      Object.keys(user).forEach(key => {
-        if (key.startsWith('profile.')) {
-          const profileKey = key.replace('profile.', '');
-          reconstructed.profile[profileKey] = user[key];
-        }
-      });
+  // Rebuild profile from flattened keys (e.g. "profile.firstName")
+  Object.keys(user).forEach(key => {
+    if (key.startsWith("profile.")) {
+      const profileKey = key.replace("profile.", "");
+      reconstructed.profile[profileKey] = user[key];
     }
+  });
 
-    if (!user.studentData || Object.keys(user.studentData).length === 0) {
+  // // Fix: hydrate connections.* from flattened keys
+  // reconstructed.connections = reconstructed.connections || { sent: [], received: [], pending: [] };
+  // reconstructed.social = reconstructed.social || {};
+
+  // Object.keys(user).forEach(key => {
+  //   if (key.startsWith("connections.")) {
+  //     const sub = key.slice("connections.".length); // "sent" | "received" | "pending"
+  //     reconstructed.connections[sub] = user[key] ?? reconstructed.connections[sub] ?? [];
+  //   }
+  //   if (key.startsWith("social.")) {
+  //     const sub = key.slice("social.".length); // e.g. "connected"
+  //     reconstructed.social[sub] = user[key] ?? reconstructed.social[sub];
+  //   }
+  // });
+
+
+    
+  
+
+  // Reconstruct profile from flattened keys
+  Object.keys(user).forEach(key => {
+    if (key.startsWith("profile.")) {
+      const profileKey = key.replace("profile.", "");
+      reconstructed.profile[profileKey] = user[key];
+    }
+  });
+
+
+
+    // Reconstruct studentData from flattened keys
+    if (!reconstructed.studentData) {
       reconstructed.studentData = {};
       Object.keys(user).forEach(key => {
         if (key.startsWith('studentData.')) {
@@ -1057,6 +1063,67 @@ class DynamoDBService {
     }
   }
 
+
+  //To ftch user's connections(profiles user follows)  //Parul
+  async getUserConnections(customUserId) {
+  try {
+    const me = await this.findUserByCustomId(customUserId);
+    if (!me) throw new Error('User not found');
+
+    const followingIds = me.social?.following || [];
+    if (followingIds.length === 0) return [];
+
+    // Parallelize database calls
+    const users = await Promise.all(
+      followingIds.map(id => this.findUserByCustomId(id))
+    );
+
+    const myFollowingSet = new Set(followingIds);
+    const result = [];
+
+    for (const u of users) {
+      if (!u) continue; // Skip deleted users
+
+      const first = (u.profile?.firstName || '').trim();
+      const last = (u.profile?.lastName || '').trim();
+      const name = [first, last].filter(Boolean).join(' ') || 
+                   (u.profile?.username || u.profile?.email || 'User');
+
+      const fromWork = Array.isArray(u.workExperience) && u.workExperience[0]?.company;
+      const fromProfessor = u.professorData?.institution || u.professorData?.university;
+      const fromStudent = u.studentData?.college || u.studentData?.university;
+      const company = fromProfessor || fromStudent || fromWork || '';
+
+      const theirFollowing = u.social?.following || [];
+      const mutual = theirFollowing.filter(x => myFollowingSet.has(x)).length;
+
+      result.push({
+        id: u.customUserId,
+        name,
+        title: u.profile?.title || '',
+        company,
+        location: u.profile?.location || u.freelancerData?.location || '',
+        avatar: u.profile?.avatar || '',
+        mutualConnections: mutual,
+        isConnected: Array.isArray(u.social?.followers) ? 
+                    u.social.followers.includes(customUserId) : false,
+        skills: (u.skills || []).map(s => typeof s === 'string' ? s : (s.name || '')).filter(Boolean),
+      });
+    }
+
+    return result;
+  } catch (err) {
+    console.error('Error getUserConnections:', err);
+    throw err;
+  }
+}
+
+
+
+
+
+
+
   async getUserStats(customUserId) {
     try {
       const user = await this.findUserByCustomId(customUserId);
@@ -1364,352 +1431,207 @@ async searchUsersByName(query) {
   }
 }
 
-// ==========================
-// Connection Requests
-// ==========================
 
-// Create a connection request
-// async createConnectionRequest(userId, targetUserId) {
+
+
+
+// // Send connection request
+// async createConnectionRequest(senderId, receiverId) {
 //   try {
-//     const connection = {
-//       id: Date.now().toString(),
-//       userId,
-//       targetUserId,
-//       status: 'pending',
-//       createdAt: new Date().toISOString()
-//     };
+//     // Prevent self-request
+//     if (senderId === receiverId) {
+//       throw new Error("You cannot send a connection request to yourself");
+//     }
 
-//     // Add connection for requester
-//     const userConnections = await this.getUserConnections(userId);
-//     await this.updateUser(userId, {
-//       'social.connections': [...userConnections, connection]
+//     const sender = await this.findUserByCustomId(senderId);
+//     const receiver = await this.findUserByCustomId(receiverId);
+
+//     if (!sender || !receiver) throw new Error("User not found");
+
+//     // Prevent duplicate or already connected requests
+//     if (
+//       sender.connections?.sent?.includes(receiverId) ||
+//       receiver.connections?.received?.includes(senderId) ||
+//       sender.social?.connected?.includes(receiverId) ||
+//       receiver.social?.connected?.includes(senderId)
+//     ) {
+//       throw new Error("Request already exists or users are already connected");
+//     }
+
+//     // Update sender (add to sent)
+//     await this.updateUser(senderId, {
+//       "connections.sent": [...(sender.connections?.sent || []), receiverId],
 //     });
 
-//     // Add "incoming" connection for target
-//     const targetConnections = await this.getUserConnections(targetUserId);
-//     await this.updateUser(targetUserId, {
-//       'social.connections': [
-//         ...targetConnections,
-//         { ...connection, status: 'incoming' }
-//       ]
+//     // Update receiver (add to received)
+//     await this.updateUser(receiverId, {
+//       "connections.received": [...(receiver.connections?.received || []), senderId],
 //     });
 
-//     return connection;
+//     return { success: true, message: "Connection request sent" };
 //   } catch (err) {
-//     console.error('Error creating connection request:', err);
+//     console.error("Error creating connection request:", err);
 //     throw err;
 //   }
 // }
 
-// // Get all connections of a user
-// async getUserConnections(customUserId) {
+// // Accept connection request
+// async acceptConnectionRequest(receiverId, senderId) {
+//   try {
+//     if (receiverId === senderId) throw new Error("Invalid operation");
+
+//     const sender = await this.findUserByCustomId(senderId);
+//     const receiver = await this.findUserByCustomId(receiverId);
+
+//     if (!sender || !receiver) throw new Error("User not found");
+
+//     // Remove pending request
+//     const updatedSenderSent = (sender.connections?.sent || []).filter(id => id !== receiverId);
+//     const updatedReceiverReceived = (receiver.connections?.received || []).filter(id => id !== senderId);
+
+//     //  Add both to connected
+//     const updatedSenderConnected = [...(sender.social?.connected || []), receiverId];
+//     const updatedReceiverConnected = [...(receiver.social?.connected || []), senderId];
+
+//     await this.updateUser(senderId, {
+//       "connections.sent": updatedSenderSent,
+//       "social.connected": updatedSenderConnected,
+//     });
+
+//     await this.updateUser(receiverId, {
+//       "connections.received": updatedReceiverReceived,
+//       "social.connected": updatedReceiverConnected,
+//     });
+
+//     return { success: true, message: "Connection request accepted" };
+//   } catch (err) {
+//     console.error("Error accepting connection request:", err);
+//     throw err;
+//   }
+// }
+
+// // Reject connection request
+// async rejectConnectionRequest(receiverId, senderId) {
+//   try {
+//     if (receiverId === senderId) throw new Error("Invalid operation");
+
+//     const sender = await this.findUserByCustomId(senderId);
+//     const receiver = await this.findUserByCustomId(receiverId);
+
+//     if (!sender || !receiver) throw new Error("User not found");
+
+//     // Remove from sent/received only
+//     const updatedSenderSent = (sender.connections?.sent || []).filter(id => id !== receiverId);
+//     const updatedReceiverReceived = (receiver.connections?.received || []).filter(id => id !== senderId);
+
+//     await this.updateUser(senderId, { "connections.sent": updatedSenderSent });
+//     await this.updateUser(receiverId, { "connections.received": updatedReceiverReceived });
+
+//     return { success: true, message: "Connection request rejected" };
+//   } catch (err) {
+//     console.error("Error rejecting connection request:", err);
+//     throw err;
+//   }
+// }
+
+// // Withdraw (cancel) connection request by sender
+// async withdrawConnectionRequest(senderId, receiverId) {
+//   try {
+//     if (senderId === receiverId) throw new Error("Invalid operation");
+
+//     const sender = await this.findUserByCustomId(senderId);
+//     const receiver = await this.findUserByCustomId(receiverId);
+
+//     if (!sender || !receiver) throw new Error("User not found");
+
+//     //Remove from both sides
+//     const updatedSenderSent = (sender.connections?.sent || []).filter(id => id !== receiverId);
+//     const updatedReceiverReceived = (receiver.connections?.received || []).filter(id => id !== senderId);
+
+//     await this.updateUser(senderId, { "connections.sent": updatedSenderSent });
+//     await this.updateUser(receiverId, { "connections.received": updatedReceiverReceived });
+
+//     return { success: true, message: "Connection request withdrawn" };
+//   } catch (err) {
+//     console.error("Error withdrawing connection request:", err);
+//     throw err;
+//   }
+// }
+
+// // dynamoDBService.js
+// async getUserConnectionsWithId(customUserId) {
 //   try {
 //     const user = await this.findUserByCustomId(customUserId);
-//     return (user.social && user.social.connections) || [];
-//   } catch (err) {
-//     console.error('Error fetching user connections:', err);
-//     return [];
+//     if (!user) throw new Error("User not found");
+
+//     return {
+//       customUserId: user.customUserId,
+//       connections: {
+//         sent: user.connections?.sent || [],
+//         received: user.connections?.received || [],
+//         pending: user.connections?.pending || [],
+//       },
+//       connected: user.social?.connected || []
+//     };
+//   } catch (error) {
+//     console.error("Error fetching user connections with ID:", error);
+//     throw error;
 //   }
 // }
 
-// // Update connection request status (accept/reject)
-// async updateConnectionStatus(userId, targetUserId, status) {
+
+// // dynamoDBService.js
+// async getReceivedConnectionsWithProfiles(customUserId) {
 //   try {
-//     const user = await this.findUserByCustomId(userId);
-//     const targetUser = await this.findUserByCustomId(targetUserId);
+//     const me = await this.findUserByCustomId(customUserId);
+//     if (!me) throw new Error("User not found");
 
-//     if (!user || !targetUser) throw new Error('User not found');
+//     const receivedIds = me.connections?.received || [];
+//     if (receivedIds.length === 0) {
+//       return {
+//         success: true,
+//         data: {
+//           customUserId: me.customUserId,
+//           connections: { received: [] }
+//         }
+//       };
+//     }
 
-//     // Update requester’s record
-//     const updatedUserConnections = (user.social.connections || []).map(conn =>
-//       (conn.targetUserId === targetUserId || conn.userId === targetUserId)
-//         ? { ...conn, status }
-//         : conn
+//     // Fetch profiles of all users in received list
+//     const receivedUsers = await Promise.all(
+//       receivedIds.map(async id => {
+//         const u = await this.findUserByCustomId(id);
+//         if (!u) return null;
+
+//         return {
+//           customUserId: u.customUserId,
+//           profile: {
+//             firstName: u.profile?.firstName || "",
+//             lastName: u.profile?.lastName || "",
+//             avatar: u.profile?.avatar || null,
+//             userType: u.profile?.userType || "student",
+//             username: u.profile?.username || ""
+//           }
+//         };
+//       })
 //     );
 
-//     // Update target’s record
-//     const updatedTargetConnections = (targetUser.social.connections || []).map(conn =>
-//       (conn.targetUserId === userId || conn.userId === userId)
-//         ? { ...conn, status }
-//         : conn
-//     );
-
-//     await this.updateUser(userId, { 'social.connections': updatedUserConnections });
-//     await this.updateUser(targetUserId, { 'social.connections': updatedTargetConnections });
-
-//     return { success: true, status };
+//     return {
+//       success: true,
+//       data: {
+//         customUserId: me.customUserId,
+//         connections: {
+//           received: receivedUsers.filter(Boolean) // remove nulls
+//         }
+//       }
+//     };
 //   } catch (err) {
-//     console.error('Error updating connection status:', err);
+//     console.error("Error in getReceivedConnectionsWithProfiles:", err);
 //     throw err;
 //   }
 // }
 
 
-// Send connection request
-async createConnectionRequest(senderId, receiverId) {
-  try {
-    const sender = await this.findUserByCustomId(senderId);
-    const receiver = await this.findUserByCustomId(receiverId);
-
-    if (!sender || !receiver) throw new Error("User not found");
-
-    // Prevent duplicate requests or already connected
-    if (
-      sender.connections?.sent?.includes(receiverId) ||
-      sender.social?.connected?.includes(receiverId)
-    ) {
-      throw new Error("Connection request already sent or already connected");
-    }
-
-    // Update sender (add to sent)
-    await this.updateUser(senderId, {
-      "connections.sent": [...(sender.connections?.sent || []), receiverId],
-    });
-
-    // Update receiver (add to received)
-    await this.updateUser(receiverId, {
-      "connections.received": [...(receiver.connections?.received || []), senderId],
-    });
-
-    return { success: true, message: "Connection request sent" };
-  } catch (err) {
-    console.error("Error creating connection request:", err);
-    throw err;
-  }
-}
-
-// Accept connection request
-async acceptConnectionRequest(receiverId, senderId) {
-  try {
-    const sender = await this.findUserByCustomId(senderId);
-    const receiver = await this.findUserByCustomId(receiverId);
-
-    if (!sender || !receiver) throw new Error("User not found");
-
-    // Remove from sent & received
-    const updatedSenderSent = (sender.connections?.sent || []).filter(id => id !== receiverId);
-    const updatedReceiverReceived = (receiver.connections?.received || []).filter(id => id !== senderId);
-
-    // Add each other to connected
-    const updatedSenderConnected = [...(sender.social?.connected || []), receiverId];
-    const updatedReceiverConnected = [...(receiver.social?.connected || []), senderId];
-
-    await this.updateUser(senderId, {
-      "connections.sent": updatedSenderSent,
-      "social.connected": updatedSenderConnected,
-    });
-
-    await this.updateUser(receiverId, {
-      "connections.received": updatedReceiverReceived,
-      "social.connected": updatedReceiverConnected,
-    });
-
-    return { success: true, message: "Connection request accepted" };
-  } catch (err) {
-    console.error("Error accepting connection request:", err);
-    throw err;
-  }
-}
-
-// Reject connection request
-async rejectConnectionRequest(receiverId, senderId) {
-  try {
-    const sender = await this.findUserByCustomId(senderId);
-    const receiver = await this.findUserByCustomId(receiverId);
-
-    if (!sender || !receiver) throw new Error("User not found");
-
-    // Remove from both sent and received
-    const updatedSenderSent = (sender.connections?.sent || []).filter(id => id !== receiverId);
-    const updatedReceiverReceived = (receiver.connections?.received || []).filter(id => id !== senderId);
-
-    await this.updateUser(senderId, { "connections.sent": updatedSenderSent });
-    await this.updateUser(receiverId, { "connections.received": updatedReceiverReceived });
-
-    return { success: true, message: "Connection request rejected" };
-  } catch (err) {
-    console.error("Error rejecting connection request:", err);
-    throw err;
-  }
-}
-
-// Withdraw (cancel) request by sender
-async withdrawConnectionRequest(senderId, receiverId) {
-  try {
-    const sender = await this.findUserByCustomId(senderId);
-    const receiver = await this.findUserByCustomId(receiverId);
-
-    if (!sender || !receiver) throw new Error("User not found");
-
-    const updatedSenderSent = (sender.connections?.sent || []).filter(id => id !== receiverId);
-    const updatedReceiverReceived = (receiver.connections?.received || []).filter(id => id !== senderId);
-
-    await this.updateUser(senderId, { "connections.sent": updatedSenderSent });
-    await this.updateUser(receiverId, { "connections.received": updatedReceiverReceived });
-
-    return { success: true, message: "Connection request withdrawn" };
-  } catch (err) {
-    console.error("Error withdrawing connection request:", err);
-    throw err;
-  }
-}
-
-  // ==========================
-  // Agents Operations
-  // ==========================
-
-  async getAllAgents() {
-    try {
-      const params = {
-        TableName: this.agentsTable
-      };
-      
-      const result = await dynamodb.scan(params).promise();
-      return result.Items || [];
-    } catch (error) {
-      console.error('Error getting all agents:', error);
-      throw error;
-    }
-  }
-
-  async getAgent(agentId) {
-    try {
-      const params = {
-        TableName: this.agentsTable,
-        Key: {
-          id: agentId
-        }
-      };
-
-      const result = await dynamodb.get(params).promise();
-      return result.Item || null;
-    } catch (error) {
-      console.error('Error getting agent:', error);
-      throw error;
-    }
-  }
-
-  async createAgent(agentData) {
-    try {
-      const agent = {
-        id: Date.now().toString(),
-        ...agentData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        rating: 0,
-        downloads: 0,
-        views: 0,
-        sales: 0,
-        favoritedBy: []
-      };
-
-      const params = {
-        TableName: this.agentsTable,
-        Item: agent
-      };
-
-      await dynamodb.put(params).promise();
-      return agent;
-    } catch (error) {
-      console.error('Error creating agent:', error);
-      throw error;
-    }
-  }
-
-  async updateAgent(agentId, updateData) {
-    try {
-      // Ensure files/images/video props persist as provided
-      const updateExpressions = [];
-      const expressionAttributeNames = {};
-      const expressionAttributeValues = {};
-
-      Object.keys(updateData).forEach((key, index) => {
-        const attrName = `#attr${index}`;
-        const attrValue = `:val${index}`;
-        
-        updateExpressions.push(`${attrName} = ${attrValue}`);
-        expressionAttributeNames[attrName] = key;
-        expressionAttributeValues[attrValue] = updateData[key];
-      });
-
-      // Add updatedAt
-      updateExpressions.push('#updatedAt = :updatedAt');
-      expressionAttributeNames['#updatedAt'] = 'updatedAt';
-      expressionAttributeValues[':updatedAt'] = new Date().toISOString();
-
-      const params = {
-        TableName: this.agentsTable,
-        Key: {
-          id: agentId
-        },
-        UpdateExpression: `SET ${updateExpressions.join(', ')}`,
-        ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: expressionAttributeValues,
-        ReturnValues: 'ALL_NEW'
-      };
-
-      const result = await dynamodb.update(params).promise();
-      return result.Attributes;
-    } catch (error) {
-      console.error('Error updating agent:', error);
-      throw error;
-    }
-  }
-
-  async deleteAgent(agentId) {
-    try {
-      const params = {
-        TableName: this.agentsTable,
-        Key: {
-          id: agentId
-        }
-      };
-
-      await dynamodb.delete(params).promise();
-      return { success: true, message: 'Agent deleted successfully' };
-    } catch (error) {
-      console.error('Error deleting agent:', error);
-      throw error;
-    }
-  }
-
-  async getAgentsByAuthor(authorId) {
-    try {
-      // Since AuthorIndex doesn't exist, scan the table and filter by author
-      const params = {
-        TableName: this.agentsTable,
-        FilterExpression: 'author = :author',
-        ExpressionAttributeValues: {
-          ':author': authorId
-        }
-      };
-
-      const result = await dynamodb.scan(params).promise();
-      return result.Items || [];
-    } catch (error) {
-      console.error('Error getting agents by author:', error);
-      throw error;
-    }
-  }
-
-  async getAgentsByCategory(category) {
-    try {
-      const params = {
-        TableName: this.agentsTable,
-        IndexName: 'CategoryIndex',
-        KeyConditionExpression: 'category = :category',
-        ExpressionAttributeValues: {
-          ':category': category
-        }
-      };
-
-      const result = await dynamodb.query(params).promise();
-      return result.Items || [];
-    } catch (error) {
-      console.error('Error getting agents by category:', error);
-      throw error;
-    }
-  }
 
 }
 
