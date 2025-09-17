@@ -1,164 +1,214 @@
-import { useState } from "react";
-import { ConversationList } from "./ConversationList";
-import { ChatArea } from "./ChatArea";
+// import { useState } from "react";
+// import { ConversationList } from "./ConversationList";
+// import { ChatArea } from "./ChatArea";
 
-export interface Conversation {
-  id: string;
-  name: string;
-  lastMessage: string;
-  timestamp: string;
-  unread: boolean;
-  avatar: string;
-  online: boolean;
-}
+// export interface Conversation {
+//   id: string;
+//   name: string;
+//   lastMessage: string;
+//   timestamp: string;
+//   unread: boolean;
+//   avatar: string;
+//   online: boolean;
+// }
 
-export interface Message {
-  id: string;
-  text: string;
-  timestamp: string;
-  sender: "me" | "other";
-}
+// export interface Message {
+//   id: string;
+//   text: string;
+//   timestamp: string;
+//   sender: "me" | "other";
+// }
 
-const mockConversations: Conversation[] = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    lastMessage: "Hey! How's the project going?",
-    timestamp: "2 min ago",
-    unread: true,
-    avatar: "SJ",
-    online: true,
-  },
-  {
-    id: "2",
-    name: "Team Updates",
-    lastMessage: "Meeting scheduled for tomorrow at 3 PM",
-    timestamp: "1 hour ago",
-    unread: true,
-    avatar: "TU",
-    online: false,
-  },
-  {
-    id: "3",
-    name: "Alex Chen",
-    lastMessage: "Thanks for the quick response!",
-    timestamp: "3 hours ago",
-    unread: false,
-    avatar: "AC",
-    online: true,
-  },
-  {
-    id: "4",
-    name: "Design Team",
-    lastMessage: "New mockups are ready for review",
-    timestamp: "Yesterday",
-    unread: false,
-    avatar: "DT",
-    online: false,
-  },
-  {
-    id: "5",
-    name: "Michael Rodriguez",
-    lastMessage: "Let's catch up this weekend",
-    timestamp: "2 days ago",
-    unread: false,
-    avatar: "MR",
-    online: false,
-  },
-];
+// const mockConversations: Conversation[] = [
+//   {
+//     id: "1",
+//     name: "Sarah Johnson",
+//     lastMessage: "Hey! How's the project going?",
+//     timestamp: "2 min ago",
+//     unread: true,
+//     avatar: "SJ",
+//     online: true,
+//   },
+//   {
+//     id: "2",
+//     name: "Team Updates",
+//     lastMessage: "Meeting scheduled for tomorrow at 3 PM",
+//     timestamp: "1 hour ago",
+//     unread: true,
+//     avatar: "TU",
+//     online: false,
+//   },
+//   {
+//     id: "3",
+//     name: "Alex Chen",
+//     lastMessage: "Thanks for the quick response!",
+//     timestamp: "3 hours ago",
+//     unread: false,
+//     avatar: "AC",
+//     online: true,
+//   },
+//   {
+//     id: "4",
+//     name: "Design Team",
+//     lastMessage: "New mockups are ready for review",
+//     timestamp: "Yesterday",
+//     unread: false,
+//     avatar: "DT",
+//     online: false,
+//   },
+//   {
+//     id: "5",
+//     name: "Michael Rodriguez",
+//     lastMessage: "Let's catch up this weekend",
+//     timestamp: "2 days ago",
+//     unread: false,
+//     avatar: "MR",
+//     online: false,
+//   },
+// ];
 
-const mockMessages: Record<string, Message[]> = {
-  "1": [
-    {
-      id: "1",
-      text: "Hey! How's the project going?",
-      timestamp: "2:30 PM",
-      sender: "other",
-    },
-    {
-      id: "2",
-      text: "It's going really well! We're making great progress on the UI components.",
-      timestamp: "2:32 PM",
-      sender: "me",
-    },
-    {
-      id: "3",
-      text: "That's awesome! Can't wait to see the final result.",
-      timestamp: "2:33 PM",
-      sender: "other",
-    },
-  ],
-  "2": [
-    {
-      id: "1",
-      text: "Meeting scheduled for tomorrow at 3 PM",
-      timestamp: "1:15 PM",
-      sender: "other",
-    },
-    {
-      id: "2",
-      text: "Perfect! I'll be there.",
-      timestamp: "1:16 PM",
-      sender: "me",
-    },
-  ],
-};
+// const mockMessages: Record<string, Message[]> = {
+//   "1": [
+//     {
+//       id: "1",
+//       text: "Hey! How's the project going?",
+//       timestamp: "2:30 PM",
+//       sender: "other",
+//     },
+//     {
+//       id: "2",
+//       text: "It's going really well! We're making great progress on the UI components.",
+//       timestamp: "2:32 PM",
+//       sender: "me",
+//     },
+//     {
+//       id: "3",
+//       text: "That's awesome! Can't wait to see the final result.",
+//       timestamp: "2:33 PM",
+//       sender: "other",
+//     },
+//   ],
+//   "2": [
+//     {
+//       id: "1",
+//       text: "Meeting scheduled for tomorrow at 3 PM",
+//       timestamp: "1:15 PM",
+//       sender: "other",
+//     },
+//     {
+//       id: "2",
+//       text: "Perfect! I'll be there.",
+//       timestamp: "1:16 PM",
+//       sender: "me",
+//     },
+//   ],
+// };
 
-export const ChatLayout = () => {
-  const [selectedConversation, setSelectedConversation] = useState<string | null>("1");
-  const [conversations, setConversations] = useState(mockConversations);
-  const [messages, setMessages] = useState(mockMessages);
+// export const ChatLayout = () => {
+//   const [selectedConversation, setSelectedConversation] = useState<string | null>("1");
+//   const [conversations, setConversations] = useState(mockConversations);
+//   const [messages, setMessages] = useState(mockMessages);
 
-  const handleSelectConversation = (id: string) => {
-    setSelectedConversation(id);
-    // Mark as read
-    setConversations(prev => 
-      prev.map(conv => 
-        conv.id === id ? { ...conv, unread: false } : conv
-      )
-    );
-  };
+//   const handleSelectConversation = (id: string) => {
+//     setSelectedConversation(id);
+//     // Mark as read
+//     setConversations(prev => 
+//       prev.map(conv => 
+//         conv.id === id ? { ...conv, unread: false } : conv
+//       )
+//     );
+//   };
 
-  const handleSendMessage = (text: string) => {
-    if (!selectedConversation) return;
+//   const handleSendMessage = (text: string) => {
+//     if (!selectedConversation) return;
     
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      sender: "me",
-    };
+//     const newMessage: Message = {
+//       id: Date.now().toString(),
+//       text,
+//       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+//       sender: "me",
+//     };
 
-    setMessages(prev => ({
-      ...prev,
-      [selectedConversation]: [...(prev[selectedConversation] || []), newMessage],
-    }));
+//     setMessages(prev => ({
+//       ...prev,
+//       [selectedConversation]: [...(prev[selectedConversation] || []), newMessage],
+//     }));
 
-    // Update last message in conversation
-    setConversations(prev =>
-      prev.map(conv =>
-        conv.id === selectedConversation
-          ? { ...conv, lastMessage: text, timestamp: "now" }
-          : conv
-      )
-    );
-  };
+//     // Update last message in conversation
+//     setConversations(prev =>
+//       prev.map(conv =>
+//         conv.id === selectedConversation
+//           ? { ...conv, lastMessage: text, timestamp: "now" }
+//           : conv
+//       )
+//     );
+//   };
 
-  const selectedConv = conversations.find(c => c.id === selectedConversation);
-  const currentMessages = selectedConversation ? messages[selectedConversation] || [] : [];
+//   const selectedConv = conversations.find(c => c.id === selectedConversation);
+//   const currentMessages = selectedConversation ? messages[selectedConversation] || [] : [];
+
+//   return (
+//     <div className="flex h-full bg-white shadow-2xl">
+//       <ConversationList
+//         conversations={conversations}
+//         selectedId={selectedConversation}
+//         onSelect={handleSelectConversation}
+//       />
+//       <ChatArea
+//         conversation={selectedConv}
+//         messages={currentMessages}
+//         onSendMessage={handleSendMessage}
+//       />
+//     </div>
+//   );
+// };
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { ConversationList } from './ConversationList';
+import { ChatArea } from './ChatArea';
+import { conversations as mockConversations, Conversation } from './data';
+
+const ChatLayout: React.FC = () => {
+  const { userId } = useParams<{ userId: string }>();
+
+  // We get the list of all conversations from our data file.
+  const [conversations] = useState<Conversation[]>(mockConversations);
+
+  // This state holds the currently selected conversation. It starts as null.
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+
+  // This useEffect hook runs when the component loads or when the userId in the URL changes.
+  // Its job is to decide which conversation to display.
+  useEffect(() => {
+    let conversationToSelect: Conversation | undefined;
+
+    if (userId) {
+      // If a userId is in the URL (e.g., /chat/1), find that specific conversation.
+      conversationToSelect = conversations.find((c) => c.id === userId);
+    } else if (conversations.length > 0) {
+      // If there's no userId (e.g., you're on /chat), select the first conversation by default.
+      conversationToSelect = conversations[0];
+    }
+
+    // Update the state to show the conversation we found.
+    setSelectedConversation(conversationToSelect || null);
+
+  }, [userId, conversations]); // This effect re-runs if the userId changes.
 
   return (
-    <div className="flex h-full bg-white shadow-2xl">
-      <ConversationList
-        conversations={conversations}
-        selectedId={selectedConversation}
-        onSelect={handleSelectConversation}
-      />
-      <ChatArea
-        conversation={selectedConv}
-        messages={currentMessages}
-        onSendMessage={handleSendMessage}
-      />
+    <div className="flex h-[calc(100vh-4rem)] bg-white dark:bg-gray-900">
+      <div className="w-1/4 border-r dark:border-gray-700 overflow-y-auto">
+        <ConversationList
+          conversations={conversations}
+          selectedConversation={selectedConversation}
+          setSelectedConversation={setSelectedConversation}
+        />
+      </div>
+      <div className="w-3/4 flex flex-col">
+        <ChatArea conversation={selectedConversation} />
+      </div>
     </div>
   );
 };
+
+export default ChatLayout;

@@ -10,6 +10,7 @@ import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { useEffect } from "react";
 import CookieConsent from "@/components/CookieConsent";
 import Leaderboard from './pages/Leaderboard';
+import ChatPage from './pages/Chat';
 
 
 // Lazy load all pages for code splitting
@@ -168,6 +169,11 @@ const App = () => (
               <Suspense fallback={<PageLoader />}>
                 <Chat />
               </Suspense>
+            } />
+            <Route path="/chat/:userId" element={
+             <Suspense fallback={<PageLoader />}>
+                <Chat />
+             </Suspense>
             } />
             <Route path="/connections" element={
               <Suspense fallback={<PageLoader />}>
