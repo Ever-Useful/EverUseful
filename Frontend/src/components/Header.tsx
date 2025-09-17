@@ -53,6 +53,7 @@ import { MyProjects } from '@/components/MyProjects';
 import { Input } from '@/components/ui/input';
 import { clearAllCookies } from '@/utils/cookieUtils';
 import SearchFilterBar, { FilterTag } from '@/components/ui/SearchFilterBar';
+import { API_ENDPOINTS } from '@/config/api';
 
 const mockNotifications = [
     {
@@ -621,8 +622,17 @@ useEffect(() => {
     setUnreadNotificationCount(prev => prev + 1);
   });
 
+  // Clear notifications broadcast
+  socket.on("notifications_cleared", () => {
+    setNotifications([]);
+    setUnreadNotificationCount(0);
+    localStorage.setItem('userNotifications', JSON.stringify([]));
+    localStorage.setItem('userNotificationsUnreadCount', '0');
+  });
+
   return () => {
     socket.off("user_notification");
+    socket.off("notifications_cleared");
   };
 }, []);
 
@@ -632,13 +642,26 @@ useEffect(() => {
   localStorage.setItem('userNotificationsUnreadCount', String(unreadNotificationCount));
 }, [notifications, unreadNotificationCount]);
 
-// Mark all as read
+// Mark all as read: clear on backend, then clear locally
 const handleMarkAllAsRead = async () => {
-    await relationService.clearNotifications();
-    setNotifications([]);
-    setUnreadNotificationCount(0);
-    localStorage.setItem('userNotifications', JSON.stringify([]));
-    localStorage.setItem('userNotificationsUnreadCount', '0');
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+    const token = await user.getIdToken();
+    await fetch(API_ENDPOINTS.NOTIFICATIONS_CLEAR, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (e) {
+    // fall through to local clear
+  }
+  setNotifications([]);
+  setUnreadNotificationCount(0);
+  localStorage.setItem('userNotifications', JSON.stringify([]));
+  localStorage.setItem('userNotificationsUnreadCount', '0');
 };
     return (
         <>

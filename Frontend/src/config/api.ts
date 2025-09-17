@@ -72,6 +72,11 @@ export const API_ENDPOINTS = {
   get RELATIONS_ME() { return getApiUrl('/api/relations/me'); },
   get RELATIONS_STATUS() { return getApiUrl('/api/relations/status'); },
   
+  // Notifications endpoints
+  get NOTIFICATIONS() { return getApiUrl('/api/notifications'); },
+  get NOTIFICATIONS_CLEAR() { return getApiUrl('/api/notifications/clear'); },
+  NOTIFICATION_READ: (id: string) => getApiUrl(`/api/notifications/${id}/read`),
+  
   // Health check
   get HEALTH() { return getApiUrl('/api/test'); },
 };
