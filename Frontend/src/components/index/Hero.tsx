@@ -1,5 +1,3 @@
-// src/components/Hero.tsx
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
