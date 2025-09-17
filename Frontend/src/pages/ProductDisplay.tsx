@@ -132,8 +132,8 @@ const ProductDisplay = () => {
     
     if (!user) {
       return { 
-        name: authorsLoading ? 'Loading...' : 'username', 
-        image: NoUserProfile, 
+        name: 'username', 
+        image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png", 
         userType: '', 
         id: authorId,
         isLoading: authorsLoading,
@@ -187,7 +187,7 @@ const ProductDisplay = () => {
     const userType = profile.userType || auth.userType || user.userType || '';
     
     // Get avatar with fallback
-    const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
+    const avatar = profile.avatar || auth.avatar || user.avatar || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png";
     
     // Get customUserId with fallback
     const customUserId = user.customUserId || user.data?.customUserId || authorId;
@@ -253,6 +253,7 @@ const ProductDisplay = () => {
         return;
       }
       await userService.addToCart({
+        id: project.id,
         name: project.title,
         price: project.price || 0,
         quantity: 1
@@ -261,6 +262,35 @@ const ProductDisplay = () => {
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error('Failed to add project to cart');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!project) return;
+
+    const shareData = {
+      title: project.title,
+      text: project.description,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      } catch (clipboardError) {
+        toast.error('Failed to share project');
+      }
     }
   };
 
@@ -301,7 +331,7 @@ const ProductDisplay = () => {
                   )} 
                   alt={project.title}
                   className="w-full h-96 object-cover rounded-lg shadow-lg"
-                  onError={(e) => handleImageError(e, NoImageAvailable)}
+                  onError={(e) => handleImageError(e, "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png")}
                 />
               </div>
                   {project.images && Array.isArray(project.images) && project.images.length > 1 && (
@@ -318,7 +348,7 @@ const ProductDisplay = () => {
                         src={getS3ImageUrl(image, 'project', 'thumbnail')} 
                         alt={`${project.title} ${index + 1}`}
                         className="w-full h-10 xs:h-12 sm:h-16 lg:h-20 object-cover"
-                        onError={(e) => handleImageError(e, NoImageAvailable)}
+                        onError={(e) => handleImageError(e, "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png")}
                       />
                     </button>
                   ))}
@@ -370,7 +400,7 @@ const ProductDisplay = () => {
               <div className="sm:mt-20 p-4 sm:p-6 mb-4 sm:mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                   <div className="mb-2 sm:mb-0">
-                    <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">${project.price}</span>
+                    <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">₹{project.price}</span>
                     <span className="text-base sm:text-lg text-gray-500 line-through ml-2">{project.originalPrice}</span>
                     <span className="text-base sm:text-lg text-green-600 ml-2 font-medium">{project.discount}</span>
                   </div>
@@ -394,7 +424,12 @@ const ProductDisplay = () => {
                     <ShoppingCart className="w-4 h-4" />
                     <span className="hidden sm:inline">&nbsp;Add to Cart</span>
                   </Button>
-                  <Button variant="outline" size="icon" className="flex-none hover:bg-gray-50 transition-colors">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="flex-none hover:bg-gray-50 transition-colors"
+                    onClick={handleShare}
+                  >
                     <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -589,7 +624,7 @@ const ProductDisplay = () => {
                       src={getUserAvatarUrl({ avatar: getAuthorDetails(project.author).image })} 
                       alt={getAuthorDetails(project.author).name}
                       className="w-16 h-16 rounded-full cursor-pointer"
-                      onError={e => { e.currentTarget.src = NoUserProfile; }}
+                      onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"; }}
                       onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                     />
                     <div>
@@ -646,7 +681,7 @@ const ProductDisplay = () => {
                     src={getUserAvatarUrl({ avatar: getAuthorDetails(project.author).image })} 
                     alt={getAuthorDetails(project.author).name}
                     className="w-12 h-12 rounded-full cursor-pointer transition-transform hover:scale-110"
-                    onError={e => { e.currentTarget.src = NoUserProfile; }}
+                    onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"; }}
                     onClick={() => goToAuthorProfile(getAuthorDetails(project.author).userType, project.author)}
                   />
                   <div className="flex-1">

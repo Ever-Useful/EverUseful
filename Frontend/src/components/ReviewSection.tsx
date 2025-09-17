@@ -45,7 +45,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
       id: 1,
       author: {
         name: "Alex Thompson",
-        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+        image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1472099645785-5658abf4ff4e_11zon.jpg",
         verified: true,
         initials: "AT"
       },
@@ -60,7 +60,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
       id: 2,
       author: {
         name: "Maria Rodriguez",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+        image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1438761681033-6461ffad8d80_11zon.jpg",
         verified: true,
         initials: "MR"
       },
@@ -75,7 +75,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
       id: 3,
       author: {
         name: "Dr. James Wilson",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+        image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1507003211169-0a1dd7228f2d_11zon.jpg",
         verified: true,
         initials: "JW"
       },
@@ -236,7 +236,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
       </div>
 
       {/* Reviews List */}
-      <Card className="border-gray-200 bg-white">
+      {/* <Card className="border-gray-200 bg-white">
         <CardHeader className="flex flex-row items-center justify-between px-2 py-2 sm:px-4 sm:py-4">
           <CardTitle className="text-gray-900 text-base sm:text-lg">Customer Reviews</CardTitle>
           <select
@@ -273,7 +273,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
                       {/* <Badge variant="outline" className="text-[10px] sm:text-xs">
                         Verified Purchase
                       </Badge> */}
-                    </div>
+                    {/* </div>
                     <div className="flex items-center space-x-2 sm:space-x-3 mb-1 sm:mb-2">
                       {renderStars(review.rating, false, "w-3 h-3 sm:w-4 sm:h-4")}
                       <span className="text-[10px] sm:text-sm text-gray-500">
@@ -337,7 +337,7 @@ export const ReviewSection = ({ projectId, averageRating, totalReviews }: Review
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 };

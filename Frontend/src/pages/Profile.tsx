@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Star, MapPin, Clock, DollarSign, Calendar, Award, Users, BookOpen, GraduationCap, Briefcase, Link, UserPlus, Edit, Plus, Trash2, Camera, Upload, X, Image as ImageIcon, ShoppingCart } from "lucide-react";
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect, useRef } from "react";
@@ -15,12 +15,17 @@ import { EditProfile } from '@/components/EditProfile';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import toast from "react-hot-toast";
 import { MyProjects } from '@/components/MyProjects';
+import PublishAgentSidebar from '@/components/PublishAgentSidebar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import BackgroundUpload from '@/components/BackgroundUpload';
 import { UnreadMessagesCard } from "@/components/chat/UnreadMessagesCard";
+import LoadingAnimation from '@/components/LoadingAnimation';
 import NoImageAvailable from "@/assets/images/no image available.png";
 import NoUserProfile from "@/assets/images/no user profile.png";
 import { API_ENDPOINTS } from '../config/api';
+
+
+
 import { PhotoUpload } from '@/components/PhotoUpload';
 import ConnectionsPopup from '@/components/ConnectionsPopup';
 // import GlobeLoader from '@/components/GlobeLoader';
@@ -38,7 +43,7 @@ const Profile = () => {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const navigate = useNavigate();
   const [backgroundImage, setBackgroundImage] = useState(
-    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80"
+    "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1470071459604-3b5ec3a7fe05_11zon.jpg"
   );
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -72,6 +77,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showMyProjects, setShowMyProjects] = useState(false);
+  const [showEditAgent, setShowEditAgent] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<any>(null);
   const [editSection, setEditSection] = useState('');
 
 
@@ -164,7 +171,8 @@ const Profile = () => {
       console.log('Profile - Raw background value from database:', resolvedBackgroundUrl);
       if (resolvedBackgroundUrl && !String(resolvedBackgroundUrl).includes('amazonaws.com/')) {
         resolvedBackgroundUrl = `https://amogh-assets.s3.ap-south-1.amazonaws.com/${resolvedBackgroundUrl}`;
-      }
+      };
+      
       if (resolvedBackgroundUrl) {
         resolvedBackgroundUrl = `${resolvedBackgroundUrl}${String(resolvedBackgroundUrl).includes('?') ? '&' : '?'}t=${Date.now()}`;
       }
@@ -242,23 +250,29 @@ const Profile = () => {
          if (projectsData && projectsData.success && projectsData.data) {
            // Handle the correct backend response structure
            const projects = projectsData.data.created || projectsData.data || [];
-           console.log('Profile - Projects found:', projects.length);
+           const projectCount = projectsData.data.count || projects.length;
+           console.log('Profile - Projects found:', projects.length, 'Count:', projectCount);
            setProjects(projects);
+           setStats(prev => ({ ...prev, projects: projectCount }));
          } else if (projectsData && Array.isArray(projectsData)) {
            // Handle direct array response (backward compatibility)
            console.log('Profile - Projects found in direct array:', projectsData.length);
            setProjects(projectsData);
+           setStats(prev => ({ ...prev, projects: projectsData.length }));
          } else if (projectsData && projectsData.created && Array.isArray(projectsData.created)) {
            // Handle nested created array
            console.log('Profile - Projects found in created array:', projectsData.created.length);
            setProjects(projectsData.created);
+           setStats(prev => ({ ...prev, projects: projectsData.created.length }));
          } else {
            console.log('Profile - No projects found in getUserProjects');
            setProjects([]);
+           setStats(prev => ({ ...prev, projects: 0 }));
          }
        } catch (error) {
          console.error('Profile - Error fetching projects from getUserProjects:', error);
          setProjects([]);
+         setStats(prev => ({ ...prev, projects: 0 }));
        }
 
       setEducation(educationArr || []);
@@ -344,6 +358,8 @@ const Profile = () => {
     setShowMyProjects(true);
   };
 
+  // Agents are represented within projects list; no separate fetch needed
+
   const handleDeleteProject = async (projectId: string) => {
     try {
       const user = auth.currentUser;
@@ -392,6 +408,91 @@ const Profile = () => {
   const handleMyProjectsClose = () => {
     setShowMyProjects(false);
     fetchUserData(); // Refresh data after adding a project
+  };
+
+  const isAgentItem = (item: any) => item?.type === 'agent' || (typeof item?.projectLink === 'string' && item.projectLink.startsWith('/ai-agent/'));
+
+  const handleEditItem = async (item: any) => {
+    if (isAgentItem(item)) {
+      try {
+        const res = await fetch(API_ENDPOINTS.AGENT(item.id));
+        if (!res.ok) throw new Error('Failed to load agent');
+        const data = await res.json();
+        setEditingAgent(data.agent);
+        setShowEditAgent(true);
+      } catch (e) {
+        console.error('Error loading agent for edit:', e);
+        toast.error('Failed to open agent editor');
+      }
+    } else {
+      setEditingProject(item);
+      setShowEditProjectSidebar(true);
+    }
+  };
+
+  const handleDeleteItem = async (item: any) => {
+    if (isAgentItem(item)) {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          toast.error('You must be logged in to delete an agent.');
+          return;
+        }
+        const token = await user.getIdToken();
+        const res = await fetch(API_ENDPOINTS.AGENT(item.id), {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to delete agent');
+        toast.success('Agent deleted');
+        // Refresh the projects list
+        fetchUserData();
+      } catch (e) {
+        console.error('Error deleting agent:', e);
+        toast.error((e as any).message || 'Failed to delete agent');
+      }
+    } else {
+      await handleDeleteProject(item.id);
+    }
+  };
+
+  const handleAddToCart = async (item: any) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error('You must be logged in to add items to cart.');
+        return;
+      }
+
+      const userData = await userService.getUserProfile();
+      if (!userData) {
+        toast.error('User data not found');
+        return;
+      }
+
+      if (isAgentItem(item)) {
+        // Add agent to cart
+        await userService.addToCart({
+          id: item.id,
+          name: item.title,
+          price: item.price || 0,
+          quantity: 1
+        });
+        toast.success('Agent added to cart successfully');
+      } else {
+        // Add project to cart
+        await userService.addToCart({
+          id: item.id,
+          name: item.title,
+          price: item.price || 0,
+          quantity: 1
+        });
+        toast.success('Project added to cart successfully');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add item to cart');
+    }
   };
 
   // Camera functionality handlers
@@ -456,11 +557,7 @@ const Profile = () => {
 
   // Conditional rendering based on userType
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
-      </div>
-    );
+    return <LoadingAnimation fullScreen={true} />;
   }
 
   return (
@@ -518,7 +615,7 @@ const Profile = () => {
                           src={resolvedAvatar}
                           alt={getDisplayName()}
                           className="w-20 h-20 sm:w-24 md:w-36 sm:h-24 md:h-36 border-4 border-white shadow-lg rounded-full object-cover hover:opacity-90 transition-opacity"
-                          onError={(e) => { e.currentTarget.src = NoUserProfile; }}
+                          onError={(e) => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"; }}
                         />
                       ) : (
                         <div className="w-20 h-20 sm:w-24 md:w-36 sm:h-24 md:h-36 border-4 border-white shadow-lg rounded-full bg-gray-300 flex items-center justify-center text-lg sm:text-xl md:text-3xl font-bold text-gray-600 hover:bg-gray-200 transition-colors">
@@ -782,10 +879,10 @@ const Profile = () => {
                       >
                         <div className="w-full sm:w-48 flex-shrink-0 h-32 sm:h-36 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
-                            src={project.image || NoImageAvailable}
+                            src={project.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
                             alt={project.title}
                             className="object-cover w-full h-full rounded-t-lg sm:rounded-l-lg sm:rounded-t-none"
-                            onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                            onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }}
                           />
                         </div>
                         <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">
@@ -810,14 +907,15 @@ const Profile = () => {
                               </div>
                             </div>
                             <div className="flex flex-col gap-1 sm:gap-2 items-end ml-2">
-                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700 h-8 w-8 sm:h-10 sm:w-10" onClick={() => { setEditingProject(project); setShowEditProjectSidebar(true); }}>
+                              <Button variant="ghost" size="icon" className="text-blue-500 hover:text-blue-700 h-8 w-8 sm:h-10 sm:w-10" onClick={() => handleEditItem(project)} title="Edit">
                                 <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="text-red-500 bg-white hover:bg-red-500 hover:bg-opacity-80 hover:text-white transition-colors shadow-sm h-8 w-8 sm:h-10 sm:w-10"
-                                onClick={() => handleDeleteProject(project.id)}
+                                onClick={() => handleDeleteItem(project)}
+                                title="Delete"
                               >
                                 <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
@@ -836,6 +934,7 @@ const Profile = () => {
                 </div>
               </CardContent>
             </Card>
+            {/* Removed AI Agents section; agents now surface in Projects */}
           </div>
 
           {/* Sidebar - LinkedIn Mobile Style */}
@@ -886,8 +985,21 @@ const Profile = () => {
       {showMyProjects && (
         <MyProjects onClose={handleMyProjectsClose} onProjectCreated={fetchUserData} />
       )}
+      {/* Removed agent sidebars */}
       {showEditProjectSidebar && editingProject && (
         <MyProjects onClose={() => { setShowEditProjectSidebar(false); setEditingProject(null); }} editMode={true} projectToEdit={editingProject} onProjectCreated={fetchUserData} />
+      )}
+      {showEditAgent && editingAgent && (
+        <PublishAgentSidebar 
+          onClose={() => { setShowEditAgent(false); setEditingAgent(null); }} 
+          editMode={true} 
+          agentToEdit={editingAgent} 
+          onAgentCreated={() => { 
+            setShowEditAgent(false); 
+            setEditingAgent(null); 
+            fetchUserData(); 
+          }} 
+        />
       )}
       
       Connections Popup

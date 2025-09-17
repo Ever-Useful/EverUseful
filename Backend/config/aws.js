@@ -30,7 +30,8 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 // Table names
 const TABLES = {
   USERS: process.env.DYNAMODB_USERS_TABLE || 'Users',
-  MARKETPLACE: process.env.DYNAMODB_MARKETPLACE_TABLE || 'MarketplaceProjects'
+  MARKETPLACE: process.env.DYNAMODB_MARKETPLACE_TABLE || 'MarketplaceProjects',
+  AGENTS: process.env.DYNAMODB_AGENTS_TABLE || 'Agents'
 };
 
 // S3 Configuration

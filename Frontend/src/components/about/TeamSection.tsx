@@ -20,7 +20,7 @@ const TeamSection = () => {
   const founder = {
     name: "Harsh Parashar",
     role: "Founder",
-    avatar: founderImage,
+    avatar: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Founder_11zon.jpg",
     linkedin: "https://www.linkedin.com/in/harsh-parashar-0b8baa224?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BuUrPtS5UTfClY0yh1aPmvg%3D%3D",
     email: "amogheveruseful@gmail.com",
     description: "Founder - Sarvagya Nirakar Community Working at World Wide Level for Youth Empowerment & Nation Building. Other Community Works include - teaching students at government schools, doing charity for needy people, science for all campaign, bringing ancient Indian knowledge back to life, women empowerment and biggest free Startup Incubation Center for all"

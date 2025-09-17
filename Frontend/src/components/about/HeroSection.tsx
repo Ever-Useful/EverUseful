@@ -64,7 +64,7 @@ const HeroSection = () => {
             <div className="relative mb-6 group">
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-3xl z-10"></div>
               <img 
-                src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1605810230434-7631ac76ec81_11zon.jpg" 
                 alt="Team collaboration" 
                 className="w-full h-64 sm:h-80 object-cover rounded-3xl shadow-2xl transform transition-all duration-500 group-hover:scale-105" 
               />
@@ -80,7 +80,7 @@ const HeroSection = () => {
               <div className="group relative overflow-hidden rounded-2xl shadow-lg">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
                 <img 
-                  src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                  src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1581091226825-a6a2a5aee158_11zon.jpg" 
                   alt="Innovation workspace" 
                   className="w-full h-40 object-cover transform transition-all duration-500 group-hover:scale-110" 
                 />
@@ -93,7 +93,7 @@ const HeroSection = () => {
               <div className="group relative overflow-hidden rounded-2xl shadow-lg">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
                 <img 
-                  src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                  src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1519389950473-47ba0277781c_11zon.jpg" 
                   alt="Technology collaboration" 
                   className="w-full h-40 object-cover transform transition-all duration-500 group-hover:scale-110" 
                 />

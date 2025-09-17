@@ -112,10 +112,20 @@ interface Project {
   description: string;
   category: string;
   tags: string[];
-  status: 'planning' | 'in-progress' | 'completed';
-  collaborators: string[];
-  createdBy: string;
-  createdAt: string;
+  // Allow broader statuses and optional for mapped agent entries
+  status?: string;
+  collaborators?: string[];
+  createdBy?: string;
+  createdAt?: string;
+  // Optional fields to support marketplace/agent projections
+  image?: string;
+  images?: string[];
+  projectLink?: string;
+  price?: number;
+  duration?: string | number | null;
+  posted?: string;
+  dateAdded?: string;
+  author?: string;
 }
 
 interface Meeting {
@@ -296,17 +306,29 @@ async getUserByCustomId(customUserId: string): Promise<any> {
   }
 
   // Add item to cart
-  async addToCart(item: Omit<CartItem, 'id'>): Promise<CartItem[]> {
-    const response = await this.makeRequest(API_ENDPOINTS.USER_CART, {
+  async addToCart(item: AddToCartItem): Promise<CartItem[]> {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart`, {
       method: 'POST',
-      body: JSON.stringify(item),
+      body: JSON.stringify({ productId: item.id || item.name, quantity: item.quantity }),
     });
     return response;
   }
 
   // Remove item from cart
   async removeFromCart(itemId: string): Promise<CartItem[]> {
-    const response = await this.makeRequest(`${API_ENDPOINTS.USER_CART}/${itemId}`, {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart/${itemId}`, {
       method: 'DELETE',
     });
     return response;
@@ -314,7 +336,13 @@ async getUserByCustomId(customUserId: string): Promise<any> {
 
   // Clear cart
   async clearCart(): Promise<void> {
-    await this.makeRequest(API_ENDPOINTS.USER_CART, {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart`, {
       method: 'DELETE',
     });
   }

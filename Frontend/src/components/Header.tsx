@@ -362,7 +362,7 @@ const Header = () => {
     // const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeFilter, setActiveFilter] = useState<string>('all');
+    // const [activeFilter, setActiveFilter] = useState<string>('all');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     //const unreadNotifications = notifications.filter(n => n.unread);
     const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
@@ -671,7 +671,7 @@ const handleMarkAllAsRead = async () => {
                         {/* Logo */}
                         <div className="flex items-center space-x-1 flex-shrink-0">
                             <Link to="/" className="flex items-center space-x-2 group">
-                                <img src={Logo} alt="AMOGH" className="h-10 w-auto md:h-8" />
+                                <img src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Logo+Side+Simple.png" alt="AMOGH" className="h-10 w-auto md:h-8" />
                             </Link>
                         </div>
 
@@ -689,18 +689,6 @@ const handleMarkAllAsRead = async () => {
                                         onBlur={handleSearchBlur}
                                         className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                     />
-                                    {/* Filter Bar - Only show when search is focused */}
-                                    {isSearchFocused && (
-                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
-                                            <div className="p-3">
-                                                <SearchFilterBar
-                                                    tags={filterTags}
-                                                    onTagClick={handleFilterClick}
-                                                    className="justify-start"
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                             <Navigation isLoggedIn={isLoggedIn} />
@@ -893,22 +881,15 @@ const handleMarkAllAsRead = async () => {
                                                 onBlur={handleSearchBlur}
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
-                                            {/* Filter Bar - Only show when search is focused */}
-                                            {isSearchFocused && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
-                                                    <div className="p-3">
-                                                        <SearchFilterBar
-                                                            tags={filterTags}
-                                                            onTagClick={handleFilterClick}
-                                                            className="justify-start"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    <Link to="/leaderboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                        <TrendingUp className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium mobile-text-base">Leaderboard</span>
+                                    </Link> {/* <-- ADD THIS LINK */}
+
                                     {/* Cart */}
                                     <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                         <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
@@ -963,16 +944,6 @@ const handleMarkAllAsRead = async () => {
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
                                         </div>
-                                        {/* Filter Bar - Only show when search is focused */}
-                                        {isSearchFocused && (
-                                            <div className="mt-2 mb-1 animate-in slide-in-from-top-2 duration-200">
-                                                <SearchFilterBar
-                                                    tags={filterTags}
-                                                    onTagClick={handleFilterClick}
-                                                    className="justify-start"
-                                                />
-                                            </div>
-                                        )}
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />

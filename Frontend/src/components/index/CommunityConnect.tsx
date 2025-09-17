@@ -1,0 +1,82 @@
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import bgImage from '@/assets/images/community.jpg';
+import { Link } from "react-router-dom";
+
+export const CommunityConnect: React.FC = () => {
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+
+  // Preload background image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setBackgroundLoaded(true);
+    img.src = bgImage;
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant'
+    });
+    // Additional fallbacks
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
+
+  return (
+    <section id="community" className="relative overflow-hidden py-16 sm:py-20">
+      {/* Blurred Background Image */}
+      <div className="absolute inset-0 -z-20">
+        <div
+          className="w-full h-full bg-cover bg-center filter blur-xs"
+          style={{ 
+            backgroundImage: backgroundLoaded ? `url(https://amogh-assets.s3.ap-south-1.amazonaws.com/content/community_11zon.jpg)` : 'none',
+            backgroundColor: backgroundLoaded ? 'transparent' : '#1f2937'
+          }}
+        />
+      </div>
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/50 -z-10" />
+
+      {/* Centered Content */}
+      <div className="flex flex-col items-center justify-center text-center px-4">
+        <motion.h2
+          className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight px-2 sm:px-0"
+          style={{ WebkitTextStroke: '1px rgba(255,255,255,0.9)' }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.8 }}
+        >
+          Elevate Your Innovation Journey
+        </motion.h2>
+        <motion.p
+          className="mt-2 text-base text-white drop-shadow-xl max-w-md mobile-text-base"
+          style={{ WebkitTextStroke: '0.5px rgba(255,255,255,0.9)' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+        >
+          Connect, collaborate, and grow with a global network of innovators.
+        </motion.p>
+        <motion.div
+          className="mt-4 w-full flex justify-center"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
+        >
+          <Link to="/connect"  onClick={scrollToTop} >
+            <Button
+              size="lg"
+              className="w-full max-w-xs sm:max-w-fit px-6 py-3 bg-white text-black hover:bg-gray-100 shadow-lg hover:shadow-xl transition-transform hover:scale-105 mobile-text-base"
+            >
+              Join the Community <ArrowRight className="ml-1 w-4 h-4" />
+            </Button>
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+};

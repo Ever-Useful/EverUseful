@@ -8,6 +8,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { API_ENDPOINTS } from '../config/api';
 import NoImageAvailable from '@/assets/images/no image available.png';
+import LoadingAnimation from '@/components/LoadingAnimation';
 
 // Define Project type if not imported from elsewhere
 interface Project {
@@ -77,7 +78,7 @@ export const RelatedProducts = () => {
       title: "EcoTrack",
       subtitle: "Carbon Footprint Monitor",
       category: "Sustainability",
-      image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=250&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1501854140801-50d01698950b_11zon.jpg",
       tags: ["AI", "Sustainability", "IoT"],
       description: "Revolutionary platform for tracking environmental impact",
       rating: 4.8,
@@ -90,7 +91,7 @@ export const RelatedProducts = () => {
       title: "QuantumMed",
       subtitle: "Drug Discovery Platform",
       category: "Healthcare",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=250&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1581091226825-a6a2a5aee158_11zon.jpg",
       tags: ["Quantum", "Healthcare", "Research"],
       description: "Advanced AI-powered drug discovery and development platform",
       rating: 4.9,
@@ -103,7 +104,7 @@ export const RelatedProducts = () => {
       title: "AgriBot",
       subtitle: "Smart Farming Assistant",
       category: "Agriculture",
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=400&h=250&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1500673922987-e212871fec22_11zon+(1).jpg",
       tags: ["Robotics", "Agriculture", "AI"],
       description: "Intelligent robotic system for automated farming operations",
       rating: 4.7,
@@ -116,7 +117,7 @@ export const RelatedProducts = () => {
       title: "ROBot",
       subtitle: "Smart Farming Assistant",
       category: "Agriculture",
-      image: "https://plus.unsplash.com/premium_photo-1678344170545-c3edef92a16e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/premium_photo-1678344170545-c3edef92a16e_11zon.jpg",
       tags: ["Robotics", "Agriculture", "AI"],
       description: "Next-generation robotics for precision agriculture",
       rating: 4.6,
@@ -129,7 +130,7 @@ export const RelatedProducts = () => {
       title: "EcoTrack",
       subtitle: "Carbon Footprint Monitor",
       category: "Sustainability",
-      image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=250&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1501854140801-50d01698950b_11zon.jpg",
       tags: ["AI", "Sustainability", "IoT"],
     },
     {
@@ -137,7 +138,7 @@ export const RelatedProducts = () => {
       title: "QuantumMed",
       subtitle: "Drug Discovery Platform",
       category: "Healthcare",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=250&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1581091226825-a6a2a5aee158_11zon.jpg",
       tags: ["Quantum", "Healthcare", "Research"],
     },
     {
@@ -145,7 +146,7 @@ export const RelatedProducts = () => {
       title: "AgriBot",
       subtitle: "Smart Farming Assistant",
       category: "Agriculture",
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=400&h=250&fit=crop",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1500673922987-e212871fec22_11zon+(1).jpg",
       tags: ["Robotics", "Agriculture", "AI"],
     },
     {
@@ -153,7 +154,7 @@ export const RelatedProducts = () => {
       title: "ROBot",
       subtitle: "Smart Farming Assistant",
       category: "Agriculture",
-      image: "https://plus.unsplash.com/premium_photo-1678344170545-c3edef92a16e?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/premium_photo-1678344170545-c3edef92a16e_11zon.jpg",
       tags: ["Robotics", "Agriculture", "AI"],
     }
   ];
@@ -184,7 +185,9 @@ export const RelatedProducts = () => {
   if (loading) {
     return (
       <div className={`container mx-auto ${isMobile ? 'px-4' : 'px-6'} py-8`}>
-        <div className="text-center py-8">Loading...</div>
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     );
   }
@@ -215,11 +218,11 @@ export const RelatedProducts = () => {
               <Link to={`/product/${project.id}`} key={project.id} className="block">
                 <Card className="hover:shadow-lg transition-shadow duration-200 bg-white rounded-lg">
                   <div className="relative">
-                    <img
-                      src={project.image || NoImageAvailable}
+                     <img
+                      src={project.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
                       alt={project.title}
                       className="w-full h-32 xs:h-36 object-cover rounded-t-lg"
-                      onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                      onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }}
                     />
                     <Badge className="absolute top-2 right-2 bg-blue-600 text-white text-[10px] px-2 py-0.5">
                       {project.category}
@@ -294,10 +297,10 @@ export const RelatedProducts = () => {
                   <Card className="h-full hover:shadow-lg transition-shadow duration-200 rounded-lg">
                     <div className="relative">
                       <img
-                        src={project.image || NoImageAvailable}
+                        src={project.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
                         alt={project.title}
                         className="w-full h-28 md:h-32 lg:h-36 object-cover rounded-t-lg"
-                        onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                        onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }}
                       />
                       <Badge className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5">
                         {project.category}

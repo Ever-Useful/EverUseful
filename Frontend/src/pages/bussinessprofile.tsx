@@ -354,7 +354,7 @@ useEffect(() => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" />
+                    <AvatarImage src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1472099645785-5658abf4ff4e_11zon.jpg" />
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
                   <span className="text-sm">John Doe</span>

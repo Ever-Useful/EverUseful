@@ -83,7 +83,7 @@ const handlers = useSwipeable({
       {/* Background Image */}
       <div className="absolute inset-0">
         <img 
-          src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+          src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1581091226825-a6a2a5aee158_11zon.jpg" 
           alt="Events Background"
           className="w-full h-full object-cover"
         />
@@ -92,7 +92,7 @@ const handlers = useSwipeable({
 
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-12">
-          <h2 className="heading-section font-bold mb-6 text-white">Upcoming Events & Speaker Talks</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight px-2 sm:px-0">Upcoming Events & Speaker Talks</h2>
           <p className="text-indigo-100 text-lg max-w-3xl mx-auto mb-8 leading-relaxed">
             Join industry leaders and innovators at our exclusive events.
           </p>

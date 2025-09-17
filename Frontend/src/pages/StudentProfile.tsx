@@ -60,35 +60,55 @@ const Profile = () => {
           setBackgroundImage(userBackgroundImage);
         } else {
           // Fallback to default background
-          setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
+          setBackgroundImage("https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1470071459604-3b5ec3a7fe05_11zon.jpg");
         }
         console.log('StudentProfile - User data set:', data.data);
         console.log('StudentProfile - Projects object:', data.data.projects);
         console.log('StudentProfile - Projects.created:', data.data.projects?.created);
         console.log('StudentProfile - Is projects.created an array?', Array.isArray(data.data.projects?.created));
         
-        // Fetch full project details for each project ID
-        const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-        console.log('StudentProfile - Project IDs found:', projectIds);
-        console.log('StudentProfile - Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
-        
-        if (projectIds.length > 0) {
-          console.log('StudentProfile - Attempting to fetch projects:', projectIds);
-          const projectPromises = projectIds.map((pid) =>
-            fetchProjectData(pid)
-          );
-          const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-          console.log('StudentProfile - Full projects fetched:', fullProjects);
-          console.log('StudentProfile - Project details:', fullProjects.map(p => ({
+        // Use projects data from the user response (no authentication required)
+        try {
+          const projects = data.data.projects?.created || [];
+          console.log('StudentProfile - Projects found:', projects.length);
+          
+          // Fetch both projects and agents
+          const allItems = [];
+          
+          // Fetch projects from the user's projects array
+          if (projects.length > 0) {
+            console.log('StudentProfile - Attempting to fetch projects:', projects);
+            const projectPromises = projects.map((item) => {
+              // Handle both old format (string IDs) and new format (objects with id and type)
+              const itemId = typeof item === 'string' ? item : item.id;
+              const itemType = typeof item === 'object' ? item.type : 'project';
+              return fetchItemData(itemId, itemType);
+            });
+            const fetchedProjects = (await Promise.all(projectPromises)).filter(Boolean);
+            allItems.push(...fetchedProjects);
+            console.log(`StudentProfile - Successfully loaded ${fetchedProjects.length} projects`);
+          }
+          
+          // Fetch user agents directly
+          const userAgents = await fetchUserAgents(id);
+          allItems.push(...userAgents);
+          console.log(`StudentProfile - Successfully loaded ${userAgents.length} agents`);
+          
+          console.log('StudentProfile - Full items fetched:', allItems);
+          console.log('StudentProfile - Item details:', allItems.map(p => ({
             id: p.id,
-            title: p.title,
+            title: p.title || p.name,
             image: p.image,
-            hasImage: !!p.image
+            hasImage: !!p.image,
+            type: p.type
           })));
-          setPortfolioProjects(fullProjects);
-        } else {
-          console.log('StudentProfile - No project IDs found');
+          setPortfolioProjects(allItems);
+          setProjectsCount(allItems.length);
+          
+        } catch (error) {
+          console.error('StudentProfile - Error processing projects and agents:', error);
           setPortfolioProjects([]);
+          setProjectsCount(0);
         }
       } else {
         console.log('StudentProfile - No user data found or API error');
@@ -412,17 +432,68 @@ const handleUnblock = async () => {
 
   const fetchProjectData = async (pid: string) => {
     try {
-      console.log(`StudentProfile - Fetching project ${pid}...`);
-      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
+      console.log(`StudentProfile - Fetching ${itemType} ${itemId}...`);
+      
+      let response;
+      if (itemType === 'agent') {
+        response = await fetch(API_ENDPOINTS.AGENT(itemId));
+      } else {
+        response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(itemId));
+      }
+      
       if (!response.ok) {
-        console.log(`StudentProfile - Project ${pid} not found (${response.status})`);
+        // Silently handle 404s - project/agent may have been deleted
+        if (response.status === 404) {
+          console.log(`StudentProfile - ${itemType} ${itemId} not found (deleted or unpublished)`);
+        } else {
+          console.log(`StudentProfile - ${itemType} ${itemId} error (${response.status})`);
+        }
         return null;
       }
+      
       const data = await response.json();
-      return data && data.project ? data.project : null;
-    } catch (error) {
-      console.error(`StudentProfile - Error fetching project ${pid}:`, error);
+      const item = itemType === 'agent' ? data.agent : data.project;
+      
+      if (item) {
+        // Normalize the item data to match the expected format
+        return {
+          ...item,
+          title: item.title || item.name,
+          type: itemType
+        };
+      }
+      
       return null;
+    } catch (error) {
+      console.error(`StudentProfile - Error fetching ${itemType} ${itemId}:`, error);
+      return null;
+    }
+  };
+
+  const fetchProjectData = async (pid: string) => {
+    return fetchItemData(pid, 'project');
+  };
+
+  // Fetch user agents directly from the agents API
+  const fetchUserAgents = async (userId: string) => {
+    try {
+      console.log(`StudentProfile - Fetching agents for user ${userId}...`);
+      const response = await fetch(`${API_ENDPOINTS.AGENTS}?author=${userId}`);
+      if (!response.ok) {
+        console.log(`StudentProfile - No agents found for user ${userId}`);
+        return [];
+      }
+      const data = await response.json();
+      const agents = data.agents || [];
+      console.log(`StudentProfile - Found ${agents.length} agents for user ${userId}`);
+      return agents.map(agent => ({
+        ...agent,
+        title: agent.name,
+        type: 'agent'
+      }));
+    } catch (error) {
+      console.error(`StudentProfile - Error fetching agents for user ${userId}:`, error);
+      return [];
     }
   };
 
@@ -430,15 +501,9 @@ const handleUnblock = async () => {
     fetchUserData();
   }, [id]);
 
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-slate-100">
-  //       <div className="text-xl font-semibold text-slate-700 animate-pulse">
-  //         Loading your profile...
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (loading) {
+    return <LoadingAnimation fullScreen={true} />;
+  }
 
   const auth = userData?.auth || {};
   const fullName = `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User';
@@ -447,7 +512,7 @@ const handleUnblock = async () => {
     name: fullName,
     title: userData?.profile?.title || "New Member",
     bio: userData?.profile?.bio || "This is a new profile. Update your bio!",
-    avatar: userData?.profile?.avatar || NoUserProfile,
+    avatar: userData?.profile?.avatar || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png",
     stats: {
       followers: userData?.social?.followersCount || 0,
       following: userData?.social?.followingCount || 0,
@@ -459,7 +524,6 @@ const handleUnblock = async () => {
   };
 
   const MAX_LENGTH = 200;
-  const [isExpanded, setIsExpanded] = useState(false);
   const shouldTruncate = profile.bio && profile.bio.length > MAX_LENGTH;
   const displayedText = shouldTruncate && !isExpanded
     ? profile.bio.slice(0, MAX_LENGTH) + "..."
@@ -623,7 +687,7 @@ const isBlocked = !isSelf && relationStatus === 'BLOCKED';
           <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
             <CardContent className="p-3 sm:p-4 text-center">
               <Award className="w-6 h-6 mx-auto mb-2" />
-                                <div className="text-2xl font-bold">{profile.stats.projects}+</div>
+              <div className="text-2xl font-bold">{projectsCount}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
             </CardContent>
           </Card>
@@ -770,19 +834,19 @@ const isBlocked = !isSelf && relationStatus === 'BLOCKED';
                       >
                         <div className="w-full md:w-40 lg:w-48 flex-shrink-0 h-28 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
-                            src={project.image || NoImageAvailable}
-                            alt={project.title}
+                            src={project.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
+                            alt={project.title || project.name}
                             className="object-cover w-full h-full rounded-l-lg"
-                            onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                            onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }}
                           />
                         </div>
                         <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 line-clamp-1">{project.title}</h3>
+                              <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 line-clamp-1">{project.title || project.name}</h3>
                               <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{project.description}</p>
                               <div className="flex flex-wrap gap-2 mb-2">
-                                {(project.skills || []).map((skill, skillIndex) => (
+                                {(project.skills || project.tags || []).map((skill, skillIndex) => (
                                   <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">
                                     {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                                   </Badge>

@@ -3,7 +3,6 @@ import { Target, Globe, Lightbulb, TrendingUp, Users, Zap, Leaf, Heart } from "l
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
-import bgImage from "@/assets/images/bg1.jpg";
 
 export const ImpactMotive = () => {
   const { ref: impactRef, inView: impactInView } = useInView({ triggerOnce: true, threshold: 0.3 });
@@ -61,8 +60,8 @@ export const ImpactMotive = () => {
       <section
         id="impact"
         className="relative py-10 bg-cover bg-center"
-        style={{ backgroundImage: `url(${bgImage})` }}
-      >
+        style={{ backgroundImage: `url(https://amogh-assets.s3.ap-south-1.amazonaws.com/content/howitworks_11zon.jpg)` }}
+        >
         <div className="absolute inset-0 bg-white/60 backdrop-blur-xs"></div>
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 max-w-[85vw]">
           <div className="text-center mb-8 sm:mb-16">

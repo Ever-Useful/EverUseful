@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import bgImage from '@/assets/images/community.jpg';
 import { Link } from "react-router-dom";
 
 export const CommunityConnect: React.FC = () => {
@@ -22,7 +21,7 @@ export const CommunityConnect: React.FC = () => {
       <div className="absolute inset-0 -z-20">
         <div
           className="w-full h-full bg-cover bg-center filter blur-xs"
-          style={{ backgroundImage: `url(${bgImage})` }}
+          style={{ backgroundImage: `url(https://amogh-assets.s3.ap-south-1.amazonaws.com/content/community_11zon.jpg)` }}
         />
       </div>
       {/* Dark Overlay */}

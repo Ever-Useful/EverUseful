@@ -660,11 +660,11 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
                   {uploadedImages.map((imageUrl, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={imageUrl || NoImageAvailable}
+                        src={imageUrl || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
                         alt={`Project image ${index + 1}`}
                         className="w-full h-24 sm:h-32 object-cover rounded-lg border shadow-sm"
                         onError={(e) => { 
-                          e.currentTarget.src = NoImageAvailable; 
+                          e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; 
                         }}
                       />
                       <button
@@ -801,7 +801,7 @@ export const MyProjects: React.FC<MyProjectsSidebarProps> = ({ onClose, onProjec
             disabled={loading} 
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 sm:px-6 py-2 sm:py-2.5 transition-all duration-200 hover:shadow-md border-0 text-xs sm:text-sm order-1 sm:order-2"
           >
-            {loading ? (editMode ? 'Saving...' : 'Creating...') : (editMode ? 'Save Changes' : 'Create Project')}
+                {loading ? (editMode ? 'Saving' : 'Creating') : (editMode ? 'Save Changes' : 'Create Project')}
           </Button>
         </footer>
       </div>

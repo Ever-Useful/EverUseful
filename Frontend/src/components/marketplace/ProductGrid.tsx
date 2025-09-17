@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import LoadingAnimation from '@/components/LoadingAnimation';
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -272,7 +273,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       if (!user) {
         detailsMap[authorId] = {
           name: 'username',
-          image: NoUserProfile,
+          mage: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png",
           userType: '',
           id: authorId,
           isLoading: false
@@ -324,7 +325,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
       const userType = profile.userType || auth.userType || user.userType || '';
 
       // Get avatar with fallback
-      const avatar = profile.avatar || auth.avatar || user.avatar || NoUserProfile;
+      const avatar = profile.avatar || auth.avatar || user.avatar || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png";
 
       // Get customUserId with fallback - this is the ID we'll use for navigation
       const customUserId = user.customUserId || user.data?.customUserId || user.id || authorId;
@@ -345,7 +346,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
   const getAuthorDetails = useCallback((authorId: string) => {
     return authorDetailsMap[authorId] || {
       name: 'username',
-      image: NoUserProfile,
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png",
       userType: '',
       id: authorId,
       isLoading: false
@@ -547,6 +548,33 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     }
   };
 
+  const handleShare = async (project: any) => {
+    const shareData = {
+      title: project.title,
+      text: project.description,
+      url: `${window.location.origin}/product/${project.id}`
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareData.url);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        toast.success('Link copied to clipboard!');
+      } catch (clipboardError) {
+        toast.error('Failed to share project');
+      }
+    }
+  };
+
   // Helper: get 2 related projects (different from selected)
   const getRelated = (id: number) => projects.filter((p) => p.id !== id).slice(0, 2);
 
@@ -580,8 +608,12 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
     }
   };
 
-  if (loading || authLoading) {
-    return <div className="text-center py-8">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   if (error) {
@@ -630,7 +662,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     className="max-w-full max-h-full object-contain rounded"
                     loading="lazy"
                     onClick={() => setSelected(project)}
-                    onError={(e) => handleImageError(e, NoImageAvailable)}
+                    onError={(e) => handleImageError(e, "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png")}
                   />
                 </div>
 
@@ -717,7 +749,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
                     className="w-full h-40 object-contain cursor-pointer"
                     loading="lazy"
                     onClick={() => setSelected(project)}
-                    onError={(e) => handleImageError(e, NoImageAvailable)}
+                    onError={(e) => handleImageError(e, "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png")}
                   />
                   <div className="absolute top-0 left-0">
                     <span className="inline-block bg-gray-100 text-gray-800 text-sm px-2 py-1 rounded-full">
@@ -837,10 +869,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
           </div>
           <div className="overflow-y-auto flex-1 px-6 py-4">
             <img
-              src={selected.image || NoImageAvailable}
+              src={selected.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
               alt={selected.title}
               className="w-full h-40 object-cover rounded-lg mb-4"
-              onError={e => { e.currentTarget.src = NoImageAvailable; }}
+              onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }}
             />
 
             <div className="flex items-center mb-4">
@@ -855,10 +887,10 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               ) : (
                 <>
                   <img
-                    src={getUserAvatarUrl({ avatar: getAuthorDetails(selected.author).image }) || NoUserProfile}
+                    src={getUserAvatarUrl({ avatar: getAuthorDetails(selected.author).image }) || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"}
                     alt={getAuthorDetails(selected.author).name}
                     className="w-8 h-8 rounded-full border border-gray-200 mr-3 cursor-pointer"
-                    onError={e => { e.currentTarget.src = NoUserProfile; }}
+                    onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"; }}
                     onClick={() => goToAuthorProfile(getAuthorDetails(selected.author).userType, getAuthorDetails(selected.author).id)}
                   />
                   <div>
@@ -924,7 +956,12 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
             <p className="text-gray-700 text-sm mb-4">{selected.description}</p>
 
             <div className="flex gap-2 mb-6">
-              <Button size="sm" variant="outline" className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100"
+                onClick={() => handleShare(selected)}
+              >
                 <Share2 className="w-4 h-4" />
               </Button>
               <Button size="sm" variant="outline" className="flex items-center gap-1 border-gray-300 text-gray-700 hover:bg-gray-100">
@@ -945,7 +982,7 @@ export const ProductGrid = ({ searchQuery, filters, onFiltersChange }: ProductGr
               <div className="flex flex-col gap-3">
                 {getRelated(selected.id).map((rel) => (
                   <div key={rel.id} className="flex items-center gap-3 bg-gray-50 rounded p-2">
-                    <img src={rel.image || NoImageAvailable} alt={rel.title} className="w-12 h-12 object-cover rounded" onError={e => { e.currentTarget.src = NoImageAvailable; }} />
+                    <img src={rel.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"} alt={rel.title} className="w-12 h-12 object-cover rounded" onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }} />
                     <div className="flex-1">
                       <div className="font-semibold text-xs text-gray-700">{rel.title}</div>
                       <div className="flex items-center gap-2 text-[11px] text-gray-500">

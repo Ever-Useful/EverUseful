@@ -2,28 +2,28 @@
 const CultureGallery = () => {
   const images = [
     {
-      src: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=600&h=400&fit=crop&crop=center",
+      src: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1605810230434-7631ac76ec81_11zon.jpg",
       alt: "Team collaboration session",
       className: "md:row-span-2",
       title: "Collaborative Environment",
       description: "We believe in the power of teamwork and open communication to drive innovation."
     },
     {
-      src: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=300&fit=crop&crop=center", 
+      src: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1488590528505-98d2b5aba04b_11zon.jpg", 
       alt: "Remote work setup",
       className: "",
       title: "Remote-First Culture",
       description: "Work from anywhere with our flexible remote-first approach to modern work."
     },
     {
-      src: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=300&fit=crop&crop=center",
+      src: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1522202176988-66273c2fd55f_11zon.jpg",
       alt: "Office teamwork",
       className: "",
       title: "Diverse Teams",
       description: "Our inclusive environment brings together talent from all backgrounds and perspectives."
     },
     {
-      src: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=400&fit=crop&crop=center",
+      src: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1531482615713-2afd69097998_11zon.jpg",
       alt: "Creative brainstorming",
       className: "md:col-span-2",
       title: "Innovation Hub",
@@ -35,9 +35,9 @@ const CultureGallery = () => {
      <section className="py-20" style={{ backgroundColor: '#E2F4ED' }}>
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-         <h2 className="heading-section font-bold mb-4" style={{ color: '#2A311B' }}>            Life at Our Company
+         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 animate-fade-in leading-tight px-2 sm:px-0" style={{ color: '#2A311B' }}>            Life at Our Company
           </h2>
-          <p className="text-xl max-w-2xl mx-auto" style={{ color: '#3A4325' }}>
+          <p className="text-base max-w-2xl mx-auto" style={{ color: '#3A4325' }}>
             Discover what makes our workplace special through the experiences that define our culture.
           </p>
         </div>

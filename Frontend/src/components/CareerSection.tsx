@@ -11,7 +11,7 @@ export const CareerSection = () => {
       company: "AMOGH Labs",
       location: "San Francisco, CA",
       type: "Full-time",
-              salary: "₹150K - ₹200K",
+      salary: "₹150K - ₹200K",
       experience: "5+ years",
       skills: ["Python", "TensorFlow", "Deep Learning"],
       posted: "2 days ago"

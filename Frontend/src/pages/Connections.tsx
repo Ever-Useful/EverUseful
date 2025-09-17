@@ -1122,7 +1122,7 @@ useEffect(() => {
               <Card className="border-0 shadow-sm flex flex-col items-center justify-center py-6 sm:py-8">
                 <CardContent className="flex flex-col items-center">
                   <img
-                    src={Logo}
+                    src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Logo+Main_11zon.png"
                     alt="Logo"
                     className="w-auto h-16 sm:h-20 mb-2 sm:mb-3"
                   />

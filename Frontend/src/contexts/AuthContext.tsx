@@ -33,8 +33,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Register this user in socket.io backend
         // If you store customUserId in Firestore/DynamoDB, fetch it here
         const customUserId = firebaseUser.uid; // replace if you map uid -> customUserId
-        socket.emit("register", customUserId);
-        console.log("Registered user with socket:", customUserId);
+        if (socket) {
+          socket.emit("register", customUserId);
+          console.log("Registered user with socket:", customUserId);
+        }
       }
     });
 

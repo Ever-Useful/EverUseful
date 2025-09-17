@@ -4,6 +4,7 @@ class DynamoDBService {
   constructor() {
     this.usersTable = TABLES.USERS;
     this.marketplaceTable = TABLES.MARKETPLACE;
+    this.agentsTable = TABLES.AGENTS;
   }
 
   // User Operations
@@ -256,7 +257,7 @@ class DynamoDBService {
     const reconstructed = {
       customUserId: user.customUserId,
       firebaseUid: user.firebaseUid,
-      profile: {},
+      profile: user.profile || {},
       stats: user.stats || {},
       studentData: user.studentData || null,
       professorData: user.professorData || null,
@@ -323,8 +324,7 @@ class DynamoDBService {
       });
     }
 
-    // Reconstruct professorData from flattened keys
-    if (!reconstructed.professorData) {
+    if (!user.professorData || Object.keys(user.professorData).length === 0) {
       reconstructed.professorData = {};
       Object.keys(user).forEach(key => {
         if (key.startsWith('professorData.')) {
@@ -333,8 +333,6 @@ class DynamoDBService {
         }
       });
     }
-
-    // Reconstruct freelancerData from flattened keys or use existing nested object
     if (!reconstructed.freelancerData || Object.keys(reconstructed.freelancerData).length === 0) {
       reconstructed.freelancerData = {};
       Object.keys(user).forEach(key => {
@@ -367,12 +365,19 @@ class DynamoDBService {
       const expressionAttributeValues = {};
 
       Object.keys(updateData).forEach((key, index) => {
-        const attrName = `#attr${index}`;
-        const attrValue = `:val${index}`;
-        
-        updateExpressions.push(`${attrName} = ${attrValue}`);
-        expressionAttributeNames[attrName] = key;
-        expressionAttributeValues[attrValue] = updateData[key];
+        const valuePlaceholder = `:val${index}`;
+        expressionAttributeValues[valuePlaceholder] = updateData[key];
+
+        // Support nested paths like "profile.userType" by splitting and mapping each segment
+        const segments = key.split('.');
+        const pathPlaceholders = segments.map((segment, segIndex) => {
+          const namePlaceholder = `#attr${index}_${segIndex}`;
+          expressionAttributeNames[namePlaceholder] = segment;
+          return namePlaceholder;
+        });
+
+        const pathExpression = pathPlaceholders.join('.');
+        updateExpressions.push(`${pathExpression} = ${valuePlaceholder}`);
       });
 
       const params = {
@@ -732,26 +737,10 @@ class DynamoDBService {
         };
       }
   
-      // Create project object with the correct structure
-      const project = {
-        projectId: projectData.id || Date.now().toString(),
-        title: projectData.title,
-        description: projectData.description,
-        category: projectData.category,
-        tags: Array.isArray(projectData.tags) ? projectData.tags : (projectData.tags ? projectData.tags.split(',').map(tag => tag.trim()) : []),
-        imageUrl: projectData.image || projectData.imageUrl || '',
-        projectLink: projectData.projectLink || '',
-        githubLink: projectData.githubLink || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        likes: 0,
-        views: 0,
-        downloads: 0
-      };
-  
-      // Store only the project ID in the user's projects.created array
-      const projectId = project.projectId;
-  
+      // Always store only the ID and type in user's projects.created array
+      const projectId = projectData.id || Date.now().toString();
+      const projectType = projectData.type || 'project';
+      
       const params = {
         TableName: this.usersTable,
         Key: {
@@ -771,7 +760,7 @@ class DynamoDBService {
       };
   
       const result = await dynamodb.update(params).promise();
-      return project;
+      return projectId;
     } catch (error) {
       console.error('Error adding user project:', error);
       throw error;

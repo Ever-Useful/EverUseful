@@ -6,7 +6,7 @@ import { getDropdownOptions } from '../utils/dropdownUtils';
 import { Star, Users, TrendingUp, Globe, Sparkles, ArrowRight, CheckCircle } from "lucide-react";
 
 const heroImage =
-  "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?auto=format&fit=crop&w=1200&q=80";
+  "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1521737852567-6949f3f9f2b5_11zon.jpg";
 
 const steps = [
   {

@@ -21,6 +21,26 @@ const upload = multer({
   }
 });
 
+// Configure multer for agent files (allows various file types)
+const agentUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB limit for agent files
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow various file types for agents
+    const allowedTypes = [
+      'image/', 'video/', 'application/', 'text/', 'model/'
+    ];
+    
+    if (allowedTypes.some(type => file.mimetype.startsWith(type))) {
+      cb(null, true);
+    } else {
+      cb(new Error('File type not allowed'), false);
+    }
+  }
+});
+
 // Create user folder structure on signup
 router.post('/create-user-folder', authorize, async (req, res) => {
   try {
@@ -380,6 +400,132 @@ router.post('/upload-stock-image', authorize, upload.single('image'), async (req
   } catch (error) {
     console.error('Error uploading stock image:', error);
     res.status(500).json({ error: 'Failed to upload stock image' });
+  }
+});
+
+// Upload agent files (model, config, documentation)
+router.post('/upload-agent-files', authorize, agentUpload.array('files', 10), async (req, res) => {
+  try {
+    console.log('=== Agent Files Upload Request ===');
+    console.log('User from token:', req.user);
+    console.log('Files received:', req.files ? req.files.length : 0);
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No files provided' });
+    }
+
+    const firebaseUid = req.user.uid;
+    const { userId } = req.body;
+    
+    let user = null;
+    try {
+      user = await userService.findUserByFirebaseUid(firebaseUid);
+    } catch (e) {
+      user = null;
+    }
+
+    // Convert multer files to File-like objects
+    const files = req.files.map(file => ({
+      name: file.originalname,
+      type: file.mimetype,
+      arrayBuffer: () => Promise.resolve(file.buffer)
+    }));
+
+    const customId = user?.customUserId || firebaseUid || 'anonymous';
+    const fileResults = await s3Service.uploadAgentFiles(files, customId);
+    
+    res.json({
+      success: true,
+      message: 'Agent files uploaded successfully',
+      files: fileResults
+    });
+  } catch (error) {
+    console.error('Error uploading agent files:', error);
+    res.status(500).json({ error: 'Failed to upload agent files', details: error?.message || null });
+  }
+});
+
+// Upload agent images
+router.post('/upload-agent-images', authorize, upload.array('images', 5), async (req, res) => {
+  try {
+    console.log('=== Agent Images Upload Request ===');
+    console.log('User from token:', req.user);
+    console.log('Files received:', req.files ? req.files.length : 0);
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No image files provided' });
+    }
+
+    const firebaseUid = req.user.uid;
+    const { userId } = req.body;
+    
+    let user = null;
+    try {
+      user = await userService.findUserByFirebaseUid(firebaseUid);
+    } catch (e) {
+      user = null;
+    }
+
+    // Convert multer files to File-like objects
+    const files = req.files.map(file => ({
+      name: file.originalname,
+      type: file.mimetype,
+      arrayBuffer: () => Promise.resolve(file.buffer)
+    }));
+
+    const customId = user?.customUserId || firebaseUid || 'anonymous';
+    const imageResults = await s3Service.uploadAgentImages(files, customId);
+    
+    res.json({
+      success: true,
+      message: 'Agent images uploaded successfully',
+      images: imageResults
+    });
+  } catch (error) {
+    console.error('Error uploading agent images:', error);
+    res.status(500).json({ error: 'Failed to upload agent images', details: error?.message || null });
+  }
+});
+
+// Upload agent video
+router.post('/upload-agent-video', authorize, agentUpload.single('video'), async (req, res) => {
+  try {
+    console.log('=== Agent Video Upload Request ===');
+    console.log('User from token:', req.user);
+    console.log('File received:', req.file ? 'Yes' : 'No');
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No video file provided' });
+    }
+
+    const firebaseUid = req.user.uid;
+    const { userId } = req.body;
+    
+    let user = null;
+    try {
+      user = await userService.findUserByFirebaseUid(firebaseUid);
+    } catch (e) {
+      user = null;
+    }
+
+    // Convert multer file to File-like object
+    const file = {
+      name: req.file.originalname,
+      type: req.file.mimetype,
+      arrayBuffer: () => Promise.resolve(req.file.buffer)
+    };
+
+    const customId = user?.customUserId || firebaseUid || 'anonymous';
+    const videoResult = await s3Service.uploadAgentVideo(file, customId);
+    
+    res.json({
+      success: true,
+      message: 'Agent video uploaded successfully',
+      video: videoResult
+    });
+  } catch (error) {
+    console.error('Error uploading agent video:', error);
+    res.status(500).json({ error: 'Failed to upload agent video', details: error?.message || null });
   }
 });
 

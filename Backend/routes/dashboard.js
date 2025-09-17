@@ -25,7 +25,7 @@ router.get('/dashboarddata', authorize, async (req, res) => {
       });
     }
 
-    // Get user's projects from marketplace
+    // Get user's projects from marketplace and agents
     const customUserId = user.customUserId;
     
     try {
@@ -36,12 +36,34 @@ router.get('/dashboarddata', authorize, async (req, res) => {
         p.author === customUserId || p.customUserId === customUserId
       );
 
+      // Get user's agents
+      let userAgents = [];
+      try {
+        userAgents = await dynamoDBService.getAgentsByAuthor(customUserId);
+      } catch (agentError) {
+        console.warn('Failed to fetch user agents for dashboard:', agentError.message);
+      }
+
+      // Get project count from user.projects.count if available, otherwise calculate
+      let projectCount = 0;
+      if (user.projects && user.projects.count !== undefined) {
+        projectCount = user.projects.count;
+      } else {
+        // Fallback: count from marketplace and agents
+        projectCount = userProjects.length + userAgents.length;
+      }
+
       let totalViews = 0;
       let totalEarnings = 0;
       
       userProjects.forEach(project => {
         totalViews += project.views || 0;
         totalEarnings += project.price || 0; // Use price as earnings for now
+      });
+
+      userAgents.forEach(agent => {
+        totalViews += agent.views || 0;
+        totalEarnings += agent.price || 0;
       });
 
       // Get optimized recent activities (only necessary fields for display)
@@ -61,7 +83,7 @@ router.get('/dashboarddata', authorize, async (req, res) => {
       const response = {
         totalViews,
         totalEarnings,
-        projectCount: userProjects.length,
+        projectCount,
         activities: optimizedActivities,
         connections,
         favourites

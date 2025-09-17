@@ -13,7 +13,6 @@ import {
   VolumeX,
 } from "lucide-react";
 import mainVideo from "@/assets/videos/promotion.mp4";
-import bgImage from "@/assets/images/howitworks.jpg";
 import { Link } from 'react-router-dom';
 
 type Step = {
@@ -134,7 +133,7 @@ export const HowItWorks: React.FC<{ deferVideo?: boolean }> = ({ deferVideo = fa
         <div
           className="md:w-1/2 w-full flex flex-col items-center justify-center relative"
           style={{
-            backgroundImage: `url(${bgImage})`,
+            backgroundImage: `url(https://amogh-assets.s3.ap-south-1.amazonaws.com/content/howitworks_11zon.jpg)`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             minHeight: 320,
