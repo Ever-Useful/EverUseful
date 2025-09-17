@@ -170,11 +170,6 @@ const App = () => (
                 <Chat />
               </Suspense>
             } />
-            <Route path="/chat/:userId" element={
-             <Suspense fallback={<PageLoader />}>
-                <Chat />
-             </Suspense>
-            } />
             <Route path="/connections" element={
               <Suspense fallback={<PageLoader />}>
                 <Connections />
