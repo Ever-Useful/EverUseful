@@ -52,14 +52,14 @@ const InitialsAvatar: React.FC<InitialsAvatarProps> = ({
   const fontSize = Math.max(size * 0.4, 16); // Responsive font size
 
   // If avatar is provided, show the image
-  if (avatar) {
+   if (avatar) {
     return (
       <img
         src={avatar}
         alt="User profile"
         className={`rounded-full object-cover border-2 border-indigo-200 shadow-md ${className}`}
         style={{ width: size, height: size }}
-        onError={e => { e.currentTarget.src = NoUserProfile; }}
+        onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"; }}
       />
     );
   }
@@ -68,7 +68,7 @@ const InitialsAvatar: React.FC<InitialsAvatarProps> = ({
   if (!initials) {
     return (
       <img
-        src={NoUserProfile}
+        src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"
         alt="No user profile"
         className={`rounded-full object-cover border-2 border-gray-200 shadow-md ${className}`}
         style={{ width: size, height: size }}

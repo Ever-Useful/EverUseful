@@ -3,10 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
-import Students from "../assets/images/Students.jpeg";
-import PhD from "../assets/images/phdscholars.jpeg";
-import Professors from "../assets/images/professors.jpeg";
-import Business from "../assets/images/Business.jpeg";
 
 
 type Option = {
@@ -20,28 +16,34 @@ type Option = {
 const OPTIONS: Option[] = [
   {
     id: 1,
-    imageUrl: Students,
+    imageUrl:
+      "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Final+amogh+student+studying.avif", // student studying
+    label: "Students",
     description: "Join peer communities & showcase projects",
     iconClass: "fas fa-user-graduate",
-    label: "Students"
+    // label: "Students"
   },
   {
     id: 2,
-    imageUrl: PhD,
+    imageUrl:
+      "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/amogh+label+pHd+holder.avif", // scientist in lab
+    label: "PhD Holders",
     description: "Collaborate on research & funding",
     iconClass: "fas fa-flask",
-    label: "PhD"
+    // label: "PhD"
   },
   {
     id: 3,
-    imageUrl: Professors,
+    imageUrl:
+      "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Final_amoghprofessorlecturing.jpg", // professor lecturing
     label: "Professors",
     description: "Share knowledge & mentor next gen",
     iconClass: "fas fa-chalkboard-teacher",
   },
   {
     id: 4,
-    imageUrl: Business,
+    imageUrl:
+      "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Final_amoghbusinessmeeting.jpg", // business meeting
     label: "Business",
     description: "Discover solutions & partnerships",
     iconClass: "fas fa-briefcase",

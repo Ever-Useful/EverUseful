@@ -8,7 +8,6 @@ import {
   Headphones,
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
-import provideImg from "@/assets/images/provide-removebg-preview (1).png";
 
 export const WhatWeProvide = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -302,8 +301,8 @@ export const WhatWeProvide = () => {
             }}
             className="hidden sm:block"
           >
-            <img
-              src={provideImg}
+             <img
+              src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/provide-removebg-preview.png"
               alt="What We Provide"
               className="w-full h-full object-cover object-bottom-right rounded-2xl shadow-lg"
               loading="lazy"

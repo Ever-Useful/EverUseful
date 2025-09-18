@@ -1,8 +1,6 @@
 import React, { useRef } from 'react';
-import partnersImage from '@/assets/images/team.png'; // Adjust path as needed
 import { Link } from 'react-router-dom';
-import cfLogo from '@/assets/images/chainfly.png';
-import rlLogo from '@/assets/images/reslink.jpg';
+
 
 type Partner = {
   id: number;
@@ -19,7 +17,7 @@ const partners: Partner[] = [
     name: 'Chainfly',
     tagline: 'Solar Asset Management',
     description: 'AI-Powered Solar Asset Intelligence',
-    imageUrl: cfLogo,
+    imageUrl: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/chainfly.png",
     href: 'https://www.chainfly.co/'
   },
   {
@@ -27,7 +25,7 @@ const partners: Partner[] = [
     name: 'Reslink',
     tagline: 'Semiconductor Inventions',
     description: 'Material Science for Sustainability',
-    imageUrl: rlLogo,
+    imageUrl: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/reslink.jpg",
     href: 'https://www.reslink.org/'
   },
 ];
@@ -100,7 +98,7 @@ export const GlobalCollaborations: React.FC = () => {
           </div>
           <div className="hidden sm:flex flex-1 justify-end gap-4">
             <img
-              src={partnersImage}
+              src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/team.png"
               alt="Global Partners 1"
               className="h-20 sm:h-28 md:h-44 w-auto object-contain drop-shadow-lg"
             />

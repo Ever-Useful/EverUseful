@@ -25,7 +25,7 @@ export const FreelancingPreview = () => {
       completedProjects: 32,
       hourlyRate: 95,
       location: "Austin",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+      avatar: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1507003211169-0a1dd7228f2d_11zon.jpg",
       skills: ["Solidity", "Web3", "Smart Contracts"]
     },
     {
@@ -35,11 +35,10 @@ export const FreelancingPreview = () => {
       completedProjects: 68,
       hourlyRate: 70,
       location: "New York",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+      avatar: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1438761681033-6461ffad8d80_11zon.jpg",
       skills: ["Figma", "Design Systems", "Prototyping"]
     }
   ];
-
   return (
     <section className="py-20 bg-gradient-to-br from-indigo-50/50 via-purple-50/50 to-pink-50/50 relative">
       {/* Background decoration */}

@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, MapPin, Globe, Mail, Phone, GraduationCap, Briefcase, Award, Users, Eye, Heart, Download, Share2, MessageCircle, Send, Linkedin, Github, Twitter, Instagram, Facebook, Youtube, Globe as GlobeIcon, UserPlus, BookOpen, Star } from 'lucide-react';
 import userService from '@/services/userService';
+import relationService from '@/services/relationService';
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ChatBox } from "@/components/ChatBox";
@@ -17,6 +18,7 @@ import { API_ENDPOINTS } from '../config/api';
 import { getUserAvatarUrl, getBackgroundImageUrl } from '@/utils/s3ImageUtils';
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { socket } from "@/socket.ts";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -31,11 +33,48 @@ const Profile = () => {
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
   const [error, setError] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
+  const [relationStatus, setRelationStatus] = useState<'NONE' | 'PENDING_OUT' | 'PENDING_IN' | 'CONNECTED' | 'BLOCKED'>('NONE');
   const { profileData: currentUser } = useUserProfile(); 
+  const [projectsCount, setProjectsCount] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
+  // Fetch a single item (project or agent) by id and type
+  const fetchItemData = async (itemId: string, itemType: 'project' | 'agent') => {
+    try {
+      console.log(`StudentProfile - Fetching ${itemType} ${itemId}...`);
 
+      let response: Response;
+      if (itemType === 'agent') {
+        response = await fetch(API_ENDPOINTS.AGENT(itemId));
+      } else {
+        response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(itemId));
+      }
 
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log(`StudentProfile - ${itemType} ${itemId} not found (deleted or unpublished)`);
+        } else {
+          console.log(`StudentProfile - ${itemType} ${itemId} error (${response.status})`);
+        }
+        return null;
+      }
 
+      const data = await response.json();
+      const item = itemType === 'agent' ? data.agent : data.project;
+
+      if (item) {
+        return {
+          ...item,
+          title: item.title || item.name,
+          type: itemType,
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`StudentProfile - Error fetching ${itemType} ${itemId}:`, error);
+      return null;
+    }
+  };
 
   // Fetch user data by customUserId from userData.json
   const fetchUserData = async () => {
@@ -59,35 +98,55 @@ const Profile = () => {
           setBackgroundImage(userBackgroundImage);
         } else {
           // Fallback to default background
-          setBackgroundImage("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80");
+          setBackgroundImage("https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1470071459604-3b5ec3a7fe05_11zon.jpg");
         }
         console.log('StudentProfile - User data set:', data.data);
         console.log('StudentProfile - Projects object:', data.data.projects);
         console.log('StudentProfile - Projects.created:', data.data.projects?.created);
         console.log('StudentProfile - Is projects.created an array?', Array.isArray(data.data.projects?.created));
         
-        // Fetch full project details for each project ID
-        const projectIds = Array.isArray(data.data.projects?.created) ? data.data.projects.created : [];
-        console.log('StudentProfile - Project IDs found:', projectIds);
-        console.log('StudentProfile - Project IDs type check:', projectIds.map(id => ({ id, type: typeof id })));
-        
-        if (projectIds.length > 0) {
-          console.log('StudentProfile - Attempting to fetch projects:', projectIds);
-          const projectPromises = projectIds.map((pid) =>
-            fetchProjectData(pid)
-          );
-          const fullProjects = (await Promise.all(projectPromises)).filter(Boolean);
-          console.log('StudentProfile - Full projects fetched:', fullProjects);
-          console.log('StudentProfile - Project details:', fullProjects.map(p => ({
+        // Use projects data from the user response (no authentication required)
+        try {
+          const projects = data.data.projects?.created || [];
+          console.log('StudentProfile - Projects found:', projects.length);
+          
+          // Fetch both projects and agents
+          const allItems = [];
+          
+          // Fetch projects from the user's projects array
+          if (projects.length > 0) {
+            console.log('StudentProfile - Attempting to fetch projects:', projects);
+            const projectPromises = projects.map((item) => {
+              // Handle both old format (string IDs) and new format (objects with id and type)
+              const itemId = typeof item === 'string' ? item : item.id;
+              const itemType = typeof item === 'object' ? item.type : 'project';
+              return fetchItemData(itemId, itemType);
+            });
+            const fetchedProjects = (await Promise.all(projectPromises)).filter(Boolean);
+            allItems.push(...fetchedProjects);
+            console.log(`StudentProfile - Successfully loaded ${fetchedProjects.length} projects`);
+          }
+          
+          // Fetch user agents directly
+          const userAgents = await fetchUserAgents(id);
+          allItems.push(...userAgents);
+          console.log(`StudentProfile - Successfully loaded ${userAgents.length} agents`);
+          
+          console.log('StudentProfile - Full items fetched:', allItems);
+          console.log('StudentProfile - Item details:', allItems.map(p => ({
             id: p.id,
-            title: p.title,
+            title: p.title || p.name,
             image: p.image,
-            hasImage: !!p.image
+            hasImage: !!p.image,
+            type: p.type
           })));
-          setPortfolioProjects(fullProjects);
-        } else {
-          console.log('StudentProfile - No project IDs found');
+          setPortfolioProjects(allItems);
+          setProjectsCount(allItems.length);
+          
+        } catch (error) {
+          console.error('StudentProfile - Error processing projects and agents:', error);
           setPortfolioProjects([]);
+          setProjectsCount(0);
         }
       } else {
         console.log('StudentProfile - No user data found or API error');
@@ -104,202 +163,333 @@ const Profile = () => {
     }
   };
 
-// useEffect(() => {
-//   const fetchConnectionStatus = async () => {
-//     try {
-//       const connections = await userService.getConnections();
-
-//       if (connections.sent.includes(id)) {
-//         setConnectionStatus("pending"); // request sent by me
-//       } else if (connections.received.includes(id)) {
-//         setConnectionStatus("pending"); // request received, still pending
-//       } else if (connections.connected.includes(id)) {
-//         setConnectionStatus("connected"); // already connected
-//       } else {
-//         setConnectionStatus("none"); // no relation
-//       }
-//     } catch (err) {
-//       console.error("Failed to fetch connection status:", err);
-//     }
-//   };
-
-//   if (currentUser?.customUserId && id) {
-//     fetchConnectionStatus();
-//   }
-// }, [currentUser, id]);
 
 
-// // Ye wala final hai
-// useEffect(() => {
-//   if (!currentUser?.customUserId || !id) return;
-
-//   (async () => {
-//     try {
-//       const resp = await userService.getConnections();
-//       const payload = resp?.data ?? resp; // support both shapes
-
-//       const sent: string[] = payload?.sent ?? [];
-//       const received: string[] = payload?.received ?? [];
-//       const connected: string[] = payload?.connected ?? [];
-
-//       if (connected.includes(id)) {
-//         setConnectionStatus('connected');
-//       } else if (sent.includes(id) || received.includes(id)) {
-//         setConnectionStatus('pending');
-//       } else {
-//         setConnectionStatus('none');
-//       }
-//     } catch (err) {
-//       console.error('Failed to fetch connection status:', err);
-//     }
-//   })();
-// }, [currentUser?.customUserId, id]);
-
-// 🔹 Fetch connection status on mount / refresh
 useEffect(() => {
-  const fetchConnectionStatus = async () => {
+  const fetchRelationStatus = async () => {
     try {
-      const res = await userService.getConnections(); 
-      // NOTE: res is { success: true, data: { sent, received, connected } }
-      const connections = res.data;
-
-      if (connections.sent.includes(id)) {
-        setConnectionStatus("pending"); // request sent by me
-      } else if (connections.received.includes(id)) {
-        setConnectionStatus("pending"); // request received, still pending
-      } else if (connections.connected.includes(id)) {
-        setConnectionStatus("connected"); // already connected
-      } else {
-        setConnectionStatus("none");
-      }
+      if (!id) return;
+      const res = await relationService.getStatus(id);
+      const status = (res?.data?.relation || res?.relation || 'NONE') as any;
+      setRelationStatus(status);
     } catch (err) {
-      console.error("Failed to fetch connection status:", err);
+      console.error('Failed to fetch relation status:', err);
+      setRelationStatus('NONE');
     }
   };
 
   if (currentUser?.customUserId && id) {
-    fetchConnectionStatus();
+    fetchRelationStatus();
   }
 }, [currentUser, id]);
 
 
 
 
-  useEffect(() => {
-    if (currentUser?.customUserId) {
-      socket.emit("register", currentUser.customUserId);
-      console.log("Registered socket for user:", currentUser.customUserId);
+//   useEffect(() => {
+//     if (currentUser?.customUserId) {
+//       socket.emit("register", currentUser.customUserId);
+//       console.log("Registered socket for user:", currentUser.customUserId);
+//     }
+//   }, [currentUser?.customUserId]);
+
+//   useEffect(() => {
+//   socket.on('relation_request_received', (data: any) => {
+//     console.log('Relation request received:', data);
+//     if (data?.from === id) {
+//       setRelationStatus('PENDING_IN');
+//     }
+//   });
+
+//   // socket.on('relation_update', (data: any) => {
+//   //   console.log('Relation update:', data);
+//   //   if (data?.type === 'ACCEPTED' && data?.between?.includes(id)) {
+//   //     setRelationStatus('CONNECTED');
+//   //   }
+//   // });
+
+//   useEffect(() => {
+//   // Listen for relation_update events
+//   socket.on('relation_update', (data: any) => {
+//     // Block notification
+//     if (data?.type === 'BLOCKED') {
+//       // Check Notification API
+//       if (typeof window !== 'undefined' && 'Notification' in window) {
+//         // Request permission if needed
+//         if (Notification.permission === 'default') {
+//           try { Notification.requestPermission(); } catch {}
+//         }
+//         // If permission granted, show notification
+//         if (Notification.permission === 'granted') {
+//           try {
+//             // Compose blocker name (current user)
+//             const blockerName = `${data.blockerFirstName || ""} ${data.blockerLastName || ""}`.trim() || "You";
+//             // Show browser notification
+//             new Notification("User Blocked", {
+//               body: `${blockerName}, you have blocked a user.`,
+//               icon: "/favicon.ico",
+//             });
+//           } catch {}
+//         }
+//       }
+//       // Optionally update UI
+//       setRelationStatus && setRelationStatus('BLOCKED');
+//     }
+
+//     // Unblock notification
+//     if (data?.type === 'UNBLOCKED') {
+//       // Check Notification API
+//       if (typeof window !== 'undefined' && 'Notification' in window) {
+//         // Request permission if needed
+//         if (Notification.permission === 'default') {
+//           try { Notification.requestPermission(); } catch {}
+//         }
+//         // If permission granted, show notification
+//         if (Notification.permission === 'granted') {
+//           try {
+//             // Compose unblocker name (current user)
+//             const unblockerName = `${data.unblockerFirstName || ""} ${data.unblockerLastName || ""}`.trim() || "You";
+//             // Show browser notification
+//             new Notification("User Unblocked", {
+//               body: `${unblockerName}, you have unblocked a user.`,
+//               icon: "/favicon.ico",
+//             });
+//           } catch {}
+//         }
+//       }
+//       // Optionally update UI
+//       setRelationStatus && setRelationStatus('NONE');
+//     }
+//   });
+
+//   // Cleanup on unmount
+//   return () => {
+//     socket.off('relation_update');
+//   };
+// }, [socket]);
+
+//   return () => {
+//     socket.off('relation_request_received');
+//     socket.off('relation_update');
+//   };
+// }, [id]);
+
+
+useEffect(() => {
+  if (currentUser?.customUserId) {
+    socket.emit("register", currentUser.customUserId);
+    console.log("Registered socket for user:", currentUser.customUserId);
+  }
+}, [currentUser?.customUserId]);
+
+useEffect(() => {
+  // --- relation_request_received ---
+  const onRelationRequestReceived = (data: any) => {
+    console.log('Relation request received:', data);
+    if (data?.from === id) {
+      setRelationStatus('PENDING_IN');
     }
-  }, [currentUser?.customUserId]);
-
-  useEffect(() => {
-  socket.on("connectionRequestReceived", (data) => {
-    console.log("New connection request received:", data);
-    alert(`${data.message}`);
-  });
-
-  return () => {
-    socket.off("connectionRequestReceived");
   };
-}, []);
 
+  // --- relation_update ---
+  const onRelationUpdate = (data: any) => {
+    console.log('Relation update:', data);
 
+    // Accept logic (if you want to keep it)
+    if (data?.type === 'ACCEPTED' && data?.between?.includes(id)) {
+      setRelationStatus('CONNECTED');
+    }
 
+// Block notification
+if (data?.type === 'BLOCKED') {
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    if (Notification.permission === 'default') {
+      try { Notification.requestPermission(); } catch {}
+    }
+    if (Notification.permission === 'granted') {
+      try {
+        // Blocked user's name
+        const blockedName = `${data.blockedFirstName || ""} ${data.blockedLastName || ""}`.trim() || "this user";
+        new Notification("User Blocked", {
+          body: `You have blocked ${blockedName}`,
+          icon: "/favicon.ico",
+        });
+      } catch {}
+    }
+  }
+  setRelationStatus && setRelationStatus('BLOCKED')
+}
 
+// Unblock notification
+if (data?.type === 'UNBLOCKED') {
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    if (Notification.permission === 'default') {
+      try { Notification.requestPermission(); } catch {}
+    }
+    if (Notification.permission === 'granted') {
+      try {
+        // Unblocked user's name
+        const unblockedName = `${data.blockedFirstName || ""} ${data.blockedLastName || ""}`.trim() || "this user";
+        new Notification("User Unblocked", {
+          body: `You have unblocked ${unblockedName}`,
+          icon: "/favicon.ico",
+        });
+      } catch {}
+    }
+  }
+  setRelationStatus && setRelationStatus('NONE');
+}
+  };
 
-// const handleConnect = async () => {
-//   if (!id) return;
+  // Register listeners
+  socket.on('relation_request_received', onRelationRequestReceived);
+  socket.on('relation_update', onRelationUpdate);
 
-//   // Optimistic UI
-//   setConnectionStatus("pending");
-
-//   try {
-//     const response = await userService.sendConnectionRequest(id);
-
-//     if (response?.success === false) {
-//       setConnectionStatus("none"); // revert
-//       alert(`Failed to send request: ${response.message || "Unknown error"}`);
-//       return;
-//     }
-
-//     // Emit socket event (real-time notification)
-//     socket.emit("connectionRequest", {
-//       from: currentUser.customUserId,
-//       to: id,
-//       message: `${currentUser.firstName || "Someone"} sent you a connection request.`,
-//     });
-
-//     // Show notification/alert
-//     if ("Notification" in window && Notification.permission === "granted") {
-//       new Notification("Connection request sent!", {
-//         body: "Your request is now pending.",
-//         icon: "/favicon.ico",
-//       });
-//     } else {
-//       alert("Connection request sent!");
-//     }
-//   } catch (err: any) {
-//     setConnectionStatus("none"); // revert if error
-//     console.error("Error sending connection request:", err);
-
-//     const message =
-//       err?.response?.data?.message ||
-//       err?.message ||
-//       "Failed to send connection request due to an unknown error.";
-
-//     alert(`Connection request failed: ${message}`);
-//   }
-// };
+  // Cleanup on unmount
+  return () => {
+    socket.off('relation_request_received', onRelationRequestReceived);
+    socket.off('relation_update', onRelationUpdate);
+  };
+}, [id, socket]);
 
    
 
-// 🔹 Handle connect click
+// ... (existing imports and code)
 const handleConnect = async () => {
   try {
-    const response = await userService.sendConnectionRequest(id);
+    if (!id) return;
+    // Prevent duplicate sends if any relation already exists
+    if (relationStatus && relationStatus !== 'NONE') return;
 
-    if (response?.success === false) {
-      alert(`Failed to send request: ${response.message || "Unknown error"}`);
-      return;
-    }
+    await relationService.send(id);
+    setRelationStatus('PENDING_OUT');
 
-    setConnectionStatus("pending"); // update UI immediately
+    // Notify other parts of the app (Connections page) to update Sent list
+    try {
+      window.dispatchEvent(new CustomEvent('relations:sent', { detail: { toUserId: id } }));
+    } catch {}
 
-    socket.emit("connectionRequest", {
-      from: currentUser.customUserId,
+    // Console log for debugging
+    console.log('Connection request sent:', {
+      from: currentUser?.customUserId,
       to: id,
-      message: `${currentUser.firstName || "Someone"} sent you a connection request.`,
+      timestamp: Date.now(),
     });
 
-    if ("Notification" in window && Notification.permission === "granted") {
-      new Notification("Connection request sent!", {
-        body: "Your request is now pending.",
-        icon: "/favicon.ico",
-      });
-    } else {
-      alert("Connection request sent!");
+    // Browser notification
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        try { await Notification.requestPermission(); } catch {}
+      }
+      if (Notification.permission === 'granted') {
+        try {
+          // Get receiver's name (firstName + lastName)
+          const receiverFirstName = userData?.auth?.firstName || '';
+          const receiverLastName = userData?.auth?.lastName || '';
+          const receiverFullName = `${receiverFirstName} ${receiverLastName}`.trim() || 'User';
+
+          new Notification('Connection request sent', {
+            body: `Your notification to ${receiverFullName} is now pending.`,
+            icon: '/favicon.ico',
+          });
+        } catch {}
+      }
     }
   } catch (err: any) {
-    console.error("Error sending connection request:", err);
-    alert(`Connection request failed: ${err.message || "Unknown error"}`);
+    console.error('Error sending relation request:', err);
+    alert(err?.message || 'Failed to send request');
+  }
+};
+const handleAccept = async () => {
+  try {
+    if (!id) return;
+    await relationService.accept(id);
+    setRelationStatus('CONNECTED');
+  } catch (err: any) {
+    console.error('Error accepting request:', err);
+    alert(err?.message || 'Failed to accept request');
+  }
+};
+
+const handleDecline = async () => {
+  try {
+    if (!id) return;
+    await relationService.decline(id);
+    setRelationStatus('NONE');
+  } catch (err: any) {
+    console.error('Error declining request:', err);
+    alert(err?.message || 'Failed to decline request');
+  }
+};
+
+const handleCancel = async () => {
+  try {
+    if (!id) return;
+    await relationService.cancel(id);
+    setRelationStatus('NONE');
+  } catch (err: any) {
+    console.error('Error cancelling request:', err);
+    alert(err?.message || 'Failed to cancel request');
+  }
+};
+
+const handleRemoveConnection = async () => {
+  try {
+    if (!id) return;
+    await relationService.removeConnection(id);
+    setRelationStatus('NONE');
+  } catch (err: any) {
+    console.error('Error removing connection:', err);
+    alert(err?.message || 'Failed to remove connection');
+  }
+};
+
+const handleBlock = async () => {
+  try {
+    if (!id) return;
+    await relationService.block(id);
+    setRelationStatus('BLOCKED');
+  } catch (err: any) {
+    console.error('Error blocking user:', err);
+    alert(err?.message || 'Failed to block user');
+  }
+};
+
+const handleUnblock = async () => {
+  try {
+    if (!id) return;
+    await relationService.unblock(id);
+    setRelationStatus('NONE');
+  } catch (err: any) {
+    console.error('Error unblocking user:', err);
+    alert(err?.message || 'Failed to unblock user');
   }
 };
 
 
 
-  const fetchProjectData = async (pid: string) => {
+  // Removed duplicate fetchProjectData declarations; use fetchItemData instead
+
+  // Fetch user agents directly from the agents API
+  const fetchUserAgents = async (userId: string) => {
     try {
-      console.log(`StudentProfile - Fetching project ${pid}...`);
-      const response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(pid));
+      console.log(`StudentProfile - Fetching agents for user ${userId}...`);
+      const response = await fetch(`${API_ENDPOINTS.AGENTS}/author/${userId}`);
       if (!response.ok) {
-        console.log(`StudentProfile - Project ${pid} not found (${response.status})`);
-        return null;
+        console.log(`StudentProfile - No agents found for user ${userId}`);
+        return [];
       }
       const data = await response.json();
-      return data && data.project ? data.project : null;
+      const agents = data.agents || [];
+      console.log(`StudentProfile - Found ${agents.length} agents for user ${userId}`);
+      return agents.map(agent => ({
+        ...agent,
+        title: agent.name,
+        type: 'agent'
+      }));
     } catch (error) {
-      console.error(`StudentProfile - Error fetching project ${pid}:`, error);
-      return null;
+      console.error(`StudentProfile - Error fetching agents for user ${userId}:`, error);
+      return [];
     }
   };
 
@@ -307,15 +497,9 @@ const handleConnect = async () => {
     fetchUserData();
   }, [id]);
 
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-slate-100">
-  //       <div className="text-xl font-semibold text-slate-700 animate-pulse">
-  //         Loading your profile...
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (loading) {
+    return <LoadingAnimation fullScreen={true} />;
+  }
 
   const auth = userData?.auth || {};
   const fullName = `${auth.firstName || ''} ${auth.lastName || ''}`.trim() || 'Unnamed User';
@@ -324,7 +508,7 @@ const handleConnect = async () => {
     name: fullName,
     title: userData?.profile?.title || "New Member",
     bio: userData?.profile?.bio || "This is a new profile. Update your bio!",
-    avatar: userData?.profile?.avatar || NoUserProfile,
+    avatar: userData?.profile?.avatar || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png",
     stats: {
       followers: userData?.social?.followersCount || 0,
       following: userData?.social?.followingCount || 0,
@@ -336,7 +520,6 @@ const handleConnect = async () => {
   };
 
   const MAX_LENGTH = 200;
-  const [isExpanded, setIsExpanded] = useState(false);
   const shouldTruncate = profile.bio && profile.bio.length > MAX_LENGTH;
   const displayedText = shouldTruncate && !isExpanded
     ? profile.bio.slice(0, MAX_LENGTH) + "..."
@@ -380,15 +563,13 @@ const handleConnect = async () => {
     safePortfolioProjectsLength: safePortfolioProjects.length
   });
 
-  // 🔹 Button rendering
+  // 🔹 Relation button rendering
 const isSelf = currentUser?.customUserId === id;
-const disabled = isSelf || connectionStatus !== "none";
-const label =
-  connectionStatus === "none"
-    ? "Connect"
-    : connectionStatus === "pending"
-    ? "Pending"
-    : "Connected";
+const showConnect = !isSelf && relationStatus === 'NONE';
+const showPendingOut = !isSelf && relationStatus === 'PENDING_OUT';
+const showPendingIn = !isSelf && relationStatus === 'PENDING_IN';
+const showConnected = !isSelf && relationStatus === 'CONNECTED';
+const isBlocked = !isSelf && relationStatus === 'BLOCKED';
 
 
   return (
@@ -421,17 +602,72 @@ const label =
               <div className="flex-1 text-white mt-1 md:mt-0 w-full">
                 <h1 className="text-2xl sm:text-3xl font-bold drop-shadow-lg mb-1 text-left">{profile.name}</h1>
                 <p className="text-xs sm:text-sm text-slate-200 drop-shadow-md text-left">{(userData?.auth?.userType || '').charAt(0).toUpperCase() + (userData?.auth?.userType || '').slice(1) || profile.title}</p>
-                {/* Connect Button */}
+                {/* Relation Actions */}
                 <div className="flex flex-row items-center justify-start mt-2">
-                  <button
-  onClick={handleConnect}
-  disabled={disabled}
-  className={`flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 ${
-    disabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-  }`}
->
-  {label}
-</button>
+                  {showConnect && (
+                    <button
+                      onClick={handleConnect}
+                      className={`flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-blue-600 hover:bg-blue-700`}
+                    >
+                      Connect
+                    </button>
+                  )}
+                  {showPendingOut && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        disabled
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-gray-400 cursor-not-allowed"
+                      >
+                        Pending
+                      </button>
+                      <button
+                        onClick={handleCancel}
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-amber-600 hover:bg-amber-700"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                  {showPendingIn && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleAccept}
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-green-600 hover:bg-green-700"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={handleDecline}
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-red-600 hover:bg-red-700"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  )}
+                  {showConnected && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        disabled
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-emerald-600"
+                      >
+                        Connected
+                      </button>
+                      <button
+                        onClick={handleRemoveConnection}
+                        className="flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 bg-slate-600 hover:bg-slate-700"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                  {!isSelf && (
+                    <button
+                      onClick={isBlocked ? handleUnblock : handleBlock}
+                      className={`ml-2 flex items-center gap-2 text-white drop-shadow-md text-xs sm:text-sm rounded-2xl px-3 py-1.5 ${isBlocked ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-700 hover:bg-gray-800'}`}
+                    >
+                      {isBlocked ? 'Unblock' : 'Block'}
+                    </button>
+                  )}
                   <button className="ml-2 p-2 rounded-full bg-gray-100/20 text-white">
                     <Send className="w-4 h-4" />
                   </button>
@@ -447,7 +683,7 @@ const label =
           <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white rounded-xl">
             <CardContent className="p-3 sm:p-4 text-center">
               <Award className="w-6 h-6 mx-auto mb-2" />
-                                <div className="text-2xl font-bold">{profile.stats.projects}+</div>
+              <div className="text-2xl font-bold">{projectsCount}+</div>
               <div className="text-xs opacity-90 uppercase tracking-wider">Projects</div>
             </CardContent>
           </Card>
@@ -594,19 +830,19 @@ const label =
                       >
                         <div className="w-full md:w-40 lg:w-48 flex-shrink-0 h-28 md:h-auto bg-gray-100 flex items-center justify-center">
                           <img
-                            src={project.image || NoImageAvailable}
-                            alt={project.title}
+                            src={project.image || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"}
+                            alt={project.title || project.name}
                             className="object-cover w-full h-full rounded-l-lg"
-                            onError={e => { e.currentTarget.src = NoImageAvailable; }}
+                            onError={e => { e.currentTarget.src = "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+image+available_11zon.png"; }}
                           />
                         </div>
                         <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 line-clamp-1">{project.title}</h3>
+                              <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 line-clamp-1">{project.title || project.name}</h3>
                               <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{project.description}</p>
                               <div className="flex flex-wrap gap-2 mb-2">
-                                {(project.skills || []).map((skill, skillIndex) => (
+                                {(project.skills || project.tags || []).map((skill, skillIndex) => (
                                   <Badge key={skillIndex} variant="secondary" className="text-xs bg-gray-100">
                                     {typeof skill === 'string' ? skill : (skill as any)?.name || (skill as any)?.expertise || 'Unknown Skill'}
                                   </Badge>

@@ -1,7 +1,7 @@
 import { auth } from '../lib/firebase';
 import { API_ENDPOINTS, makeAuthenticatedRequest } from '../config/api';
 
-export interface UserSearchResult {
+export type UserSearchResult = {
   customUserId: string;
   profile: {
     firstName: string;
@@ -10,7 +10,14 @@ export interface UserSearchResult {
     userType: string;
     username: string;
   };
-}
+  connections?: {
+    sent: string[];
+    received: string[];
+    pending: string[];
+  };
+  connected?: string[];
+};
+
 
 interface UserProfile {
   avatar: string;
@@ -105,10 +112,20 @@ interface Project {
   description: string;
   category: string;
   tags: string[];
-  status: 'planning' | 'in-progress' | 'completed';
-  collaborators: string[];
-  createdBy: string;
-  createdAt: string;
+  // Allow broader statuses and optional for mapped agent entries
+  status?: string;
+  collaborators?: string[];
+  createdBy?: string;
+  createdAt?: string;
+  // Optional fields to support marketplace/agent projections
+  image?: string;
+  images?: string[];
+  projectLink?: string;
+  price?: number;
+  duration?: string | number | null;
+  posted?: string;
+  dateAdded?: string;
+  author?: string;
 }
 
 interface Meeting {
@@ -129,12 +146,24 @@ interface CartItem {
   quantity: number;
 }
 
-interface Connection {
+interface DBConnection {
   id: string;
   userId: string;
   targetUserId: string;
   status: 'pending' | 'accepted' | 'rejected';
   createdAt: string;
+}
+
+export interface Connection {
+  id: string;
+  name: string;
+  title: string;
+  company: string;
+  location: string;
+  avatar?: string;
+  mutualConnections: number;
+  isConnected: boolean;
+  skills: string[];
 }
 
 class UserService {
@@ -207,6 +236,8 @@ class UserService {
     }
   }
 
+
+
   // Update user profile
   async updateUserProfile(profileData: Partial<UserProfile>): Promise<SimpleUserData> {
     const response = await this.makeRequest(API_ENDPOINTS.USER_PROFILE, {
@@ -215,6 +246,19 @@ class UserService {
     });
     return response;
   }
+
+  // Get user by custom ID (fixed to match backend)
+async getUserByCustomId(customUserId: string): Promise<any> {
+  const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${customUserId}`, {
+    method: "GET",
+  });
+
+  if (response?.success) {
+    return response.data;
+  }
+  return null;
+}
+
 
   // Get user skills
   async getUserSkills(): Promise<Skill[]> {
@@ -262,17 +306,29 @@ class UserService {
   }
 
   // Add item to cart
-  async addToCart(item: Omit<CartItem, 'id'>): Promise<CartItem[]> {
-    const response = await this.makeRequest(API_ENDPOINTS.USER_CART, {
+  async addToCart(item: AddToCartItem): Promise<CartItem[]> {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart`, {
       method: 'POST',
-      body: JSON.stringify(item),
+      body: JSON.stringify({ productId: item.id || item.name, quantity: item.quantity }),
     });
     return response;
   }
 
   // Remove item from cart
   async removeFromCart(itemId: string): Promise<CartItem[]> {
-    const response = await this.makeRequest(`${API_ENDPOINTS.USER_CART}/${itemId}`, {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart/${itemId}`, {
       method: 'DELETE',
     });
     return response;
@@ -280,7 +336,13 @@ class UserService {
 
   // Clear cart
   async clearCart(): Promise<void> {
-    await this.makeRequest(API_ENDPOINTS.USER_CART, {
+    // Get user profile to get customUserId
+    const userProfile = await this.getUserProfile();
+    if (!userProfile || !userProfile.data?.customUserId) {
+      throw new Error('User profile not found');
+    }
+    
+    await this.makeRequest(`${API_ENDPOINTS.USERS}/${userProfile.data.customUserId}/cart`, {
       method: 'DELETE',
     });
   }
@@ -304,14 +366,26 @@ class UserService {
     return await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS);
   }
 
-  // // Send connection request
-  // async sendConnectionRequest(targetUserId: string): Promise<Connection> {
-  //   const response = await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS, {
-  //     method: 'POST',
-  //     body: JSON.stringify({ targetUserId }),
-  //   });
-  //   return response;
-  // }
+  // Get user followers/following
+  async getSocialData(type: 'followers' | 'following'): Promise<{
+    users: any[];
+    count: number;
+  }> {
+    const response = await this.makeRequest(`/social/${type}`);
+    return response.data;
+  }
+
+  // Check if user exists and create if not
+  async ensureUserExists(userData: Partial<UserProfile>): Promise<UserData> {
+    try {
+      // Try to get existing user
+      return await this.getUserProfile();
+    } catch (error) {
+      // User doesn't exist, create new user
+      await this.createUser(userData);
+      return await this.getUserProfile();
+    }
+  }
 
   // Update auth info
   async updateAuthInfo(authData: any): Promise<void> {
@@ -326,10 +400,10 @@ class UserService {
     return await this.makeRequest(`${API_ENDPOINTS.USERS}/all`);
   }
 
-  // Get user by custom ID
-  async getUserByCustomId(customUserId: string): Promise<SimpleUserData> {
-    return await this.makeRequest(`${API_ENDPOINTS.USERS}/custom/${customUserId}`);
-  }
+  // // Get user by custom ID
+  // async getUserByCustomId(customUserId: string): Promise<SimpleUserData> {
+  //   return await this.makeRequest(`${API_ENDPOINTS.USERS}/custom/${customUserId}`);
+  // }
 
   // Add item to cart (alternative method)
   async addItemToCart(productId: string): Promise<any> {
@@ -358,10 +432,17 @@ class UserService {
 
   // Update student data
   async updateStudentData(studentData: any): Promise<void> {
-    await this.makeRequest(`${API_ENDPOINTS.USERS}/student-data`, {
-      method: 'PUT',
-      body: JSON.stringify(studentData),
-    });
+    console.log('Updating student data:', studentData);
+    try {
+      await this.makeRequest(`${API_ENDPOINTS.USERS}/student-data`, {
+        method: 'PUT',
+        body: JSON.stringify(studentData),
+      });
+      console.log('Student data updated successfully');
+    } catch (error) {
+      console.error('Error updating student data:', error);
+      throw error;
+    }
   }
 
   // Update freelancer data
@@ -476,6 +557,21 @@ class UserService {
     }
   }
 
+// Get user suggestions
+async getSuggestedUsers(): Promise<UserSearchResult[]> {
+  try {
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/suggestions`, {
+      method: 'GET',
+    });
+    return response.success ? response.data : [];
+  } catch (err) {
+    console.error("Suggestions fetch error:", err);
+    return [];
+  }
+}
+
+
+
   // ----------------------------
   // Send connection request
   // ----------------------------
@@ -486,12 +582,36 @@ class UserService {
     });
   }
 
-  // ----------------------------
-  // Get logged-in user’s connections
-  // ----------------------------
-  async getConnections() {
-    return await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS);
+// ----------------------------
+// Get all connections
+// ----------------------------
+async getConnections(): Promise<{ sent: string[]; received: string[]; pending: string[]; connected: string[] }> {
+  try {
+    const token = await this.getAuthToken();
+    const response = await this.makeRequest(API_ENDPOINTS.USER_CONNECTIONS, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response?.success) {
+      // ✅ unwrap and return normalized structure
+      return {
+        sent: response.data.sent || [],
+        received: response.data.received || [],
+        pending: response.data.pending || [],
+        connected: response.data.connected || [],
+      };
+    }
+
+    return { sent: [], received: [], pending: [], connected: [] };
+  } catch (error) {
+    console.error("Error fetching connections:", error);
+    return { sent: [], received: [], pending: [], connected: [] };
   }
+}
+
 
   // ----------------------------
   // Accept connection request
@@ -519,6 +639,58 @@ class UserService {
       method: "DELETE",
     });
   }
+
+    // ----------------------------
+  // Get user connections with ID (customUserId)
+  // ----------------------------
+  async getUserConnectionsWithId(customUserId: string): Promise<{
+    customUserId: string;
+    connections: { sent: string[]; received: string[]; pending: string[] };
+    connected: string[];
+  }> {
+    try {
+      const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/${customUserId}/connections`, {
+        method: "GET",
+      });
+
+      if (response?.success) {
+        return {
+          customUserId: response.data.customUserId,
+          connections: {
+            sent: response.data.connections?.sent || [],
+            received: response.data.connections?.received || [],
+            pending: response.data.connections?.pending || [],
+          },
+          connected: response.data.connected || [],
+        };
+      }
+
+      return { customUserId, connections: { sent: [], received: [], pending: [] }, connected: [] };
+    } catch (error) {
+      console.error("Error fetching user connections with ID:", error);
+      return { customUserId, connections: { sent: [], received: [], pending: [] }, connected: [] };
+    }
+  }
+
+async getConnectionsByUserId(customUserId: string) {
+  const response = await this.makeRequest(
+    `${API_ENDPOINTS.USERS}/${customUserId}/connections`,
+    { method: "GET" }
+  );
+
+  // Ensure we unwrap correctly
+  if (response?.success && response?.data) {
+    return response.data;
+  }
+
+  return { connections: { sent: [], received: [], pending: [] }, connected: [] };
+}
+
+
+
+
+
+
 
   
 }

@@ -11,7 +11,11 @@ import Header from '@/components/Header';
 import {Footer} from '@/components/Footer';
 import Logo from '@/assets/Logo/Logo Main.png'; 
 import UserService, { UserSearchResult } from "@/services/userService";
-type Connection = {
+import relationService from "@/services/relationService";
+import { socket } from "@/socket.ts";
+import { useUserProfile } from '@/contexts/UserProfileContext';
+
+type ConnectionItem = {
   id: string;
   name: string;
   title: string;
@@ -24,7 +28,7 @@ type Connection = {
   sentTime?: string;
 };
 
-const mockConnections: Connection[] = [
+const mockConnections: ConnectionItem[] = [
   {
     id: '1',
     name: 'Sarah Chen',
@@ -147,41 +151,60 @@ const mockConnections: Connection[] = [
   }
 ];
 
-const mockSuggestions: Connection[] = [
-  {
-    id: '4',
-    name: 'David Kim',
-    title: 'UX Designer',
-    company: 'DesignStudio',
-    location: 'Seattle, WA',
-    mutualConnections: 5,
-    isConnected: false,
-    skills: ['UI/UX', 'Figma', 'Design Systems'],
-    sentTime: 'Sent 2 weeks ago'
-  },
-  {
-    id: '5',
-    name: 'Lisa Wang',
-    title: 'Data Scientist',
-    company: 'DataTech',
-    location: 'Boston, MA',
-    mutualConnections: 3,
-    isConnected: false,
-    skills: ['Machine Learning', 'Python', 'Statistics'],
-    sentTime: 'Sent 3 weeks ago'
-  }
-];
+// const mockSuggestions: Connection[] = [
+//   {
+//     id: '4',
+//     name: 'David Kim',
+//     title: 'UX Designer',
+//     company: 'DesignStudio',
+//     location: 'Seattle, WA',
+//     mutualConnections: 5,
+//     isConnected: false,
+//     skills: ['UI/UX', 'Figma', 'Design Systems'],
+//     sentTime: 'Sent 2 weeks ago'
+//   },
+//   {
+//     id: '5',
+//     name: 'Lisa Wang',
+//     title: 'Data Scientist',
+//     company: 'DataTech',
+//     location: 'Boston, MA',
+//     mutualConnections: 3,
+//     isConnected: false,
+//     skills: ['Machine Learning', 'Python', 'Statistics'],
+//     sentTime: 'Sent 3 weeks ago'
+//   }
+// ];
 
 type TabType = 'received' | 'sent' | 'find';
 
 const Connections = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('received');
   
   const [connections, setConnections] = useState(mockConnections);
-  const [suggestions, setSuggestions] = useState(mockSuggestions);
+  // const [suggestions, setSuggestions] = useState(mockSuggestions);
+  const [suggestions, setSuggestions] = useState<UserSearchResult[]>([]);
+  // const [suggestions, setSuggestions] = useState<UserProfile[]>([]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
-  const navigate = useNavigate();
+
+  const [sentUsers, setSentUsers] = useState<UserSearchResult[]>([]);
+  const [receivedUsers, setReceivedUsers] = useState<UserSearchResult[]>([]);
+  const [connectedUsers, setConnectedUsers] = useState<UserSearchResult[]>([]);
+  const [allUsers, setAllUsers] = useState<UserSearchResult[]>([]);
+  const [connectedIds, setConnectedIds] = useState<string[]>([]);
+  const [myRelations, setMyRelations] = useState(null);
+
+
+
+
+
+
+  const { profileData } = useUserProfile();  // logged-in user
+  const loggedInUserId = profileData?.customUserId;
+
 
 
 useEffect(() => {
@@ -195,17 +218,403 @@ useEffect(() => {
   };
   fetchResults();
 }, [searchQuery])
+
+  // Fetch all users and set suggestions (except self)
+useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      const response = await UserService.getAllUsers();
+      // If response is the whole object, extract .users
+      const users = Array.isArray(response) ? response : response?.users || [];
+      setAllUsers(users);
+      console.log("Fetched users:", users);
+    } catch (err) {
+      console.error("Error fetching all users:", err);
+      setAllUsers([]);
+    }
+  };
+  fetchUsers();
+}, []);
+
+// Fetch my relations (connections) ONCE loggedInUserId is ready
+useEffect(() => {
+  if (!loggedInUserId) {
+    setMyRelations(null);
+    return;
+  }
+  (async () => {
+    try {
+      const res = await relationService.getMyRelations();
+      // FIX: set directly, don't unwrap `.data`
+      setMyRelations(res || null);
+      console.log("Fetched myRelations:", res);
+    } catch (err) {
+      console.error("Failed to fetch relations:", err);
+      setMyRelations(null);
+    }
+  })();
+}, [loggedInUserId]);
+
+
+useEffect(() => {
+  if (!loggedInUserId || !myRelations) {
+    setSuggestions([]);
+    return;
+  }
+
+  const connectedIds = Object.keys(myRelations.connections || {});
+  const sentIds = Object.keys(myRelations.requestsSent || {});
+  const receivedIds = Object.keys(myRelations.requestsReceived || {});
+  const blockedIds = Object.keys(myRelations.blockedUsers || {});
+
+  const excludeIds = new Set([
+    loggedInUserId,
+    ...connectedIds,
+    ...sentIds,
+    ...receivedIds,
+    ...blockedIds,
+  ]);
+
+  console.log("loggedInUserId:", loggedInUserId);
+  console.log("excludeIds:", Array.from(excludeIds));
+  console.log("first user:", allUsers[0]);
+
+  const filtered = allUsers.filter(u => {
+    const id = u.customUserId;
+    if (!id) {
+      console.warn("User without customUserId:", u);
+      return false;
+    }
+    return !excludeIds.has(id);
+  });
+
+  console.log("filtered suggestions:", filtered);
+  setSuggestions(filtered);
+}, [allUsers, loggedInUserId, myRelations]);
+
+
+
+
+  // Card click navigation (used in both search and suggestions)
+  const handleCardClick = (user: UserSearchResult) => {
+    const id = user.customUserId;
+    const type = user.profile.userType?.toLowerCase();
+
+    if (type === "student") {
+      navigate(`/studentprofile/${id}`);
+    } else if (type === "business") {
+      navigate(`/businessprofile/${id}`);
+    } else if (type === "freelancer") {
+      navigate(`/freelancerprofile/${id}`);
+    } else {
+      navigate(`/studentprofile/${id}`);
+    }
+  };
+
+useEffect(() => {
+  const fetchReceivedProfiles = async () => {
+    if (!profileData?.customUserId) return;
+
+    try {
+      // Pull my relations doc, then hydrate received with full profiles
+      const myRelations = await relationService.getMyRelations();
+      const receivedIds: string[] = myRelations?.data?.requestsReceived
+        ? Object.keys(myRelations.data.requestsReceived)
+            .filter((fromId) => myRelations.data.requestsReceived[fromId]?.status === 'PENDING')
+        : [];
+
+      const receivedProfiles = await Promise.all(
+        receivedIds.map(async (id: string) => {
+          try {
+            const user = await UserService.getUserByCustomId(id);
+            return user;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      setReceivedUsers(
+        receivedProfiles
+          .filter(Boolean)
+          .map((user: any) => ({
+            customUserId: user.customUserId,
+            profile: {
+              firstName: user.auth?.firstName || user.profile?.firstName || "User",
+              lastName: user.auth?.lastName || user.profile?.lastName || "",
+              avatar: user.profile?.avatar || "",
+              userType: user.auth?.userType || user.profile?.userType || "student",
+              username: user.auth?.username || "",
+            },
+          }))
+      );
+    } catch (err) {
+      console.error("Failed to fetch received profiles:", err);
+    }
+  };
+
+  fetchReceivedProfiles();
+}, [profileData?.customUserId]);
+
+// Realtime socket updates for received/sent
+useEffect(() => {
+  if (!socket || !profileData?.customUserId) return;
+
+  // ensure this user is registered for targeted room updates
+  socket.emit('register', profileData.customUserId);
+
+  const onRelationRequestReceived = async (data: { from: string, firstName?: string, lastName?: string }) => {
+    try {
+      const fromId = data?.from;
+      if (!fromId) return;
+      // Show browser notification
+      if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "default") {
+          try { await Notification.requestPermission(); } catch {}
+        }
+        if (Notification.permission === "granted") {
+          try {
+            const senderFullName = `${data.firstName || ""} ${data.lastName || ""}`.trim() || "User";
+            new Notification(`${senderFullName} sent you a connection request!`, {
+              body: "",
+              icon: "/favicon.ico",
+            });
+          } catch {}
+        }
+      }
+      // Avoid duplicates
+      if (receivedUsers.some(u => u.customUserId === fromId)) return;
+      const user = await UserService.getUserByCustomId(fromId);
+      if (!user) return;
+      setReceivedUsers(prev => [
+        {
+          customUserId: user.customUserId,
+          profile: {
+            firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+            lastName: user.auth?.lastName || user.profile?.lastName || '',
+            avatar: user.profile?.avatar || '',
+            userType: user.auth?.userType || user.profile?.userType || 'student',
+            username: user.auth?.username || '',
+          },
+        },
+        ...prev,
+      ]);
+    } catch (err) {
+      console.error('socket relation_request_received hydrate failed:', err);
+    }
+  };
+
+const onRelationUpdate = async (data: {
+  type: string;
+  between?: string[];
+  senderFirstName?: string;
+  senderLastName?: string;
+  receiverFirstName?: string;
+  receiverLastName?: string;
+  declinerFirstName?: string;
+  declinerLastName?: string;
+}) => {
+  try {
+    const type = data?.type;
+    const between = data?.between || [];
+    if (!type || between.length < 2) return;
+    const myId = profileData.customUserId;
+    if (!between.includes(myId)) return; // unrelated pair
+    const otherId = between.find(id => id !== myId)!;
+
+    if (type === 'ACCEPTED') {
+
+      // Show browser notification for accepted
+      if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "default") {
+          try { await Notification.requestPermission(); } catch {}
+        }
+        if (Notification.permission === "granted") {
+          try {
+            let connectedName = "";
+            if (myId === between[0]) {
+              // me is receiver
+              connectedName = `${data.senderFirstName || ""} ${data.senderLastName || ""}`.trim() || "User";
+            } else {
+              // me is sender
+              connectedName = `${data.receiverFirstName || ""} ${data.receiverLastName || ""}`.trim() || "User";
+            }
+            new Notification(`${connectedName} are now connected`, {
+              body: "",
+              icon: "/favicon.ico",
+            });
+          } catch {}
+        }
+      }
+
+      // Remove from received/sent and add to connected
+      setReceivedUsers(prev => prev.filter(u => u.customUserId !== otherId));
+      setSentUsers(prev => prev.filter(u => u.customUserId !== otherId));
+
+      // Hydrate if not already present, then add to connectedUsers
+      const existing = connectedUsers.some(u => u.customUserId === otherId);
+      if (!existing) {
+        try {
+          const user = await UserService.getUserByCustomId(otherId);
+          if (user) {
+            setConnectedUsers(prev => ([
+              ...prev,
+              {
+                customUserId: user.customUserId,
+                profile: {
+                  firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+                  lastName: user.auth?.lastName || user.profile?.lastName || '',
+                  avatar: user.profile?.avatar || '',
+                  userType: user.auth?.userType || user.profile?.userType || 'student',
+                  username: user.auth?.username || '',
+                },
+              }
+            ]));
+          }
+        } catch {}
+      }
+    }
+
+    if (type === 'DECLINED') {
+      // Show browser notification for decline
+      if (typeof window !== "undefined" && "Notification" in window) {
+      }
+
+      // Remove from received/sent and add to connected
+      setReceivedUsers(prev => prev.filter(u => u.customUserId !== otherId));
+      setSentUsers(prev => prev.filter(u => u.customUserId !== otherId));
+
+      // Hydrate if not already present, then add to connectedUsers
+      const existing = connectedUsers.some(u => u.customUserId === otherId);
+      if (!existing) {
+        try {
+          const user = await UserService.getUserByCustomId(otherId);
+          if (user) {
+            setConnectedUsers(prev => ([
+              ...prev,
+              {
+                customUserId: user.customUserId,
+                profile: {
+                  firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+                  lastName: user.auth?.lastName || user.profile?.lastName || '',
+                  avatar: user.profile?.avatar || '',
+                  userType: user.auth?.userType || user.profile?.userType || 'student',
+                  username: user.auth?.username || '',
+                },
+              }
+            ]));
+          }
+        } catch {}
+      }
+    }
+
+      // Handle declines/cancellations/withdrawals if backend emits them later
+      if (type === 'DECLINED' || type === 'CANCELLED' || type === 'WITHDRAWN') {
+        setReceivedUsers(prev => prev.filter(u => u.customUserId !== otherId));
+        setSentUsers(prev => prev.filter(u => u.customUserId !== otherId));
+      }
+    } catch (err) {
+      console.error('socket relation_update handling failed:', err);
+    }
+  };
+
+  socket.on('relation_request_received', onRelationRequestReceived);
+  socket.on('relation_update', onRelationUpdate);
+
+  return () => {
+    socket.off('relation_request_received', onRelationRequestReceived);
+    socket.off('relation_update', onRelationUpdate);
+  };
+}, [socket, profileData?.customUserId, receivedUsers, connectedUsers]);
+
+useEffect(() => {
+  const fetchSentProfiles = async () => {
+    if (!profileData?.customUserId) return;
+
+    try {
+      // Use relations: pick requestsSent with status REQUESTED
+      const myRelations = await relationService.getMyRelations();
+      const sentIds: string[] = myRelations?.data?.requestsSent
+        ? Object.keys(myRelations.data.requestsSent)
+            .filter((toId) => myRelations.data.requestsSent[toId]?.status === 'REQUESTED')
+        : [];
+
+const sentProfiles = await Promise.all(
+        sentIds.map(async (id: string) => {
+    try {
+      const user = await UserService.getUserByCustomId(id);
+      return user;
+    } catch {
+      return null;
+    }
+  })
+);
+
+      setSentUsers(
+        sentProfiles
+          .filter(Boolean)
+          .map((user: any) => ({
+            customUserId: user.customUserId,
+            profile: {
+              firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+              lastName: user.auth?.lastName || user.profile?.lastName || '',
+              avatar: user.profile?.avatar || '',
+              userType: user.auth?.userType || user.profile?.userType || 'student',
+              username: user.auth?.username || '',
+            },
+          }))
+      );
+    } catch (err) {
+      console.error('Failed to fetch sent profiles:', err);
+    }
+  };
+
+  fetchSentProfiles();
+}, [profileData?.customUserId]);
+
+useEffect(() => {
+  const onSent = async (e: any) => {
+    try {
+      const toUserId = e?.detail?.toUserId;
+      if (!toUserId) return;
+      // Avoid duplicates
+      if (sentUsers.some(u => u.customUserId === toUserId)) return;
+      const user = await UserService.getUserByCustomId(toUserId);
+      if (!user) return;
+      setSentUsers(prev => ([
+        ...prev,
+        {
+          customUserId: user.customUserId,
+          profile: {
+            firstName: user.auth?.firstName || user.profile?.firstName || 'User',
+            lastName: user.auth?.lastName || user.profile?.lastName || '',
+            avatar: user.profile?.avatar || '',
+            userType: user.auth?.userType || user.profile?.userType || 'student',
+            username: user.auth?.username || '',
+          },
+        }
+      ]));
+    } catch (err) {
+      console.error('Failed to hydrate newly-sent relation:', err);
+    }
+  };
+
+  window.addEventListener('relations:sent', onSent);
+  return () => window.removeEventListener('relations:sent', onSent);
+}, [sentUsers]);
+
+
   const handleConnect = (personId: string) => {
     setSuggestions(prev => 
       prev.map(person => 
-        person.id === personId 
-          ? { ...person, isConnected: true }
+        person.customUserId === personId
+          ? { ...person, isConnected: true } as any
           : person
       )
     );
   };
 
-  const handleCardClick = (user: UserSearchResult) => {
+  const handleSuggestionCardClick = (user: UserSearchResult) => {
   const id = user.customUserId;
   const type = user.profile.userType?.toLowerCase();
 
@@ -225,26 +634,11 @@ useEffect(() => {
 
   const handleWithdraw = (personId: string) => {
     setSuggestions(prev => 
-      prev.filter(person => person.id !== personId)
+      prev.filter(person => person.customUserId !== personId)
     );
   };
 
-  const filteredConnections = connections.filter(person =>
-    person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    person.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    person.company.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // For the 'find' tab, filter all connections and suggestions that are not already connected
-  const filteredSearchResults = [
-    ...connections.filter(person => !person.isConnected),
-    ...suggestions.filter(person => !person.isConnected)
-  ].filter(person =>
-    person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    person.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    person.company.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
+  
   const ConnectionItem = ({ person, showWithdrawButton = false, showConnectButton = false }: { 
     person: Connection; 
     showWithdrawButton?: boolean;
@@ -298,37 +692,125 @@ useEffect(() => {
     </div>
   );
 
-  const renderTabContent = () => {
+    // // Filter suggestions to exclude users already sent, received, or connected
+    // const filteredSuggestions = suggestions.filter(
+    //   user =>
+    //     !sentUsers.some(u => u.customUserId === user.customUserId) &&
+    //     !receivedUsers.some(u => u.customUserId === user.customUserId) &&
+    //     !connectedUsers.some(u => u.customUserId === user.customUserId)
+    // );
+
+    const renderTabContent = () => {
     switch (activeTab) {
       case 'received':
-        return (
-          <div className="flex flex-col h-full">
-            {/* Sticky header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white rounded-t-lg border border-b-0 border-gray-200 sticky top-0 z-10">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">Connection Requests</h2>
-                <p className="text-sm text-gray-600 mt-1">Manage your incoming connection requests</p>
+  return (
+    <div className="flex flex-col h-full">
+      {/* Sticky header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white rounded-t-lg border border-b-0 border-gray-200 sticky top-0 z-10">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Connection Requests</h2>
+          <p className="text-sm text-gray-600 mt-1">Manage your incoming connection requests</p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm" className="flex items-center text-blue-800">
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+          <Button variant="outline" size="sm" className="text-blue-800">
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Scrollable cards */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
+          {receivedUsers.length > 0 ? (
+            receivedUsers.map(user => (
+              <div
+                key={user.customUserId}
+                onClick={() => handleCardClick(user)}
+                className="flex items-center justify-between p-3 hover:bg-gray-50 transition"
+              >
+                {/* Left side: user card */}
+                <ConnectionItem
+                  person={{
+                    id: user.customUserId,
+                    name: `${user.profile.firstName} ${user.profile.lastName}`,
+                    title: user.profile.userType || 'student',
+                    company: user.profile.username,
+                    avatar: user.profile.avatar,
+                    location: "",
+                    mutualConnections: 0,
+                    isConnected: false,
+                    skills: []
+                  }}
+                />
+
+
+
+                {/* Right side: action buttons */}
+                <div className="flex space-x-2 ml-4">
+      {/* Accept button */}
+      <Button
+        className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+        onClick={async () => {
+          try {
+            await relationService.accept(user.customUserId);
+
+            //  Remove from received list → card disappears
+            setReceivedUsers(prev =>
+              prev.filter(u => u.customUserId !== user.customUserId)
+            );
+
+            //  Add to connected list
+            setConnectedUsers(prev => [
+              ...prev,
+              {
+                customUserId: user.customUserId,
+                profile: user.profile,
+              },
+            ]);
+          } catch (err) {
+            console.error("Failed to accept request:", err);
+          }
+        }}
+      >
+        Accept
+                  </Button>
+        {/* Reject button */}
+        <button
+          className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+          onClick={async () => {
+            try {
+              await relationService.decline(user.customUserId);
+
+              // ✅ Remove from received only
+              setReceivedUsers(prev =>
+                prev.filter(u => u.customUserId !== user.customUserId)
+              );
+            } catch (err) {
+              console.error("Failed to reject request:", err);
+            }
+          }}
+        >
+          Reject
+        </button>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" className="flex items-center text-blue-800">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-                <Button variant="outline" size="sm" className="text-blue-800">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            {/* Scrollable cards */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-              <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
-                {connections.map(person => (
-                  <ConnectionItem key={person.id} person={person} />
-                ))}
-              </div>
-            </div>
-          </div>
-        );
+            ))
+          ) : (
+            <Card className="text-center py-12 shadow-none border-none">
+              <CardContent>
+                <h3 className="font-semibold text-gray-700">No connection requests</h3>
+                <p className="text-gray-500 mt-1">You don’t have any pending requests.</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 
       case 'sent':
         return (
@@ -345,13 +827,49 @@ useEffect(() => {
               </Badge>
             </div>
             {/* Scrollable cards */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-              <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
-                {suggestions.length > 0 ? (
-                  suggestions.map(person => (
-                    <ConnectionItem key={person.id} person={person} showWithdrawButton />
-                  ))
-                ) : (
+<div className="flex-1 overflow-y-auto scrollbar-hide">
+  <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg divide-y divide-gray-100">
+    {sentUsers.length > 0 ? (
+      sentUsers.map(user => (
+        <div
+          key={user.customUserId}
+          className="flex items-center justify-between p-3 hover:bg-gray-50 transition"
+        >
+          {/* Left side: user card */}
+          <ConnectionItem
+            person={{
+              id: user.customUserId,
+                          name: `${user.profile.firstName || 'User'} ${user.profile.lastName || ''}`.trim(),
+                          title: user.profile.userType || 'Student',
+                          company: user.profile.username || 'N/A',
+                          avatar: user.profile.avatar || '',
+                          location: '',
+              mutualConnections: 0,
+              isConnected: false,
+              skills: []
+            }}
+          />
+
+                      {/* Right side: Status + Withdraw */}
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700 border border-amber-200">Requested</span>
+          <button
+            onClick={async () => {
+              try {
+                              await relationService.cancel(user.customUserId);
+                              setSentUsers(prev => prev.filter(u => u.customUserId !== user.customUserId));
+              } catch (err) {
+                              console.error('Failed to withdraw connection:', err);
+              }
+            }}
+            className="px-3 py-1 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
+          >
+            Withdraw
+          </button>
+                      </div>
+        </div>
+      ))
+    ) : (
                   <Card className="text-center py-12 shadow-none border-none">
                     <CardContent>
                       <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -366,8 +884,11 @@ useEffect(() => {
             </div>
           </div>
         );
-
       case 'find':
+        function handleSuggestionConnect(user: UserSearchResult) {
+          throw new Error("Function not implemented.");
+        }
+
         return (
 
           <div className="flex flex-col h-full">
@@ -375,6 +896,7 @@ useEffect(() => {
             <div className="p-4 bg-white rounded-t-lg border border-b-0 border-gray-200 sticky top-0 z-10">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Find Connections</h2>
               <div className="relative">
+
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search by name, title, or company..."
@@ -390,14 +912,6 @@ useEffect(() => {
                     <X className="h-4 w-4" />
                   </button>
                 )}
-              </div>
-              {/* Filter Bar */}
-              <div className="mt-3 mb-1">
-                <SearchFilterBar 
-                  tags={filterTags}
-                  onTagClick={handleFilterClick}
-                  className="justify-start"
-                />
               </div>
             </div>
             {/* Scrollable cards */}
@@ -442,6 +956,7 @@ useEffect(() => {
                   )
                 ) : (
                   <>
+                    {/* SUGGESTIONS LIST */}
                     <Card className="shadow-none border-none">
                       <CardHeader>
                         <CardTitle>Discover New Connections</CardTitle>
@@ -450,10 +965,46 @@ useEffect(() => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
+                        {/* Debug log for suggestions */}
+                        {console.log("Suggestions before render:", suggestions)}
                         <div className="divide-y divide-gray-100">
-                          {suggestions.map(person => (
-                            <ConnectionItem key={person.id} person={person} showConnectButton />
-                          ))}
+                          {suggestions.length > 0 ? (
+                            suggestions.map(user => (
+                              <div
+                                key={user.customUserId}
+                                onClick={() => handleSuggestionCardClick(user)}
+                                className="cursor-pointer hover:bg-gray-50 transition flex items-center"
+                              >
+                                <ConnectionItem
+                                  person={{
+                                    id: user.customUserId,
+                                    name: `${user.profile.firstName || ""} ${user.profile.lastName || ""}`.trim(),
+                                    title: user.profile.userType || "student",
+                                    company: user.profile.username || "",
+                                    avatar: user.profile.avatar || "",
+                                    location: "",
+                                    mutualConnections: 0,
+                                    isConnected: false,
+                                    skills: [],
+                                  }}
+                                  
+                                />
+                                {/* <Button
+                                  size="sm"
+                                  className="ml-4 bg-blue-600 hover:bg-blue-700 text-white"
+                                  onClick={e => {
+                                    e.stopPropagation(); // prevent navigation
+                                    handleSuggestionConnect(user);
+                                  }}
+                                >
+                                  <UserPlus className="h-4 w-4 mr-1" />
+                                  Connect
+                                </Button> */}
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-gray-500 p-4">No suggestions right now</p>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -463,7 +1014,10 @@ useEffect(() => {
             </div>
           </div>
         );
+
+        
     }}
+
 
   return (
     <div className="min-h-screen bg-blue-100">
@@ -568,7 +1122,7 @@ useEffect(() => {
               <Card className="border-0 shadow-sm flex flex-col items-center justify-center py-6 sm:py-8">
                 <CardContent className="flex flex-col items-center">
                   <img
-                    src={Logo}
+                    src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Logo+Main_11zon.png"
                     alt="Logo"
                     className="w-auto h-16 sm:h-20 mb-2 sm:mb-3"
                   />

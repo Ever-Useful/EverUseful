@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
   USER_BY_ID: (id: string) => getApiUrl(`/api/users/${id}`),
   USER_BULK: (ids: string) => getApiUrl(`/api/users/bulk/${ids}`),
   get USER_FOLLOW() { return getApiUrl('/api/users/follow'); },
+  get USER_LEADERBOARD() { return getApiUrl('/api/users/leaderboard'); },
   
   // Phone verification endpoints
   get VERIFY_PHONE() { return getApiUrl('/api/users/verify-phone'); },
@@ -53,12 +54,36 @@ export const API_ENDPOINTS = {
   MARKETPLACE_FAVORITE: (id: string) => getApiUrl(`/api/marketplace/projects/${id}/favorite`),
   MARKETPLACE_VIEW: (id: string) => getApiUrl(`/api/marketplace/projects/${id}/view`),
   
+  // Agents endpoints
+  get AGENTS() { return getApiUrl('/api/agents'); },
+  AGENT: (id: string) => getApiUrl(`/api/agents/${id}`),
+  AGENTS_BY_AUTHOR: (authorId: string) => getApiUrl(`/api/agents/author/${authorId}`),
+  AGENTS_BY_CATEGORY: (category: string) => getApiUrl(`/api/agents/category/${category}`),
+  AGENT_FAVORITE: (id: string) => getApiUrl(`/api/agents/${id}/favorite`),
+  
   // Dashboard endpoints
   get DASHBOARD() { return getApiUrl('/api/dashboarddata'); },
   
   // Admin endpoints
   get ADMIN() { return getApiUrl('/api/admin'); },
   get ADMIN_OVERVIEW() { return getApiUrl('/api/admin/overview'); },
+  
+  // Relations endpoints
+  get RELATIONS() { return getApiUrl('/api/relations'); },
+  get RELATIONS_SEND() { return getApiUrl('/api/relations/send'); },
+  get RELATIONS_ACCEPT() { return getApiUrl('/api/relations/accept'); },
+  get RELATIONS_DECLINE() { return getApiUrl('/api/relations/decline'); },
+  get RELATIONS_CANCEL() { return getApiUrl('/api/relations/cancel'); },
+  get RELATIONS_REMOVE_CONNECTION() { return getApiUrl('/api/relations/remove-connection'); },
+  get RELATIONS_BLOCK() { return getApiUrl('/api/relations/block'); },
+  get RELATIONS_UNBLOCK() { return getApiUrl('/api/relations/unblock'); },
+  get RELATIONS_ME() { return getApiUrl('/api/relations/me'); },
+  get RELATIONS_STATUS() { return getApiUrl('/api/relations/status'); },
+  
+  // Notifications endpoints
+  get NOTIFICATIONS() { return getApiUrl('/api/notifications'); },
+  get NOTIFICATIONS_CLEAR() { return getApiUrl('/api/notifications/clear'); },
+  NOTIFICATION_READ: (id: string) => getApiUrl(`/api/notifications/${id}/read`),
   
   // Health check
   get HEALTH() { return getApiUrl('/api/test'); },

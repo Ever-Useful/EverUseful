@@ -254,7 +254,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
             {/* Single preview at top */}
             <div className="relative">
               <img
-                src={previewUrl || currentImage || NoUserProfile}
+                src={previewUrl || currentImage || "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/no+user+profile_11zon.png"}
                 alt="Profile preview"
                 style={getImageStyle()}
                 className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-gray-200 shadow-lg"
@@ -441,7 +441,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 w-full sm:w-auto"
               >
-                {isUploading ? 'Uploading...' : 'Apply'}
+                {isUploading ? 'Uploading' : 'Apply'}
               </Button>
             </div>
           </div>
@@ -666,7 +666,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-3 py-2 w-full sm:w-auto"
             >
-              {isUploading ? 'Uploading...' : 'Apply'}
+                {isUploading ? 'Uploading' : 'Apply'}
             </Button>
           </div>
         </div>

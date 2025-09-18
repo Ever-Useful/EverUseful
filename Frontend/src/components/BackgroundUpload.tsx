@@ -18,17 +18,17 @@ const BackgroundUpload = ({ onBackgroundChange }: BackgroundUploadProps) => {
     name: 'Alex Rivera',
     title: 'Digital Creator & Entrepreneur',
     bio: 'Passionate about technology, design, and creating meaningful connections. Building the future one project at a time.',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80',
+    avatar: 'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1472099645785-5658abf4ff4e_11zon+(1).jpg',
     location: 'London',
     website: 'https://github.com',
     projects: []
   });
   
   const predefinedBackgrounds = [
-    'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80',
-    'https://images.unsplash.com/photo-1500673922987-e212871fec22?auto=format&fit=crop&w=1920&q=80',
-    'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=1920&q=80',
-    'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=1920&q=80',
+    'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1470071459604-3b5ec3a7fe05_11zon.jpg',
+    'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1500673922987-e212871fec22_11zon.jpg',
+    'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1466442929976-97f336a657be_11zon.jpg',
+    'https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1649972904349-6e44c42644a7_11zon.jpg',
   ];
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +97,7 @@ const BackgroundUpload = ({ onBackgroundChange }: BackgroundUploadProps) => {
           size="sm"
         >
           <Upload className="w-4 h-4 mr-2 text-xs" />
-          {isUploading ? 'Uploading...' : 'Upload Image'}
+                {isUploading ? 'Uploading' : 'Upload Image'}
         </Button>
         
         <input

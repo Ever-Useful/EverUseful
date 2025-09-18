@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
+import { socket } from '@/socket';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -33,7 +34,8 @@ import {
     Database,
     Lock,
     ShoppingCart,
-    Menu
+    Menu,
+    Trophy
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/assets/Logo/Logo Side Simple.png';
@@ -43,6 +45,7 @@ import Navigation from '@/components/Navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import userService from '@/services/userService';
+import relationService from '@/services/relationService';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Connections from '@/components/Connections';
@@ -51,6 +54,7 @@ import { MyProjects } from '@/components/MyProjects';
 import { Input } from '@/components/ui/input';
 import { clearAllCookies } from '@/utils/cookieUtils';
 import SearchFilterBar, { FilterTag } from '@/components/ui/SearchFilterBar';
+import { API_ENDPOINTS } from '@/config/api';
 
 const mockNotifications = [
     {
@@ -223,18 +227,6 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
-
-    // Check if current page needs user data (only pages that require authentication)
-    const needsUserData = useMemo(() => {
-        const authRequiredRoutes = [
-            '/dashboard', '/profile', '/marketplace', '/cart', '/chat',
-            '/connections', '/collaborators', '/freelancing', '/findexpert',
-            '/freelancerprofile', '/studentprofile', '/businessprofile',
-            '/new-project', '/schedule-meeting'
-        ];
-        const needsData = authRequiredRoutes.some(route => location.pathname.startsWith(route));
-        return needsData;
-    }, [location.pathname]);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [messages, setMessages] = useState(mockMessages);
     const unreadMessageCount = messages.filter(m => m.unread).length;
@@ -242,9 +234,119 @@ const Header = () => {
     const [showNotificationsSidebar, setShowNotificationsSidebar] = useState(false);
     const [showProfileSidebar, setShowProfileSidebar] = useState(false);
     const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
-    const [notifications, setNotifications] = useState(mockNotifications);
-    const unreadNotificationCount = notifications.filter(n => n.unread).length;
+    const [notifications, setNotifications] = useState<any[]>([]);
+    // Store unread count
+    const [unreadNotificationCount, setUnreadNotificationCount] = useState<number>(0);
+    const unreadNotifications = notifications.filter(n => !n.read);
+
+    // --- Listen for relation notifications ---
+    // useEffect(() => {
+    //     // Handler for relation events
+    //     const handleRelationNotification = (data: any) => {
+    //         let notif = null;
+    //         if (data?.type === 'CONNECTION_REQUEST') {
+    //             notif = {
+    //                 id: Date.now() + Math.random(),
+    //                 type: 'CONNECTION_REQUEST',
+    //                 message: `${data.fromFirstName || ''} ${data.fromLastName || ''} sent you a connection request`,
+    //                 meta: { from: data.from },
+    //                 unread: true,
+    //                 createdAt: Date.now(),
+    //             };
+    //         } else if (data?.type === 'CONNECTION_ACCEPTED') {
+    //             notif = {
+    //                 id: Date.now() + Math.random(),
+    //                 type: 'CONNECTION_ACCEPTED',
+    //                 message: `${data.toFirstName || ''} ${data.toLastName || ''} accepted your connection request`,
+    //                 meta: { to: data.to },
+    //                 unread: true,
+    //                 createdAt: Date.now(),
+    //             };
+    //         } else if (data?.type === 'CONNECTION_DECLINED') {
+    //             notif = {
+    //                 id: Date.now() + Math.random(),
+    //                 type: 'CONNECTION_DECLINED',
+    //                 message: `${data.toFirstName || ''} ${data.toLastName || ''} declined your connection request`,
+    //                 meta: { to: data.to },
+    //                 unread: true,
+    //                 createdAt: Date.now(),
+    //             };
+    //         } else if (data?.type === 'BLOCKED') {
+    //             notif = {
+    //                 id: Date.now() + Math.random(),
+    //                 type: 'BLOCKED',
+    //                 message: `${data.blockerFirstName || ''} ${data.blockerLastName || ''} blocked a user.`,
+    //                 meta: { blockedUserId: data.blockedUserId },
+    //                 unread: true,
+    //                 createdAt: Date.now(),
+    //             };
+    //         } else if (data?.type === 'UNBLOCKED') {
+    //             notif = {
+    //                 id: Date.now() + Math.random(),
+    //                 type: 'UNBLOCKED',
+    //                 message: `${data.unblockerFirstName || ''} ${data.unblockerLastName || ''} unblocked a user.`,
+    //                 meta: { unblockedUserId: data.unblockedUserId },
+    //                 unread: true,
+    //                 createdAt: Date.now(),
+    //             };
+    //         }
+    //         if (notif) {
+    //             setNotifications(prev => [notif, ...prev]);
+    //             setUnreadNotificationCount(prev => prev + 1);
+    //         }
+    //     };
+
+    //     // Listen for socket events
+    //     const win = window as any;
+    //     if (win.socket) {
+    //         win.socket.on('relation_request_received', handleRelationNotification);
+    //         win.socket.on('relation_update', handleRelationNotification);
+    //     }
+    //     // Cleanup
+    //     return () => {
+    //         if (win.socket) {
+    //             win.socket.off('relation_request_received', handleRelationNotification);
+    //             win.socket.off('relation_update', handleRelationNotification);
+    //         }
+    //     };
+    // }, []);
+
+//     useEffect(() => {
+//     // Load notifications from backend on mount
+//     relationService.getNotifications().then(({ notifications, unreadCount }) => {
+//         setNotifications(notifications);
+//         setUnreadNotificationCount(unreadCount);
+//     });
+//     // Subscribe to socket events
+//     socket.on("user_notification", (notif: any) => {
+//         setNotifications(prev => [notif, ...prev]);
+//         setUnreadNotificationCount(prev => prev + 1);
+//     });
+//     return () => {
+//         socket.off("user_notification");
+//     };
+// }, []);
+
+//     // Mark notification as read when clicked
+    // Route to connections page when any notification is clicked
+    const handleNotificationClick = (id: string | number) => {
+        navigate('/connections');
+    };
+
+    // Mark all as read and clear all notifications
+    // const handleMarkAllAsRead = () => {
+    //     setNotifications([]);
+    //     setUnreadNotificationCount(0);
+    //     localStorage.setItem('userNotifications', JSON.stringify([]));
+    //     localStorage.setItem('userNotificationsUnreadCount', '0');
+    // };
     const { profileData, isLoggedIn, refreshProfile, isLoading } = useUserProfile();
+    
+    // Always fetch user data when logged in for header display
+    const needsUserData = useMemo(() => {
+        return isLoggedIn;
+    }, [isLoggedIn]);
+    
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
@@ -257,6 +359,9 @@ const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState<string>('all');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
+    //const unreadNotifications = notifications.filter(n => n.unread);
+    const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
+    // Remove duplicate declaration
 
     // Filter tags for search
     const filterTags: FilterTag[] = [
@@ -283,6 +388,8 @@ const Header = () => {
             setIsSearchFocused(false);
         }, 200);
     };
+
+
 
     // Open MyProjects sidebar when a global event is dispatched (e.g., from Dashboard or Navigation)
     useEffect(() => {
@@ -405,11 +512,7 @@ const Header = () => {
         );
     };
 
-    const handleNotificationClick = (notificationId: number) => {
-        setNotifications(prev =>
-            prev.map(n => n.id === notificationId ? { ...n, unread: false } : n)
-        );
-    };
+    // Remove duplicate declaration
 
     const handleLogout = async () => {
         try {
@@ -486,8 +589,75 @@ const Header = () => {
         alert(`Connection request sent to user with ID: ${personId}`);
         // Optionally, update UI state to reflect the request was sent
         // Example: setSuggestedConnections(prev => prev.filter(p => p.id !== personId));
+
     }
 
+    // Whenever notifications change (new notification received, marked as read, etc)
+// Notification initialization (single useEffect)
+useEffect(() => {
+  const storedNotifs = localStorage.getItem('userNotifications');
+  const storedUnread = localStorage.getItem('userNotificationsUnreadCount');
+  if (storedNotifs) {
+    setNotifications(JSON.parse(storedNotifs));
+    setUnreadNotificationCount(Number(storedUnread || 0));
+  } else {
+    relationService.getNotifications().then(({ notifications, unreadCount }) => {
+      setNotifications(notifications);
+      setUnreadNotificationCount(unreadCount);
+    });
+  }
+
+  socket.on("user_notification", (notif) => {
+    setNotifications(prev => {
+      const updated = [notif, ...prev];
+      localStorage.setItem('userNotifications', JSON.stringify(updated));
+      localStorage.setItem('userNotificationsUnreadCount', String(updated.filter(n => !n.read).length));
+      return updated;
+    });
+    setUnreadNotificationCount(prev => prev + 1);
+  });
+
+  // Clear notifications broadcast
+  socket.on("notifications_cleared", () => {
+    setNotifications([]);
+    setUnreadNotificationCount(0);
+    localStorage.setItem('userNotifications', JSON.stringify([]));
+    localStorage.setItem('userNotificationsUnreadCount', '0');
+  });
+
+  return () => {
+    socket.off("user_notification");
+    socket.off("notifications_cleared");
+  };
+}, []);
+
+// Persist notifications on change
+useEffect(() => {
+  localStorage.setItem('userNotifications', JSON.stringify(notifications));
+  localStorage.setItem('userNotificationsUnreadCount', String(unreadNotificationCount));
+}, [notifications, unreadNotificationCount]);
+
+// Mark all as read: clear on backend, then clear locally
+const handleMarkAllAsRead = async () => {
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+    const token = await user.getIdToken();
+    await fetch(API_ENDPOINTS.NOTIFICATIONS_CLEAR, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (e) {
+    // fall through to local clear
+  }
+  setNotifications([]);
+  setUnreadNotificationCount(0);
+  localStorage.setItem('userNotifications', JSON.stringify([]));
+  localStorage.setItem('userNotificationsUnreadCount', '0');
+};
     return (
         <>
             <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-white shadow-sm">
@@ -496,7 +666,7 @@ const Header = () => {
                         {/* Logo */}
                         <div className="flex items-center space-x-1 flex-shrink-0">
                             <Link to="/" className="flex items-center space-x-2 group">
-                                <img src={Logo} alt="AMOGH" className="h-10 w-auto md:h-8" />
+                                <img src="https://amogh-assets.s3.ap-south-1.amazonaws.com/content/Logo+Side+Simple.png" alt="AMOGH" className="h-10 w-auto md:h-8" />
                             </Link>
                         </div>
 
@@ -514,18 +684,6 @@ const Header = () => {
                                         onBlur={handleSearchBlur}
                                         className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                     />
-                                    {/* Filter Bar - Only show when search is focused */}
-                                    {isSearchFocused && (
-                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
-                                            <div className="p-3">
-                                                <SearchFilterBar
-                                                    tags={filterTags}
-                                                    onTagClick={handleFilterClick}
-                                                    className="justify-start"
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                             <Navigation isLoggedIn={isLoggedIn} />
@@ -564,11 +722,75 @@ const Header = () => {
                                                 <ShoppingCart className="h-5 w-5 text-gray-600" />
                                             </Link>
                                         </Button>
+                                        {/* Notifications Dropdown */}
+                                        <DropdownMenu open={isNotificationsMenuOpen} onOpenChange={setIsNotificationsMenuOpen}>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="relative hover:bg-white/10 hover:scale-105 transition-all duration-300" aria-label="Notifications">
+                                                    <Bell className="h-5 w-5 text-gray-600" />
+                                                    {unreadNotificationCount > 0 && (
+                                                        <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-none">
+                                                            {unreadNotificationCount}
+                                                        </span>
+                                                    )}
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-80 p-0">
+                                                <div className="p-3 border-b">
+                                                    <div className="text-sm font-semibold text-gray-800">Notifications</div>
+                                                    <div className="text-xs text-gray-500">{unreadNotificationCount} unread</div>
+                                                </div>
+                                                {unreadNotifications.length === 0 ? (
+                                                    <div className="p-4 text-sm text-gray-500">You're all caught up.</div>
+                                                ) : (
+                                                    <div className="max-h-80 overflow-auto">
+                                                        {unreadNotifications.map((notification) => (
+                                                            <div
+                                                                key={notification.id}
+                                                                className="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-b last:border-b-0"
+                                                                onClick={() => handleNotificationClick(notification.id)}
+                                                            >
+                                                                <div className="flex items-start gap-3">
+                                                                    <span className="text-xl">{getNotificationIcon(notification.type)}</span>
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <h4 className="font-medium text-gray-900 text-sm truncate">{notification.title}</h4>
+                                                                            <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                                                                        </div>
+                                                                        <p className="text-xs text-gray-600 line-clamp-2">{notification.message}</p>
+                                                                        <p className="text-[10px] text-gray-400 mt-1">{notification.time}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                <DropdownMenuSeparator />
+                                                <div className="p-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-center text-sm text-black"
+                                                        onClick={() => {
+                                                            setShowNotificationsSidebar(true);
+                                                            setIsNotificationsMenuOpen(false);
+                                                        }}
+                                                    >
+                                                        View all notifications
+                                                    </Button>
+                                                    <Button
+    variant="outline"
+                                                        className="w-full justify-center text-sm text-black"
+    onClick={handleMarkAllAsRead}
+>
+    Mark All as Read
+                                                    </Button>
+                                                </div>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                         {/* Profile Button with User Name */}
                                         <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
                                             <User className="h-5 w-5 text-gray-600" />
                                             <span className="hidden sm:inline text-sm font-medium">
-                                                Hi, {profileData.firstName || 'there'}
+                                                Hi, {isLoading ? '...' : (profileData.firstName || 'there')}
                                             </span>
                                         </Button>
                                     </div>
@@ -654,22 +876,15 @@ const Header = () => {
                                                 onBlur={handleSearchBlur}
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
-                                            {/* Filter Bar - Only show when search is focused */}
-                                            {isSearchFocused && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 animate-in slide-in-from-top-2 duration-200">
-                                                    <div className="p-3">
-                                                        <SearchFilterBar
-                                                            tags={filterTags}
-                                                            onTagClick={handleFilterClick}
-                                                            className="justify-start"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
+                                    <Link to="/leaderboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
+                                        <TrendingUp className="w-5 h-5 mr-3 text-gray-600" />
+                                        <span className="text-gray-700 font-medium mobile-text-base">Leaderboard</span>
+                                    </Link> {/* <-- ADD THIS LINK */}
+
                                     {/* Cart */}
                                     <Link to="/cart" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                         <ShoppingCart className="w-5 h-5 mr-3 text-gray-600" />
@@ -724,16 +939,6 @@ const Header = () => {
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
                                         </div>
-                                        {/* Filter Bar - Only show when search is focused */}
-                                        {isSearchFocused && (
-                                            <div className="mt-2 mb-1 animate-in slide-in-from-top-2 duration-200">
-                                                <SearchFilterBar
-                                                    tags={filterTags}
-                                                    onTagClick={handleFilterClick}
-                                                    className="justify-start"
-                                                />
-                                            </div>
-                                        )}
                                     </div>
                                     {/* Navigation */}
                                     <Navigation mobile isLoggedIn={isLoggedIn} />
@@ -992,9 +1197,10 @@ const Header = () => {
                                     </div>
 
                                     <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">
-                                        {(profileData.firstName || profileData.lastName)
-                                            ? `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim()
-                                            : 'User Profile'
+                                        {isLoading ? 'Loading...' : 
+                                            (profileData.firstName || profileData.lastName)
+                                                ? `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim()
+                                                : 'User Profile'
                                         }
                                     </h3>
 
@@ -1023,7 +1229,7 @@ const Header = () => {
                                         <Link to="/dashboard" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <LayoutGrid className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
                                             <span className="text-sm sm:text-base text-gray-700 font-medium">Dashboard</span>
-                                        </Link>
+                                        </Link> 
                                         <Link to="/connections"
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
@@ -1046,18 +1252,10 @@ const Header = () => {
                                             <List className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
                                             <span className="text-sm sm:text-base text-gray-700 font-medium">My Projects</span>
                                         </Link>
-                                        <Link to="#"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setShowFavouritesSidebar(true);
-                                                setShowProjectsSidebar(false);
-                                                setShowSettingsSidebar(false);
-                                                // setShowConnectionsSidebar(false);
-                                                setShowCalendarSidebar(false);
-                                            }}
+                                        <Link to="/leaderboard"
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                            <Heart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
-                                            <span className="text-sm sm:text-base text-gray-700 font-medium">My Favourites</span>
+                                            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
+                                            <span className="text-sm sm:text-base text-gray-700 font-medium">Leaderboard</span>
                                         </Link>
                                         <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
@@ -1170,10 +1368,8 @@ const Header = () => {
                     <div className="p-3 sm:p-4 border-t bg-slate-50">
                         <Button
                             variant="outline"
-                            className="w-full text-xs sm:text-sm"
-                            onClick={() => {
-                                setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-                            }}
+                            className="w-full justify-center text-sm text-black"
+                            onClick={handleMarkAllAsRead}
                         >
                             Mark All as Read
                         </Button>

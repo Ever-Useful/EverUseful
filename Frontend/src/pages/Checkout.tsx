@@ -15,14 +15,14 @@ const Checkout = () => {
       title: "AI-Powered Climate Change Prediction Model",
       price: 2500,
       category: "AI & Sustainability",
-      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=100&h=100&fit=crop"
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1451187580459-43490279c0fa_11zon.jpg"
     },
     {
       id: 2,
       title: "Blockchain-Based Supply Chain Tracker",
       price: 3200,
       category: "Blockchain",
-      image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=100&h=100&fit=crop"
+      image: "https://amogh-assets.s3.ap-south-1.amazonaws.com/content/photo-1639762681485-074b7f938ba0_11zon.jpg"
     }
   ];
 
