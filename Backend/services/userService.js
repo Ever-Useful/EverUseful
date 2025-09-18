@@ -100,46 +100,6 @@ class UserService {
     return await this.dbService.updateSocialLinks(customUserId, socialLinks);
   }
 
-  // Phone verification methods
-  async verifyPhoneNumber(customUserId, phoneNumber, isVerified = true) {
-    return await this.dbService.updateUserProfile(customUserId, {
-      phoneNumber: phoneNumber,
-      phoneVerified: isVerified,
-      phoneVerificationDate: isVerified ? new Date().toISOString() : null
-    });
-  }
-
-  async markPhoneAsVerified(customUserId) {
-    return await this.dbService.updateUserProfile(customUserId, {
-      phoneVerified: true,
-      phoneVerificationDate: new Date().toISOString()
-    });
-  }
-
-  async createUserWithPhoneVerification(firebaseUid, userData) {
-    // Add phone verification fields
-    const enhancedUserData = {
-      ...userData,
-      phoneVerified: false,
-      phoneVerificationDate: null,
-      emailVerified: false,
-      emailVerificationDate: null
-    };
-    
-    return await this.createUser(firebaseUid, enhancedUserData);
-  }
-
-  async findUserByPhone(phoneNumber) {
-    return await this.dbService.findUserByPhone(phoneNumber);
-  }
-
-  async updateEmailVerificationStatus(customUserId, isVerified = true) {
-    return await this.dbService.updateUserProfile(customUserId, {
-      emailVerified: isVerified,
-      emailVerificationDate: isVerified ? new Date().toISOString() : null
-    });
-  }
-
   // Update user auth info (Firestore fields)
   async updateUserAuthInfo(customUserId, authData) {
     return await this.dbService.updateUserProfile(customUserId, authData);
@@ -195,6 +155,11 @@ class UserService {
     return await this.dbService.followUser(followerId, followingId);
   }
 
+  // Get user connections (following list with profile data)
+  async getUserConnections(customUserId) {
+    return await this.dbService.getUserConnections(customUserId);
+  }
+
   // Get user statistics
   async getUserStats(customUserId) {
     return await this.dbService.getUserStats(customUserId);
@@ -225,35 +190,63 @@ class UserService {
     return await this.dbService.searchUsersByName(query);
 }
 
-// Send connection request
-async sendConnectionRequest(senderId, receiverId) {
-  return await this.dbService.createConnectionRequest(senderId, receiverId);
-}
+// // Send connection request
+// async sendConnectionRequest(senderId, receiverId) {
+//   return await this.dbService.createConnectionRequest(senderId, receiverId);
+// }
 
-// Accept connection request
-async acceptConnectionRequest(receiverId, senderId) {
-  return await this.dbService.acceptConnectionRequest(receiverId, senderId);
-}
+// // Accept connection request
+// async acceptConnectionRequest(receiverId, senderId) {
+//   return await this.dbService.acceptConnectionRequest(receiverId, senderId);
+// }
 
-// Reject connection request
-async rejectConnectionRequest(receiverId, senderId) {
-  return await this.dbService.rejectConnectionRequest(receiverId, senderId);
-}
+// // Reject connection request
+// async rejectConnectionRequest(receiverId, senderId) {
+//   return await this.dbService.rejectConnectionRequest(receiverId, senderId);
+// }
 
-// Withdraw (cancel) connection request
-async withdrawConnectionRequest(senderId, receiverId) {
-  return await this.dbService.withdrawConnectionRequest(senderId, receiverId);
-}
+// // Withdraw (cancel) connection request
+// async withdrawConnectionRequest(senderId, receiverId) {
+//   return await this.dbService.withdrawConnectionRequest(senderId, receiverId);
+// }
 
-// Get connections for a user (returns sent, received, connected)
-async getConnections(customUserId) {
-  const user = await this.dbService.findUserByCustomId(customUserId);
-  return {
-    sent: user.connections?.sent || [],
-    received: user.connections?.received || [],
-    connected: user.social?.connected || [],
-  };
-}
+// async getConnections(userId) {
+//   const user = await this.findUserByCustomId(userId);
+//   if (!user) return { sent: [], received: [], connected: [] };
+
+//   // Existing normalized structure
+//   const connections = user.connections || { sent: [], received: [], connected: [] };
+
+//   // Legacy social connections (array of objects)
+//   const social = user.profile?.social?.connections || [];
+
+//   // Merge legacy into normalized
+//   social.forEach(c => {
+//     if (c.status === "incoming" && !connections.received.includes(c.userId)) {
+//       connections.received.push(c.userId);
+//     }
+//     if (c.status === "sent" && !connections.sent.includes(c.targetUserId)) {
+//       connections.sent.push(c.targetUserId);
+//     }
+//     if (c.status === "connected" && !connections.connected.includes(c.targetUserId)) {
+//       connections.connected.push(c.targetUserId);
+//     }
+//   });
+
+//   console.log(" Final merged connections:", connections);
+//   return connections;
+// }
+
+// // Get logged-in user's ID and connections
+// async getUserConnectionsWithId(customUserId) {
+//   return await this.dbService.getUserConnectionsWithId(customUserId);
+// }
+
+//   // ✅ New: get only received connections with profile data
+//   async getReceivedConnectionsWithProfiles(customUserId) {
+//     return await this.dbService.getReceivedConnectionsWithProfiles(customUserId);
+//   }
+
 
 
 }
