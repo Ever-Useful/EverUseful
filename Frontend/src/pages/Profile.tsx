@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import userService from '@/services/userService';
+import relationService from '@/services/relationService';
 import s3Service from '@/services/s3Service';
 import { EditProfile } from '@/components/EditProfile';
 import InitialsAvatar from '@/components/InitialsAvatar';
@@ -107,6 +108,25 @@ const Profile = () => {
   const [showEditProjectSidebar, setShowEditProjectSidebar] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [showConnectionsPopup, setShowConnectionsPopup] = useState(false);
+  const [connectionCount, setConnectionCount] = useState(0);
+
+  // Fetch connection count from relation service
+  const fetchConnectionCount = async () => {
+    try {
+      const relationsData = await relationService.getMyRelations();
+      // Connections are stored as a map { userId: true, ... } so we need to get the keys
+      const connectionsMap = relationsData?.data?.connections || relationsData?.connections || {};
+      const connections = Object.keys(connectionsMap);
+      const count = connections.length;
+      setConnectionCount(count);
+      setStats(prev => ({ ...prev, connections: count }));
+      return count;
+    } catch (error) {
+      console.error('Error fetching connection count:', error);
+      return 0;
+    }
+  };
+
 
   const [education, setEducation] = useState([]);
   const [workExperience, setWorkExperience] = useState([]);
@@ -269,6 +289,9 @@ const Profile = () => {
         hourlyRate: freelancerData?.hourlyRate || '',
         avgResponseTime: freelancerData?.avgResponseTime || '',
       });
+
+      // Fetch connection count from relation service
+      await fetchConnectionCount();
 
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -680,7 +703,10 @@ const Profile = () => {
           >
             <CardContent className="p-3 sm:p-4 text-center relative">
               <UserPlus className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2" />
-              <div className="text-base sm:text-lg md:text-2xl font-bold">{stats.connections}+</div>
+              <div className="text-base sm:text-lg md:text-2xl font-bold">
+                {(connectionCount || stats.connections) ?? 0}+
+              </div>
+
               <div className="text-xs opacity-90 uppercase tracking-wider">Connections</div>
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="bg-white/20 rounded-full p-1">
@@ -976,12 +1002,18 @@ const Profile = () => {
         />
       )}
       
-      {/* Connections Popup */}
-      <ConnectionsPopup 
-        isOpen={showConnectionsPopup}
-        onClose={() => setShowConnectionsPopup(false)}
-        connectionCount={stats.connections}
-      />
+      Connections Popup
+<ConnectionsPopup 
+  isOpen={showConnectionsPopup}
+  onClose={() => setShowConnectionsPopup(false)}
+  connectionCount={connectionCount}
+  onFetchedCount={(count: number) => {
+    setConnectionCount(count);
+    setStats(prev => ({ ...prev, connections: count })); // keep card in sync
+  }}
+/>
+
+
     </div>
   );
 };

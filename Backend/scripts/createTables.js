@@ -94,6 +94,31 @@ const createTables = async () => {
       }
     };
 
+    // Create UserRelations table
+    const userRelationsParams = {
+      TableName: process.env.DYNAMODB_USER_RELATIONS_TABLE || 'UserRelations',
+      KeySchema: [
+        { AttributeName: 'userId', KeyType: 'HASH' } // Partition key
+      ],
+      AttributeDefinitions: [
+        { AttributeName: 'userId', AttributeType: 'S' }
+      ],
+      BillingMode: 'PAY_PER_REQUEST'
+    };
+
+    console.log('Creating UserRelations table...');
+    try {
+      await dynamodb.createTable(userRelationsParams).promise();
+      console.log('UserRelations table created successfully!');
+    } catch (err) {
+      if (err.code === 'ResourceInUseException') {
+        console.log('UserRelations table already exists');
+      } else {
+        console.error('Error creating UserRelations table:', err);
+      }
+    }
+
+
     console.log('Creating Users table...');
     await dynamodb.createTable(usersTableParams).promise();
     console.log('Users table created successfully!');
