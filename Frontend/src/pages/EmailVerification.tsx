@@ -97,21 +97,21 @@ const EmailVerification = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         <Header />
-        <div className="flex items-center justify-center p-4">
-          <Card className="w-full max-w-md text-center">
-            <CardHeader>
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4 sm:p-6">
+          <Card className="w-full max-w-md text-center shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+            <CardHeader className="pb-6 pt-8 px-6 sm:px-8">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
               </div>
-              <CardTitle className="text-2xl font-bold text-gray-900">Email Verified!</CardTitle>
-              <CardDescription className="text-gray-600">
+              <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Email Verified!</CardTitle>
+              <CardDescription className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 Your email has been successfully verified. You can now access your account.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pb-8 px-6 sm:px-8">
               <Button 
                 onClick={handleContinue}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="w-full h-10 sm:h-12 text-sm sm:text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 Continue to Profile
               </Button>
@@ -143,6 +143,9 @@ const EmailVerification = () => {
               </h1>
               <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 sm:mb-6">
                 To start using your account, confirm your email address with the email we sent to:
+              </p>
+              <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">
+                Don't see the email? Check your spam folder as it might have been filtered there.
               </p>
               <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-lg p-3 sm:p-4 mb-6 sm:mb-8 shadow-sm">
                 <p className="font-semibold text-gray-900 text-sm sm:text-base break-all">{email || 'your email'}</p>
