@@ -44,10 +44,12 @@ router.get('/dashboarddata', authorize, async (req, res) => {
         console.warn('Failed to fetch user agents for dashboard:', agentError.message);
       }
 
-      // Get project count from user.projects.count if available, otherwise calculate
+      // Get project count - prioritize stored count, fallback to calculated count
       let projectCount = 0;
       if (user.projects && user.projects.count !== undefined) {
-        projectCount = user.projects.count;
+        projectCount = parseInt(user.projects.count) || 0;
+      } else if (user.stats && user.stats.projectsCount !== undefined) {
+        projectCount = parseInt(user.stats.projectsCount) || 0;
       } else {
         // Fallback: count from marketplace and agents
         projectCount = userProjects.length + userAgents.length;

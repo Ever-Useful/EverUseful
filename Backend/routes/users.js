@@ -314,6 +314,133 @@ router.get('/projects', authorize, async (req, res) => {
   }
 });
 
+// Get leaderboard data - optimized version
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const dynamoDBService = require('../services/dynamoDBService');
+    
+    // Get marketplace data to calculate project stats
+    const marketplace = await dynamoDBService.getMarketplaceData();
+    
+    // Get all agents once to avoid repeated API calls
+    const allAgents = await dynamoDBService.getAllAgents();
+    
+    // Process each user to calculate their leaderboard stats
+    const leaderboardData = [];
+    
+    // Get all users but only process those with projects
+    const allUsers = await dynamoDBService.getAllUsers();
+    
+    for (const user of allUsers) {
+      try {
+        const customUserId = user.customUserId;
+        
+        // First check if user has any projects using stored counts
+        let hasProjects = false;
+        let projectCount = 0;
+        
+        if (user.projects && user.projects.count !== undefined) {
+          projectCount = parseInt(user.projects.count) || 0;
+          hasProjects = projectCount > 0;
+        } else if (user.stats && user.stats.projectsCount !== undefined) {
+          projectCount = parseInt(user.stats.projectsCount) || 0;
+          hasProjects = projectCount > 0;
+        }
+        
+        // Skip users with no projects to improve performance
+        if (!hasProjects) {
+          continue;
+        }
+        
+        // Only fetch detailed data for users with projects
+        const userProjects = marketplace.projects.filter(p => 
+          p.author === customUserId || p.customUserId === customUserId
+        );
+        
+        // Get user's agents from the pre-fetched list instead of making individual API calls
+        const userAgents = allAgents.filter(agent => agent.author === customUserId);
+        
+        // Calculate total views
+        let totalViews = 0;
+        userProjects.forEach(project => {
+          totalViews += project.views || 0;
+        });
+        userAgents.forEach(agent => {
+          totalViews += agent.views || 0;
+        });
+        
+        // Only include users who have projects
+        leaderboardData.push({
+          customUserId: customUserId,
+          name: `${user.profile?.firstName || ''} ${user.profile?.lastName || ''}`.trim() || user.profile?.username || 'Unknown User',
+          profilePicture: user.profile?.avatar || null,
+          userType: user.profile?.userType || 'student',
+          projects: projectCount,
+          views: totalViews,
+          // Simple ranking: prioritize project count, then views
+          rankingScore: (projectCount * 1000) + totalViews
+        });
+      } catch (userError) {
+        console.warn(`Error processing user ${user.customUserId}:`, userError.message);
+        continue;
+      }
+    }
+    
+    // Sort by ranking score (descending)
+    leaderboardData.sort((a, b) => b.rankingScore - a.rankingScore);
+    
+    // Limit to top 100 users for better performance
+    const limitedData = leaderboardData.slice(0, 100);
+    
+    res.json({
+      success: true,
+      data: limitedData
+    });
+  } catch (error) {
+    console.error('Error fetching leaderboard data:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Synchronize project counts for a specific user
+router.post('/sync-counts/:customUserId', authorize, async (req, res) => {
+  try {
+    const { customUserId } = req.params;
+    const dynamoDBService = require('../services/dynamoDBService');
+    
+    const result = await dynamoDBService.synchronizeProjectCounts(customUserId);
+    res.json({ success: true, message: 'Counts synchronized successfully', actualCount: result.actualCount });
+  } catch (error) {
+    console.error('Error synchronizing counts:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Synchronize project counts for all users (admin only)
+router.post('/sync-all-counts', authorize, async (req, res) => {
+  try {
+    const dynamoDBService = require('../services/dynamoDBService');
+    
+    // Get all users
+    const allUsers = await dynamoDBService.getAllUsers();
+    const results = [];
+    
+    for (const user of allUsers) {
+      try {
+        const result = await dynamoDBService.synchronizeProjectCounts(user.customUserId);
+        results.push({ customUserId: user.customUserId, success: true, actualCount: result.actualCount });
+      } catch (error) {
+        results.push({ customUserId: user.customUserId, success: false, error: error.message });
+      }
+    }
+    
+    res.json({ success: true, message: 'Counts synchronized for all users', results });
+  } catch (error) {
+    console.error('Error synchronizing all counts:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Update user profile
 router.put('/profile', authorize, async (req, res) => {
   try {
@@ -342,11 +469,27 @@ router.put('/student-data', authorize, async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
     
+    console.log('Student data update request:', {
+      customUserId: user.customUserId,
+      body: req.body,
+      bodyKeys: Object.keys(req.body || {})
+    });
+    
+    // Validate that we have some data to update
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ success: false, message: 'No data provided to update' });
+    }
+    
     const updatedData = await userService.updateStudentData(user.customUserId, req.body);
     res.json({ success: true, message: 'Student data updated successfully', data: updatedData });
   } catch (error) {
     console.error('Error updating student data:', error);
-    res.status(400).json({ success: false, message: error.message });
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    res.status(400).json({ success: false, message: error.message || 'Failed to update student data' });
   }
 });
 

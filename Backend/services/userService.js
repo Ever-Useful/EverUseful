@@ -165,6 +165,11 @@ class UserService {
     return await this.dbService.getUserStats(customUserId);
   }
 
+  // Synchronize project counts for a user
+  async synchronizeProjectCounts(customUserId) {
+    return await this.dbService.synchronizeProjectCounts(customUserId);
+  }
+
   // Get all users (for admin purposes)
   async getAllUsers() {
     return await this.dbService.getAllUsers();
