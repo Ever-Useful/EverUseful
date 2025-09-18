@@ -362,7 +362,7 @@ const Header = () => {
     // const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    // const [activeFilter, setActiveFilter] = useState<string>('all');
+    const [activeFilter, setActiveFilter] = useState<string>('all');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     //const unreadNotifications = notifications.filter(n => n.unread);
     const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
