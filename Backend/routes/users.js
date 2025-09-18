@@ -310,19 +310,26 @@ router.get('/projects', authorize, async (req, res) => {
 // Get leaderboard data - optimized version
 router.get('/leaderboard', async (req, res) => {
   try {
+    console.log('Starting leaderboard data fetch...');
     const dynamoDBService = require('../services/dynamoDBService');
     
     // Get marketplace data to calculate project stats
+    console.log('Fetching marketplace data...');
     const marketplace = await dynamoDBService.getMarketplaceData();
+    console.log(`Found ${marketplace.projects.length} marketplace items`);
     
     // Get all agents once to avoid repeated API calls
+    console.log('Fetching all agents...');
     const allAgents = await dynamoDBService.getAllAgents();
+    console.log(`Found ${allAgents.length} agents`);
     
     // Process each user to calculate their leaderboard stats
     const leaderboardData = [];
     
     // Get all users but only process those with projects
+    console.log('Fetching all users...');
     const allUsers = await dynamoDBService.getAllUsers();
+    console.log(`Found ${allUsers.length} total users`);
     
     for (const user of allUsers) {
       try {
@@ -385,13 +392,20 @@ router.get('/leaderboard', async (req, res) => {
     // Limit to top 100 users for better performance
     const limitedData = leaderboardData.slice(0, 100);
     
+    console.log(`Leaderboard data processed successfully. Returning ${limitedData.length} users.`);
+    
     res.json({
       success: true,
       data: limitedData
     });
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
