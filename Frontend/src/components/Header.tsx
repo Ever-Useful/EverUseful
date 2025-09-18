@@ -34,7 +34,8 @@ import {
     Database,
     Lock,
     ShoppingCart,
-    Menu
+    Menu,
+    Trophy
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/assets/Logo/Logo Side Simple.png';
@@ -1251,18 +1252,10 @@ const handleMarkAllAsRead = async () => {
                                             <List className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
                                             <span className="text-sm sm:text-base text-gray-700 font-medium">My Projects</span>
                                         </Link>
-                                        <Link to="#"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setShowFavouritesSidebar(true);
-                                                setShowProjectsSidebar(false);
-                                                setShowSettingsSidebar(false);
-                                                // setShowConnectionsSidebar(false);
-                                                setShowCalendarSidebar(false);
-                                            }}
+                                        <Link to="/leaderboard"
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                            <Heart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
-                                            <span className="text-sm sm:text-base text-gray-700 font-medium">My Favourites</span>
+                                            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
+                                            <span className="text-sm sm:text-base text-gray-700 font-medium">Leaderboard</span>
                                         </Link>
                                         <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
