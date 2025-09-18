@@ -264,7 +264,7 @@ router.delete('/agents/:id', authorize, async (req, res) => {
     
     // Remove agent from user's projects list and update count
     try {
-      await userService.removeUserProject(user.customUserId, id);
+      await userService.removeUserProject(agent.author, id);
     } catch (userError) {
       console.warn('Failed to remove agent from user\'s projects list:', userError.message);
     }

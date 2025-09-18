@@ -23,8 +23,7 @@ interface LeaderboardUser {
     userType: string;
     projects: number;
     views: number;
-    likes: number;
-    points: number;
+    rankingScore: number;
 }
 
 const getInitials = (name: string) => {
@@ -41,6 +40,7 @@ const Leaderboard = () => {
     const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [infoBanner, setInfoBanner] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -85,10 +85,83 @@ const Leaderboard = () => {
         }
     };
 
-    const { profileData } = useUserProfile();
+    // Sort once based on the active main filter (no time slicing)
+    const sortedByMainFilter = React.useMemo(() => {
+        const sorted = [...leaderboardData];
+        switch (activeMainFilter) {
+            case 'Projects':
+                sorted.sort((a, b) => b.projects - a.projects);
+                break;
+            case 'Views':
+                sorted.sort((a, b) => b.views - a.views);
+                break;
+            case 'Rank':
+            default:
+                sorted.sort((a, b) => b.rankingScore - a.rankingScore);
+                break;
+        }
+        return sorted;
+    }, [leaderboardData, activeMainFilter]);
+
+    // Apply time-based view slicing on the already-sorted data
+    const filteredLeaderboardData = React.useMemo(() => {
+        const timeFilterFactors = {
+            '24h': 0.2,
+            '7D': 0.5,
+            '30D': 1.0
+        } as const;
+        const factor = timeFilterFactors[activeTimeFilter as keyof typeof timeFilterFactors] || 1.0;
+        const maxUsers = Math.ceil(sortedByMainFilter.length * factor);
+        return sortedByMainFilter.slice(0, Math.max(0, maxUsers));
+    }, [sortedByMainFilter, activeTimeFilter]);
+
+    const { profileData, isLoggedIn } = useUserProfile();
     const currentUserId = (profileData as any)?.customUserId || (profileData as any)?.userId || (profileData as any)?.id;
-    const currentUser = leaderboardData.find(u => u.customUserId === currentUserId);
-    const currentUserRank = leaderboardData.findIndex(u => u.customUserId === currentUserId) + 1;
+    const currentUser = sortedByMainFilter.find(u => u.customUserId === currentUserId);
+    const currentUserRank = sortedByMainFilter.findIndex(u => u.customUserId === currentUserId) + 1;
+    
+    const handleShowMyPlace = () => {
+        if (!isLoggedIn) {
+            navigate('/signin');
+            return;
+        }
+
+        if (currentUser && currentUserRank > 0) {
+            // Ensure the user is visible under current time filter; if not, expand to 30D first
+            const isVisibleNow = !!document.querySelector(`[data-user-id="${currentUserId}"]`);
+            if (!isVisibleNow && activeTimeFilter !== '30D') {
+                setActiveTimeFilter('30D');
+                // Defer scrolling to next paint after state update
+                setTimeout(() => {
+                    const rowAfterExpand = document.querySelector(`[data-user-id="${currentUserId}"]`);
+                    if (rowAfterExpand) {
+                        rowAfterExpand.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        rowAfterExpand.classList.add('bg-blue-100', 'ring-2', 'ring-blue-500');
+                        setTimeout(() => {
+                            rowAfterExpand.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-500');
+                        }, 3000);
+                    }
+                }, 50);
+                return;
+            }
+
+            const userRow = document.querySelector(`[data-user-id="${currentUserId}"]`);
+            if (userRow) {
+                userRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                userRow.classList.add('bg-blue-100', 'ring-2', 'ring-blue-500');
+                setTimeout(() => {
+                    userRow.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-500');
+                }, 3000);
+            }
+        } else {
+            // If the user exists but has zero projects, show guidance; otherwise generic message
+            if (profileData && currentUserId) {
+                setInfoBanner('You are not ranked yet. Create your first project to get on the leaderboard.');
+            } else {
+                setInfoBanner('Sign in to see your position on the leaderboard.');
+            }
+        }
+    };
 
     const handleUserClick = (user: LeaderboardUser) => {
         if (user.customUserId === currentUserId) {
@@ -97,34 +170,12 @@ const Leaderboard = () => {
         } else {
             // Navigate to user's profile based on userType
             if (user.userType === 'freelancer') {
-                navigate(`/freelancer-profile/${user.customUserId}`);
+                navigate(`/freelancerprofile/${user.customUserId}`);
             } else {
-                navigate(`/student-profile/${user.customUserId}`);
+                navigate(`/studentprofile/${user.customUserId}`);
             }
         }
     };
-
-    const filteredLeaderboardData = React.useMemo(() => {
-        let filtered = [...leaderboardData];
-        
-        switch (activeMainFilter) {
-            case 'Projects':
-                filtered.sort((a, b) => b.projects - a.projects);
-                break;
-            case 'Views':
-                filtered.sort((a, b) => b.views - a.views);
-                break;
-            case 'Likes':
-                filtered.sort((a, b) => b.likes - a.likes);
-                break;
-            case 'Rank':
-            default:
-                // Already sorted by points (rank)
-                break;
-        }
-        
-        return filtered;
-    }, [leaderboardData, activeMainFilter]);
 
     const top3 = filteredLeaderboardData.slice(0, 3);
     const remainingUsers = filteredLeaderboardData.slice(3);
@@ -182,12 +233,30 @@ const Leaderboard = () => {
                 <div className="max-w-6xl mx-auto space-y-8 pt-16">
 
                     <Card className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6">
+                        {infoBanner && (
+                            <div className="mb-4 p-3 rounded-md bg-blue-50 border border-blue-200 text-blue-800 flex items-center justify-between">
+                                <span className="text-sm">{infoBanner}</span>
+                                <div className="flex gap-2">
+                                    {isLoggedIn ? (
+                                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => navigate('/newproject')}>
+                                            Create project
+                                        </Button>
+                                    ) : (
+                                        <Button size="sm" variant="outline" onClick={() => navigate('/signin')}>
+                                            Sign in
+                                        </Button>
+                                    )}
+                                    <Button size="sm" variant="ghost" onClick={() => setInfoBanner(null)}>Dismiss</Button>
+                                </div>
+                            </div>
+                        )}
                         {/* Filter Tabs and Buttons */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-                            <div className="flex flex-wrap gap-2">
-                                <Tabs value={activeMainFilter} onValueChange={setActiveMainFilter}>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                <div className="flex flex-wrap gap-2">
+                                    <Tabs value={activeMainFilter} onValueChange={setActiveMainFilter}>
                                     <TabsList className="bg-slate-200 p-0.5 rounded-md">
-                                        {['Rank', 'Projects', 'Views', 'Likes'].map(filter => ( 
+                                        {['Rank', 'Projects', 'Views'].map(filter => ( 
                                             <TabsTrigger key={filter} value={filter}
                                                 className={cn("px-4 py-2 text-sm font-medium rounded-md transition-colors",
                                                     activeMainFilter === filter ? "bg-white text-blue-600 shadow-sm" : "text-slate-600 hover:bg-slate-100")}>
@@ -196,6 +265,7 @@ const Leaderboard = () => {
                                         ))}
                                     </TabsList>
                                 </Tabs>
+                                </div>
                             </div>
 
                             <div className="flex flex-wrap gap-2 items-center">
@@ -205,19 +275,37 @@ const Leaderboard = () => {
                                         {time}
                                     </Button>
                                 ))}
-                                <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm">
+                                <Button onClick={handleShowMyPlace} className="bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm">
                                     Show my place
                                 </Button>
                             </div>
                         </div>
 
-                        {/* Animated Bar Chart for Top 3 */}
+                        {/* Animated Bar Chart for Top 3 (driven by selected metric) */}
                         <Card className="mb-8 p-6 bg-slate-50/80 rounded-lg">
-                            <h3 className="text-lg font-semibold text-center mb-4 text-slate-800">Top 3 Champions</h3>
+                            <h3 className="text-lg font-semibold text-center mb-4 text-slate-800">Top 3 by {activeMainFilter}</h3>
+                            {top3.length === 0 || top3.every(u => (activeMainFilter === 'Projects' ? u.projects : activeMainFilter === 'Views' ? u.views : u.rankingScore) === 0) ? (
+                                <div className="flex items-center justify-center h-40 text-slate-600 text-sm">
+                                    No data to display yet for {activeMainFilter}.
+                                </div>
+                            ) : (
                             <div className="flex justify-center items-end h-56 border-b-2 border-slate-200 pb-2">
                                 {podiumOrder.map((user) => {
-                                    const maxPoints = top3[0]?.points || 1;
-                                    const height = isMounted ? `${(user.points / maxPoints) * 100}%` : '0%';
+                                    const metricValue = activeMainFilter === 'Projects' ? user.projects : activeMainFilter === 'Views' ? user.views : user.rankingScore;
+                                    const maxMetric = Math.max(
+                                        1,
+                                        ...top3.map(u => activeMainFilter === 'Projects' ? u.projects : activeMainFilter === 'Views' ? u.views : u.rankingScore)
+                                    );
+                                    const rawPercent = (metricValue / maxMetric) * 100;
+                                    // Prevent avatars from sitting too low: enforce a minimum height.
+                                    // - If value is zero, show a small baseline height so avatar isn't at the very bottom.
+                                    // - If value is non-zero but tiny, clamp to a reasonable minimum for visibility.
+                                    const minPercentForZero = 14;   // keeps avatar visibly above the baseline
+                                    const minPercentForNonZero = 24; // ensures small values still look decent
+                                    const adjustedPercent = metricValue === 0
+                                        ? minPercentForZero
+                                        : Math.max(rawPercent, minPercentForNonZero);
+                                    const height = isMounted ? `${adjustedPercent}%` : '0%';
                                     const originalIndex = getOriginalIndex(user.customUserId);
                                     const barColors = ['bg-yellow-400', 'bg-slate-400', 'bg-amber-800'];
                                     const barColor = barColors[originalIndex];
@@ -235,13 +323,17 @@ const Leaderboard = () => {
                                     );
                                 })}
                             </div>
+                            )}
                             <div className="flex justify-center mt-2">
-                                {podiumOrder.map(user => (
-                                    <div key={user.customUserId} className="w-20 text-center px-1">
-                                        <p className="font-semibold text-slate-800 text-xs truncate cursor-pointer hover:text-blue-600" onClick={() => handleUserClick(user)}>{user.name}</p>
-                                        <p className="text-xs text-slate-600">{user.points} pts</p>
-                                    </div>
-                                ))}
+                                {podiumOrder.map(user => {
+                                    const metricValue = activeMainFilter === 'Projects' ? `${user.projects} projects` : activeMainFilter === 'Views' ? `${user.views} views` : `Score ${user.rankingScore}`;
+                                    return (
+                                        <div key={user.customUserId} className="w-20 text-center px-1">
+                                            <p className="font-semibold text-slate-800 text-xs truncate cursor-pointer hover:text-blue-600" onClick={() => handleUserClick(user)}>{user.name}</p>
+                                            <p className="text-xs text-slate-600">{metricValue}</p>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </Card>
 
@@ -262,15 +354,15 @@ const Leaderboard = () => {
                                         </Avatar>
                                         <div>
                                             <h3 className="font-semibold text-lg text-slate-800 hover:text-blue-600">{user.name}</h3>
-                                            <p className="text-sm text-slate-600">{user.points} Points</p>
-                                            <div className="flex gap-4 mt-1 text-sm text-slate-700">
-                                                <span>Projects: {user.projects}</span>
-
-                                                <span className="flex items-center gap-1.5">
-                                                    <Eye className="w-4 h-4 text-blue-500" />
-                                                    {user.views}
-                                                </span>
-                                            </div>
+                                            {activeMainFilter === 'Rank' && (
+                                                <p className="text-sm text-slate-600">Rank #{index + 1}</p>
+                                            )}
+                                            {activeMainFilter === 'Projects' && (
+                                                <p className="text-sm text-slate-600">Projects: {user.projects}</p>
+                                            )}
+                                            {activeMainFilter === 'Views' && (
+                                                <p className="text-sm text-slate-600 flex items-center gap-1.5"><Eye className="w-4 h-4 text-blue-500" />{user.views}</p>
+                                            )}
                                         </div>
                                     </div>
                                     <img src={trophyImages[index]} alt={`Rank ${index + 1} trophy`} className="w-16 h-16" />
@@ -278,22 +370,19 @@ const Leaderboard = () => {
                             ))}
                         </div>
 
-                        {/* Animated Remaining Ranks Table */}
+                        {/* Remaining Users Table - show only the selected metric */}
                         <div className="overflow-x-auto">
                             <table className="min-w-full">
                                 <thead className="bg-blue-100/50">
                                     <tr>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Rank</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">{activeMainFilter}</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Name</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Projects</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Views</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Likes</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Points</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white/0">
                                     {remainingUsers.map((user, index) => (
                                         <tr key={user.customUserId}
+                                            data-user-id={user.customUserId}
                                             className={cn("transition-all duration-300 border-b border-slate-200/50 cursor-pointer",
                                                 user.customUserId === currentUserId ? 'bg-blue-100/50' : 'hover:bg-slate-100/50',
                                                 isMounted ? "opacity-100" : "opacity-0",
@@ -301,7 +390,9 @@ const Leaderboard = () => {
                                             )}
                                             style={{ transitionDelay: `${index * 50}ms` }}
                                             onClick={() => handleUserClick(user)}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{index + 4}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                                                {activeMainFilter === 'Rank' ? index + 4 : activeMainFilter === 'Projects' ? user.projects : user.views}
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <Avatar className="w-8 h-8 mr-3">
@@ -311,25 +402,11 @@ const Leaderboard = () => {
                                                     <span className="text-sm font-medium text-slate-900 hover:text-blue-600">{user.name}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{user.projects}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
-                                                <div className="flex items-center gap-1.5">
-                                                     <Eye className="w-4 h-4 text-blue-500/80" />
-                                                     {user.views}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
-                                                <div className="flex items-center gap-1.5">
-                                                     <Heart className="w-4 h-4 text-red-500/80" />
-                                                     {user.likes}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-bold">{user.points}</td>
                                         </tr>
                                     ))}
                                     {currentUser && currentUserRank > 3 && (
-                                        <tr className="bg-blue-200/80 border-t-2 border-blue-300 cursor-pointer" onClick={() => handleUserClick(currentUser)}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-800">{currentUserRank}</td>
+                                        <tr data-user-id={currentUser.customUserId} className="bg-blue-200/80 border-t-2 border-blue-300 cursor-pointer" onClick={() => handleUserClick(currentUser)}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-800">{activeMainFilter === 'Rank' ? currentUserRank : activeMainFilter === 'Projects' ? currentUser.projects : currentUser.views}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <Avatar className="w-8 h-8 mr-3 border-2 border-blue-500">
@@ -339,20 +416,6 @@ const Leaderboard = () => {
                                                     <span className="text-sm font-bold text-blue-800 hover:text-blue-600">{currentUser.name} (You)</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-700">{currentUser.projects}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-700">
-                                                 <div className="flex items-center gap-1.5">
-                                                     <Eye className="w-4 h-4 text-blue-500" />
-                                                     {currentUser.views}
-                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-700">
-                                                 <div className="flex items-center gap-1.5">
-                                                     <Heart className="w-4 h-4 text-red-500" />
-                                                     {currentUser.likes}
-                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-700">{currentUser.points}</td>
                                         </tr>
                                     )}
                                 </tbody>

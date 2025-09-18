@@ -75,7 +75,7 @@ const VisitingProfile = () => {
   const fetchUserAgents = async (userId: string) => {
     try {
       console.log(`FreelancerProfile - Fetching agents for user ${userId}...`);
-      const response = await fetch(`${API_ENDPOINTS.AGENTS}?author=${userId}`);
+      const response = await fetch(`${API_ENDPOINTS.AGENTS}/author/${userId}`);
       if (!response.ok) {
         console.log(`FreelancerProfile - No agents found for user ${userId}`);
         return [];
