@@ -1316,6 +1316,38 @@ class DynamoDBService {
     }
   }
 
+  async getAllAgents() {
+    try {
+      const params = {
+        TableName: this.agentsTable
+      };
+      
+      const result = await dynamodb.scan(params).promise();
+      return result.Items || [];
+    } catch (error) {
+      console.error('Error getting all agents:', error);
+      throw error;
+    }
+  }
+
+  async getAgentsByAuthor(authorId) {
+    try {
+      const params = {
+        TableName: this.agentsTable,
+        FilterExpression: 'author = :author',
+        ExpressionAttributeValues: {
+          ':author': authorId
+        }
+      };
+
+      const result = await dynamodb.scan(params).promise();
+      return result.Items || [];
+    } catch (error) {
+      console.error('Error getting agents by author:', error);
+      throw error;
+    }
+  }
+
   async getMarketplaceItem(itemId) {
     try {
       const params = {
