@@ -18,6 +18,7 @@ import { API_ENDPOINTS } from '../config/api';
 import { getUserAvatarUrl, getBackgroundImageUrl } from '@/utils/s3ImageUtils';
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { socket } from "@/socket.ts";
+import LoadingAnimation from "@/components/LoadingAnimation";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ const Profile = () => {
   const [workExperience, setWorkExperience] = useState([]);
   const [error, setError] = useState<string | null>(null);
   const [relationStatus, setRelationStatus] = useState<'NONE' | 'PENDING_OUT' | 'PENDING_IN' | 'CONNECTED' | 'BLOCKED'>('NONE');
+  const [projectsCount, setProjectsCount] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { profileData: currentUser } = useUserProfile(); 
 
 
@@ -430,7 +433,7 @@ const handleUnblock = async () => {
 
 
 
-  const fetchProjectData = async (pid: string) => {
+  const fetchItemData = async (itemId: string, itemType: 'project' | 'agent') => {
     try {
       console.log(`StudentProfile - Fetching ${itemType} ${itemId}...`);
       
