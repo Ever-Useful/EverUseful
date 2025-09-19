@@ -419,15 +419,26 @@ class DynamoDBService {
 
   async updateStudentData(customUserId, studentData) {
     try {
+      console.log('updateStudentData called with:', { customUserId, studentData });
+      
+      if (!studentData || typeof studentData !== 'object') {
+        throw new Error('Invalid student data provided');
+      }
+      
       const updateData = {
         'studentData.updatedAt': new Date().toISOString()
       };
 
       Object.keys(studentData).forEach(key => {
-        updateData[`studentData.${key}`] = studentData[key];
+        if (studentData[key] !== undefined && studentData[key] !== null) {
+          updateData[`studentData.${key}`] = studentData[key];
+        }
       });
 
-      return await this.updateUser(customUserId, updateData);
+      console.log('Update data prepared:', updateData);
+      const result = await this.updateUser(customUserId, updateData);
+      console.log('Student data updated successfully');
+      return result;
     } catch (error) {
       console.error('Error updating student data:', error);
       throw error;
@@ -787,6 +798,7 @@ class DynamoDBService {
 
       // Remove the project ID from the array
       const updatedProjects = user.projects.created.filter((_, index) => index !== projectIndex);
+      const newCount = updatedProjects.length;
 
       const params = {
         TableName: this.usersTable,
@@ -796,7 +808,7 @@ class DynamoDBService {
         UpdateExpression: 'SET projects.created = :projects, projects.count = :count, stats.projectsCount = :count',
         ExpressionAttributeValues: {
           ':projects': updatedProjects,
-          ':count': updatedProjects.length
+          ':count': newCount
         },
         ReturnValues: 'ALL_NEW'
       };
@@ -805,6 +817,38 @@ class DynamoDBService {
       return { success: true, message: 'Project removed successfully' };
     } catch (error) {
       console.error('Error removing user project:', error);
+      throw error;
+    }
+  }
+
+  // Utility function to synchronize project counts
+  async synchronizeProjectCounts(customUserId) {
+    try {
+      const user = await this.findUserByCustomId(customUserId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Calculate actual count from projects.created array
+      const actualCount = user.projects && user.projects.created ? user.projects.created.length : 0;
+
+      // Update both count attributes to match the actual count
+      const params = {
+        TableName: this.usersTable,
+        Key: {
+          customUserId: customUserId
+        },
+        UpdateExpression: 'SET projects.count = :count, stats.projectsCount = :count',
+        ExpressionAttributeValues: {
+          ':count': actualCount
+        },
+        ReturnValues: 'ALL_NEW'
+      };
+
+      await dynamodb.update(params).promise();
+      return { success: true, actualCount };
+    } catch (error) {
+      console.error('Error synchronizing project counts:', error);
       throw error;
     }
   }
@@ -1268,6 +1312,38 @@ class DynamoDBService {
       };
     } catch (error) {
       console.error('Error getting marketplace data:', error);
+      throw error;
+    }
+  }
+
+  async getAllAgents() {
+    try {
+      const params = {
+        TableName: this.agentsTable
+      };
+      
+      const result = await dynamodb.scan(params).promise();
+      return result.Items || [];
+    } catch (error) {
+      console.error('Error getting all agents:', error);
+      throw error;
+    }
+  }
+
+  async getAgentsByAuthor(authorId) {
+    try {
+      const params = {
+        TableName: this.agentsTable,
+        FilterExpression: 'author = :author',
+        ExpressionAttributeValues: {
+          ':author': authorId
+        }
+      };
+
+      const result = await dynamodb.scan(params).promise();
+      return result.Items || [];
+    } catch (error) {
+      console.error('Error getting agents by author:', error);
       throw error;
     }
   }

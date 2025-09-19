@@ -24,6 +24,7 @@ const VisitingProfile = () => {
   const [loading, setLoading] = useState(true);
   const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
+  const [projectsCount, setProjectsCount] = useState(0);
   const MAX_LENGTH = 200;
   const [isExpanded, setIsExpanded] = useState(false);
   const [education, setEducation] = useState([]);
@@ -273,6 +274,29 @@ useEffect(() => {
     } catch (err: any) {
       console.error('Error unblocking user:', err);
       alert(err?.message || 'Failed to unblock user');
+    }
+  };
+
+  // Fetch user agents directly from the agents API
+  const fetchUserAgents = async (userId: string) => {
+    try {
+      console.log(`FreelancerProfile - Fetching agents for user ${userId}...`);
+      const response = await fetch(`${API_ENDPOINTS.AGENTS}/author/${userId}`);
+      if (!response.ok) {
+        console.log(`FreelancerProfile - No agents found for user ${userId}`);
+        return [];
+      }
+      const data = await response.json();
+      const agents = data.agents || [];
+      console.log(`FreelancerProfile - Found ${agents.length} agents for user ${userId}`);
+      return agents.map(agent => ({
+        ...agent,
+        title: agent.name,
+        type: 'agent'
+      }));
+    } catch (error) {
+      console.error(`FreelancerProfile - Error fetching agents for user ${userId}:`, error);
+      return [];
     }
   };
 

@@ -18,6 +18,7 @@ import { API_ENDPOINTS } from '../config/api';
 import { getUserAvatarUrl, getBackgroundImageUrl } from '@/utils/s3ImageUtils';
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { socket } from "@/socket.ts";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -34,9 +35,46 @@ const Profile = () => {
   const [error, setError] = useState<string | null>(null);
   const [relationStatus, setRelationStatus] = useState<'NONE' | 'PENDING_OUT' | 'PENDING_IN' | 'CONNECTED' | 'BLOCKED'>('NONE');
   const { profileData: currentUser } = useUserProfile(); 
+  const [projectsCount, setProjectsCount] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
+  // Fetch a single item (project or agent) by id and type
+  const fetchItemData = async (itemId: string, itemType: 'project' | 'agent') => {
+    try {
+      console.log(`StudentProfile - Fetching ${itemType} ${itemId}...`);
 
+      let response: Response;
+      if (itemType === 'agent') {
+        response = await fetch(API_ENDPOINTS.AGENT(itemId));
+      } else {
+        response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(itemId));
+      }
 
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log(`StudentProfile - ${itemType} ${itemId} not found (deleted or unpublished)`);
+        } else {
+          console.log(`StudentProfile - ${itemType} ${itemId} error (${response.status})`);
+        }
+        return null;
+      }
 
+      const data = await response.json();
+      const item = itemType === 'agent' ? data.agent : data.project;
+
+      if (item) {
+        return {
+          ...item,
+          title: item.title || item.name,
+          type: itemType,
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`StudentProfile - Error fetching ${itemType} ${itemId}:`, error);
+      return null;
+    }
+  };
 
   // Fetch user data by customUserId from userData.json
   const fetchUserData = async () => {
@@ -430,55 +468,13 @@ const handleUnblock = async () => {
 
 
 
-  const fetchProjectData = async (pid: string) => {
-    try {
-      console.log(`StudentProfile - Fetching ${itemType} ${itemId}...`);
-      
-      let response;
-      if (itemType === 'agent') {
-        response = await fetch(API_ENDPOINTS.AGENT(itemId));
-      } else {
-        response = await fetch(API_ENDPOINTS.MARKETPLACE_PROJECT(itemId));
-      }
-      
-      if (!response.ok) {
-        // Silently handle 404s - project/agent may have been deleted
-        if (response.status === 404) {
-          console.log(`StudentProfile - ${itemType} ${itemId} not found (deleted or unpublished)`);
-        } else {
-          console.log(`StudentProfile - ${itemType} ${itemId} error (${response.status})`);
-        }
-        return null;
-      }
-      
-      const data = await response.json();
-      const item = itemType === 'agent' ? data.agent : data.project;
-      
-      if (item) {
-        // Normalize the item data to match the expected format
-        return {
-          ...item,
-          title: item.title || item.name,
-          type: itemType
-        };
-      }
-      
-      return null;
-    } catch (error) {
-      console.error(`StudentProfile - Error fetching ${itemType} ${itemId}:`, error);
-      return null;
-    }
-  };
-
-  const fetchProjectData = async (pid: string) => {
-    return fetchItemData(pid, 'project');
-  };
+  // Removed duplicate fetchProjectData declarations; use fetchItemData instead
 
   // Fetch user agents directly from the agents API
   const fetchUserAgents = async (userId: string) => {
     try {
       console.log(`StudentProfile - Fetching agents for user ${userId}...`);
-      const response = await fetch(`${API_ENDPOINTS.AGENTS}?author=${userId}`);
+      const response = await fetch(`${API_ENDPOINTS.AGENTS}/author/${userId}`);
       if (!response.ok) {
         console.log(`StudentProfile - No agents found for user ${userId}`);
         return [];

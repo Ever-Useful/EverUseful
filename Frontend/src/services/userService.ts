@@ -432,10 +432,17 @@ async getUserByCustomId(customUserId: string): Promise<any> {
 
   // Update student data
   async updateStudentData(studentData: any): Promise<void> {
-    await this.makeRequest(`${API_ENDPOINTS.USERS}/student-data`, {
-      method: 'PUT',
-      body: JSON.stringify(studentData),
-    });
+    console.log('Updating student data:', studentData);
+    try {
+      await this.makeRequest(`${API_ENDPOINTS.USERS}/student-data`, {
+        method: 'PUT',
+        body: JSON.stringify(studentData),
+      });
+      console.log('Student data updated successfully');
+    } catch (error) {
+      console.error('Error updating student data:', error);
+      throw error;
+    }
   }
 
   // Update freelancer data
