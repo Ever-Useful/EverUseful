@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
   USER_BY_ID: (id: string) => getApiUrl(`/api/users/${id}`),
   USER_BULK: (ids: string) => getApiUrl(`/api/users/bulk/${ids}`),
   get USER_FOLLOW() { return getApiUrl('/api/users/follow'); },
+  get USER_LEADERBOARD() { return getApiUrl('/api/users/leaderboard'); },
   
   // Phone verification endpoints
   get VERIFY_PHONE() { return getApiUrl('/api/users/verify-phone'); },
