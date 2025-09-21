@@ -48,9 +48,6 @@ import { MyProjects } from '@/components/MyProjects';
 import { clearAllCookies } from '@/utils/cookieUtils';
 import { API_ENDPOINTS } from '@/config/api';
 
-
-
-
 const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, onAuthClick, onShowMyProjects }: { title: string, href: string, description: string, icon: React.ReactNode, authAction?: 'popup' | 'hide', isLoggedIn: boolean, onAuthClick: () => void, onShowMyProjects?: () => void }) => {
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
         if (authAction === 'popup' && !isLoggedIn) {
@@ -204,7 +201,7 @@ const Header = () => {
             default: return '📢';
         }
     };
-    
+
     // Whenever notifications change (new notification received, marked as read, etc)
 // Notification initialization (single useEffect)
 useEffect(() => {
