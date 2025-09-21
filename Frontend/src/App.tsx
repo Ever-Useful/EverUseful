@@ -10,6 +10,7 @@ import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { useEffect } from "react";
 import CookieConsent from "@/components/CookieConsent";
 import Leaderboard from './pages/Leaderboard';
+import ChatPage from './pages/Chat';
 
 
 // Lazy load all pages for code splitting
