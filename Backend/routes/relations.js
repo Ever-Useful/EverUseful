@@ -183,7 +183,7 @@ router.post('/accept', authorize, async (req, res) => {
 
     if (req.app && req.app.get('io')) {
       const meUser = me;
-      const otherUser = await userService.findUserByCustomUserId(fromUserId);
+      const otherUser = await userService.findUserByCustomId(fromUserId);
       // Emit relation_update to both (for real-time UI update)
       req.app.get('io').to(me.customUserId).emit('relation_update', {
         type: 'ACCEPTED',
@@ -282,7 +282,7 @@ router.post('/decline', authorize, async (req, res) => {
 
     // Notify sender (User A) of decline (for UI update only, not notification)
     if (req.app && req.app.get('io')) {
-      const senderUser = await userService.findUserByCustomUserId(fromUserId); // User A (sender)
+      const senderUser = await userService.findUserByCustomId(fromUserId); // User A (sender)
       req.app.get('io').to(fromUserId).emit('relation_update', {
         type: 'DECLINED',
         between: [me.customUserId, fromUserId],

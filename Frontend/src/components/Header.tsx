@@ -17,9 +17,6 @@ import {
     Search,
     MessageSquare,
     TrendingUp,
-    Star,
-    Shield,
-    Heart,
     BarChart2,
     Calendar,
     X,
@@ -27,7 +24,6 @@ import {
     Users,
     List,
     LayoutGrid,
-    Send,
     UserPlus,
     Globe,
     Palette,
@@ -35,7 +31,8 @@ import {
     Lock,
     ShoppingCart,
     Menu,
-    Trophy
+    Trophy,
+    Shield
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/assets/Logo/Logo Side Simple.png';
@@ -47,156 +44,12 @@ import { auth } from '@/lib/firebase';
 import userService from '@/services/userService';
 import relationService from '@/services/relationService';
 import { useUserProfile } from '@/contexts/UserProfileContext';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import Connections from '@/components/Connections';
-import { EditProfile } from '../components/EditProfile';
 import { MyProjects } from '@/components/MyProjects';
-import { Input } from '@/components/ui/input';
 import { clearAllCookies } from '@/utils/cookieUtils';
-import SearchFilterBar, { FilterTag } from '@/components/ui/SearchFilterBar';
 import { API_ENDPOINTS } from '@/config/api';
 
-const mockNotifications = [
-    {
-        id: 1,
-        title: "New order received",
-        message: "You have a new order for your sustainable product from EcoMart",
-        time: "2 minutes ago",
-        unread: true,
-        type: "order",
-    },
-    {
-        id: 2,
-        title: "Profile updated",
-        message: "Your professional profile has been successfully updated with new skills",
-        time: "1 hour ago",
-        unread: true,
-        type: "profile",
-    },
-    {
-        id: 3,
-        title: "Welcome to AMOGH!",
-        message: "Thank you for joining our platform. Start exploring opportunities now!",
-        time: "2 days ago",
-        unread: false,
-        type: "welcome",
-    },
-    {
-        id: 4,
-        title: "New connection request",
-        message: "Sarah Johnson wants to connect with you",
-        time: "3 hours ago",
-        unread: true,
-        type: "connection",
-    },
-    {
-        id: 5,
-        title: "Project milestone achieved",
-        message: "Congratulations! Your green initiative project reached 100 participants",
-        time: "1 day ago",
-        unread: false,
-        type: "achievement",
-    },
-    {
-        id: 6,
-        title: "Payment received",
-        message: "₹250 payment received for your freelance work",
-        time: "2 days ago",
-        unread: false,
-        type: "payment",
-    },
-    {
-        id: 7,
-        title: "New job opportunity",
-        message: "A perfect job match found based on your skills",
-        time: "3 days ago",
-        unread: false,
-        type: "job",
-    },
-];
 
-const mockMessages = [
-    {
-        id: 1,
-        sender: "John Doe",
-        avatar: "👨‍💼",
-        message: "Hey, are you available for a quick chat about the sustainability project?",
-        time: "5 minutes ago",
-        unread: true,
-        lastMessage: true,
-        conversationId: "conv1",
-    },
-    {
-        id: 2,
-        sender: "Sarah Smith",
-        avatar: "👩‍💻",
-        message: "Thanks for the help with the project! The client loved it.",
-        time: "30 minutes ago",
-        unread: true,
-        lastMessage: true,
-        conversationId: "conv2",
-    },
-    {
-        id: 3,
-        sender: "Mike Johnson",
-        avatar: "👨‍🎨",
-        message: "Let's schedule a meeting for tomorrow to discuss the new features",
-        time: "2 hours ago",
-        unread: false,
-        lastMessage: true,
-        conversationId: "conv3",
-    },
-    {
-        id: 4,
-        sender: "Emma Wilson",
-        avatar: "👩‍🔬",
-        message: "The green tech proposal looks fantastic! When can we start?",
-        time: "1 day ago",
-        unread: true,
-        lastMessage: true,
-        conversationId: "conv4",
-    },
-    {
-        id: 5,
-        sender: "Alex Chen",
-        avatar: "👨‍💼",
-        message: "Your marketplace listing is getting great reviews!",
-        time: "2 days ago",
-        unread: false,
-        lastMessage: true,
-        conversationId: "conv5",
-    },
-];
 
-const mockChatMessages: Record<string, Array<{
-    id: number;
-    sender: string;
-    message: string;
-    time: string;
-    isOwn: boolean;
-}>> = {
-    conv1: [
-        { id: 1, sender: "John Doe", message: "Hey, are you available for a quick chat about the sustainability project?", time: "5 minutes ago", isOwn: false },
-        { id: 2, sender: "You", message: "Yes, I'm available. What would you like to discuss?", time: "3 minutes ago", isOwn: true },
-        { id: 3, sender: "John Doe", message: "Great! I wanted to get your thoughts on the green initiative we discussed last week.", time: "2 minutes ago", isOwn: false },
-    ],
-    conv2: [
-        { id: 1, sender: "Sarah Smith", message: "Thanks for the help with the project! The client loved it.", time: "30 minutes ago", isOwn: false },
-        { id: 2, sender: "You", message: "That's wonderful to hear! I'm glad everything worked out well.", time: "25 minutes ago", isOwn: true },
-        { id: 3, sender: "Sarah Smith", message: "Absolutely! Would you be interested in working on another project together?", time: "20 minutes ago", isOwn: false },
-    ],
-    conv3: [
-        { id: 1, sender: "Mike Johnson", message: "Let's schedule a meeting for tomorrow to discuss the new features", time: "2 hours ago", isOwn: false },
-        { id: 2, sender: "You", message: "Sounds good! What time works best for you?", time: "1 hour ago", isOwn: true },
-    ],
-    conv4: [
-        { id: 1, sender: "Emma Wilson", message: "The green tech proposal looks fantastic! When can we start?", time: "1 day ago", isOwn: false },
-    ],
-    conv5: [
-        { id: 1, sender: "Alex Chen", message: "Your marketplace listing is getting great reviews!", time: "2 days ago", isOwn: false },
-        { id: 2, sender: "You", message: "Thank you! I've been working hard to maintain quality.", time: "2 days ago", isOwn: true },
-    ],
-};
 
 const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, onAuthClick, onShowMyProjects }: { title: string, href: string, description: string, icon: React.ReactNode, authAction?: 'popup' | 'hide', isLoggedIn: boolean, onAuthClick: () => void, onShowMyProjects?: () => void }) => {
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -227,105 +80,17 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-    const [messages, setMessages] = useState(mockMessages);
+    const [messages, setMessages] = useState<any[]>([]);
     const unreadMessageCount = messages.filter(m => m.unread).length;
     const [showMessagesSidebar, setShowMessagesSidebar] = useState(false);
     const [showNotificationsSidebar, setShowNotificationsSidebar] = useState(false);
     const [showProfileSidebar, setShowProfileSidebar] = useState(false);
-    const [showEditProfileSidebar, setShowEditProfileSidebar] = useState(false);
     const [notifications, setNotifications] = useState<any[]>([]);
     // Store unread count
     const [unreadNotificationCount, setUnreadNotificationCount] = useState<number>(0);
     const unreadNotifications = notifications.filter(n => !n.read);
 
-    // --- Listen for relation notifications ---
-    // useEffect(() => {
-    //     // Handler for relation events
-    //     const handleRelationNotification = (data: any) => {
-    //         let notif = null;
-    //         if (data?.type === 'CONNECTION_REQUEST') {
-    //             notif = {
-    //                 id: Date.now() + Math.random(),
-    //                 type: 'CONNECTION_REQUEST',
-    //                 message: `${data.fromFirstName || ''} ${data.fromLastName || ''} sent you a connection request`,
-    //                 meta: { from: data.from },
-    //                 unread: true,
-    //                 createdAt: Date.now(),
-    //             };
-    //         } else if (data?.type === 'CONNECTION_ACCEPTED') {
-    //             notif = {
-    //                 id: Date.now() + Math.random(),
-    //                 type: 'CONNECTION_ACCEPTED',
-    //                 message: `${data.toFirstName || ''} ${data.toLastName || ''} accepted your connection request`,
-    //                 meta: { to: data.to },
-    //                 unread: true,
-    //                 createdAt: Date.now(),
-    //             };
-    //         } else if (data?.type === 'CONNECTION_DECLINED') {
-    //             notif = {
-    //                 id: Date.now() + Math.random(),
-    //                 type: 'CONNECTION_DECLINED',
-    //                 message: `${data.toFirstName || ''} ${data.toLastName || ''} declined your connection request`,
-    //                 meta: { to: data.to },
-    //                 unread: true,
-    //                 createdAt: Date.now(),
-    //             };
-    //         } else if (data?.type === 'BLOCKED') {
-    //             notif = {
-    //                 id: Date.now() + Math.random(),
-    //                 type: 'BLOCKED',
-    //                 message: `${data.blockerFirstName || ''} ${data.blockerLastName || ''} blocked a user.`,
-    //                 meta: { blockedUserId: data.blockedUserId },
-    //                 unread: true,
-    //                 createdAt: Date.now(),
-    //             };
-    //         } else if (data?.type === 'UNBLOCKED') {
-    //             notif = {
-    //                 id: Date.now() + Math.random(),
-    //                 type: 'UNBLOCKED',
-    //                 message: `${data.unblockerFirstName || ''} ${data.unblockerLastName || ''} unblocked a user.`,
-    //                 meta: { unblockedUserId: data.unblockedUserId },
-    //                 unread: true,
-    //                 createdAt: Date.now(),
-    //             };
-    //         }
-    //         if (notif) {
-    //             setNotifications(prev => [notif, ...prev]);
-    //             setUnreadNotificationCount(prev => prev + 1);
-    //         }
-    //     };
 
-    //     // Listen for socket events
-    //     const win = window as any;
-    //     if (win.socket) {
-    //         win.socket.on('relation_request_received', handleRelationNotification);
-    //         win.socket.on('relation_update', handleRelationNotification);
-    //     }
-    //     // Cleanup
-    //     return () => {
-    //         if (win.socket) {
-    //             win.socket.off('relation_request_received', handleRelationNotification);
-    //             win.socket.off('relation_update', handleRelationNotification);
-    //         }
-    //     };
-    // }, []);
-
-//     useEffect(() => {
-//     // Load notifications from backend on mount
-//     relationService.getNotifications().then(({ notifications, unreadCount }) => {
-//         setNotifications(notifications);
-//         setUnreadNotificationCount(unreadCount);
-//     });
-//     // Subscribe to socket events
-//     socket.on("user_notification", (notif: any) => {
-//         setNotifications(prev => [notif, ...prev]);
-//         setUnreadNotificationCount(prev => prev + 1);
-//     });
-//     return () => {
-//         socket.off("user_notification");
-//     };
-// }, []);
 
 //     // Mark notification as read when clicked
     // Route to connections page when any notification is clicked
@@ -333,13 +98,6 @@ const Header = () => {
         navigate('/connections');
     };
 
-    // Mark all as read and clear all notifications
-    // const handleMarkAllAsRead = () => {
-    //     setNotifications([]);
-    //     setUnreadNotificationCount(0);
-    //     localStorage.setItem('userNotifications', JSON.stringify([]));
-    //     localStorage.setItem('userNotificationsUnreadCount', '0');
-    // };
     const { profileData, isLoggedIn, refreshProfile, isLoading } = useUserProfile();
     
     // Always fetch user data when logged in for header display
@@ -348,46 +106,11 @@ const Header = () => {
     }, [isLoggedIn]);
     
     const [showMyProjects, setShowMyProjects] = useState(false);
-    const [activeChatId, setActiveChatId] = useState<string | null>(null);
-    const [newMessage, setNewMessage] = useState("");
-    const [showSettingsSidebar, setShowSettingsSidebar] = useState(false);
-    const [showProjectsSidebar, setShowProjectsSidebar] = useState(false);
-    const [showFavouritesSidebar, setShowFavouritesSidebar] = useState(false);
-    const [showCalendarSidebar, setShowCalendarSidebar] = useState(false);
-    // const [showConnectionsSidebar, setShowConnectionsSidebar] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeFilter, setActiveFilter] = useState<string>('all');
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
-    //const unreadNotifications = notifications.filter(n => n.unread);
     const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
     // Remove duplicate declaration
 
-    // Filter tags for search
-    const filterTags: FilterTag[] = [
-        { id: 'all', label: 'All', active: activeFilter === 'all' },
-        { id: 'professor', label: 'Professor', active: activeFilter === 'professor' },
-        { id: 'student', label: 'Student', active: activeFilter === 'student' },
-        { id: 'enterprise', label: 'Enterprise', active: activeFilter === 'enterprise' },
-        { id: 'freelancer', label: 'Freelancer', active: activeFilter === 'freelancer' },
-        { id: 'experts', label: 'Experts', active: activeFilter === 'experts' },
-        { id: 'jobs', label: 'Jobs', active: activeFilter === 'jobs' }
-    ];
-
-    const handleFilterClick = (tagId: string) => {
-        setActiveFilter(tagId);
-    };
-
-    const handleSearchFocus = () => {
-        setIsSearchFocused(true);
-    };
-
-    const handleSearchBlur = () => {
-        // Delay hiding the filter bar to allow for clicks on filter tags
-        setTimeout(() => {
-            setIsSearchFocused(false);
-        }, 200);
-    };
 
 
 
@@ -398,83 +121,6 @@ const Header = () => {
         return () => window.removeEventListener('open-myprojects', handler);
     }, []);
 
-    // Mock data for connections (replace with real data fetching as needed)
-    const existingConnections: Array<any> = [
-        {
-            id: '1',
-            name: 'Alice Johnson',
-            title: 'Frontend Developer',
-            company: 'TechCorp',
-            avatar: '',
-            mutualConnections: 8,
-            isConnected: true,
-        },
-        {
-            id: '2',
-            name: 'Bob Smith',
-            title: 'Backend Engineer',
-            company: 'CodeWorks',
-            avatar: '',
-            mutualConnections: 8,
-            isConnected: true,
-        },
-        {
-            id: '3',
-            name: 'Carla Brown',
-            title: 'Data Scientist',
-            company: 'DataSolutions',
-            avatar: '',
-            mutualConnections: 8,
-            isConnected: true,
-        },
-        {
-            id: '4',
-            name: 'Dwayne Johnson',
-            title: 'Archiologist',
-            company: 'Rockfellar',
-            avatar: '',
-            mutualConnections: 8,
-            isConnected: true,
-        }
-    ];
-    const suggestedConnections: Array<any> = [
-        {
-            id: '1',
-            name: 'Alice Johnson',
-            title: 'Frontend Developer',
-            company: 'TechCorp',
-            avatar: '',
-            mutualConnections: 8,
-            isConnected: false,
-        },
-        {
-            id: '2',
-            name: 'Bob Smith',
-            title: 'Backend Engineer',
-            company: 'CodeWorks',
-            avatar: '',
-            mutualConnections: 8,
-            isConnected: false,
-        },
-        {
-            id: '3',
-            name: 'Carla Brown',
-            title: 'Data Scientist',
-            company: 'DataSolutions',
-            avatar: '',
-            mutualConnections: 8,
-            isConnected: false,
-        },
-        {
-            id: '4',
-            name: 'Dwayne Johnson',
-            title: 'Archiologist',
-            company: 'Rockfellar',
-            avatar: '',
-            mutualConnections: 8,
-            isConnected: false,
-        }
-    ];
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -506,13 +152,6 @@ const Header = () => {
         await refreshProfile();
     };
 
-    const handleMessageClick = (messageId: number) => {
-        setMessages(prev =>
-            prev.map(m => m.id === messageId ? { ...m, unread: false } : m)
-        );
-    };
-
-    // Remove duplicate declaration
 
     const handleLogout = async () => {
         try {
@@ -520,7 +159,6 @@ const Header = () => {
             setShowNotificationsSidebar(false);
             setShowMessagesSidebar(false);
             setShowProfileSidebar(false);
-            setShowEditProfileSidebar(false);
 
             // Clear localStorage
             localStorage.removeItem("isLoggedIn");
@@ -545,7 +183,6 @@ const Header = () => {
                 setShowNotificationsSidebar(false);
                 setShowMessagesSidebar(false);
                 setShowProfileSidebar(false);
-                setShowEditProfileSidebar(false);
             }
         };
 
@@ -559,6 +196,8 @@ const Header = () => {
             case 'profile': return '👤';
             case 'welcome': return '🎉';
             case 'connection': return '🤝';
+            case 'ACCEPT': return '✅';
+            case 'SEND': return '📤';
             case 'achievement': return '🏆';
             case 'payment': return '💰';
             case 'job': return '💼';
@@ -567,30 +206,8 @@ const Header = () => {
     };
 
 
-    const handleMessageSelect = (conversationId: string) => {
-        setActiveChatId(activeChatId === conversationId ? null : conversationId);
-        // Mark message as read when opening chat
-        setMessages(prev =>
-            prev.map(m => m.conversationId === conversationId ? { ...m, unread: false } : m)
-        );
-    };
 
-    const handleSendMessage = (conversationId: string) => {
-        if (!newMessage.trim()) return;
 
-        // Here you would typically send the message to your backend
-        console.log(`Sending message to ${conversationId}: ${newMessage}`);
-        setNewMessage("");
-    };
-
-    function handleConnect(personId: string): void {
-        // Here you would typically send a connection request to your backend
-        // For now, just show a toast or alert for demonstration
-        alert(`Connection request sent to user with ID: ${personId}`);
-        // Optionally, update UI state to reflect the request was sent
-        // Example: setSuggestedConnections(prev => prev.filter(p => p.id !== personId));
-
-    }
 
     // Whenever notifications change (new notification received, marked as read, etc)
 // Notification initialization (single useEffect)
@@ -615,6 +232,21 @@ useEffect(() => {
       return updated;
     });
     setUnreadNotificationCount(prev => prev + 1);
+
+    // Show browser notification for connection accepted
+    if (notif.type === 'ACCEPT' && typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        try { Notification.requestPermission(); } catch {}
+      }
+      if (Notification.permission === 'granted') {
+        try {
+          new Notification('Connection Request Accepted! 🎉', {
+            body: notif.message,
+            icon: '/favicon.ico',
+          });
+        } catch {}
+      }
+    }
   });
 
   // Clear notifications broadcast
@@ -680,8 +312,6 @@ const handleMarkAllAsRead = async () => {
                                         placeholder="Search projects, services..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        onFocus={handleSearchFocus}
-                                        onBlur={handleSearchBlur}
                                         className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                     />
                                 </div>
@@ -872,8 +502,6 @@ const handleMarkAllAsRead = async () => {
                                                 placeholder="Search projects, services..."
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                onFocus={handleSearchFocus}
-                                                onBlur={handleSearchBlur}
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
                                         </div>
@@ -934,8 +562,6 @@ const handleMarkAllAsRead = async () => {
                                                 placeholder="Search projects, services..."
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                onFocus={handleSearchFocus}
-                                                onBlur={handleSearchBlur}
                                                 className="flex h-9 w-full rounded-full border border-gray-200 bg-transparent py-2 pl-10 pr-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-0"
                                             />
                                         </div>
@@ -965,20 +591,15 @@ const handleMarkAllAsRead = async () => {
                         className="fixed inset-0 bg-black bg-opacity-50"
                         onClick={() => {
                             setShowProfileSidebar(false);
-                            setShowSettingsSidebar(false);
-                            setShowCalendarSidebar(false);
-                            setShowFavouritesSidebar(false);
-                            // setShowConnectionsSidebar(false);
-                            setShowProjectsSidebar(false);
                         }}
                     />
 
-                    {showSettingsSidebar && (
+                    {false && (
                         <div className="fixed bottom-0 right-0 sm:right-[24rem] w-full sm:w-96 h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right z-[60]">
                             <div className="flex items-center justify-between p-3 sm:p-4 border-b">
                                 <h2 className="font-bold text-lg sm:text-xl text-gray-900">Settings</h2>
                                 <button
-                                    onClick={() => setShowSettingsSidebar(false)}
+                                    onClick={() => {}}
                                     className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
                                 >
                                     <X className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -1034,115 +655,7 @@ const handleMarkAllAsRead = async () => {
                             </div>
                         </div>
                     )}
-                    {/* here we have sidebars for project, my favourites, calendar, connections, settings, profile */}
-                    {/* {showProjectsSidebar && (
-                        <div className="fixed bottom-0 right-0 sm:right-[24rem] w-full sm:w-96 h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right z-[60]">
-                            <div className="flex items-center justify-between p-3 sm:p-4 border-b">
-                                <h2 className="font-bold text-lg sm:text-xl text-gray-900">Projects</h2>
-                                <button
-                                    onClick={() => setShowProjectsSidebar(false)}
-                                    className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
-                                >
-                                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                                </button>
-                            </div>
 
-                            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-                            </div>
-                        </div>
-                    )}
-
-                    {showFavouritesSidebar && (
-                        <div className="fixed bottom-0 right-0 sm:right-[24rem] w-full sm:w-96 h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right z-[60]">
-                            <div className="flex items-center justify-between p-3 sm:p-4 border-b">
-                                <h2 className="font-bold text-lg sm:text-xl text-gray-900">Favourites</h2>
-                                <button
-                                    onClick={() => setShowFavouritesSidebar(false)}
-                                    className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
-                                >
-                                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                                </button>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-                            </div>
-                        </div>
-                    )}
-
-                    {showCalendarSidebar && (
-                        <div className="fixed bottom-0 right-0 sm:right-[24rem] w-full sm:w-96 h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right z-[60]">
-                            <div className="flex items-center justify-between p-3 sm:p-4 border-b">
-                                <h2 className="font-bold text-lg sm:text-xl text-gray-900">Calendar</h2>
-                                <button
-                                    onClick={() => setShowCalendarSidebar(false)}
-                                    className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
-                                >
-                                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                                </button>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-                            </div>
-                        </div>
-                    )} */}
-
-                    {/* {showConnectionsSidebar && (
-                        <div className="fixed bottom-0 right-0 sm:right-[24rem] w-full sm:w-[50rem] h-[80vh] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right z-50">
-                            <div className="flex items-center justify-between p-3 sm:p-4 border-b">
-                                <h2 className="font-bold text-lg sm:text-xl text-gray-900">Connections</h2>
-                                <button
-                                    onClick={() => setShowConnectionsSidebar(false)}
-                                    className="text-gray-600 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
-                                >
-                                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                                </button>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto">
-                                <Tabs defaultValue="existing" className="w-full h-full">
-                                    <TabsList className="grid w-auto grid-cols-2 mx-3 sm:mx-4 mt-3 sm:mt-4">
-                                        <TabsTrigger value="existing" className="text-xs sm:text-sm">Existing Connections</TabsTrigger>
-                                        <TabsTrigger value="new" className="text-xs sm:text-sm">Make New Connections</TabsTrigger>
-                                    </TabsList>
-
-                                    <TabsContent value="existing" className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                                        {existingConnections.length > 0 ? (
-                                            existingConnections.map((person) => (
-                                                <Connections
-                                                    key={person.id}
-                                                    person={person}
-                                                    onMessage={handleSendMessage}
-                                                    showConnectButton={false}
-                                                />
-                                            ))
-                                        ) : (
-                                            <div className="text-center text-gray-500 mt-6 sm:mt-8">
-                                                <p className="text-sm sm:text-base">No existing connections found</p>
-                                            </div>
-                                        )}
-                                    </TabsContent>
-
-                                    <TabsContent value="new" className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                                        {suggestedConnections.length > 0 ? (
-                                            suggestedConnections.map((person) => (
-                                                <Connections
-                                                    key={person.id}
-                                                    person={person}
-                                                    onConnect={handleConnect}
-                                                    onMessage={handleSendMessage}
-                                                    showConnectButton={true}
-                                                />
-                                            ))
-                                        ) : (
-                                            <div className="text-center text-gray-500 mt-6 sm:mt-8">
-                                                <p className="text-sm sm:text-base">No new connection suggestions available</p>
-                                            </div>
-                                        )}
-                                    </TabsContent>
-                                </Tabs>
-                            </div>
-                        </div>
-                    )} */}
 
                     {showProfileSidebar && (
                         <div className="relative w-full sm:w-96 max-w-[90vw] h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-in slide-in-from-right">
@@ -1157,18 +670,6 @@ const handleMarkAllAsRead = async () => {
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 <div className="flex flex-col items-center text-center">
-                                    {/* Debug info - remove in production */}
-                                    {/* {process.env.NODE_ENV === 'development' && (
-                                        // <div className="text-xs text-gray-500 mb-2">
-                                        //     Avatar: {profileData.avatar || 'No avatar'}
-                                        //     <button 
-                                        //         onClick={() => refreshProfile()} 
-                                        //         className="ml-2 text-blue-500 underline"
-                                        //     >
-                                        //         Refresh
-                                        //     </button>
-                                        // </div>
-                                    )} */}
 
                                     {/* Profile Photo with proper error handling, fallback to initials immediately */}
                                     <div className="relative">
@@ -1209,20 +710,6 @@ const handleMarkAllAsRead = async () => {
                                     </Link>
                                 </div>
 
-                                {/* <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
-                                    <div className="p-2 rounded-lg bg-gray-50">
-                                        <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-green-500 mb-1" />
-                                        <p className="font-bold text-xs sm:text-sm text-gray-900">111452</p>
-                                    </div>
-                                    <div className="p-2 rounded-lg bg-gray-50">
-                                        <Star className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-yellow-500 mb-1" />
-                                        <p className="font-bold text-xs sm:text-sm text-gray-900">7083</p>
-                                    </div>
-                                    <div className="p-2 rounded-lg bg-gray-50">
-                                        <Shield className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-blue-500 mb-1" />
-                                        <p className="font-bold text-xs sm:text-sm text-gray-900">528</p>
-                                    </div>
-                                </div> */}
                                 <div>
                                     <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">USER</h4>
                                     <nav className="space-y-1">
@@ -1242,11 +729,6 @@ const handleMarkAllAsRead = async () => {
                                         <Link to="#"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                setShowProjectsSidebar(true);
-                                                setShowSettingsSidebar(false);
-                                                setShowCalendarSidebar(false);
-                                                setShowFavouritesSidebar(false);
-                                                // setShowConnectionsSidebar(false);
                                             }}
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <List className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
@@ -1264,11 +746,6 @@ const handleMarkAllAsRead = async () => {
                                         <Link to="#"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                setShowCalendarSidebar(true);
-                                                setShowFavouritesSidebar(false);
-                                                setShowProjectsSidebar(false);
-                                                // setShowConnectionsSidebar(false);
-                                                setShowSettingsSidebar(false);
                                             }}
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
@@ -1284,11 +761,6 @@ const handleMarkAllAsRead = async () => {
                                             to="#"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                setShowSettingsSidebar(true);
-                                                setShowCalendarSidebar(false);
-                                                setShowFavouritesSidebar(false);
-                                                // setShowConnectionsSidebar(false);
-                                                setShowProjectsSidebar(false);
                                             }}
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100"
                                         >
@@ -1403,8 +875,7 @@ const handleMarkAllAsRead = async () => {
                                     <div key={message.id} className="relative">
                                         <div
                                             className={`p-3 sm:p-4 hover:bg-slate-50 transition-colors cursor-pointer ${message.unread ? "bg-green-50/50 border-l-4 border-l-green-400" : ""
-                                                } ${activeChatId === message.conversationId ? "bg-green-100" : ""}`}
-                                            onClick={() => handleMessageSelect(message.conversationId)}
+                                                }`}
                                         >
                                             <div className="flex items-start gap-2 sm:gap-3">
                                                 <span className="text-2xl sm:text-3xl">{message.avatar}</span>
@@ -1427,57 +898,6 @@ const handleMarkAllAsRead = async () => {
                                             </div>
                                         </div>
 
-                                        {/* Dropdown Chat Box */}
-                                        {activeChatId === message.conversationId && (
-                                            <div className="border-t bg-white shadow-inner">
-                                                <div className="max-h-64 overflow-y-auto p-2 sm:p-3 space-y-2">
-                                                    {mockChatMessages[message.conversationId]?.map((chatMsg) => (
-                                                        <div
-                                                            key={chatMsg.id}
-                                                            className={`flex ${chatMsg.isOwn ? 'justify-end' : 'justify-start'}`}
-                                                        >
-                                                            <div
-                                                                className={`max-w-[80%] p-2 rounded-lg text-xs sm:text-sm ${chatMsg.isOwn
-                                                                    ? 'bg-green-500 text-white'
-                                                                    : 'bg-slate-100 text-slate-800'
-                                                                    }`}
-                                                            >
-                                                                <p>{chatMsg.message}</p>
-                                                                <p
-                                                                    className={`text-xs mt-1 ${chatMsg.isOwn ? 'text-green-100' : 'text-slate-500'
-                                                                        }`}
-                                                                >
-                                                                    {chatMsg.time}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                {/* Message Input */}
-                                                <div className="p-2 sm:p-3 border-t bg-slate-50">
-                                                    <div className="flex gap-2">
-                                                        <Input
-                                                            placeholder="Type a message..."
-                                                            value={newMessage}
-                                                            onChange={(e) => setNewMessage(e.target.value)}
-                                                            onKeyPress={(e) => {
-                                                                if (e.key === 'Enter') {
-                                                                    handleSendMessage(message.conversationId);
-                                                                }
-                                                            }}
-                                                            className="flex-1 text-xs sm:text-sm"
-                                                        />
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={() => handleSendMessage(message.conversationId)}
-                                                            className="bg-green-500 hover:bg-green-600"
-                                                        >
-                                                            <Send className="w-3 h-3 sm:w-4 sm:h-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -1495,10 +915,6 @@ const handleMarkAllAsRead = async () => {
                         </Button>
                     </div>
                 </div>
-            )}
-            {/* Edit Profile Sidebar */}
-            {showEditProfileSidebar && (
-                <EditProfile onClose={() => setShowEditProfileSidebar(false)} />
             )}
             {/* My Projects Sidebar */}
             {showMyProjects && (
