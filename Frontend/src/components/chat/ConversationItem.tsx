@@ -1,57 +1,41 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Conversation } from "./ChatLayout";
 import { cn } from "@/lib/utils";
-import type { Conversation } from "./ChatLayout";
 
 interface ConversationItemProps {
   conversation: Conversation;
   isSelected: boolean;
-  onClick: () => void;
+  onSelect: (id: string) => void;
 }
 
-export const ConversationItem = ({ conversation, isSelected, onClick }: ConversationItemProps) => {
+export const ConversationItem = ({ conversation, isSelected, onSelect }: ConversationItemProps) => {
   return (
     <div
-      onClick={onClick}
+      onClick={() => onSelect(conversation.id)}
       className={cn(
-        "flex items-center gap-3 p-4 cursor-pointer transition-all duration-200 hover:bg-gray-50",
-        isSelected && "bg-green-50 border-r-2 border-blue-600"
+        "flex items-center p-3 cursor-pointer rounded-lg transition-colors",
+        isSelected ? "bg-blue-100" : "hover:bg-gray-100"
       )}
     >
-      {/* Avatar */}
       <div className="relative">
-        <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
-          {conversation.avatar}
-        </div>
+        <Avatar className="h-12 w-12">
+          <AvatarImage src={conversation.avatar} alt={conversation.name} />
+          <AvatarFallback>{conversation.name.substring(0, 2)}</AvatarFallback>
+        </Avatar>
         {conversation.online && (
-          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+          <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
         )}
       </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <h3 className={cn(
-            "font-medium text-gray-900 truncate",
-            conversation.unread && "font-semibold"
-          )}>
-            {conversation.name}
-          </h3>
-          <span className={cn(
-            "text-xs text-gray-500",
-            conversation.unread && "text-green-600 font-medium"
-          )}>
-            {conversation.timestamp}
-          </span>
+      <div className="ml-4 flex-1">
+        <div className="flex justify-between items-center">
+          <p className="font-semibold text-gray-800">{conversation.name}</p>
+          <p className="text-xs text-gray-500">{conversation.timestamp}</p>
         </div>
-        
-        <div className="flex items-center justify-between">
-          <p className={cn(
-            "text-sm text-gray-600 truncate",
-            conversation.unread && "font-medium text-gray-900"
-          )}>
-            {conversation.lastMessage}
-          </p>
+        <div className="flex justify-between items-start">
+          <p className="text-sm text-gray-600 truncate w-40">{conversation.lastMessage}</p>
           {conversation.unread && (
-            <div className="w-2 h-2 bg-green-600 rounded-full ml-2 flex-shrink-0"></div>
+            <Badge className="bg-blue-500 text-white">New</Badge>
           )}
         </div>
       </div>
