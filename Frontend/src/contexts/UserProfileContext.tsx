@@ -136,7 +136,7 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
       } finally {
         setIsLoading(false);
       }
-    }, 1000); // 1 second debounce
+    }, 100); // 100ms debounce for faster loading
     
     setRefreshTimeout(timeout);
   }, [isLoading]); // Only depend on isLoading
@@ -165,15 +165,14 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
           try {
             const parsedProfile = JSON.parse(cachedProfile);
             setProfileData(parsedProfile);
-            // Don't refresh if we have cached data
-            setHasRefreshed(true);
+            // Still refresh to ensure we have the latest data, but with lower priority
+            setHasRefreshed(false);
           } catch (error) {
             console.error('Error parsing cached profile:', error);
-            // Only refresh if cached data is invalid
             setHasRefreshed(false);
           }
         } else {
-          // Only refresh if no cached data
+          // No cached data, definitely need to refresh
           setHasRefreshed(false);
         }
       } else {
@@ -194,6 +193,14 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({ childr
       }
     };
   }, []); // Remove refreshTimeout from dependencies
+
+  // Auto-refresh profile when user logs in and we don't have fresh data
+  useEffect(() => {
+    if (isLoggedIn && !hasRefreshed && !isLoading) {
+      console.log('UserProfileContext - Auto-refreshing profile data');
+      refreshProfile();
+    }
+  }, [isLoggedIn, hasRefreshed, isLoading, refreshProfile]);
 
   // Listen for storage changes (when user logs in/out in another tab)
   useEffect(() => {

@@ -235,16 +235,6 @@ const App = () => (
                 <FindExpert />
               </Suspense>
             } />
-            <Route path="/new-project" element={
-              <Suspense fallback={<PageLoader />}>
-                <NewProject />
-              </Suspense>
-            } />
-            <Route path="/schedule-meeting" element={
-              <Suspense fallback={<PageLoader />}>
-                <ScheduleMeeting />
-              </Suspense>
-            } />
             <Route path="/aboutus" element={
               <Suspense fallback={<PageLoader />}>
                 <AboutUs />
