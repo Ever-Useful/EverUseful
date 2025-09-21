@@ -1,14 +1,18 @@
-import { useState } from "react";
-import { Send, Phone, Video, MoreVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Send, MoreVertical, MessageSquare } from "lucide-react";
+import { Conversation, Message } from "./ChatLayout";
 import { MessageBubble } from "./MessageBubble";
-import type { Conversation, Message } from "./ChatLayout";
+import { cn } from "@/lib/utils";
+import chatBackground from "@/assets/images/chatbg.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -16,104 +20,122 @@ interface ChatAreaProps {
   conversation?: Conversation;
   messages: Message[];
   onSendMessage: (text: string) => void;
+  onHeaderClick: () => void;
 }
 
-export const ChatArea = ({ conversation, messages, onSendMessage }: ChatAreaProps) => {
-  const [newMessage, setNewMessage] = useState("");
+export const ChatArea = ({
+  conversation,
+  messages,
+  onSendMessage,
+  onHeaderClick,
+}: ChatAreaProps) => {
+  const [messageText, setMessageText] = useState("");
+
+  const userAvatar = "https://picsum.photos/seed/currentUser/150";
+  const userName = "Me";
 
   const handleSend = () => {
-    if (newMessage.trim()) {
-      onSendMessage(newMessage.trim());
-      setNewMessage("");
+    if (messageText.trim()) {
+      onSendMessage(messageText);
+      setMessageText("");
     }
   };
+  
+  // --- Functions moved inside the component ---
+  const handleBlock = () => {
+    if (!conversation) return;
+    alert(`${conversation.name} has been blocked.`);
+  };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+  const handleReport = () => {
+    if (!conversation) return;
+    alert(`${conversation.name} has been reported.`);
+  };
+
+  const chatBackgroundStyle = {
+    backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url(${chatBackground})`,
+    backgroundSize: 'cover',
   };
 
   if (!conversation) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center text-gray-500 dark:text-gray-400">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Send size={32} className="text-white" />
-          </div>
-          <p className="text-lg font-medium mb-2">Select a conversation</p>
-          <p className="text-sm">Choose a conversation from the sidebar to start messaging</p>
-        </div>
+      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-slate-50">
+        <MessageSquare className="w-16 h-16 mb-4 text-gray-300" />
+        <p className="text-lg">Select a conversation to start chatting</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Chat Header */}
-      <div className="bg-gradient-to-br from-blue-600 to-purple-600 border-b p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full border-2 border-white/20 flex items-center justify-center text-white font-medium text-sm">
-              {conversation.avatar}
-            </div>
-            {conversation.online && (
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-            )}
-          </div>
-          <div>
-            <h2 className="font-semibold text-white">{conversation.name}</h2>
-            <p className="text-xs text-white/80">
-              {conversation.online ? "Online" : "Last seen recently"}
+    <Card className="flex-1 h-full flex flex-col rounded-none border-0">
+      <CardHeader className="flex flex-row items-center justify-between border-b bg-background">
+        <div className="flex items-center cursor-pointer" onClick={onHeaderClick}>
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={conversation.avatar} alt={conversation.name} />
+            <AvatarFallback>{conversation.name.substring(0, 2)}</AvatarFallback>
+          </Avatar>
+          <div className="ml-4">
+            <p className="font-semibold text-foreground">{conversation.name}</p>
+            <p className={cn("text-sm", conversation.online ? "text-green-500" : "text-gray-500")}>
+              {conversation.online ? "Online" : "Offline"}
             </p>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2 rounded-full">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/50 rounded-full">
-                <MoreVertical size={18} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40">
-              <DropdownMenuItem>About</DropdownMenuItem>
-              <DropdownMenuItem>Search</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">Block</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">Report</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
 
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
-          ))}
-        </div>
-      </ScrollArea>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="h-5 w-5 text-muted-foreground" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onHeaderClick}>View Contact</DropdownMenuItem>
+            <DropdownMenuItem>Search</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Mute Notifications</DropdownMenuItem>
+            <DropdownMenuItem className="focus:bg-background">Clear Chat</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-red-500 focus:bg-red-50 focus:text-red-600"
+              onClick={handleReport}
+            >
+              Report
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-red-500 focus:bg-red-50 focus:text-red-600"
+              onClick={handleBlock}
+            >
+              Block
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </CardHeader>
 
-      {/* Message Input */}
-      <div className="bg-gradient-to-br from-blue-500/90 to-purple-500/90 border-t border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex items-center gap-3">
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type a message..."
-            className="flex-1 border-none bg-white/90 focus-visible:ring-0 focus-visible:ring-offset-0"
+      <CardContent className="flex-1 overflow-y-auto p-4" style={chatBackgroundStyle}>
+        {messages.map((msg) => (
+          <MessageBubble
+            key={msg.id}
+            message={msg}
+            avatar={msg.sender === 'me' ? userAvatar : conversation.avatar}
+            senderName={msg.sender === 'me' ? userName : conversation.name}
           />
-          <Button
-            onClick={handleSend}
-            className="bg-white text-blue-600 hover:bg-white/90 hover:text-blue-600"
-          >
-            <Send size={16} />
+        ))}
+      </CardContent>
+
+      <CardFooter className="p-4 border-t bg-background">
+        <div className="flex w-full items-center space-x-2">
+          <Input
+            placeholder="Type a message..."
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSend()}
+            className="bg-background focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+          <Button onClick={handleSend} className="bg-blue-600 hover:bg-blue-700">
+            <Send className="h-5 w-5" />
           </Button>
         </div>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };

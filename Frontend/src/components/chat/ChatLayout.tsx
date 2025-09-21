@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ConversationList } from "./ConversationList";
 import { ChatArea } from "./ChatArea";
+import { ProfileSidebar } from "./ProfileSidebar";
 
 export interface Conversation {
   id: string;
@@ -23,19 +24,19 @@ const mockConversations: Conversation[] = [
   {
     id: "1",
     name: "Sarah Johnson",
-    lastMessage: "Hey! How's the project going?",
+    lastMessage: "That's awesome! Can't wait...",
     timestamp: "2 min ago",
     unread: true,
-    avatar: "SJ",
+    avatar: "https://picsum.photos/seed/sarah/150",
     online: true,
   },
   {
     id: "2",
     name: "Team Updates",
-    lastMessage: "Meeting scheduled for tomorrow at 3 PM",
+    lastMessage: "Meeting scheduled for 3 PM",
     timestamp: "1 hour ago",
     unread: true,
-    avatar: "TU",
+    avatar: "https://picsum.photos/seed/team/150",
     online: false,
   },
   {
@@ -44,84 +45,57 @@ const mockConversations: Conversation[] = [
     lastMessage: "Thanks for the quick response!",
     timestamp: "3 hours ago",
     unread: false,
-    avatar: "AC",
+    avatar: "https://picsum.photos/seed/alex/150",
     online: true,
   },
   {
     id: "4",
     name: "Design Team",
-    lastMessage: "New mockups are ready for review",
+    lastMessage: "New mockups are ready...",
     timestamp: "Yesterday",
     unread: false,
-    avatar: "DT",
+    avatar: "https://picsum.photos/seed/design/150",
     online: false,
   },
   {
     id: "5",
     name: "Michael Rodriguez",
-    lastMessage: "Let's catch up this weekend",
+    lastMessage: "Let's catch up this week.",
     timestamp: "2 days ago",
     unread: false,
-    avatar: "MR",
-    online: false,
+    avatar: "https://picsum.photos/seed/michael/150",
+    online: true,
   },
 ];
 
 const mockMessages: Record<string, Message[]> = {
   "1": [
-    {
-      id: "1",
-      text: "Hey! How's the project going?",
-      timestamp: "2:30 PM",
-      sender: "other",
-    },
-    {
-      id: "2",
-      text: "It's going really well! We're making great progress on the UI components.",
-      timestamp: "2:32 PM",
-      sender: "me",
-    },
-    {
-      id: "3",
-      text: "That's awesome! Can't wait to see the final result.",
-      timestamp: "2:33 PM",
-      sender: "other",
-    },
+    { id: "1", text: "Hey! How's the project going?", timestamp: "2:30 PM", sender: "other" },
+    { id: "2", text: "It's going really well! We're making great progress on the UI components.", timestamp: "2:32 PM", sender: "me" },
+    { id: "3", text: "That's awesome! Can't wait to see the final result.", timestamp: "2:33 PM", sender: "other" }
   ],
-  "2": [
-    {
-      id: "1",
-      text: "Meeting scheduled for tomorrow at 3 PM",
-      timestamp: "1:15 PM",
-      sender: "other",
-    },
-    {
-      id: "2",
-      text: "Perfect! I'll be there.",
-      timestamp: "1:16 PM",
-      sender: "me",
-    },
-  ],
+  "2": [{ id: "1", text: "Meeting scheduled for tomorrow at 3 PM", timestamp: "1:15 PM", sender: "other" }],
+  "3": [{ id: "1", text: "Thanks for the quick response!", timestamp: "12:05 PM", sender: "other" }],
+  "4": [{ id: "1", text: "New mockups are ready for review.", timestamp: "Yesterday, 11:00 AM", sender: "other" }],
+  "5": [{ id: "1", text: "Let's catch up this week.", timestamp: "2 days ago, 4:30 PM", sender: "other" }]
 };
 
 export const ChatLayout = () => {
   const [selectedConversation, setSelectedConversation] = useState<string | null>("1");
   const [conversations, setConversations] = useState(mockConversations);
   const [messages, setMessages] = useState(mockMessages);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const handleSelectConversation = (id: string) => {
     setSelectedConversation(id);
-    // Mark as read
-    setConversations(prev => 
-      prev.map(conv => 
-        conv.id === id ? { ...conv, unread: false } : conv
-      )
+    setConversations(prev =>
+      prev.map(conv => (conv.id === id ? { ...conv, unread: false } : conv))
     );
   };
 
   const handleSendMessage = (text: string) => {
     if (!selectedConversation) return;
-    
+
     const newMessage: Message = {
       id: Date.now().toString(),
       text,
@@ -134,7 +108,6 @@ export const ChatLayout = () => {
       [selectedConversation]: [...(prev[selectedConversation] || []), newMessage],
     }));
 
-    // Update last message in conversation
     setConversations(prev =>
       prev.map(conv =>
         conv.id === selectedConversation
@@ -148,17 +121,27 @@ export const ChatLayout = () => {
   const currentMessages = selectedConversation ? messages[selectedConversation] || [] : [];
 
   return (
-    <div className="flex h-full bg-white shadow-2xl">
-      <ConversationList
-        conversations={conversations}
-        selectedId={selectedConversation}
-        onSelect={handleSelectConversation}
-      />
-      <ChatArea
-        conversation={selectedConv}
-        messages={currentMessages}
-        onSendMessage={handleSendMessage}
-      />
+    <div className="flex h-full bg-white relative">
+      <div className="flex flex-1">
+        <ConversationList
+          conversations={conversations}
+          selectedId={selectedConversation}
+          onSelect={handleSelectConversation}
+        />
+        <ChatArea
+          conversation={selectedConv}
+          messages={currentMessages}
+          onSendMessage={handleSendMessage}
+          onHeaderClick={() => setIsProfileOpen(true)}
+        />
+      </div>
+
+      {isProfileOpen && (
+        <ProfileSidebar
+          conversation={selectedConv}
+          onClose={() => setIsProfileOpen(false)}
+        />
+      )}
     </div>
   );
 };
