@@ -1,8 +1,9 @@
-import { Search, MessageSquare } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button"; 
+import { Conversation } from "./ChatLayout";
 import { ConversationItem } from "./ConversationItem";
-import type { Conversation } from "./ChatLayout";
+import { Search, UserPlus } from "lucide-react"; 
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -11,40 +12,39 @@ interface ConversationListProps {
 }
 
 export const ConversationList = ({ conversations, selectedId, onSelect }: ConversationListProps) => {
+  const handleAddPerson = () => {
+    alert("Add new person functionality to be implemented.");
+  };
+
   return (
-    <div className="w-80 bg-white dark:bg-gray-900 flex-col border-r border-gray-200 dark:border-gray-700">
-      {/* Header */}
-      <div className="p-4 bg-gradient-to-br from-blue-600 to-purple-600 text-white">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
-            <MessageSquare size={20} />
-          </div>
-          <h1 className="text-lg font-semibold">Messages</h1>
+    <Card className="w-1/3 border-r h-full flex flex-col rounded-none">
+      <CardHeader className="border-b">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-gray-800">Conversations</CardTitle>
+          <Button variant="ghost" size="icon" onClick={handleAddPerson}>
+            <UserPlus className="h-5 w-5 text-muted-foreground" />
+          </Button>
         </div>
-        
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70" size={16} />
+        <div className="relative mt-4">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search conversations..."
-            className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:bg-white/20 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="pl-8 bg-white focus-visible:ring-0 focus-visible:ring-offset-0"
           />
         </div>
-      </div>
-
-      {/* Conversations */}
-      <ScrollArea className="flex-1">
-        <div className="divide-y divide-gray-100 dark:divide-gray-800">
-          {conversations.map((conversation) => (
+      </CardHeader>
+      <CardContent className="flex-1 overflow-y-auto p-2">
+        <div className="space-y-1">
+          {conversations.map((conv) => (
             <ConversationItem
-              key={conversation.id}
-              conversation={conversation}
-              isSelected={selectedId === conversation.id}
-              onClick={() => onSelect(conversation.id)}
+              key={conv.id}
+              conversation={conv}
+              isSelected={selectedId === conv.id}
+              onSelect={onSelect}
             />
           ))}
         </div>
-      </ScrollArea>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
