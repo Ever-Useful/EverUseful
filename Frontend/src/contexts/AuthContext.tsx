@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { auth } from '@/lib/firebase';
 import { User } from 'firebase/auth';
-import { socket } from '@/socket'; 
+import { socket } from '@/socket';
+import { userService } from '@/services/userService'; 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -25,17 +26,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       setUser(firebaseUser);
       setLoading(false);
 
       if (firebaseUser) {
-        // Register this user in socket.io backend
-        // If you store customUserId in Firestore/DynamoDB, fetch it here
-        const customUserId = firebaseUser.uid; // replace if you map uid -> customUserId
-        if (socket) {
-          socket.emit("register", customUserId);
-          console.log("Registered user with socket:", customUserId);
+        // Register this user in socket.io backend with their customUserId
+        try {
+          const userData = await userService.findUserByFirebaseUid(firebaseUser.uid);
+          if (userData?.customUserId && socket) {
+            socket.emit("register", userData.customUserId);
+            console.log("Registered user with socket:", userData.customUserId);
+          } else {
+            console.warn("Could not register socket - user data or customUserId not found");
+          }
+        } catch (error) {
+          console.error("Failed to register socket:", error);
         }
       }
     });

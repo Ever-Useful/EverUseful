@@ -210,9 +210,20 @@ router.post('/accept', authorize, async (req, res) => {
       message: `${me.firstName || ""} ${me.lastName || ""} accepted your connection request`,
       meta: { to: me.customUserId }
     };
+    
+    console.log('Sending acceptance notification to sender:', {
+      senderId: fromUserId,
+      receiverId: me.customUserId,
+      notification: notif
+    });
+    
     await addUserRelationNotification(fromUserId, notif);
+    
     if (req.app && req.app.get('io')) {
+      console.log('Emitting socket notification to room:', fromUserId);
       req.app.get('io').to(fromUserId).emit('user_notification', notif);
+    } else {
+      console.warn('Socket.io not available for notification emission');
     }
 
     res.json({ success: true, data: result });

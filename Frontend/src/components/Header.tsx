@@ -202,6 +202,14 @@ const Header = () => {
         }
     };
 
+    // Socket registration for notifications
+    useEffect(() => {
+        if (profileData?.customUserId && socket) {
+            socket.emit("register", profileData.customUserId);
+            console.log("Header: Registered user with socket:", profileData.customUserId);
+        }
+    }, [profileData?.customUserId]);
+
     // Whenever notifications change (new notification received, marked as read, etc)
 // Notification initialization (single useEffect)
 useEffect(() => {
