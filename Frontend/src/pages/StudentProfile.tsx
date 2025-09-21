@@ -474,7 +474,7 @@ const handleUnblock = async () => {
   const fetchUserAgents = async (userId: string) => {
     try {
       console.log(`StudentProfile - Fetching agents for user ${userId}...`);
-      const response = await fetch(`${API_ENDPOINTS.AGENTS}?author=${userId}`);
+      const response = await fetch(`${API_ENDPOINTS.AGENTS}/author/${userId}`);
       if (!response.ok) {
         console.log(`StudentProfile - No agents found for user ${userId}`);
         return [];

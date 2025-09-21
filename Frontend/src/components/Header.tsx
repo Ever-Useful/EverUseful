@@ -34,7 +34,8 @@ import {
     Database,
     Lock,
     ShoppingCart,
-    Menu
+    Menu,
+    Trophy
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/assets/Logo/Logo Side Simple.png';
@@ -226,18 +227,6 @@ const NavSubLink = ({ title, href, description, icon, authAction, isLoggedIn, on
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
-
-    // Check if current page needs user data (only pages that require authentication)
-    const needsUserData = useMemo(() => {
-        const authRequiredRoutes = [
-            '/dashboard', '/profile', '/marketplace', '/cart', '/chat',
-            '/connections', '/collaborators', '/freelancing', '/findexpert',
-            '/freelancerprofile', '/studentprofile', '/businessprofile',
-            '/new-project', '/schedule-meeting'
-        ];
-        const needsData = authRequiredRoutes.some(route => location.pathname.startsWith(route));
-        return needsData;
-    }, [location.pathname]);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [messages, setMessages] = useState(mockMessages);
     const unreadMessageCount = messages.filter(m => m.unread).length;
@@ -352,6 +341,12 @@ const Header = () => {
     //     localStorage.setItem('userNotificationsUnreadCount', '0');
     // };
     const { profileData, isLoggedIn, refreshProfile, isLoading } = useUserProfile();
+    
+    // Always fetch user data when logged in for header display
+    const needsUserData = useMemo(() => {
+        return isLoggedIn;
+    }, [isLoggedIn]);
+    
     const [showMyProjects, setShowMyProjects] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
@@ -795,7 +790,7 @@ const handleMarkAllAsRead = async () => {
                                         <Button variant="ghost" onClick={() => setShowProfileSidebar(true)} className="bg-white/10 text-gray-900 hover:scale-105 transition-all duration-300 text-sm px-2 lg:px-3 py-2 rounded-lg flex items-center space-x-2">
                                             <User className="h-5 w-5 text-gray-600" />
                                             <span className="hidden sm:inline text-sm font-medium">
-                                                Hi, {profileData.firstName || 'there'}
+                                                Hi, {isLoading ? '...' : (profileData.firstName || 'there')}
                                             </span>
                                         </Button>
                                     </div>
@@ -1202,9 +1197,10 @@ const handleMarkAllAsRead = async () => {
                                     </div>
 
                                     <h3 className="font-bold text-base sm:text-lg text-gray-900 mt-2 sm:mt-3">
-                                        {(profileData.firstName || profileData.lastName)
-                                            ? `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim()
-                                            : 'User Profile'
+                                        {isLoading ? 'Loading...' : 
+                                            (profileData.firstName || profileData.lastName)
+                                                ? `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim()
+                                                : 'User Profile'
                                         }
                                     </h3>
 
@@ -1256,18 +1252,10 @@ const handleMarkAllAsRead = async () => {
                                             <List className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
                                             <span className="text-sm sm:text-base text-gray-700 font-medium">My Projects</span>
                                         </Link>
-                                        <Link to="#"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setShowFavouritesSidebar(true);
-                                                setShowProjectsSidebar(false);
-                                                setShowSettingsSidebar(false);
-                                                // setShowConnectionsSidebar(false);
-                                                setShowCalendarSidebar(false);
-                                            }}
+                                        <Link to="/leaderboard"
                                             className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                            <Heart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
-                                            <span className="text-sm sm:text-base text-gray-700 font-medium">My Favourites</span>
+                                            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
+                                            <span className="text-sm sm:text-base text-gray-700 font-medium">Leaderboard</span>
                                         </Link>
                                         <Link to="#" className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors">
                                             <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-600" />
