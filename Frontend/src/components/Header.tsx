@@ -204,11 +204,7 @@ const Header = () => {
             default: return '📢';
         }
     };
-
-
-
-
-
+    
     // Whenever notifications change (new notification received, marked as read, etc)
 // Notification initialization (single useEffect)
 useEffect(() => {
