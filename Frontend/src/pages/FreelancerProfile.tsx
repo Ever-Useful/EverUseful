@@ -16,6 +16,7 @@ import { getUserAvatarUrl, getBackgroundImageUrl } from "@/utils/s3ImageUtils";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
 import LoadingAnimation from '@/components/LoadingAnimation';
+import toast from "react-hot-toast";
 
 const VisitingProfile = () => {
   const { id } = useParams();
@@ -207,7 +208,7 @@ useEffect(() => {
       }
     } catch (err: any) {
       console.error('Error sending relation request:', err);
-      alert(err?.message || 'Failed to send request');
+      toast.error(err?.message || 'Failed to send request');
     }
   };
 
@@ -216,9 +217,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.accept(id);
       setRelationStatus('CONNECTED');
+      toast.success('Connection request accepted');
     } catch (err: any) {
       console.error('Error accepting request:', err);
-      alert(err?.message || 'Failed to accept request');
+      toast.error(err?.message || 'Failed to accept request');
     }
   };
 
@@ -227,9 +229,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.decline(id);
       setRelationStatus('NONE');
+      toast.success('Connection request declined');
     } catch (err: any) {
       console.error('Error declining request:', err);
-      alert(err?.message || 'Failed to decline request');
+      toast.error(err?.message || 'Failed to decline request');
     }
   };
 
@@ -238,9 +241,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.cancel(id);
       setRelationStatus('NONE');
+      toast.success('Connection request cancelled');
     } catch (err: any) {
       console.error('Error cancelling request:', err);
-      alert(err?.message || 'Failed to cancel request');
+      toast.error(err?.message || 'Failed to cancel request');
     }
   };
 
@@ -249,9 +253,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.removeConnection(id);
       setRelationStatus('NONE');
+      toast.success('Connection removed');
     } catch (err: any) {
       console.error('Error removing connection:', err);
-      alert(err?.message || 'Failed to remove connection');
+      toast.error(err?.message || 'Failed to remove connection');
     }
   };
 
@@ -260,9 +265,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.block(id);
       setRelationStatus('BLOCKED');
+      toast.success('User blocked');
     } catch (err: any) {
       console.error('Error blocking user:', err);
-      alert(err?.message || 'Failed to block user');
+      toast.error(err?.message || 'Failed to block user');
     }
   };
 
@@ -271,9 +277,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.unblock(id);
       setRelationStatus('NONE');
+      toast.success('User unblocked');
     } catch (err: any) {
       console.error('Error unblocking user:', err);
-      alert(err?.message || 'Failed to unblock user');
+      toast.error(err?.message || 'Failed to unblock user');
     }
   };
 
@@ -365,6 +372,8 @@ useEffect(() => {
             setPortfolioProjects([]);
           }
         } catch (err) {
+          console.error('Error fetching freelancer data:', err);
+          toast.error('Failed to load freelancer profile');
           setFreelancer(null);
           setPortfolioProjects([]);
         }

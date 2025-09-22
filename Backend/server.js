@@ -215,7 +215,11 @@ io.on("connection", (socket) => {
 
   socket.on("register", (userId) => {
     socket.join(userId);
-    console.log(`User ${userId} joined room`);
+    console.log(`User ${userId} joined room ${userId}`);
+    
+    // Debug: List all rooms this socket is in
+    const rooms = Array.from(socket.rooms);
+    console.log(`Socket ${socket.id} is now in rooms:`, rooms);
   });
 
   socket.on("disconnect", () => {

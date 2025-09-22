@@ -19,8 +19,7 @@ export const UnreadMessagesCard = (): JSX.Element => {
   const [selectedMessage, setSelectedMessage] = useState<UnreadMessage | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
   const navigate = useNavigate();
-
-  // Sample unread messages data
+  
   const unreadMessages: UnreadMessage[] = [
     {
       id: "1",

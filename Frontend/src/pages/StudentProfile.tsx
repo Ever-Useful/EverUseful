@@ -34,9 +34,9 @@ const Profile = () => {
   const [workExperience, setWorkExperience] = useState([]);
   const [error, setError] = useState<string | null>(null);
   const [relationStatus, setRelationStatus] = useState<'NONE' | 'PENDING_OUT' | 'PENDING_IN' | 'CONNECTED' | 'BLOCKED'>('NONE');
-  const { profileData: currentUser } = useUserProfile(); 
   const [projectsCount, setProjectsCount] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const { profileData: currentUser } = useUserProfile();
   // Fetch a single item (project or agent) by id and type
   const fetchItemData = async (itemId: string, itemType: 'project' | 'agent') => {
     try {
@@ -80,6 +80,15 @@ const Profile = () => {
   const fetchUserData = async () => {
     try {
       setLoading(true);
+      console.log('StudentProfile - Fetching user data for ID:', id);
+      
+      if (!id) {
+        console.log('StudentProfile - No ID provided, cannot fetch user data');
+        setError('No user ID provided');
+        setLoading(false);
+        return;
+      }
+      
       const response = await fetch(API_ENDPOINTS.USER_BY_ID(id));
       if (!response.ok) {
         throw new Error('Failed to fetch user data');
@@ -499,6 +508,23 @@ const handleUnblock = async () => {
 
   if (loading) {
     return <LoadingAnimation fullScreen={true} />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => navigate('/')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Go Home
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const auth = userData?.auth || {};
