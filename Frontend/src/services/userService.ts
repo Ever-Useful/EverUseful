@@ -146,6 +146,12 @@ interface CartItem {
   quantity: number;
 }
 
+interface AddToCartItem {
+  id?: string;
+  name?: string;
+  quantity: number;
+}
+
 interface DBConnection {
   id: string;
   userId: string;
@@ -684,6 +690,18 @@ async getConnectionsByUserId(customUserId: string) {
   }
 
   return { connections: { sent: [], received: [], pending: [] }, connected: [] };
+}
+
+// Find user by Firebase UID
+async findUserByFirebaseUid(firebaseUid: string): Promise<any> {
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/firebase/${firebaseUid}`, {
+        method: "GET",
+    });
+
+    if (response?.success) {
+        return response.data;
+    }
+    return null;
 }
 
 
