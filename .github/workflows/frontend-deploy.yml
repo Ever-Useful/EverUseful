@@ -42,13 +42,13 @@ jobs:
       - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+           host: ${{ secrets.HOSTINGER_HOST }}
+           username: ${{ secrets.HOSTINGER_USER }}
+           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           source: "Frontend/dist"
           target: "/var/www/html/Frontend/"
           strip_components: 1
-          overwrite: true
+           overwrite: true
 
       - name: Configure server and verify deployment
         uses: appleboy/ssh-action@v1.0.3
@@ -195,9 +195,12 @@ jobs:
                       API_SUBDOMAIN_IN_CERT=true
                       SSL_CERT_EXISTS=true
                       echo "✅ Certificate verified - includes api.amoghconnect.com (expires: $CERT_EXPIRY_FINAL)"
+                      echo "   Certificate includes domains: $CERT_DOMAINS"
                     else
-                      echo "⚠️ Certificate obtained but doesn't include api.amoghconnect.com"
-                      echo "   Certificate domains: $CERT_DOMAINS"
+                      echo "❌ CRITICAL: Certificate obtained but doesn't include api.amoghconnect.com"
+                      echo "   Certificate domains found: $CERT_DOMAINS"
+                      echo "   This will cause SSL errors. Retrying certificate acquisition..."
+                      exit 1
                     fi
                   fi
                 else
@@ -292,9 +295,12 @@ jobs:
                       API_SUBDOMAIN_IN_CERT=true
                       SSL_CERT_EXISTS=true
                       echo "✅ Certificate verified - includes api.amoghconnect.com (expires: $CERT_EXPIRY_FINAL)"
+                      echo "   Certificate includes domains: $CERT_DOMAINS"
                     else
-                      echo "⚠️ Certificate obtained but doesn't include api.amoghconnect.com"
-                      echo "   Certificate domains: $CERT_DOMAINS"
+                      echo "❌ CRITICAL: Certificate obtained but doesn't include api.amoghconnect.com"
+                      echo "   Certificate domains found: $CERT_DOMAINS"
+                      echo "   This will cause SSL errors. Retrying certificate acquisition..."
+                      exit 1
                     fi
                   fi
                 else
@@ -452,6 +458,12 @@ jobs:
                 
                 # Proxy to backend API on AWS
                 location / {
+                    # Remove backend CORS headers to avoid conflicts, then add our own
+                    proxy_hide_header Access-Control-Allow-Origin;
+                    proxy_hide_header Access-Control-Allow-Methods;
+                    proxy_hide_header Access-Control-Allow-Headers;
+                    proxy_hide_header Access-Control-Allow-Credentials;
+                    
                     proxy_pass http://13.235.148.91:3000;
                     proxy_http_version 1.1;
                     proxy_set_header Upgrade $http_upgrade;
@@ -460,18 +472,31 @@ jobs:
                     proxy_set_header X-Real-IP $remote_addr;
                     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                     proxy_set_header X-Forwarded-Proto $scheme;
+                    proxy_set_header X-Forwarded-Host $host;
                     proxy_cache_bypass $http_upgrade;
                     proxy_read_timeout 86400;
+                    proxy_connect_timeout 60s;
+                    proxy_send_timeout 60s;
+                    proxy_buffering off;
                     
-                    # CORS headers
-                    add_header Access-Control-Allow-Origin * always;
-                    add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
-                    add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;
-                    
-                    # Handle preflight requests
+                    # Handle CORS preflight requests
                     if ($request_method = OPTIONS) {
+                        add_header Access-Control-Allow-Origin * always;
+                        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS" always;
+                        add_header Access-Control-Allow-Headers "Authorization, Content-Type, X-Requested-With, Accept" always;
+                        add_header Access-Control-Allow-Credentials true always;
+                        add_header Access-Control-Max-Age 86400 always;
+                        add_header Content-Type 'text/plain' always;
+                        add_header Content-Length 0 always;
                         return 204;
                     }
+                    
+                    # CORS headers for actual requests
+                    add_header Access-Control-Allow-Origin * always;
+                    add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS" always;
+                    add_header Access-Control-Allow-Headers "Authorization, Content-Type, X-Requested-With, Accept" always;
+                    add_header Access-Control-Allow-Credentials true always;
+                    add_header Access-Control-Expose-Headers "Content-Length, Content-Type, ETag" always;
                 }
             }
             EOF
@@ -506,7 +531,7 @@ jobs:
                 fi
               fi
               
-              sudo systemctl reload nginx
+            sudo systemctl reload nginx
               echo "✅ Nginx reloaded"
               
               # Wait a moment for nginx to fully reload
