@@ -507,7 +507,7 @@ router.put('/student-data', authorize, async (req, res) => {
   }
 });
 
-// Update professor data
+// Update professor 
 router.put('/professor-data', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
