@@ -183,7 +183,7 @@ router.post('/accept', authorize, async (req, res) => {
 
     if (req.app && req.app.get('io')) {
       const meUser = me;
-      const otherUser = await userService.findUserByCustomUserId(fromUserId);
+      const otherUser = await userService.findUserByCustomId(fromUserId);
       // Emit relation_update to both (for real-time UI update)
       req.app.get('io').to(me.customUserId).emit('relation_update', {
         type: 'ACCEPTED',
@@ -210,9 +210,20 @@ router.post('/accept', authorize, async (req, res) => {
       message: `${me.firstName || ""} ${me.lastName || ""} accepted your connection request`,
       meta: { to: me.customUserId }
     };
+    
+    console.log('Sending acceptance notification to sender:', {
+      senderId: fromUserId,
+      receiverId: me.customUserId,
+      notification: notif
+    });
+    
     await addUserRelationNotification(fromUserId, notif);
+    
     if (req.app && req.app.get('io')) {
+      console.log('Emitting socket notification to room:', fromUserId);
       req.app.get('io').to(fromUserId).emit('user_notification', notif);
+    } else {
+      console.warn('Socket.io not available for notification emission');
     }
 
     res.json({ success: true, data: result });
@@ -282,7 +293,7 @@ router.post('/decline', authorize, async (req, res) => {
 
     // Notify sender (User A) of decline (for UI update only, not notification)
     if (req.app && req.app.get('io')) {
-      const senderUser = await userService.findUserByCustomUserId(fromUserId); // User A (sender)
+      const senderUser = await userService.findUserByCustomId(fromUserId); // User A (sender)
       req.app.get('io').to(fromUserId).emit('relation_update', {
         type: 'DECLINED',
         between: [me.customUserId, fromUserId],

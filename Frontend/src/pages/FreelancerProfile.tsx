@@ -16,6 +16,7 @@ import { getUserAvatarUrl, getBackgroundImageUrl } from "@/utils/s3ImageUtils";
 import NoImageAvailable from "@/assets/images/no image available.png";
 import { API_ENDPOINTS } from '../config/api';
 import LoadingAnimation from '@/components/LoadingAnimation';
+import toast from "react-hot-toast";
 
 const VisitingProfile = () => {
   const { id } = useParams();
@@ -24,6 +25,7 @@ const VisitingProfile = () => {
   const [loading, setLoading] = useState(true);
   const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
+  const [projectsCount, setProjectsCount] = useState(0);
   const MAX_LENGTH = 200;
   const [isExpanded, setIsExpanded] = useState(false);
   const [education, setEducation] = useState([]);
@@ -206,7 +208,7 @@ useEffect(() => {
       }
     } catch (err: any) {
       console.error('Error sending relation request:', err);
-      alert(err?.message || 'Failed to send request');
+      toast.error(err?.message || 'Failed to send request');
     }
   };
 
@@ -215,9 +217,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.accept(id);
       setRelationStatus('CONNECTED');
+      toast.success('Connection request accepted');
     } catch (err: any) {
       console.error('Error accepting request:', err);
-      alert(err?.message || 'Failed to accept request');
+      toast.error(err?.message || 'Failed to accept request');
     }
   };
 
@@ -226,9 +229,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.decline(id);
       setRelationStatus('NONE');
+      toast.success('Connection request declined');
     } catch (err: any) {
       console.error('Error declining request:', err);
-      alert(err?.message || 'Failed to decline request');
+      toast.error(err?.message || 'Failed to decline request');
     }
   };
 
@@ -237,9 +241,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.cancel(id);
       setRelationStatus('NONE');
+      toast.success('Connection request cancelled');
     } catch (err: any) {
       console.error('Error cancelling request:', err);
-      alert(err?.message || 'Failed to cancel request');
+      toast.error(err?.message || 'Failed to cancel request');
     }
   };
 
@@ -248,9 +253,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.removeConnection(id);
       setRelationStatus('NONE');
+      toast.success('Connection removed');
     } catch (err: any) {
       console.error('Error removing connection:', err);
-      alert(err?.message || 'Failed to remove connection');
+      toast.error(err?.message || 'Failed to remove connection');
     }
   };
 
@@ -259,9 +265,10 @@ useEffect(() => {
       if (!id) return;
       await relationService.block(id);
       setRelationStatus('BLOCKED');
+      toast.success('User blocked');
     } catch (err: any) {
       console.error('Error blocking user:', err);
-      alert(err?.message || 'Failed to block user');
+      toast.error(err?.message || 'Failed to block user');
     }
   };
 
@@ -270,9 +277,33 @@ useEffect(() => {
       if (!id) return;
       await relationService.unblock(id);
       setRelationStatus('NONE');
+      toast.success('User unblocked');
     } catch (err: any) {
       console.error('Error unblocking user:', err);
-      alert(err?.message || 'Failed to unblock user');
+      toast.error(err?.message || 'Failed to unblock user');
+    }
+  };
+
+  // Fetch user agents directly from the agents API
+  const fetchUserAgents = async (userId: string) => {
+    try {
+      console.log(`FreelancerProfile - Fetching agents for user ${userId}...`);
+      const response = await fetch(`${API_ENDPOINTS.AGENTS}/author/${userId}`);
+      if (!response.ok) {
+        console.log(`FreelancerProfile - No agents found for user ${userId}`);
+        return [];
+      }
+      const data = await response.json();
+      const agents = data.agents || [];
+      console.log(`FreelancerProfile - Found ${agents.length} agents for user ${userId}`);
+      return agents.map(agent => ({
+        ...agent,
+        title: agent.name,
+        type: 'agent'
+      }));
+    } catch (error) {
+      console.error(`FreelancerProfile - Error fetching agents for user ${userId}:`, error);
+      return [];
     }
   };
 
@@ -341,6 +372,8 @@ useEffect(() => {
             setPortfolioProjects([]);
           }
         } catch (err) {
+          console.error('Error fetching freelancer data:', err);
+          toast.error('Failed to load freelancer profile');
           setFreelancer(null);
           setPortfolioProjects([]);
         }

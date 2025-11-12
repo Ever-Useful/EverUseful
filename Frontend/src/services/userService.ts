@@ -146,6 +146,12 @@ interface CartItem {
   quantity: number;
 }
 
+interface AddToCartItem {
+  id?: string;
+  name?: string;
+  quantity: number;
+}
+
 interface DBConnection {
   id: string;
   userId: string;
@@ -432,10 +438,17 @@ async getUserByCustomId(customUserId: string): Promise<any> {
 
   // Update student data
   async updateStudentData(studentData: any): Promise<void> {
-    await this.makeRequest(`${API_ENDPOINTS.USERS}/student-data`, {
-      method: 'PUT',
-      body: JSON.stringify(studentData),
-    });
+    console.log('Updating student data:', studentData);
+    try {
+      await this.makeRequest(`${API_ENDPOINTS.USERS}/student-data`, {
+        method: 'PUT',
+        body: JSON.stringify(studentData),
+      });
+      console.log('Student data updated successfully');
+    } catch (error) {
+      console.error('Error updating student data:', error);
+      throw error;
+    }
   }
 
   // Update freelancer data
@@ -677,6 +690,18 @@ async getConnectionsByUserId(customUserId: string) {
   }
 
   return { connections: { sent: [], received: [], pending: [] }, connected: [] };
+}
+
+// Find user by Firebase UID
+async findUserByFirebaseUid(firebaseUid: string): Promise<any> {
+    const response = await this.makeRequest(`${API_ENDPOINTS.USERS}/firebase/${firebaseUid}`, {
+        method: "GET",
+    });
+
+    if (response?.success) {
+        return response.data;
+    }
+    return null;
 }
 
 
