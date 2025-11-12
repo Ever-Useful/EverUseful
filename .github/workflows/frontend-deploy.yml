@@ -75,8 +75,40 @@ jobs:
             sudo chown -R www-data:www-data /var/www/html/Frontend/dist/
             echo "✅ Permissions set"
             
-            # Configure nginx for HTTPS
-            sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
+            # Detect and setup SSL certificate path
+            CERT_PATH=""
+            if [ -f "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" ]; then
+              CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+              echo "✅ Found SSL certificate at standard path: $CERT_PATH"
+            elif [ -f "/etc/letsencrypt/live/amoghconnect.com-0001/fullchain.pem" ]; then
+              CERT_PATH="/etc/letsencrypt/live/amoghconnect.com-0001"
+              echo "✅ Found SSL certificate at: $CERT_PATH"
+              # Create symlink for easier management
+              sudo ln -sf /etc/letsencrypt/live/amoghconnect.com-0001 /etc/letsencrypt/live/amoghconnect.com
+              CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+              echo "✅ Created symlink to standard path"
+            fi
+            
+            # Check if certificate is valid
+            SSL_CERT_EXISTS=false
+            if [ -n "$CERT_PATH" ] && [ -f "$CERT_PATH/fullchain.pem" ]; then
+              CERT_EXPIRY=$(sudo openssl x509 -enddate -noout -in "$CERT_PATH/fullchain.pem" 2>/dev/null | cut -d= -f2)
+              if [ -n "$CERT_EXPIRY" ]; then
+                CERT_EXPIRY_EPOCH=$(date -d "$CERT_EXPIRY" +%s 2>/dev/null || echo "0")
+                CURRENT_EPOCH=$(date +%s)
+                if [ "$CERT_EXPIRY_EPOCH" -gt "$CURRENT_EPOCH" ]; then
+                  SSL_CERT_EXISTS=true
+                  echo "✅ Valid SSL certificate found (expires: $CERT_EXPIRY)"
+                else
+                  echo "⚠️ SSL certificate found but expired (expired: $CERT_EXPIRY)"
+                fi
+              fi
+            fi
+            
+            # Configure nginx based on SSL availability
+            if [ "$SSL_CERT_EXISTS" = true ]; then
+              echo "🔒 Configuring nginx with HTTPS..."
+              sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
             # Block direct IP access
             server {
                 listen 80 default_server;
@@ -89,7 +121,7 @@ jobs:
             server {
                 listen 80;
                 listen [::]:80;
-                server_name amoghconnect.com www.amoghconnect.com;
+                server_name amoghconnect.com;
                 return 301 https://$server_name$request_uri;
             }
             
@@ -97,7 +129,7 @@ jobs:
             server {
                 listen 443 ssl http2;
                 listen [::]:443 ssl http2;
-                server_name amoghconnect.com www.amoghconnect.com;
+                server_name amoghconnect.com;
                 
                 # SSL Configuration
                 ssl_certificate /etc/letsencrypt/live/amoghconnect.com/fullchain.pem;
@@ -139,10 +171,60 @@ jobs:
                 error_page 404 /index.html;
             }
             EOF
+            else
+              echo "🔓 Configuring nginx with HTTP only (SSL certificate not available)..."
+              sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
+            # Block direct IP access
+            server {
+                listen 80 default_server;
+                listen [::]:80 default_server;
+                server_name _;
+                return 444;
+            }
             
-            # Configure API subdomain
-            sudo tee /etc/nginx/sites-available/api.amoghconnect.com > /dev/null << 'EOF'
-            # API subdomain configuration
+            # Main HTTP server
+            server {
+                listen 80;
+                listen [::]:80;
+                server_name amoghconnect.com;
+                root /var/www/html/Frontend/dist;
+                index index.html index.htm;
+                
+                # Handle all routes for SPA
+                location / {
+                    try_files $uri $uri/ /index.html;
+                }
+                
+                # Cache control for index.html
+                location = /index.html {
+                    add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+                    add_header Pragma "no-cache" always;
+                    add_header Expires "0" always;
+                }
+                
+                # Cache static assets
+                location /assets/ {
+                    expires 1h;
+                    add_header Cache-Control "public, max-age=3600";
+                }
+                
+                # Cache other static files
+                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|mp4|woff|woff2|ttf|eot)$ {
+                    expires 1h;
+                    add_header Cache-Control "public, max-age=3600";
+                }
+                
+                # Handle 404 errors
+                error_page 404 /index.html;
+            }
+            EOF
+            fi
+            
+            # Configure API subdomain based on SSL availability
+            if [ "$SSL_CERT_EXISTS" = true ]; then
+              echo "🔒 Configuring API subdomain with HTTPS..."
+              sudo tee /etc/nginx/sites-available/api.amoghconnect.com > /dev/null << 'EOF'
+            # API subdomain configuration - HTTPS
             server {
                 listen 80;
                 listen [::]:80;
@@ -179,6 +261,31 @@ jobs:
                 }
             }
             EOF
+            else
+              echo "🔓 Configuring API subdomain with HTTP only..."
+              sudo tee /etc/nginx/sites-available/api.amoghconnect.com > /dev/null << 'EOF'
+            # API subdomain configuration - HTTP
+            server {
+                listen 80;
+                listen [::]:80;
+                server_name api.amoghconnect.com;
+                
+                # Proxy to backend API
+                location / {
+                    proxy_pass http://13.235.148.91:3000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                    proxy_cache_bypass $http_upgrade;
+                    proxy_read_timeout 86400;
+                }
+            }
+            EOF
+            fi
             
             # Enable API subdomain
             sudo ln -sf /etc/nginx/sites-available/api.amoghconnect.com /etc/nginx/sites-enabled/
@@ -197,15 +304,21 @@ jobs:
             # Wait for nginx to fully reload
             sleep 3
             
-            # Test the website with HTTPS
-            echo "Testing website with HTTPS..."
-            HTTPS_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://amoghconnect.com)
-            echo "HTTPS Response Code: $HTTPS_RESPONSE"
-            
-            if [ "$HTTPS_RESPONSE" = "200" ]; then
-              echo "✅ Website is working correctly with HTTPS"
+            # Test the website based on SSL availability
+            if [ "$SSL_CERT_EXISTS" = true ]; then
+              echo "Testing website with HTTPS..."
+              WEBSITE_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://amoghconnect.com)
+              echo "HTTPS Response Code: $WEBSITE_RESPONSE"
             else
-              echo "❌ Website test failed (Status: $HTTPS_RESPONSE)"
+              echo "Testing website with HTTP..."
+              WEBSITE_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://amoghconnect.com)
+              echo "HTTP Response Code: $WEBSITE_RESPONSE"
+            fi
+            
+            if [ "$WEBSITE_RESPONSE" = "200" ]; then
+              echo "✅ Website is working correctly"
+            else
+              echo "❌ Website test failed (Status: $WEBSITE_RESPONSE)"
               echo "Checking nginx error logs..."
               sudo tail -10 /var/log/nginx/error.log
               exit 1
@@ -213,7 +326,11 @@ jobs:
             
             # Test API subdomain
             echo "Testing API subdomain..."
-            API_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://api.amoghconnect.com/api/test)
+            if [ "$SSL_CERT_EXISTS" = true ]; then
+              API_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://api.amoghconnect.com/api/test)
+            else
+              API_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://api.amoghconnect.com/api/test)
+            fi
             echo "API Response Code: $API_RESPONSE"
             
             if [ "$API_RESPONSE" = "200" ]; then
@@ -221,6 +338,25 @@ jobs:
             else
               echo "⚠️ API subdomain test failed (Status: $API_RESPONSE)"
               echo "This might be due to DNS propagation delay"
+            fi
+            
+            # Setup automatic certificate renewal hook (if certbot is installed)
+            if command -v certbot >/dev/null 2>&1 && [ "$SSL_CERT_EXISTS" = true ]; then
+              echo "🔧 Setting up automatic certificate renewal..."
+              # Create renewal hook to reload nginx after certificate renewal
+              sudo mkdir -p /etc/letsencrypt/renewal-hooks/deploy
+              echo '#!/bin/bash' | sudo tee /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
+              echo '# Reload nginx after certificate renewal' | sudo tee -a /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
+              echo 'systemctl reload nginx' | sudo tee -a /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
+              sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+              echo "✅ Auto-renewal hook configured"
+              
+              # Test renewal (dry run)
+              if sudo certbot renew --dry-run >/dev/null 2>&1; then
+                echo "✅ Certificate auto-renewal is working"
+              else
+                echo "⚠️ Certificate auto-renewal test failed (this is usually OK if cert was just issued)"
+              fi
             fi
             
             echo "🎉 Frontend deployment completed successfully!" 
