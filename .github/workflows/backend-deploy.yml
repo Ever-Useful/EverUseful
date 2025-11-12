@@ -6,8 +6,8 @@ on:
     paths: [ 'Backend/**' ]
   schedule:
     # Runs every 2 months on days 12-15 at 2:00 AM UTC
-    # Schedule for 5+ years: Feb, Apr, Jun, Aug, Oct, Dec (2025-2030)
-    - cron: '0 2 12-15 2,4,6,8,10,12 *'  # 2025-2030 (and beyond)
+    # Schedule for 5+ years: Feb, May, Aug, Nov (2025-2030)
+    - cron: '0 2 12-15 2,5,8,11 *'  # 2025-2030 (and beyond)
   workflow_dispatch: # Allow manual triggering
 
 jobs:
