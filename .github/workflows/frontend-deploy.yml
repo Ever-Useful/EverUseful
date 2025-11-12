@@ -89,8 +89,9 @@ jobs:
               echo "✅ Created symlink to standard path"
             fi
             
-            # Check if certificate is valid
+            # Check if certificate is valid and includes API subdomain
             SSL_CERT_EXISTS=false
+            API_SUBDOMAIN_IN_CERT=false
             if [ -n "$CERT_PATH" ] && [ -f "$CERT_PATH/fullchain.pem" ]; then
               CERT_EXPIRY=$(sudo openssl x509 -enddate -noout -in "$CERT_PATH/fullchain.pem" 2>/dev/null | cut -d= -f2)
               if [ -n "$CERT_EXPIRY" ]; then
@@ -99,9 +100,77 @@ jobs:
                 if [ "$CERT_EXPIRY_EPOCH" -gt "$CURRENT_EPOCH" ]; then
                   SSL_CERT_EXISTS=true
                   echo "✅ Valid SSL certificate found (expires: $CERT_EXPIRY)"
+                  
+                  # Check if certificate includes api.amoghconnect.com
+                  CERT_DOMAINS=$(sudo openssl x509 -in "$CERT_PATH/fullchain.pem" -text -noout 2>/dev/null | grep -E "DNS:|Subject Alternative Name" -A 10 | grep -oE "DNS:[^,]*" | sed 's/DNS://g' | tr '\n' ' ')
+                  if echo "$CERT_DOMAINS" | grep -q "api.amoghconnect.com"; then
+                    API_SUBDOMAIN_IN_CERT=true
+                    echo "✅ Certificate includes api.amoghconnect.com"
+                  else
+                    echo "⚠️ Certificate does NOT include api.amoghconnect.com"
+                    echo "   Certificate domains: $CERT_DOMAINS"
+                  fi
                 else
                   echo "⚠️ SSL certificate found but expired (expired: $CERT_EXPIRY)"
                 fi
+              fi
+            fi
+            
+            # Always ensure certificate includes API subdomain - REQUIRED for HTTPS
+            if [ "$SSL_CERT_EXISTS" = true ] && [ "$API_SUBDOMAIN_IN_CERT" = false ]; then
+              echo "🔧 Certificate doesn't include api.amoghconnect.com - obtaining new certificate..."
+              if command -v certbot >/dev/null 2>&1; then
+                # Stop nginx temporarily for certbot
+                sudo systemctl stop nginx
+                
+                # Get certificate for both domains - REQUIRED
+                if sudo certbot certonly --standalone -d amoghconnect.com -d api.amoghconnect.com --non-interactive --agree-tos --register-unsafely-without-email --force-renewal 2>&1 | tee /tmp/certbot.log; then
+                  echo "✅ Successfully obtained certificate for both domains"
+                  # Update certificate path
+                  if [ -f "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" ]; then
+                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+                    API_SUBDOMAIN_IN_CERT=true
+                    SSL_CERT_EXISTS=true
+                  fi
+                else
+                  echo "❌ CRITICAL: Failed to get certificate for api subdomain"
+                  CERTBOT_ERROR=$(cat /tmp/certbot.log | grep -i "error\|failed" | head -5)
+                  echo "   Error details: $CERTBOT_ERROR"
+                  echo "   This will cause SSL errors. Please check DNS and try again."
+                  # Start nginx anyway
+                  sudo systemctl start nginx
+                  exit 1
+                fi
+                
+                # Start nginx
+                sudo systemctl start nginx
+              else
+                echo "❌ CRITICAL: Certbot not installed - cannot get certificate for API subdomain"
+                exit 1
+              fi
+            fi
+            
+            # If no certificate exists at all, try to get one
+            if [ "$SSL_CERT_EXISTS" = false ]; then
+              echo "🔧 No valid certificate found - obtaining new certificate for both domains..."
+              if command -v certbot >/dev/null 2>&1; then
+                sudo systemctl stop nginx
+                if sudo certbot certonly --standalone -d amoghconnect.com -d api.amoghconnect.com --non-interactive --agree-tos --register-unsafely-without-email 2>&1 | tee /tmp/certbot.log; then
+                  echo "✅ Successfully obtained certificate for both domains"
+                  if [ -f "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" ]; then
+                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+                    API_SUBDOMAIN_IN_CERT=true
+                    SSL_CERT_EXISTS=true
+                  fi
+                else
+                  echo "❌ CRITICAL: Failed to obtain certificate"
+                  sudo systemctl start nginx
+                  exit 1
+                fi
+                sudo systemctl start nginx
+              else
+                echo "❌ CRITICAL: Certbot not installed"
+                exit 1
               fi
             fi
             
@@ -220,11 +289,11 @@ jobs:
             EOF
             fi
             
-            # Configure API subdomain based on SSL availability
-            if [ "$SSL_CERT_EXISTS" = true ]; then
-              echo "🔒 Configuring API subdomain with HTTPS..."
+            # Configure API subdomain - ALWAYS HTTPS (certificate must include api subdomain)
+            if [ "$SSL_CERT_EXISTS" = true ] && [ "$API_SUBDOMAIN_IN_CERT" = true ]; then
+              echo "🔒 Configuring API subdomain with HTTPS (proxy to AWS backend)..."
               sudo tee /etc/nginx/sites-available/api.amoghconnect.com > /dev/null << 'EOF'
-            # API subdomain configuration - HTTPS
+            # API subdomain configuration - HTTPS proxy to AWS backend
             server {
                 listen 80;
                 listen [::]:80;
@@ -246,7 +315,7 @@ jobs:
                 ssl_session_cache shared:SSL:10m;
                 ssl_session_timeout 10m;
                 
-                # Proxy to backend API
+                # Proxy to backend API on AWS
                 location / {
                     proxy_pass http://13.235.148.91:3000;
                     proxy_http_version 1.1;
@@ -258,33 +327,22 @@ jobs:
                     proxy_set_header X-Forwarded-Proto $scheme;
                     proxy_cache_bypass $http_upgrade;
                     proxy_read_timeout 86400;
+                    
+                    # CORS headers
+                    add_header Access-Control-Allow-Origin * always;
+                    add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+                    add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;
+                    
+                    # Handle preflight requests
+                    if ($request_method = OPTIONS) {
+                        return 204;
+                    }
                 }
             }
             EOF
             else
-              echo "🔓 Configuring API subdomain with HTTP only..."
-              sudo tee /etc/nginx/sites-available/api.amoghconnect.com > /dev/null << 'EOF'
-            # API subdomain configuration - HTTP
-            server {
-                listen 80;
-                listen [::]:80;
-                server_name api.amoghconnect.com;
-                
-                # Proxy to backend API
-                location / {
-                    proxy_pass http://13.235.148.91:3000;
-                    proxy_http_version 1.1;
-                    proxy_set_header Upgrade $http_upgrade;
-                    proxy_set_header Connection 'upgrade';
-                    proxy_set_header Host $host;
-                    proxy_set_header X-Real-IP $remote_addr;
-                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                    proxy_set_header X-Forwarded-Proto $scheme;
-                    proxy_cache_bypass $http_upgrade;
-                    proxy_read_timeout 86400;
-                }
-            }
-            EOF
+              echo "❌ CRITICAL: Cannot configure API subdomain - certificate must include api.amoghconnect.com"
+              exit 1
             fi
             
             # Enable API subdomain
@@ -324,14 +382,10 @@ jobs:
               exit 1
             fi
             
-            # Test API subdomain
-            echo "Testing API subdomain..."
-            if [ "$SSL_CERT_EXISTS" = true ]; then
-              API_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://api.amoghconnect.com/api/test)
-            else
-              API_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://api.amoghconnect.com/api/test)
-            fi
-            echo "API Response Code: $API_RESPONSE"
+            # Test API subdomain - Always HTTPS
+            echo "Testing API subdomain with HTTPS..."
+            API_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://api.amoghconnect.com/api/test)
+            echo "HTTPS API Response Code: $API_RESPONSE"
             
             if [ "$API_RESPONSE" = "200" ]; then
               echo "✅ API subdomain is working correctly"
@@ -340,23 +394,74 @@ jobs:
               echo "This might be due to DNS propagation delay"
             fi
             
-            # Setup automatic certificate renewal hook (if certbot is installed)
+            # Update frontend API configuration - Always HTTPS
+            echo "📝 Updating frontend API configuration to use HTTPS..."
+            # Update built JavaScript files to use HTTPS (handle various formats)
+            find /var/www/html/Frontend/dist/assets -name "*.js" -type f | while read file; do
+              sed -i 's|http://api\.amoghconnect\.com|https://api.amoghconnect.com|g' "$file"
+              sed -i "s|'http://api\.amoghconnect\.com'|'https://api.amoghconnect.com'|g" "$file"
+              sed -i 's|"http://api\.amoghconnect\.com"|"https://api.amoghconnect.com"|g' "$file"
+              sed -i 's|http:\\/\\/api\.amoghconnect\.com|https://api.amoghconnect.com|g' "$file"
+            done
+            echo "✅ Frontend API configuration updated to HTTPS"
+            
+            # Setup automatic certificate renewal - Works independently of CI/CD
             if command -v certbot >/dev/null 2>&1 && [ "$SSL_CERT_EXISTS" = true ]; then
-              echo "🔧 Setting up automatic certificate renewal..."
+              echo "🔧 Setting up automatic certificate renewal (independent of CI/CD)..."
+              
               # Create renewal hook to reload nginx after certificate renewal
               sudo mkdir -p /etc/letsencrypt/renewal-hooks/deploy
               echo '#!/bin/bash' | sudo tee /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
-              echo '# Reload nginx after certificate renewal' | sudo tee -a /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
+              echo '# Auto-renewal hook - Reloads nginx after certificate renewal' | sudo tee -a /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
+              echo '# This runs automatically when certbot renews certificates (twice daily check)' | sudo tee -a /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
+              echo '' | sudo tee -a /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
+              echo 'echo "Certificate renewed - Reloading nginx..."' | sudo tee -a /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
               echo 'systemctl reload nginx' | sudo tee -a /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
+              echo 'echo "Nginx reloaded successfully"' | sudo tee -a /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh > /dev/null
               sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
-              echo "✅ Auto-renewal hook configured"
+              echo "✅ Auto-renewal hook created"
+              
+              # Ensure certbot renewal timer is enabled and active
+              if systemctl list-unit-files | grep -q certbot.timer; then
+                sudo systemctl enable certbot.timer
+                sudo systemctl start certbot.timer
+                echo "✅ Certbot timer enabled and started"
+              else
+                echo "⚠️ Certbot timer not found - renewal will run via cron"
+              fi
+              
+              # Set up cron job as backup (runs twice daily at 3 AM and 3 PM)
+              CRON_JOB="0 3,15 * * * /usr/bin/certbot renew --quiet --deploy-hook /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh"
+              if ! crontab -l 2>/dev/null | grep -q "certbot renew"; then
+                (crontab -l 2>/dev/null; echo "$CRON_JOB") | sudo crontab -
+                echo "✅ Cron job added for certificate renewal"
+              else
+                echo "✅ Cron job already exists for certificate renewal"
+              fi
               
               # Test renewal (dry run)
-              if sudo certbot renew --dry-run >/dev/null 2>&1; then
-                echo "✅ Certificate auto-renewal is working"
+              echo "Testing certificate renewal (dry run)..."
+              if sudo certbot renew --dry-run --deploy-hook /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh >/dev/null 2>&1; then
+                echo "✅ Certificate auto-renewal test passed"
               else
-                echo "⚠️ Certificate auto-renewal test failed (this is usually OK if cert was just issued)"
+                echo "⚠️ Certificate auto-renewal test had issues (check manually with: certbot renew --dry-run)"
               fi
+              
+              # Show renewal status
+              echo ""
+              echo "📋 Certificate Renewal Status:"
+              echo "   - Renewal hook: /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh"
+              if systemctl is-active --quiet certbot.timer; then
+                echo "   - Certbot timer: Active"
+                systemctl status certbot.timer --no-pager -l | grep -E "Active|Trigger" | head -2
+              else
+                echo "   - Certbot timer: Not active (using cron instead)"
+              fi
+              echo "   - Cron job: Runs at 3 AM and 3 PM daily"
+              echo "   - Next renewal: Certificates auto-renew when < 30 days until expiry"
+              echo ""
+            else
+              echo "⚠️ Certbot not found - automatic renewal not configured"
             fi
             
             echo "🎉 Frontend deployment completed successfully!" 

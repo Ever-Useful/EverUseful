@@ -5,8 +5,9 @@ const isDevelopment = import.meta.env.DEV;
 const isProduction = import.meta.env.PROD;
 
 // Simple API URL configuration
+// Note: Always uses HTTPS in production - certificate must include api.amoghconnect.com
 export const getApiUrl = (endpoint: string) => {
-  // Use localhost for development, api.amoghconnect.com for production
+  // Use localhost for development, api.amoghconnect.com (HTTPS) for production
   const baseUrl = isDevelopment ? 'http://localhost:3000' : 'https://api.amoghconnect.com';
   const url = `${baseUrl}${endpoint}`;
   return url;
@@ -14,7 +15,7 @@ export const getApiUrl = (endpoint: string) => {
 
 // API Endpoints - Lazy evaluation to avoid logging on import
 export const API_ENDPOINTS = {
-  // Base URL for direct use
+  // Base URL for direct use - Always HTTPS in production
   get BASE_URL() { return isDevelopment ? 'http://localhost:3000' : 'https://api.amoghconnect.com'; },
   
   // Auth endpoints
