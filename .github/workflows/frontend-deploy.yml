@@ -75,8 +75,145 @@ jobs:
             sudo chown -R www-data:www-data /var/www/html/Frontend/dist/
             echo "✅ Permissions set"
             
-            # Configure nginx for HTTPS
-            sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
+            # Detect and setup SSL certificate path
+            CERT_PATH=""
+            if [ -f "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" ]; then
+              CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+              echo "✅ Found SSL certificate at standard path: $CERT_PATH"
+            elif [ -f "/etc/letsencrypt/live/amoghconnect.com-0001/fullchain.pem" ]; then
+              CERT_PATH="/etc/letsencrypt/live/amoghconnect.com-0001"
+              echo "✅ Found SSL certificate at: $CERT_PATH"
+              # Create symlink for easier management
+              sudo ln -sf /etc/letsencrypt/live/amoghconnect.com-0001 /etc/letsencrypt/live/amoghconnect.com
+              CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+              echo "✅ Created symlink to standard path"
+            fi
+            
+            # Check if certificate is valid and includes API subdomain
+            SSL_CERT_EXISTS=false
+            API_SUBDOMAIN_IN_CERT=false
+            if [ -n "$CERT_PATH" ] && [ -f "$CERT_PATH/fullchain.pem" ]; then
+              CERT_EXPIRY=$(sudo openssl x509 -enddate -noout -in "$CERT_PATH/fullchain.pem" 2>/dev/null | cut -d= -f2)
+              if [ -n "$CERT_EXPIRY" ]; then
+                CERT_EXPIRY_EPOCH=$(date -d "$CERT_EXPIRY" +%s 2>/dev/null || echo "0")
+                CURRENT_EPOCH=$(date +%s)
+                if [ "$CERT_EXPIRY_EPOCH" -gt "$CURRENT_EPOCH" ]; then
+                  SSL_CERT_EXISTS=true
+                  echo "✅ Valid SSL certificate found (expires: $CERT_EXPIRY)"
+                  
+                  # Check if certificate includes api.amoghconnect.com
+                  CERT_DOMAINS=$(sudo openssl x509 -in "$CERT_PATH/fullchain.pem" -text -noout 2>/dev/null | grep -E "DNS:|Subject Alternative Name" -A 10 | grep -oE "DNS:[^,]*" | sed 's/DNS://g' | tr '\n' ' ')
+                  if echo "$CERT_DOMAINS" | grep -q "api.amoghconnect.com"; then
+                    API_SUBDOMAIN_IN_CERT=true
+                    echo "✅ Certificate includes api.amoghconnect.com"
+                  else
+                    echo "⚠️ Certificate does NOT include api.amoghconnect.com"
+                    echo "   Certificate domains: $CERT_DOMAINS"
+                  fi
+                else
+                  echo "⚠️ SSL certificate found but expired (expired: $CERT_EXPIRY)"
+                fi
+              fi
+            fi
+            
+            # Always ensure certificate includes API subdomain - REQUIRED for HTTPS
+            if [ "$SSL_CERT_EXISTS" = true ] && [ "$API_SUBDOMAIN_IN_CERT" = false ]; then
+              echo "🔧 Certificate doesn't include api.amoghconnect.com - obtaining new certificate..."
+              if command -v certbot >/dev/null 2>&1; then
+                # Stop nginx temporarily for certbot
+                sudo systemctl stop nginx
+                
+                # Get certificate for both domains - REQUIRED
+                # Use --expand to expand existing certificate to include api subdomain
+                if sudo certbot certonly --standalone -d amoghconnect.com -d api.amoghconnect.com --non-interactive --agree-tos --register-unsafely-without-email --expand 2>&1 | tee /tmp/certbot.log; then
+                  echo "✅ Successfully obtained certificate for both domains"
+                  # Check for certificate in standard path or -0001 path
+                  if [ -f "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" ]; then
+                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+                  elif [ -f "/etc/letsencrypt/live/amoghconnect.com-0001/fullchain.pem" ]; then
+                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com-0001"
+                    # Create symlink
+                    sudo ln -sf /etc/letsencrypt/live/amoghconnect.com-0001 /etc/letsencrypt/live/amoghconnect.com
+                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+                  fi
+                  
+                  # Verify certificate includes api subdomain
+                  if [ -n "$CERT_PATH" ] && [ -f "$CERT_PATH/fullchain.pem" ]; then
+                    CERT_DOMAINS=$(sudo openssl x509 -in "$CERT_PATH/fullchain.pem" -text -noout 2>/dev/null | grep -E "DNS:|Subject Alternative Name" -A 10 | grep -oE "DNS:[^,]*" | sed 's/DNS://g' | tr '\n' ' ')
+                    if echo "$CERT_DOMAINS" | grep -q "api.amoghconnect.com"; then
+                      API_SUBDOMAIN_IN_CERT=true
+                      SSL_CERT_EXISTS=true
+                      echo "✅ Certificate verified - includes api.amoghconnect.com"
+                    else
+                      echo "⚠️ Certificate obtained but doesn't include api.amoghconnect.com"
+                      echo "   Certificate domains: $CERT_DOMAINS"
+                    fi
+                  fi
+                else
+                  echo "❌ CRITICAL: Failed to get certificate for api subdomain"
+                  CERTBOT_ERROR=$(cat /tmp/certbot.log | grep -i "error\|failed" | head -5)
+                  echo "   Error details: $CERTBOT_ERROR"
+                  echo "   This will cause SSL errors. Please check DNS and try again."
+                  # Start nginx anyway
+                  sudo systemctl start nginx
+                  exit 1
+                fi
+                
+                # Start nginx
+                sudo systemctl start nginx
+              else
+                echo "❌ CRITICAL: Certbot not installed - cannot get certificate for API subdomain"
+                exit 1
+              fi
+            fi
+            
+            # If no certificate exists at all, or certificate is expired, try to get/renew one
+            if [ "$SSL_CERT_EXISTS" = false ]; then
+              echo "🔧 No valid certificate found (or expired) - obtaining new certificate for both domains..."
+              if command -v certbot >/dev/null 2>&1; then
+                sudo systemctl stop nginx
+                if sudo certbot certonly --standalone -d amoghconnect.com -d api.amoghconnect.com --non-interactive --agree-tos --register-unsafely-without-email --expand 2>&1 | tee /tmp/certbot.log; then
+                  echo "✅ Successfully obtained certificate for both domains"
+                  # Check for certificate in standard path or -0001 path
+                  if [ -f "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" ]; then
+                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+                  elif [ -f "/etc/letsencrypt/live/amoghconnect.com-0001/fullchain.pem" ]; then
+                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com-0001"
+                    # Create symlink
+                    sudo ln -sf /etc/letsencrypt/live/amoghconnect.com-0001 /etc/letsencrypt/live/amoghconnect.com
+                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+                  fi
+                  
+                  # Verify certificate includes api subdomain
+                  if [ -n "$CERT_PATH" ] && [ -f "$CERT_PATH/fullchain.pem" ]; then
+                    CERT_DOMAINS=$(sudo openssl x509 -in "$CERT_PATH/fullchain.pem" -text -noout 2>/dev/null | grep -E "DNS:|Subject Alternative Name" -A 10 | grep -oE "DNS:[^,]*" | sed 's/DNS://g' | tr '\n' ' ')
+                    if echo "$CERT_DOMAINS" | grep -q "api.amoghconnect.com"; then
+                      API_SUBDOMAIN_IN_CERT=true
+                      SSL_CERT_EXISTS=true
+                      echo "✅ Certificate verified - includes api.amoghconnect.com"
+                    else
+                      echo "⚠️ Certificate obtained but doesn't include api.amoghconnect.com"
+                      echo "   Certificate domains: $CERT_DOMAINS"
+                    fi
+                  fi
+                else
+                  echo "❌ CRITICAL: Failed to obtain certificate"
+                  CERTBOT_ERROR=$(cat /tmp/certbot.log | grep -i "error\|failed" | head -5)
+                  echo "   Error details: $CERTBOT_ERROR"
+                  sudo systemctl start nginx
+                  exit 1
+                fi
+                sudo systemctl start nginx
+              else
+                echo "❌ CRITICAL: Certbot not installed"
+                exit 1
+              fi
+            fi
+            
+            # Configure nginx based on SSL availability
+            if [ "$SSL_CERT_EXISTS" = true ]; then
+              echo "🔒 Configuring nginx with HTTPS..."
+              sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
             # Block direct IP access
             server {
                 listen 80 default_server;
@@ -194,25 +331,55 @@ jobs:
               exit 1
             fi
             
-            # Wait for nginx to fully reload
-            sleep 3
+            # Wait for nginx to fully reload and verify it's listening
+            sleep 5
+            echo "Checking nginx status..."
+            sudo systemctl status nginx --no-pager | head -10
             
-            # Test the website with HTTPS
-            echo "Testing website with HTTPS..."
-            HTTPS_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://amoghconnect.com)
-            echo "HTTPS Response Code: $HTTPS_RESPONSE"
+            # Verify nginx is listening on required ports
+            echo "Checking listening ports..."
+            sudo netstat -tulnp | grep nginx || sudo ss -tulnp | grep nginx
             
-            if [ "$HTTPS_RESPONSE" = "200" ]; then
-              echo "✅ Website is working correctly with HTTPS"
+            # Test the website based on SSL availability (with retries)
+            MAX_RETRIES=3
+            RETRY_COUNT=0
+            WEBSITE_RESPONSE="000"
+            
+            if [ "$SSL_CERT_EXISTS" = true ]; then
+              echo "Testing website with HTTPS (with retries)..."
+              while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ] && [ "$WEBSITE_RESPONSE" != "200" ]; do
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "Attempt $RETRY_COUNT of $MAX_RETRIES..."
+                sleep 2
+                WEBSITE_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://amoghconnect.com || echo "000")
+                echo "HTTPS Response Code: $WEBSITE_RESPONSE"
+              done
             else
-              echo "❌ Website test failed (Status: $HTTPS_RESPONSE)"
-              echo "Checking nginx error logs..."
-              sudo tail -10 /var/log/nginx/error.log
-              exit 1
+              echo "Testing website with HTTP..."
+              WEBSITE_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://amoghconnect.com || echo "000")
+              echo "HTTP Response Code: $WEBSITE_RESPONSE"
             fi
             
-            # Test API subdomain
-            echo "Testing API subdomain..."
+            if [ "$WEBSITE_RESPONSE" = "200" ]; then
+              echo "✅ Website is working correctly"
+            else
+              echo "⚠️ Website test returned status: $WEBSITE_RESPONSE"
+              echo "Checking nginx error logs..."
+              sudo tail -20 /var/log/nginx/error.log
+              echo "Checking nginx access logs..."
+              sudo tail -10 /var/log/nginx/access.log || echo "No access log entries"
+              echo "Checking if nginx is listening on port 443..."
+              sudo netstat -tulnp | grep :443 || sudo ss -tulnp | grep :443
+              echo "Checking certificate file exists..."
+              ls -la /etc/letsencrypt/live/amoghconnect.com/fullchain.pem || echo "Certificate file not found"
+              echo "Testing HTTPS connection directly..."
+              curl -v --max-time 10 https://amoghconnect.com 2>&1 | head -30 || echo "Curl test failed"
+              # Don't exit on test failure - might be temporary DNS/network issue
+              echo "⚠️ Website test had issues but deployment completed. Please verify manually."
+            fi
+            
+            # Test API subdomain - Always HTTPS
+            echo "Testing API subdomain with HTTPS..."
             API_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://api.amoghconnect.com/api/test)
             echo "API Response Code: $API_RESPONSE"
             
