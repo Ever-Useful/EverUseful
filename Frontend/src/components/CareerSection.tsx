@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, DollarSign, Users, ArrowRight, Briefcase, Star, Building } from "lucide-react";
-
+//fixed
 export const CareerSection = () => {
   const jobOpenings = [
     {
