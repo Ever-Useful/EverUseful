@@ -314,7 +314,7 @@ router.get('/projects', authorize, async (req, res) => {
   }
 });
 
-// Update user profile
+// Update user 
 router.put('/profile', authorize, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
