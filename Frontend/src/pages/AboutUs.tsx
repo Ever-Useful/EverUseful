@@ -8,7 +8,7 @@ import ComparisonSection from "@/components/about/ComparisonSection";
 import TeamSection from "@/components/about/TeamSection";
 import EventsSection from "@/components/about/EventsSection";
 import FAQSection from "@/components/about/FAQSection";
-// import TestimonialsSection from "@/components/about/TestimonialsSection";
+// import TestimonialsSection from "@/components/about/TestimonialsSection"
 import CTASection from "@/components/about/CTASection";
 import { Footer } from "@/components/Footer";
 
