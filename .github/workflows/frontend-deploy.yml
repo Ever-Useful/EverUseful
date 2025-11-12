@@ -45,9 +45,9 @@ jobs:
            host: ${{ secrets.HOSTINGER_HOST }}
            username: ${{ secrets.HOSTINGER_USER }}
            key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          source: "Frontend/dist"
-          target: "/var/www/html/Frontend/"
-          strip_components: 1
+           source: "Frontend/dist"
+           target: "/var/www/html/Frontend/"
+           strip_components: 1
            overwrite: true
 
       - name: Configure server and verify deployment
