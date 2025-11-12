@@ -127,23 +127,74 @@ jobs:
                 # Use --expand to expand existing certificate to include api subdomain
                 if sudo certbot certonly --standalone -d amoghconnect.com -d api.amoghconnect.com --non-interactive --agree-tos --register-unsafely-without-email --expand 2>&1 | tee /tmp/certbot.log; then
                   echo "✅ Successfully obtained certificate for both domains"
-                  # Check for certificate in standard path or -0001 path
+                  
+                  # Find the newest/valid certificate (check both paths)
+                  NEWEST_CERT_PATH=""
+                  NEWEST_CERT_EXPIRY=0
+                  
+                  # Check standard path
                   if [ -f "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" ]; then
+                    CERT_EXPIRY_STR=$(sudo openssl x509 -enddate -noout -in "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" 2>/dev/null | cut -d= -f2)
+                    if [ -n "$CERT_EXPIRY_STR" ]; then
+                      CERT_EXPIRY_EPOCH=$(date -d "$CERT_EXPIRY_STR" +%s 2>/dev/null || echo "0")
+                      CURRENT_EPOCH=$(date +%s)
+                      if [ "$CERT_EXPIRY_EPOCH" -gt "$CURRENT_EPOCH" ] && [ "$CERT_EXPIRY_EPOCH" -gt "$NEWEST_CERT_EXPIRY" ]; then
+                        NEWEST_CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+                        NEWEST_CERT_EXPIRY=$CERT_EXPIRY_EPOCH
+                        echo "   Found valid certificate at standard path (expires: $CERT_EXPIRY_STR)"
+                      fi
+                    fi
+                  fi
+                  
+                  # Check -0001 path
+                  if [ -f "/etc/letsencrypt/live/amoghconnect.com-0001/fullchain.pem" ]; then
+                    CERT_EXPIRY_STR=$(sudo openssl x509 -enddate -noout -in "/etc/letsencrypt/live/amoghconnect.com-0001/fullchain.pem" 2>/dev/null | cut -d= -f2)
+                    if [ -n "$CERT_EXPIRY_STR" ]; then
+                      CERT_EXPIRY_EPOCH=$(date -d "$CERT_EXPIRY_STR" +%s 2>/dev/null || echo "0")
+                      CURRENT_EPOCH=$(date +%s)
+                      if [ "$CERT_EXPIRY_EPOCH" -gt "$CURRENT_EPOCH" ] && [ "$CERT_EXPIRY_EPOCH" -gt "$NEWEST_CERT_EXPIRY" ]; then
+                        NEWEST_CERT_PATH="/etc/letsencrypt/live/amoghconnect.com-0001"
+                        NEWEST_CERT_EXPIRY=$CERT_EXPIRY_EPOCH
+                        echo "   Found valid certificate at -0001 path (expires: $CERT_EXPIRY_STR)"
+                      fi
+                    fi
+                  fi
+                  
+                  # Set up symlink to point to the newest valid certificate
+                  if [ -n "$NEWEST_CERT_PATH" ]; then
+                    if [ "$NEWEST_CERT_PATH" != "/etc/letsencrypt/live/amoghconnect.com" ]; then
+                      # Remove old directory if it's a symlink or empty
+                      if [ -L "/etc/letsencrypt/live/amoghconnect.com" ]; then
+                        sudo rm -f /etc/letsencrypt/live/amoghconnect.com
+                      elif [ -d "/etc/letsencrypt/live/amoghconnect.com" ]; then
+                        # Check if it contains expired certificate
+                        if [ -f "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" ]; then
+                          OLD_EXPIRY_STR=$(sudo openssl x509 -enddate -noout -in "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" 2>/dev/null | cut -d= -f2)
+                          OLD_EXPIRY_EPOCH=$(date -d "$OLD_EXPIRY_STR" +%s 2>/dev/null || echo "0")
+                          if [ "$OLD_EXPIRY_EPOCH" -lt "$CURRENT_EPOCH" ]; then
+                            echo "   Removing old expired certificate directory..."
+                            sudo rm -rf /etc/letsencrypt/live/amoghconnect.com
+                          fi
+                        fi
+                      fi
+                      # Create symlink to newest certificate
+                      sudo ln -sf "$NEWEST_CERT_PATH" /etc/letsencrypt/live/amoghconnect.com
+                      echo "   Created symlink: /etc/letsencrypt/live/amoghconnect.com -> $NEWEST_CERT_PATH"
+                    fi
                     CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
-                  elif [ -f "/etc/letsencrypt/live/amoghconnect.com-0001/fullchain.pem" ]; then
-                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com-0001"
-                    # Create symlink
-                    sudo ln -sf /etc/letsencrypt/live/amoghconnect.com-0001 /etc/letsencrypt/live/amoghconnect.com
-                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+                  else
+                    echo "❌ No valid certificate found after expansion"
+                    exit 1
                   fi
                   
                   # Verify certificate includes api subdomain
                   if [ -n "$CERT_PATH" ] && [ -f "$CERT_PATH/fullchain.pem" ]; then
                     CERT_DOMAINS=$(sudo openssl x509 -in "$CERT_PATH/fullchain.pem" -text -noout 2>/dev/null | grep -E "DNS:|Subject Alternative Name" -A 10 | grep -oE "DNS:[^,]*" | sed 's/DNS://g' | tr '\n' ' ')
+                    CERT_EXPIRY_FINAL=$(sudo openssl x509 -enddate -noout -in "$CERT_PATH/fullchain.pem" 2>/dev/null | cut -d= -f2)
                     if echo "$CERT_DOMAINS" | grep -q "api.amoghconnect.com"; then
                       API_SUBDOMAIN_IN_CERT=true
                       SSL_CERT_EXISTS=true
-                      echo "✅ Certificate verified - includes api.amoghconnect.com"
+                      echo "✅ Certificate verified - includes api.amoghconnect.com (expires: $CERT_EXPIRY_FINAL)"
                     else
                       echo "⚠️ Certificate obtained but doesn't include api.amoghconnect.com"
                       echo "   Certificate domains: $CERT_DOMAINS"
@@ -175,23 +226,72 @@ jobs:
                 # Use --expand to expand existing certificate if it exists
                 if sudo certbot certonly --standalone -d amoghconnect.com -d api.amoghconnect.com --non-interactive --agree-tos --register-unsafely-without-email --expand 2>&1 | tee /tmp/certbot.log; then
                   echo "✅ Successfully obtained certificate for both domains"
-                  # Check for certificate in standard path or -0001 path
+                  
+                  # Find the newest/valid certificate (check both paths)
+                  NEWEST_CERT_PATH=""
+                  NEWEST_CERT_EXPIRY=0
+                  CURRENT_EPOCH=$(date +%s)
+                  
+                  # Check standard path
                   if [ -f "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" ]; then
+                    CERT_EXPIRY_STR=$(sudo openssl x509 -enddate -noout -in "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" 2>/dev/null | cut -d= -f2)
+                    if [ -n "$CERT_EXPIRY_STR" ]; then
+                      CERT_EXPIRY_EPOCH=$(date -d "$CERT_EXPIRY_STR" +%s 2>/dev/null || echo "0")
+                      if [ "$CERT_EXPIRY_EPOCH" -gt "$CURRENT_EPOCH" ] && [ "$CERT_EXPIRY_EPOCH" -gt "$NEWEST_CERT_EXPIRY" ]; then
+                        NEWEST_CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+                        NEWEST_CERT_EXPIRY=$CERT_EXPIRY_EPOCH
+                        echo "   Found valid certificate at standard path (expires: $CERT_EXPIRY_STR)"
+                      fi
+                    fi
+                  fi
+                  
+                  # Check -0001 path
+                  if [ -f "/etc/letsencrypt/live/amoghconnect.com-0001/fullchain.pem" ]; then
+                    CERT_EXPIRY_STR=$(sudo openssl x509 -enddate -noout -in "/etc/letsencrypt/live/amoghconnect.com-0001/fullchain.pem" 2>/dev/null | cut -d= -f2)
+                    if [ -n "$CERT_EXPIRY_STR" ]; then
+                      CERT_EXPIRY_EPOCH=$(date -d "$CERT_EXPIRY_STR" +%s 2>/dev/null || echo "0")
+                      if [ "$CERT_EXPIRY_EPOCH" -gt "$CURRENT_EPOCH" ] && [ "$CERT_EXPIRY_EPOCH" -gt "$NEWEST_CERT_EXPIRY" ]; then
+                        NEWEST_CERT_PATH="/etc/letsencrypt/live/amoghconnect.com-0001"
+                        NEWEST_CERT_EXPIRY=$CERT_EXPIRY_EPOCH
+                        echo "   Found valid certificate at -0001 path (expires: $CERT_EXPIRY_STR)"
+                      fi
+                    fi
+                  fi
+                  
+                  # Set up symlink to point to the newest valid certificate
+                  if [ -n "$NEWEST_CERT_PATH" ]; then
+                    if [ "$NEWEST_CERT_PATH" != "/etc/letsencrypt/live/amoghconnect.com" ]; then
+                      # Remove old directory if it's a symlink or contains expired certificate
+                      if [ -L "/etc/letsencrypt/live/amoghconnect.com" ]; then
+                        sudo rm -f /etc/letsencrypt/live/amoghconnect.com
+                      elif [ -d "/etc/letsencrypt/live/amoghconnect.com" ]; then
+                        if [ -f "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" ]; then
+                          OLD_EXPIRY_STR=$(sudo openssl x509 -enddate -noout -in "/etc/letsencrypt/live/amoghconnect.com/fullchain.pem" 2>/dev/null | cut -d= -f2)
+                          OLD_EXPIRY_EPOCH=$(date -d "$OLD_EXPIRY_STR" +%s 2>/dev/null || echo "0")
+                          if [ "$OLD_EXPIRY_EPOCH" -lt "$CURRENT_EPOCH" ]; then
+                            echo "   Removing old expired certificate directory..."
+                            sudo rm -rf /etc/letsencrypt/live/amoghconnect.com
+                          fi
+                        fi
+                      fi
+                      # Create symlink to newest certificate
+                      sudo ln -sf "$NEWEST_CERT_PATH" /etc/letsencrypt/live/amoghconnect.com
+                      echo "   Created symlink: /etc/letsencrypt/live/amoghconnect.com -> $NEWEST_CERT_PATH"
+                    fi
                     CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
-                  elif [ -f "/etc/letsencrypt/live/amoghconnect.com-0001/fullchain.pem" ]; then
-                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com-0001"
-                    # Create symlink
-                    sudo ln -sf /etc/letsencrypt/live/amoghconnect.com-0001 /etc/letsencrypt/live/amoghconnect.com
-                    CERT_PATH="/etc/letsencrypt/live/amoghconnect.com"
+                  else
+                    echo "❌ No valid certificate found after expansion"
+                    exit 1
                   fi
                   
                   # Verify certificate includes api subdomain
                   if [ -n "$CERT_PATH" ] && [ -f "$CERT_PATH/fullchain.pem" ]; then
                     CERT_DOMAINS=$(sudo openssl x509 -in "$CERT_PATH/fullchain.pem" -text -noout 2>/dev/null | grep -E "DNS:|Subject Alternative Name" -A 10 | grep -oE "DNS:[^,]*" | sed 's/DNS://g' | tr '\n' ' ')
+                    CERT_EXPIRY_FINAL=$(sudo openssl x509 -enddate -noout -in "$CERT_PATH/fullchain.pem" 2>/dev/null | cut -d= -f2)
                     if echo "$CERT_DOMAINS" | grep -q "api.amoghconnect.com"; then
                       API_SUBDOMAIN_IN_CERT=true
                       SSL_CERT_EXISTS=true
-                      echo "✅ Certificate verified - includes api.amoghconnect.com"
+                      echo "✅ Certificate verified - includes api.amoghconnect.com (expires: $CERT_EXPIRY_FINAL)"
                     else
                       echo "⚠️ Certificate obtained but doesn't include api.amoghconnect.com"
                       echo "   Certificate domains: $CERT_DOMAINS"
@@ -212,7 +312,7 @@ jobs:
             # Configure nginx based on SSL availability
             if [ "$SSL_CERT_EXISTS" = true ]; then
               echo "🔒 Configuring nginx with HTTPS..."
-              sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
+            sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOF'
             # Block direct IP access
             server {
                 listen 80 default_server;
@@ -386,8 +486,31 @@ jobs:
             # Test nginx configuration
             if sudo nginx -t; then
               echo "✅ Nginx configuration is valid"
+              
+              # Verify certificate file exists and is valid before reloading
+              if [ "$SSL_CERT_EXISTS" = true ] && [ -n "$CERT_PATH" ]; then
+                echo "Verifying certificate before reloading nginx..."
+                if [ -f "$CERT_PATH/fullchain.pem" ] && [ -f "$CERT_PATH/privkey.pem" ]; then
+                  CERT_EXPIRY_CHECK=$(sudo openssl x509 -enddate -noout -in "$CERT_PATH/fullchain.pem" 2>/dev/null | cut -d= -f2)
+                  CERT_EXPIRY_EPOCH_CHECK=$(date -d "$CERT_EXPIRY_CHECK" +%s 2>/dev/null || echo "0")
+                  CURRENT_EPOCH_CHECK=$(date +%s)
+                  if [ "$CERT_EXPIRY_EPOCH_CHECK" -gt "$CURRENT_EPOCH_CHECK" ]; then
+                    echo "✅ Certificate is valid (expires: $CERT_EXPIRY_CHECK)"
+                  else
+                    echo "❌ Certificate at $CERT_PATH is expired (expired: $CERT_EXPIRY_CHECK)"
+                    exit 1
+                  fi
+                else
+                  echo "❌ Certificate files not found at $CERT_PATH"
+                  exit 1
+                fi
+              fi
+              
               sudo systemctl reload nginx
               echo "✅ Nginx reloaded"
+              
+              # Wait a moment for nginx to fully reload
+              sleep 2
             else
               echo "❌ Nginx configuration failed"
               sudo nginx -t
@@ -413,7 +536,7 @@ jobs:
               while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ] && [ "$WEBSITE_RESPONSE" != "200" ]; do
                 RETRY_COUNT=$((RETRY_COUNT + 1))
                 echo "Attempt $RETRY_COUNT of $MAX_RETRIES..."
-                sleep 2
+            sleep 2
                 WEBSITE_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://amoghconnect.com || echo "000")
                 echo "HTTPS Response Code: $WEBSITE_RESPONSE"
               done
