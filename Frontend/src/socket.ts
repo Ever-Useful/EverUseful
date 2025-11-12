@@ -2,7 +2,11 @@
 import { io } from "socket.io-client";
 
 // Connect to socket.io backend
-const socketUrl = "http://localhost:3000"; // Backend socket server URL
+// Use localhost in development, API subdomain in production
+const isDevelopment = import.meta.env.DEV;
+const socketUrl = isDevelopment 
+  ? "http://localhost:3000" 
+  : "https://api.amoghconnect.com"; // Backend socket server URL via API subdomain
 
 export const socket = socketUrl ? io(socketUrl, {
   withCredentials: true,
@@ -13,6 +17,7 @@ export const socket = socketUrl ? io(socketUrl, {
   reconnectionDelayMax: 5000, // Maximum delay between reconnection attempts
   maxReconnectionAttempts: 5, // Maximum number of reconnection attempts
   forceNew: true, // Force a new connection
+  transports: ['websocket', 'polling'], // Use websocket with polling fallback
 }) : null;
 
 // Add connection event listeners for debugging

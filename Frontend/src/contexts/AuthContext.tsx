@@ -33,7 +33,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (firebaseUser) {
         // Register this user in socket.io backend with their customUserId
         try {
-          const userData = await userService.findUserByFirebaseUid(firebaseUser.uid);
+          // Use getUserProfile instead of findUserByFirebaseUid (which requires a non-existent endpoint)
+          const userData = await userService.getUserProfile();
           if (userData?.customUserId && socket) {
             socket.emit("register", userData.customUserId);
             console.log("Registered user with socket:", userData.customUserId);
@@ -41,7 +42,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             console.warn("Could not register socket - user data or customUserId not found");
           }
         } catch (error) {
-          console.error("Failed to register socket:", error);
+          // Silently fail - user might not be fully set up yet, socket registration can happen later
+          console.debug("Socket registration deferred:", error);
         }
       }
     });
